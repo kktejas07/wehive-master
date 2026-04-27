@@ -1,0 +1,7 @@
+.App {
+  min-height: 100vh;
+  background: hsl(var(--background));
+}
+
+/* Override CRA default centered styling */
+.App-header { all: unset; }
