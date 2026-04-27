@@ -117,6 +117,23 @@ scanning** for visa form auto-fill.
     appointment), never to the government fee.
 - Apply CTA / Total meta-card always show the rupee amount (no "Free" label).
 
+### Round 5 — Final fee math: tier-based base + per-applicant scaling (this round)
+- **Visible rows simplified to 3 max**: Application fee · Appointment / VFS fee
+  (when required) · GST (18 %).
+- **"Base service fee" row hidden** — folded into a single **Application fee**
+  row that combines `(Govt fee + Base service fee) × applicants`.
+- **"Additional applicants" surcharge row hidden** — the ₹350 × (N − 1)
+  surcharge is silently folded into the GST line for display.
+- **Per-applicant scaling**: Application AND Appointment scale linearly with
+  the number of applicants (so total roughly doubles at N = 2).
+- **Tier-based base service fees** (`BASE_FEE_BY_TYPE` in FeeBreakdown.jsx):
+  Tourist ₹3,500 · Business ₹4,500 · Student / F-1 ₹5,500 · Work ₹7,500 ·
+  Transit ₹2,500 · Medical ₹4,000.
+- Internal formula (unchanged from round 4 in spirit, just regrouped on screen):
+  `Total = (Govt + Base) × N + Appointment × N + 350 × (N−1) + 18% × (Base × N + Appointment × N)`
+- Verified to the rupee on US Tourist 1/2/3, US Student 1, US Work 1, US
+  Business 1, UAE 1/2, Nepal 1/2.
+
 ## Known limitations / Backlog
 - **P1 (blocker for real emails)**: `SMTP_PASSWORD` is a placeholder. Requires
   Gmail App Password from user.
