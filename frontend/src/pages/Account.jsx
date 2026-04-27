@@ -52,6 +52,7 @@ function ProfileTab({ user }) {
           { id: 'name', label: 'Name', value: user.name || 'Not set' },
           { id: 'email', label: 'Email', value: user.email || 'Not set' },
           { id: 'phone', label: 'Mobile', value: user.phone || 'Not set' },
+          { id: 'plan', label: 'Plan', value: user.is_premium ? 'Premium' : 'Free' },
           { id: 'verified', label: 'Verified channel', value: user.email_verified ? 'Email' : user.phone_verified ? 'Mobile (OTP)' : 'None' },
         ].map((i) => (
           <div key={i.id} className="rounded-2xl bg-white border border-black/5 p-5">

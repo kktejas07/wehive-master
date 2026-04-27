@@ -12,7 +12,9 @@ import {
 import DocumentChecklist, { getReadyCount } from '../components/DocumentChecklist';
 import ApplicationTimeline from '../components/ApplicationTimeline';
 import ConsultantChat from '../components/ConsultantChat';
+import AIScanModal from '../components/AIScanModal';
 import { COUNTRIES } from '../data/mock';
+import { Sparkles } from 'lucide-react';
 
 export default function ApplicationDetail() {
   const { id } = useParams();
@@ -24,6 +26,8 @@ export default function ApplicationDetail() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [docs, setDocs] = useState([]);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [autofill, setAutofill] = useState(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthed) navigate('/login', { replace: true });
@@ -140,6 +144,14 @@ export default function ApplicationDetail() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Button
+                data-testid="open-ai-scan-btn"
+                onClick={() => setScanOpen(true)}
+                variant="outline"
+                className="rounded-full h-11 px-5 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
+              >
+                <Sparkles className="w-4 h-4 mr-1" /> Scan with AI
+              </Button>
+              <Button
                 onClick={onDownloadReceipt}
                 variant="outline"
                 className="rounded-full h-11 px-5 font-bold border-black/10 hover:border-[hsl(var(--blue-700))]/30"
@@ -168,6 +180,46 @@ export default function ApplicationDetail() {
       <section className="py-14">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 space-y-6">
+            {autofill && (
+              <section className="rounded-3xl bg-white border border-emerald-200 p-6" data-testid="autofill-card">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
+                    <Sparkles className="w-4 h-4 text-emerald-700" />
+                  </span>
+                  <div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-emerald-700">
+                      AI auto-filled
+                    </div>
+                    <div className="text-[13px] text-[hsl(var(--blue-900))]/70">
+                      These values will prefill your visa form on submission.
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setAutofill(null)}
+                    className="ml-auto text-[12px] underline text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]"
+                    data-testid="autofill-clear-btn"
+                  >
+                    Clear
+                  </button>
+                </div>
+                <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-[13px]">
+                  {[
+                    ['Full name', autofill.full_name],
+                    ['Passport #', autofill.passport_number],
+                    ['Date of birth', autofill.date_of_birth],
+                    ['Nationality', autofill.nationality],
+                    ['Issue date', autofill.issue_date],
+                    ['Expiry date', autofill.expiry_date],
+                  ].filter(([, v]) => v).map(([l, v]) => (
+                    <div key={l} className="flex justify-between gap-3 border-b border-emerald-100 py-1.5">
+                      <dt className="text-[hsl(var(--blue-900))]/60">{l}</dt>
+                      <dd className="font-bold text-[hsl(var(--blue-900))]">{String(v)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+
             <DocumentChecklist
               applicationId={id}
               requiredDocs={requiredDocs}
@@ -227,6 +279,13 @@ export default function ApplicationDetail() {
       </section>
 
       <Footer />
+
+      <AIScanModal
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        applicationId={id}
+        onApplied={(data) => setAutofill(data)}
+      />
     </div>
   );
 }

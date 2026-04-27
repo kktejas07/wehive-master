@@ -30,6 +30,8 @@ def _public(u: dict) -> PublicUser:
         gender=u.get('gender'),
         avatar_seed=u.get('avatar_seed'),
         avatar_style=u.get('avatar_style'),
+        is_premium=bool(u.get('is_premium', False)),
+        premium_since=u.get('premium_since'),
         created_at=u.get('created_at', datetime.utcnow()),
     )
 

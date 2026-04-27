@@ -75,6 +75,30 @@ async def list_saved_plans(user=Depends(get_current_user)):
     return [_serialize(d) async for d in cur]
 
 
+# ---------- Premium (demo: self-toggle, replace with Stripe checkout later) ----------
+@router.post('/me/upgrade')
+async def upgrade_to_premium(user=Depends(get_current_user)):
+    """Flip the user's premium flag. Demo endpoint — in production this should
+    be driven by a successful Stripe/Razorpay webhook rather than a direct call.
+    """
+    now = datetime.utcnow()
+    await users.update_one(
+        {'_id': user['_id']},
+        {'$set': {'is_premium': True, 'premium_since': now, 'updated_at': now}},
+    )
+    return {'ok': True, 'is_premium': True, 'premium_since': now.isoformat()}
+
+
+@router.post('/me/downgrade')
+async def downgrade_from_premium(user=Depends(get_current_user)):
+    now = datetime.utcnow()
+    await users.update_one(
+        {'_id': user['_id']},
+        {'$set': {'is_premium': False, 'updated_at': now}, '$unset': {'premium_since': ''}},
+    )
+    return {'ok': True, 'is_premium': False}
+
+
 def _serialize(d: dict) -> dict:
     out = dict(d)
     out['id'] = out.pop('_id')

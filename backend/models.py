@@ -51,6 +51,8 @@ class PublicUser(BaseModel):
     gender: Optional[str] = None
     avatar_seed: Optional[str] = None
     avatar_style: Optional[str] = None
+    is_premium: bool = False
+    premium_since: Optional[datetime] = None
     created_at: datetime
 
 

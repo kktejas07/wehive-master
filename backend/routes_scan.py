@@ -1,0 +1,257 @@
+"""AI document scanning — Gemini vision via emergentintegrations.
+
+Premium-only endpoints that accept an uploaded image (passport page or
+supporting document) and return a structured JSON with the fields we can
+reliably lift out of it so the frontend can auto-fill visa forms.
+"""
+
+import os
+import json
+import base64
+import logging
+import uuid
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
+
+from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+
+from auth_utils import get_current_user
+from db import applications
+
+router = APIRouter(prefix='/scan', tags=['scan'])
+logger = logging.getLogger('wehive.scan')
+
+EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+MAX_SCAN_BYTES = 8 * 1024 * 1024  # 8MB
+ALLOWED_MIME = {'image/jpeg', 'image/png', 'image/webp'}
+
+
+# ---------- prompts ---------- #
+PASSPORT_PROMPT = """You are a passport OCR extraction engine.
+Analyse the uploaded passport page and extract the following fields as strict JSON.
+Return ONLY a JSON object, no prose, no markdown fences.
+
+Schema (all keys required, use null when not visible):
+{
+  "document_type": "passport" | "national_id" | "other",
+  "full_name": string | null,
+  "given_names": string | null,
+  "surname": string | null,
+  "date_of_birth": "YYYY-MM-DD" | null,
+  "gender": "M" | "F" | "X" | null,
+  "nationality": string | null,
+  "place_of_birth": string | null,
+  "passport_number": string | null,
+  "issue_date": "YYYY-MM-DD" | null,
+  "expiry_date": "YYYY-MM-DD" | null,
+  "issuing_country": string | null,
+  "issuing_authority": string | null,
+  "mrz_line1": string | null,
+  "mrz_line2": string | null,
+  "has_photo": boolean,
+  "has_signature": boolean,
+  "confidence": 0-100,
+  "warnings": [string]
+}
+
+Rules:
+- Dates must be ISO-8601 (YYYY-MM-DD). Convert DD MMM YYYY formats.
+- `nationality` and `issuing_country` should be full country names when possible.
+- If the image is not a passport, set document_type accordingly and still fill what you can.
+- `confidence` is your overall confidence that the extraction is correct (0–100).
+- `warnings` is a list of strings describing any issues (e.g. "Expiry date partially obscured").
+"""
+
+DOCUMENT_PROMPT = """You are a document OCR engine for visa applications.
+Analyse the uploaded document and extract any useful fields for a visa form.
+Return ONLY a JSON object (no prose, no markdown).
+
+Schema:
+{
+  "document_kind": "bank_statement" | "invitation_letter" | "hotel_booking" | "flight_itinerary" | "employment_letter" | "admission_letter" | "utility_bill" | "id_card" | "other",
+  "title": string | null,
+  "issued_to": string | null,
+  "issued_by": string | null,
+  "date": "YYYY-MM-DD" | null,
+  "valid_until": "YYYY-MM-DD" | null,
+  "address": string | null,
+  "reference_number": string | null,
+  "amount": string | null,
+  "currency": string | null,
+  "summary": string,
+  "key_fields": { [key: string]: string },
+  "confidence": 0-100,
+  "warnings": [string]
+}
+Keep `summary` to 1–2 sentences. `key_fields` is an object of extra labelled values
+(e.g. { "flight_no": "AI173", "pnr": "K7YB2W" }).
+"""
+
+
+# ---------- schemas ---------- #
+class ScanResponse(BaseModel):
+    id: str
+    kind: str                 # "passport" | "document"
+    model: str
+    extracted: dict
+    raw: Optional[str] = None
+    created_at: datetime
+
+
+class UpgradeRequest(BaseModel):
+    tier: str = 'premium'     # placeholder for future: monthly/annual
+
+
+# ---------- helpers ---------- #
+def _ensure_premium(user: dict):
+    if not user.get('is_premium'):
+        raise HTTPException(
+            status_code=402,
+            detail='AI Scanning is available on the Premium plan. Upgrade to unlock.',
+        )
+
+
+def _parse_json(text: str) -> dict:
+    """Best-effort JSON parse — strip markdown fences, find first { }."""
+    if not text:
+        return {}
+    t = text.strip()
+    if t.startswith('```'):
+        t = t.strip('`')
+        # Remove leading "json\n"
+        if t.lower().startswith('json'):
+            t = t[4:]
+        t = t.strip()
+    # fall back: find outermost braces
+    start = t.find('{')
+    end = t.rfind('}')
+    if start != -1 and end != -1 and end > start:
+        t = t[start:end + 1]
+    try:
+        return json.loads(t)
+    except Exception as e:
+        logger.warning('Scan JSON parse failed: %s', e)
+        return {'_parse_error': str(e), '_raw': text[:2000]}
+
+
+async def _call_gemini_vision(
+    prompt: str, image_bytes: bytes, mime: str, session_id: str
+) -> str:
+    if not EMERGENT_KEY:
+        raise HTTPException(503, 'AI service not configured')
+    chat = LlmChat(
+        api_key=EMERGENT_KEY,
+        session_id=session_id,
+        system_message='You are a careful, concise document-analysis assistant.',
+    ).with_model('gemini', 'gemini-2.5-flash')
+    b64 = base64.b64encode(image_bytes).decode('utf-8')
+    msg = UserMessage(
+        text=prompt,
+        file_contents=[ImageContent(image_base64=b64)],
+    )
+    reply = await chat.send_message(msg)
+    return (reply or '').strip()
+
+
+async def _read_upload(file: UploadFile) -> bytes:
+    content = await file.read(MAX_SCAN_BYTES + 1)
+    if len(content) > MAX_SCAN_BYTES:
+        raise HTTPException(413, f'Image exceeds {MAX_SCAN_BYTES // (1024 * 1024)}MB limit')
+    mime = (file.content_type or '').lower()
+    if mime not in ALLOWED_MIME:
+        raise HTTPException(415, f'Unsupported image type: {mime or "unknown"}. Use JPG, PNG or WEBP.')
+    return content
+
+
+# ---------- endpoints ---------- #
+@router.post('/passport', response_model=ScanResponse)
+async def scan_passport(
+    file: UploadFile = File(...),
+    application_id: Optional[str] = Form(None),
+    user=Depends(get_current_user),
+):
+    _ensure_premium(user)
+    content = await _read_upload(file)
+    session_id = f"scan-passport-{uuid.uuid4()}"
+    raw = await _call_gemini_vision(PASSPORT_PROMPT, content, file.content_type, session_id)
+    extracted = _parse_json(raw)
+
+    result = {
+        '_id': str(uuid.uuid4()),
+        'kind': 'passport',
+        'model': 'gemini-2.5-flash',
+        'extracted': extracted,
+        'raw': raw if '_parse_error' in extracted else None,
+        'created_at': datetime.utcnow(),
+    }
+
+    # Optionally attach to an application
+    if application_id:
+        await applications.update_one(
+            {'_id': application_id, 'user_id': user['_id']},
+            {'$push': {'scans': {
+                '_id': result['_id'],
+                'kind': 'passport',
+                'extracted': extracted,
+                'created_at': result['created_at'],
+            }}},
+        )
+
+    return ScanResponse(
+        id=result['_id'],
+        kind='passport',
+        model=result['model'],
+        extracted=extracted,
+        raw=result['raw'],
+        created_at=result['created_at'],
+    )
+
+
+@router.post('/document', response_model=ScanResponse)
+async def scan_document(
+    file: UploadFile = File(...),
+    application_id: Optional[str] = Form(None),
+    hint: Optional[str] = Form(None),
+    user=Depends(get_current_user),
+):
+    _ensure_premium(user)
+    content = await _read_upload(file)
+    session_id = f"scan-doc-{uuid.uuid4()}"
+    prompt = DOCUMENT_PROMPT
+    if hint:
+        prompt = prompt + f"\n\nUser hint about the document: {hint.strip()}"
+    raw = await _call_gemini_vision(prompt, content, file.content_type, session_id)
+    extracted = _parse_json(raw)
+
+    result = {
+        '_id': str(uuid.uuid4()),
+        'kind': 'document',
+        'model': 'gemini-2.5-flash',
+        'extracted': extracted,
+        'raw': raw if '_parse_error' in extracted else None,
+        'created_at': datetime.utcnow(),
+    }
+
+    if application_id:
+        await applications.update_one(
+            {'_id': application_id, 'user_id': user['_id']},
+            {'$push': {'scans': {
+                '_id': result['_id'],
+                'kind': 'document',
+                'extracted': extracted,
+                'created_at': result['created_at'],
+            }}},
+        )
+
+    return ScanResponse(
+        id=result['_id'],
+        kind='document',
+        model=result['model'],
+        extracted=extracted,
+        raw=result['raw'],
+        created_at=result['created_at'],
+    )

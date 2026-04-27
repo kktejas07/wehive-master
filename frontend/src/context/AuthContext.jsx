@@ -64,6 +64,10 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    if (token) await fetchMe(token);
+  }, [token, fetchMe]);
+
   const openAuth = useCallback((mode = 'login') => {
     setAuthMode(mode);
     setAuthOpen(true);
@@ -78,6 +82,7 @@ export function AuthProvider({ children }) {
     sendOtp,
     verifyOtp,
     logout,
+    refreshUser,
     authOpen,
     authMode,
     openAuth,
