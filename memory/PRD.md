@@ -45,29 +45,54 @@ scanning** for visa form auto-fill.
 - `POST /api/chatbot/sessions`, `POST /api/chatbot/sessions/{id}/messages`
 
 ## Changelog — Feb 2026 session
-- ✅ Added `is_premium` + `premium_since` fields to users.
-- ✅ New FastAPI router `routes_scan.py` with `/scan/passport` and `/scan/document`
-  endpoints. Premium-gated (402). Uses Gemini 2.5 Flash with structured JSON
-  prompts. Robust error handling for budget, invalid-image, and network failures.
-- ✅ `seed_countries.py` script — ingests 250 countries from restcountries.com
-  into `countries_v2`. Preserves handcrafted metadata for 15 priority countries.
-- ✅ `routes_countries.py` now DB-backed with static fallback.
-- ✅ React `AIScanModal` component (premium gate → file picker → extraction
-  preview → "Use these values" autofill). Integrated into `ApplicationDetail`.
-- ✅ `AuthContext.refreshUser()` + Account page shows **Plan** (Free/Premium).
-- ✅ Backend error handling for `ChatError`, empty uploads, budget exhaustion.
-- ✅ **Hero search now backend-powered** (`HeroSearchLive.jsx`) with 220ms
-  debounce, keyboard navigation, and a popover that searches across all 250
-  countries. Replaces the old 15-country mock filter.
-- ✅ **Fee breakdown component** (`FeeBreakdown.jsx`) — exposes the full
-  pricing model on every visa detail page:
-    - Government / embassy fee (no markup)
-    - We Hive service fee (Tourist ₹1,499 · Business ₹2,499 · Student ₹3,999 · Work ₹4,999)
-    - GST 18% on service fee (HSN 998599)
-    - **Total payable** (also shown on the Apply CTA).
-  Visa-free destinations show a "No fees apply" emerald card.
-- ✅ Country grid card image fallback uses `flag_url` (REST Countries SVG/PNG)
-  when no curated Unsplash image is available.
+### Round 1 — AI scanning + 250-country DB
+- Added `is_premium` + `premium_since` fields to users.
+- New FastAPI router `routes_scan.py` (`/scan/passport`, `/scan/document`).
+  Premium-gated. Uses Gemini 2.5 Flash via `emergentintegrations`.
+- `seed_countries.py` — ingests 250 countries from restcountries.com into
+  `countries_v2`. Manual entries for 15 priority countries preserved.
+- `routes_countries.py` now DB-backed with static fallback.
+- React `AIScanModal` — premium gate → file picker → extraction view →
+  "Use these values" autofill on `ApplicationDetail`.
+- `AuthContext.refreshUser()` + Account page shows **Plan** (Free/Premium).
+- Robust error handling for budget exhaustion, invalid images, empty uploads.
+
+### Round 2 — Hero search + initial fee breakdown
+- `HeroSearchLive.jsx` — backend-powered live autocomplete across all 250
+  countries with debounce + keyboard nav.
+- Country card image fallback uses `flag_url` when no curated landmark.
+
+### Round 3 — Final fee structure + flights + animations (this round)
+- **New fee structure** (`FeeBreakdown.jsx`):
+  - **Base service fee ₹3,500** (no longer tier-based; "Hive fee" line removed)
+  - **₹350 surcharge per additional applicant** (only shown when >1)
+  - **Country-specific appointment / VFS fee** — only displayed when the
+    country requires biometrics (US, UK, Schengen 26, AU, NZ, CA, JP, CN, KR, CH)
+  - GST 18 % on (service + surcharge + appointment) · HSN 998599
+  - Govt fee passes through with no markup
+  - Visa-free destinations show "No fees apply" emerald card
+  - Applicants stepper (1-20) with +/- buttons
+- **Country appointment metadata** (`seed_countries.py`):
+  - `requires_appointment: bool`
+  - `appointment_fee_inr: int` (US ₹1,750, GB ₹2,400, CA ₹1,900,
+    AU/NZ ₹1,700, Schengen ₹1,900, JP ₹1,200, CN ₹1,500, KR ₹1,200)
+- **Curated landmark images** (`/app/frontend/src/lib/landmarks.js`) for ~50
+  popular countries (US: Statue of Liberty, UK: Big Ben, JP: Tokyo Tower,
+  FR: Eiffel Tower, IN: Taj Mahal, …) used by `CountryGrid` cards.
+- **AI Flight Suggestions** module (`FlightSuggestions.jsx`) — Cheapest /
+  Most popular / Fastest cards per country. Stubbed dataset, structured for
+  future `/api/flights/suggest` + LLM rerank.
+- **Framer Motion animations**:
+  - `AnimatePresence` page transitions via `PageTransition.jsx` wrapper
+    around all routes in `App.js`
+  - Country cards: scroll-reveal (`initial → whileInView`) + hover lift
+  - Flight cards: staggered entrance + hover lift
+- **Comprehensive backend tests** (`/app/backend/tests/test_wehive_backend.py`):
+  **28/28 passing** — countries (8), premium toggle (2), AI scan
+  positive+negative (7), country appointment metadata (8 parametrised),
+  application lifecycle (3).
+- Fixed pre-existing nested `<a>` warning in country grid (Plan button is
+  now a span button, not a Link inside a Link).
 
 ## Known limitations / Backlog
 - **P1 (blocker for real emails)**: `SMTP_PASSWORD` is a placeholder. Requires
