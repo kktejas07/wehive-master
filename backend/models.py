@@ -48,6 +48,9 @@ class PublicUser(BaseModel):
     phone: Optional[str] = None
     email_verified: bool = False
     phone_verified: bool = False
+    gender: Optional[str] = None
+    avatar_seed: Optional[str] = None
+    avatar_style: Optional[str] = None
     created_at: datetime
 
 
@@ -55,6 +58,9 @@ class UpdateProfileRequest(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
+    gender: Optional[Literal['male', 'female', 'other']] = None
+    avatar_seed: Optional[str] = None
+    avatar_style: Optional[str] = None
 
 
 # ----- Applications ----- #

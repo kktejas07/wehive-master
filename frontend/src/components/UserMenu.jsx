@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, User as UserIcon, LogOut, FileText, Compass, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { avatarUrl } from '../lib/avatars';
 
 export default function UserMenu() {
   const { user, logout, openAuth } = useAuth();
@@ -37,6 +38,8 @@ export default function UserMenu() {
 
   const initial = (user.name || user.email || user.phone || '?').charAt(0).toUpperCase();
   const display = user.name || user.email || user.phone;
+  const seed = user.avatar_seed || user.email || user.phone || user.id;
+  const aUrl = avatarUrl({ seed, gender: user.gender || 'hero', style: user.avatar_style });
 
   return (
     <div className="relative" ref={ref}>
@@ -44,8 +47,8 @@ export default function UserMenu() {
         onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-2 rounded-full bg-white border border-black/8 hover:border-[hsl(var(--blue-700))]/30 px-2 py-1.5 transition"
       >
-        <span className="h-7 w-7 rounded-full bg-[hsl(var(--blue-700))] text-white inline-flex items-center justify-center text-[12px] font-bold">
-          {initial}
+        <span className="h-8 w-8 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-1 ring-black/5">
+          <img src={aUrl} alt={initial} className="h-full w-full object-cover" />
         </span>
         <span className="hidden sm:inline text-[13px] font-bold text-[hsl(var(--blue-900))] max-w-[140px] truncate">
           {display}
@@ -53,12 +56,17 @@ export default function UserMenu() {
         <ChevronDown className="w-3.5 h-3.5 text-[hsl(var(--blue-900))]/55" />
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-black/5 shadow-[0_20px_50px_-25px_rgba(10,44,138,0.4)] p-2 z-50">
-          <div className="px-3 py-2 border-b border-black/5">
-            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
-              Signed in as
+        <div className="absolute right-0 mt-2 w-64 rounded-2xl backdrop-blur-xl bg-white/85 border border-white/40 shadow-[0_20px_50px_-25px_rgba(10,44,138,0.4)] p-2 z-50">
+          <div className="px-3 py-3 border-b border-black/5 flex items-center gap-3">
+            <span className="h-10 w-10 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-2 ring-white">
+              <img src={aUrl} alt={initial} className="h-full w-full object-cover" />
+            </span>
+            <div className="min-w-0">
+              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">{display}</div>
+              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
+                Signed in
+              </div>
             </div>
-            <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">{display}</div>
           </div>
           {[
             { id: 'account', to: '/account', Icon: UserIcon, label: 'My account' },

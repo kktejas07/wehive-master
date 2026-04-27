@@ -27,6 +27,9 @@ def _public(u: dict) -> PublicUser:
         phone=u.get('phone'),
         email_verified=u.get('email_verified', False),
         phone_verified=u.get('phone_verified', False),
+        gender=u.get('gender'),
+        avatar_seed=u.get('avatar_seed'),
+        avatar_style=u.get('avatar_style'),
         created_at=u.get('created_at', datetime.utcnow()),
     )
 

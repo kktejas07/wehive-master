@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
@@ -122,22 +123,56 @@ export default function AuthCard({ mode }) {
   const placeholder = tab === 'phone' ? '+91 9XXXX XXXXX' : 'you@example.com';
 
   return (
-    <div className="rounded-3xl bg-white border border-black/5 shadow-[0_20px_50px_-30px_rgba(10,44,138,0.4)] p-7 sm:p-9">
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
-        <ShieldCheck className="w-3.5 h-3.5" /> Secure access
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
+      className="relative rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-[0_30px_70px_-30px_rgba(10,44,138,0.45)] p-7 sm:p-9 overflow-hidden"
+    >
+      {/* Animated gradient backdrop */}
+      <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none">
+        <motion.div
+          animate={{ x: [0, 20, -10, 0], y: [0, -10, 15, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -top-20 -right-20 h-[280px] w-[280px] rounded-full bg-[hsl(var(--blue-50))] blur-3xl"
+        />
+        <motion.div
+          animate={{ x: [0, -15, 10, 0], y: [0, 10, -15, 0] }}
+          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -bottom-24 -left-24 h-[260px] w-[260px] rounded-full bg-[#FEE5E7] blur-3xl"
+        />
       </div>
-      <h1 className="mt-2 font-display font-extrabold text-[30px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+
+      <motion.div
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]"
+      >
+        <ShieldCheck className="w-3.5 h-3.5" /> Secure access
+      </motion.div>
+      <motion.h1
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.16 }}
+        className="mt-2 font-display font-extrabold text-[30px] tracking-[-0.025em] text-[hsl(var(--blue-900))]"
+      >
         {step === 'input'
           ? isSignup
             ? 'Create your account'
             : 'Sign in to We Hive'
           : 'Enter the verification code'}
-      </h1>
-      <p className="mt-1.5 text-[14px] text-[hsl(var(--blue-900))]/60">
+      </motion.h1>
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.22 }}
+        className="mt-1.5 text-[14px] text-[hsl(var(--blue-900))]/60"
+      >
         {step === 'input'
           ? 'We will send a 6\u2011digit code by ' + (tab === 'phone' ? 'WhatsApp / SMS' : 'email') + '.'
           : `Code sent to ${otpInfo?.masked || identifier}`}
-      </p>
+      </motion.p>
       {step === 'input' ? (
         <div className="mt-6 space-y-5">
           <div className="flex justify-center">
@@ -221,6 +256,6 @@ export default function AuthCard({ mode }) {
       <p className="mt-6 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
         By continuing you agree to our Terms and Privacy Policy.
       </p>
-    </div>
+    </motion.div>
   );
 }

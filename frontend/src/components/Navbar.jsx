@@ -1,20 +1,23 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Phone, ChevronDown } from 'lucide-react';
+import { Menu, X, Phone } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
 import UserMenu from './UserMenu';
+import LanguageSwitcher from './LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
+import { useI18n } from '../context/I18nContext';
 
 const NAV = [
-  { id: 'home', label: 'Home', to: '/' },
-  { id: 'services', label: 'Services', to: '/#services' },
-  { id: 'pricing', label: 'Pricing', to: '/pricing' },
-  { id: 'about', label: 'About', to: '/about' },
+  { id: 'home', label: 'nav.home', to: '/' },
+  { id: 'services', label: 'nav.services', to: '/#services' },
+  { id: 'pricing', label: 'nav.pricing', to: '/pricing' },
+  { id: 'about', label: 'nav.about', to: '/about' },
 ];
 
 function NavLinks({ orientation = 'horizontal' }) {
+  const { t } = useI18n();
   if (orientation === 'horizontal') {
     return (
       <nav className="hidden lg:flex items-center gap-1">
@@ -32,7 +35,7 @@ function NavLinks({ orientation = 'horizontal' }) {
               )
             }
           >
-            {item.label}
+            {t(item.label, item.id)}
           </NavLink>
         ))}
       </nav>
@@ -46,7 +49,7 @@ function NavLinks({ orientation = 'horizontal' }) {
           to={item.to}
           className="px-3 py-3 text-[15px] font-bold rounded-lg hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]"
         >
-          {item.label}
+          {t(item.label, item.id)}
         </Link>
       ))}
     </div>
@@ -134,19 +137,15 @@ export default function Navbar() {
           : 'bg-transparent border-b border-transparent'
       )}
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[84px] flex items-center justify-between gap-3">
         <Link to="/" className="flex items-center gap-3 group shrink-0">
-          <img src={BRAND.logo} alt="We Hive" className="h-10 w-auto select-none" draggable={false} />
+          <img src={BRAND.logo} alt="We Hive" className="h-14 sm:h-16 w-auto select-none transition-transform group-hover:scale-[1.02]" draggable={false} />
         </Link>
 
         <NavLinks />
 
         <div className="flex items-center gap-2">
-          <button className="hidden sm:inline-flex items-center gap-1 px-2 py-2 text-[12.5px] font-bold text-[hsl(var(--blue-900))]/70 hover:text-[hsl(var(--blue-700))] rounded-full hover:bg-[hsl(var(--blue-50))] transition-colors">
-            <span aria-hidden>🇮🇳</span>
-            <span>EN</span>
-            <ChevronDown className="w-3.5 h-3.5" />
-          </button>
+          <LanguageSwitcher />
           <PhoneBlock />
           <UserMenu />
           <button

@@ -11,7 +11,9 @@ import Account from './pages/Account';
 import HolidayPlanner from './pages/HolidayPlanner';
 import ApplicationDetail from './pages/ApplicationDetail';
 import { AuthProvider } from './context/AuthContext';
+import { I18nProvider } from './context/I18nContext';
 import AuthModal from './components/AuthModal';
+import ChatbotWidget from './components/ChatbotWidget';
 import { Toaster } from './components/ui/toaster';
 
 function ScrollToTop() {
@@ -26,23 +28,26 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <AuthProvider>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/visa/:id" element={<VisaDetail />} />
-            <Route path="/holiday/:id" element={<HolidayPlanner />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/account/applications/:id" element={<ApplicationDetail />} />
-            <Route path="*" element={<Home />} />
-          </Routes>
-          <AuthModal />
-          <Toaster />
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <ScrollToTop />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/visa/:id" element={<VisaDetail />} />
+              <Route path="/holiday/:id" element={<HolidayPlanner />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/account/applications/:id" element={<ApplicationDetail />} />
+              <Route path="*" element={<Home />} />
+            </Routes>
+            <AuthModal />
+            <ChatbotWidget />
+            <Toaster />
+          </AuthProvider>
+        </I18nProvider>
       </BrowserRouter>
     </div>
   );
