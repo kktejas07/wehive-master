@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import FilterBar, { DEFAULT_FILTERS } from './FilterBar';
 import { COUNTRIES, BRAND } from '../data/mock';
+import { useI18n } from '../context/I18nContext';
 import HeroSearchLive from './HeroSearchLive';
 
 function TrustPill() {
@@ -49,6 +50,7 @@ function CountrySuggestions({ items, label }) {
 
 export default function Hero({ filters, onFilters }) {
   const [query, setQuery] = useState('');
+  const { t } = useI18n();
   const top = COUNTRIES.filter((c) => c.popular).slice(0, 6);
 
   const f = filters || DEFAULT_FILTERS;
@@ -69,13 +71,11 @@ export default function Hero({ filters, onFilters }) {
         </div>
 
         <h1 className="text-center mx-auto max-w-5xl font-display font-extrabold text-[44px] leading-[1.02] sm:text-[68px] sm:leading-[1.0] lg:text-[80px] tracking-[-0.035em] text-[hsl(var(--blue-900))] text-balance">
-          New visa.{' '}
-          <span className="text-[hsl(var(--accent))]">Start now.</span>
+          {t('hero.headline')}{' '}
+          <span className="text-[hsl(var(--accent))]">{t('hero.headlineAccent')}</span>
         </h1>
         <p className="text-center mx-auto max-w-2xl mt-5 text-[16px] sm:text-[18px] leading-relaxed text-[hsl(var(--blue-900))]/65">
-          Bridging dreams, connecting continents — your visa, your voyage, our
-          expertise. Filter by visa type, delivery speed, documents and travel
-          dates.
+          {t('hero.sub')}
         </p>
 
         <div className="mt-10">
@@ -87,7 +87,7 @@ export default function Hero({ filters, onFilters }) {
           {!query && (
             <CountrySuggestions
               items={top}
-              label="Most requested this week"
+              label={t('hero.suggestions')}
             />
           )}
         </div>

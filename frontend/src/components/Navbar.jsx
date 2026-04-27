@@ -8,7 +8,6 @@ import UserMenu from './UserMenu';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
-
 const NAV = [
   { id: 'home', label: 'nav.home', to: '/' },
   { id: 'services', label: 'nav.services', to: '/#services' },
@@ -57,6 +56,7 @@ function NavLinks({ orientation = 'horizontal' }) {
 }
 
 function PhoneBlock() {
+  const { t } = useI18n();
   return (
     <a
       href={`tel:${BRAND.phoneRaw}`}
@@ -66,7 +66,7 @@ function PhoneBlock() {
         <Phone className="w-4 h-4" />
       </span>
       <div className="leading-tight text-left">
-        <div className="text-[10px] uppercase tracking-[0.16em] text-white/80 font-bold">Call us</div>
+        <div className="text-[10px] uppercase tracking-[0.16em] text-white/80 font-bold">{t('cta.callUs')}</div>
         <div className="text-[13.5px] font-bold tracking-tight">{BRAND.phone}</div>
       </div>
     </a>
@@ -75,6 +75,7 @@ function PhoneBlock() {
 
 function MobileMenu({ open }) {
   const { isAuthed, openAuth } = useAuth();
+  const { t } = useI18n();
   if (!open) return null;
   return (
     <div className="lg:hidden border-t border-black/5 bg-white/95 backdrop-blur-xl">
@@ -94,13 +95,13 @@ function MobileMenu({ open }) {
               className="rounded-full h-11"
               onClick={() => openAuth('login')}
             >
-              Sign in
+              {t('cta.signIn')}
             </Button>
             <Button
               className="rounded-full btn-primary text-white h-11"
               onClick={() => openAuth('signup')}
             >
-              Sign up
+              {t('cta.signUp')}
             </Button>
           </div>
         )}

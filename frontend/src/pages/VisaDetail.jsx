@@ -105,9 +105,7 @@ function CategoryDetails({ cat, country, onApply, applying, typeId, applicants }
             data-testid="visa-apply-btn"
           >
             {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-              fees.isFree
-                ? 'Continue · Free'
-                : `Apply · ₹${fees.total.toLocaleString('en-IN')}`
+              `Apply · ₹${fees.total.toLocaleString('en-IN')}`
             )}
           </Button>
           <a
@@ -121,7 +119,7 @@ function CategoryDetails({ cat, country, onApply, applying, typeId, applicants }
         <div className="mt-10 grid grid-cols-3 gap-4 max-w-lg">
           <MetaCard Icon={Clock} k="Processing" v={`${cat.processing_days}d`} />
           <MetaCard Icon={Calendar} k="Validity" v={cat.validity} />
-          <MetaCard Icon={CreditCard} k="Total" v={fees.isFree ? 'Free' : `₹${fees.total.toLocaleString('en-IN')}`} />
+          <MetaCard Icon={CreditCard} k="Total" v={`₹${fees.total.toLocaleString('en-IN')}`} />
         </div>
       </div>
       <div className="lg:col-span-5">

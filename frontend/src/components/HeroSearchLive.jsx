@@ -4,6 +4,7 @@ import { Search, ArrowRight, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { API } from '../context/AuthContext';
+import { useI18n } from '../context/I18nContext';
 
 function useDebounced(value, delay = 220) {
   const [v, setV] = useState(value);
@@ -16,6 +17,7 @@ function useDebounced(value, delay = 220) {
 
 export default function HeroSearchLive({ query, setQuery }) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const debounced = useDebounced(query, 220);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -81,7 +83,7 @@ export default function HeroSearchLive({ query, setQuery }) {
             onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
             onKeyDown={onKey}
-            placeholder="Search a country — try USA, UK, Canada…"
+            placeholder={t('hero.search')}
             className="w-full bg-transparent border-0 outline-none focus:outline-none placeholder:text-[hsl(var(--blue-900))]/40 text-[15px] py-3 text-[hsl(var(--blue-900))]"
             autoComplete="off"
           />
@@ -92,7 +94,7 @@ export default function HeroSearchLive({ query, setQuery }) {
           data-testid="hero-search-submit"
           className="rounded-full btn-accent text-white h-12 px-5 shadow-sm font-bold"
         >
-          Find my visa
+          {t('hero.find')}
           <ArrowRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
@@ -104,7 +106,7 @@ export default function HeroSearchLive({ query, setQuery }) {
         >
           {results.length === 0 && !loading && (
             <div className="px-5 py-6 text-center text-[13.5px] text-[hsl(var(--blue-900))]/55">
-              No matches for "{q}". Try a different spelling.
+              {t('hero.noMatch').replace('{q}', q)}
             </div>
           )}
           <ul className="max-h-[320px] overflow-y-auto">
@@ -136,8 +138,8 @@ export default function HeroSearchLive({ query, setQuery }) {
             ))}
           </ul>
           <div className="px-4 py-2 text-[11px] text-[hsl(var(--blue-900))]/45 border-t border-black/5 flex items-center justify-between">
-            <span>↑↓ to navigate · Enter to open</span>
-            <span>Powered by 250+ destinations</span>
+            <span>{t('hero.searchKeys')}</span>
+            <span>{t('hero.searchSource')}</span>
           </div>
         </div>
       )}

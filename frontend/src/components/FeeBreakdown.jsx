@@ -1,17 +1,27 @@
 /**
- * Wehive fee structure (revised — Feb 2026)
+ * Wehive fee structure (revised — Feb 2026, round 4)
+ * --------------------------------------------------
+ * Pricing rule:
+ *   Total = Government / embassy fee
+ *         + Base service fee  (₹3,500 — ALWAYS, even for visa-free destinations)
+ *         + Additional-applicant surcharge (₹350 × extra applicants)
+ *         + Country appointment / VFS fee (only when country requires it)
+ *         + GST 18 % on (base + extra + appointment)
  *
- *  Total payable = Government / embassy fee
- *               + Base service fee (₹3,500)
- *               + Additional-applicant surcharge (₹350 × extra applicants)
- *               + Country-specific appointment fee (only if required)
- *               + GST 18 % on (service + surcharge + appointment)
+ * Three scenarios:
+ *   1. Country has both govt fee + appointment (e.g. US):
+ *        Govt + Base + Extra + Appointment + GST
+ *   2. Country has govt fee only, no appointment (e.g. UAE, Thailand):
+ *        Govt + Base + Extra + GST
+ *   3. Visa-free country, no appointment (e.g. Nepal, Bhutan):
+ *        Base + Extra + GST     ← still charged for our concierge
  *
- *  Government fee comes from the country category metadata. Pass-through, no markup.
- *  Visa-free destinations charge zero on every line.
+ * Government fee is passed through with no markup. GST applies only to
+ * Wehive's portion (service + surcharge + appointment), never to the
+ * government fee.
  */
 import { useState } from 'react';
-import { Users, Plus, Minus, Info } from 'lucide-react';
+import { Users, Plus, Minus, Info, BadgeCheck } from 'lucide-react';
 
 export const BASE_SERVICE_FEE_INR = 3500;
 export const PER_EXTRA_APPLICANT_INR = 350;
@@ -19,11 +29,13 @@ export const GST_RATE = 0.18;
 
 export function computeFees({ category, applicants = 1, country }) {
   const govt = Number(category?.fees_inr || 0);
-  const isVisaFree = govt === 0 && (category?.name || '').toLowerCase().includes('visa-free');
+  const isVisaFree = !!country?.no_visa || (govt === 0 && (category?.name || '').toLowerCase().includes('visa-free'));
 
-  const base = isVisaFree ? 0 : BASE_SERVICE_FEE_INR;
-  const extra = isVisaFree ? 0 : Math.max(0, applicants - 1) * PER_EXTRA_APPLICANT_INR;
+  // Base + surcharge are always charged — even for visa-free destinations.
+  const base = BASE_SERVICE_FEE_INR;
+  const extra = Math.max(0, applicants - 1) * PER_EXTRA_APPLICANT_INR;
 
+  // Appointment fee only when the country actually requires biometrics.
   const requiresAppt = !!country?.requires_appointment && !isVisaFree;
   const apptFee = requiresAppt ? Number(country?.appointment_fee_inr || 0) : 0;
 
@@ -37,10 +49,10 @@ export function computeFees({ category, applicants = 1, country }) {
     extra,
     appointment: apptFee,
     requiresAppointment: requiresAppt,
+    isVisaFree,
     gst,
     total,
     applicants,
-    isFree: total === 0,
   };
 }
 
@@ -94,26 +106,21 @@ export default function FeeBreakdown({ category, country, onApplicantsChange }) 
     onApplicantsChange?.(n);
   };
 
-  if (fees.isFree) {
-    return (
-      <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5" data-testid="fee-breakdown-free">
-        <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-emerald-700">
-          Visa-free for Indians
-        </div>
-        <div className="mt-1 text-[18px] font-display font-extrabold tracking-[-0.02em] text-emerald-800">
-          No fees apply.
-        </div>
-        <p className="mt-1 text-[13px] text-emerald-800/80">
-          You can travel on your Indian passport without applying for a visa in advance.
-        </p>
-      </div>
-    );
+  const lines = [];
+  if (fees.govt > 0) {
+    lines.push({
+      id: 'govt',
+      label: 'Government / embassy fee',
+      amount: fees.govt,
+      sub: 'Set by the consulate. Paid through us, no markup.',
+    });
   }
-
-  const lines = [
-    { id: 'govt', label: 'Government / embassy fee', amount: fees.govt, sub: 'Set by the consulate. Paid through us, no markup.' },
-    { id: 'base', label: 'Base service fee', amount: fees.base, sub: 'Document review, application prep, submission and tracking.' },
-  ];
+  lines.push({
+    id: 'base',
+    label: 'Base service fee',
+    amount: fees.base,
+    sub: 'Document review, application prep, submission and tracking.',
+  });
   if (fees.extra > 0) {
     lines.push({
       id: 'extra',
@@ -134,7 +141,7 @@ export default function FeeBreakdown({ category, country, onApplicantsChange }) 
     id: 'gst',
     label: 'GST (18%)',
     amount: fees.gst,
-    sub: 'On service + surcharge + appointment · HSN 998599.',
+    sub: 'Charged on service + surcharge + appointment · HSN 998599.',
   });
 
   return (
@@ -148,6 +155,17 @@ export default function FeeBreakdown({ category, country, onApplicantsChange }) 
           </div>
           <div className="text-[11px] text-[hsl(var(--blue-900))]/55">All amounts in INR</div>
         </div>
+
+        {fees.isVisaFree && (
+          <div className="px-5 py-3 bg-emerald-50 border-b border-emerald-200 flex items-center gap-2 text-[12.5px] text-emerald-800" data-testid="visa-free-note">
+            <BadgeCheck className="w-4 h-4" />
+            <span>
+              <strong>Visa-free for Indians.</strong> No government fee — you pay only for our
+              concierge service, document review and trip preparation.
+            </span>
+          </div>
+        )}
+
         <ul className="divide-y divide-black/5">
           {lines.map((r) => (
             <li
@@ -180,7 +198,7 @@ export default function FeeBreakdown({ category, country, onApplicantsChange }) 
         </div>
       </div>
 
-      {!fees.requiresAppointment && (
+      {!fees.requiresAppointment && !fees.isVisaFree && (
         <div className="flex items-start gap-2 text-[11.5px] text-[hsl(var(--blue-900))]/55 px-1">
           <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
           <span>No in-person appointment required for this country — fully online filing.</span>

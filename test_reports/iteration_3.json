@@ -1,0 +1,50 @@
+{
+  "summary": "Round-4 full retest (backend + frontend). Backend: 28/28 pytest pass. Frontend: all 5 non-English i18n translations render correctly on Hero, Nav, search, and no-match popover. Revised visa-free pricing (Nepal/Bhutan) verified end-to-end — visa-free-note banner renders inside the fee card, fee-breakdown-free is correctly removed, totals match spec exactly (NP/BT = ₹4,130 with 1 applicant, NP×3 = ₹4,956, US = ₹21,595, UAE = ₹10,830, FR = ₹14,272). Applicants stepper caps at 1 and 20 as expected. Flight suggestions and page transitions unchanged and working.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_wehive_backend.py",
+    "/app/test_reports/pytest/pytest_results.xml",
+    "/app/test_reports/iteration_3.json"
+  ],
+  "verified_test_cases": [
+    "Hindi → headline 'नया वीज़ा. अभी शुरू करें.' · subheading Hindi · placeholder 'देश खोजें — USA, UK, Canada…' · button 'मेरा वीज़ा खोजें' · chip label 'इस हफ़्ते सबसे ज़्यादा खोजे गए' · nav Sign in/up = 'साइन इन' / 'साइन अप' · Home/Services/Pricing/About localised.",
+    "Telugu → headline 'కొత్త వీసా. ఇప్పుడే ప్రారంభించండి.' · chip 'ఈ వారం అత్యధికంగా కోరినవి' · nav 'సైన్ ఇన్'/'సైన్ అప్'.",
+    "Tamil → headline 'புதிய விசா. இப்போதே தொடங்குங்கள்.' · placeholder 'ஒரு நாடை தேடுங்கள் — USA, UK…' · button 'எனது விசாவை கண்டறி'.",
+    "Kannada → headline 'ಹೊಸ ವೀಸಾ. ಈಗಲೇ ಪ್ರಾರಂಭಿಸಿ.' · nav 'ಸೈನ್ ಇನ್'/'ಸೈನ್ ಅಪ್'.",
+    "Bengali → headline 'নতুন ভিসা. এখনই শুরু করুন.' · nav 'সাইন ইন'/'সাইন আপ'.",
+    "No-match popover (Bengali active): '\"xyz123\" এর জন্য কোন মিল নেই। অন্য বানান চেষ্টা করুন।' — fully localised incl. footer '↑↓ চলাচল · Enter খোলা / 250+ গন্তব্য সমর্থিত'.",
+    "/visa/np (1 applicant): visa-free-note present, NO fee-row-govt, NO fee-row-appointment, Base ₹3,500 + GST ₹630 = Total ₹4,130, Apply CTA 'Apply · ₹4,130'. fee-breakdown-free element is correctly absent.",
+    "/visa/np (3 applicants via +2 increments): Base ₹3,500 + Extra (2×₹350 = ₹700) + GST ₹756 = Total ₹4,956, Apply CTA 'Apply · ₹4,956'.",
+    "/visa/bt (Bhutan, 1 applicant): identical to Nepal — visa-free-note + Base + GST = ₹4,130.",
+    "/visa/us (1 applicant): Govt ₹15,400 + Base ₹3,500 + Appt ₹1,750 + GST ₹945 = Total ₹21,595, Apply CTA 'Apply · ₹21,595'.",
+    "/visa/ae (UAE, 1 applicant): Govt ₹6,700 + Base ₹3,500 + GST ₹630 = Total ₹10,830, NO fee-row-appointment.",
+    "/visa/fr (Schengen): Govt ₹7,900 + Base ₹3,500 + Appt ₹1,900 + GST ₹972 = Total ₹14,272.",
+    "Stepper negative: decrement disabled when count==1 on every page visited (np/bt/us/ae/fr).",
+    "Stepper negative: 25 increments clicked → count caps at 20 and increment button goes disabled.",
+    "/visa/us flight-suggestions section renders 3 cards (flight-card-us-1/2/3: Air India CHEAPEST ₹64,500, Emirates MOST POPULAR ₹78,900, United FASTEST ₹92,500).",
+    "Country-grid landmark images (Argentina, Austria, Australia, France, UK, Japan, Singapore visible in screenshots) render correctly.",
+    "Page transitions (AnimatePresence) working across /, /visa/np, /visa/bt, /visa/us, /visa/ae, /visa/fr with no console errors.",
+    "Backend pytest: 28/28 PASSED in 18.42s (countries list/search/detail/holiday-plan/filters, premium upgrade/downgrade, scan auth+premium+mime+oversize+extracts, appointment metadata for 8 countries, applications lifecycle)."
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "FeeBreakdown.computeFees isVisaFree detection now has a robust primary signal (country.no_visa) with a copy-based fallback — good improvement over iter-2. The fallback path '(govt===0 && category.name contains visa-free)' is still fragile if localisation leaks into category.name; safe to drop the fallback once all seeds expose no_visa explicitly.",
+    "LanguageSwitcher.jsx has no data-testid attributes on the trigger button or option buttons. For future testability add data-testid=\"language-switcher-button\" on the trigger and data-testid=\"language-option-{code}\" on each option. Today tests have to fall back on aria-label + native-text matching.",
+    "Applicants state is still duplicated between VisaDetail (useState mirror via onApplicantsChange) and FeeBreakdown (source of truth). Working today but fragile — consider lifting to VisaDetail (carry-over from iter-2).",
+    "Hero subheading is not yet translated (still English 'Bridging dreams, connecting continents…' across all languages). Not in the round-4 spec's listed keys, but likely to be flagged by a reviewer since hero.sub is visibly untranslated next to the localised headline.",
+    "visa-free-note copy is hard-coded English inside FeeBreakdown.jsx; when the user switches to Hindi/Telugu/Tamil/Kannada/Bengali the green banner still says 'Visa-free for Indians. No government fee — you pay only for our concierge service…'. Suggest routing this string through t() with a new i18n key (e.g., fee.visaFreeNote)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (28/28)", "frontend": "100% on round-4 spec (19/19 listed cases)"},
+  "test_credentials": "Mock OTP: any email + code 123456.",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Round-4 validated both translation layer (5 Indic languages on hero, nav, search, no-match popover, Sign in/up) and the revised fee structure (visa-free destinations now charge Base+GST only, visa-free-note banner replaces the old fee-breakdown-free card). All math checked against spec. Minor follow-ups worth mentioning to main agent (not blockers): (a) hero.sub not yet localised; (b) visa-free-note green banner copy still English; (c) LanguageSwitcher trigger+option buttons lack data-testids. Backend pytest green — reuse /app/backend/tests/test_wehive_backend.py for regression. Data-testids in use: visa-free-note (new), fee-breakdown, fee-row-{govt,base,extra,appointment,gst}, fee-total-amount, fee-total-row, applicants-{stepper,increment,decrement,count}, visa-apply-btn, flight-suggestions, flight-card-us-{1,2,3}, hero-search-{input,submit,popover,wrap}.",
+  "rca_of_the_issue": "N/A — no issues blocking round-4 acceptance."
+}
