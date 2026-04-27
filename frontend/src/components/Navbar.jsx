@@ -1,27 +1,108 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { Menu, X, ShieldCheck, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Menu, X, Phone, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
+import { BRAND } from '../data/mock';
 
 const NAV = [
-  { label: 'Visas', to: '/' },
-  { label: 'How it works', to: '/#how' },
-  { label: 'Pricing', to: '/pricing' },
-  { label: 'About', to: '/about' },
+  { id: 'home', label: 'Home', to: '/' },
+  { id: 'services', label: 'Services', to: '/#services' },
+  { id: 'pricing', label: 'Pricing', to: '/pricing' },
+  { id: 'about', label: 'About', to: '/about' },
 ];
+
+function NavLinks({ orientation = 'horizontal' }) {
+  if (orientation === 'horizontal') {
+    return (
+      <nav className="hidden lg:flex items-center gap-1">
+        {NAV.map((item) => (
+          <NavLink
+            key={item.id}
+            to={item.to}
+            end={item.to === '/'}
+            className={({ isActive }) =>
+              cn(
+                'px-4 py-2 text-[14px] font-semibold tracking-tight rounded-full transition-colors',
+                isActive
+                  ? 'text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
+                  : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]'
+              )
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-1">
+      {NAV.map((item) => (
+        <Link
+          key={item.id}
+          to={item.to}
+          className="px-3 py-3 text-[15px] font-semibold rounded-lg hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]"
+        >
+          {item.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function PhoneBlock() {
+  return (
+    <a
+      href={`tel:${BRAND.phoneRaw}`}
+      className="hidden md:inline-flex items-center gap-2.5 rounded-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--red-600))] text-white pr-5 pl-2 py-1.5 transition-colors group"
+    >
+      <span className="h-9 w-9 rounded-full bg-white/15 group-hover:bg-white/25 inline-flex items-center justify-center">
+        <Phone className="w-4 h-4" />
+      </span>
+      <div className="leading-tight text-left">
+        <div className="text-[10px] uppercase tracking-[0.16em] text-white/80 font-semibold">Call us</div>
+        <div className="text-[13.5px] font-bold tracking-tight">{BRAND.phone}</div>
+      </div>
+    </a>
+  );
+}
+
+function MobileMenu({ open }) {
+  if (!open) return null;
+  return (
+    <div className="lg:hidden border-t border-black/5 bg-white/95 backdrop-blur-xl">
+      <div className="px-5 py-4 flex flex-col gap-1">
+        <NavLinks orientation="vertical" />
+        <a
+          href={`tel:${BRAND.phoneRaw}`}
+          className="mt-3 inline-flex items-center justify-center gap-2 rounded-full btn-accent text-white h-11"
+        >
+          <Phone className="w-4 h-4" />
+          {BRAND.phone}
+        </a>
+        <Button className="rounded-full btn-primary text-white h-11">
+          Reserve a slot
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
 
+  const onScroll = useCallback(() => {
+    setScrolled(window.scrollY > 12);
+  }, []);
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [onScroll]);
 
   useEffect(() => {
     setOpen(false);
@@ -32,132 +113,46 @@ export default function Navbar() {
       className={cn(
         'fixed top-0 inset-x-0 z-50 transition-[background,backdrop-filter,border-color] duration-300',
         scrolled
-          ? 'bg-[hsl(var(--cream))]/85 backdrop-blur-xl border-b border-black/5'
+          ? 'bg-white/85 backdrop-blur-xl border-b border-black/5 shadow-[0_4px_30px_-20px_rgba(10,44,138,0.18)]'
           : 'bg-transparent border-b border-transparent'
       )}
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[68px] flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-2 group">
-            <Logo />
-            <span className="text-[22px] font-semibold tracking-tight text-[hsl(var(--navy-900))]">
-              wehive
-            </span>
-          </Link>
-          <span className="hidden md:inline-block w-px h-6 bg-black/10" />
-          <div className="hidden md:flex items-center gap-2 text-[13px] text-[hsl(var(--navy-700))]">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[hsl(var(--navy-700))] text-white">
-              <ShieldCheck className="w-4 h-4" />
-            </span>
-            <div className="leading-tight">
-              <div className="font-semibold">Visas On Time</div>
-              <div className="underline underline-offset-2 decoration-black/30">Guaranteed</div>
+        <Link to="/" className="flex items-center gap-3 group">
+          <img
+            src={BRAND.logo}
+            alt="We Hive"
+            className="h-10 w-auto select-none"
+            draggable={false}
+          />
+          <div className="hidden sm:block leading-tight">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--blue-700))]/70 font-semibold">
+              Immigration · Visa
             </div>
           </div>
-        </div>
+        </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden lg:flex items-center gap-1">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.label}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  'px-4 py-2 text-[14px] font-medium rounded-full transition-colors',
-                  isActive && item.to !== '/#how'
-                    ? 'text-[hsl(var(--navy-900))] bg-black/5'
-                    : 'text-[hsl(var(--navy-900))]/70 hover:text-[hsl(var(--navy-900))] hover:bg-black/5'
-                )
-              }
-              end={item.to === '/'}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+        <NavLinks />
 
-        {/* Right actions */}
-        <div className="hidden md:flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-[hsl(var(--navy-900))]/80 hover:text-[hsl(var(--navy-900))] rounded-full hover:bg-black/5 transition-colors">
-            <span aria-hidden>🇺🇸</span>
+        <div className="flex items-center gap-2">
+          <button className="hidden sm:inline-flex items-center gap-1 px-2 py-2 text-[12.5px] font-semibold text-[hsl(var(--blue-900))]/70 hover:text-[hsl(var(--blue-700))] rounded-full hover:bg-[hsl(var(--blue-50))] transition-colors">
+            <span aria-hidden>🇮🇳</span>
             <span>EN</span>
             <ChevronDown className="w-3.5 h-3.5" />
           </button>
-          <Button
-            variant="ghost"
-            className="rounded-full text-[hsl(var(--navy-900))] hover:bg-black/5 px-4"
+          <PhoneBlock />
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
+            aria-label="Toggle menu"
           >
-            Sign in
-          </Button>
-          <Button className="rounded-full btn-navy text-white px-5 h-10 shadow-sm hover:shadow-md">
-            Get my visa
-          </Button>
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
-
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-black/5"
-          aria-label="Toggle menu"
-        >
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
       </div>
 
-      {/* Mobile menu */}
-      {open && (
-        <div className="lg:hidden border-t border-black/5 bg-[hsl(var(--cream))]/95 backdrop-blur-xl">
-          <div className="px-5 py-4 flex flex-col gap-1">
-            {NAV.map((item) => (
-              <Link
-                key={item.label}
-                to={item.to}
-                className="px-3 py-3 text-[15px] font-medium rounded-lg hover:bg-black/5 text-[hsl(var(--navy-900))]"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="flex gap-2 pt-3">
-              <Button variant="outline" className="flex-1 rounded-full">
-                Sign in
-              </Button>
-              <Button className="flex-1 rounded-full btn-navy text-white">
-                Get my visa
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MobileMenu open={open} />
     </header>
-  );
-}
-
-function Logo() {
-  // Hexagon hive mark in navy with red dot accent
-  return (
-    <span className="relative inline-flex h-9 w-9 items-center justify-center">
-      <svg viewBox="0 0 40 40" className="h-9 w-9">
-        <defs>
-          <linearGradient id="hex" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#163b85" />
-            <stop offset="1" stopColor="#0a1f4d" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M20 2 L36 11 L36 29 L20 38 L4 29 L4 11 Z"
-          fill="url(#hex)"
-        />
-        <path
-          d="M14 16 L20 12.5 L26 16 L26 23 L20 26.5 L14 23 Z"
-          fill="none"
-          stroke="#fff"
-          strokeWidth="1.6"
-          strokeLinejoin="round"
-        />
-        <circle cx="30" cy="10" r="2.6" fill="#B91C2C" />
-      </svg>
-    </span>
   );
 }

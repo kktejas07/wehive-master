@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
 
 html,
 body {
@@ -12,6 +12,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: hsl(var(--foreground));
   background: hsl(var(--background));
+}
+
+.font-display {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  letter-spacing: -0.025em;
 }
 
 .font-serif-display {
@@ -25,36 +30,36 @@ code {
 
 @layer base {
   :root {
-    /* Wehive brand palette \u2014 inspired by US flag */
-    --background: 36 33% 97%; /* warm cream #FAF7F2 */
-    --foreground: 222 47% 11%;
+    /* We Hive brand palette — sourced from wehive.co.in */
+    --background: 0 0% 100%;            /* white */
+    --foreground: 222 84% 5%;            /* near-black */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 84% 5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 220 70% 22%; /* navy #0F2A5F */
+    --popover-foreground: 222 84% 5%;
+    --primary: 226 88% 28%;              /* deep blue #0A2C8A */
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 25% 95%;
-    --secondary-foreground: 220 70% 22%;
+    --secondary: 220 25% 96%;
+    --secondary-foreground: 226 88% 28%;
     --muted: 220 14% 96%;
     --muted-foreground: 215 16% 47%;
-    --accent: 354 70% 42%; /* classic red #B91C2C */
+    --accent: 354 78% 50%;               /* bright red #E1212C */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 220 70% 22%;
+    --ring: 226 88% 28%;
     --radius: 0.85rem;
 
-    --navy-50: 220 60% 97%;
-    --navy-100: 220 55% 92%;
-    --navy-500: 220 60% 32%;
-    --navy-700: 220 70% 22%;
-    --navy-900: 222 60% 12%;
-    --red-500: 354 70% 42%;
-    --red-600: 354 75% 38%;
-    --cream: 36 33% 97%;
+    --blue-50: 226 100% 97%;
+    --blue-100: 226 70% 92%;
+    --blue-500: 226 88% 38%;
+    --blue-700: 226 88% 28%;
+    --blue-900: 226 90% 14%;
+    --red-500: 354 78% 50%;
+    --red-600: 354 80% 44%;
+    --soft-bg: 220 33% 98%;
   }
   .dark {
     --background: 222 47% 6%;
@@ -64,12 +69,12 @@ code {
     --popover: 222 47% 9%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
-    --primary-foreground: 220 70% 22%;
+    --primary-foreground: 226 88% 28%;
     --secondary: 222 47% 13%;
     --secondary-foreground: 0 0% 98%;
     --muted: 222 47% 13%;
     --muted-foreground: 215 16% 65%;
-    --accent: 354 70% 50%;
+    --accent: 354 78% 56%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
@@ -85,6 +90,11 @@ code {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.025em;
   }
 }
 
@@ -97,7 +107,7 @@ code {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   opacity: 0.5;
   mix-blend-mode: multiply;
 }
@@ -107,9 +117,7 @@ code {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-.animate-marquee {
-  animation: marquee 38s linear infinite;
-}
+.animate-marquee { animation: marquee 38s linear infinite; }
 
 /* Slow shimmer for badge */
 @keyframes shimmer {
@@ -135,28 +143,52 @@ code {
 }
 .card-lift:hover {
   transform: translateY(-6px);
-  box-shadow: 0 30px 60px -25px rgba(15, 42, 95, 0.35);
+  box-shadow: 0 30px 60px -25px rgba(10, 44, 138, 0.35);
 }
 
-/* Star burst gradient for primary CTA \u2014 subtle two\u2011tone navy */
-.btn-navy {
-  background: linear-gradient(180deg, hsl(220 70% 26%) 0%, hsl(220 70% 18%) 100%);
+/* Brand buttons — primary navy and accent red */
+.btn-primary {
+  background: hsl(var(--blue-700));
+  color: #fff;
+  transition: background 200ms ease;
 }
-.btn-navy:hover {
-  background: linear-gradient(180deg, hsl(220 70% 30%) 0%, hsl(220 70% 22%) 100%);
+.btn-primary:hover { background: hsl(var(--blue-500)); }
+
+.btn-accent {
+  background: hsl(var(--accent));
+  color: #fff;
+  transition: background 200ms ease;
 }
+.btn-accent:hover { background: hsl(var(--red-600)); }
 
 /* Hide horizontal scrollbar but allow scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Subtle stripe pattern */
-.bg-stripes {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    rgba(15, 42, 95, 0.04),
-    rgba(15, 42, 95, 0.04) 6px,
-    transparent 6px,
-    transparent 12px
-  );
+/* Diagonal split background — homage to wehive.co.in hero */
+.bg-split {
+  background:
+    linear-gradient(105deg,
+      hsl(var(--blue-700)) 0%,
+      hsl(var(--blue-700)) 38%,
+      transparent 38%,
+      transparent 100%);
 }
+
+/* Subtle blue dot grid */
+.bg-dots {
+  background-image: radial-gradient(rgba(10,44,138,0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Diagonal red strike accent */
+.strike-accent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 60%, hsl(var(--accent)) 60%, hsl(var(--accent)) 65%, transparent 65%);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.text-balance { text-wrap: balance; }

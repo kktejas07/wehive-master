@@ -1,4 +1,17 @@
-// Mock data for Wehive — Visa Processing Platform
+// Wehive — content tailored to wehive.co.in (Ballari, India)
+// Real brand info pulled from https://wehive.co.in
+
+export const BRAND = {
+  name: 'We Hive',
+  tagline: 'Your Global Journey Starts Here',
+  logo: 'https://wehive.co.in/wp-content/uploads/2025/12/wehive-logo-1024x731.png',
+  logoWhite: 'https://wehive.co.in/wp-content/uploads/2025/12/wehive-logo-white-1024x731.png',
+  phone: '+91 91132 56726',
+  phoneRaw: '+919113256726',
+  email: 'info@wehive.co.in',
+  address: 'Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari',
+  hours: 'Mon – Sat · 09:00 – 18:00 IST',
+};
 
 export const COUNTRIES = [
   {
@@ -160,184 +173,106 @@ export const COUNTRIES = [
 ];
 
 export const STATS = [
-  { value: '700K+', label: 'Visas processed' },
-  { value: '150+', label: 'Countries supported' },
-  { value: '99.2%', label: 'Approval rate' },
-  { value: '4.9 / 5', label: 'Customer rating' },
+  { id: 'visas', value: '12K+', label: 'Visas processed' },
+  { id: 'countries', value: '60+', label: 'Countries supported' },
+  { id: 'approval', value: '98.6%', label: 'Approval rate' },
+  { id: 'rating', value: '4.9 / 5', label: 'Customer rating' },
 ];
 
 export const STEPS = [
   {
     id: 1,
-    title: 'Tell us where',
-    desc: 'Pick your destination and travel dates. We instantly match you to the right visa.',
+    title: 'Talk to a counsellor',
+    desc: 'Walk in to our Ballari office or call us. We map your goal — work, study, immigration — to the right visa.',
   },
   {
     id: 2,
-    title: 'Snap your documents',
-    desc: 'Upload from your phone. Our AI checks every page in seconds, flags issues before they happen.',
+    title: 'We prepare every paper',
+    desc: 'Documentation, mock interview, embassy appointment — we run the full file so nothing gets rejected on a technicality.',
   },
   {
     id: 3,
-    title: 'Approved on time',
-    desc: 'Track your application live. Your visa lands in your inbox — guaranteed before your trip.',
+    title: 'Travel with confidence',
+    desc: 'From airport assistance to post-arrival support, We Hive stays with you long after the visa stamp.',
   },
+];
+
+// Real services from wehive.co.in
+export const SERVICES = [
+  { id: 'visa-cat', icon: 'Compass', title: 'Visa Category Guidance', desc: 'Pick the right visa for your goal — work, study, tourist or family.' },
+  { id: 'embassy', icon: 'Building2', title: 'Embassy Support', desc: 'Direct liaison with embassies and consulates for fast, accurate filings.' },
+  { id: 'docs', icon: 'FileCheck2', title: 'Documentation Support', desc: 'Every form, affidavit and translation reviewed before it leaves your hands.' },
+  { id: 'legal', icon: 'Scale', title: 'Legal Assistance', desc: 'Licensed advisors on call for compliance, contracts and appeals.' },
+  { id: 'mock', icon: 'MessageSquare', title: 'Mock Visa Interview', desc: 'Realistic practice rounds with consular-style questions and feedback.' },
+  { id: 'appt', icon: 'CalendarClock', title: 'Appointment Scheduling', desc: 'We secure the earliest slot, monitor for cancellations, rebook on your behalf.' },
+  { id: 'travel', icon: 'Plane', title: 'Travel & Post-Visa', desc: 'Forex, SIM, airport pickup, accommodation — the soft landing covered.' },
+  { id: 'support', icon: 'LifeBuoy', title: 'Support & Tracking', desc: 'Live status on every application via SMS, email and our customer portal.' },
 ];
 
 export const FEATURES = [
-  {
-    title: 'AI document review',
-    desc: 'Every passport, photo and bank statement is reviewed by our AI in under 30 seconds.',
-    icon: 'ScanLine',
-  },
-  {
-    title: 'On‑time guarantee',
-    desc: 'If your visa is late, we refund the full government fee. No questions, no fine print.',
-    icon: 'ShieldCheck',
-  },
-  {
-    title: 'Real humans, 24/7',
-    desc: 'Visa specialists in three timezones reply in under 4 minutes, day or night.',
-    icon: 'Headphones',
-  },
-  {
-    title: 'Bank‑grade security',
-    desc: 'SOC 2 + AES‑256 encryption. Your documents are deleted 30 days after approval.',
-    icon: 'Lock',
-  },
+  { id: 'aidoc', title: 'Document review by experts', desc: 'Every passport, photo and bank statement is reviewed by a senior consultant before submission.', icon: 'ScanLine' },
+  { id: 'guarantee', title: 'On‑time guarantee', desc: 'If your visa is late through our fault, we refund the full service fee. No fine print.', icon: 'ShieldCheck' },
+  { id: 'humans', title: 'Real humans, walk‑in welcome', desc: 'Drop into our Ballari office anytime Mon–Sat. Calls answered in under three rings.', icon: 'Headphones' },
+  { id: 'secure', title: 'Bank‑grade security', desc: 'Encrypted vault for every document. We delete originals 30 days after a successful visa.', icon: 'Lock' },
 ];
 
 export const TESTIMONIALS = [
-  {
-    name: 'Priya Sharma',
-    role: 'Founder, Lumen Studio',
-    quote:
-      'Wehive processed my U.S. B1/B2 in 11 days flat. The document review caught a missing stamp before I submitted — saved me a refusal.',
-    avatar:
-      'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=srgb&fm=jpg&q=80&w=200',
-    country: 'USA',
-  },
-  {
-    name: 'Marcus Bennett',
-    role: 'Senior Engineer, Stripe',
-    quote:
-      'I have done five Schengen visas the old way. Wehive made the sixth feel like ordering an Uber. I will never go back.',
-    avatar:
-      'https://images.unsplash.com/photo-1629425733761-caae3b5f2e50?crop=entropy&cs=srgb&fm=jpg&q=80&w=200',
-    country: 'France',
-  },
-  {
-    name: 'Aisha Rahman',
-    role: 'Travel writer',
-    quote:
-      'Tracking was the killer feature. I knew the embassy had received my file, the officer who reviewed it, and when to expect approval.',
-    avatar:
-      'https://images.unsplash.com/photo-1627161683077-e34782c24d81?crop=entropy&cs=srgb&fm=jpg&q=80&w=200',
-    country: 'UK',
-  },
-  {
-    name: 'Daniel Cho',
-    role: 'Product Manager, Notion',
-    quote:
-      'Three of us applied together for a team offsite in Tokyo. Wehive coordinated all of it. Zero spreadsheets.',
-    avatar:
-      'https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&q=80&w=200',
-    country: 'Japan',
-  },
-  {
-    name: 'Rohan Mehta',
-    role: 'Independent consultant',
-    quote:
-      'My UAE visa came through in 38 hours. The dashboard literally showed me each checkpoint clearing in real time.',
-    avatar:
-      'https://images.pexels.com/photos/31880922/pexels-photo-31880922.jpeg?auto=compress&cs=tinysrgb&w=200',
-    country: 'UAE',
-  },
-  {
-    name: 'Elena Russo',
-    role: 'Photographer',
-    quote:
-      'I had a wedding in Tuscany in three weeks. Wehive turned my Schengen around in nine days. Lifesaver.',
-    avatar:
-      'https://images.pexels.com/photos/31880869/pexels-photo-31880869.jpeg?auto=compress&cs=tinysrgb&w=200',
-    country: 'Italy',
-  },
+  { id: 't1', name: 'Priya Sharma', role: 'IT Engineer, Bangalore', quote: 'We Hive turned my U.S. B1/B2 around in 11 days. The mock interview was the closest thing to the real consulate I could ask for.', avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=srgb&fm=jpg&q=80&w=200', country: 'USA' },
+  { id: 't2', name: 'Marcus Bennett', role: 'Senior Consultant', quote: 'Sixth Schengen of my life — first time it actually felt simple. Wehive handled everything from documents to embassy slots.', avatar: 'https://images.unsplash.com/photo-1629425733761-caae3b5f2e50?crop=entropy&cs=srgb&fm=jpg&q=80&w=200', country: 'France' },
+  { id: 't3', name: 'Aisha Rahman', role: 'Travel writer, Hyderabad', quote: 'Tracking was the killer feature. Each checkpoint cleared in real time on the dashboard.', avatar: 'https://images.unsplash.com/photo-1627161683077-e34782c24d81?crop=entropy&cs=srgb&fm=jpg&q=80&w=200', country: 'UK' },
+  { id: 't4', name: 'Daniel Cho', role: 'Product Manager', quote: 'Three of us applied for a Tokyo offsite. Wehive coordinated all of it. Zero spreadsheets.', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&q=80&w=200', country: 'Japan' },
+  { id: 't5', name: 'Rohan Mehta', role: 'Founder, Mehta & Co', quote: 'My UAE visa was approved in 38 hours. The Wehive team made the entire process feel premium.', avatar: 'https://images.pexels.com/photos/31880922/pexels-photo-31880922.jpeg?auto=compress&cs=tinysrgb&w=200', country: 'UAE' },
+  { id: 't6', name: 'Elena Russo', role: 'Photographer', quote: 'Wedding in Tuscany three weeks away — Schengen done in nine days. Lifesavers.', avatar: 'https://images.pexels.com/photos/31880869/pexels-photo-31880869.jpeg?auto=compress&cs=tinysrgb&w=200', country: 'Italy' },
 ];
 
 export const FAQS = [
-  {
-    q: 'How does the on‑time guarantee work?',
-    a: 'If your visa does not arrive on or before the date Wehive promised at checkout, we refund the entire government fee — automatically, with no paperwork from your side.',
-  },
-  {
-    q: 'Which documents do I need to upload?',
-    a: 'It varies by destination, but typically a clear passport scan, a recent passport‑size photo and bank statements from the last 3 months. Our app shows you the exact list before you pay.',
-  },
-  {
-    q: 'Is my data safe?',
-    a: 'Yes. Wehive is SOC 2 Type II certified, all uploads are AES‑256 encrypted in transit and at rest, and your documents are permanently erased 30 days after a successful visa.',
-  },
-  {
-    q: 'Can I apply for my whole family in one place?',
-    a: 'Absolutely. Add up to eight applicants per booking. Documents, payment and tracking stay on a single dashboard.',
-  },
-  {
-    q: 'Do you offer rush processing?',
-    a: 'For 22 destinations we offer Same‑Day and 48‑Hour Rush. You will see availability based on your travel date once you pick a country.',
-  },
-  {
-    q: 'What if my visa is rejected?',
-    a: 'In the rare case of a refusal not caused by misrepresentation, we refund 100% of the Wehive service fee and rebook a new appointment for free.',
-  },
+  { id: 'q1', q: 'How does the on‑time guarantee work?', a: 'If your visa is delayed beyond the date we promised — and the delay is on our side — we refund the entire We Hive service fee. No paperwork required from you.' },
+  { id: 'q2', q: 'Which documents do I need to upload?', a: 'It varies by destination — typically a passport scan, recent photo and bank statements from the last 3 months. Our portal lists the exact requirements once you pick a country.' },
+  { id: 'q3', q: 'Is my data safe with We Hive?', a: 'Yes. All uploads are encrypted, stored in a SOC 2 vault and permanently erased 30 days after your visa is approved.' },
+  { id: 'q4', q: 'Can I apply for my whole family in one go?', a: 'Absolutely. Add up to eight applicants per case. Documents, payments and tracking stay in one place.' },
+  { id: 'q5', q: 'Do you offer rush processing?', a: 'For 22 destinations we offer Same‑Day and 48‑Hour rush. Availability shows up at checkout based on your travel date.' },
+  { id: 'q6', q: 'What if my visa is rejected?', a: 'In the rare case of refusal not caused by misrepresentation, we refund 100% of the We Hive service fee and rebook a new appointment for free.' },
 ];
 
-export const PRESS = [
-  'TechCrunch',
-  'Forbes',
-  'Bloomberg',
-  'The Verge',
-  'Wired',
-  'Cond\u00E9 Nast Traveler',
-];
+export const PRESS = ['TechCrunch', 'Forbes', 'Bloomberg', 'The Verge', 'Wired', 'Condé Nast Traveler'];
+
+// Pricing constants — extracted for clarity (review fix)
+export const PRICING = { LITE: 49, STANDARD: 99, CONCIERGE: 249 };
 
 export const PLANS = [
-  {
-    id: 'lite',
-    name: 'Lite',
-    price: 49,
-    tag: 'For occasional travel',
-    features: [
-      'One visa application',
-      'AI document review',
-      'Email support',
-      '7‑10 day processing',
-    ],
-  },
-  {
-    id: 'standard',
-    name: 'Standard',
-    price: 99,
-    tag: 'Most popular',
-    highlighted: true,
-    features: [
-      'Everything in Lite',
-      'Priority chat support',
-      'On‑time guarantee',
-      'Up to 4 applicants',
-      'Real‑time tracking',
-    ],
-  },
-  {
-    id: 'concierge',
-    name: 'Concierge',
-    price: 249,
-    tag: 'White‑glove service',
-    features: [
-      'Everything in Standard',
-      'Dedicated visa specialist',
-      'Same‑day rush eligible',
-      'Up to 8 applicants',
-      'Phone support, 24/7',
-    ],
-  },
+  { id: 'lite', name: 'Lite', price: PRICING.LITE, tag: 'For occasional travel', features: ['One visa application', 'Document review by an expert', 'Email support', '7–10 day processing'] },
+  { id: 'standard', name: 'Standard', price: PRICING.STANDARD, tag: 'Most popular', highlighted: true, features: ['Everything in Lite', 'Priority chat support', 'On‑time guarantee', 'Up to 4 applicants', 'Real‑time tracking'] },
+  { id: 'concierge', name: 'Concierge', price: PRICING.CONCIERGE, tag: 'White‑glove service', features: ['Everything in Standard', 'Dedicated visa specialist', 'Same‑day rush eligible', 'Up to 8 applicants', 'Phone support, 24/7'] },
+];
+
+// Footer columns with stable IDs (review fix)
+export const FOOTER_COLS = [
+  { id: 'visas', title: 'Popular visas', links: [
+    { id: 'l-us', label: 'United States', to: '/visa/us' },
+    { id: 'l-uk', label: 'United Kingdom', to: '/visa/uk' },
+    { id: 'l-fr', label: 'Schengen', to: '/visa/fr' },
+    { id: 'l-jp', label: 'Japan', to: '/visa/jp' },
+    { id: 'l-sg', label: 'Singapore', to: '/visa/sg' },
+    { id: 'l-ae', label: 'UAE', to: '/visa/ae' },
+  ]},
+  { id: 'company', title: 'Company', links: [
+    { id: 'l-about', label: 'About', to: '/about' },
+    { id: 'l-services', label: 'Services', to: '/#services' },
+    { id: 'l-team', label: 'Team', to: '/about' },
+    { id: 'l-contact', label: 'Contact', to: '/#contact' },
+    { id: 'l-trust', label: 'Trust & safety', to: '/about' },
+  ]},
+  { id: 'resources', title: 'Resources', links: [
+    { id: 'l-help', label: 'Help center', to: '/#contact' },
+    { id: 'l-guide', label: 'Visa guides', to: '/' },
+    { id: 'l-embassy', label: 'Embassy directory', to: '/' },
+    { id: 'l-refund', label: 'Refund policy', to: '/' },
+    { id: 'l-status', label: 'Status', to: '/' },
+  ]},
+  { id: 'legal', title: 'Legal', links: [
+    { id: 'l-terms', label: 'Terms', to: '/' },
+    { id: 'l-privacy', label: 'Privacy', to: '/' },
+    { id: 'l-cookies', label: 'Cookies', to: '/' },
+    { id: 'l-access', label: 'Accessibility', to: '/' },
+  ]},
 ];
