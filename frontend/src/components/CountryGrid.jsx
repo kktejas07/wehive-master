@@ -7,6 +7,7 @@ import { COUNTRIES } from '../data/mock';
 import { API } from '../context/AuthContext';
 import { landmarkFor } from '../lib/landmarks';
 import DeliveryCountdown from './DeliveryCountdown';
+import Reveal from './Reveal';
 
 // Local image lookup by id (frontend has the curated images)
 const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
@@ -209,22 +210,22 @@ export default function CountryGrid({ filters }) {
   const showEvents = filters?.view === 'events';
 
   return (
-    <section id="countries" className="relative py-20 sm:py-28 bg-white">
+    <section id="countries" className="relative py-16 sm:py-24 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="flex items-end justify-between flex-wrap gap-6 mb-10">
+        <Reveal className="flex items-end justify-between flex-wrap gap-6 mb-8 sm:mb-10">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
               <Sparkle className="w-3.5 h-3.5" />
               {showEvents ? 'Events & festivals' : 'Popular destinations'}
             </div>
-            <h2 className="mt-3 text-[34px] sm:text-[48px] leading-[1.02] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[48px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
               {showEvents ? (
                 <>Travel to the world&rsquo;s{' '}<span className="text-[hsl(var(--accent))]">biggest moments.</span></>
               ) : (
                 <>A world of visas,{' '}<span className="text-[hsl(var(--accent))]">in one place.</span></>
               )}
             </h2>
-            <p className="mt-3 text-[15.5px] text-[hsl(var(--blue-900))]/65 max-w-xl">
+            <p className="mt-3 text-[14.5px] sm:text-[15.5px] text-[hsl(var(--blue-900))]/65 max-w-xl">
               {showEvents
                 ? 'Visa packages timed to coincide with the world\'s great festivals, sporting events and concerts. (Coming soon)'
                 : 'Real ETA. Real fees. No hidden charges. Tap a country to see everything you need before you apply.'}
@@ -255,7 +256,7 @@ export default function CountryGrid({ filters }) {
               </button>
             </div>
           )}
-        </div>
+        </Reveal>
 
         {showEvents ? (
           <EventsBoard />
@@ -266,7 +267,7 @@ export default function CountryGrid({ filters }) {
         ) : items.length === 0 ? (
           <EmptyResults />
         ) : view === 'grid' ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
             {items.map((c, i) => (
               <CountryCard key={c.id} c={c} index={i} />
             ))}

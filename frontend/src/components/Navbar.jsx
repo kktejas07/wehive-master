@@ -138,9 +138,14 @@ export default function Navbar() {
           : 'bg-transparent border-b border-transparent'
       )}
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[84px] flex items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[96px] sm:h-[108px] flex items-center justify-between gap-3">
         <Link to="/" className="flex items-center gap-3 group shrink-0">
-          <img src={BRAND.logo} alt="We Hive" className="h-14 sm:h-16 w-auto select-none transition-transform group-hover:scale-[1.02]" draggable={false} />
+          <img
+            src={BRAND.logo}
+            alt="We Hive"
+            className="h-20 sm:h-24 lg:h-28 w-auto select-none transition-transform duration-300 group-hover:scale-[1.05]"
+            draggable={false}
+          />
         </Link>
 
         <NavLinks />

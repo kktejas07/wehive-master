@@ -1,5 +1,6 @@
 import { Quote, Star } from 'lucide-react';
 import { TESTIMONIALS } from '../data/mock';
+import Reveal from './Reveal';
 
 function TestimonialCard({ t, instance }) {
   return (
@@ -55,15 +56,15 @@ export default function Testimonials() {
   return (
     <section className="relative py-20 sm:py-28 overflow-hidden bg-white">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="max-w-3xl">
+        <Reveal className="max-w-3xl">
           <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             Loved by travelers
           </div>
-          <h2 className="mt-3 text-[34px] sm:text-[48px] leading-[1.02] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+          <h2 className="mt-3 text-[30px] sm:text-[48px] leading-[1.05] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
             4.9 stars across 12,000+ visas.{' '}
             <span className="text-[hsl(var(--accent))]">And counting.</span>
           </h2>
-        </div>
+        </Reveal>
       </div>
 
       <div className="mt-14 space-y-5">

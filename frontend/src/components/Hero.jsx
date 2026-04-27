@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import FilterBar, { DEFAULT_FILTERS } from './FilterBar';
 import { COUNTRIES, BRAND } from '../data/mock';
@@ -57,7 +58,7 @@ export default function Hero({ filters, onFilters }) {
   const setF = onFilters || (() => {});
 
   return (
-    <section className="relative pt-32 pb-16 sm:pt-36 sm:pb-24 overflow-hidden bg-grain">
+    <section className="relative pt-36 pb-16 sm:pt-44 sm:pb-24 overflow-hidden bg-grain">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-white" />
         <div className="absolute inset-0 bg-dots opacity-60" />
@@ -66,23 +67,48 @@ export default function Hero({ filters, onFilters }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 relative">
-        <div className="flex justify-center mb-7">
+        <motion.div
+          className="flex justify-center mb-7"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
           <TrustPill />
-        </div>
+        </motion.div>
 
-        <h1 className="text-center mx-auto max-w-5xl font-display font-extrabold text-[44px] leading-[1.02] sm:text-[68px] sm:leading-[1.0] lg:text-[80px] tracking-[-0.035em] text-[hsl(var(--blue-900))] text-balance">
+        <motion.h1
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center mx-auto max-w-5xl font-display font-extrabold text-[40px] leading-[1.05] sm:text-[64px] sm:leading-[1.02] lg:text-[80px] lg:leading-[1.0] tracking-[-0.035em] text-[hsl(var(--blue-900))] text-balance"
+        >
           {t('hero.headline')}{' '}
           <span className="text-[hsl(var(--accent))]">{t('hero.headlineAccent')}</span>
-        </h1>
-        <p className="text-center mx-auto max-w-2xl mt-5 text-[16px] sm:text-[18px] leading-relaxed text-[hsl(var(--blue-900))]/65">
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.18, ease: 'easeOut' }}
+          className="text-center mx-auto max-w-2xl mt-5 text-[15px] sm:text-[18px] leading-relaxed text-[hsl(var(--blue-900))]/65 px-2"
+        >
           {t('hero.sub')}
-        </p>
+        </motion.p>
 
-        <div className="mt-10">
+        <motion.div
+          className="mt-10"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.28, ease: 'easeOut' }}
+        >
           <FilterBar value={f} onChange={setF} />
-        </div>
+        </motion.div>
 
-        <div className="mt-8 mx-auto max-w-3xl">
+        <motion.div
+          className="mt-8 mx-auto max-w-3xl"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.38, ease: 'easeOut' }}
+        >
           <HeroSearch query={query} setQuery={setQuery} />
           {!query && (
             <CountrySuggestions
@@ -90,7 +116,7 @@ export default function Hero({ filters, onFilters }) {
               label={t('hero.suggestions')}
             />
           )}
-        </div>
+        </motion.div>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <a
