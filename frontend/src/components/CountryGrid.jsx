@@ -1,37 +1,50 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 import { Grid2X2, Map as MapIcon, Sparkle, Loader2, Compass } from 'lucide-react';
 import { COUNTRIES } from '../data/mock';
 import { API } from '../context/AuthContext';
+import { landmarkFor } from '../lib/landmarks';
 import DeliveryCountdown from './DeliveryCountdown';
 
 // Local image lookup by id (frontend has the curated images)
 const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
 
-function CountryCard({ c }) {
+function CountryCard({ c, index = 0 }) {
   const isNoVisa = c.no_visa;
   const types = c.visa_types || [];
-  const cardImage = IMG[c.id] || c.flag_url;
+  const cardImage = landmarkFor(c) || IMG[c.id] || c.flag_url;
+  const hasRichImage = !!(landmarkFor(c) || IMG[c.id]);
   return (
-    <Link to={isNoVisa ? `/holiday/${c.id}` : `/visa/${c.id}`} className="group block card-lift">
-      <article className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]">
-        {cardImage ? (
-          <img
-            src={cardImage}
-            alt={c.name}
-            loading="lazy"
-            className={`absolute inset-0 h-full w-full transition-transform duration-[900ms] group-hover:scale-[1.06] ${
-              IMG[c.id] ? 'object-cover' : 'object-cover scale-150 blur-md opacity-60'
-            }`}
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
-        )}
-        {!IMG[c.id] && (
-          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/85 to-[hsl(var(--blue-900))]/85" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '0px 0px -60px 0px' }}
+      transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.4 }}
+    >
+      <Link to={isNoVisa ? `/holiday/${c.id}` : `/visa/${c.id}`} className="group block card-lift">
+        <motion.article
+          whileHover={{ y: -4 }}
+          transition={{ duration: 0.25 }}
+          className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]"
+        >
+          {cardImage ? (
+            <img
+              src={cardImage}
+              alt={c.name}
+              loading="lazy"
+              className={`absolute inset-0 h-full w-full transition-transform duration-[900ms] group-hover:scale-[1.06] ${
+                hasRichImage ? 'object-cover' : 'object-cover scale-150 blur-md opacity-60'
+              }`}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
+          )}
+          {!hasRichImage && (
+            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/85 to-[hsl(var(--blue-900))]/85" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
         {/* Visa type badges - top */}
         {!isNoVisa && types.length > 0 && (
@@ -92,7 +105,7 @@ function CountryCard({ c }) {
             </div>
           )}
         </div>
-      </article>
+      </motion.article>
       <div className="mt-3 px-1 flex items-center justify-between">
         <div>
           <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
@@ -106,17 +119,29 @@ function CountryCard({ c }) {
           </div>
         </div>
         {!isNoVisa && (
-          <Link
-            to={`/holiday/${c.id}`}
-            onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[11.5px] font-bold transition"
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.location.href = `/holiday/${c.id}`;
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                window.location.href = `/holiday/${c.id}`;
+              }
+            }}
+            className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[11.5px] font-bold transition cursor-pointer"
           >
             <Compass className="w-3 h-3" />
             Plan
-          </Link>
+          </span>
         )}
       </div>
     </Link>
+    </motion.div>
   );
 }
 
@@ -242,8 +267,8 @@ export default function CountryGrid({ filters }) {
           <EmptyResults />
         ) : view === 'grid' ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {items.map((c) => (
-              <CountryCard key={c.id} c={c} />
+            {items.map((c, i) => (
+              <CountryCard key={c.id} c={c} index={i} />
             ))}
           </div>
         ) : (

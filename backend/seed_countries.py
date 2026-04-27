@@ -32,6 +32,29 @@ load_dotenv(ROOT / '.env')
 from db import db                       # noqa: E402
 from data import COUNTRIES, _vc, DOCS_BASIC, DOCS_TOURIST, DOCS_BUSINESS, DOCS_STUDENT, DOCS_WORK  # noqa: E402
 
+# Countries (ISO-2) where Indians must attend a VFS / consulate appointment.
+APPOINTMENT_REQUIRED = {
+    'US', 'GB', 'CA', 'AU', 'NZ', 'JP', 'CN', 'KR', 'CH',
+    # Schengen members (all need biometrics in person)
+    'AT', 'BE', 'BG', 'HR', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU',
+    'IS', 'IT', 'LV', 'LI', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO',
+    'SK', 'SI', 'ES', 'SE',
+}
+
+# Country-specific appointment fee in INR (VFS / biometrics service fee).
+APPOINTMENT_FEE_INR = {
+    'US': 1750, 'GB': 2400, 'CA': 1900, 'AU': 1700, 'NZ': 1700,
+    'JP': 1200, 'CN': 1500, 'KR': 1200, 'CH': 1900,
+}
+# Schengen default
+for _iso in {
+    'AT', 'BE', 'BG', 'HR', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU',
+    'IS', 'IT', 'LV', 'LI', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO',
+    'SK', 'SI', 'ES', 'SE',
+}:
+    APPOINTMENT_FEE_INR.setdefault(_iso, 1900)
+
+
 REST_API = 'https://restcountries.com/v3.1/all?fields=name,cca2,cca3,flag,flags,region,subregion,capital,currencies,languages'
 CACHE_PATH = ROOT / '.countries_cache.json'
 
@@ -140,6 +163,8 @@ def _normalize(rec: Dict[str, Any]) -> Dict[str, Any] | None:
         doc['flag_url'] = (rec.get('flags') or {}).get('svg') or (rec.get('flags') or {}).get('png')
         doc['currencies'] = list((rec.get('currencies') or {}).keys())
         doc['languages'] = list((rec.get('languages') or {}).values())
+        doc['requires_appointment'] = iso2 in APPOINTMENT_REQUIRED
+        doc['appointment_fee_inr'] = APPOINTMENT_FEE_INR.get(iso2, 0) if iso2 in APPOINTMENT_REQUIRED else 0
         doc['source'] = 'manual+rest'
         return doc
 
@@ -185,6 +210,8 @@ def _normalize(rec: Dict[str, Any]) -> Dict[str, Any] | None:
         },
         'holiday_default_days': 7,
         'highlights': [],
+        'requires_appointment': iso2 in APPOINTMENT_REQUIRED,
+        'appointment_fee_inr': APPOINTMENT_FEE_INR.get(iso2, 0) if iso2 in APPOINTMENT_REQUIRED else 0,
         'source': 'rest',
     }
     return doc

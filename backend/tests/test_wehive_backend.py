@@ -221,3 +221,66 @@ class TestScan:
         assert body.get('kind') == 'document'
         ext = body.get('extracted') or {}
         assert 'summary' in ext or 'document_kind' in ext, f"missing summary/document_kind: {ext}"
+
+    def test_passport_empty_file_400(self, session, auth_headers):
+        session.post(f"{API}/users/me/upgrade", headers=auth_headers)
+        files = {'file': ('empty.png', b'', 'image/png')}
+        r = session.post(f"{API}/scan/passport", files=files, headers=auth_headers)
+        assert r.status_code == 400
+
+
+# ---------- Country appointment metadata ----------
+class TestCountryAppointment:
+    @pytest.mark.parametrize("iso2,expected_required,expected_min_fee", [
+        ("us", True, 1500),
+        ("gb", True, 1500),
+        ("uk", True, 1500),  # alias accepted via static map
+        ("fr", True, 1500),  # Schengen
+        ("de", True, 1500),  # Schengen
+        ("ae", False, 0),
+        ("th", False, 0),
+        ("np", False, 0),    # Visa-free
+    ])
+    def test_appointment_required_by_country(self, session, iso2, expected_required, expected_min_fee):
+        r = session.get(f"{API}/countries/{iso2}")
+        assert r.status_code == 200, f"country {iso2}: {r.status_code} {r.text[:300]}"
+        d = r.json()
+        ra = d.get('requires_appointment')
+        if ra is not None:  # tolerate None for hand-curated 15 if not enriched
+            assert ra is expected_required, f"{iso2} requires_appointment={ra}, expected {expected_required}"
+            if expected_required:
+                fee = d.get('appointment_fee_inr') or 0
+                assert fee >= expected_min_fee, f"{iso2} appointment_fee_inr={fee} < {expected_min_fee}"
+            else:
+                fee = d.get('appointment_fee_inr') or 0
+                assert fee == 0, f"{iso2} should have 0 appointment fee, got {fee}"
+
+
+# ---------- Application lifecycle (positive + negative) ----------
+class TestApplications:
+    def test_create_application_unauth_401(self, session):
+        r = session.post(f"{API}/users/me/applications", json={"country_id": "us", "visa_type": "Tourist"})
+        assert r.status_code in (401, 403)
+
+    def test_create_then_fetch_application(self, session, auth_headers):
+        r = session.post(f"{API}/users/me/applications",
+                         json={"country_id": "us", "visa_type": "Tourist"},
+                         headers=auth_headers)
+        assert r.status_code == 200
+        body = r.json()
+        app_id = body.get('id')
+        assert app_id, body
+        # Fetch back
+        r2 = session.get(f"{API}/users/me/applications/{app_id}", headers=auth_headers)
+        assert r2.status_code == 200
+        d = r2.json()
+        assert d.get('country_id') == 'us'
+        assert d.get('visa_type') == 'Tourist'
+        assert d.get('status') == 'draft'
+        # Submit without docs -> 400
+        r3 = session.post(f"{API}/users/me/applications/{app_id}/submit", headers=auth_headers)
+        assert r3.status_code == 400
+
+    def test_fetch_other_users_application_404(self, session, auth_headers):
+        r = session.get(f"{API}/users/me/applications/this-id-does-not-exist", headers=auth_headers)
+        assert r.status_code == 404

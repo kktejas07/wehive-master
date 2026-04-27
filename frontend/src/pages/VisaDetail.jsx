@@ -14,6 +14,9 @@ import { useToast } from '../hooks/use-toast';
 import { COUNTRIES, FAQS, BRAND } from '../data/mock';
 import DeliveryCountdown from '../components/DeliveryCountdown';
 import FeeBreakdown, { computeFees } from '../components/FeeBreakdown';
+import FlightSuggestions from '../components/FlightSuggestions';
+import { landmarkFor } from '../lib/landmarks';
+import { motion } from 'framer-motion';
 
 const TYPE_ICONS = {
   Tourist: Plane,
@@ -69,9 +72,9 @@ function CategoryTabs({ categories, value, onChange }) {
   );
 }
 
-function CategoryDetails({ cat, country, onApply, applying, typeId }) {
-  const fallbackImg = COUNTRIES.find((c) => c.id === country.id)?.image || country.flag_url;
-  const fees = computeFees({ ...cat, _kind: typeId });
+function CategoryDetails({ cat, country, onApply, applying, typeId, applicants }) {
+  const fallbackImg = landmarkFor(country) || country.flag_url || COUNTRIES.find((c) => c.id === country.id)?.image;
+  const fees = computeFees({ category: cat, applicants, country });
   return (
     <div className="grid lg:grid-cols-12 gap-10 items-start">
       <div className="lg:col-span-7">
@@ -264,6 +267,7 @@ export default function VisaDetail() {
   const [country, setCountry] = useState(null);
   const [type, setType] = useState('Tourist');
   const [applying, setApplying] = useState(false);
+  const [applicants, setApplicants] = useState(1);
 
   useEffect(() => {
     let mounted = true;
@@ -327,7 +331,7 @@ export default function VisaDetail() {
             <CategoryTabs categories={country.categories} value={type} onChange={setType} />
           </div>
           <div className="mt-8">
-            {cat && <CategoryDetails cat={cat} country={country} onApply={onApply} applying={applying} typeId={type} />}
+            {cat && <CategoryDetails cat={cat} country={country} onApply={onApply} applying={applying} typeId={type} applicants={applicants} />}
           </div>
         </div>
       </section>
@@ -354,13 +358,20 @@ export default function VisaDetail() {
             </div>
           </div>
           <aside className="lg:col-span-5 space-y-6">
-            {cat && <FeeBreakdown category={cat} visaTypeId={type} />}
+            {cat && (
+              <FeeBreakdown
+                category={cat}
+                country={country}
+                onApplicantsChange={setApplicants}
+              />
+            )}
             <AssistCard />
           </aside>
         </div>
       </section>
 
       <FaqSection countryName={country.name} />
+      <FlightSuggestions country={country} />
       <OtherCountries list={others} />
       <Footer />
     </div>
