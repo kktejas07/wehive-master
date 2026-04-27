@@ -22,6 +22,7 @@
  */
 import { useState } from 'react';
 import { Users, Plus, Minus, Info, BadgeCheck } from 'lucide-react';
+import { useI18n } from '../context/I18nContext';
 
 export const BASE_SERVICE_FEE_INR = 3500;
 export const PER_EXTRA_APPLICANT_INR = 350;
@@ -99,6 +100,7 @@ function ApplicantsStepper({ value, onChange }) {
 
 export default function FeeBreakdown({ category, country, onApplicantsChange }) {
   const [applicants, setApplicants] = useState(1);
+  const { t } = useI18n();
   const fees = computeFees({ category, applicants, country });
 
   const handleApplicants = (n) => {
@@ -158,11 +160,8 @@ export default function FeeBreakdown({ category, country, onApplicantsChange }) 
 
         {fees.isVisaFree && (
           <div className="px-5 py-3 bg-emerald-50 border-b border-emerald-200 flex items-center gap-2 text-[12.5px] text-emerald-800" data-testid="visa-free-note">
-            <BadgeCheck className="w-4 h-4" />
-            <span>
-              <strong>Visa-free for Indians.</strong> No government fee — you pay only for our
-              concierge service, document review and trip preparation.
-            </span>
+            <BadgeCheck className="w-4 h-4 shrink-0" />
+            <span>{t('fee.visaFreeNote')}</span>
           </div>
         )}
 

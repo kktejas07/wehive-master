@@ -94,6 +94,29 @@ scanning** for visa form auto-fill.
 - Fixed pre-existing nested `<a>` warning in country grid (Plan button is
   now a span button, not a Link inside a Link).
 
+### Round 4 — Translation polish + visa-free pricing fix (this round)
+- **i18n coverage extended** — added new keys (`hero.suggestions`, `hero.matching`,
+  `hero.searchKeys`, `hero.searchSource`, `hero.noMatch`, `cta.signIn`,
+  `cta.signUp`, `cta.callUs`, `fee.visaFreeNote`) to all 6 languages
+  (en / hi / te / ta / kn / bn).
+- Wired `useI18n()` into:
+  - `Hero.jsx` — headline / sub / suggestion-strip label
+  - `HeroSearchLive.jsx` — placeholder, button, no-match copy, popover footer
+  - `Navbar.jsx` (`PhoneBlock`, `MobileMenu`) — "Call us", Sign in, Sign up
+  - `UserMenu.jsx` — desktop Sign in / Sign up
+  - `FeeBreakdown.jsx` — visa-free banner now localised (`fee.visaFreeNote`)
+- `LanguageSwitcher` got `data-testid="language-switcher-button"` +
+  `data-testid="language-option-{code}"` on each option.
+- **Pricing rule update — visa-free destinations now charge our service fees**:
+  - Removed the old "fee-breakdown-free" early return that returned ₹0.
+  - Total = Base ₹3,500 + ₹350 × extra applicants + 18 % GST → ₹4,130 for
+    1 applicant on Nepal / Bhutan / Indonesia etc.
+  - A green `data-testid="visa-free-note"` banner inside the fee-breakdown
+    card explains "no government fee — you pay only for our concierge service".
+  - GST is still applied **only** to the Wehive portion (base + surcharge +
+    appointment), never to the government fee.
+- Apply CTA / Total meta-card always show the rupee amount (no "Free" label).
+
 ## Known limitations / Backlog
 - **P1 (blocker for real emails)**: `SMTP_PASSWORD` is a placeholder. Requires
   Gmail App Password from user.

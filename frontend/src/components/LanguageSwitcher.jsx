@@ -21,6 +21,7 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
+        data-testid="language-switcher-button"
         className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-[12.5px] font-bold text-[hsl(var(--blue-900))]/70 hover:text-[hsl(var(--blue-700))] rounded-full hover:bg-[hsl(var(--blue-50))] transition-colors"
         aria-label="Change language"
       >
@@ -35,6 +36,7 @@ export default function LanguageSwitcher() {
             return (
               <button
                 key={l.code}
+                data-testid={`language-option-${l.code}`}
                 onClick={() => {
                   setLang(l.code);
                   setOpen(false);
