@@ -182,7 +182,7 @@ export default function ChatbotWidget() {
                 <div className="flex justify-start">
                   <div className="rounded-2xl rounded-bl-sm bg-white border border-black/5 px-3.5 py-2.5 inline-flex items-center gap-2 text-[hsl(var(--blue-900))]/65">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span className="text-[13px]">Eva is thinking…</span>
+                    <span className="text-[13px]">{t('chatbot.thinking')}</span>
                   </div>
                 </div>
               )}

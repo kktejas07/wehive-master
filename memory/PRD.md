@@ -134,6 +134,28 @@ scanning** for visa form auto-fill.
 - Verified to the rupee on US Tourist 1/2/3, US Student 1, US Work 1, US
   Business 1, UAE 1/2, Nepal 1/2.
 
+### Round 6 — Animations, responsive polish, Eva rename, bigger logo (this round)
+- **AI assistant renamed `Hive → Eva`** in the chatbot widget header, loading
+  indicator, and the backend LLM system prompt. All 6 language translations
+  of `chatbot.title` updated + new `chatbot.thinking` key localised too.
+  Brand name "We Hive" intact. Verified via live LLM call: "Hi there, what
+  is your name?" → "Hello! I'm Eva, your friendly visa and travel assistant
+  from We Hive Immigration Services."
+- **Navbar logo enlarged** from `h-14 sm:h-16` to `h-20 sm:h-24 lg:h-28`
+  (desktop 112 px). Nav row height bumped to `h-[96px] sm:h-[108px]`.
+  Hero `pt-36 sm:pt-44` to avoid content hiding under the taller nav.
+- **New `Reveal.jsx`** wrapper (framer-motion `whileInView` with
+  index-based stagger) applied across the landing page:
+  - Hero: trust-pill, H1, sub-copy, FilterBar, HeroSearch stagger in on mount.
+  - HowItWorks: StepCards, ServiceCards, FeatureCards, StatCards stagger.
+  - Testimonials / PressStrip / Faq / CtaBanner / CountryGrid: section
+    headings reveal; CTA banner reveals from left+right; PressStrip logos
+    stagger with hover lift; FAQ items slide in from the left.
+- **Mobile responsiveness polish**: typography scaled down on `< sm`
+  (text-[28px] sm:text-[40px] lg:text-[48px] for section headers), padding
+  gated `py-16 sm:py-24 lg:py-28`. CountryGrid moves to 2-col on mobile,
+  3-col on tablet, 4-col on desktop.
+
 ## Known limitations / Backlog
 - **P1 (blocker for real emails)**: `SMTP_PASSWORD` is a placeholder. Requires
   Gmail App Password from user.
