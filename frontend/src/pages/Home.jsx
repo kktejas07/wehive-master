@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Hero from '../components/Hero';
@@ -7,14 +8,16 @@ import Testimonials from '../components/Testimonials';
 import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
 import PressStrip from '../components/PressStrip';
+import { DEFAULT_FILTERS } from '../components/FilterBar';
 
 export default function Home() {
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   return (
     <div>
       <Navbar />
-      <Hero />
+      <Hero filters={filters} onFilters={setFilters} />
       <PressStrip />
-      <CountryGrid />
+      <CountryGrid filters={filters} />
       <HowItWorks />
       <Testimonials />
       <Faq />

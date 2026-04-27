@@ -4,6 +4,8 @@ import { Menu, X, Phone, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
+import UserMenu from './UserMenu';
+import { useAuth } from '../context/AuthContext';
 
 const NAV = [
   { id: 'home', label: 'Home', to: '/' },
@@ -23,7 +25,7 @@ function NavLinks({ orientation = 'horizontal' }) {
             end={item.to === '/'}
             className={({ isActive }) =>
               cn(
-                'px-4 py-2 text-[14px] font-semibold tracking-tight rounded-full transition-colors',
+                'px-4 py-2 text-[14px] font-bold tracking-tight rounded-full transition-colors',
                 isActive
                   ? 'text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
                   : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]'
@@ -42,7 +44,7 @@ function NavLinks({ orientation = 'horizontal' }) {
         <Link
           key={item.id}
           to={item.to}
-          className="px-3 py-3 text-[15px] font-semibold rounded-lg hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]"
+          className="px-3 py-3 text-[15px] font-bold rounded-lg hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]"
         >
           {item.label}
         </Link>
@@ -55,13 +57,13 @@ function PhoneBlock() {
   return (
     <a
       href={`tel:${BRAND.phoneRaw}`}
-      className="hidden md:inline-flex items-center gap-2.5 rounded-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--red-600))] text-white pr-5 pl-2 py-1.5 transition-colors group"
+      className="hidden xl:inline-flex items-center gap-2.5 rounded-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--red-600))] text-white pr-5 pl-2 py-1.5 transition-colors group"
     >
       <span className="h-9 w-9 rounded-full bg-white/15 group-hover:bg-white/25 inline-flex items-center justify-center">
         <Phone className="w-4 h-4" />
       </span>
       <div className="leading-tight text-left">
-        <div className="text-[10px] uppercase tracking-[0.16em] text-white/80 font-semibold">Call us</div>
+        <div className="text-[10px] uppercase tracking-[0.16em] text-white/80 font-bold">Call us</div>
         <div className="text-[13.5px] font-bold tracking-tight">{BRAND.phone}</div>
       </div>
     </a>
@@ -69,6 +71,7 @@ function PhoneBlock() {
 }
 
 function MobileMenu({ open }) {
+  const { isAuthed, openAuth } = useAuth();
   if (!open) return null;
   return (
     <div className="lg:hidden border-t border-black/5 bg-white/95 backdrop-blur-xl">
@@ -76,14 +79,28 @@ function MobileMenu({ open }) {
         <NavLinks orientation="vertical" />
         <a
           href={`tel:${BRAND.phoneRaw}`}
-          className="mt-3 inline-flex items-center justify-center gap-2 rounded-full btn-accent text-white h-11"
+          className="mt-3 inline-flex items-center justify-center gap-2 rounded-full btn-accent text-white h-11 font-bold"
         >
           <Phone className="w-4 h-4" />
           {BRAND.phone}
         </a>
-        <Button className="rounded-full btn-primary text-white h-11">
-          Reserve a slot
-        </Button>
+        {!isAuthed && (
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <Button
+              variant="outline"
+              className="rounded-full h-11"
+              onClick={() => openAuth('login')}
+            >
+              Sign in
+            </Button>
+            <Button
+              className="rounded-full btn-primary text-white h-11"
+              onClick={() => openAuth('signup')}
+            >
+              Sign up
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -117,31 +134,21 @@ export default function Navbar() {
           : 'bg-transparent border-b border-transparent'
       )}
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <img
-            src={BRAND.logo}
-            alt="We Hive"
-            className="h-10 w-auto select-none"
-            draggable={false}
-          />
-          <div className="hidden sm:block leading-tight">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--blue-700))]/70 font-semibold">
-              Immigration · Visa
-            </div>
-          </div>
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between gap-3">
+        <Link to="/" className="flex items-center gap-3 group shrink-0">
+          <img src={BRAND.logo} alt="We Hive" className="h-10 w-auto select-none" draggable={false} />
         </Link>
 
         <NavLinks />
 
         <div className="flex items-center gap-2">
-          <button className="hidden sm:inline-flex items-center gap-1 px-2 py-2 text-[12.5px] font-semibold text-[hsl(var(--blue-900))]/70 hover:text-[hsl(var(--blue-700))] rounded-full hover:bg-[hsl(var(--blue-50))] transition-colors">
+          <button className="hidden sm:inline-flex items-center gap-1 px-2 py-2 text-[12.5px] font-bold text-[hsl(var(--blue-900))]/70 hover:text-[hsl(var(--blue-700))] rounded-full hover:bg-[hsl(var(--blue-50))] transition-colors">
             <span aria-hidden>🇮🇳</span>
             <span>EN</span>
             <ChevronDown className="w-3.5 h-3.5" />
           </button>
           <PhoneBlock />
+          <UserMenu />
           <button
             onClick={() => setOpen((v) => !v)}
             className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
