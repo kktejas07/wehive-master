@@ -101,6 +101,7 @@ export function computeFees({ category, applicants = 1, country, visaType }) {
 const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
 
 function ApplicantsStepper({ value, onChange }) {
+  const { t } = useI18n();
   const dec = () => onChange(Math.max(1, value - 1));
   const inc = () => onChange(Math.min(20, value + 1));
   return (
@@ -108,8 +109,8 @@ function ApplicantsStepper({ value, onChange }) {
       <div className="flex items-center gap-2.5">
         <Users className="w-4 h-4 text-[hsl(var(--blue-700))]" />
         <div>
-          <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Applicants</div>
-          <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">Fees scale per traveller</div>
+          <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{t('fee.applicants')}</div>
+          <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">{t('fee.applicantsSub')}</div>
         </div>
       </div>
       <div className="flex items-center gap-1.5">
@@ -150,27 +151,30 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
   };
 
   const lines = [];
+  const nStr = String(applicants);
+  const sPlural = applicants > 1 ? 's' : '';
+  const applicationSub = fees.isVisaFree
+    ? t('fee.applicationSubFree').replace('{n}', nStr).replace('{s}', sPlural)
+    : t('fee.applicationSubEmbassy').replace('{n}', nStr).replace('{s}', sPlural);
   lines.push({
     id: 'application',
-    label: 'Application fee',
+    label: t('fee.application'),
     amount: fees.application,
-    sub: fees.isVisaFree
-      ? `Document review, application prep, submission and tracking · ${applicants} applicant${applicants > 1 ? 's' : ''}.`
-      : `Embassy fee + document review, prep, submission and tracking · ${applicants} applicant${applicants > 1 ? 's' : ''}.`,
+    sub: applicationSub,
   });
   if (fees.requiresAppointment && fees.appointment > 0) {
     lines.push({
       id: 'appointment',
-      label: 'Appointment / VFS fee',
+      label: t('fee.appointment'),
       amount: fees.appointment,
-      sub: `Mandatory in-person biometrics for this country · ${applicants} applicant${applicants > 1 ? 's' : ''}.`,
+      sub: t('fee.appointmentSub').replace('{n}', nStr).replace('{s}', sPlural),
     });
   }
   lines.push({
     id: 'gst',
-    label: 'GST (18%)',
+    label: t('fee.gst'),
     amount: fees.gst,
-    sub: 'Charged on service & appointment portions · HSN 998599.',
+    sub: t('fee.gstSub'),
   });
 
   return (
@@ -180,9 +184,9 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
       <div className="rounded-2xl bg-white border border-black/8 overflow-hidden">
         <div className="px-5 py-3 border-b border-black/5 flex items-center justify-between">
           <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
-            Fee breakdown
+            {t('fee.heading')}
           </div>
-          <div className="text-[11px] text-[hsl(var(--blue-900))]/55">All amounts in INR</div>
+          <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{t('fee.currencyNote')}</div>
         </div>
 
         {fees.isVisaFree && (
@@ -212,10 +216,10 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
         <div className="px-5 py-3.5 bg-[hsl(var(--soft-bg))] grid grid-cols-[1fr_auto] gap-3 border-t border-black/5" data-testid="fee-total-row">
           <div>
             <div className="text-[15px] font-display font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
-              Total payable
+              {t('fee.total')}
             </div>
             <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-0.5">
-              For {applicants} applicant{applicants > 1 ? 's' : ''} · No hidden fees · On-time guarantee
+              {t('fee.totalSub').replace('{n}', nStr).replace('{s}', sPlural)}
             </div>
           </div>
           <div data-testid="fee-total-amount" className="text-[20px] font-display font-extrabold tracking-[-0.02em] text-[hsl(var(--accent))] tabular-nums">
@@ -227,7 +231,7 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
       {!fees.requiresAppointment && !fees.isVisaFree && (
         <div className="flex items-start gap-2 text-[11.5px] text-[hsl(var(--blue-900))]/55 px-1">
           <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-          <span>No in-person appointment required for this country — fully online filing.</span>
+          <span>{t('fee.noAppointment')}</span>
         </div>
       )}
     </div>

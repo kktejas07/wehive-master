@@ -175,5 +175,17 @@ scanning** for visa form auto-fill.
 - `TWILIO_*` — provided, sandbox mode.
 - `SMTP_*` — provided; App Password pending.
 
+### Round 7 — Fee-breakdown labels localised (this round)
+- Added i18n keys for every string inside `FeeBreakdown.jsx` — `fee.applicants`,
+  `fee.heading`, `fee.currencyNote`, `fee.application`,
+  `fee.applicationSubEmbassy`, `fee.applicationSubFree`, `fee.appointment`,
+  `fee.appointmentSub`, `fee.gst`, `fee.gstSub`, `fee.total`, `fee.totalSub`,
+  `fee.noAppointment` — across all 6 languages (en / hi / te / ta / kn / bn).
+- Applicant count is interpolated via `{n}` / `{s}` placeholders for proper
+  singular / plural handling. Amounts stay in `₹` with `en-IN` formatting.
+- Added `chatbot.placeholder` / `chatbot.start` for future chat widget use.
+- Verified visually in Hindi and Tamil: all four fee-row labels + applicants
+  stepper labels + total row translate correctly; ₹ amounts unchanged.
+
 ## Test credentials
 See `/app/memory/test_credentials.md`.
