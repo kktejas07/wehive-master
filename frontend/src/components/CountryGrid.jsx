@@ -4,12 +4,14 @@ import axios from 'axios';
 import { Grid2X2, Map as MapIcon, Sparkle, Loader2, Compass } from 'lucide-react';
 import { COUNTRIES } from '../data/mock';
 import { API } from '../context/AuthContext';
+import DeliveryCountdown from './DeliveryCountdown';
 
 // Local image lookup by id (frontend has the curated images)
 const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
 
 function CountryCard({ c }) {
   const isNoVisa = c.no_visa;
+  const types = c.visa_types || [];
   return (
     <Link to={isNoVisa ? `/holiday/${c.id}` : `/visa/${c.id}`} className="group block card-lift">
       <article className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]">
@@ -24,6 +26,30 @@ function CountryCard({ c }) {
           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+
+        {/* Visa type badges - top */}
+        {!isNoVisa && types.length > 0 && (
+          <div className="absolute top-3 left-3 right-3 flex flex-wrap gap-1.5">
+            {types.slice(0, 3).map((t) => (
+              <span
+                key={`${c.id}-${t}`}
+                className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/90 backdrop-blur text-[10px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]"
+              >
+                {t}
+              </span>
+            ))}
+            {types.length > 3 && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/90 backdrop-blur text-[10px] font-bold text-[hsl(var(--blue-900))]/60">
+                +{types.length - 3}
+              </span>
+            )}
+          </div>
+        )}
+        {isNoVisa && (
+          <div className="absolute top-3 left-3 inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] uppercase tracking-[0.14em] font-bold">
+            Visa-free
+          </div>
+        )}
 
         <div className="absolute bottom-[42%] left-1/2 -translate-x-1/2 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white/95 ring-2 ring-white/40 backdrop-blur flex items-center justify-center text-[22px] sm:text-[26px] leading-none shadow-lg">
           <span>{c.flag}</span>
@@ -42,7 +68,7 @@ function CountryCard({ c }) {
               <div>
                 <div>Type</div>
                 <div className="text-white text-[10.5px] sm:text-[12px] font-bold mt-0.5 truncate">
-                  {c.visa_types?.[0] || c.type || 'E-VISA'}
+                  {types[0] || 'E-VISA'}
                 </div>
               </div>
               <div className="text-center">
@@ -66,8 +92,11 @@ function CountryCard({ c }) {
           <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
             {isNoVisa ? 'Holiday planner' : 'Standard delivery'}
           </div>
-          <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">
+          <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] inline-flex items-center gap-2">
             {isNoVisa ? `${c.holiday_default_days} days suggested` : `${c.delivery?.standard_days ?? 7} days`}
+            {!isNoVisa && c.delivery?.same_day && (
+              <DeliveryCountdown compact deliveryDays={c.delivery?.standard_days ?? 7} />
+            )}
           </div>
         </div>
         {!isNoVisa && (
