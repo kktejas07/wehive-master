@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Search, ArrowRight, Phone } from 'lucide-react';
+import { ArrowRight, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import FilterBar, { DEFAULT_FILTERS } from './FilterBar';
 import { COUNTRIES, BRAND } from '../data/mock';
+import HeroSearchLive from './HeroSearchLive';
 
 function TrustPill() {
   return (
@@ -20,23 +21,7 @@ function TrustPill() {
 }
 
 function HeroSearch({ query, setQuery }) {
-  return (
-    <div className="relative rounded-full bg-white border border-black/5 shadow-[0_24px_60px_-30px_rgba(10,44,138,0.45)] p-1.5 flex items-center gap-1.5">
-      <div className="flex-1 flex items-center gap-3 pl-5">
-        <Search className="w-4 h-4 text-[hsl(var(--blue-900))]/45" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search a country — try USA, UK, Canada…"
-          className="w-full bg-transparent border-0 outline-none focus:outline-none placeholder:text-[hsl(var(--blue-900))]/40 text-[15px] py-3 text-[hsl(var(--blue-900))]"
-        />
-      </div>
-      <Button className="rounded-full btn-accent text-white h-12 px-5 shadow-sm font-bold">
-        Find my visa
-        <ArrowRight className="w-4 h-4 ml-1" />
-      </Button>
-    </div>
-  );
+  return <HeroSearchLive query={query} setQuery={setQuery} />;
 }
 
 function CountrySuggestions({ items, label }) {
@@ -65,9 +50,6 @@ function CountrySuggestions({ items, label }) {
 export default function Hero({ filters, onFilters }) {
   const [query, setQuery] = useState('');
   const top = COUNTRIES.filter((c) => c.popular).slice(0, 6);
-  const filtered = query
-    ? COUNTRIES.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
-    : top;
 
   const f = filters || DEFAULT_FILTERS;
   const setF = onFilters || (() => {});
@@ -102,10 +84,12 @@ export default function Hero({ filters, onFilters }) {
 
         <div className="mt-8 mx-auto max-w-3xl">
           <HeroSearch query={query} setQuery={setQuery} />
-          <CountrySuggestions
-            items={filtered}
-            label={query ? 'Matching destinations' : 'Most requested this week'}
-          />
+          {!query && (
+            <CountrySuggestions
+              items={top}
+              label="Most requested this week"
+            />
+          )}
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">

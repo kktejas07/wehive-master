@@ -13,6 +13,7 @@ import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { COUNTRIES, FAQS, BRAND } from '../data/mock';
 import DeliveryCountdown from '../components/DeliveryCountdown';
+import FeeBreakdown, { computeFees } from '../components/FeeBreakdown';
 
 const TYPE_ICONS = {
   Tourist: Plane,
@@ -68,8 +69,9 @@ function CategoryTabs({ categories, value, onChange }) {
   );
 }
 
-function CategoryDetails({ cat, country, onApply, applying }) {
-  const fallbackImg = COUNTRIES.find((c) => c.id === country.id)?.image;
+function CategoryDetails({ cat, country, onApply, applying, typeId }) {
+  const fallbackImg = COUNTRIES.find((c) => c.id === country.id)?.image || country.flag_url;
+  const fees = computeFees({ ...cat, _kind: typeId });
   return (
     <div className="grid lg:grid-cols-12 gap-10 items-start">
       <div className="lg:col-span-7">
@@ -97,8 +99,13 @@ function CategoryDetails({ cat, country, onApply, applying }) {
             onClick={onApply}
             disabled={applying}
             className="rounded-full btn-primary text-white h-12 px-6 font-bold"
+            data-testid="visa-apply-btn"
           >
-            {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : `Apply · ₹${cat.fees_inr.toLocaleString('en-IN')}`}
+            {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+              fees.isFree
+                ? 'Continue · Free'
+                : `Apply · ₹${fees.total.toLocaleString('en-IN')}`
+            )}
           </Button>
           <a
             href={`tel:${BRAND.phoneRaw}`}
@@ -111,7 +118,7 @@ function CategoryDetails({ cat, country, onApply, applying }) {
         <div className="mt-10 grid grid-cols-3 gap-4 max-w-lg">
           <MetaCard Icon={Clock} k="Processing" v={`${cat.processing_days}d`} />
           <MetaCard Icon={Calendar} k="Validity" v={cat.validity} />
-          <MetaCard Icon={CreditCard} k="Govt. fee" v={`₹${cat.fees_inr.toLocaleString('en-IN')}`} />
+          <MetaCard Icon={CreditCard} k="Total" v={fees.isFree ? 'Free' : `₹${fees.total.toLocaleString('en-IN')}`} />
         </div>
       </div>
       <div className="lg:col-span-5">
@@ -320,7 +327,7 @@ export default function VisaDetail() {
             <CategoryTabs categories={country.categories} value={type} onChange={setType} />
           </div>
           <div className="mt-8">
-            {cat && <CategoryDetails cat={cat} country={country} onApply={onApply} applying={applying} />}
+            {cat && <CategoryDetails cat={cat} country={country} onApply={onApply} applying={applying} typeId={type} />}
           </div>
         </div>
       </section>
@@ -346,7 +353,8 @@ export default function VisaDetail() {
               </Button>
             </div>
           </div>
-          <aside className="lg:col-span-5">
+          <aside className="lg:col-span-5 space-y-6">
+            {cat && <FeeBreakdown category={cat} visaTypeId={type} />}
             <AssistCard />
           </aside>
         </div>

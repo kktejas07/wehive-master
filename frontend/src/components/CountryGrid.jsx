@@ -12,18 +12,24 @@ const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
 function CountryCard({ c }) {
   const isNoVisa = c.no_visa;
   const types = c.visa_types || [];
+  const cardImage = IMG[c.id] || c.flag_url;
   return (
     <Link to={isNoVisa ? `/holiday/${c.id}` : `/visa/${c.id}`} className="group block card-lift">
       <article className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]">
-        {IMG[c.id] ? (
+        {cardImage ? (
           <img
-            src={IMG[c.id]}
+            src={cardImage}
             alt={c.name}
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] group-hover:scale-[1.06]"
+            className={`absolute inset-0 h-full w-full transition-transform duration-[900ms] group-hover:scale-[1.06] ${
+              IMG[c.id] ? 'object-cover' : 'object-cover scale-150 blur-md opacity-60'
+            }`}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
+        )}
+        {!IMG[c.id] && (
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/85 to-[hsl(var(--blue-900))]/85" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 

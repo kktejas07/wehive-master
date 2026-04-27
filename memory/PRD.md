@@ -56,6 +56,18 @@ scanning** for visa form auto-fill.
   preview → "Use these values" autofill). Integrated into `ApplicationDetail`.
 - ✅ `AuthContext.refreshUser()` + Account page shows **Plan** (Free/Premium).
 - ✅ Backend error handling for `ChatError`, empty uploads, budget exhaustion.
+- ✅ **Hero search now backend-powered** (`HeroSearchLive.jsx`) with 220ms
+  debounce, keyboard navigation, and a popover that searches across all 250
+  countries. Replaces the old 15-country mock filter.
+- ✅ **Fee breakdown component** (`FeeBreakdown.jsx`) — exposes the full
+  pricing model on every visa detail page:
+    - Government / embassy fee (no markup)
+    - We Hive service fee (Tourist ₹1,499 · Business ₹2,499 · Student ₹3,999 · Work ₹4,999)
+    - GST 18% on service fee (HSN 998599)
+    - **Total payable** (also shown on the Apply CTA).
+  Visa-free destinations show a "No fees apply" emerald card.
+- ✅ Country grid card image fallback uses `flag_url` (REST Countries SVG/PNG)
+  when no curated Unsplash image is available.
 
 ## Known limitations / Backlog
 - **P1 (blocker for real emails)**: `SMTP_PASSWORD` is a placeholder. Requires
