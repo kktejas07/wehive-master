@@ -153,12 +153,33 @@ async def _call_gemini_vision(
         text=prompt,
         file_contents=[ImageContent(image_base64=b64)],
     )
-    reply = await chat.send_message(msg)
+    try:
+        reply = await chat.send_message(msg)
+    except Exception as e:
+        err = str(e)
+        logger.exception('Gemini vision call failed: %s', err)
+        low = err.lower()
+        if 'budget' in low or 'exceed' in low:
+            raise HTTPException(
+                status_code=402,
+                detail='AI credits exhausted. Please top up your Emergent key to continue scanning.',
+            )
+        if 'invalid_argument' in low or 'unable to process input image' in low:
+            raise HTTPException(
+                status_code=422,
+                detail='That image could not be analysed. Try a clearer photo of the passport data page.',
+            )
+        raise HTTPException(
+            status_code=502,
+            detail='AI service is temporarily unavailable. Please try again in a moment.',
+        )
     return (reply or '').strip()
 
 
 async def _read_upload(file: UploadFile) -> bytes:
     content = await file.read(MAX_SCAN_BYTES + 1)
+    if not content:
+        raise HTTPException(400, 'Empty file')
     if len(content) > MAX_SCAN_BYTES:
         raise HTTPException(413, f'Image exceeds {MAX_SCAN_BYTES // (1024 * 1024)}MB limit')
     mime = (file.content_type or '').lower()

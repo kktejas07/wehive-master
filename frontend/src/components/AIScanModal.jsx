@@ -196,12 +196,18 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
       setResult(r.data.extracted || {});
     } catch (e) {
       const detail = e?.response?.data?.detail;
-      if (e?.response?.status === 402) {
+      const status = e?.response?.status;
+      if (status === 402 && !user?.is_premium) {
         toast({ title: 'Premium required', description: detail });
+      } else if (status === 402) {
+        // Budget exhausted on server side
+        toast({ title: 'AI credits exhausted', description: detail || 'Please try again later.' });
+      } else if (status === 422) {
+        toast({ title: 'Could not read image', description: detail || 'Try a clearer, well-lit photo.' });
       } else {
         toast({
           title: 'Scan failed',
-          description: detail || 'The image could not be processed. Try a clearer photo.',
+          description: detail || 'The image could not be processed. Try again in a moment.',
         });
       }
     } finally {
