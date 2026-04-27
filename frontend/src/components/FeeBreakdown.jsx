@@ -1,59 +1,100 @@
 /**
- * Wehive fee structure (revised — Feb 2026, round 4)
+ * Wehive fee structure (revised — Feb 2026, round 5)
  * --------------------------------------------------
- * Pricing rule:
- *   Total = Government / embassy fee
- *         + Base service fee  (₹3,500 — ALWAYS, even for visa-free destinations)
- *         + Additional-applicant surcharge (₹350 × extra applicants)
- *         + Country appointment / VFS fee (only when country requires it)
- *         + GST 18 % on (base + extra + appointment)
+ * Visible rows on screen:
+ *   1.  Application fee        = (Govt fee + Base service)  × applicants
+ *   2.  Appointment / VFS fee  = appointment_fee_inr        × applicants  (only when required)
+ *   3.  GST (18%)              = 18% on (Base + Appointment) × applicants  +  ₹350 × extra applicants
+ *   ─────────────────────────────────────────────
+ *   Total payable              = sum of the above.
  *
- * Three scenarios:
- *   1. Country has both govt fee + appointment (e.g. US):
- *        Govt + Base + Extra + Appointment + GST
- *   2. Country has govt fee only, no appointment (e.g. UAE, Thailand):
- *        Govt + Base + Extra + GST
- *   3. Visa-free country, no appointment (e.g. Nepal, Bhutan):
- *        Base + Extra + GST     ← still charged for our concierge
+ * Internally the formula is identical to the old one:
+ *     Total = Govt × n
+ *           + Base × n
+ *           + Appointment × n
+ *           + 350 × (n − 1)
+ *           + 18 % × (Base × n + Appointment × n)
  *
- * Government fee is passed through with no markup. GST applies only to
- * Wehive's portion (service + surcharge + appointment), never to the
- * government fee.
+ * but we now hide "Base service fee" (it's folded into Application fee) and
+ * the per-extra-applicant surcharge (it's folded into the GST line). The
+ * customer sees one Application-fee number that scales with applicants, plus
+ * Appointment + GST.
+ *
+ * Base service fee is tiered by visa category:
+ *   Tourist                ₹3,500
+ *   Business               ₹4,500
+ *   Student / F1           ₹5,500
+ *   Work / employment      ₹7,500
+ *   Transit                ₹2,500
+ *   Medical                ₹4,000
+ *
+ * Govt fee comes from the country category metadata. GST is applied **only**
+ * to Wehive's portion (base + appointment + surcharge); never on the govt fee.
  */
 import { useState } from 'react';
 import { Users, Plus, Minus, Info, BadgeCheck } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 
-export const BASE_SERVICE_FEE_INR = 3500;
 export const PER_EXTRA_APPLICANT_INR = 350;
 export const GST_RATE = 0.18;
 
-export function computeFees({ category, applicants = 1, country }) {
-  const govt = Number(category?.fees_inr || 0);
-  const isVisaFree = !!country?.no_visa || (govt === 0 && (category?.name || '').toLowerCase().includes('visa-free'));
+export const BASE_FEE_BY_TYPE = {
+  Tourist:  3500,
+  Business: 4500,
+  Student:  5500,
+  Work:     7500,
+  Transit:  2500,
+  Medical:  4000,
+};
 
-  // Base + surcharge are always charged — even for visa-free destinations.
-  const base = BASE_SERVICE_FEE_INR;
-  const extra = Math.max(0, applicants - 1) * PER_EXTRA_APPLICANT_INR;
+export function baseFeeFor(visaType, categoryName = '') {
+  if (visaType && BASE_FEE_BY_TYPE[visaType] != null) return BASE_FEE_BY_TYPE[visaType];
+  // Fallback: try to detect from the category name
+  const n = (categoryName || '').toLowerCase();
+  if (n.includes('student') || n.includes('f1') || n.includes('admission')) return BASE_FEE_BY_TYPE.Student;
+  if (n.includes('work') || n.includes('employment') || n.includes('h1')) return BASE_FEE_BY_TYPE.Work;
+  if (n.includes('business')) return BASE_FEE_BY_TYPE.Business;
+  if (n.includes('transit')) return BASE_FEE_BY_TYPE.Transit;
+  if (n.includes('medical')) return BASE_FEE_BY_TYPE.Medical;
+  return BASE_FEE_BY_TYPE.Tourist;
+}
 
-  // Appointment fee only when the country actually requires biometrics.
+export function computeFees({ category, applicants = 1, country, visaType }) {
+  const n = Math.max(1, Number(applicants) || 1);
+  const govtPer = Number(category?.fees_inr || 0);
+  const base = baseFeeFor(visaType, category?.name);
+
+  const isVisaFree =
+    !!country?.no_visa ||
+    (govtPer === 0 && (category?.name || '').toLowerCase().includes('visa-free'));
+
   const requiresAppt = !!country?.requires_appointment && !isVisaFree;
-  const apptFee = requiresAppt ? Number(country?.appointment_fee_inr || 0) : 0;
+  const apptPer = requiresAppt ? Number(country?.appointment_fee_inr || 0) : 0;
 
-  const taxable = base + extra + apptFee;
-  const gst = Math.round(taxable * GST_RATE);
-  const total = govt + taxable + gst;
+  const application = (govtPer + base) * n;
+  const appointment = apptPer * n;
+  const surcharge = (n - 1) * PER_EXTRA_APPLICANT_INR;
+
+  // GST applies to base + appointment portions only (never to govt fee).
+  // Surcharge is folded into the GST line for display.
+  const gstOnService = Math.round((base * n + apptPer * n) * GST_RATE);
+  const gstDisplay = gstOnService + surcharge;
+
+  const total = application + appointment + gstDisplay;
 
   return {
-    govt,
-    base,
-    extra,
-    appointment: apptFee,
+    govt: govtPer * n,
+    base: base * n,
+    application,
+    appointment,
     requiresAppointment: requiresAppt,
     isVisaFree,
-    gst,
+    surcharge,
+    gstOnService,
+    gst: gstDisplay,
     total,
-    applicants,
+    applicants: n,
+    baseFeeUnit: base,
   };
 }
 
@@ -68,7 +109,7 @@ function ApplicantsStepper({ value, onChange }) {
         <Users className="w-4 h-4 text-[hsl(var(--blue-700))]" />
         <div>
           <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Applicants</div>
-          <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">+₹350 for each additional traveller</div>
+          <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">Fees scale per traveller</div>
         </div>
       </div>
       <div className="flex items-center gap-1.5">
@@ -98,10 +139,10 @@ function ApplicantsStepper({ value, onChange }) {
   );
 }
 
-export default function FeeBreakdown({ category, country, onApplicantsChange }) {
+export default function FeeBreakdown({ category, country, visaType, onApplicantsChange }) {
   const [applicants, setApplicants] = useState(1);
   const { t } = useI18n();
-  const fees = computeFees({ category, applicants, country });
+  const fees = computeFees({ category, applicants, country, visaType });
 
   const handleApplicants = (n) => {
     setApplicants(n);
@@ -109,41 +150,27 @@ export default function FeeBreakdown({ category, country, onApplicantsChange }) 
   };
 
   const lines = [];
-  if (fees.govt > 0) {
-    lines.push({
-      id: 'govt',
-      label: 'Government / embassy fee',
-      amount: fees.govt,
-      sub: 'Set by the consulate. Paid through us, no markup.',
-    });
-  }
   lines.push({
-    id: 'base',
-    label: 'Base service fee',
-    amount: fees.base,
-    sub: 'Document review, application prep, submission and tracking.',
+    id: 'application',
+    label: 'Application fee',
+    amount: fees.application,
+    sub: fees.isVisaFree
+      ? `Document review, application prep, submission and tracking · ${applicants} applicant${applicants > 1 ? 's' : ''}.`
+      : `Embassy fee + document review, prep, submission and tracking · ${applicants} applicant${applicants > 1 ? 's' : ''}.`,
   });
-  if (fees.extra > 0) {
-    lines.push({
-      id: 'extra',
-      label: `Additional applicants (${applicants - 1} × ₹${PER_EXTRA_APPLICANT_INR})`,
-      amount: fees.extra,
-      sub: 'Per traveller beyond the primary applicant.',
-    });
-  }
   if (fees.requiresAppointment && fees.appointment > 0) {
     lines.push({
       id: 'appointment',
       label: 'Appointment / VFS fee',
       amount: fees.appointment,
-      sub: 'Mandatory in-person biometrics for this country.',
+      sub: `Mandatory in-person biometrics for this country · ${applicants} applicant${applicants > 1 ? 's' : ''}.`,
     });
   }
   lines.push({
     id: 'gst',
     label: 'GST (18%)',
     amount: fees.gst,
-    sub: 'Charged on service + surcharge + appointment · HSN 998599.',
+    sub: 'Charged on service & appointment portions · HSN 998599.',
   });
 
   return (

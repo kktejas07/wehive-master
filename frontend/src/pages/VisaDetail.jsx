@@ -74,7 +74,7 @@ function CategoryTabs({ categories, value, onChange }) {
 
 function CategoryDetails({ cat, country, onApply, applying, typeId, applicants }) {
   const fallbackImg = landmarkFor(country) || country.flag_url || COUNTRIES.find((c) => c.id === country.id)?.image;
-  const fees = computeFees({ category: cat, applicants, country });
+  const fees = computeFees({ category: cat, applicants, country, visaType: typeId });
   return (
     <div className="grid lg:grid-cols-12 gap-10 items-start">
       <div className="lg:col-span-7">
@@ -360,6 +360,7 @@ export default function VisaDetail() {
               <FeeBreakdown
                 category={cat}
                 country={country}
+                visaType={type}
                 onApplicantsChange={setApplicants}
               />
             )}

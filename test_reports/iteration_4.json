@@ -1,0 +1,49 @@
+{
+  "summary": "Round-5 retest (fee restructure) — backend 28/28 pytest pass; frontend 45/45 fee math + negative + stepper + flight-suggestion checks pass. All 13 spec'd fee scenarios verified to the rupee against the new tier-based base + per-applicant scaling + folded-surcharge-into-GST formula. Removed rows fee-row-base / fee-row-extra confirmed absent on US, UAE, NP. Apply CTA reflects total. Stepper bounds [1..20] enforced.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_wehive_backend.py",
+    "/app/test_reports/pytest/pytest_results.xml",
+    "/app/test_reports/iteration_4.json"
+  ],
+  "verified_test_cases": [
+    "/visa/us Tourist 1 → Application ₹18,900 · Appointment ₹1,750 · GST ₹945 · Total ₹21,595 · Apply CTA contains '₹21,595' · no fee-row-base · no fee-row-extra.",
+    "/visa/us Tourist 2 → Application ₹37,800 · Appointment ₹3,500 · GST ₹2,240 (1,890 svc + 350 surcharge) · Total ₹43,540 (≈2× of 1-applicant case).",
+    "/visa/us Tourist 3 → Application ₹56,700 · Appointment ₹5,250 · GST ₹3,535 (2,835 svc + 700 surcharge) · Total ₹65,485.",
+    "/visa/us Student 1 → Application ₹34,500 (govt 29,000 + F1 base 5,500) · Appointment ₹1,750 · GST ₹1,305 · Total ₹37,555.",
+    "/visa/us Work 1 → Application ₹45,300 (govt 37,800 + Work base 7,500) · Appointment ₹1,750 · GST ₹1,665 · Total ₹48,715.",
+    "/visa/us Business 1 → Application ₹19,900 (govt 15,400 + Business base 4,500) · Appointment ₹1,750 · GST ₹1,125 · Total ₹22,775. Confirms tier base = ₹4,500.",
+    "/visa/ae Tourist 1 → Application ₹10,200 (6,700 + 3,500) · GST ₹630 · Total ₹10,830 · NO fee-row-appointment · no fee-row-base · no fee-row-extra.",
+    "/visa/ae Tourist 2 → Application ₹20,400 · GST ₹1,610 (1,260 + 350) · Total ₹22,010.",
+    "/visa/np Tourist 1 → visa-free-note banner visible · Application ₹3,500 · GST ₹630 · Total ₹4,130.",
+    "/visa/np Tourist 2 → Application ₹7,000 · GST ₹1,610 (1,260 + 350) · Total ₹8,610.",
+    "Negative: fee-row-base absent on /visa/us, /visa/ae, /visa/np.",
+    "Negative: fee-row-extra absent on /visa/us, /visa/ae, /visa/np.",
+    "Stepper: decrement disabled at 1; increment caps count at 20 and disables.",
+    "Apply CTA on hero shows '₹{total}' for every visa-type / applicants combination tested.",
+    "Fee-row labels remain in English ('Application fee', 'Appointment / VFS fee', 'GST (18%)') as spec'd (no fee-label keys added in round 5).",
+    "AI flight suggestions section renders 3 cards on /visa/us (flight-card-us-1/2/3) — STUB unchanged.",
+    "Backend pytest /app/backend/tests/test_wehive_backend.py → 28/28 PASSED in 15.99s (countries / premium / scan / appointment metadata / applications)."
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "FeeBreakdown.computeFees logic is now elegant and matches the spec exactly: govt+base scales by N, appointment scales by N, surcharge ₹350×(N−1) is silently folded into the displayed GST. baseFeeFor() with the BASE_FEE_BY_TYPE map + name-fallback is solid.",
+    "Minor: fee-row labels ('Application fee', 'Appointment / VFS fee', 'GST (18%)', 'Total payable') are still hard-coded English. The round-5 spec accepted this, but next round consider routing through t() with new keys (fee.application, fee.appointment, fee.gst, fee.total) so the breakdown card is fully localised alongside the visa-free-note banner.",
+    "visa-free-note banner copy IS routed through t('fee.visaFreeNote') — good. Could not auto-verify Hindi translation in this round because LanguageSwitcher options still lack data-testid (carry-over from iter-3); functionality unchanged from round 4 where Hindi visa-free banner translation was verified.",
+    "Applicants state still duplicated between VisaDetail (mirror via onApplicantsChange) and FeeBreakdown (source of truth). Carry-over from iter-2/iter-3 — functional but a refactor candidate.",
+    "Suggest adding data-testid='language-switcher-button' on the trigger and data-testid='language-option-{code}' on each option button (carry-over from iter-3) so future i18n regressions can be auto-verified."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (28/28)", "frontend": "100% (45/45 fee+negative+stepper+CTA+flight assertions)"},
+  "test_credentials": "Mock OTP: any email + code 123456.",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Round 5 verified the fee restructure end-to-end: tier-based base (Tourist 3500 / Business 4500 / Student 5500 / Work 7500), per-applicant scaling on Application+Appointment, ₹350×(N-1) surcharge folded into GST line, removed fee-row-base/fee-row-extra. All 13 spec'd numeric scenarios pass to the rupee. UAE seed govt fee = ₹6,700, US Student govt = ₹29,000, US Work govt = ₹37,800 (used for Student/Work calculations). FlightSuggestions remain MOCKED — STUB unchanged. Backend (28/28) test file: /app/backend/tests/test_wehive_backend.py. Data-testids in active use: fee-breakdown, fee-row-application, fee-row-appointment (conditional), fee-row-gst, fee-total-amount, fee-total-row, applicants-stepper, applicants-increment, applicants-decrement, applicants-count, visa-free-note, visa-apply-btn, flight-card-us-{1,2,3}. Open follow-ups (not blockers): LanguageSwitcher data-testids absent; fee-row labels not yet i18n-keyed.",
+  "rca_of_the_issue": "N/A — no issues blocking round-5 acceptance."
+}
