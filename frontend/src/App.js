@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Account from './pages/Account';
 import HolidayPlanner from './pages/HolidayPlanner';
+import ApplicationDetail from './pages/ApplicationDetail';
 import { AuthProvider } from './context/AuthContext';
 import AuthModal from './components/AuthModal';
 import { Toaster } from './components/ui/toaster';
@@ -36,6 +37,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/account/applications/:id" element={<ApplicationDetail />} />
             <Route path="*" element={<Home />} />
           </Routes>
           <AuthModal />

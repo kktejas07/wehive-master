@@ -83,18 +83,38 @@ function ApplicationsTab({ token }) {
       />
     );
   }
+  const statusColor = (s) => {
+    if (s === 'approved') return 'bg-emerald-100 text-emerald-700';
+    if (s === 'in_review') return 'bg-amber-100 text-amber-700';
+    if (s === 'rejected') return 'bg-red-100 text-red-700';
+    if (s === 'submitted') return 'bg-blue-100 text-blue-700';
+    return 'bg-slate-100 text-slate-700';
+  };
   return (
     <div className="space-y-3">
       {items.map((a) => (
-        <div key={a.id} className="rounded-2xl bg-white border border-black/5 p-5 flex items-center justify-between">
-          <div>
-            <div className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{a.country_id.toUpperCase()} \u00B7 {a.visa_type}</div>
-            <div className="text-[12.5px] text-[hsl(var(--blue-900))]/55">Status: {a.status}</div>
+        <Link
+          key={a.id}
+          to={`/account/applications/${a.id}`}
+          className="block rounded-2xl bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 p-5 transition"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
+                  {a.country_id.toUpperCase()} · {a.visa_type}
+                </span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold capitalize ${statusColor(a.status)}`}>
+                  {(a.status || 'draft').replace('_', ' ')}
+                </span>
+              </div>
+              <div className="mt-0.5 text-[12.5px] text-[hsl(var(--blue-900))]/55">
+                #{a.id?.slice(0, 8).toUpperCase()} · created {new Date(a.created_at).toLocaleDateString()}
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[hsl(var(--blue-900))]/40 shrink-0" />
           </div>
-          <Link to={`/visa/${a.country_id}`} className="inline-flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline">
-            Open <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
+        </Link>
       ))}
     </div>
   );

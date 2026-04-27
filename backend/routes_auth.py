@@ -92,13 +92,16 @@ async def verify_otp(req: VerifyOtpRequest):
         user = {
             '_id': str(uuid.uuid4()),
             'name': req.name or '',
-            'email': identifier if kind == 'email' else None,
-            'phone': identifier if kind == 'phone' else None,
             'email_verified': kind == 'email',
             'phone_verified': kind == 'phone',
             'created_at': now,
             'updated_at': now,
         }
+        # Only set email or phone field if it has a value
+        if kind == 'email':
+            user['email'] = identifier
+        else:
+            user['phone'] = identifier
         await users.insert_one(user)
     else:
         update = {f'{kind}_verified': True, 'updated_at': now}

@@ -27,6 +27,7 @@ async def update_me(req: UpdateProfileRequest, user=Depends(get_current_user)):
 
 @router.post('/me/applications')
 async def create_application(req: ApplicationCreate, user=Depends(get_current_user)):
+    now = datetime.utcnow()
     app = {
         '_id': str(uuid.uuid4()),
         'user_id': user['_id'],
@@ -35,7 +36,14 @@ async def create_application(req: ApplicationCreate, user=Depends(get_current_us
         'travel_date': req.travel_date,
         'status': 'draft',
         'notes': req.notes,
-        'created_at': datetime.utcnow(),
+        'documents': [],
+        'messages': [],
+        'timeline': [
+            {'id': str(uuid.uuid4()), 'status': 'draft', 'label': 'Draft created', 'at': now,
+             'note': f'{req.country_id.upper()} {req.visa_type} application opened. Upload your documents to continue.'},
+        ],
+        'created_at': now,
+        'updated_at': now,
     }
     await applications.insert_one(app)
     return _serialize(app)
