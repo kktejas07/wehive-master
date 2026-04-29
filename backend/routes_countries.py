@@ -62,8 +62,19 @@ async def list_countries(
                      if (c.get('delivery') or {}).get('standard_days') is not None
                      and c['delivery']['standard_days'] <= 15]
     if documents and documents.lower() not in ('', 'any'):
+        def _doc_count(c: dict) -> int:
+            cats = c.get('categories') or {}
+            counts = []
+            for cat in cats.values():
+                docs = cat.get('documents') if isinstance(cat, dict) else None
+                if isinstance(docs, list):
+                    counts.append(len(docs))
+            return min(counts) if counts else len(c.get('documents', []))
+
         if documents == 'minimal':
-            items = [c for c in items if len(c.get('documents', [])) <= 2]
+            items = [c for c in items if _doc_count(c) <= 3]
+        elif documents == 'standard':
+            items = [c for c in items if 4 <= _doc_count(c) <= 6]
     if no_visa is True:
         items = [c for c in items if c.get('no_visa')]
     if limit:

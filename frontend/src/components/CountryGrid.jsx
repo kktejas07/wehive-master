@@ -192,6 +192,10 @@ export default function CountryGrid({ filters }) {
     if (filters?.documentsId && filters.documentsId !== 'any') {
       p.documents = filters.documentsId;
     }
+    // "Holidays" toggle → only show visa-free destinations
+    if (filters?.view === 'holidays') {
+      p.no_visa = true;
+    }
     return p;
   }, [filters]);
 
@@ -208,6 +212,7 @@ export default function CountryGrid({ filters }) {
   }, [params]);
 
   const showEvents = filters?.view === 'events';
+  const showHolidays = filters?.view === 'holidays';
 
   return (
     <section id="countries" className="relative py-16 sm:py-24 lg:py-28 bg-white">
@@ -216,11 +221,13 @@ export default function CountryGrid({ filters }) {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
               <Sparkle className="w-3.5 h-3.5" />
-              {showEvents ? 'Events & festivals' : 'Popular destinations'}
+              {showEvents ? 'Events & festivals' : showHolidays ? 'Visa-free holidays' : 'Popular destinations'}
             </div>
             <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[48px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
               {showEvents ? (
                 <>Travel to the world&rsquo;s{' '}<span className="text-[hsl(var(--accent))]">biggest moments.</span></>
+              ) : showHolidays ? (
+                <>Pack a bag.{' '}<span className="text-[hsl(var(--accent))]">Skip the visa.</span></>
               ) : (
                 <>A world of visas,{' '}<span className="text-[hsl(var(--accent))]">in one place.</span></>
               )}
@@ -228,7 +235,9 @@ export default function CountryGrid({ filters }) {
             <p className="mt-3 text-[14.5px] sm:text-[15.5px] text-[hsl(var(--blue-900))]/65 max-w-xl">
               {showEvents
                 ? 'Visa packages timed to coincide with the world\'s great festivals, sporting events and concerts. (Coming soon)'
-                : 'Real ETA. Real fees. No hidden charges. Tap a country to see everything you need before you apply.'}
+                : showHolidays
+                  ? 'Destinations Indian passport holders can enter visa-free or with a visa-on-arrival. Tap a country to see the holiday plan.'
+                  : 'Real ETA. Real fees. No hidden charges. Tap a country to see everything you need before you apply.'}
             </p>
           </div>
 

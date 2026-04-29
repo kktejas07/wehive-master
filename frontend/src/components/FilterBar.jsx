@@ -107,8 +107,9 @@ function OptionList({ options, value, onSelect, close }) {
 
 function TabsBar({ value, onChange }) {
   const tabs = [
-    { id: 'explore', label: 'Explore', Icon: Compass },
-    { id: 'events', label: 'Events', Icon: Ticket },
+    { id: 'explore',  label: 'Explore',  Icon: Compass },
+    { id: 'holidays', label: 'Holidays', Icon: Sparkles },
+    { id: 'events',   label: 'Events',   Icon: Ticket },
   ];
   return (
     <div className="flex justify-center gap-2">
