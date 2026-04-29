@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Download, Loader2, Users, FileStack, Globe, Banknote } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import { downloadCsv } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
@@ -13,7 +13,7 @@ const EXPORTS = [
 ];
 
 export default function ExportsTab() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const { toast } = useToast();
   const [busy, setBusy] = useState(null);
 

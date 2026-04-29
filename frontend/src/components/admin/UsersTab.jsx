@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Loader2, Search, ShieldCheck, Trash2, Crown, UserCog } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
@@ -21,7 +21,7 @@ function Chip({ children, color = 'slate' }) {
 }
 
 export default function UsersTab() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const { toast } = useToast();
   const [items, setItems] = useState(null);
   const [total, setTotal] = useState(0);

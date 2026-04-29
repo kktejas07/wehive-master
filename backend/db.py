@@ -24,3 +24,7 @@ async def ensure_indexes():
     await otps.create_index('expires_at', expireAfterSeconds=0)
     await applications.create_index('user_id')
     await holiday_plans.create_index('user_id')
+    # Admin auth support
+    await db['password_reset_tokens'].create_index('token_hash')
+    await db['password_reset_tokens'].create_index('expires_at', expireAfterSeconds=0)
+    await db['login_attempts'].create_index('last_attempt_at', expireAfterSeconds=60 * 60)

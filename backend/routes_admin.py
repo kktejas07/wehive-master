@@ -17,7 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from auth_utils import get_current_user
+from admin_auth import get_current_admin_flex
 from db import db, users, applications, holiday_plans, leads, otps
 
 router = APIRouter(prefix='/admin', tags=['admin'])
@@ -33,11 +33,12 @@ ADMIN_EMAILS = {
 
 
 # ---------- auth ----------
-async def get_current_admin(user=Depends(get_current_user)):
-    email = (user.get('email') or '').lower()
-    if user.get('is_admin') or email in ADMIN_EMAILS:
-        return user
-    raise HTTPException(status_code=403, detail='Admin access required')
+async def get_current_admin(user=Depends(get_current_admin_flex)):
+    """Admin gate — accepts admin JWT (role=admin) OR user OTP token with email in ADMIN_EMAILS.
+
+    Delegates to admin_auth.get_current_admin_flex so the rules stay centralised.
+    """
+    return user
 
 
 def _public_user(u: dict) -> dict:
@@ -455,6 +456,10 @@ async def admin_update_country(country_id: str, patch: CountryPatch, _=Depends(g
         raise HTTPException(400, 'Nothing to update')
     if 'no_visa' in update:
         update['visa_required'] = not update['no_visa']
+    # Keep visa_types in sync with categories so the public /countries API
+    # and filter dropdowns reflect admin changes immediately.
+    if 'categories' in update and isinstance(update['categories'], dict):
+        update['visa_types'] = list(update['categories'].keys())
     update['updated_at'] = datetime.utcnow()
     await countries_col.update_one({'id': cid}, {'$set': update})
     fresh = await countries_col.find_one({'id': cid}, {'_id': 0})

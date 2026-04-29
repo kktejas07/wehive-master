@@ -1,6 +1,6 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { BRAND } from '../../data/mock';
-import { useAuth } from '../../context/AuthContext';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft,
@@ -18,8 +18,10 @@ const TABS = [
 ];
 
 export default function AdminShell({ children }) {
-  const { user, logout } = useAuth();
+  const { admin, logout } = useAdminAuth();
   const { pathname } = useLocation();
+
+  const user = admin;
 
   return (
     <div className="min-h-screen bg-[#0b1020] text-slate-100" data-testid="admin-shell">

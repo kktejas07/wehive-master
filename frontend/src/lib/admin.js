@@ -1,14 +1,32 @@
 import axios from 'axios';
 import { API } from '../context/AuthContext';
 
-export function adminClient(token) {
+const ADMIN_TOKEN_KEY = 'wehive_admin_token';
+const USER_TOKEN_KEY = 'wehive_token';
+
+/**
+ * Return the best available token for /api/admin/* calls.
+ * Prefers the dedicated admin JWT; falls back to the regular user OTP
+ * token (which also works if the user's email is in ADMIN_EMAILS).
+ */
+export function preferredAdminToken() {
+  return (
+    localStorage.getItem(ADMIN_TOKEN_KEY) ||
+    localStorage.getItem(USER_TOKEN_KEY) ||
+    null
+  );
+}
+
+export function adminClient(passedToken) {
+  const token = passedToken || preferredAdminToken();
   return axios.create({
     baseURL: `${API}/admin`,
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 }
 
-export function downloadCsv(token, kind) {
+export function downloadCsv(passedToken, kind) {
+  const token = passedToken || preferredAdminToken();
   const url = `${API}/admin/export/${kind}.csv`;
   return fetch(url, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => {

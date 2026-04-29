@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, inr } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 
@@ -46,7 +46,7 @@ function SparkBars({ data, metric = 'applications', accent = '#e1212c' }) {
 }
 
 export default function OverviewTab() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
 

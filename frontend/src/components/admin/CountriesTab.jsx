@@ -1,38 +1,156 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, Search, Save, X, Pencil } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { Loader2, Search, Save, X, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, inr } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
-function CategoryEditor({ visaType, cat, onChange }) {
+const VISA_TYPES = ['Tourist', 'Business', 'Student', 'Work', 'Transit', 'Medical'];
+
+function CategoryEditor({ visaType, cat, onChange, onDelete }) {
   const update = (patch) => onChange({ ...cat, ...patch });
+  const docsText = (cat.documents || []).join('\n');
+  const setDocs = (txt) => update({ documents: txt.split('\n').map((s) => s.trim()).filter(Boolean) });
+
   return (
-    <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-      <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 mb-2">{visaType}</div>
+    <div className="rounded-lg bg-white/5 border border-white/10 p-3" data-testid={`category-editor-${visaType}`}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-slate-300">{visaType}</div>
+        <button
+          type="button"
+          onClick={onDelete}
+          data-testid={`delete-category-${visaType}`}
+          className="inline-flex items-center gap-1 rounded-md bg-red-500/10 hover:bg-red-500/20 px-2 py-1 text-[10.5px] font-bold text-red-300"
+        >
+          <Trash2 className="w-3 h-3" /> Remove
+        </button>
+      </div>
+
       <div className="grid grid-cols-2 gap-2">
         <label className="text-[11px] text-slate-500">
+          Display name
+          <input value={cat.name || ''} onChange={(e) => update({ name: e.target.value })}
+            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+        </label>
+        <label className="text-[11px] text-slate-500">
+          Validity
+          <input value={cat.validity || ''} onChange={(e) => update({ validity: e.target.value })}
+            placeholder="e.g. 90 DAYS"
+            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+        </label>
+        <label className="text-[11px] text-slate-500">
           Govt fees (INR)
-          <input type="number" value={cat.fees_inr ?? ''} onChange={(e) => update({ fees_inr: Number(e.target.value) })}
+          <input type="number" value={cat.fees_inr ?? 0} onChange={(e) => update({ fees_inr: Number(e.target.value) })}
+            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+        </label>
+        <label className="text-[11px] text-slate-500">
+          Govt fees (USD)
+          <input type="number" value={cat.fees_usd ?? 0} onChange={(e) => update({ fees_usd: Number(e.target.value) })}
             className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
         </label>
         <label className="text-[11px] text-slate-500">
           Processing days
-          <input type="number" value={cat.processing_days ?? ''} onChange={(e) => update({ processing_days: Number(e.target.value) })}
+          <input type="number" value={cat.processing_days ?? 0} onChange={(e) => update({ processing_days: Number(e.target.value) })}
             className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
         </label>
+        <label className="text-[11px] text-slate-500 inline-flex items-end gap-2">
+          <input type="checkbox" checked={!!cat.multi_entry} onChange={(e) => update({ multi_entry: e.target.checked })} />
+          <span className="text-[12px] text-slate-300 font-bold">Multi-entry</span>
+        </label>
         <label className="text-[11px] text-slate-500 col-span-2">
-          Validity
-          <input value={cat.validity || ''} onChange={(e) => update({ validity: e.target.value })}
-            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+          Required documents (one per line)
+          <textarea
+            value={docsText}
+            onChange={(e) => setDocs(e.target.value)}
+            rows={4}
+            placeholder={'Passport (6mo validity)\nTwo recent photos\nFinancial proof'}
+            className="mt-0.5 w-full px-2 py-1.5 rounded bg-black/30 border border-white/10 text-[12.5px] text-white resize-y"
+          />
         </label>
       </div>
     </div>
   );
 }
 
+function AddCategoryButton({ existing, onAdd }) {
+  const [open, setOpen] = useState(false);
+  const [picked, setPicked] = useState('');
+  const [custom, setCustom] = useState('');
+  const available = VISA_TYPES.filter((v) => !existing[v]);
+
+  const add = () => {
+    const key = (picked || custom).trim();
+    if (!key) return;
+    onAdd(key, {
+      name: `${key} Visa`,
+      fees_inr: 0,
+      fees_usd: 0,
+      processing_days: 7,
+      validity: '90 DAYS',
+      multi_entry: false,
+      documents: ['Passport (6mo validity)'],
+    });
+    setOpen(false);
+    setPicked('');
+    setCustom('');
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        data-testid="add-category-btn"
+        onClick={() => setOpen(true)}
+        className="rounded-lg border border-dashed border-white/15 hover:border-[hsl(var(--accent))]/50 hover:bg-white/5 p-3 text-[12.5px] font-bold text-slate-300 inline-flex items-center justify-center gap-2 w-full"
+      >
+        <Plus className="w-3.5 h-3.5" /> Add visa type
+      </button>
+    );
+  }
+
+  return (
+    <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+      <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 mb-2">Add visa type</div>
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {available.map((v) => (
+          <button
+            key={v}
+            type="button"
+            data-testid={`pick-category-${v}`}
+            onClick={() => { setPicked(v); setCustom(''); }}
+            className={`rounded-full px-2.5 py-1 text-[11px] font-bold border ${
+              picked === v
+                ? 'bg-[hsl(var(--accent))] text-white border-[hsl(var(--accent))]'
+                : 'border-white/15 text-slate-300 hover:border-[hsl(var(--accent))]/50'
+            }`}
+          >{v}</button>
+        ))}
+      </div>
+      <input
+        data-testid="add-category-custom"
+        value={custom}
+        onChange={(e) => { setCustom(e.target.value); setPicked(''); }}
+        placeholder="Or custom type (e.g. Digital Nomad)"
+        className="w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white"
+      />
+      <div className="flex gap-2 mt-2 justify-end">
+        <button type="button" onClick={() => setOpen(false)} className="rounded-md px-2.5 py-1 text-[11.5px] font-bold text-slate-300 hover:bg-white/5">Cancel</button>
+        <button
+          type="button"
+          data-testid="add-category-confirm"
+          onClick={add}
+          disabled={!picked && !custom}
+          className="rounded-md bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 px-3 py-1 text-[11.5px] font-bold text-white"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CountryRow({ c, onSaved }) {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -41,7 +159,9 @@ function CountryRow({ c, onSaved }) {
   const save = async () => {
     setBusy(true);
     try {
+      const visaTypes = Object.keys(draft.categories || {});
       await adminClient(token).patch(`/countries/${c.id}`, {
+        no_visa: !!draft.no_visa,
         requires_appointment: !!draft.requires_appointment,
         appointment_fee_inr: Number(draft.appointment_fee_inr) || 0,
         delivery: {
@@ -51,7 +171,7 @@ function CountryRow({ c, onSaved }) {
         },
         categories: draft.categories,
       });
-      toast({ title: 'Country updated' });
+      toast({ title: 'Country saved', description: `${visaTypes.length} visa type${visaTypes.length === 1 ? '' : 's'} active` });
       setEditing(false);
       onSaved?.();
     } catch (e) {
@@ -59,6 +179,21 @@ function CountryRow({ c, onSaved }) {
     } finally {
       setBusy(false);
     }
+  };
+
+  const addCategory = (key, def) => {
+    setDraft({ ...draft, categories: { ...(draft.categories || {}), [key]: def } });
+  };
+
+  const updateCategory = (key, val) => {
+    setDraft({ ...draft, categories: { ...(draft.categories || {}), [key]: val } });
+  };
+
+  const deleteCategory = (key) => {
+    if (!window.confirm(`Remove the ${key} visa type from ${c.name}?`)) return;
+    const next = { ...(draft.categories || {}) };
+    delete next[key];
+    setDraft({ ...draft, categories: next });
   };
 
   return (
@@ -79,6 +214,14 @@ function CountryRow({ c, onSaved }) {
                 {c.delivery?.standard_days ?? '—'}d · rush {c.delivery?.rush_days ?? '—'}d {c.delivery?.same_day ? '· same-day' : ''}
               </span>
             )}
+        </td>
+        <td className="px-5 py-3">
+          <div className="flex flex-wrap gap-1">
+            {Object.keys(c.categories || {}).map((k) => (
+              <span key={k} className="inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-200 text-[10.5px] font-bold">{k}</span>
+            ))}
+            {Object.keys(c.categories || {}).length === 0 && <span className="text-[11.5px] text-slate-500">—</span>}
+          </div>
         </td>
         <td className="px-5 py-3 text-slate-300 text-[12.5px]">
           {c.requires_appointment ? `Yes · ${inr(c.appointment_fee_inr)}` : 'No'}
@@ -114,8 +257,8 @@ function CountryRow({ c, onSaved }) {
       </tr>
       {editing && (
         <tr className="border-t border-white/5 bg-black/30">
-          <td colSpan={5} className="px-5 py-4">
-            <div className="grid sm:grid-cols-3 gap-3 mb-3">
+          <td colSpan={6} className="px-5 py-4">
+            <div className="grid sm:grid-cols-3 gap-3 mb-4">
               <label className="text-[11px] text-slate-500">
                 Standard days
                 <input type="number" value={draft.delivery?.standard_days ?? 0}
@@ -146,21 +289,25 @@ function CountryRow({ c, onSaved }) {
                   className="mt-0.5 w-full h-9 px-2 rounded bg-black/30 border border-white/10 text-[13px] text-white disabled:opacity-50" />
               </label>
             </div>
-            {draft.categories && (
-              <div>
-                <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-slate-500 mb-2">Visa categories & pricing</div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {Object.entries(draft.categories).map(([k, v]) => (
-                    <CategoryEditor
-                      key={k}
-                      visaType={k}
-                      cat={v}
-                      onChange={(nv) => setDraft({ ...draft, categories: { ...draft.categories, [k]: nv } })}
-                    />
-                  ))}
-                </div>
+
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-slate-500 mb-2 flex items-center justify-between">
+                <span>Visa categories · pricing · documents</span>
+                <span className="text-slate-600 normal-case tracking-normal text-[11px] font-normal">Add / remove types, edit fees, validity, delivery and checklists.</span>
               </div>
-            )}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {Object.entries(draft.categories || {}).map(([k, v]) => (
+                  <CategoryEditor
+                    key={k}
+                    visaType={k}
+                    cat={v}
+                    onChange={(nv) => updateCategory(k, nv)}
+                    onDelete={() => deleteCategory(k)}
+                  />
+                ))}
+                <AddCategoryButton existing={draft.categories || {}} onAdd={addCategory} />
+              </div>
+            </div>
           </td>
         </tr>
       )}
@@ -169,7 +316,7 @@ function CountryRow({ c, onSaved }) {
 }
 
 export default function CountriesTab() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [items, setItems] = useState(null);
   const [q, setQ] = useState('');
 
@@ -185,7 +332,7 @@ export default function CountriesTab() {
     <div data-testid="admin-countries-tab">
       <AdminHeader
         title="Countries"
-        subtitle={`${items?.length ?? '—'} countries. Edit delivery times, appointment fees and category pricing.`}
+        subtitle={`${items?.length ?? '—'} countries. Add / edit visa types, fees, validity, delivery times and document checklists.`}
       />
       <Panel>
         <div className="relative">
@@ -207,16 +354,17 @@ export default function CountriesTab() {
               <th className="px-5 py-3">Country</th>
               <th className="px-5 py-3">Region</th>
               <th className="px-5 py-3">Delivery</th>
+              <th className="px-5 py-3">Visa types</th>
               <th className="px-5 py-3">Appointment</th>
               <th className="px-5 py-3 text-right"></th>
             </tr>
           </thead>
           <tbody>
             {items === null && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-500"><Loader2 className="w-5 h-5 animate-spin inline text-[hsl(var(--accent))]" /></td></tr>
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-slate-500"><Loader2 className="w-5 h-5 animate-spin inline text-[hsl(var(--accent))]" /></td></tr>
             )}
             {items?.length === 0 && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-500">No countries match.</td></tr>
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-slate-500">No countries match.</td></tr>
             )}
             {items?.map((c) => (
               <CountryRow key={c.id} c={c} onSaved={load} />
