@@ -195,6 +195,26 @@ user was never taken anywhere, so the draft sat hidden in the dashboard.
   `primary_applicant: PrimaryApplicant | None`. Documents stored in MongoDB.
 - All 28 pytest tests still pass.
 
+### Round 9 — Review breadcrumb + real /api/flights/suggest (this round)
+- **`ApplicationReviewModal`** now shows a 3-step **breadcrumb trail**
+  (1. Review · 2. Documents · 3. Submit & Pay) so the user can clearly see
+  they're at the review stage and not paying. Plus a green
+  "You're reviewing — not paying. No card needed." banner inside the modal.
+  data-testids: `apply-review-trail`, `apply-review-step-{n}`,
+  `apply-no-payment-banner`.
+- **New backend endpoint `GET /api/flights/suggest`** in `routes_flights.py`:
+  - Calls Gemini 2.5 Flash via emergentintegrations to generate three
+    realistic routes (cheapest, most popular, fastest) for `BLR → {country}`
+    with airline, code, IATA, stops, duration_h and price_inr.
+  - Cached in `flights_cache` collection per `(country, origin)` for 6 h.
+  - 404 on unknown country, 400 on invalid id, 502 on LLM/parse failure.
+  - Honors `?origin=BLR|DEL|BOM|MAA|HYD|CCU` and `?refresh=true`.
+- **Frontend `FlightSuggestions`** now consumes the live endpoint:
+  origin selector, "Refresh" button (regenerates), "cached" badge.
+  Falls back to a tiny local stub for UAE if the API is down.
+- **4 new pytest cases** for the flights endpoint — all passing
+  (`32/32` total).
+
 ### Round 7 — Fee-breakdown labels localised
 - Added i18n keys for every string inside `FeeBreakdown.jsx` — `fee.applicants`,
   `fee.heading`, `fee.currencyNote`, `fee.application`,

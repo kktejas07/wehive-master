@@ -284,3 +284,36 @@ class TestApplications:
     def test_fetch_other_users_application_404(self, session, auth_headers):
         r = session.get(f"{API}/users/me/applications/this-id-does-not-exist", headers=auth_headers)
         assert r.status_code == 404
+
+
+# ---------- Flight suggestions (Gemini-powered) ----------
+class TestFlightSuggestions:
+    def test_unknown_country_404(self, session):
+        r = session.get(f"{API}/flights/suggest", params={"country": "zzz", "origin": "BLR"})
+        assert r.status_code == 404
+
+    def test_invalid_country_400(self, session):
+        r = session.get(f"{API}/flights/suggest", params={"country": "x", "origin": "BLR"})
+        assert r.status_code == 400
+
+    def test_us_blr_returns_three_routes(self, session):
+        r = session.get(f"{API}/flights/suggest", params={"country": "us", "origin": "BLR"}, timeout=120)
+        assert r.status_code == 200, r.text[:500]
+        body = r.json()
+        assert body.get("country", {}).get("id") == "us"
+        assert body.get("origin") == "BLR"
+        routes = body.get("routes") or []
+        assert len(routes) == 3, f"expected 3 routes, got {len(routes)}"
+        kinds = {r["kind"] for r in routes}
+        assert kinds == {"cheapest", "popular", "fastest"}, f"kinds={kinds}"
+        for r_ in routes:
+            assert r_["from"] == "BLR"
+            assert isinstance(r_["price_inr"], int) and r_["price_inr"] > 0
+            assert r_["duration_h"] > 0
+
+    def test_cache_is_used(self, session):
+        # First call may have cached from previous test; second call should be cached.
+        session.get(f"{API}/flights/suggest", params={"country": "ae", "origin": "BLR"}, timeout=120)
+        r2 = session.get(f"{API}/flights/suggest", params={"country": "ae", "origin": "BLR"})
+        assert r2.status_code == 200
+        assert r2.json().get("cached") is True

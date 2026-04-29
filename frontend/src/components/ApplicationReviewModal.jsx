@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   X, Calendar, User as UserIcon, Phone, Mail,
   ShieldCheck, Loader2, ArrowRight, MapPin,
+  FileText, CreditCard, Check,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth, API } from '../context/AuthContext';
@@ -140,10 +141,8 @@ export default function ApplicationReviewModal({
           >
             <header className="flex items-start justify-between px-5 sm:px-7 pt-5 pb-4 border-b border-black/5 gap-3">
               <div className="min-w-0">
-                <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
-                  Step 1 of 2 · Review
-                </div>
-                <h2 className="font-display text-[20px] sm:text-[22px] font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))] mt-0.5 truncate">
+                <ProgressTrail current={1} />
+                <h2 className="font-display text-[20px] sm:text-[22px] font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))] mt-2 truncate">
                   {country.name} · {category.name || visaType}
                 </h2>
                 <div className="text-[12.5px] text-[hsl(var(--blue-900))]/55 mt-0.5 inline-flex items-center gap-1.5">
@@ -161,6 +160,15 @@ export default function ApplicationReviewModal({
             </header>
 
             <div className="px-5 sm:px-7 py-5 max-h-[70vh] overflow-y-auto space-y-5">
+              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3 flex items-start gap-2.5" data-testid="apply-no-payment-banner">
+                <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0 text-emerald-700" />
+                <div className="text-[12.5px] leading-snug text-emerald-900">
+                  <strong>You&rsquo;re reviewing — not paying.</strong> No card needed.
+                  We&rsquo;ll save a draft application so you can upload documents
+                  in the next step.
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Travel date" Icon={Calendar}>
                   <input
@@ -291,6 +299,47 @@ function Row({ k, v }) {
     <div className="flex items-center justify-between text-[13px] py-1">
       <span className="text-[hsl(var(--blue-900))]/65">{k}</span>
       <span className="font-bold text-[hsl(var(--blue-900))] tabular-nums">{v}</span>
+    </div>
+  );
+}
+
+const STEPS = [
+  { id: 1, label: 'Review',         Icon: FileText },
+  { id: 2, label: 'Documents',      Icon: ShieldCheck },
+  { id: 3, label: 'Submit & Pay',   Icon: CreditCard },
+];
+
+function ProgressTrail({ current = 1 }) {
+  return (
+    <div className="flex items-center gap-1.5" data-testid="apply-review-trail">
+      {STEPS.map((s, i) => {
+        const active = current === s.id;
+        const done = current > s.id;
+        return (
+          <div key={s.id} className="flex items-center gap-1.5">
+            <span
+              data-testid={`apply-review-step-${s.id}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-[0.12em] transition ${
+                active
+                  ? 'bg-[hsl(var(--accent))] text-white'
+                  : done
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/55'
+              }`}
+            >
+              {done ? <Check className="w-3 h-3" /> : <s.Icon className="w-3 h-3" />}
+              {s.id}. {s.label}
+            </span>
+            {i < STEPS.length - 1 && (
+              <span
+                className={`h-px w-3 sm:w-5 transition-colors ${
+                  done ? 'bg-emerald-300' : 'bg-black/10'
+                }`}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

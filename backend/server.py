@@ -16,6 +16,7 @@ from routes_leads import router as leads_router  # noqa: E402
 from routes_apps import router as apps_router  # noqa: E402
 from routes_chatbot import router as chatbot_router  # noqa: E402
 from routes_scan import router as scan_router  # noqa: E402
+from routes_flights import router as flights_router  # noqa: E402
 
 app = FastAPI(title='We Hive API', version='1.0.0')
 
@@ -42,6 +43,7 @@ api_router.include_router(users_router)
 api_router.include_router(apps_router)
 api_router.include_router(chatbot_router)
 api_router.include_router(scan_router)
+api_router.include_router(flights_router)
 api_router.include_router(countries_router)
 api_router.include_router(leads_router)
 

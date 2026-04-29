@@ -13,6 +13,8 @@ otps = db['otps']
 applications = db['applications']
 holiday_plans = db['holiday_plans']
 leads = db['leads']
+countries_v2 = db['countries_v2']
+flights_cache = db['flights_cache']
 
 
 async def ensure_indexes():
