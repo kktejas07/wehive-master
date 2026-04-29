@@ -53,17 +53,18 @@ export default function AdminForgotPassword() {
             {sent.message}
           </p>
           {sent.dev_mode && sent.dev_link && (
-            <div className="mt-5 w-full rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-left" data-testid="admin-forgot-dev-link">
+            <div className="mt-5 w-full rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-left">
               <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-amber-300 mb-1">Dev mode</div>
               <p className="text-[12.5px] text-slate-300 leading-relaxed">
                 SMTP isn't configured, so we're showing the reset link here. Open it to set a new password:
               </p>
-              <Link
-                to={`/admin/reset-password?token=${encodeURIComponent(sent.dev_token)}`}
+              <a
+                data-testid="admin-forgot-dev-link"
+                href={`/admin/reset-password?token=${encodeURIComponent(sent.dev_token)}`}
                 className="mt-2 inline-block text-[12.5px] font-mono text-[hsl(var(--accent))] break-all hover:underline"
               >
                 /admin/reset-password?token={sent.dev_token.slice(0, 12)}…
-              </Link>
+              </a>
             </div>
           )}
         </div>

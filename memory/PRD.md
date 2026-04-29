@@ -1,6 +1,6 @@
 # Wehive — Product Requirements Document
 
-_Last updated: 29 Apr 2026_
+_Last updated: 29 Apr 2026 (Round 11)_
 
 ## Original problem statement
 Clone the "Atlys" website for a brand called **Wehive** with elite minimalist
@@ -214,6 +214,68 @@ user was never taken anywhere, so the draft sat hidden in the dashboard.
   Falls back to a tiny local stub for UAE if the API is down.
 - **4 new pytest cases** for the flights endpoint — all passing
   (`32/32` total).
+
+### Round 11 — Password-based admin auth + richer country CRUD + component refactor (this round)
+
+**1. Password-based admin auth (new /admin/{login,signup,forgot-password,reset-password})**
+
+Backend — new files:
+- `/app/backend/admin_auth.py` — bcrypt hashing (cost 12), JWT with `role=admin`
+  claim, `secrets.token_urlsafe(32)` reset tokens stored as SHA-256 hashes with
+  30-minute TTL, simple Mongo-backed lockout (5 attempts / 15 min), optional
+  SMTP reset-email helper with dev-mode fallback.
+- `/app/backend/routes_admin_auth.py` — `/api/admin-auth/{signup,login,
+  forgot-password,reset-password,change-password,me}` + `ensure_seed_admin()`
+  bootstrap.
+- `/app/backend/routes_admin.py::get_current_admin` now delegates to
+  `admin_auth.get_current_admin_flex` so admin routes accept EITHER:
+    • an admin JWT (role=admin), OR
+    • a user OTP JWT whose email is in `ADMIN_EMAILS` (legacy compat).
+
+`.env` additions: `ADMIN_SEED_EMAIL`, `ADMIN_SEED_PASSWORD`, `ADMIN_SEED_NAME`,
+`RESET_TOKEN_TTL_MINUTES`. Super admin is seeded on startup and is the
+password owner for `admin@wehive.co.in / Wehive@Admin2026`.
+
+Frontend — new files:
+- `/app/frontend/src/context/AdminAuthContext.jsx` — owns `wehive_admin_token`
+  in localStorage (separate from the regular user `wehive_token`).
+- `/app/frontend/src/pages/Admin.jsx` — nested routes: `/admin/{login,signup,
+  forgot-password,reset-password}` are public, everything else sits behind a
+  `<ProtectedAdmin>` guard that redirects to `/admin/login`.
+- `/app/frontend/src/pages/{AdminLogin,AdminSignup,AdminForgotPassword,
+  AdminResetPassword}.jsx` — dark-theme, minimalist auth screens with
+  `AdminAuthShell`, `Field`, `PasswordStrength`, `PrimaryButton`,
+  `ErrorMessage` primitives.
+- SMTP dev-mode: when `SMTP_PASSWORD` is placeholder, the API returns
+  `{dev_mode:true, dev_token, dev_link}` and the UI renders a clickable
+  `/admin/reset-password?token=…` anchor inside an amber banner.
+
+**2. Richer visa-type CRUD in admin CountriesTab**
+
+- Add / remove visa types (presets: Tourist, Business, Student, Work, Transit,
+  Medical + custom name).
+- Per-category fields: Display name, Validity, Govt fees (INR), Govt fees
+  (USD), Processing days, Multi-entry toggle, Required documents (one per
+  line textarea).
+- `PATCH /api/admin/countries/{id}` now auto-syncs `visa_types` from
+  `categories.keys()` so the public filter dropdowns always match.
+- Country-level edits: standard/rush days, same-day flag, appointment
+  toggle + INR fee.
+
+**3. Component refactor (P2 from handoff)**
+
+- `VisaDetail.jsx` 377 → 136 lines. Extracted under
+  `/app/frontend/src/components/visa/`:
+  `VisaBreadcrumb`, `CategoryTabs`, `CategoryDetails`, `DocsList`,
+  `AssistCard`, `VisaFaqSection`, `OtherCountries`.
+- `ApplicationDetail.jsx` 256 → 152 lines. Extracted under
+  `/app/frontend/src/components/application/`:
+  `ApplicationHero`, `WhatsNextCard`, `ApplicationTimelineSection`.
+
+**Testing (iteration_7.json):** **75/75 backend tests** pass (21 new admin-auth
+password + 54 regression); frontend ~96% — every documented testid/flow works;
+only nit was an empty `href` on the dev-mode reset link, which is now fixed.
+
 
 ### Round 10 — Super Admin Dashboard + editable profile fix (this round)
 
