@@ -1,0 +1,72 @@
+{
+  "summary": "Round-7 Super Admin dashboard end-to-end verification. Backend: 22/22 admin tests + 33/33 prior-regression tests pass against the live preview URL. Frontend: admin can sign in with admin@wehive.co.in (mock OTP 123456), /admin renders Overview with all four metric cards (users=36, applications=24, revenue=₹88,032, countries=250) and all seven sidebar tabs. Non-admin sees the admin-forbidden screen. UserMenu shows the 'Super admin' link with data-testid=usermenu-admin only for admins. /account profile edit regression passes (name persists across reload). Country filter regression on public /api/countries (delivery, documents, no_visa) holds.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "PUT /api/users/me", "issue": "When the supplied phone collides with an existing unique-indexed phone, the route returns a raw 500 (pymongo DuplicateKeyError) instead of a graceful 409/400. Reproducible: PUT body {phone: \"<existing-phone>\"}. Suggest catching DuplicateKeyError and returning HTTPException(409, 'Phone already in use')."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Header / UserMenu", "issues": ["The user-menu trigger button (the Admin/avatar pill in the navbar) is missing a data-testid (e.g. data-testid=usermenu-trigger). Only the dropdown items are tagged. This makes Playwright tests rely on text/role selectors. Add it to the trigger button in /app/frontend/src/components/UserMenu.jsx."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_admin_dashboard.py",
+    "/app/backend/tests/test_wehive_backend.py",
+    "/app/backend/tests/test_chatbot_eva.py",
+    "/app/test_reports/pytest/admin_dashboard.xml"
+  ],
+  "verified_test_cases": [
+    "GET /api/admin/me → 200 with is_admin=true for admin@wehive.co.in",
+    "Non-admin gets 403 on /api/admin/me, /metrics, /users, /applications, /countries, /integrations, /export/users.csv",
+    "/api/auth/me returns is_admin/is_staff/staff_role/is_premium",
+    "/api/admin/metrics returns users.total, applications.total, revenue.total_inr, countries.total, 14-day trend, top_countries",
+    "/api/admin/users with role=all|premium|staff|admin and q= search returns shaped payload",
+    "PATCH /api/admin/users/{id} toggles is_premium then back",
+    "DELETE /api/admin/users/{self_id} returns 400",
+    "POST /api/admin/staff creates staff with is_staff=true and staff_role=consultant",
+    "GET /api/admin/applications returns items[].user/country/revenue_inr",
+    "PATCH /api/admin/applications/{id} status change appends timeline event",
+    "GET /api/admin/countries?q= filters; PATCH /api/admin/countries/ae updates appointment_fee_inr + delivery.rush_days",
+    "GET /api/admin/integrations returns otp_channel + masked twilio/smtp/emergent_llm services",
+    "PATCH /api/admin/integrations OTP_CHANNEL=mock persists and /api/auth/send-otp follows mock channel",
+    "/api/admin/export/{users,applications,countries,revenue}.csv all return 200 text/csv with Content-Disposition attachment",
+    "PUT /api/users/me with new name + unique phone persists (verified via subsequent /api/auth/me)",
+    "Public /api/countries?delivery=same_day|rush|standard, ?documents=minimal|standard, ?no_visa=true all 200",
+    "FE: /admin renders metric-users/metric-applications/metric-revenue/metric-countries",
+    "FE: admin-nav-overview/users/applications/countries/staff/integrations/exports all switch tabs",
+    "FE: Integrations tab shows otp-channel-mock/auto/twilio_sms/twilio_whatsapp/email and clicking auto then mock persists",
+    "FE: Exports tab exposes export-users-btn/export-applications-btn/export-countries-btn/export-revenue-btn",
+    "FE: Countries tab renders 250 country edit affordances; Staff tab shows Onboard form",
+    "FE: Non-admin user visiting /admin sees data-testid=admin-forbidden screen",
+    "FE: UserMenu shows 'Super admin' link (data-testid=usermenu-admin, href=/admin) for admin only",
+    "FE: /account → Profile tab → Edit → change name → Save persists across reload (testids: profile-edit-btn, profile-name-input, profile-save-btn)"
+  ],
+  "action_items": [
+    "[MINOR] Catch DuplicateKeyError in PUT /api/users/me and return 409 with a friendly message instead of bubbling a 500.",
+    "[NICE-TO-HAVE] Add data-testid=usermenu-trigger to the avatar/account button in UserMenu.jsx so automated tests can open the menu without relying on user-name text matching."
+  ],
+  "critical_code_review_comments": [
+    "routes_admin.py duplicates revenue calculation (constants & _revenue_for) that already lives in front-end fee logic — keep these in sync; consider moving to a shared backend module if the calculation grows.",
+    "DELETE /api/admin/users also deletes the user's applications and saved plans (correct cascading), but no soft-delete/audit log. For a real super-admin product this should be reversible or at least audit-logged.",
+    "PATCH /api/admin/integrations writes os.environ[k] in-process. If running behind multiple workers, only the worker that handled the PATCH will see the new OTP_CHANNEL until the settings_col is re-read. The current /send-otp does check settings_col via lookups in some places — confirm OTP route reads from settings_col first to keep behaviour consistent across workers.",
+    "Twilio creds in backend/.env are committed real-looking SID/Token values — confirm they are sandbox/dummy. If real, rotate.",
+    "UserMenu trigger lacks data-testid (see frontend_issues)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin_dashboard.py (NEW — 22 tests covering every admin endpoint + profile/country regressions)"
+  ],
+  "success_rate": {
+    "backend": "100% (22/22 new admin + 33/33 prior regression — total 55/55)",
+    "frontend": "100% on all 13 frontend acceptance items in the request"
+  },
+  "test_credentials": "Admin: admin@wehive.co.in + mock OTP 123456 → is_admin=true via ADMIN_EMAILS. Regular user: any unused email + 123456.",
+  "seed_data_creation": "Tests create transient TEST_-prefixed users/staff/applications and clean up where applicable. Country PATCH on 'ae' restores the original fee+delivery after the test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Auth login response key is `access_token` (not `token`); _login() helper in test_admin_dashboard.py normalises both. Admin UI testids: admin-nav-{overview|users|applications|countries|staff|integrations|exports}, metric-{users|applications|revenue|countries}, otp-channel-{mock|auto|twilio_sms|twilio_whatsapp|email}, export-{users|applications|countries|revenue}-btn, admin-forbidden, usermenu-admin. UserMenu trigger has NO testid yet — open it via 'button:has-text(\"<name>\")' or by clicking the avatar pill. PUT /api/users/me has a known 500 on duplicate phone (unique index) — avoid reusing the same phone across test users.",
+  "rca_of_the_issue": "PUT /api/users/me lacks try/except around users.update_one; pymongo's E11000 DuplicateKeyError on the phone_1 unique index escapes as a 500. Mitigation: wrap update_one with try/except DuplicateKeyError and translate to HTTPException(409). Reproduction: create user A with phone +919876543210, log in as user B, PUT /api/users/me {phone: '+919876543210'} → 500."
+}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, User as UserIcon, LogOut, FileText, Compass, Settings } from 'lucide-react';
+import { ChevronDown, User as UserIcon, LogOut, FileText, Compass, Settings, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 import { avatarUrl } from '../lib/avatars';
@@ -75,6 +75,7 @@ export default function UserMenu() {
             { id: 'apps', to: '/account?tab=applications', Icon: FileText, label: 'My applications' },
             { id: 'plans', to: '/account?tab=plans', Icon: Compass, label: 'Saved holiday plans' },
             { id: 'settings', to: '/account?tab=settings', Icon: Settings, label: 'Settings' },
+            ...(user.is_admin ? [{ id: 'admin', to: '/admin', Icon: ShieldCheck, label: 'Super admin' }] : []),
           ].map((it) => {
             const Icon = it.Icon;
             return (
@@ -82,6 +83,7 @@ export default function UserMenu() {
                 key={it.id}
                 to={it.to}
                 onClick={() => setOpen(false)}
+                data-testid={`usermenu-${it.id}`}
                 className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))]"
               >
                 <Icon className="w-4 h-4 text-[hsl(var(--blue-700))]" />

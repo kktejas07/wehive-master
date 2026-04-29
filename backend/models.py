@@ -53,6 +53,9 @@ class PublicUser(BaseModel):
     avatar_style: Optional[str] = None
     is_premium: bool = False
     premium_since: Optional[datetime] = None
+    is_admin: bool = False
+    is_staff: bool = False
+    staff_role: Optional[str] = None
     created_at: datetime
 
 

@@ -18,6 +18,19 @@ router = APIRouter(prefix='/auth', tags=['auth'])
 MOCK_CODE = os.environ.get('MOCK_OTP_CODE', '').strip()
 OTP_TTL_MIN = int(os.environ.get('OTP_TTL_MINUTES', '10'))
 
+ADMIN_EMAILS = {
+    e.strip().lower()
+    for e in os.environ.get('ADMIN_EMAILS', '').split(',')
+    if e.strip()
+}
+
+
+def _is_admin(u: dict) -> bool:
+    if u.get('is_admin'):
+        return True
+    email = (u.get('email') or '').lower()
+    return email in ADMIN_EMAILS
+
 
 def _public(u: dict) -> PublicUser:
     return PublicUser(
@@ -32,6 +45,9 @@ def _public(u: dict) -> PublicUser:
         avatar_style=u.get('avatar_style'),
         is_premium=bool(u.get('is_premium', False)),
         premium_since=u.get('premium_since'),
+        is_admin=_is_admin(u),
+        is_staff=bool(u.get('is_staff', False)),
+        staff_role=u.get('staff_role'),
         created_at=u.get('created_at', datetime.utcnow()),
     )
 

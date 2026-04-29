@@ -60,7 +60,7 @@ function ProfileTab({ user, token, onUpdated }) {
   const onSave = async () => {
     setSaving(true);
     try {
-      await axios.patch(
+      await axios.put(
         `${API}/users/me`,
         { name: name.trim(), email: email.trim() || null, phone: phone.trim() || null, gender: gender || null },
         { headers: { Authorization: `Bearer ${token}` } },
@@ -400,7 +400,7 @@ function EmptyState({ title, sub, cta }) {
 }
 
 export default function Account() {
-  const { user, token, isAuthed, loading } = useAuth();
+  const { user, token, isAuthed, loading, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const tab = params.get('tab') || 'profile';
@@ -454,10 +454,10 @@ export default function Account() {
           </aside>
           <section className="lg:col-span-9">
             <div className="rounded-3xl bg-white border border-black/5 p-8 min-h-[420px]">
-              {tab === 'profile' && <ProfileTab user={user} />}
+              {tab === 'profile' && <ProfileTab user={user} token={token} onUpdated={refreshUser} />}
               {tab === 'applications' && <ApplicationsTab token={token} />}
               {tab === 'plans' && <PlansTab token={token} />}
-              {tab === 'settings' && <SettingsTab user={user} token={token} />}
+              {tab === 'settings' && <SettingsTab user={user} token={token} onUpdated={refreshUser} />}
             </div>
           </section>
         </div>

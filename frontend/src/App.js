@@ -9,6 +9,7 @@ import Pricing from './pages/Pricing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Account from './pages/Account';
+import Admin from './pages/Admin';
 import HolidayPlanner from './pages/HolidayPlanner';
 import ApplicationDetail from './pages/ApplicationDetail';
 import { AuthProvider } from './context/AuthContext';
@@ -40,6 +41,7 @@ function AnimatedRoutes() {
         <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
         <Route path="/account" element={<PageTransition><Account /></PageTransition>} />
         <Route path="/account/applications/:id" element={<PageTransition><ApplicationDetail /></PageTransition>} />
+        <Route path="/admin/*" element={<Admin />} />
         <Route path="*" element={<PageTransition><Home /></PageTransition>} />
       </Routes>
     </AnimatePresence>
