@@ -13,6 +13,7 @@ import DocumentChecklist, { getReadyCount } from '../components/DocumentChecklis
 import ApplicationTimeline from '../components/ApplicationTimeline';
 import ConsultantChat from '../components/ConsultantChat';
 import AIScanModal from '../components/AIScanModal';
+import ApplicationFormCard from '../components/ApplicationFormCard';
 import { COUNTRIES } from '../data/mock';
 import { Sparkles } from 'lucide-react';
 
@@ -27,7 +28,6 @@ export default function ApplicationDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [docs, setDocs] = useState([]);
   const [scanOpen, setScanOpen] = useState(false);
-  const [autofill, setAutofill] = useState(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthed) navigate('/login', { replace: true });
@@ -180,45 +180,10 @@ export default function ApplicationDetail() {
       <section className="py-14">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 space-y-6">
-            {autofill && (
-              <section className="rounded-3xl bg-white border border-emerald-200 p-6" data-testid="autofill-card">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
-                    <Sparkles className="w-4 h-4 text-emerald-700" />
-                  </span>
-                  <div>
-                    <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-emerald-700">
-                      AI auto-filled
-                    </div>
-                    <div className="text-[13px] text-[hsl(var(--blue-900))]/70">
-                      These values will prefill your visa form on submission.
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setAutofill(null)}
-                    className="ml-auto text-[12px] underline text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]"
-                    data-testid="autofill-clear-btn"
-                  >
-                    Clear
-                  </button>
-                </div>
-                <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-[13px]">
-                  {[
-                    ['Full name', autofill.full_name],
-                    ['Passport #', autofill.passport_number],
-                    ['Date of birth', autofill.date_of_birth],
-                    ['Nationality', autofill.nationality],
-                    ['Issue date', autofill.issue_date],
-                    ['Expiry date', autofill.expiry_date],
-                  ].filter(([, v]) => v).map(([l, v]) => (
-                    <div key={l} className="flex justify-between gap-3 border-b border-emerald-100 py-1.5">
-                      <dt className="text-[hsl(var(--blue-900))]/60">{l}</dt>
-                      <dd className="font-bold text-[hsl(var(--blue-900))]">{String(v)}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </section>
-            )}
+            <ApplicationFormCard
+              application={app}
+              onUpdated={(form) => setApp((a) => ({ ...a, form_data: form }))}
+            />
 
             <DocumentChecklist
               applicationId={id}
@@ -284,7 +249,7 @@ export default function ApplicationDetail() {
         open={scanOpen}
         onClose={() => setScanOpen(false)}
         applicationId={id}
-        onApplied={(data) => setAutofill(data)}
+        onApplied={() => refresh()}
       />
     </div>
   );

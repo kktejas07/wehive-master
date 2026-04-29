@@ -210,16 +210,36 @@ async def scan_passport(
         'created_at': datetime.utcnow(),
     }
 
-    # Optionally attach to an application
+    # Optionally attach to an application AND auto-fill the draft form fields.
     if application_id:
+        passport_form_keys = (
+            'full_name', 'given_names', 'surname', 'date_of_birth', 'gender',
+            'nationality', 'place_of_birth', 'passport_number', 'issue_date',
+            'expiry_date', 'issuing_country', 'issuing_authority',
+        )
+        form_patch = {}
+        for k in passport_form_keys:
+            v = extracted.get(k)
+            if v is None or v == '':
+                continue
+            form_patch[f'form_data.{k}'] = str(v)[:200]
+
+        update_set = {'updated_at': datetime.utcnow()}
+        if form_patch:
+            update_set.update(form_patch)
+            update_set['form_updated_at'] = datetime.utcnow()
+
         await applications.update_one(
             {'_id': application_id, 'user_id': user['_id']},
-            {'$push': {'scans': {
-                '_id': result['_id'],
-                'kind': 'passport',
-                'extracted': extracted,
-                'created_at': result['created_at'],
-            }}},
+            {
+                '$push': {'scans': {
+                    '_id': result['_id'],
+                    'kind': 'passport',
+                    'extracted': extracted,
+                    'created_at': result['created_at'],
+                }},
+                '$set': update_set,
+            },
         )
 
     return ScanResponse(

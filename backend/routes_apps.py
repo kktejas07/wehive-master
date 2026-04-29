@@ -8,6 +8,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import StreamingResponse, FileResponse
+from pydantic import BaseModel
 
 from auth_utils import get_current_user
 from db import db, applications
@@ -37,6 +38,53 @@ async def _get_app_for_user(application_id: str, user_id: str):
     if not app:
         raise HTTPException(404, 'Application not found')
     return app
+
+
+# ---------- Form data (auto-filled from passport scan, user-editable) ----------
+ALLOWED_FORM_FIELDS = {
+    'full_name', 'given_names', 'surname', 'date_of_birth', 'gender',
+    'nationality', 'place_of_birth', 'passport_number', 'issue_date',
+    'expiry_date', 'issuing_country', 'issuing_authority',
+    'email', 'phone', 'address',
+}
+
+
+def _sanitize_form(payload: dict) -> dict:
+    """Whitelist the fields the user can write to applications.form_data."""
+    out = {}
+    for k, v in (payload or {}).items():
+        if k not in ALLOWED_FORM_FIELDS:
+            continue
+        if v is None:
+            out[k] = None
+            continue
+        s = str(v).strip()
+        if not s:
+            continue
+        out[k] = s[:200]
+    return out
+
+
+class FormDataRequest(BaseModel):
+    form_data: dict
+
+
+@router.patch('/{application_id}/form')
+async def update_form_data(
+    application_id: str,
+    req: FormDataRequest,
+    user=Depends(get_current_user),
+):
+    app = await _get_app_for_user(application_id, user['_id'])
+    cleaned = _sanitize_form(req.form_data or {})
+    existing = app.get('form_data') or {}
+    merged = {**existing, **cleaned}
+    now = datetime.utcnow()
+    await applications.update_one(
+        {'_id': application_id},
+        {'$set': {'form_data': merged, 'form_updated_at': now, 'updated_at': now}},
+    )
+    return {'form_data': merged, 'form_updated_at': now.isoformat()}
 
 
 def _initial_timeline():
