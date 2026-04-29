@@ -1,6 +1,6 @@
 # Wehive — Product Requirements Document
 
-_Last updated: 27 Feb 2026_
+_Last updated: 29 Apr 2026_
 
 ## Original problem statement
 Clone the "Atlys" website for a brand called **Wehive** with elite minimalist
@@ -214,6 +214,68 @@ user was never taken anywhere, so the draft sat hidden in the dashboard.
   Falls back to a tiny local stub for UAE if the API is down.
 - **4 new pytest cases** for the flights endpoint — all passing
   (`32/32` total).
+
+### Round 10 — Super Admin Dashboard + editable profile fix (this round)
+
+**New `/admin` dashboard** (admin-gated via `ADMIN_EMAILS` in `backend/.env`).
+Dark-theme premium UI at `/admin/*` with a sidebar and seven tabs:
+
+1. **Overview** — metric cards (users, applications, revenue ₹, countries),
+   14-day twin sparkline (apps + signups), top-5 destinations leaderboard,
+   draft/review/approved/rejected status cards.
+2. **Users** — paginated list with search + role filter (all/premium/staff/admin),
+   one-click toggles for `is_premium`, `is_staff`, `is_admin`, and delete.
+3. **Applications** — filter by status + text search, inline status dropdown that
+   appends a timeline event, revenue column (recomputed server-side using the
+   same tier-based base-fee logic as `FeeBreakdown`).
+4. **Countries** — list of all 250, inline editor for `delivery.standard_days`,
+   `rush_days`, `same_day`, `requires_appointment`, `appointment_fee_inr`, and
+   per-category pricing (`fees_inr`, `processing_days`, `validity`).
+5. **Staff** — onboard consultants/reviewers/support/ops/managers by email.
+   Seeded user gets `is_staff=true`, `staff_role=<role>`.
+6. **Integrations** — live status of Twilio (SID masked), SMTP, Emergent LLM,
+   and a one-click switcher for `OTP_CHANNEL` (mock/auto/twilio_sms/
+   twilio_whatsapp/email).
+7. **Exports** — one-click CSV downloads for `users`, `applications`,
+   `countries`, and `revenue` (billable apps only: submitted + review + approved).
+
+**Backend** (`/app/backend/routes_admin.py`):
+- `GET /api/admin/me` · `GET /api/admin/metrics`
+- `GET/PATCH/DELETE /api/admin/users[…]`
+- `POST /api/admin/staff`
+- `GET/PATCH /api/admin/applications[…]` (PATCH auto-appends timeline event)
+- `GET/PATCH /api/admin/countries[…]`
+- `GET/PATCH /api/admin/integrations` (PATCH writes MongoDB `settings`
+  collection + mutates `os.environ[OTP_CHANNEL]` live)
+- `GET /api/admin/export/{users|applications|countries|revenue}.csv`
+- `get_current_admin` dependency: allows caller if email ∈ `ADMIN_EMAILS`
+  OR `users.is_admin == true`. Non-admin → `403 Admin access required`.
+- `PublicUser` extended with `is_admin`, `is_staff`, `staff_role` so
+  `/api/auth/me` & `/api/auth/verify-otp` now expose these to the SPA.
+- `PUT /api/users/me` now catches `pymongo.errors.DuplicateKeyError` and
+  returns `409 Conflict` ("That email/phone is already linked to another
+  account.") instead of bubbling a 500.
+
+**Frontend**:
+- `/app/frontend/src/pages/Admin.jsx` — nested routes, guard that shows
+  `admin-forbidden` screen for non-admins.
+- `/app/frontend/src/components/admin/*.jsx` — `AdminShell`,
+  `OverviewTab`, `UsersTab`, `ApplicationsTab`, `CountriesTab`, `StaffTab`,
+  `IntegrationsTab`, `ExportsTab`.
+- `/app/frontend/src/lib/admin.js` — axios client + `downloadCsv` helper.
+- `UserMenu` shows a **"Super admin"** link with `data-testid=usermenu-admin`
+  only when `user.is_admin === true`. Trigger button gets
+  `data-testid=usermenu-trigger`.
+- `Account.jsx` profile tab: fixed PATCH → PUT (matching backend route);
+  Edit profile is now fully functional (name / email / phone / gender).
+
+**Env additions** (`backend/.env`):
+- `ADMIN_EMAILS="admin@wehive.co.in,krishnakranthiteja@gmail.com"`
+
+**Testing** (iteration_6): **55/55 backend + 13/13 frontend acceptance items
+passing**. See `/app/backend/tests/test_admin_dashboard.py` for 22 new
+admin-specific pytest cases.
+
 
 ### Round 7 — Fee-breakdown labels localised
 - Added i18n keys for every string inside `FeeBreakdown.jsx` — `fee.applicants`,

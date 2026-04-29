@@ -47,6 +47,7 @@ export default function UserMenu() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
+        data-testid="usermenu-trigger"
         className="inline-flex items-center gap-2 rounded-full bg-white border border-black/8 hover:border-[hsl(var(--blue-700))]/30 px-2 py-1.5 transition"
       >
         <span className="h-8 w-8 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-1 ring-black/5">

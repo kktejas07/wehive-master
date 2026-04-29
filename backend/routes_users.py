@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
+from pymongo.errors import DuplicateKeyError
 
 from models import UpdateProfileRequest, ApplicationCreate, Application, SavedPlanCreate, SavedPlan, PublicUser
 from auth_utils import get_current_user
@@ -15,7 +16,11 @@ async def update_me(req: UpdateProfileRequest, user=Depends(get_current_user)):
     if not update:
         raise HTTPException(400, 'Nothing to update')
     update['updated_at'] = datetime.utcnow()
-    await users.update_one({'_id': user['_id']}, {'$set': update})
+    try:
+        await users.update_one({'_id': user['_id']}, {'$set': update})
+    except DuplicateKeyError as e:
+        field = 'email' if 'email' in str(e).lower() else 'phone'
+        raise HTTPException(409, f'That {field} is already linked to another account.')
     fresh = await users.find_one({'_id': user['_id']})
     return {
         'id': fresh['_id'],
