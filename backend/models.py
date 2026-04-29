@@ -66,10 +66,18 @@ class UpdateProfileRequest(BaseModel):
 
 
 # ----- Applications ----- #
+class PrimaryApplicant(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+
 class ApplicationCreate(BaseModel):
     country_id: str
     visa_type: str
     travel_date: Optional[str] = None
+    applicants: int = 1
+    primary_applicant: Optional[PrimaryApplicant] = None
     notes: Optional[str] = None
 
 

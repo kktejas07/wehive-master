@@ -28,12 +28,15 @@ async def update_me(req: UpdateProfileRequest, user=Depends(get_current_user)):
 @router.post('/me/applications')
 async def create_application(req: ApplicationCreate, user=Depends(get_current_user)):
     now = datetime.utcnow()
+    primary = req.primary_applicant.model_dump() if req.primary_applicant else None
     app = {
         '_id': str(uuid.uuid4()),
         'user_id': user['_id'],
         'country_id': req.country_id,
         'visa_type': req.visa_type,
         'travel_date': req.travel_date,
+        'applicants': max(1, int(req.applicants or 1)),
+        'primary_applicant': primary,
         'status': 'draft',
         'notes': req.notes,
         'documents': [],

@@ -15,6 +15,7 @@ import { COUNTRIES, FAQS, BRAND } from '../data/mock';
 import DeliveryCountdown from '../components/DeliveryCountdown';
 import FeeBreakdown, { computeFees } from '../components/FeeBreakdown';
 import FlightSuggestions from '../components/FlightSuggestions';
+import ApplicationReviewModal from '../components/ApplicationReviewModal';
 import { landmarkFor } from '../lib/landmarks';
 import { motion } from 'framer-motion';
 
@@ -260,12 +261,11 @@ function OtherCountries({ list }) {
 
 export default function VisaDetail() {
   const { id } = useParams();
-  const { token, isAuthed, openAuth } = useAuth();
-  const { toast } = useToast();
+  const { isAuthed, openAuth } = useAuth();
   const [country, setCountry] = useState(null);
   const [type, setType] = useState('Tourist');
-  const [applying, setApplying] = useState(false);
   const [applicants, setApplicants] = useState(1);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -298,25 +298,15 @@ export default function VisaDetail() {
   const cat = country.categories?.[type];
   const others = COUNTRIES.filter((c) => c.id !== country.id).slice(0, 4);
 
-  const onApply = async () => {
+  const onApply = () => {
     if (!isAuthed) {
       openAuth('signup');
       return;
     }
-    setApplying(true);
-    try {
-      await axios.post(
-        `${API}/users/me/applications`,
-        { country_id: country.id, visa_type: type },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast({ title: 'Application started', description: `${country.name} ${type} draft saved.` });
-    } catch {
-      toast({ title: 'Could not start application' });
-    } finally {
-      setApplying(false);
-    }
+    setReviewOpen(true);
   };
+
+  const applying = false;
 
   return (
     <div className="bg-white">
@@ -373,6 +363,15 @@ export default function VisaDetail() {
       <FlightSuggestions country={country} />
       <OtherCountries list={others} />
       <Footer />
+
+      <ApplicationReviewModal
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        country={country}
+        category={cat}
+        visaType={type}
+        applicants={applicants}
+      />
     </div>
   );
 }

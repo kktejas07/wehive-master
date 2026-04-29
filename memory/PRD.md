@@ -175,7 +175,27 @@ scanning** for visa form auto-fill.
 - `TWILIO_*` — provided, sandbox mode.
 - `SMTP_*` — provided; App Password pending.
 
-### Round 7 — Fee-breakdown labels localised (this round)
+### Round 8 — Apply flow: review modal + redirect to draft page (this round)
+**Bug fix**: Clicking the "Apply" button on a country page used to silently
+create a draft via `POST /users/me/applications` and only show a toast — the
+user was never taken anywhere, so the draft sat hidden in the dashboard.
+
+**Fix**:
+- New `ApplicationReviewModal.jsx` opens as **Step 1 of 2 — Review** before
+  any draft is created.
+- Modal collects: travel date (default = today + 21 days), primary applicant
+  name (prefilled from logged-in user), email & mobile (prefilled), and shows
+  a live fee estimate matching the FeeBreakdown card.
+- "Continue to documents" → `POST /users/me/applications` with the new fields
+  (`applicants`, `travel_date`, `primary_applicant`) → on success **redirects
+  to `/account/applications/{id}`** so the user immediately lands on the
+  document-checklist + timeline + AI-scan view.
+- Cancel keeps the user on `/visa/{id}` with no DB write.
+- Backend `ApplicationCreate` model now accepts `applicants: int = 1` and
+  `primary_applicant: PrimaryApplicant | None`. Documents stored in MongoDB.
+- All 28 pytest tests still pass.
+
+### Round 7 — Fee-breakdown labels localised
 - Added i18n keys for every string inside `FeeBreakdown.jsx` — `fee.applicants`,
   `fee.heading`, `fee.currencyNote`, `fee.application`,
   `fee.applicationSubEmbassy`, `fee.applicationSubFree`, `fee.appointment`,
