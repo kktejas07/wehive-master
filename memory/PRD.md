@@ -1,6 +1,6 @@
 # Wehive — Product Requirements Document
 
-_Last updated: 29 Apr 2026 (Round 11)_
+_Last updated: 30 Apr 2026 (Round 12)_
 
 ## Original problem statement
 Clone the "Atlys" website for a brand called **Wehive** with elite minimalist
@@ -214,6 +214,49 @@ user was never taken anywhere, so the draft sat hidden in the dashboard.
   Falls back to a tiny local stub for UAE if the API is down.
 - **4 new pytest cases** for the flights endpoint — all passing
   (`32/32` total).
+
+### Round 12 — My scans history + PropTypes (this round)
+
+**1. "My scans" history tab on /account**
+
+Backend:
+- New dedicated `scans` MongoDB collection (index on `user_id, created_at`).
+- `POST /api/scan/passport` and `/document` now **always** persist to
+  `scans` (in addition to the optional embedded `applications.scans[]` push
+  when `application_id` is provided).
+- `GET /api/scan/history` — paginated `{total, items, limit, skip}` with
+  `raw` field stripped.
+- `DELETE /api/scan/{scan_id}` — deletes from `scans` AND pulls the entry
+  from `applications.scans[]` when the scan was linked to an app.
+  Enforces owner check via `user_id`.
+
+Frontend:
+- New `ScansTab` under `/components/account/ScansTab.jsx` — cards per
+  scan (passport vs document UI), confidence badge, warnings block,
+  linked-application deep link, delete with confirm, raw-JSON modal,
+  all-vs-passport-vs-document filter, premium-aware empty state.
+- `Account.jsx` adds `'scans'` to the tab list between Applications and
+  Saved plans.
+- `UserMenu` gets a new "My AI scans" quick link.
+
+**2. PropTypes on extracted sub-components (Round 11 follow-up)**
+
+Added `prop-types@15.8.1` and validation to every sub-component that
+takes props:
+
+- `/components/visa/{VisaBreadcrumb,CategoryTabs,CategoryDetails,
+  DocsList,OtherCountries,VisaFaqSection}.jsx`
+- `/components/application/{ApplicationHero,
+  ApplicationTimelineSection}.jsx`
+- `/components/account/ScansTab.jsx`
+
+`AssistCard.jsx` and `WhatsNextCard.jsx` have no props, so no import.
+
+**Testing (iteration_8.json)**: **83/83 backend tests pass** (8 new
+scans tests + 75 Round 10/11 regression). **Frontend 100%** — every
+documented testid renders; zero PropTypes runtime errors on /visa/* or
+/account?tab=scans.
+
 
 ### Round 11 — Password-based admin auth + richer country CRUD + component refactor (this round)
 
