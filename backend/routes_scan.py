@@ -20,7 +20,7 @@ from pydantic import BaseModel
 from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
 
 from auth_utils import get_current_user
-from db import applications
+from db import applications, scans
 
 router = APIRouter(prefix='/scan', tags=['scan'])
 logger = logging.getLogger('wehive.scan')
@@ -203,12 +203,15 @@ async def scan_passport(
 
     result = {
         '_id': str(uuid.uuid4()),
+        'user_id': user['_id'],
         'kind': 'passport',
         'model': 'gemini-2.5-flash',
         'extracted': extracted,
         'raw': raw if '_parse_error' in extracted else None,
+        'application_id': application_id,
         'created_at': datetime.utcnow(),
     }
+    await scans.insert_one(dict(result))  # dict() so Mongo can't mutate the outer ref
 
     # Optionally attach to an application AND auto-fill the draft form fields.
     if application_id:
@@ -270,12 +273,15 @@ async def scan_document(
 
     result = {
         '_id': str(uuid.uuid4()),
+        'user_id': user['_id'],
         'kind': 'document',
         'model': 'gemini-2.5-flash',
         'extracted': extracted,
         'raw': raw if '_parse_error' in extracted else None,
+        'application_id': application_id,
         'created_at': datetime.utcnow(),
     }
+    await scans.insert_one(dict(result))
 
     if application_id:
         await applications.update_one(
@@ -296,3 +302,43 @@ async def scan_document(
         raw=result['raw'],
         created_at=result['created_at'],
     )
+
+
+# ---------- history ---------- #
+@router.get('/history')
+async def scan_history(
+    user=Depends(get_current_user),
+    limit: int = 50,
+    skip: int = 0,
+):
+    limit = max(1, min(100, int(limit)))
+    skip = max(0, int(skip))
+    q = {'user_id': user['_id']}
+    total = await scans.count_documents(q)
+    cur = scans.find(q, {'raw': 0}).sort('created_at', -1).skip(skip).limit(limit)
+    items = []
+    async for s in cur:
+        items.append({
+            'id': s['_id'],
+            'kind': s.get('kind'),
+            'model': s.get('model'),
+            'application_id': s.get('application_id'),
+            'extracted': s.get('extracted') or {},
+            'created_at': (s.get('created_at') or datetime.utcnow()).isoformat(),
+        })
+    return {'total': total, 'items': items, 'limit': limit, 'skip': skip}
+
+
+@router.delete('/{scan_id}')
+async def delete_scan(scan_id: str, user=Depends(get_current_user)):
+    rec = await scans.find_one({'_id': scan_id, 'user_id': user['_id']})
+    if not rec:
+        raise HTTPException(404, 'Scan not found')
+    await scans.delete_one({'_id': scan_id})
+    # Also scrub from the embedded application.scans list (if any)
+    if rec.get('application_id'):
+        await applications.update_one(
+            {'_id': rec['application_id'], 'user_id': user['_id']},
+            {'$pull': {'scans': {'_id': scan_id}}},
+        )
+    return {'ok': True}

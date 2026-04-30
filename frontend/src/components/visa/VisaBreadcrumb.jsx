@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { ChevronRight } from 'lucide-react';
 
 export default function VisaBreadcrumb({ countryName }) {
@@ -12,3 +13,7 @@ export default function VisaBreadcrumb({ countryName }) {
     </div>
   );
 }
+
+VisaBreadcrumb.propTypes = {
+  countryName: PropTypes.string.isRequired,
+};

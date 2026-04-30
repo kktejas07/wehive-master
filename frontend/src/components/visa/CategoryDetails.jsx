@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Button } from '../ui/button';
 import { Clock, Calendar, CreditCard, Loader2 } from 'lucide-react';
 import { BRAND, COUNTRIES } from '../../data/mock';
@@ -81,3 +82,26 @@ export default function CategoryDetails({ cat, country, onApply, applying, typeI
     </div>
   );
 }
+
+CategoryDetails.propTypes = {
+  cat: PropTypes.shape({
+    name: PropTypes.string,
+    validity: PropTypes.string,
+    processing_days: PropTypes.number,
+    multi_entry: PropTypes.bool,
+    documents: PropTypes.arrayOf(PropTypes.string),
+    fees_inr: PropTypes.number,
+    fees_usd: PropTypes.number,
+  }).isRequired,
+  country: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string.isRequired,
+    flag: PropTypes.string,
+    flag_url: PropTypes.string,
+    delivery: PropTypes.object,
+  }).isRequired,
+  onApply: PropTypes.func.isRequired,
+  applying: PropTypes.bool,
+  typeId: PropTypes.string.isRequired,
+  applicants: PropTypes.number,
+};

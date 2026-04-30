@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { ChevronRight } from 'lucide-react';
 import { FAQS } from '../../data/mock';
 
@@ -23,3 +24,7 @@ export default function VisaFaqSection({ countryName }) {
     </section>
   );
 }
+
+VisaFaqSection.propTypes = {
+  countryName: PropTypes.string.isRequired,
+};

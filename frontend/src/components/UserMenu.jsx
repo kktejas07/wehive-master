@@ -74,6 +74,7 @@ export default function UserMenu() {
           {[
             { id: 'account', to: '/account', Icon: UserIcon, label: 'My account' },
             { id: 'apps', to: '/account?tab=applications', Icon: FileText, label: 'My applications' },
+            { id: 'scans', to: '/account?tab=scans', Icon: ShieldCheck, label: 'My AI scans' },
             { id: 'plans', to: '/account?tab=plans', Icon: Compass, label: 'Saved holiday plans' },
             { id: 'settings', to: '/account?tab=settings', Icon: Settings, label: 'Settings' },
             ...(user.is_admin ? [{ id: 'admin', to: '/admin', Icon: ShieldCheck, label: 'Super admin' }] : []),

@@ -6,12 +6,14 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X } from 'lucide-react';
+import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
+import ScansTab from '../components/account/ScansTab';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },
   { id: 'applications', label: 'Applications', Icon: FileText },
+  { id: 'scans', label: 'My scans', Icon: ScanLine },
   { id: 'plans', label: 'Saved plans', Icon: Compass },
   { id: 'settings', label: 'Settings', Icon: Settings },
 ];
@@ -456,6 +458,7 @@ export default function Account() {
             <div className="rounded-3xl bg-white border border-black/5 p-8 min-h-[420px]">
               {tab === 'profile' && <ProfileTab user={user} token={token} onUpdated={refreshUser} />}
               {tab === 'applications' && <ApplicationsTab token={token} />}
+              {tab === 'scans' && <ScansTab user={user} token={token} />}
               {tab === 'plans' && <PlansTab token={token} />}
               {tab === 'settings' && <SettingsTab user={user} token={token} onUpdated={refreshUser} />}
             </div>

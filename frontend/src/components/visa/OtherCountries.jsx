@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 export default function OtherCountries({ list }) {
   return (
@@ -29,3 +30,15 @@ export default function OtherCountries({ list }) {
     </section>
   );
 }
+
+OtherCountries.propTypes = {
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      image: PropTypes.string,
+      fees_usd: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+      fees: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    }),
+  ).isRequired,
+};

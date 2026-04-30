@@ -15,6 +15,7 @@ holiday_plans = db['holiday_plans']
 leads = db['leads']
 countries_v2 = db['countries_v2']
 flights_cache = db['flights_cache']
+scans = db['scans']
 
 
 async def ensure_indexes():
@@ -24,6 +25,7 @@ async def ensure_indexes():
     await otps.create_index('expires_at', expireAfterSeconds=0)
     await applications.create_index('user_id')
     await holiday_plans.create_index('user_id')
+    await scans.create_index([('user_id', 1), ('created_at', -1)])
     # Admin auth support
     await db['password_reset_tokens'].create_index('token_hash')
     await db['password_reset_tokens'].create_index('expires_at', expireAfterSeconds=0)

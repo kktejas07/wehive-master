@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { ChevronRight, Download, Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '../ui/button';
 import { COUNTRIES } from '../../data/mock';
@@ -85,3 +86,23 @@ export default function ApplicationHero({
     </section>
   );
 }
+
+ApplicationHero.propTypes = {
+  app: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    country_id: PropTypes.string,
+    visa_type: PropTypes.string,
+    status: PropTypes.string,
+  }).isRequired,
+  country: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    flag: PropTypes.string,
+  }).isRequired,
+  readyCount: PropTypes.number.isRequired,
+  requiredDocs: PropTypes.array.isRequired,
+  submitting: PropTypes.bool,
+  canSubmit: PropTypes.bool,
+  onScan: PropTypes.func.isRequired,
+  onDownloadReceipt: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+};

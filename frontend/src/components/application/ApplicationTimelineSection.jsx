@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 export default function ApplicationTimelineSection({ app, TimelineComponent }) {
   return (
     <section className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
@@ -13,3 +15,11 @@ export default function ApplicationTimelineSection({ app, TimelineComponent }) {
     </section>
   );
 }
+
+ApplicationTimelineSection.propTypes = {
+  app: PropTypes.shape({
+    timeline: PropTypes.array,
+    status: PropTypes.string,
+  }).isRequired,
+  TimelineComponent: PropTypes.elementType.isRequired,
+};

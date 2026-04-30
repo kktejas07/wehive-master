@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Check } from 'lucide-react';
 
 export default function DocsList({ docs }) {
@@ -17,3 +18,7 @@ export default function DocsList({ docs }) {
     </ul>
   );
 }
+
+DocsList.propTypes = {
+  docs: PropTypes.arrayOf(PropTypes.string).isRequired,
+};

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Plane, Briefcase, GraduationCap, Building2 } from 'lucide-react';
 
 export const TYPE_ICONS = {
@@ -44,3 +45,9 @@ export default function CategoryTabs({ categories, value, onChange }) {
     </div>
   );
 }
+
+CategoryTabs.propTypes = {
+  categories: PropTypes.object,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
