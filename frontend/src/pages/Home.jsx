@@ -9,6 +9,7 @@ import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
 import PressStrip from '../components/PressStrip';
 import EventsBanner from '../components/EventsBanner';
+import StatsStrip from '../components/StatsStrip';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
     <div>
       <Navbar />
       <Hero filters={filters} onFilters={setFilters} />
+      <StatsStrip />
       <PressStrip />
       <EventsBanner />
       <CountryGrid filters={filters} />

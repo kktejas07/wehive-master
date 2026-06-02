@@ -18,6 +18,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from admin_auth import get_current_admin_flex
+from audit import record as audit_record, recent as audit_recent
 from db import db, users, applications, holiday_plans, leads, otps
 
 router = APIRouter(prefix='/admin', tags=['admin'])
@@ -257,6 +258,7 @@ async def admin_metrics(_=Depends(get_current_admin)):
         'saved_plans': {'total': total_plans},
         'trend': days,
         'top_countries': top_countries,
+        'recent_activity': await audit_recent(8),
         'generated_at': now.isoformat(),
     }
 
@@ -299,7 +301,7 @@ class UserPatch(BaseModel):
 
 
 @router.patch('/users/{user_id}')
-async def admin_update_user(user_id: str, patch: UserPatch, _=Depends(get_current_admin)):
+async def admin_update_user(user_id: str, patch: UserPatch, admin=Depends(get_current_admin)):
     u = await users.find_one({'_id': user_id})
     if not u:
         raise HTTPException(404, 'User not found')
@@ -314,6 +316,12 @@ async def admin_update_user(user_id: str, patch: UserPatch, _=Depends(get_curren
         await users.update_one({'_id': user_id}, {'$unset': {'premium_since': ''}})
     await users.update_one({'_id': user_id}, {'$set': update})
     fresh = await users.find_one({'_id': user_id})
+    await audit_record(
+        admin, 'update', 'user', user_id,
+        before={k: u.get(k) for k in patch.model_dump(exclude_none=True).keys()},
+        after={k: fresh.get(k) for k in patch.model_dump(exclude_none=True).keys()},
+        extra={'email': u.get('email')},
+    )
     return _public_user(fresh)
 
 
@@ -327,6 +335,7 @@ async def admin_delete_user(user_id: str, admin=Depends(get_current_admin)):
     await users.delete_one({'_id': user_id})
     await applications.delete_many({'user_id': user_id})
     await holiday_plans.delete_many({'user_id': user_id})
+    await audit_record(admin, 'delete', 'user', user_id, extra={'email': u.get('email'), 'name': u.get('name')})
     return {'ok': True}
 
 
@@ -444,6 +453,13 @@ async def admin_update_application(application_id: str, patch: AppPatch, admin=D
 
     await applications.update_one({'_id': application_id}, {'$set': update})
     fresh = await applications.find_one({'_id': application_id})
+    if 'status' in update or patch.note:
+        await audit_record(
+            admin, 'update', 'application', application_id,
+            before={'status': app.get('status')},
+            after={'status': fresh.get('status')},
+            extra={'country_id': app.get('country_id'), 'visa_type': app.get('visa_type'), 'note': patch.note},
+        )
     return _serialize_app(fresh)
 
 
@@ -476,7 +492,7 @@ class CountryPatch(BaseModel):
 
 
 @router.patch('/countries/{country_id}')
-async def admin_update_country(country_id: str, patch: CountryPatch, _=Depends(get_current_admin)):
+async def admin_update_country(country_id: str, patch: CountryPatch, admin=Depends(get_current_admin)):
     cid = country_id.lower()
     existing = await countries_col.find_one({'id': cid})
     if not existing:
@@ -493,6 +509,12 @@ async def admin_update_country(country_id: str, patch: CountryPatch, _=Depends(g
     update['updated_at'] = datetime.utcnow()
     await countries_col.update_one({'id': cid}, {'$set': update})
     fresh = await countries_col.find_one({'id': cid}, {'_id': 0})
+    await audit_record(
+        admin, 'update', 'country', cid,
+        before={k: existing.get(k) for k in patch.model_dump(exclude_none=True).keys()},
+        after={k: fresh.get(k) for k in patch.model_dump(exclude_none=True).keys()},
+        extra={'name': existing.get('name')},
+    )
     return fresh
 
 
@@ -522,7 +544,8 @@ async def admin_get_pricing(_=Depends(get_current_admin)):
 
 
 @router.patch('/pricing')
-async def admin_update_pricing(patch: PricingPatch, _=Depends(get_current_admin)):
+async def admin_update_pricing(patch: PricingPatch, admin=Depends(get_current_admin)):
+    before = await _load_pricing()
     update = {k: v for k, v in patch.model_dump(exclude_none=True).items()}
     if not update:
         raise HTTPException(400, 'Nothing to update')
@@ -542,6 +565,12 @@ async def admin_update_pricing(patch: PricingPatch, _=Depends(get_current_admin)
         {'_id': 'pricing'}, {'$set': update}, upsert=True,
     )
     _bust_pricing_cache()
+    after = await _load_pricing()
+    await audit_record(
+        admin, 'update', 'pricing', 'global',
+        before={k: before.get(k) for k in update.keys() if k != 'updated_at'},
+        after={k: after.get(k) for k in update.keys() if k != 'updated_at'},
+    )
     return await admin_get_pricing(_=None)
 
 
@@ -610,7 +639,7 @@ async def admin_list_events(
 
 
 @router.post('/events')
-async def admin_create_event(payload: EventCreate, _=Depends(get_current_admin)):
+async def admin_create_event(payload: EventCreate, admin=Depends(get_current_admin)):
     now = datetime.utcnow()
     doc = {
         '_id': str(uuid.uuid4()),
@@ -619,28 +648,48 @@ async def admin_create_event(payload: EventCreate, _=Depends(get_current_admin))
         'updated_at': now,
     }
     await events_col.insert_one(doc)
+    await audit_record(admin, 'create', 'event', doc['_id'], after={'title': doc.get('title'), 'tag': doc.get('tag'), 'is_published': doc.get('is_published')})
     return _serialize_event(doc)
 
 
 @router.patch('/events/{event_id}')
-async def admin_update_event(event_id: str, payload: EventPatch, _=Depends(get_current_admin)):
+async def admin_update_event(event_id: str, payload: EventPatch, admin=Depends(get_current_admin)):
+    existing = await events_col.find_one({'_id': event_id})
+    if not existing:
+        raise HTTPException(404, 'Event not found')
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
     if not update:
         raise HTTPException(400, 'Nothing to update')
     update['updated_at'] = datetime.utcnow()
-    res = await events_col.update_one({'_id': event_id}, {'$set': update})
-    if res.matched_count == 0:
-        raise HTTPException(404, 'Event not found')
+    await events_col.update_one({'_id': event_id}, {'$set': update})
     fresh = await events_col.find_one({'_id': event_id})
+    await audit_record(
+        admin, 'update', 'event', event_id,
+        before={k: existing.get(k) for k in update.keys() if k != 'updated_at'},
+        after={k: fresh.get(k) for k in update.keys() if k != 'updated_at'},
+        extra={'title': existing.get('title')},
+    )
     return _serialize_event(fresh)
 
 
 @router.delete('/events/{event_id}')
-async def admin_delete_event(event_id: str, _=Depends(get_current_admin)):
-    res = await events_col.delete_one({'_id': event_id})
-    if res.deleted_count == 0:
+async def admin_delete_event(event_id: str, admin=Depends(get_current_admin)):
+    existing = await events_col.find_one({'_id': event_id})
+    if not existing:
         raise HTTPException(404, 'Event not found')
+    await events_col.delete_one({'_id': event_id})
+    await audit_record(admin, 'delete', 'event', event_id, extra={'title': existing.get('title')})
     return {'ok': True}
+
+
+# ---------- audit log ----------
+@router.get('/audit')
+async def admin_audit_recent(
+    _=Depends(get_current_admin),
+    limit: int = Query(50, ge=1, le=200),
+):
+    items = await audit_recent(limit)
+    return {'items': items, 'total': len(items)}
 
 
 # ---------- integrations ----------

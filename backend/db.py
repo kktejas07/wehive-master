@@ -26,6 +26,9 @@ async def ensure_indexes():
     await applications.create_index('user_id')
     await holiday_plans.create_index('user_id')
     await scans.create_index([('user_id', 1), ('created_at', -1)])
+    # Admin audit log
+    await db['admin_audit'].create_index([('at', -1)])
+    await db['admin_audit'].create_index([('entity_type', 1), ('at', -1)])
     # Admin auth support
     await db['password_reset_tokens'].create_index('token_hash')
     await db['password_reset_tokens'].create_index('expires_at', expireAfterSeconds=0)

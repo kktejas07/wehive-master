@@ -21,6 +21,7 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
 
 from auth_utils import get_current_user
 from db import applications, scans
+import storage as r2
 
 router = APIRouter(prefix='/scan', tags=['scan'])
 logger = logging.getLogger('wehive.scan')
@@ -211,6 +212,16 @@ async def scan_passport(
         'application_id': application_id,
         'created_at': datetime.utcnow(),
     }
+    # Persist the original image to R2 if configured — gives users an
+    # auditable copy of what was scanned. Failures don't break the scan flow.
+    if r2.is_configured():
+        try:
+            key = r2.scan_key(user['_id'], result['_id'], file.filename or 'passport.jpg')
+            r2.upload_bytes(key, content, file.content_type or 'image/jpeg')
+            result['storage'] = 'r2'
+            result['object_key'] = key
+        except Exception as e:  # noqa: BLE001
+            logger.warning('R2 scan upload skipped: %s', e)
     await scans.insert_one(dict(result))  # dict() so Mongo can't mutate the outer ref
 
     # Optionally attach to an application AND auto-fill the draft form fields.
@@ -281,6 +292,14 @@ async def scan_document(
         'application_id': application_id,
         'created_at': datetime.utcnow(),
     }
+    if r2.is_configured():
+        try:
+            key = r2.scan_key(user['_id'], result['_id'], file.filename or 'document.jpg')
+            r2.upload_bytes(key, content, file.content_type or 'image/jpeg')
+            result['storage'] = 'r2'
+            result['object_key'] = key
+        except Exception as e:  # noqa: BLE001
+            logger.warning('R2 scan upload skipped: %s', e)
     await scans.insert_one(dict(result))
 
     if application_id:
@@ -334,6 +353,9 @@ async def delete_scan(scan_id: str, user=Depends(get_current_user)):
     rec = await scans.find_one({'_id': scan_id, 'user_id': user['_id']})
     if not rec:
         raise HTTPException(404, 'Scan not found')
+    # Clean up the R2 object if one was stored.
+    if rec.get('storage') == 'r2' and rec.get('object_key'):
+        r2.delete_object(rec['object_key'])
     await scans.delete_one({'_id': scan_id})
     # Also scrub from the embedded application.scans list (if any)
     if rec.get('application_id'):

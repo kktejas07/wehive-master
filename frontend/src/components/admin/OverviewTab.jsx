@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight } from 'lucide-react';
+import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight, History, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, inr } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -76,7 +76,7 @@ export default function OverviewTab() {
     );
   }
 
-  const { users, applications, revenue, countries, trend, top_countries } = data;
+  const { users, applications, revenue, countries, trend, top_countries, recent_activity } = data;
 
   return (
     <div data-testid="admin-overview">
@@ -183,6 +183,72 @@ export default function OverviewTab() {
           <div className="mt-2 text-[24px] font-display font-extrabold text-red-300">{applications.rejected}</div>
         </Panel>
       </div>
+
+      {/* Recent activity feed */}
+      <Panel className="mt-5" data-testid="admin-recent-activity">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400 inline-flex items-center gap-2">
+              <History className="w-3 h-3 text-[hsl(var(--accent))]" /> Recent activity
+            </div>
+            <div className="mt-1 text-[18px] font-display font-extrabold text-white">Admin audit log</div>
+          </div>
+        </div>
+        {(!recent_activity || recent_activity.length === 0) ? (
+          <div className="mt-5 text-[13px] text-slate-500 py-6 text-center">
+            No admin activity yet — your audit trail starts the moment you make changes.
+          </div>
+        ) : (
+          <ul className="mt-5 divide-y divide-white/5">
+            {recent_activity.map((row) => {
+              const Icon = row.action === 'delete' ? Trash2 : row.action === 'create' ? Plus : Pencil;
+              const tone =
+                row.action === 'delete' ? 'text-red-300 bg-red-500/10'
+                : row.action === 'create' ? 'text-emerald-300 bg-emerald-500/10'
+                : 'text-amber-300 bg-amber-500/10';
+              const at = row.at ? new Date(row.at) : null;
+              return (
+                <li
+                  key={row.id}
+                  data-testid={`audit-row-${row.id}`}
+                  className="py-3 flex items-start gap-3"
+                >
+                  <span className={`mt-0.5 h-8 w-8 inline-flex items-center justify-center rounded-lg ${tone}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13.5px] text-white">
+                      <span className="font-bold capitalize">{row.action}</span>
+                      <span className="text-slate-400"> on </span>
+                      <span className="font-bold capitalize">{row.entity_type}</span>
+                      {row.entity_id && (
+                        <span className="text-slate-500 font-mono ml-1">·{String(row.entity_id).slice(0, 8)}</span>
+                      )}
+                    </div>
+                    <div className="text-[11.5px] text-slate-500 mt-0.5">
+                      <span className="font-bold text-slate-400">{row.admin_email || row.admin_name || 'admin'}</span>
+                      {at && (
+                        <span> · {at.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</span>
+                      )}
+                    </div>
+                    {row.diff && Object.keys(row.diff).length > 0 && (
+                      <div className="mt-1.5 text-[12px] text-slate-300 space-x-2 space-y-0.5">
+                        {Object.entries(row.diff).slice(0, 3).map(([k, v]) => (
+                          <span key={k} className="inline-block bg-white/5 rounded px-1.5 py-0.5 text-[11.5px]">
+                            <span className="text-slate-500">{k}:</span>{' '}
+                            <span className="text-red-300 line-through mr-1">{String(v.from ?? '—').slice(0, 24)}</span>
+                            <span className="text-emerald-300">{String(v.to ?? '—').slice(0, 24)}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Panel>
     </div>
   );
 }
