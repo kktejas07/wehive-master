@@ -54,7 +54,7 @@ const STATS: StatItem[] = [
 export default function StatsStrip() {
   return (
     <section
-      className="relative -mt-12 sm:-mt-16 z-10 pb-10"
+      className="relative z-10 pb-10"
       data-testid="hero-stats-strip"
       aria-label="Wehive platform stats"
     >
