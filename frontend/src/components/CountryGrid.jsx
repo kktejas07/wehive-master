@@ -199,15 +199,17 @@ export default function CountryGrid({ filters }) {
     return p;
   }, [filters]);
 
-  useEffect(() => {
+useEffect(() => {
     let mounted = true;
-    setItems(null);
-    axios
-      .get(`${API}/countries`, { params })
-      .then((r) => mounted && setItems(r.data?.length ? r.data : COUNTRIES))
-      .catch(() => mounted && setItems(COUNTRIES));
+    const timer = setTimeout(() => {
+      axios
+        .get(`${API}/countries`, { params })
+        .then((r) => mounted && setItems(r.data?.length ? r.data : COUNTRIES))
+        .catch(() => mounted && setItems(COUNTRIES));
+    }, 3000);
     return () => {
       mounted = false;
+      clearTimeout(timer);
     };
   }, [params]);
 
