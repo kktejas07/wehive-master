@@ -204,8 +204,8 @@ export default function CountryGrid({ filters }) {
     setItems(null);
     axios
       .get(`${API}/countries`, { params })
-      .then((r) => mounted && setItems(r.data))
-      .catch(() => mounted && setItems([]));
+      .then((r) => mounted && setItems(r.data?.length ? r.data : COUNTRIES))
+      .catch(() => mounted && setItems(COUNTRIES));
     return () => {
       mounted = false;
     };
