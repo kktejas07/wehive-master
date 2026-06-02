@@ -1,3 +1,4 @@
+import re
 from fastapi import FastAPI, APIRouter
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -61,17 +62,33 @@ app.include_router(api_router)
 
 _raw_origins = os.environ.get('ALLOWED_ORIGINS', '').strip()
 if _raw_origins:
-    _origins = [o.strip() for o in _raw_origins.split(',') if o.strip()]
-else:
-    _origins = ['*']
+    _raw_list = [o.strip() for o in _raw_origins.split(',') if o.strip()]
+    _exact_origins: list[str] = []
+    _wildcard_regexes: list[str] = []
+    for o in _raw_list:
+        if '*' in o:
+            pattern = re.escape(o).replace(r'\*', '[^/]+')
+            _wildcard_regexes.append(f'^{pattern}$')
+        else:
+            _exact_origins.append(o)
+    _origin_regex = '|'.join(_wildcard_regexes) if _wildcard_regexes else None
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=_origins,
-    allow_methods=['*'],
-    allow_headers=['*'],
-)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_credentials=True,
+        allow_origins=_exact_origins if _exact_origins else ['*'],
+        allow_origin_regex=_origin_regex,
+        allow_methods=['*'],
+        allow_headers=['*'],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_credentials=True,
+        allow_origins=['*'],
+        allow_methods=['*'],
+        allow_headers=['*'],
+    )
 
 logging.basicConfig(
     level=logging.INFO,
