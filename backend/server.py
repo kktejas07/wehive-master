@@ -59,10 +59,16 @@ api_router.include_router(ai_docs_router)
 
 app.include_router(api_router)
 
+_raw_origins = os.environ.get('ALLOWED_ORIGINS', '').strip()
+if _raw_origins:
+    _origins = [o.strip() for o in _raw_origins.split(',') if o.strip()]
+else:
+    _origins = ['*']
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=['*'],
+    allow_origins=_origins,
     allow_methods=['*'],
     allow_headers=['*'],
 )
