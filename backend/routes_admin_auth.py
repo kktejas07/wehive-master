@@ -60,6 +60,13 @@ async def ensure_seed_admin() -> None:
     pwd = (os.environ.get('ADMIN_SEED_PASSWORD') or '').strip()
     if not email or not pwd:
         return
+    # Clear any seed-admin lockout from previous runs (dev/test convenience).
+    # In production with multi-instance deployments this is harmless because
+    # the seeded admin should rarely be locked anyway.
+    try:
+        await login_attempts.delete_one({'_id': f'admin:{email}'})
+    except Exception:
+        pass
     now = datetime.utcnow()
     existing = await users.find_one({'email': email})
     if existing is None:

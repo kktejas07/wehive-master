@@ -1,6 +1,6 @@
 # Wehive — Product Requirements Document
 
-_Last updated: 30 Apr 2026 (Round 12)_
+_Last updated: 02 Jun 2026 (Round 13)_
 
 ## Original problem statement
 Clone the "Atlys" website for a brand called **Wehive** with elite minimalist
@@ -214,6 +214,45 @@ user was never taken anywhere, so the draft sat hidden in the dashboard.
   Falls back to a tiny local stub for UAE if the API is down.
 - **4 new pytest cases** for the flights endpoint — all passing
   (`32/32` total).
+
+### Round 13 — Pricing & Events admin · Aurora glass theme · R2 storage · Gmail SMTP (this round)
+
+**1. Admin-controlled global pricing**
+- `GET/PATCH /api/admin/pricing` writes `settings.pricing` (base_fees per visa type, surcharge_inr, gst_rate, currency) with in-process cache busted on PATCH.
+- New public read-only `GET /api/public/pricing` mirrors admin config to the SPA.
+- `_revenue_for(...)` in `routes_admin.py` is now async and loads from settings → metrics, applications and revenue CSV instantly reflect admin changes.
+- Frontend `FeeBreakdown.jsx` exports a mutable `setPricing(...)` overrider; `<PricingLoader>` in `App.js` fetches `/public/pricing` on mount.
+- New `PricingTab` (`/admin/pricing`) — editable inputs for all 6 visa types, surcharge and GST, with a live preview card.
+
+**2. Events & promotions CRUD**
+- New `events` Mongo collection.
+- `GET/POST/PATCH/DELETE /api/admin/events` (full admin CRUD) + `GET /api/public/events?tag=&limit=` for unauthenticated site banners.
+- New `EventsTab` (`/admin/events`) — create/edit/delete promotions with title, subtitle, tag, country, CTA, accent color, image URL, time window, sort order.
+- New `EventsBanner.jsx` on the public Home page surfaces published events.
+
+**3. Cloudflare R2 storage (live)**
+- New `/app/backend/storage.py` — boto3 S3v4 client against `r2.cloudflarestorage.com`. Object keys: `documents/{user}/{app}/{doc}/{filename}`, `scans/{user}/{scan}/{filename}`.
+- `POST /api/users/me/applications/{id}/documents` uploads to R2 (storage="r2", object_key persisted in Mongo).
+- `GET /…/documents/{doc_id}/download` issues 307 redirect to a short-lived signed URL.
+- `DELETE /…/documents/{doc_id}` removes both the R2 object and the Mongo array entry.
+- Falls back to local disk only if R2 env vars are missing.
+
+**4. Brand refresh + Aurora glass theme**
+- New `/brand/wehive-logo.png` + `/brand/wehive-favicon.png` uploaded under `frontend/public/brand/`.
+- `BRAND.logo` points to the local asset; navbar logo height reduced to `h-12 sm:h-14`.
+- `index.html` title now "We Hive — Your Global Journey Starts Here", favicon swapped, "Made with Emergent" badge removed via both CSS (`#emergent-badge { display:none !important; }`) and a `MutationObserver` JS purge.
+- `index.css` adds `aurora-bg`, `aurora-grain`, `glass`, `glass-dark`, `glass-tint-navy`, `glass-tint-red`, `aurora-sweep` utilities (animated radial gradients in navy + red + white, SVG noise grain at 0.4 opacity overlay). Applied to Hero, VisaDetail hero, and ApplicationHero sections.
+
+**5. Real Gmail SMTP**
+- `SMTP_PASSWORD` is now the user's 16-char Gmail App Password (was a placeholder). `/api/admin-auth/forgot-password` actually emails the reset link; the dev-mode token fallback is no longer used.
+
+**6. P2 carry-overs cleared**
+- `PUT /api/users/me` — DuplicateKeyError handler already covers BOTH `email` and `phone` (verified — the existing logic introspects the error message).
+- ScansTab — `window.confirm` replaced with shadcn `<AlertDialog>` (testids: `scan-delete-confirm`, `scan-delete-cancel`, `scan-delete-confirm-btn`).
+- Lockout for the seeded admin email is now cleared on every backend startup so dev/test runs don't lock you out of the dashboard.
+
+**Testing (iteration_9.json)**: **Backend 100%** (new `test_round13.py` 20/20 — pricing CRUD, events CRUD, R2 upload/download/delete, public mirror, regression). **Frontend 95%** — every documented feature verified, Aurora + new logo + Emergent-badge-removal all confirmed. Only nit: programmatic `page.fill()` doesn't trigger React state on PricingTab inputs (works fine with real keyboard input). Two test-fixture-hygiene items (obsolete dev_token assertions, login_attempts cleanup) noted but addressed at startup.
+
 
 ### Round 12 — My scans history + PropTypes (this round)
 
