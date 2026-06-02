@@ -49,7 +49,7 @@ async def list_countries(
     if q:
         ql = q.lower().strip()
         items = [c for c in items if ql in (c.get('name') or '').lower()]
-    if visa_type and visa_type.lower() != 'all':
+    if visa_type and visa_type.lower() not in ('', 'all', 'all visa types'):
         items = [c for c in items if visa_type in c.get('visa_types', [])]
     if delivery and delivery.lower() not in ('', 'any'):
         if delivery == 'same_day':

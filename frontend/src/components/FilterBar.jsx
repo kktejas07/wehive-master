@@ -48,11 +48,11 @@ function Pop({ Icon, label, value, color, children }) {
   const ref = useRef(null);
   useOutsideClose(ref, () => setOpen(false));
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative flex-shrink-0 min-w-[12rem]" ref={ref}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-3 px-3 py-2 rounded-2xl hover:bg-[hsl(var(--blue-50))] transition text-left"
+        className="flex min-w-0 items-center gap-3 px-3 py-2 rounded-2xl hover:bg-[hsl(var(--blue-50))] transition text-left"
       >
         <span
           className="h-8 w-8 rounded-full inline-flex items-center justify-center shrink-0"
@@ -60,11 +60,11 @@ function Pop({ Icon, label, value, color, children }) {
         >
           <Icon className="w-4 h-4 text-white" />
         </span>
-        <span className="flex flex-col items-start leading-tight">
+        <span className="flex min-w-0 flex-col items-start leading-tight">
           <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
             {label}
           </span>
-          <span className="text-[13.5px] font-bold text-[hsl(var(--blue-900))] inline-flex items-center gap-1">
+          <span className="text-[13.5px] font-bold text-[hsl(var(--blue-900))] inline-flex min-w-0 items-center gap-1 truncate">
             {value}
             <ChevronDown className="w-3 h-3 text-[hsl(var(--blue-900))]/40" />
           </span>
@@ -146,7 +146,7 @@ export default function FilterBar({ value, onChange }) {
   return (
     <div className="flex flex-col items-center gap-5">
       <TabsBar value={v.view} onChange={(view) => set({ view })} />
-      <div className="w-full max-w-4xl rounded-full bg-white border border-black/5 shadow-[0_20px_50px_-30px_rgba(10,44,138,0.4)] px-2 py-1.5 flex flex-wrap items-center justify-between gap-1">
+      <div className="w-full max-w-4xl rounded-full bg-white border border-black/5 shadow-[0_20px_50px_-30px_rgba(10,44,138,0.4)] px-2 py-1.5 flex items-center gap-2 overflow-x-auto whitespace-nowrap sm:justify-between">
         <Pop Icon={Zap} label="Visa delivery" value={v.delivery} color="#22c55e">
           {(close) => (
             <OptionList

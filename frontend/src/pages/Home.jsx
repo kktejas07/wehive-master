@@ -17,8 +17,8 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <Hero filters={filters} onFilters={setFilters} />
       <StatsStrip />
+      <Hero filters={filters} onFilters={setFilters} />
       <PressStrip />
       <EventsBanner />
       <CountryGrid filters={filters} />
