@@ -342,7 +342,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                   )}
 
                   <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 leading-relaxed">
-                    Your image is processed by Gemini 2.5 Flash and not stored permanently.
+                    Your image is processed by AI and not stored permanently.
                     Keep lighting even, avoid glare, and crop to the data page.
                   </div>
                 </div>

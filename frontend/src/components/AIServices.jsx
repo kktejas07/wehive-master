@@ -147,9 +147,6 @@ export default function AIServices() {
         </div>
 
         <Reveal className="text-center mt-10">
-          <p className="text-[13px] text-[hsl(var(--blue-900))]/50 mb-4">
-            AI features use Gemini 2.5 Flash via Emergent Integrations
-          </p>
           <Link to="/account">
             <Button className="rounded-full btn-accent text-white h-11 px-7 font-bold">
               Start your application <ArrowRight className="w-4 h-4 ml-1" />
