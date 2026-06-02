@@ -158,7 +158,7 @@ export default function ChatbotWidget() {
                 <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">{t('chatbot.title')}</div>
                 <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 inline-flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Powered by Gemini 2.5
+                  AI powered
                 </div>
               </div>
             </header>
