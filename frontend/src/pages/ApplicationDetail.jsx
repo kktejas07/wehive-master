@@ -10,6 +10,9 @@ import DocumentChecklist, { getReadyCount } from '../components/DocumentChecklis
 import ApplicationTimeline from '../components/ApplicationTimeline';
 import ConsultantChat from '../components/ConsultantChat';
 import AIScanModal from '../components/AIScanModal';
+import AICoverLetterModal from '../components/AICoverLetterModal';
+import AIItineraryModal from '../components/AIItineraryModal';
+import AIRiskAnalysisModal from '../components/AIRiskAnalysisModal';
 import ApplicationFormCard from '../components/ApplicationFormCard';
 import ApplicationHero from '../components/application/ApplicationHero';
 import WhatsNextCard from '../components/application/WhatsNextCard';
@@ -26,6 +29,9 @@ export default function ApplicationDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [docs, setDocs] = useState([]);
   const [scanOpen, setScanOpen] = useState(false);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const [itineraryOpen, setItineraryOpen] = useState(false);
+  const [riskOpen, setRiskOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthed) navigate('/login', { replace: true });
@@ -113,6 +119,9 @@ export default function ApplicationDetail() {
         submitting={submitting}
         canSubmit={canSubmit}
         onScan={() => setScanOpen(true)}
+        onCoverLetter={() => setCoverOpen(true)}
+        onItinerary={() => setItineraryOpen(true)}
+        onRiskAnalysis={() => setRiskOpen(true)}
         onDownloadReceipt={onDownloadReceipt}
         onSubmit={onSubmit}
       />
@@ -146,6 +155,25 @@ export default function ApplicationDetail() {
         onClose={() => setScanOpen(false)}
         applicationId={id}
         onApplied={() => refresh()}
+      />
+      <AICoverLetterModal
+        open={coverOpen}
+        onClose={() => setCoverOpen(false)}
+        applicationId={id}
+        country_id={app?.country_id}
+        visa_type={app?.visa_type}
+        formData={app?.form_data}
+      />
+      <AIItineraryModal
+        open={itineraryOpen}
+        onClose={() => setItineraryOpen(false)}
+        applicationId={id}
+        country_id={app?.country_id}
+      />
+      <AIRiskAnalysisModal
+        open={riskOpen}
+        onClose={() => setRiskOpen(false)}
+        applicationId={id}
       />
     </div>
   );
