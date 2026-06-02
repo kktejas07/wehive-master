@@ -75,6 +75,13 @@ async def on_startup():
     try:
         await ensure_indexes()
         await ensure_seed_admin()
+        count = await countries_v2.estimated_document_count()
+        if count == 0:
+            logger.info('Countries collection empty — seeding …')
+            res = await seed_countries()
+            logger.info('Seeded countries: %s', res)
+        else:
+            logger.info('Countries collection already has %d docs', count)
         logger.info('Indexes ensured. OTP channel = %s', os.environ.get('OTP_CHANNEL', 'mock'))
     except Exception as e:
         logger.exception('Startup failure: %s', e)
