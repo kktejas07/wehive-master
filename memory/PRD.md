@@ -1,6 +1,22 @@
 # Wehive — Product Requirements Document
 
-_Last updated: 02 Jun 2026 (Round 15)_
+_Last updated: 02 Jun 2026 (Round 16)_
+
+## 🆕 Round 16 — 02 Jun 2026
+- **PropTypes → TypeScript migration (P3)** — Migrated all 11 sub-components
+  to `.tsx` with proper TS interfaces. Files: `visa/{VisaBreadcrumb, CategoryTabs,
+  CategoryDetails, DocsList, OtherCountries, VisaFaqSection}.tsx`,
+  `application/{ApplicationHero, ApplicationTimelineSection}.tsx`,
+  `account/ScansTab.tsx`, `EventsBanner.tsx`, `StatsStrip.tsx`.
+- **TypeScript toolchain wired up**: Added `typescript@5.3.3`, `@types/react@19`,
+  `@types/react-dom@19`, `@types/node`. Created `tsconfig.json` (merged in old
+  `jsconfig.json` paths) and `.d.ts` shims at
+  `src/components/ui/{alert-dialog,button}.d.ts` so legacy shadcn JSX modules
+  compile without warnings.
+- **Cleanup**: Removed `prop-types` from `package.json` (0 references remain
+  across the entire codebase). `yarn build` passes full TS typecheck.
+- Testing iteration 11 confirms **100% pass** — 0 frontend issues, 0 action
+  items, no regressions in any TS-migrated component.
 
 ## 🆕 Round 15 — 02 Jun 2026
 - **Admin login (prod) blocker fixed**: User reported `POST /api/admin-auth/login`
