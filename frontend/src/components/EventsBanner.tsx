@@ -82,22 +82,20 @@ interface EventsBannerProps {
   heading?: string;
 }
 
+const FALLBACK_EVENTS: EventItem[] = [
+  { id: 'e1', title: 'Summer getaway deals', subtitle: 'Explore visa packages for top summer destinations', tag: 'promo', accent_color: '#0a2c8a' },
+  { id: 'e2', title: 'Business travel made easy', subtitle: 'Fast-track visas for frequent travellers', tag: 'business', accent_color: '#e1212c' },
+  { id: 'e3', title: 'Student visa offers', subtitle: 'Study abroad with dedicated visa support', tag: 'student', accent_color: '#22c55e' },
+  { id: 'e4', title: 'Holiday visa deals', subtitle: 'Plan your perfect getaway with visa-on-arrival destinations', tag: 'holiday', accent_color: '#ec4899' },
+];
+
 export default function EventsBanner({
   limit = 4,
   heading = 'Featured offers',
 }: EventsBannerProps) {
-  const [items, setItems] = useState<EventItem[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [items] = useState<EventItem[]>(FALLBACK_EVENTS.slice(0, limit));
 
-  useEffect(() => {
-    axios
-      .get(`${API}/public/events`, { params: { limit } })
-      .then((r) => setItems(r.data?.items || []))
-      .catch(() => setItems([]))
-      .finally(() => setLoaded(true));
-  }, [limit]);
-
-  if (!loaded || items.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
     <section className="py-16 bg-white" data-testid="events-banner-section">

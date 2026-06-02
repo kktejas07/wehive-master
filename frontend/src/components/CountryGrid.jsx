@@ -199,7 +199,7 @@ export default function CountryGrid({ filters }) {
     return p;
   }, [filters]);
 
-  useEffect(() => {
+useEffect(() => {
     let mounted = true;
     const timer = setTimeout(() => {
       setItems(COUNTRIES);

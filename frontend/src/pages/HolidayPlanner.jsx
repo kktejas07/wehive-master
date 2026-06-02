@@ -63,13 +63,16 @@ export default function HolidayPlanner() {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    axios
-      .get(`${API}/countries/${id}/holiday-plan`)
-      .then((r) => mounted && setData(r.data))
-      .catch(() => mounted && setData(null))
-      .finally(() => mounted && setLoading(false));
+    const timer = setTimeout(() => {
+      axios
+        .get(`${API}/countries/${id}/holiday-plan`)
+        .then((r) => mounted && setData(r.data))
+        .catch(() => mounted && setData(null))
+        .finally(() => mounted && setLoading(false));
+    }, 3000);
     return () => {
       mounted = false;
+      clearTimeout(timer);
     };
   }, [id]);
 
