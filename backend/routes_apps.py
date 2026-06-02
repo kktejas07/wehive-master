@@ -7,11 +7,12 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import StreamingResponse, FileResponse, RedirectResponse
 from pydantic import BaseModel
 
 from auth_utils import get_current_user
 from db import db, applications
+import storage as r2
 
 router = APIRouter(prefix='/users/me/applications', tags=['applications'])
 
@@ -124,25 +125,35 @@ async def upload_document(
         raise HTTPException(415, f'Unsupported file type: {file.content_type}')
 
     doc_id = str(uuid.uuid4())
-    user_dir = UPLOAD_ROOT / user['_id'] / application_id
-    user_dir.mkdir(parents=True, exist_ok=True)
     safe_name = (file.filename or 'document').replace('/', '_').replace('\\', '_')
-    saved_path = user_dir / f'{doc_id}__{safe_name}'
-    with open(saved_path, 'wb') as f:
-        f.write(content)
+    mime = file.content_type or 'application/octet-stream'
 
     now = datetime.utcnow()
     doc = {
         '_id': doc_id,
         'doc_type': doc_type,
         'filename': safe_name,
-        'mime': file.content_type or 'application/octet-stream',
+        'mime': mime,
         'size': len(content),
-        'status': 'uploaded',  # uploaded | reviewing | approved | rejected
+        'status': 'uploaded',
         'note': 'Auto-review queued',
-        'storage_path': str(saved_path),
         'uploaded_at': now,
     }
+
+    if r2.is_configured():
+        key = r2.doc_key(user['_id'], application_id, doc_id, safe_name)
+        r2.upload_bytes(key, content, mime)
+        doc['storage'] = 'r2'
+        doc['object_key'] = key
+    else:
+        user_dir = UPLOAD_ROOT / user['_id'] / application_id
+        user_dir.mkdir(parents=True, exist_ok=True)
+        saved_path = user_dir / f'{doc_id}__{safe_name}'
+        with open(saved_path, 'wb') as f:
+            f.write(content)
+        doc['storage'] = 'local'
+        doc['storage_path'] = str(saved_path)
+
     await applications.update_one(
         {'_id': application_id},
         {
@@ -150,7 +161,6 @@ async def upload_document(
             '$set': {'updated_at': now},
         },
     )
-    # Auto-mock review badge
     return _serialize(doc)
 
 
@@ -160,10 +170,13 @@ async def delete_document(application_id: str, doc_id: str, user=Depends(get_cur
     doc = next((d for d in app.get('documents', []) if d.get('_id') == doc_id), None)
     if not doc:
         raise HTTPException(404, 'Document not found')
-    try:
-        Path(doc['storage_path']).unlink(missing_ok=True)
-    except Exception:
-        pass
+    if doc.get('storage') == 'r2' and doc.get('object_key'):
+        r2.delete_object(doc['object_key'])
+    elif doc.get('storage_path'):
+        try:
+            Path(doc['storage_path']).unlink(missing_ok=True)
+        except Exception:
+            pass
     await applications.update_one(
         {'_id': application_id},
         {'$pull': {'documents': {'_id': doc_id}}},
@@ -177,7 +190,10 @@ async def download_document(application_id: str, doc_id: str, user=Depends(get_c
     doc = next((d for d in app.get('documents', []) if d.get('_id') == doc_id), None)
     if not doc:
         raise HTTPException(404, 'Document not found')
-    p = Path(doc['storage_path'])
+    if doc.get('storage') == 'r2' and doc.get('object_key'):
+        url = r2.signed_download_url(doc['object_key'], filename=doc.get('filename'))
+        return RedirectResponse(url, status_code=307)
+    p = Path(doc.get('storage_path', ''))
     if not p.exists():
         raise HTTPException(410, 'File missing on storage')
     return FileResponse(str(p), media_type=doc.get('mime', 'application/octet-stream'), filename=doc['filename'])

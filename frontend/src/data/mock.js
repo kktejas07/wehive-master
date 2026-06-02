@@ -4,8 +4,8 @@
 export const BRAND = {
   name: 'We Hive',
   tagline: 'Your Global Journey Starts Here',
-  logo: 'https://wehive.co.in/wp-content/uploads/2025/12/wehive-logo-1024x731.png',
-  logoWhite: 'https://wehive.co.in/wp-content/uploads/2025/12/wehive-logo-white-1024x731.png',
+  logo: '/brand/wehive-logo.png',
+  logoWhite: '/brand/wehive-logo.png',
   phone: '+91 91132 56726',
   phoneRaw: '+919113256726',
   email: 'info@wehive.co.in',

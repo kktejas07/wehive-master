@@ -35,10 +35,10 @@ import { useState } from 'react';
 import { Users, Plus, Minus, Info, BadgeCheck } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 
-export const PER_EXTRA_APPLICANT_INR = 350;
-export const GST_RATE = 0.18;
+export let PER_EXTRA_APPLICANT_INR = 350;
+export let GST_RATE = 0.18;
 
-export const BASE_FEE_BY_TYPE = {
+export let BASE_FEE_BY_TYPE = {
   Tourist:  3500,
   Business: 4500,
   Student:  5500,
@@ -46,6 +46,15 @@ export const BASE_FEE_BY_TYPE = {
   Transit:  2500,
   Medical:  4000,
 };
+
+/** Override module-level pricing constants with admin-configured values. */
+export function setPricing({ base_fees, surcharge_inr, gst_rate } = {}) {
+  if (base_fees && typeof base_fees === 'object') {
+    BASE_FEE_BY_TYPE = { ...BASE_FEE_BY_TYPE, ...base_fees };
+  }
+  if (Number.isFinite(Number(surcharge_inr))) PER_EXTRA_APPLICANT_INR = Number(surcharge_inr);
+  if (Number.isFinite(Number(gst_rate))) GST_RATE = Number(gst_rate);
+}
 
 export function baseFeeFor(visaType, categoryName = '') {
   if (visaType && BASE_FEE_BY_TYPE[visaType] != null) return BASE_FEE_BY_TYPE[visaType];

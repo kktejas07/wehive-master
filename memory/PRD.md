@@ -1,6 +1,6 @@
 # Wehive — Product Requirements Document
 
-_Last updated: 30 Apr 2026 (Round 12)_
+_Last updated: 02 Jun 2026 (Round 14)_
 
 ## Original problem statement
 Clone the "Atlys" website for a brand called **Wehive** with elite minimalist
@@ -215,6 +215,45 @@ user was never taken anywhere, so the draft sat hidden in the dashboard.
 - **4 new pytest cases** for the flights endpoint — all passing
   (`32/32` total).
 
+### Round 13 — Pricing & Events admin · Aurora glass theme · R2 storage · Gmail SMTP (this round)
+
+**1. Admin-controlled global pricing**
+- `GET/PATCH /api/admin/pricing` writes `settings.pricing` (base_fees per visa type, surcharge_inr, gst_rate, currency) with in-process cache busted on PATCH.
+- New public read-only `GET /api/public/pricing` mirrors admin config to the SPA.
+- `_revenue_for(...)` in `routes_admin.py` is now async and loads from settings → metrics, applications and revenue CSV instantly reflect admin changes.
+- Frontend `FeeBreakdown.jsx` exports a mutable `setPricing(...)` overrider; `<PricingLoader>` in `App.js` fetches `/public/pricing` on mount.
+- New `PricingTab` (`/admin/pricing`) — editable inputs for all 6 visa types, surcharge and GST, with a live preview card.
+
+**2. Events & promotions CRUD**
+- New `events` Mongo collection.
+- `GET/POST/PATCH/DELETE /api/admin/events` (full admin CRUD) + `GET /api/public/events?tag=&limit=` for unauthenticated site banners.
+- New `EventsTab` (`/admin/events`) — create/edit/delete promotions with title, subtitle, tag, country, CTA, accent color, image URL, time window, sort order.
+- New `EventsBanner.jsx` on the public Home page surfaces published events.
+
+**3. Cloudflare R2 storage (live)**
+- New `/app/backend/storage.py` — boto3 S3v4 client against `r2.cloudflarestorage.com`. Object keys: `documents/{user}/{app}/{doc}/{filename}`, `scans/{user}/{scan}/{filename}`.
+- `POST /api/users/me/applications/{id}/documents` uploads to R2 (storage="r2", object_key persisted in Mongo).
+- `GET /…/documents/{doc_id}/download` issues 307 redirect to a short-lived signed URL.
+- `DELETE /…/documents/{doc_id}` removes both the R2 object and the Mongo array entry.
+- Falls back to local disk only if R2 env vars are missing.
+
+**4. Brand refresh + Aurora glass theme**
+- New `/brand/wehive-logo.png` + `/brand/wehive-favicon.png` uploaded under `frontend/public/brand/`.
+- `BRAND.logo` points to the local asset; navbar logo height reduced to `h-12 sm:h-14`.
+- `index.html` title now "We Hive — Your Global Journey Starts Here", favicon swapped, "Made with Emergent" badge removed via both CSS (`#emergent-badge { display:none !important; }`) and a `MutationObserver` JS purge.
+- `index.css` adds `aurora-bg`, `aurora-grain`, `glass`, `glass-dark`, `glass-tint-navy`, `glass-tint-red`, `aurora-sweep` utilities (animated radial gradients in navy + red + white, SVG noise grain at 0.4 opacity overlay). Applied to Hero, VisaDetail hero, and ApplicationHero sections.
+
+**5. Real Gmail SMTP**
+- `SMTP_PASSWORD` is now the user's 16-char Gmail App Password (was a placeholder). `/api/admin-auth/forgot-password` actually emails the reset link; the dev-mode token fallback is no longer used.
+
+**6. P2 carry-overs cleared**
+- `PUT /api/users/me` — DuplicateKeyError handler already covers BOTH `email` and `phone` (verified — the existing logic introspects the error message).
+- ScansTab — `window.confirm` replaced with shadcn `<AlertDialog>` (testids: `scan-delete-confirm`, `scan-delete-cancel`, `scan-delete-confirm-btn`).
+- Lockout for the seeded admin email is now cleared on every backend startup so dev/test runs don't lock you out of the dashboard.
+
+**Testing (iteration_9.json)**: **Backend 100%** (new `test_round13.py` 20/20 — pricing CRUD, events CRUD, R2 upload/download/delete, public mirror, regression). **Frontend 95%** — every documented feature verified, Aurora + new logo + Emergent-badge-removal all confirmed. Only nit: programmatic `page.fill()` doesn't trigger React state on PricingTab inputs (works fine with real keyboard input). Two test-fixture-hygiene items (obsolete dev_token assertions, login_attempts cleanup) noted but addressed at startup.
+
+
 ### Round 12 — My scans history + PropTypes (this round)
 
 **1. "My scans" history tab on /account**
@@ -359,6 +398,44 @@ Dark-theme premium UI at `/admin/*` with a sidebar and seven tabs:
   `/api/auth/me` & `/api/auth/verify-otp` now expose these to the SPA.
 - `PUT /api/users/me` now catches `pymongo.errors.DuplicateKeyError` and
   returns `409 Conflict` ("That email/phone is already linked to another
+  account.") instead of bubbling a 500.
+
+**Frontend**:
+- `/app/frontend/src/pages/Admin.jsx` — nested routes, guard that shows
+  `admin-forbidden` screen for non-admins.
+- `/app/frontend/src/components/admin/*.jsx` — `AdminShell`,
+  `OverviewTab`, `UsersTab`, `ApplicationsTab`, `CountriesTab`, `StaffTab`,
+  `IntegrationsTab`, `ExportsTab`.
+- `/app/frontend/src/lib/admin.js` — axios client + `downloadCsv` helper.
+- `UserMenu` shows a **"Super admin"** link with `data-testid=usermenu-admin`
+  only when `user.is_admin === true`. Trigger button gets
+  `data-testid=usermenu-trigger`.
+- `Account.jsx` profile tab: fixed PATCH → PUT (matching backend route);
+  Edit profile is now fully functional (name / email / phone / gender).
+
+**Env additions** (`backend/.env`):
+- `ADMIN_EMAILS="admin@wehive.co.in,krishnakranthiteja@gmail.com"`
+
+**Testing** (iteration_6): **55/55 backend + 13/13 frontend acceptance items
+passing**. See `/app/backend/tests/test_admin_dashboard.py` for 22 new
+admin-specific pytest cases.
+
+
+### Round 7 — Fee-breakdown labels localised
+- Added i18n keys for every string inside `FeeBreakdown.jsx` — `fee.applicants`,
+  `fee.heading`, `fee.currencyNote`, `fee.application`,
+  `fee.applicationSubEmbassy`, `fee.applicationSubFree`, `fee.appointment`,
+  `fee.appointmentSub`, `fee.gst`, `fee.gstSub`, `fee.total`, `fee.totalSub`,
+  `fee.noAppointment` — across all 6 languages (en / hi / te / ta / kn / bn).
+- Applicant count is interpolated via `{n}` / `{s}` placeholders for proper
+  singular / plural handling. Amounts stay in `₹` with `en-IN` formatting.
+- Added `chatbot.placeholder` / `chatbot.start` for future chat widget use.
+- Verified visually in Hindi and Tamil: all four fee-row labels + applicants
+  stepper labels + total row translate correctly; ₹ amounts unchanged.
+
+## Test credentials
+See `/app/memory/test_credentials.md`.
+already linked to another
   account.") instead of bubbling a 500.
 
 **Frontend**:

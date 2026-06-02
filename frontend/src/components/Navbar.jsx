@@ -138,14 +138,45 @@ export default function Navbar() {
           : 'bg-transparent border-b border-transparent'
       )}
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[96px] sm:h-[108px] flex items-center justify-between gap-3">
-        <Link to="/" className="flex items-center gap-3 group shrink-0">
-          <img
-            src={BRAND.logo}
-            alt="We Hive"
-            className="h-20 sm:h-24 lg:h-28 w-auto select-none transition-transform duration-300 group-hover:scale-[1.05]"
-            draggable={false}
-          />
+      <div className={cn(
+        'max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between gap-3 transition-[height] duration-300',
+        scrolled ? 'h-[68px] sm:h-[76px]' : 'h-[110px] sm:h-[130px]'
+      )}>
+        <Link to="/" className="flex items-center gap-2 group shrink-0 relative">
+          <div className={cn(
+            'relative transition-[width,height] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-visible',
+            scrolled ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-24 h-24 sm:w-28 sm:h-28'
+          )}>
+            {/* Full logo — visible when at top */}
+            <img
+              src="/brand/wehive-logo.png"
+              alt="We Hive"
+              draggable={false}
+              className={cn(
+                'absolute inset-0 h-full w-full object-contain select-none transition-all duration-500 group-hover:scale-[1.04]',
+                scrolled ? 'opacity-0 scale-50 rotate-[-12deg] pointer-events-none' : 'opacity-100 scale-100 rotate-0'
+              )}
+            />
+            {/* Favicon — visible when scrolled (mini glyph) */}
+            <img
+              src="/brand/wehive-favicon.png"
+              alt="We Hive"
+              draggable={false}
+              className={cn(
+                'absolute inset-0 h-full w-full object-contain select-none transition-all duration-500 group-hover:scale-[1.08] group-hover:rotate-[6deg]',
+                scrolled ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-150 rotate-12 pointer-events-none'
+              )}
+            />
+          </div>
+          {/* Wordmark next to favicon when scrolled */}
+          <span className={cn(
+            'font-display font-extrabold text-[hsl(var(--blue-900))] tracking-[-0.03em] leading-none transition-all duration-500',
+            scrolled
+              ? 'opacity-100 text-[20px] sm:text-[22px] translate-x-0'
+              : 'opacity-0 text-[20px] -translate-x-3 pointer-events-none'
+          )}>
+            We Hive
+          </span>
         </Link>
 
         <NavLinks />

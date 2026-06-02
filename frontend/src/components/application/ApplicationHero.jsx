@@ -18,7 +18,7 @@ export default function ApplicationHero({
   const heroImg = COUNTRIES.find((c) => c.id === app.country_id)?.image;
 
   return (
-    <section className="pt-28 pb-10 bg-[hsl(var(--soft-bg))] border-b border-black/5">
+    <section className="pt-28 pb-10 bg-[hsl(var(--soft-bg))] border-b border-black/5 aurora-bg aurora-grain">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="flex items-center gap-1.5 text-[13px] text-[hsl(var(--blue-900))]/55">
           <Link to="/account?tab=applications" className="hover:text-[hsl(var(--blue-700))]">My applications</Link>

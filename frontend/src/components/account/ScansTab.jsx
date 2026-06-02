@@ -7,6 +7,10 @@ import {
 } from 'lucide-react';
 import { API } from '../../context/AuthContext';
 import { useToast } from '../../hooks/use-toast';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '../ui/alert-dialog';
 
 /** Pretty a single extracted field. */
 function Field({ label, value }) {
@@ -204,6 +208,7 @@ export default function ScansTab({ user, token }) {
   const [total, setTotal] = useState(0);
   const [filter, setFilter] = useState('all');
   const [rawScan, setRawScan] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const load = useCallback(async () => {
     setItems(null);
@@ -223,7 +228,6 @@ export default function ScansTab({ user, token }) {
   useEffect(() => { load(); }, [load]);
 
   const del = async (scan) => {
-    if (!window.confirm('Delete this scan? The extracted data will be removed.')) return;
     try {
       await axios.delete(`${API}/scan/${scan.id}`, { headers: { Authorization: `Bearer ${token}` } });
       toast({ title: 'Scan deleted' });
@@ -231,6 +235,8 @@ export default function ScansTab({ user, token }) {
       setTotal((n) => Math.max(0, n - 1));
     } catch (e) {
       toast({ title: 'Could not delete', description: e?.response?.data?.detail || e.message });
+    } finally {
+      setPendingDelete(null);
     }
   };
 
@@ -285,12 +291,34 @@ export default function ScansTab({ user, token }) {
       {shown && shown.length > 0 && (
         <div className="grid gap-4">
           {shown.map((s) => (
-            <ScanCard key={s.id} scan={s} onDelete={del} onOpenRaw={setRawScan} />
+            <ScanCard key={s.id} scan={s} onDelete={setPendingDelete} onOpenRaw={setRawScan} />
           ))}
         </div>
       )}
 
       <RawScanModal scan={rawScan} onClose={() => setRawScan(null)} />
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent data-testid="scan-delete-confirm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this scan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The extracted data for this {pendingDelete?.kind || 'scan'} will be permanently removed.
+              {pendingDelete?.application_id && ' It will also be detached from any linked application.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="scan-delete-cancel">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="scan-delete-confirm-btn"
+              onClick={() => pendingDelete && del(pendingDelete)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
