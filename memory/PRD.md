@@ -1,6 +1,6 @@
 # Wehive — Product Requirements Document
 
-_Last updated: 02 Jun 2026 (Round 13)_
+_Last updated: 02 Jun 2026 (Round 14)_
 
 ## Original problem statement
 Clone the "Atlys" website for a brand called **Wehive** with elite minimalist
@@ -398,6 +398,44 @@ Dark-theme premium UI at `/admin/*` with a sidebar and seven tabs:
   `/api/auth/me` & `/api/auth/verify-otp` now expose these to the SPA.
 - `PUT /api/users/me` now catches `pymongo.errors.DuplicateKeyError` and
   returns `409 Conflict` ("That email/phone is already linked to another
+  account.") instead of bubbling a 500.
+
+**Frontend**:
+- `/app/frontend/src/pages/Admin.jsx` — nested routes, guard that shows
+  `admin-forbidden` screen for non-admins.
+- `/app/frontend/src/components/admin/*.jsx` — `AdminShell`,
+  `OverviewTab`, `UsersTab`, `ApplicationsTab`, `CountriesTab`, `StaffTab`,
+  `IntegrationsTab`, `ExportsTab`.
+- `/app/frontend/src/lib/admin.js` — axios client + `downloadCsv` helper.
+- `UserMenu` shows a **"Super admin"** link with `data-testid=usermenu-admin`
+  only when `user.is_admin === true`. Trigger button gets
+  `data-testid=usermenu-trigger`.
+- `Account.jsx` profile tab: fixed PATCH → PUT (matching backend route);
+  Edit profile is now fully functional (name / email / phone / gender).
+
+**Env additions** (`backend/.env`):
+- `ADMIN_EMAILS="admin@wehive.co.in,krishnakranthiteja@gmail.com"`
+
+**Testing** (iteration_6): **55/55 backend + 13/13 frontend acceptance items
+passing**. See `/app/backend/tests/test_admin_dashboard.py` for 22 new
+admin-specific pytest cases.
+
+
+### Round 7 — Fee-breakdown labels localised
+- Added i18n keys for every string inside `FeeBreakdown.jsx` — `fee.applicants`,
+  `fee.heading`, `fee.currencyNote`, `fee.application`,
+  `fee.applicationSubEmbassy`, `fee.applicationSubFree`, `fee.appointment`,
+  `fee.appointmentSub`, `fee.gst`, `fee.gstSub`, `fee.total`, `fee.totalSub`,
+  `fee.noAppointment` — across all 6 languages (en / hi / te / ta / kn / bn).
+- Applicant count is interpolated via `{n}` / `{s}` placeholders for proper
+  singular / plural handling. Amounts stay in `₹` with `en-IN` formatting.
+- Added `chatbot.placeholder` / `chatbot.start` for future chat widget use.
+- Verified visually in Hindi and Tamil: all four fee-row labels + applicants
+  stepper labels + total row translate correctly; ₹ amounts unchanged.
+
+## Test credentials
+See `/app/memory/test_credentials.md`.
+already linked to another
   account.") instead of bubbling a 500.
 
 **Frontend**:
