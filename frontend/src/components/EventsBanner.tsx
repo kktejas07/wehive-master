@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import PropTypes from 'prop-types';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API } from '../context/AuthContext';
 
-const TAG_LABEL = {
+const TAG_LABEL: Record<string, string> = {
   tourist: 'Tourist',
   student: 'Student',
   work: 'Work',
@@ -14,10 +13,19 @@ const TAG_LABEL = {
   promo: 'Limited offer',
 };
 
-function EventCard({ ev }) {
+interface EventItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  cta_label?: string;
+  cta_url?: string;
+  image_url?: string;
+  accent_color?: string;
+  tag?: string;
+}
+
+function EventCard({ ev }: { ev: EventItem }) {
   const accent = ev.accent_color || '#e1212c';
-  const Cta = ev.cta_url ? Link : 'div';
-  const ctaProps = ev.cta_url ? { to: ev.cta_url } : {};
   const body = (
     <>
       <div
@@ -34,7 +42,7 @@ function EventCard({ ev }) {
       <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
       <div className="relative z-[2] h-full flex flex-col justify-end p-6 text-white">
         <div className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.18em] font-bold text-white/85 mb-2">
-          <Sparkles className="w-3 h-3" /> {TAG_LABEL[ev.tag] || ev.tag || 'Featured'}
+          <Sparkles className="w-3 h-3" /> {TAG_LABEL[ev.tag || ''] || ev.tag || 'Featured'}
         </div>
         <h3 className="font-display font-extrabold text-[22px] tracking-[-0.025em] leading-[1.15]">
           {ev.title}
@@ -52,31 +60,33 @@ function EventCard({ ev }) {
     </>
   );
 
+  const wrapperClass =
+    'group relative block aspect-[16/9] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-[0_30px_70px_-30px_rgba(10,44,138,0.4)] hover:shadow-[0_30px_70px_-20px_rgba(225,33,44,0.4)] transition-shadow';
+
+  if (ev.cta_url) {
+    return (
+      <Link to={ev.cta_url} data-testid={`event-banner-${ev.id}`} className={wrapperClass}>
+        {body}
+      </Link>
+    );
+  }
   return (
-    <Cta
-      {...ctaProps}
-      data-testid={`event-banner-${ev.id}`}
-      className="group relative block aspect-[16/9] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-[0_30px_70px_-30px_rgba(10,44,138,0.4)] hover:shadow-[0_30px_70px_-20px_rgba(225,33,44,0.4)] transition-shadow"
-    >
+    <div data-testid={`event-banner-${ev.id}`} className={wrapperClass}>
       {body}
-    </Cta>
+    </div>
   );
 }
-EventCard.propTypes = {
-  ev: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    subtitle: PropTypes.string,
-    cta_label: PropTypes.string,
-    cta_url: PropTypes.string,
-    image_url: PropTypes.string,
-    accent_color: PropTypes.string,
-    tag: PropTypes.string,
-  }).isRequired,
-};
 
-export default function EventsBanner({ limit = 4, heading = 'Featured offers' }) {
-  const [items, setItems] = useState([]);
+interface EventsBannerProps {
+  limit?: number;
+  heading?: string;
+}
+
+export default function EventsBanner({
+  limit = 4,
+  heading = 'Featured offers',
+}: EventsBannerProps) {
+  const [items, setItems] = useState<EventItem[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -114,7 +124,3 @@ export default function EventsBanner({ limit = 4, heading = 'Featured offers' })
     </section>
   );
 }
-EventsBanner.propTypes = {
-  limit: PropTypes.number,
-  heading: PropTypes.string,
-};

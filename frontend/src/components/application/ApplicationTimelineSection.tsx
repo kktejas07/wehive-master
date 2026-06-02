@@ -1,6 +1,17 @@
-import PropTypes from 'prop-types';
+import { ComponentType } from 'react';
 
-export default function ApplicationTimelineSection({ app, TimelineComponent }) {
+interface ApplicationTimelineSectionProps {
+  app: {
+    timeline?: unknown[];
+    status?: string;
+  };
+  TimelineComponent: ComponentType<{ events: unknown[]; currentStatus?: string }>;
+}
+
+export default function ApplicationTimelineSection({
+  app,
+  TimelineComponent,
+}: ApplicationTimelineSectionProps) {
   return (
     <section className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
       <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
@@ -15,11 +26,3 @@ export default function ApplicationTimelineSection({ app, TimelineComponent }) {
     </section>
   );
 }
-
-ApplicationTimelineSection.propTypes = {
-  app: PropTypes.shape({
-    timeline: PropTypes.array,
-    status: PropTypes.string,
-  }).isRequired,
-  TimelineComponent: PropTypes.elementType.isRequired,
-};

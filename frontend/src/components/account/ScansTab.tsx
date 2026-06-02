@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import PropTypes from 'prop-types';
 import {
   Loader2, Sparkles, ScanLine, FileText, Trash2, ExternalLink, ShieldCheck, AlertTriangle,
 } from 'lucide-react';
@@ -12,8 +11,45 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '../ui/alert-dialog';
 
+type ScanKind = 'passport' | 'document';
+
+interface ExtractedData {
+  confidence?: number | string;
+  full_name?: string;
+  given_names?: string;
+  surname?: string;
+  passport_number?: string;
+  nationality?: string;
+  date_of_birth?: string;
+  expiry_date?: string;
+  issuing_country?: string;
+  document_kind?: string;
+  title?: string;
+  issued_to?: string;
+  issued_by?: string;
+  reference_number?: string;
+  date?: string;
+  amount?: string | number;
+  currency?: string;
+  warnings?: string[];
+  [k: string]: unknown;
+}
+
+interface Scan {
+  id: string;
+  kind: ScanKind;
+  extracted?: ExtractedData;
+  application_id?: string;
+  created_at: string;
+}
+
+interface FieldProps {
+  label: string;
+  value?: string | number | boolean | null;
+}
+
 /** Pretty a single extracted field. */
-function Field({ label, value }) {
+function Field({ label, value }: FieldProps) {
   if (value == null || value === '') return null;
   return (
     <div className="min-w-0">
@@ -22,12 +58,14 @@ function Field({ label, value }) {
     </div>
   );
 }
-Field.propTypes = {
-  label: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]),
-};
 
-function ScanCard({ scan, onDelete, onOpenRaw }) {
+interface ScanCardProps {
+  scan: Scan;
+  onDelete: (scan: Scan) => void;
+  onOpenRaw: (scan: Scan) => void;
+}
+
+function ScanCard({ scan, onDelete, onOpenRaw }: ScanCardProps) {
   const e = scan.extracted || {};
   const confidence = Number(e.confidence) || null;
   const confidenceColor = confidence == null
@@ -103,7 +141,7 @@ function ScanCard({ scan, onDelete, onOpenRaw }) {
             <Field label="Issued by" value={e.issued_by} />
             <Field label="Reference" value={e.reference_number} />
             <Field label="Date" value={e.date} />
-            <Field label="Amount" value={e.amount && e.currency ? `${e.amount} ${e.currency}` : e.amount} />
+            <Field label="Amount" value={e.amount && e.currency ? `${e.amount} ${e.currency}` : e.amount as (string | number | undefined)} />
           </>
         )}
       </dl>
@@ -132,19 +170,13 @@ function ScanCard({ scan, onDelete, onOpenRaw }) {
     </article>
   );
 }
-ScanCard.propTypes = {
-  scan: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    kind: PropTypes.oneOf(['passport', 'document']).isRequired,
-    extracted: PropTypes.object,
-    application_id: PropTypes.string,
-    created_at: PropTypes.string.isRequired,
-  }).isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onOpenRaw: PropTypes.func.isRequired,
-};
 
-function RawScanModal({ scan, onClose }) {
+interface RawScanModalProps {
+  scan: Scan | null;
+  onClose: () => void;
+}
+
+function RawScanModal({ scan, onClose }: RawScanModalProps) {
   if (!scan) return null;
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
@@ -170,12 +202,8 @@ function RawScanModal({ scan, onClose }) {
     </div>
   );
 }
-RawScanModal.propTypes = {
-  scan: PropTypes.object,
-  onClose: PropTypes.func.isRequired,
-};
 
-function EmptyState({ isPremium }) {
+function EmptyState({ isPremium }: { isPremium?: boolean }) {
   return (
     <div className="rounded-3xl bg-[hsl(var(--soft-bg))] border border-black/5 p-10 text-center" data-testid="scans-empty">
       <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))] mb-4">
@@ -200,15 +228,21 @@ function EmptyState({ isPremium }) {
     </div>
   );
 }
-EmptyState.propTypes = { isPremium: PropTypes.bool };
 
-export default function ScansTab({ user, token }) {
+interface ScansTabProps {
+  user?: { is_premium?: boolean } | null;
+  token: string;
+}
+
+type FilterKind = 'all' | ScanKind;
+
+export default function ScansTab({ user, token }: ScansTabProps) {
   const { toast } = useToast();
-  const [items, setItems] = useState(null);
+  const [items, setItems] = useState<Scan[] | null>(null);
   const [total, setTotal] = useState(0);
-  const [filter, setFilter] = useState('all');
-  const [rawScan, setRawScan] = useState(null);
-  const [pendingDelete, setPendingDelete] = useState(null);
+  const [filter, setFilter] = useState<FilterKind>('all');
+  const [rawScan, setRawScan] = useState<Scan | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Scan | null>(null);
 
   const load = useCallback(async () => {
     setItems(null);
@@ -219,22 +253,24 @@ export default function ScansTab({ user, token }) {
       });
       setItems(r.data.items);
       setTotal(r.data.total);
-    } catch (e) {
-      toast({ title: 'Could not load scans', description: e?.response?.data?.detail || e.message });
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { detail?: string } }; message?: string };
+      toast({ title: 'Could not load scans', description: err?.response?.data?.detail || err.message });
       setItems([]);
     }
   }, [token, toast]);
 
   useEffect(() => { load(); }, [load]);
 
-  const del = async (scan) => {
+  const del = async (scan: Scan) => {
     try {
       await axios.delete(`${API}/scan/${scan.id}`, { headers: { Authorization: `Bearer ${token}` } });
       toast({ title: 'Scan deleted' });
       setItems((arr) => (arr || []).filter((s) => s.id !== scan.id));
       setTotal((n) => Math.max(0, n - 1));
-    } catch (e) {
-      toast({ title: 'Could not delete', description: e?.response?.data?.detail || e.message });
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { detail?: string } }; message?: string };
+      toast({ title: 'Could not delete', description: err?.response?.data?.detail || err.message });
     } finally {
       setPendingDelete(null);
     }
@@ -260,11 +296,11 @@ export default function ScansTab({ user, token }) {
         </div>
         {items && items.length > 0 && (
           <div className="inline-flex rounded-xl bg-[hsl(var(--soft-bg))] p-1">
-            {[
+            {([
               { id: 'all', label: 'All' },
               { id: 'passport', label: 'Passports' },
               { id: 'document', label: 'Documents' },
-            ].map((f) => (
+            ] as { id: FilterKind; label: string }[]).map((f) => (
               <button
                 key={f.id}
                 data-testid={`scans-filter-${f.id}`}
@@ -322,9 +358,3 @@ export default function ScansTab({ user, token }) {
     </div>
   );
 }
-ScansTab.propTypes = {
-  user: PropTypes.shape({
-    is_premium: PropTypes.bool,
-  }),
-  token: PropTypes.string.isRequired,
-};
