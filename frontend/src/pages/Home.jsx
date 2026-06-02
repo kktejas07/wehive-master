@@ -18,8 +18,8 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <StatsStrip />
       <Hero filters={filters} onFilters={setFilters} />
+      <StatsStrip />
       <PressStrip />
       <EventsBanner />
       <AIServices />

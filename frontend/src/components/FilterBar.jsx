@@ -146,7 +146,7 @@ export default function FilterBar({ value, onChange }) {
   return (
     <div className="flex flex-col items-center gap-5">
       <TabsBar value={v.view} onChange={(view) => set({ view })} />
-      <div className="w-full max-w-4xl rounded-full bg-white border border-black/5 shadow-[0_20px_50px_-30px_rgba(10,44,138,0.4)] px-2 py-1.5 flex items-center gap-2 overflow-x-auto whitespace-nowrap sm:justify-between">
+      <div className="w-full max-w-4xl rounded-full bg-white border border-black/5 shadow-[0_20px_50px_-30px_rgba(10,44,138,0.4)] px-2 py-1.5 flex items-center gap-2 overflow-visible whitespace-nowrap sm:justify-between">
         <Pop Icon={Zap} label="Visa delivery" value={v.delivery} color="#22c55e">
           {(close) => (
             <OptionList
