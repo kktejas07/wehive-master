@@ -1,14 +1,13 @@
-import PropTypes from 'prop-types';
-import { Plane, Briefcase, GraduationCap, Building2 } from 'lucide-react';
+import { Plane, Briefcase, GraduationCap, Building2, LucideIcon } from 'lucide-react';
 
-export const TYPE_ICONS = {
+export const TYPE_ICONS: Record<string, LucideIcon> = {
   Tourist: Plane,
   Business: Briefcase,
   Student: GraduationCap,
   Work: Building2,
 };
 
-export const TYPE_COLORS = {
+export const TYPE_COLORS: Record<string, string> = {
   Tourist: '#22c55e',
   Business: '#0a2c8a',
   Student: '#f59e0b',
@@ -17,7 +16,13 @@ export const TYPE_COLORS = {
   Medical: '#dc2626',
 };
 
-export default function CategoryTabs({ categories, value, onChange }) {
+interface CategoryTabsProps {
+  categories?: Record<string, unknown>;
+  value: string;
+  onChange: (id: string) => void;
+}
+
+export default function CategoryTabs({ categories, value, onChange }: CategoryTabsProps) {
   const ids = Object.keys(categories || {});
   return (
     <div className="inline-flex flex-wrap gap-2 p-1.5 rounded-2xl bg-white border border-black/8">
@@ -45,9 +50,3 @@ export default function CategoryTabs({ categories, value, onChange }) {
     </div>
   );
 }
-
-CategoryTabs.propTypes = {
-  categories: PropTypes.object,
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-};

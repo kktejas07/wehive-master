@@ -1,8 +1,11 @@
-import PropTypes from 'prop-types';
 import { ChevronRight } from 'lucide-react';
 import { FAQS } from '../../data/mock';
 
-export default function VisaFaqSection({ countryName }) {
+interface VisaFaqSectionProps {
+  countryName: string;
+}
+
+export default function VisaFaqSection({ countryName }: VisaFaqSectionProps) {
   return (
     <section className="py-20 bg-[hsl(var(--soft-bg))] border-y border-black/5">
       <div className="max-w-5xl mx-auto px-5 sm:px-8">
@@ -24,7 +27,3 @@ export default function VisaFaqSection({ countryName }) {
     </section>
   );
 }
-
-VisaFaqSection.propTypes = {
-  countryName: PropTypes.string.isRequired,
-};

@@ -1,7 +1,18 @@
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 
-export default function OtherCountries({ list }) {
+interface OtherCountry {
+  id: string;
+  name: string;
+  image?: string;
+  fees_usd?: number | string;
+  fees?: number | string;
+}
+
+interface OtherCountriesProps {
+  list: OtherCountry[];
+}
+
+export default function OtherCountries({ list }: OtherCountriesProps) {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
@@ -30,15 +41,3 @@ export default function OtherCountries({ list }) {
     </section>
   );
 }
-
-OtherCountries.propTypes = {
-  list: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      image: PropTypes.string,
-      fees_usd: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      fees: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    }),
-  ).isRequired,
-};

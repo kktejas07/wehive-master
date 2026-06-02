@@ -1,18 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import PropTypes from 'prop-types';
-import { TrendingUp, Globe2, ShieldCheck, Clock, Sparkles, Award } from 'lucide-react';
+import { TrendingUp, Globe2, ShieldCheck, Clock, Sparkles, Award, LucideIcon } from 'lucide-react';
 
-function CountUp({ to, suffix = '', prefix = '', duration = 1.6 }) {
-  const ref = useRef(null);
+interface CountUpProps {
+  to: number;
+  suffix?: string;
+  prefix?: string;
+  duration?: number;
+}
+
+function CountUp({ to, suffix = '', prefix = '', duration = 1.6 }: CountUpProps) {
+  const ref = useRef<HTMLSpanElement | null>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [v, setV] = useState(0);
 
   useEffect(() => {
     if (!inView) return;
-    let raf;
+    let raf: number;
     const start = performance.now();
-    const tick = (t) => {
+    const tick = (t: number) => {
       const elapsed = (t - start) / 1000;
       const progress = Math.min(elapsed / duration, 1);
       // ease-out cubic
@@ -27,14 +33,17 @@ function CountUp({ to, suffix = '', prefix = '', duration = 1.6 }) {
   const formatted = v.toLocaleString('en-IN');
   return <span ref={ref}>{prefix}{formatted}{suffix}</span>;
 }
-CountUp.propTypes = {
-  to: PropTypes.number.isRequired,
-  suffix: PropTypes.string,
-  prefix: PropTypes.string,
-  duration: PropTypes.number,
-};
 
-const STATS = [
+interface StatItem {
+  id: string;
+  Icon: LucideIcon;
+  value: number;
+  label: string;
+  suffix: string;
+  accent: string;
+}
+
+const STATS: StatItem[] = [
   { id: 'visas',    Icon: ShieldCheck, value: 5847, label: 'Visas approved this month', suffix: '+',  accent: 'from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))]' },
   { id: 'rate',     Icon: TrendingUp,  value: 99,   label: 'Success rate',               suffix: '.2%', accent: 'from-emerald-500 to-emerald-300' },
   { id: 'countries',Icon: Globe2,      value: 250,  label: 'Countries supported',        suffix: '',   accent: 'from-[hsl(var(--accent))] to-[hsl(var(--red-500))]' },

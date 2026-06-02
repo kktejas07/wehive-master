@@ -1,12 +1,35 @@
-import PropTypes from 'prop-types';
 import { Button } from '../ui/button';
-import { Clock, Calendar, CreditCard, Loader2 } from 'lucide-react';
+import { Clock, Calendar, CreditCard, Loader2, LucideIcon } from 'lucide-react';
 import { BRAND, COUNTRIES } from '../../data/mock';
 import { landmarkFor } from '../../lib/landmarks';
 import DeliveryCountdown from '../DeliveryCountdown';
 import { computeFees } from '../FeeBreakdown';
 
-function MetaCard({ Icon, k, v }) {
+interface VisaCategory {
+  name: string;
+  validity: string;
+  processing_days: number;
+  multi_entry?: boolean;
+  documents?: string[];
+  fees_inr?: number;
+  fees_usd?: number;
+}
+
+interface VisaCountry {
+  id: string;
+  name: string;
+  flag?: string;
+  flag_url?: string;
+  delivery?: { same_day?: boolean } & Record<string, unknown>;
+}
+
+interface MetaCardProps {
+  Icon: LucideIcon;
+  k: string;
+  v: string;
+}
+
+function MetaCard({ Icon, k, v }: MetaCardProps) {
   return (
     <div className="rounded-2xl bg-white border border-black/5 p-4">
       <Icon className="w-4 h-4 text-[hsl(var(--blue-700))]" />
@@ -16,8 +39,25 @@ function MetaCard({ Icon, k, v }) {
   );
 }
 
-export default function CategoryDetails({ cat, country, onApply, applying, typeId, applicants }) {
-  const fallbackImg = landmarkFor(country) || country.flag_url || COUNTRIES.find((c) => c.id === country.id)?.image;
+interface CategoryDetailsProps {
+  cat: VisaCategory;
+  country: VisaCountry;
+  onApply: () => void;
+  applying?: boolean;
+  typeId: string;
+  applicants?: number;
+}
+
+export default function CategoryDetails({
+  cat,
+  country,
+  onApply,
+  applying,
+  typeId,
+  applicants,
+}: CategoryDetailsProps) {
+  const fallbackImg =
+    landmarkFor(country) || country.flag_url || COUNTRIES.find((c) => c.id === country.id)?.image;
   const fees = computeFees({ category: cat, applicants, country, visaType: typeId });
 
   return (
@@ -49,7 +89,9 @@ export default function CategoryDetails({ cat, country, onApply, applying, typeI
             className="rounded-full btn-primary text-white h-12 px-6 font-bold"
             data-testid="visa-apply-btn"
           >
-            {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+            {applying ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
               `Apply · ₹${fees.total.toLocaleString('en-IN')}`
             )}
           </Button>
@@ -82,26 +124,3 @@ export default function CategoryDetails({ cat, country, onApply, applying, typeI
     </div>
   );
 }
-
-CategoryDetails.propTypes = {
-  cat: PropTypes.shape({
-    name: PropTypes.string,
-    validity: PropTypes.string,
-    processing_days: PropTypes.number,
-    multi_entry: PropTypes.bool,
-    documents: PropTypes.arrayOf(PropTypes.string),
-    fees_inr: PropTypes.number,
-    fees_usd: PropTypes.number,
-  }).isRequired,
-  country: PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string.isRequired,
-    flag: PropTypes.string,
-    flag_url: PropTypes.string,
-    delivery: PropTypes.object,
-  }).isRequired,
-  onApply: PropTypes.func.isRequired,
-  applying: PropTypes.bool,
-  typeId: PropTypes.string.isRequired,
-  applicants: PropTypes.number,
-};

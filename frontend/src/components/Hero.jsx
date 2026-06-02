@@ -58,7 +58,7 @@ export default function Hero({ filters, onFilters }) {
   const setF = onFilters || (() => {});
 
   return (
-    <section className="relative pt-36 pb-16 sm:pt-44 sm:pb-24 overflow-hidden bg-grain aurora-bg aurora-grain">
+    <section className="relative z-20 pt-36 pb-16 sm:pt-44 sm:pb-24 overflow-x-clip bg-grain aurora-bg aurora-grain">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-white" />
         <div className="absolute inset-0 bg-dots opacity-60" />
@@ -104,7 +104,7 @@ export default function Hero({ filters, onFilters }) {
         </motion.div>
 
         <motion.div
-          className="mt-8 mx-auto max-w-3xl"
+          className="mt-8 mx-auto max-w-3xl relative z-30"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.38, ease: 'easeOut' }}

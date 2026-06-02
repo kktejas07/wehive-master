@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { ChevronRight } from 'lucide-react';
 
-export default function VisaBreadcrumb({ countryName }) {
+interface VisaBreadcrumbProps {
+  countryName: string;
+}
+
+export default function VisaBreadcrumb({ countryName }: VisaBreadcrumbProps) {
   return (
     <div className="flex items-center gap-1.5 text-[13px] text-[hsl(var(--blue-900))]/55">
       <Link to="/" className="hover:text-[hsl(var(--blue-700))]">Home</Link>
@@ -13,7 +16,3 @@ export default function VisaBreadcrumb({ countryName }) {
     </div>
   );
 }
-
-VisaBreadcrumb.propTypes = {
-  countryName: PropTypes.string.isRequired,
-};

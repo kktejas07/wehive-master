@@ -1,7 +1,10 @@
-import PropTypes from 'prop-types';
 import { Check } from 'lucide-react';
 
-export default function DocsList({ docs }) {
+interface DocsListProps {
+  docs: string[];
+}
+
+export default function DocsList({ docs }: DocsListProps) {
   return (
     <ul className="mt-6 space-y-3">
       {docs.map((d, i) => (
@@ -18,7 +21,3 @@ export default function DocsList({ docs }) {
     </ul>
   );
 }
-
-DocsList.propTypes = {
-  docs: PropTypes.arrayOf(PropTypes.string).isRequired,
-};
