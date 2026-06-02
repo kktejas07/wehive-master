@@ -27,7 +27,10 @@ const ApplicationDetail = lazy(() => import('./pages/ApplicationDetail'));
 
 function PricingLoader() {
   useEffect(() => {
-    axios.get(`${API}/public/pricing`).then((r) => setPricing(r.data)).catch(() => {});
+    const timer = setTimeout(() => {
+      axios.get(`${API}/public/pricing`).then((r) => setPricing(r.data)).catch(() => {});
+    }, 5000);
+    return () => clearTimeout(timer);
   }, []);
   return null;
 }
