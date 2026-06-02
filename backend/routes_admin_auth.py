@@ -54,42 +54,84 @@ def _public_admin(u: dict) -> dict:
 
 
 # ---------- seed ----------
-async def ensure_seed_admin() -> None:
-    """Bootstrap a super-admin from ADMIN_SEED_EMAIL/ADMIN_SEED_PASSWORD if missing."""
-    email = (os.environ.get('ADMIN_SEED_EMAIL') or '').strip().lower()
-    pwd = (os.environ.get('ADMIN_SEED_PASSWORD') or '').strip()
+async def _seed_one(email: str, pwd: str, name: str) -> None:
+    """Upsert a single admin account with the given credentials.
+
+    Always re-hashes the password on boot so that rotating it in .env is
+    immediately reflected, and the seeded admin can never get locked out
+    of the dashboard."""
+    email = email.strip().lower()
+    pwd = pwd.strip()
     if not email or not pwd:
         return
-    # Clear any seed-admin lockout from previous runs (dev/test convenience).
-    # In production with multi-instance deployments this is harmless because
-    # the seeded admin should rarely be locked anyway.
+    now = datetime.utcnow()
+    # Clear stale lockouts so the seed account is always reachable.
     try:
         await login_attempts.delete_one({'_id': f'admin:{email}'})
     except Exception:
         pass
-    now = datetime.utcnow()
+    pwd_hash = hash_password(pwd)
     existing = await users.find_one({'email': email})
     if existing is None:
         await users.insert_one({
             '_id': str(uuid.uuid4()),
             'email': email,
-            'name': os.environ.get('ADMIN_SEED_NAME', 'Super Admin'),
+            'name': name or 'Admin',
             'is_admin': True,
             'is_staff': False,
             'is_premium': False,
             'email_verified': True,
             'phone_verified': False,
-            'password_hash': hash_password(pwd),
+            'password_hash': pwd_hash,
             'password_updated_at': now,
             'created_at': now,
             'updated_at': now,
         })
     else:
-        update: dict = {'is_admin': True, 'updated_at': now}
-        if not existing.get('password_hash'):
-            update['password_hash'] = hash_password(pwd)
-            update['password_updated_at'] = now
-        await users.update_one({'_id': existing['_id']}, {'$set': update})
+        await users.update_one(
+            {'_id': existing['_id']},
+            {'$set': {
+                'is_admin': True,
+                'name': existing.get('name') or name,
+                'password_hash': pwd_hash,
+                'password_updated_at': now,
+                'updated_at': now,
+            }},
+        )
+
+
+async def ensure_seed_admin() -> None:
+    """Bootstrap super-admin accounts from env on startup.
+
+    1. ADMIN_SEED_EMAIL + ADMIN_SEED_PASSWORD + ADMIN_SEED_NAME — primary.
+    2. ADMIN_SEEDS_JSON — JSON array of additional {email,password,name}.
+    All seeds are re-hashed every boot so password rotations in .env take
+    effect immediately.
+    """
+    # Primary
+    await _seed_one(
+        os.environ.get('ADMIN_SEED_EMAIL', ''),
+        os.environ.get('ADMIN_SEED_PASSWORD', ''),
+        os.environ.get('ADMIN_SEED_NAME', 'Super Admin'),
+    )
+    # Additional
+    extra_raw = os.environ.get('ADMIN_SEEDS_JSON', '').strip()
+    if extra_raw:
+        import json
+        try:
+            extras = json.loads(extra_raw)
+            if isinstance(extras, list):
+                for e in extras:
+                    if not isinstance(e, dict):
+                        continue
+                    await _seed_one(
+                        e.get('email', ''),
+                        e.get('password', ''),
+                        e.get('name', 'Admin'),
+                    )
+        except json.JSONDecodeError as ex:
+            import logging
+            logging.getLogger('wehive.seed').warning('ADMIN_SEEDS_JSON parse failed: %s', ex)
 
 
 # ---------- schemas ----------
