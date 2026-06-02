@@ -48,7 +48,7 @@ function Pop({ Icon, label, value, color, children }) {
   const ref = useRef(null);
   useOutsideClose(ref, () => setOpen(false));
   return (
-    <div className="relative flex-shrink-0 min-w-[12rem]" ref={ref}>
+    <div className="relative flex-shrink-0 min-w-[12rem] overflow-visible" ref={ref}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
