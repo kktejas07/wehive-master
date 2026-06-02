@@ -102,7 +102,7 @@ export default function HeroSearchLive({ query, setQuery }) {
       {showPopover && (
         <div
           data-testid="hero-search-popover"
-          className="absolute left-0 right-0 mt-2 rounded-2xl bg-white border border-black/8 shadow-[0_30px_70px_-30px_rgba(10,44,138,0.45)] overflow-hidden z-40"
+          className="absolute left-0 right-0 mt-3 rounded-2xl bg-white border border-black/8 shadow-[0_30px_70px_-30px_rgba(10,44,138,0.45)] overflow-hidden z-50"
         >
           {results.length === 0 && !loading && (
             <div className="px-5 py-6 text-center text-[13.5px] text-[hsl(var(--blue-900))]/55">

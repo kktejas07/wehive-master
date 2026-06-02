@@ -1,6 +1,23 @@
 # Wehive — Product Requirements Document
 
-_Last updated: 02 Jun 2026 (Round 14)_
+_Last updated: 02 Jun 2026 (Round 15)_
+
+## 🆕 Round 15 — 02 Jun 2026
+- **Admin login (prod) blocker fixed**: User reported `POST /api/admin-auth/login`
+  → 401 on `api.wehive.co.in`. Root cause: admin seeds were stripped from `.env`
+  in Round 14 (preview DB only had them), production DB never got the bcrypt
+  hashes. Re-added `ADMIN_SEED_EMAIL`, `ADMIN_SEED_PASSWORD`, `ADMIN_SEED_NAME`,
+  `ADMIN_SEEDS_JSON` to `/app/backend/.env`. `ensure_seed_admin()` re-hashes on
+  every boot so a redeploy auto-seeds all 3 admins.
+- **Search dropdown overlap fixed** (`Hero.jsx`, `HeroSearchLive.jsx`): Hero
+  section had `overflow-hidden` clipping the popover, and `StatsStrip` `z-10`
+  was painting on top of the Hero's nested `z-40` popover. Bumped Hero to
+  `z-20 overflow-x-clip`, search wrapper to `z-30`, popover to `z-50 mt-3`.
+  Dropdown now shows all 6+ results cleanly above the scoreboard.
+- **Lazy loading**: Converted all 10 route pages in `App.js` to `React.lazy()`
+  + `Suspense`. New `RouteFallback.jsx` shows a brand-aligned spinner + logo
+  during chunk fetch. Bundle now splits per-route → faster landing page boot.
+
 
 ## Original problem statement
 Clone the "Atlys" website for a brand called **Wehive** with elite minimalist
