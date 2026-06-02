@@ -8,6 +8,7 @@ import Testimonials from '../components/Testimonials';
 import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
 import PressStrip from '../components/PressStrip';
+import EventsBanner from '../components/EventsBanner';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
       <Navbar />
       <Hero filters={filters} onFilters={setFilters} />
       <PressStrip />
+      <EventsBanner />
       <CountryGrid filters={filters} />
       <HowItWorks />
       <Testimonials />

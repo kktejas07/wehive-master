@@ -3,7 +3,7 @@ import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
-  LogOut, ArrowLeft,
+  LogOut, ArrowLeft, Banknote, Megaphone,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 
@@ -12,6 +12,8 @@ const TABS = [
   { id: 'users',        to: '/admin/users',         label: 'Users',        Icon: UsersIcon,       testid: 'admin-nav-users' },
   { id: 'applications', to: '/admin/applications',  label: 'Applications', Icon: FileStack,       testid: 'admin-nav-applications' },
   { id: 'countries',    to: '/admin/countries',     label: 'Countries',    Icon: Globe,           testid: 'admin-nav-countries' },
+  { id: 'pricing',      to: '/admin/pricing',       label: 'Pricing',      Icon: Banknote,        testid: 'admin-nav-pricing' },
+  { id: 'events',       to: '/admin/events',        label: 'Events',       Icon: Megaphone,       testid: 'admin-nav-events' },
   { id: 'staff',        to: '/admin/staff',         label: 'Staff',        Icon: UserCog,         testid: 'admin-nav-staff' },
   { id: 'integrations', to: '/admin/integrations',  label: 'Integrations', Icon: Plug,            testid: 'admin-nav-integrations' },
   { id: 'exports',      to: '/admin/exports',       label: 'Exports',      Icon: Download,        testid: 'admin-nav-exports' },

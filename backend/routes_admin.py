@@ -24,6 +24,7 @@ router = APIRouter(prefix='/admin', tags=['admin'])
 
 countries_col = db['countries_v2']
 settings_col = db['settings']
+events_col = db['events']
 
 ADMIN_EMAILS = {
     e.strip().lower()
@@ -83,7 +84,7 @@ def _serialize_app(a: dict) -> dict:
 
 
 # ---------- fee logic (mirrored from the front-end) ----------
-BASE_FEE_BY_TYPE = {
+DEFAULT_BASE_FEE_BY_TYPE = {
     'Tourist': 3500,
     'Business': 4500,
     'Student': 5500,
@@ -91,15 +92,44 @@ BASE_FEE_BY_TYPE = {
     'Transit': 2500,
     'Medical': 4500,
 }
-SURCHARGE_INR = 350
-GST_RATE = 0.18
+DEFAULT_SURCHARGE_INR = 350
+DEFAULT_GST_RATE = 0.18
+
+# In-process cache so we don't hit Mongo for every revenue calc.
+# Invalidated on PATCH /admin/pricing.
+_pricing_cache: Optional[dict] = None
 
 
-def _revenue_for(app: dict, country: Optional[dict]) -> int:
+async def _load_pricing() -> dict:
+    """Read pricing config from `settings.pricing`, fall back to defaults."""
+    global _pricing_cache
+    if _pricing_cache is not None:
+        return _pricing_cache
+    doc = await settings_col.find_one({'_id': 'pricing'}) or {}
+    cfg = {
+        'base_fees': {**DEFAULT_BASE_FEE_BY_TYPE, **(doc.get('base_fees') or {})},
+        'surcharge_inr': int(doc.get('surcharge_inr', DEFAULT_SURCHARGE_INR)),
+        'gst_rate': float(doc.get('gst_rate', DEFAULT_GST_RATE)),
+        'currency': doc.get('currency', 'INR'),
+        'updated_at': doc.get('updated_at'),
+    }
+    _pricing_cache = cfg
+    return cfg
+
+
+def _bust_pricing_cache() -> None:
+    global _pricing_cache
+    _pricing_cache = None
+
+
+async def _revenue_for(app: dict, country: Optional[dict]) -> int:
     """Return estimated revenue (INR) for a single application."""
+    pricing = await _load_pricing()
     applicants = max(1, int(app.get('applicants') or 1))
     visa_type = app.get('visa_type') or 'Tourist'
-    base = BASE_FEE_BY_TYPE.get(visa_type, 3500)
+    base = int(pricing['base_fees'].get(visa_type, DEFAULT_BASE_FEE_BY_TYPE.get(visa_type, 3500)))
+    surcharge = pricing['surcharge_inr']
+    gst_rate = pricing['gst_rate']
     govt_inr = 0
     appt = 0
     if country:
@@ -109,9 +139,9 @@ def _revenue_for(app: dict, country: Optional[dict]) -> int:
             govt_inr = int(cat.get('fees_inr') or 0)
         if country.get('requires_appointment'):
             appt = int(country.get('appointment_fee_inr') or 0)
-    taxable = base + SURCHARGE_INR + appt
-    gst = round(taxable * GST_RATE)
-    per = govt_inr + base + SURCHARGE_INR + appt + gst
+    taxable = base + surcharge + appt
+    gst = round(taxable * gst_rate)
+    per = govt_inr + base + surcharge + appt + gst
     return per * applicants
 
 
@@ -160,7 +190,7 @@ async def admin_metrics(_=Depends(get_current_admin)):
         if country is None:
             country = await countries_col.find_one({'id': cid}, {'_id': 0}) or {}
             cache[cid] = country
-        amount = _revenue_for(a, country)
+        amount = await _revenue_for(a, country)
         revenue_total += amount
         created = a.get('created_at')
         if isinstance(created, datetime) and created >= since_30:
@@ -362,7 +392,7 @@ async def admin_list_applications(
             {'id': (a.get('country_id') or '').lower()},
             {'_id': 0, 'name': 1, 'flag': 1},
         )
-        revenue = _revenue_for(a, country)
+        revenue = await _revenue_for(a, country)
         out.append({
             **_serialize_app(a),
             'user': user or {},
@@ -464,6 +494,153 @@ async def admin_update_country(country_id: str, patch: CountryPatch, _=Depends(g
     await countries_col.update_one({'id': cid}, {'$set': update})
     fresh = await countries_col.find_one({'id': cid}, {'_id': 0})
     return fresh
+
+
+# ---------- pricing (admin-editable global pricing) ----------
+class PricingPatch(BaseModel):
+    base_fees: Optional[dict] = None    # {VisaType: int}
+    surcharge_inr: Optional[int] = None
+    gst_rate: Optional[float] = None
+    currency: Optional[str] = None
+
+
+@router.get('/pricing')
+async def admin_get_pricing(_=Depends(get_current_admin)):
+    cfg = await _load_pricing()
+    return {
+        'base_fees': cfg['base_fees'],
+        'surcharge_inr': cfg['surcharge_inr'],
+        'gst_rate': cfg['gst_rate'],
+        'currency': cfg['currency'],
+        'updated_at': cfg['updated_at'].isoformat() if isinstance(cfg.get('updated_at'), datetime) else cfg.get('updated_at'),
+        'defaults': {
+            'base_fees': DEFAULT_BASE_FEE_BY_TYPE,
+            'surcharge_inr': DEFAULT_SURCHARGE_INR,
+            'gst_rate': DEFAULT_GST_RATE,
+        },
+    }
+
+
+@router.patch('/pricing')
+async def admin_update_pricing(patch: PricingPatch, _=Depends(get_current_admin)):
+    update = {k: v for k, v in patch.model_dump(exclude_none=True).items()}
+    if not update:
+        raise HTTPException(400, 'Nothing to update')
+    if 'gst_rate' in update:
+        if update['gst_rate'] < 0 or update['gst_rate'] > 1:
+            raise HTTPException(400, 'gst_rate must be a decimal between 0 and 1 (e.g. 0.18 = 18%)')
+    if 'base_fees' in update and isinstance(update['base_fees'], dict):
+        clean = {}
+        for k, v in update['base_fees'].items():
+            try:
+                clean[str(k)] = max(0, int(v))
+            except (TypeError, ValueError):
+                raise HTTPException(400, f'base_fees.{k} must be an integer')
+        update['base_fees'] = clean
+    update['updated_at'] = datetime.utcnow()
+    await settings_col.update_one(
+        {'_id': 'pricing'}, {'$set': update}, upsert=True,
+    )
+    _bust_pricing_cache()
+    return await admin_get_pricing(_=None)
+
+
+# ---------- events / promotions (admin-managed) ----------
+class EventCreate(BaseModel):
+    title: str
+    subtitle: Optional[str] = None
+    description: Optional[str] = None
+    country_id: Optional[str] = None
+    visa_type: Optional[str] = None
+    cta_label: Optional[str] = 'Explore'
+    cta_url: Optional[str] = None
+    image_url: Optional[str] = None
+    accent_color: Optional[str] = '#e1212c'
+    starts_at: Optional[datetime] = None
+    ends_at: Optional[datetime] = None
+    is_published: bool = True
+    sort_order: int = 0
+    tag: Optional[str] = None              # e.g. 'tourist', 'student', 'work', 'holiday'
+
+
+class EventPatch(BaseModel):
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    description: Optional[str] = None
+    country_id: Optional[str] = None
+    visa_type: Optional[str] = None
+    cta_label: Optional[str] = None
+    cta_url: Optional[str] = None
+    image_url: Optional[str] = None
+    accent_color: Optional[str] = None
+    starts_at: Optional[datetime] = None
+    ends_at: Optional[datetime] = None
+    is_published: Optional[bool] = None
+    sort_order: Optional[int] = None
+    tag: Optional[str] = None
+
+
+def _serialize_event(e: dict) -> dict:
+    out: dict = {'id': e.get('_id')}
+    for k, v in e.items():
+        if k == '_id':
+            continue
+        if isinstance(v, datetime):
+            out[k] = v.isoformat()
+        else:
+            out[k] = v
+    return out
+
+
+@router.get('/events')
+async def admin_list_events(
+    _=Depends(get_current_admin),
+    tag: Optional[str] = None,
+    q: Optional[str] = None,
+):
+    filt: dict = {}
+    if tag and tag != 'all':
+        filt['tag'] = tag
+    if q:
+        rx = {'$regex': q, '$options': 'i'}
+        filt['$or'] = [{'title': rx}, {'subtitle': rx}, {'description': rx}]
+    cur = events_col.find(filt).sort([('sort_order', 1), ('created_at', -1)])
+    items = [_serialize_event(e) async for e in cur]
+    return {'items': items, 'total': len(items)}
+
+
+@router.post('/events')
+async def admin_create_event(payload: EventCreate, _=Depends(get_current_admin)):
+    now = datetime.utcnow()
+    doc = {
+        '_id': str(uuid.uuid4()),
+        **payload.model_dump(exclude_none=False),
+        'created_at': now,
+        'updated_at': now,
+    }
+    await events_col.insert_one(doc)
+    return _serialize_event(doc)
+
+
+@router.patch('/events/{event_id}')
+async def admin_update_event(event_id: str, payload: EventPatch, _=Depends(get_current_admin)):
+    update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
+    if not update:
+        raise HTTPException(400, 'Nothing to update')
+    update['updated_at'] = datetime.utcnow()
+    res = await events_col.update_one({'_id': event_id}, {'$set': update})
+    if res.matched_count == 0:
+        raise HTTPException(404, 'Event not found')
+    fresh = await events_col.find_one({'_id': event_id})
+    return _serialize_event(fresh)
+
+
+@router.delete('/events/{event_id}')
+async def admin_delete_event(event_id: str, _=Depends(get_current_admin)):
+    res = await events_col.delete_one({'_id': event_id})
+    if res.deleted_count == 0:
+        raise HTTPException(404, 'Event not found')
+    return {'ok': True}
 
 
 # ---------- integrations ----------
@@ -601,7 +778,7 @@ async def export_applications_csv(_=Depends(get_current_admin)):
             a.get('status') or '',
             str(a.get('applicants') or 1),
             a.get('travel_date') or '',
-            str(_revenue_for(a, country)),
+            str(await _revenue_for(a, country)),
             a.get('created_at').isoformat() if isinstance(a.get('created_at'), datetime) else str(a.get('created_at') or ''),
         ])
     return _csv_response(rows, 'wehive-applications.csv')
@@ -653,6 +830,6 @@ async def export_revenue_csv(_=Depends(get_current_admin)):
             a.get('visa_type') or '',
             str(a.get('applicants') or 1),
             a.get('status') or '',
-            str(_revenue_for(a, country)),
+            str(await _revenue_for(a, country)),
         ])
     return _csv_response(rows, 'wehive-revenue.csv')

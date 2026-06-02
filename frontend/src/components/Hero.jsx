@@ -58,7 +58,7 @@ export default function Hero({ filters, onFilters }) {
   const setF = onFilters || (() => {});
 
   return (
-    <section className="relative pt-36 pb-16 sm:pt-44 sm:pb-24 overflow-hidden bg-grain">
+    <section className="relative pt-36 pb-16 sm:pt-44 sm:pb-24 overflow-hidden bg-grain aurora-bg aurora-grain">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-white" />
         <div className="absolute inset-0 bg-dots opacity-60" />

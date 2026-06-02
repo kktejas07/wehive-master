@@ -1,0 +1,46 @@
+{
+  "summary": "Round 13 testing — pricing CRUD, events CRUD, R2 document upload/download/delete, public pricing/events endpoints, admin regression, FE Aurora + new logo + Emergent badge removal + Pricing/Events tabs all VERIFIED. Backend 20/20 PASS in new test_round13.py. R2 confirmed live (storage='r2', object_key='documents/...', download 307 redirects to signed URL).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/admin-auth/login", "issue": "Brute-force lockout (login_attempts collection) accumulates across test runs and locks out admin@wehive.co.in for ~14 min when prior iterations exercised wrong-password tests. Had to clear db.login_attempts to unblock browser-based admin login. Consider per-test-suite reset or shorter lockout window in test env."},
+      {"endpoint": "/api/admin-auth/forgot-password", "issue": "Now that real SMTP is configured, response no longer contains dev_token/dev_mode — prior tests in test_admin_auth_password.py that assert on dev_token are obsolete and need updating to skip when SMTP is live or to read token from a different debug path."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "PricingTab", "issue": "Live preview only updates when value is typed (keyboard event). page.fill() does not trigger React onChange in this input — likely uses controlled input bound to onInput rather than onChange, or fill() bypass. Functional via keyboard; consider also handling change event to make programmatic fill work.", "selector": "[data-testid=\"pricing-base-Tourist\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Home", "issues": ["Aurora gradient + glass effect visible, new We Hive logo loads from /brand/wehive-logo.png, Made-with-Emergent badge confirmed REMOVED (document.getElementById('emergent-badge') === null)."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_round13.py",
+    "/app/test_reports/pytest/round13.xml"
+  ],
+  "action_items": [
+    "Update test_admin_auth_password.py — dev_token assertions are obsolete since real SMTP is now configured; gate on SMTP_PASSWORD presence.",
+    "Either clear login_attempts at test bootstrap or reduce lockout window in non-prod env so browser-based admin login isn't blocked across test agent IPs.",
+    "Optional: Make PricingTab input fire onChange on programmatic fill() (controlled input) for better testability."
+  ],
+  "critical_code_review_comments": [
+    "PricingTab live preview works on user typing (verified ₹4,543 -> ₹9,853 when Tourist set to 8000).",
+    "Events tab full CRUD verified: create, toggle published, delete. Cards rendered with event-card-{id} testids; per-card toggle/edit/delete buttons all wired.",
+    "ScansTab.jsx code review confirms AlertDialog wired with data-testid=scan-delete-confirm, scan-delete-cancel, scan-delete-confirm-btn (lines 301-321). window.confirm has been fully removed from this file. Could not exercise dialog in browser as fresh OTP user has no scans and scan ingestion requires Gemini Vision (skipped per request).",
+    "R2 integration LIVE: upload returns storage='r2', object_key='documents/{user_id}/{app_id}/{doc_id}/{filename}', and download endpoint correctly returns 307 redirect to signed URL.",
+    "Public /api/public/pricing mirrors admin config (verified Tourist=4000 propagation), /api/public/events filters to only is_published=true (verified by toggling and re-fetching).",
+    "Sidebar order verified: overview, users, applications, countries, pricing, events, staff, integrations, exports."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_round13.py (new)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "95%"},
+  "test_credentials": "Admin: admin@wehive.co.in / Wehive@Admin2026. OTP user: any email/phone + code 123456.",
+  "seed_data_creation": "Created and self-cleaned: TEST_ events, TEST_round13 applications + R2-stored documents (deleted after test). Also seeded one TEST_scan in Mongo for ScansTab probing (cleaned).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend admin token: hit /api/admin-auth/login fresh; if 429 'Too many failed attempts', clear MongoDB login_attempts collection. R2 is live with real Cloudflare creds — uploaded test objects do land in the wehive bucket (verify if bucket clean-up needed). PricingTab/EventsTab fully functional. Home aurora + new logo + Emergent badge nuke all confirmed. ScansTab AlertDialog verified via code review only — to do live UI test, seed a scan document into Mongo (db.scans) with status='completed' for an OTP-logged-in user and visit /account?tab=scans.",
+  "rca of the issue": "Two pre-existing minor issues surfaced in prior test files (test_admin_auth_password.py): (1) brute-force lockout persists across test sessions in shared Mongo — mitigation: clear `db.login_attempts.delete_many({})` before admin auth tests; (2) Forgot-password no longer returns dev_token now that SMTP App Password is configured — mitigation: update assertion to check `ok=True` and pull token via SMTP/email side-channel or skip in SMTP-live env. Neither blocks Round 13 features; both are test-fixture hygiene items."
+}

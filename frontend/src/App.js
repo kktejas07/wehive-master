@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import axios from 'axios';
 import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
@@ -12,12 +13,20 @@ import Account from './pages/Account';
 import Admin from './pages/Admin';
 import HolidayPlanner from './pages/HolidayPlanner';
 import ApplicationDetail from './pages/ApplicationDetail';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, API } from './context/AuthContext';
 import { I18nProvider } from './context/I18nContext';
 import AuthModal from './components/AuthModal';
 import ChatbotWidget from './components/ChatbotWidget';
 import PageTransition from './components/PageTransition';
 import { Toaster } from './components/ui/toaster';
+import { setPricing } from './components/FeeBreakdown';
+
+function PricingLoader() {
+  useEffect(() => {
+    axios.get(`${API}/public/pricing`).then((r) => setPricing(r.data)).catch(() => {});
+  }, []);
+  return null;
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -54,6 +63,7 @@ function App() {
       <BrowserRouter>
         <I18nProvider>
           <AuthProvider>
+            <PricingLoader />
             <ScrollToTop />
             <AnimatedRoutes />
             <AuthModal />

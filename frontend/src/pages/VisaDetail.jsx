@@ -71,7 +71,7 @@ export default function VisaDetail() {
     <div className="bg-white">
       <Navbar />
 
-      <section className="relative pt-28 bg-[hsl(var(--soft-bg))] border-b border-black/5">
+      <section className="relative pt-28 bg-[hsl(var(--soft-bg))] border-b border-black/5 aurora-bg aurora-grain">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 pb-16">
           <VisaBreadcrumb countryName={country.name} />
           <div className="mt-8 flex justify-start">

@@ -2,9 +2,11 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <link rel="icon" href="/brand/wehive-favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/brand/wehive-favicon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="description" content="A product of emergent.sh" />
+        <meta name="theme-color" content="#0a2c8a" />
+        <meta name="description" content="We Hive — your global journey starts here. Visas, holiday plans and document AI for travellers." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
@@ -21,9 +23,25 @@
         work correctly both with client-side routing and a non-root public URL.
         Learn how to configure a non-root public URL by running `npm run build`.
         -->
-        <title>Emergent | Fullstack App</title>
+        <title>We Hive — Your Global Journey Starts Here</title>
+        <style>
+          /* Hide the platform-injected "Made with…" badge so the brand surface stays clean. */
+          a[href*="emergent.sh"], #emergent-badge,
+          a[class*="emergent" i], div[class*="emergent-badge" i] { display: none !important; }
+        </style>
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
+        <script>
+          (function() {
+            function hideBadge() {
+              var el = document.getElementById('emergent-badge');
+              if (el) el.remove();
+            }
+            hideBadge();
+            new MutationObserver(hideBadge).observe(document.documentElement, { childList: true, subtree: true });
+            window.addEventListener('load', hideBadge);
+          })();
+        </script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>

@@ -143,7 +143,7 @@ export default function Navbar() {
           <img
             src={BRAND.logo}
             alt="We Hive"
-            className="h-20 sm:h-24 lg:h-28 w-auto select-none transition-transform duration-300 group-hover:scale-[1.05]"
+            className="h-12 sm:h-14 w-auto select-none transition-transform duration-300 group-hover:scale-[1.05]"
             draggable={false}
           />
         </Link>

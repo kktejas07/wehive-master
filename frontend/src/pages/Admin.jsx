@@ -9,6 +9,8 @@ import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import IntegrationsTab from '../components/admin/IntegrationsTab';
 import ExportsTab from '../components/admin/ExportsTab';
+import PricingTab from '../components/admin/PricingTab';
+import EventsTab from '../components/admin/EventsTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
@@ -53,6 +55,8 @@ function AdminRoutes() {
                 <Route path="users" element={<UsersTab />} />
                 <Route path="applications" element={<ApplicationsTab />} />
                 <Route path="countries" element={<CountriesTab />} />
+                <Route path="pricing" element={<PricingTab />} />
+                <Route path="events" element={<EventsTab />} />
                 <Route path="staff" element={<StaffTab />} />
                 <Route path="integrations" element={<IntegrationsTab />} />
                 <Route path="exports" element={<ExportsTab />} />
