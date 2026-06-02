@@ -202,10 +202,11 @@ export default function CountryGrid({ filters }) {
 useEffect(() => {
     let mounted = true;
     const timer = setTimeout(() => {
+      setItems(COUNTRIES);
       axios
         .get(`${API}/countries`, { params })
         .then((r) => mounted && setItems(r.data?.length ? r.data : COUNTRIES))
-        .catch(() => mounted && setItems(COUNTRIES));
+        .catch(() => {});
     }, 3000);
     return () => {
       mounted = false;
