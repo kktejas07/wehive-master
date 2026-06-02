@@ -59,7 +59,7 @@ export default function StatsStrip() {
       aria-label="Wehive platform stats"
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="rounded-[28px] glass-tint-navy aurora-grain p-5 sm:p-7 relative overflow-hidden">
+        <div className="rounded-[28px] glass-tint-navy aurora-grain p-5 sm:p-7 relative">
           <div className="flex items-center gap-2 justify-center mb-5">
             <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
             <span className="text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--blue-900))]/65">

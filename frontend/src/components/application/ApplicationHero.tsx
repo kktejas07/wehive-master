@@ -23,6 +23,9 @@ interface ApplicationHeroProps {
   submitting?: boolean;
   canSubmit?: boolean;
   onScan: () => void;
+  onCoverLetter: () => void;
+  onItinerary: () => void;
+  onRiskAnalysis: () => void;
   onDownloadReceipt: () => void;
   onSubmit: () => void;
 }
@@ -35,6 +38,9 @@ export default function ApplicationHero({
   submitting,
   canSubmit,
   onScan,
+  onCoverLetter,
+  onItinerary,
+  onRiskAnalysis,
   onDownloadReceipt,
   onSubmit,
 }: ApplicationHeroProps) {
@@ -81,6 +87,27 @@ export default function ApplicationHero({
               className="rounded-full h-11 px-5 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
             >
               <Sparkles className="w-4 h-4 mr-1" /> Scan with AI
+            </Button>
+            <Button
+              onClick={onCoverLetter}
+              variant="outline"
+              className="rounded-full h-11 px-4 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
+            >
+              Cover Letter
+            </Button>
+            <Button
+              onClick={onItinerary}
+              variant="outline"
+              className="rounded-full h-11 px-4 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
+            >
+              AI Itinerary
+            </Button>
+            <Button
+              onClick={onRiskAnalysis}
+              variant="outline"
+              className="rounded-full h-11 px-4 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
+            >
+              Risk Analysis
             </Button>
             <Button
               onClick={onDownloadReceipt}
