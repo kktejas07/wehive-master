@@ -107,6 +107,10 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
   }, [applicationId, token]);
 
   const handleUpload = async (docType, file) => {
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Maximum file size is 10MB. Try compressing the PDF or image.' });
+      return;
+    }
     setBusy((b) => ({ ...b, [docType]: true }));
     try {
       const fd = new FormData();
