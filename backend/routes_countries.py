@@ -1,12 +1,15 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
+import logging
 
 from data import COUNTRIES as STATIC_COUNTRIES, get_country as static_get, get_holiday_plan
 from db import db
 
 router = APIRouter(prefix='/countries', tags=['countries'])
+logger = logging.getLogger('wehive')
 
 countries_col = db['countries_v2']
+MIN_COUNTRIES_THRESHOLD = 50
 
 
 def _strip_mongo(d: dict) -> dict:
@@ -15,8 +18,25 @@ def _strip_mongo(d: dict) -> dict:
     return d
 
 
+async def _ensure_seeded():
+    """Trigger seeding if the DB has fewer than MIN_COUNTRIES_THRESHOLD entries."""
+    try:
+        count = await countries_col.estimated_document_count()
+    except Exception:
+        count = 0
+    if count < MIN_COUNTRIES_THRESHOLD:
+        try:
+            from seed_countries import seed
+            logger.info('Country count (%d) below threshold (%d) — triggering auto-seed', count, MIN_COUNTRIES_THRESHOLD)
+            res = await seed()
+            logger.info('Auto-seed result: %s', res)
+        except Exception as e:
+            logger.warning('Auto-seed failed (non-fatal): %s', e)
+
+
 async def _all_countries() -> List[dict]:
     """Return DB-backed list if seeded, else fall back to the static one."""
+    await _ensure_seeded()
     cur = countries_col.find({}, {'_id': 0}).sort('name', 1)
     items = [doc async for doc in cur]
     if items:
@@ -25,8 +45,8 @@ async def _all_countries() -> List[dict]:
 
 
 async def _get_one(country_id: str) -> Optional[dict]:
+    await _ensure_seeded()
     country_id = (country_id or '').lower()
-    # Try DB first
     doc = await countries_col.find_one(
         {'$or': [{'id': country_id}, {'iso2': country_id.upper()}]},
         {'_id': 0},

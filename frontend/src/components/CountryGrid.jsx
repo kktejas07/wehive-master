@@ -8,6 +8,14 @@ import { API } from '../context/AuthContext';
 import { landmarkFor } from '../lib/landmarks';
 import DeliveryCountdown from './DeliveryCountdown';
 import Reveal from './Reveal';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from './ui/pagination';
 
 // Local image lookup by id (frontend has the curated images)
 const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
@@ -173,13 +181,13 @@ function MapPlaceholder({ items }) {
 
 export default function CountryGrid({ filters }) {
   const [view, setView] = useState('grid');
-  const [items, setItems] = useState(null);
+  const [allItems, setAllItems] = useState(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
-  // Translate UI filters to API params
   const params = useMemo(() => {
     const p = {};
     if (filters?.visaTypeId && filters.visaTypeId !== 'all') {
-      // Capitalize first letter for backend match
       const map = {
         tourist: 'Tourist', business: 'Business', student: 'Student',
         work: 'Work', transit: 'Transit', medical: 'Medical',
@@ -192,30 +200,62 @@ export default function CountryGrid({ filters }) {
     if (filters?.documentsId && filters.documentsId !== 'any') {
       p.documents = filters.documentsId;
     }
-    // "Holidays" toggle → only show visa-free destinations
     if (filters?.view === 'holidays') {
       p.no_visa = true;
     }
     return p;
   }, [filters]);
 
-useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     const timer = setTimeout(() => {
-      setItems(COUNTRIES);
       axios
         .get(`${API}/countries`, { params })
-        .then((r) => mounted && setItems(r.data?.length ? r.data : COUNTRIES))
-        .catch(() => {});
-    }, 3000);
+        .then((r) => mounted && setAllItems(r.data?.length ? r.data : COUNTRIES))
+        .catch(() => mounted && setAllItems(COUNTRIES));
+    }, 300);
     return () => {
       mounted = false;
       clearTimeout(timer);
     };
   }, [params]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [params]);
+
+  const items = useMemo(() => {
+    if (!allItems) return null;
+    const sorted = [...allItems].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    const start = (page - 1) * PAGE_SIZE;
+    return sorted.slice(start, start + PAGE_SIZE);
+  }, [allItems, page]);
+
+  const totalPages = useMemo(() => {
+    if (!allItems) return 0;
+    return Math.ceil(allItems.length / PAGE_SIZE);
+  }, [allItems]);
+
   const showEvents = filters?.view === 'events';
   const showHolidays = filters?.view === 'holidays';
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const total = totalPages;
+    const current = page;
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current > 3) pages.push('...');
+      for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+        pages.push(i);
+      }
+      if (current < total - 2) pages.push('...');
+      pages.push(total);
+    }
+    return pages;
+  };
 
   return (
     <section id="countries" className="relative py-16 sm:py-24 lg:py-28 bg-white">
@@ -279,11 +319,53 @@ useEffect(() => {
         ) : items.length === 0 ? (
           <EmptyResults />
         ) : view === 'grid' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-            {items.map((c, i) => (
-              <CountryCard key={c.id} c={c} index={i} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+              {items.map((c, i) => (
+                <CountryCard key={c.id} c={c} index={i} />
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <div className="mt-8 flex flex-col items-center gap-3">
+                <span className="text-[13px] text-[hsl(var(--blue-900))]/55">
+                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, allItems.length)} of {allItems.length} countries
+                </span>
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    {renderPageNumbers().map((p, idx) =>
+                      p === '...' ? (
+                        <PaginationItem key={`ellipsis-${idx}`}>
+                          <span className="flex h-9 w-9 items-center justify-center text-[hsl(var(--blue-900))]/40">…</span>
+                        </PaginationItem>
+                      ) : (
+                        <PaginationItem key={p}>
+                          <PaginationLink
+                            isActive={page === p}
+                            onClick={() => setPage(p)}
+                            className={`cursor-pointer ${page === p ? '' : 'text-[hsl(var(--blue-900))]/65'}`}
+                          >
+                            {p}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    )}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
         ) : (
           <MapPlaceholder items={items} />
         )}

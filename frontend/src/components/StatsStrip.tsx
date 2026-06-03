@@ -77,7 +77,7 @@ export default function StatsStrip() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-40px' }}
                   transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-center sm:text-left relative"
+                  className="flex flex-col items-center text-center relative"
                 >
                   <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${s.accent} text-white shadow-[0_8px_22px_-8px_rgba(10,44,138,0.4)] mb-2`}>
                     <Icon className="w-4 h-4" />
