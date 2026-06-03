@@ -4,6 +4,7 @@ from pymongo.errors import DuplicateKeyError
 
 from models import UpdateProfileRequest, ApplicationCreate, Application, SavedPlanCreate, SavedPlan, PublicUser
 from auth_utils import get_current_user
+from constants import AppStatus
 from db import users, applications, holiday_plans
 import uuid
 
@@ -42,12 +43,12 @@ async def create_application(req: ApplicationCreate, user=Depends(get_current_us
         'travel_date': req.travel_date,
         'applicants': max(1, int(req.applicants or 1)),
         'primary_applicant': primary,
-        'status': 'draft',
+        'status': AppStatus.DRAFT.value,
         'notes': req.notes,
         'documents': [],
         'messages': [],
         'timeline': [
-            {'id': str(uuid.uuid4()), 'status': 'draft', 'label': 'Draft created', 'at': now,
+            {'id': str(uuid.uuid4()), 'status': AppStatus.DRAFT.value, 'label': 'Draft created', 'at': now,
              'note': f'{req.country_id.upper()} {req.visa_type} application opened. Upload your documents to continue.'},
         ],
         'created_at': now,

@@ -22,16 +22,7 @@ import bcrypt
 import jwt
 from fastapi import HTTPException, Header
 
-JWT_SECRET = os.environ.get('JWT_SECRET', 'change_me')
-JWT_ALG = os.environ.get('JWT_ALG', 'HS256')
-JWT_EXPIRES_HOURS = int(os.environ.get('JWT_EXPIRES_HOURS', '720'))
-RESET_TOKEN_TTL_MIN = int(os.environ.get('RESET_TOKEN_TTL_MINUTES', '30'))
-
-ADMIN_EMAILS = {
-    e.strip().lower()
-    for e in os.environ.get('ADMIN_EMAILS', '').split(',')
-    if e.strip()
-}
+from config import ADMIN_EMAILS, JWT_SECRET, JWT_ALG, JWT_EXPIRES_HOURS, RESET_TOKEN_TTL_MIN
 
 
 # ---------- passwords ----------
