@@ -25,7 +25,7 @@ export default function PricingTab() {
     });
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!data || !draft) {
     return (

@@ -1,5 +1,5 @@
 import { Loader2, Lock, Sparkles } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from './ui/button';
 
 export default function PremiumGate({ open, onClose, feature }) {
   if (!open) return null;

@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles } from 'lucide-react';
+import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
 import ScansTab from '../components/account/ScansTab';
 import AICoverLetterModal from '../components/AICoverLetterModal';
@@ -14,7 +14,6 @@ import AIItineraryModal from '../components/AIItineraryModal';
 import AIRiskAnalysisModal from '../components/AIRiskAnalysisModal';
 import OpenMarketAI from '../components/OpenMarketAI';
 import PremiumGate from '../components/PremiumGate';
-import { Share2, Copy, Check, Users, Gift } from 'lucide-react';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },

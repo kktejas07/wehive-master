@@ -165,6 +165,7 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
 
   useEffect(() => {
     if (applicationId && token) refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applicationId, token]);
 
   const handleUpload = async (docType, file) => {
