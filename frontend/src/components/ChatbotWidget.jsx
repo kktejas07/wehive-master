@@ -69,6 +69,12 @@ export default function ChatbotWidget() {
     if (scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight;
   }, [messages, sending]);
 
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener('open-chatbot', handler);
+    return () => window.removeEventListener('open-chatbot', handler);
+  }, []);
+
   const ensureSession = async () => {
     if (sessionId) return sessionId;
     const headers = token ? { Authorization: `Bearer ${token}` } : {};

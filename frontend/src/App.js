@@ -24,6 +24,8 @@ const Account = lazy(() => import('./pages/Account'));
 const Admin = lazy(() => import('./pages/Admin'));
 const HolidayPlanner = lazy(() => import('./pages/HolidayPlanner'));
 const ApplicationDetail = lazy(() => import('./pages/ApplicationDetail'));
+const TrackStatus = lazy(() => import('./pages/TrackStatus'));
+const Help = lazy(() => import('./pages/Help'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -58,6 +60,8 @@ function AnimatedRoutes() {
           <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
           <Route path="/account" element={<PageTransition><Account /></PageTransition>} />
           <Route path="/account/applications/:id" element={<PageTransition><ApplicationDetail /></PageTransition>} />
+          <Route path="/track/:id" element={<PageTransition><TrackStatus /></PageTransition>} />
+          <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
           <Route path="*" element={<PageTransition><Home /></PageTransition>} />
         </Routes>

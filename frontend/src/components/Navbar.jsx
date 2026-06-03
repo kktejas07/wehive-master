@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
 import UserMenu from './UserMenu';
 import LanguageSwitcher from './LanguageSwitcher';
-import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import { useI18n } from '../context/I18nContext';
 const NAV = [
   { id: 'home', label: 'nav.home', to: '/' },
@@ -183,6 +183,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          <NotificationBell />
           <PhoneBlock />
           <UserMenu />
           <button

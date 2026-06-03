@@ -263,7 +263,7 @@ export const FOOTER_COLS = [
     { id: 'l-trust', label: 'Trust & safety', to: '/about' },
   ]},
   { id: 'resources', title: 'Resources', links: [
-    { id: 'l-help', label: 'Help center', to: '/#contact' },
+    { id: 'l-help', label: 'Help center', to: '/help' },
     { id: 'l-guide', label: 'Visa guides', to: '/' },
     { id: 'l-embassy', label: 'Embassy directory', to: '/' },
     { id: 'l-refund', label: 'Refund policy', to: '/' },

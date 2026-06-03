@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Upload, Check, AlertCircle, Loader2, X, Trash2 } from 'lucide-react';
+import { Upload, Check, AlertCircle, Loader2, X, Trash2, Calendar, Clock } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import { API } from '../context/AuthContext';
 
@@ -48,13 +48,15 @@ function DocRow({ docType, file, onUpload, onRemove, busy }) {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {has ? (
-            <button
-              onClick={() => onRemove(file.id)}
-              className="inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-red-50 text-[hsl(var(--accent))]"
-              aria-label="Remove"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            <>
+              <button
+                onClick={() => onRemove(file.id)}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-red-50 text-[hsl(var(--accent))]"
+                aria-label="Remove"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </>
           ) : (
             <>
               <input
@@ -84,6 +86,67 @@ function DocRow({ docType, file, onUpload, onRemove, busy }) {
   );
 }
 
+function getMonthsDiff(dateStr) {
+  const now = new Date();
+  const d = new Date(dateStr);
+  return (d.getFullYear() - now.getFullYear()) * 12 + (d.getMonth() - now.getMonth());
+}
+
+function getDaysDiff(dateStr) {
+  const now = new Date();
+  const d = new Date(dateStr);
+  return Math.floor((d - now) / (1000 * 60 * 60 * 24));
+}
+
+export function DocumentExpirationWarnings({ docs }) {
+  const warnings = [];
+
+  for (const doc of docs || []) {
+    const dt = doc.doc_type?.toLowerCase() || '';
+    const uploadedAt = doc.uploaded_at;
+
+    if (dt.includes('passport') && uploadedAt) {
+      const expMatch = doc.filename?.match(/expiry[e]?[-_\s]?(\d{4}[-\/]\d{2}[-\/]\d{2})/i)
+        || doc.metadata?.expiry_date;
+      if (expMatch) {
+        const months = getMonthsDiff(Array.isArray(expMatch) ? expMatch[1] : expMatch);
+        if (months < 0) {
+          warnings.push({ type: 'error', doc: doc.doc_type, message: 'Passport has expired. Please renew before applying.' });
+        } else if (months < 6) {
+          warnings.push({ type: 'warning', doc: doc.doc_type, message: `Passport expires in ${months} month${months !== 1 ? 's' : ''}. Most embassies require 6+ months validity.` });
+        }
+      }
+    }
+
+    if ((dt.includes('bank') || dt.includes('statement')) && uploadedAt) {
+      const days = getDaysDiff(uploadedAt);
+      if (days < -90) {
+        warnings.push({ type: 'warning', doc: doc.doc_type, message: 'Bank statement is older than 3 months. Please upload a recent statement (last 90 days).' });
+      }
+    }
+  }
+
+  if (warnings.length === 0) return null;
+
+  return (
+    <div className="space-y-2 mb-4">
+      {warnings.map((w, i) => (
+        <div
+          key={i}
+          className={`flex items-start gap-3 rounded-xl px-4 py-3 text-[13px] ${
+            w.type === 'error'
+              ? 'bg-red-50 border border-red-200 text-red-700'
+              : 'bg-amber-50 border border-amber-200 text-amber-700'
+          }`}
+        >
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{w.message}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function DocumentChecklist({ applicationId, requiredDocs, token, onDocsChange }) {
   const [docs, setDocs] = useState([]);
   const [busy, setBusy] = useState({});
@@ -97,13 +160,11 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
       setDocs(r.data || []);
       onDocsChange?.(r.data || []);
     } catch {
-      // ignore
     }
   };
 
   useEffect(() => {
     if (applicationId && token) refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applicationId, token]);
 
   const handleUpload = async (docType, file) => {
@@ -140,7 +201,6 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
     }
   };
 
-  // Map required doc -> uploaded file (latest match)
   const byType = docs.reduce((m, d) => ({ ...m, [d.doc_type]: d }), {});
   const completed = (requiredDocs || []).filter((d) => !!byType[d]).length;
   const total = (requiredDocs || []).length;
@@ -164,7 +224,9 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
         </div>
       </div>
 
-      <ul className="mt-6 space-y-3">
+      <DocumentExpirationWarnings docs={docs} />
+
+      <ul className="mt-4 space-y-3">
         {(requiredDocs || []).map((d) => (
           <DocRow
             key={d}

@@ -49,8 +49,8 @@ export function AuthProvider({ children }) {
     return res.data;
   }, []);
 
-  const verifyOtp = useCallback(async ({ identifier, code, name }) => {
-    const res = await axios.post(`${API}/auth/verify-otp`, { identifier, code, name });
+  const verifyOtp = useCallback(async ({ identifier, code, name, referral_code }) => {
+    const res = await axios.post(`${API}/auth/verify-otp`, { identifier, code, name, referral_code });
     const { access_token, user: u } = res.data;
     localStorage.setItem(TOKEN_KEY, access_token);
     setToken(access_token);

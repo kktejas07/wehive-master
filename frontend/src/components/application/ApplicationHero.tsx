@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ChevronRight, Download, Send, Loader2, Sparkles } from 'lucide-react';
+import { ChevronRight, Download, Send, Loader2, Sparkles, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 import { COUNTRIES } from '../../data/mock';
 
@@ -116,6 +116,14 @@ export default function ApplicationHero({
             >
               <Download className="w-4 h-4 mr-1" /> Download receipt
             </Button>
+            <a
+              href={`/track/${app.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full h-11 px-4 font-bold border-black/10 hover:border-[hsl(var(--blue-700))]/30 text-[hsl(var(--blue-900))]/70 transition"
+            >
+              <ExternalLink className="w-4 h-4" /> Track status
+            </a>
             <Button
               onClick={onSubmit}
               disabled={!canSubmit || submitting}
