@@ -7,6 +7,7 @@ import { BRAND } from '../data/mock';
 import UserMenu from './UserMenu';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationBell from './NotificationBell';
+import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 const NAV = [
   { id: 'home', label: 'nav.home', to: '/' },
