@@ -26,9 +26,9 @@ marketplace.db = db  # bind DB to marketplace singleton
 
 class ConnectProviderRequest(BaseModel):
     provider_id: str
-    api_key: str = ""
-    base_url: str = ""
-    model: str = ""
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
+    model: Optional[str] = None
 
 
 class SetActiveRequest(BaseModel):
@@ -37,9 +37,9 @@ class SetActiveRequest(BaseModel):
 
 class TestConnectionRequest(BaseModel):
     provider_id: str
-    api_key: str = ""
-    base_url: str = ""
-    model: str = ""
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
+    model: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -98,19 +98,27 @@ async def get_my_providers(user=Depends(get_current_user)):
 @router.post("/connect")
 async def connect_provider(req: ConnectProviderRequest, user=Depends(get_current_user)):
     """Save (or update) a provider's API key / settings for the current user."""
+    import logging
+    logger_lib = logging.getLogger("wehive.ai_marketplace")
+
     if req.provider_id not in PROVIDER_REGISTRY:
-        raise HTTPException(400, "Unknown provider")
+        logger_lib.warning("connect: unknown provider_id=%s", req.provider_id)
+        raise HTTPException(400, f"Unknown provider: {req.provider_id}")
 
     meta = PROVIDER_REGISTRY[req.provider_id]
-    if meta["requires_key"] and not req.api_key:
-        raise HTTPException(400, "API key required for this provider")
+    api_key_val = req.api_key or ""
+    if meta["requires_key"] and not api_key_val.strip():
+        raise HTTPException(400, f"API key required for {meta['name']}")
+
+    req_base_url = req.base_url or None
+    req_model = req.model or None
 
     existing = await db["ai_settings"].find_one({"user_id": user["_id"]}) or {}
     providers = existing.get("providers", {})
     providers[req.provider_id] = {
-        "key": req.api_key,
-        "base_url": req.base_url or meta.get("base_url", ""),
-        "model": req.model or (meta.get("models", [""])[0] if meta.get("models") else ""),
+        "key": api_key_val,
+        "base_url": req_base_url or meta.get("base_url", ""),
+        "model": req_model or (meta.get("models", [""])[0] if meta.get("models") else ""),
         "connected_at": datetime.utcnow().isoformat(),
     }
 
@@ -162,12 +170,12 @@ async def test_connection(req: TestConnectionRequest, user=Depends(get_current_u
     if not meta:
         raise HTTPException(400, "Unknown provider")
 
-    if meta["requires_key"] and not req.api_key:
+    if meta["requires_key"] and not (req.api_key or "").strip():
         raise HTTPException(400, "API key required")
 
     provider = get_provider(
         req.provider_id,
-        key=req.api_key,
+        key=req.api_key or "",
         base_url=req.base_url or meta.get("base_url", ""),
         model=req.model or (meta.get("models", [""])[0] if meta.get("models") else ""),
     )
