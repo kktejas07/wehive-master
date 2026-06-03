@@ -54,13 +54,16 @@ export default function NotificationBell() {
 
     const connect = () => {
       if (!active) return;
-      esRef.current = new EventSource(`${API}/notifications/stream`, {
-        headers: { Authorization: `Bearer ${token}` },
+      esRef.current = new EventSource(`${API}/notifications/stream?token=${token}`, {
       });
       esRef.current.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data);
           if (data.type === 'keepalive') return;
+          if (data.type === 'auth_required') {
+            esRef.current?.close();
+            return;
+          }
           if (data.new_count !== undefined) {
             setUnread(data.new_count);
           }
@@ -74,6 +77,9 @@ export default function NotificationBell() {
         esRef.current?.close();
         if (active) setTimeout(connect, retryDelay);
         retryDelay = Math.min(retryDelay * 2, 30000);
+      };
+      esRef.current.onopen = () => {
+        retryDelay = 5000;
       };
     };
 
