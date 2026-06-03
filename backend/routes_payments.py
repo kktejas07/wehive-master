@@ -1,4 +1,4 @@
-"""Razorpay payment integration."""
+"""Razorpay payment integration with mock bypass mode."""
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ router = APIRouter(prefix='/payments', tags=['payments'])
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
 RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
+PAYMENT_BYPASS_ENABLED = os.environ.get('PAYMENT_BYPASS_ENABLED', '').lower() in ('1', 'true', 'yes')
 
 PLANS = {
     'lite': {'name': 'Lite', 'amount_inr': 49, 'description': 'One visa application with expert review'},
@@ -61,6 +62,28 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
     plan = PLANS.get(req.plan_id)
     if not plan:
         raise HTTPException(400, 'Invalid plan_id')
+
+    if PAYMENT_BYPASS_ENABLED:
+        mock_order_id = f"mock-{uuid.uuid4().hex[:16]}"
+        payment_doc = {
+            '_id': str(uuid.uuid4()),
+            'user_id': user['_id'],
+            'plan_id': req.plan_id,
+            'razorpay_order_id': mock_order_id,
+            'razorpay_payment_id': None,
+            'amount_inr': plan['amount_inr'],
+            'status': 'mock',
+            'created_at': datetime.utcnow(),
+            'updated_at': datetime.utcnow(),
+        }
+        await payments.insert_one(payment_doc)
+        return {
+            'order_id': mock_order_id,
+            'amount': plan['amount_inr'],
+            'currency': 'INR',
+            'plan_id': req.plan_id,
+            'razorpay_key': 'mock',
+        }
 
     if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
         raise HTTPException(503, 'Payment gateway not configured')
@@ -119,6 +142,27 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
         raise HTTPException(404, 'Order not found')
     if doc.get('status') == 'paid':
         return {'ok': True, 'is_premium': True, 'message': 'Already upgraded'}
+
+    if doc.get('status') == 'mock' or (req.razorpay_order_id or '').startswith('mock-'):
+        now = datetime.utcnow()
+        await payments.update_one(
+            {'_id': doc['_id']},
+            {'$set': {
+                'razorpay_payment_id': req.razorpay_payment_id or f"mock-pay-{uuid.uuid4().hex[:12]}",
+                'status': 'paid',
+                'updated_at': now,
+            }}
+        )
+        await users.update_one(
+            {'_id': user['_id']},
+            {'$set': {'is_premium': True, 'premium_since': now, 'updated_at': now}}
+        )
+        return {
+            'ok': True,
+            'is_premium': True,
+            'premium_since': now.isoformat(),
+            'plan': plan['name'],
+        }
 
     if not RAZORPAY_KEY_SECRET:
         raise HTTPException(503, 'Payment gateway not configured')

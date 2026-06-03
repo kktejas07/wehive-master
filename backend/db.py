@@ -19,6 +19,7 @@ scans = db['scans']
 payments = db['payments']
 notifications_col = db['notifications']
 referrals_col = db['referrals']
+ai_settings = db['ai_settings']
 
 
 async def ensure_indexes():
@@ -42,3 +43,4 @@ async def ensure_indexes():
     await db['password_reset_tokens'].create_index('token_hash')
     await db['password_reset_tokens'].create_index('expires_at', expireAfterSeconds=0)
     await db['login_attempts'].create_index('last_attempt_at', expireAfterSeconds=60 * 60)
+    await ai_settings.create_index('user_id')

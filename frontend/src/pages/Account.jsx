@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift } from 'lucide-react';
+import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
 import ScansTab from '../components/account/ScansTab';
 import AICoverLetterModal from '../components/AICoverLetterModal';
@@ -14,6 +14,7 @@ import AIItineraryModal from '../components/AIItineraryModal';
 import AIRiskAnalysisModal from '../components/AIRiskAnalysisModal';
 import OpenMarketAI from '../components/OpenMarketAI';
 import PremiumGate from '../components/PremiumGate';
+import AIMarketplaceSettings from '../components/AIMarketplaceSettings';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },
@@ -22,6 +23,7 @@ const TABS = [
   { id: 'aitools', label: 'AI Tools', Icon: Sparkles },
   { id: 'scans', label: 'My scans', Icon: ScanLine },
   { id: 'plans', label: 'Saved plans', Icon: Compass },
+  { id: 'ai-marketplace', label: 'AI Marketplace', Icon: Bot },
   { id: 'settings', label: 'Settings', Icon: Settings },
 ];
 
@@ -714,6 +716,7 @@ export default function Account() {
               {tab === 'aitools' && <AIToolsTab token={token} isPremium={user?.is_premium} />}
               {tab === 'scans' && <ScansTab user={user} token={token} />}
               {tab === 'plans' && <PlansTab token={token} />}
+              {tab === 'ai-marketplace' && <AIMarketplaceSettings />}
               {tab === 'settings' && <SettingsTab user={user} token={token} onUpdated={refreshUser} />}
             </div>
           </section>

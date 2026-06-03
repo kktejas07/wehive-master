@@ -1,21 +1,24 @@
-"""AI Chatbot for visa & travel Q&A — Emergent LLM (Gemini 2.5 Flash) backed."""
+"""AI Chatbot for visa & travel Q&A — routed through AI Marketplace."""
 
 import os
 import uuid
+import logging
 from datetime import datetime
 from typing import List, Optional
+
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from ai_marketplace import marketplace
 from auth_utils import get_current_user_optional
 from db import db
 
 router = APIRouter(prefix='/chatbot', tags=['chatbot'])
+marketplace.db = db
 
-EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 chat_sessions = db['chat_sessions']
 chat_messages = db['chat_messages']
+logger = logging.getLogger('wehive.chatbot')
 
 SYSTEM_PROMPT = """You are Eva — the friendly visa & travel assistant for We Hive Immigration Services (Ballari, India).
 
@@ -121,9 +124,6 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     if sess.get('user_id') and (not user or sess['user_id'] != user['_id']):
         raise HTTPException(403, 'Not allowed')
 
-    if not EMERGENT_KEY:
-        raise HTTPException(503, 'AI service not configured')
-
     text = req.text.strip()
     now = datetime.utcnow()
 
@@ -136,23 +136,24 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     }
     await chat_messages.insert_one(user_msg)
 
-    # Build LLM with full session id for multi-turn context
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_KEY,
-            session_id=session_id,
-            system_message=SYSTEM_PROMPT,
-        ).with_model('gemini', 'gemini-2.5-flash')
-        reply = await chat.send_message(UserMessage(text=text))
-        reply_text = (reply or '').strip() or 'Sorry, I could not generate a reply just now.'
+        user_id = user['_id'] if user else None
+        if not user_id:
+            raise HTTPException(401, 'Authentication required for AI chat')
+        reply_text = await marketplace.chat(
+            user_id=user_id,
+            system_prompt=SYSTEM_PROMPT,
+            user_prompt=text,
+            max_tokens=1024,
+        )
+        if not reply_text:
+            reply_text = 'Sorry, I could not generate a reply just now.'
     except Exception as e:
         reply_text = (
             "I'm having trouble reaching my brain right now. Please try again, or contact our team at "
             "+91 91132 56726 for an immediate answer."
         )
-        # log for visibility
-        import logging
-        logging.getLogger('wehive.chatbot').exception('LLM error: %s', e)
+        logger.exception('Marketplace error: %s', e)
 
     assistant_msg = {
         '_id': str(uuid.uuid4()),
