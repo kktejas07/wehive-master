@@ -45,4 +45,4 @@ async def ensure_indexes():
     await db['password_reset_tokens'].create_index('expires_at', expireAfterSeconds=0)
     await db['login_attempts'].create_index('last_attempt_at', expireAfterSeconds=60 * 60)
     await ai_settings.create_index('user_id')
-    await third_party_settings.create_index('user_id')
+    await third_party_settings.create_index('_id')

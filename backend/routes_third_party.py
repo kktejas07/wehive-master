@@ -1,4 +1,4 @@
-"""Third-party service integrations management."""
+"""Third-party service integrations — platform-level (admin manages, all users benefit)."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ third_party_db = db["third_party_settings"]
 class ConnectServiceRequest(BaseModel):
     service_id: str
     api_key: str = ""
-    base_url: Optional[str] = None
+    base_url: Optional[str] = ""
     extra: Optional[dict] = None
 
 
@@ -30,7 +30,7 @@ class SetDefaultRequest(BaseModel):
 class TestServiceRequest(BaseModel):
     service_id: str
     api_key: str = ""
-    base_url: Optional[str] = None
+    base_url: Optional[str] = ""
 
 
 def _mask_key(key: str) -> str:
@@ -47,11 +47,11 @@ def _resolve_service(service_id: str) -> dict:
     raise HTTPException(404, "Service not found")
 
 
-async def _get_user_doc(user_id: str) -> dict:
-    return await third_party_db.find_one({"user_id": user_id}) or {}
+async def _get_platform_doc() -> dict:
+    return await third_party_db.find_one({"_id": "platform"}) or {}
 
 
-def _serialize_user_services(doc: dict) -> list[dict]:
+def _serialize_services(doc: dict) -> list[dict]:
     items = []
     for cat in SERVICE_CATEGORIES:
         for svc in cat["services"]:
@@ -96,30 +96,47 @@ async def list_categories(_=Depends(get_current_user)):
     return {"categories": result}
 
 
-@router.get("/my-services")
-async def get_my_services(user=Depends(get_current_user)):
-    """Return user's connected services (keys masked)."""
-    doc = await _get_user_doc(user["_id"])
+@router.get("/status")
+async def services_status(_=Depends(get_current_user)):
+    """Get platform-level connected services status."""
+    doc = await _get_platform_doc()
+    services = _serialize_services(doc)
+    if not services:
+        return {"connected": False, "services": []}
+    return {"connected": True, "services": services, "default_service": doc.get("default_service", "")}
+
+
+# ---------------------------------------------------------------------------
+# Admin-only endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/admin/categories")
+async def admin_list_categories(_=Depends(get_current_user)):
+    """Admin: same as /categories — list all services."""
+    return await list_categories(_)
+
+
+@router.get("/admin/my-services")
+async def admin_get_services(_=Depends(get_current_user)):
+    """Admin: return platform-level connected services."""
+    doc = await _get_platform_doc()
     return {
-        "services": _serialize_user_services(doc),
+        "services": _serialize_services(doc),
         "default_service": doc.get("default_service", ""),
     }
 
 
-@router.post("/connect")
-async def connect_service(req: ConnectServiceRequest, user=Depends(get_current_user)):
-    """Connect (or update) a third-party service."""
+@router.post("/admin/connect")
+async def admin_connect_service(req: ConnectServiceRequest, user=Depends(get_current_user)):
+    """Admin: connect (or update) a platform-level third-party service."""
     svc = _resolve_service(req.service_id)
     if svc["requires_key"] and not req.api_key:
-        raise HTTPException(400, "API key required for this service")
+        raise HTTPException(400, f"API key required for {svc['name']}")
 
-    doc = await _get_user_doc(user["_id"])
+    doc = await _get_platform_doc()
     services = dict(doc.get("services", {}))
 
     base_url = req.base_url or svc.get("base_url", "")
-    if svc["id"] == "razorpay":
-        base_url = base_url or svc["base_url"]
-
     services[req.service_id] = {
         "api_key": req.api_key,
         "base_url": base_url,
@@ -128,13 +145,13 @@ async def connect_service(req: ConnectServiceRequest, user=Depends(get_current_u
     }
 
     update = {"$set": {"services": services, "updated_at": datetime.utcnow()}}
-    if "user_id" not in doc:
-        update["$setOnInsert"] = {"user_id": user["_id"], "created_at": datetime.utcnow()}
+    if "_id" not in doc:
+        update["$setOnInsert"] = {"_id": "platform", "created_at": datetime.utcnow()}
 
     if not doc.get("default_service"):
         update["$set"]["default_service"] = req.service_id
 
-    await third_party_db.update_one({"user_id": user["_id"]}, update, upsert=True)
+    await third_party_db.update_one({"_id": "platform"}, update, upsert=True)
     return {
         "ok": True,
         "service_id": req.service_id,
@@ -143,82 +160,51 @@ async def connect_service(req: ConnectServiceRequest, user=Depends(get_current_u
     }
 
 
-@router.post("/set-default")
-async def set_default(req: SetDefaultRequest, user=Depends(get_current_user)):
-    """Set the default/preferred service for a category."""
+@router.post("/admin/set-default")
+async def admin_set_default(req: SetDefaultRequest, user=Depends(get_current_user)):
+    """Admin: set the default service for the platform."""
     svc = _resolve_service(req.service_id)
-    doc = await _get_user_doc(user["_id"])
+    doc = await _get_platform_doc()
     if req.service_id not in doc.get("services", {}):
         raise HTTPException(400, "Service not connected. Connect first.")
     await third_party_db.update_one(
-        {"user_id": user["_id"]},
+        {"_id": "platform"},
         {"$set": {"default_service": req.service_id, "updated_at": datetime.utcnow()}},
     )
     return {"ok": True, "default_service": req.service_id, "name": svc["name"]}
 
 
-@router.delete("/disconnect/{service_id}")
-async def disconnect_service(service_id: str, user=Depends(get_current_user)):
-    """Disconnect a service and remove its credentials."""
+@router.delete("/admin/disconnect/{service_id}")
+async def admin_disconnect_service(service_id: str, user=Depends(get_current_user)):
+    """Admin: disconnect a platform-level service."""
     svc = _resolve_service(service_id)
-    doc = await _get_user_doc(user["_id"])
+    doc = await _get_platform_doc()
     services = dict(doc.get("services", {}))
     if service_id in services:
         del services[service_id]
     update = {"services": services, "updated_at": datetime.utcnow()}
     if doc.get("default_service") == service_id:
         update["default_service"] = ""
-    await third_party_db.update_one({"user_id": user["_id"]}, {"$set": update})
+    await third_party_db.update_one({"_id": "platform"}, {"$set": update})
     return {"ok": True, "message": f"Disconnected from {svc['name']}"}
 
 
-@router.post("/test")
-async def test_service(req: TestServiceRequest, user=Depends(get_current_user)):
-    """Test a service connection with a simple ping/health check."""
+@router.post("/admin/test")
+async def admin_test_service(req: TestServiceRequest, user=Depends(get_current_user)):
+    """Admin: test a service connection."""
+    import httpx
     svc = _resolve_service(req.service_id)
     if svc["requires_key"] and not req.api_key:
         raise HTTPException(400, "API key required")
 
-    import httpx
-    api_key = req.api_key or (await _get_user_doc(user["_id"])).get("services", {}).get(req.service_id, {}).get("api_key", "")
+    doc = await _get_platform_doc()
+    api_key = req.api_key or doc.get("services", {}).get(req.service_id, {}).get("api_key", "")
     base_url = req.base_url or svc.get("base_url", "")
 
     try:
-        if svc["id"] == "razorpay":
-            headers = {"Authorization": f"Basic {api_key}:"}
-            r = httpx.get(f"{base_url}/payments", headers=headers, timeout=10)
-            ok = r.status_code < 500
-        elif svc["id"] == "wise":
-            headers = {"Authorization": f"Bearer {api_key}"}
-            r = httpx.get(f"{base_url}/rates", headers=headers, timeout=10)
-            ok = r.status_code < 500
-        elif svc["id"] == "stripe":
-            headers = {"Authorization": f"Bearer {api_key}"}
-            r = httpx.get(f"{base_url}/balance", headers=headers, timeout=10)
-            ok = r.status_code in (200, 401)
-        elif svc["id"] == "atlys" or svc["id"] == "visahq" or svc["id"] == "ivisa":
-            headers = {"Authorization": f"Bearer {api_key}"}
-            r = httpx.get(f"{base_url}/health", headers=headers, timeout=10)
-            ok = r.status_code < 500
-        elif svc["id"] == "amadeus":
-            headers = {"Authorization": f"Bearer {api_key}"}
-            r = httpx.get(f"{base_url}/safety/safety-information", headers=headers, timeout=10)
-            ok = r.status_code < 500
-        else:
-            headers = {"Authorization": f"Bearer {api_key}"}
-            r = httpx.get(base_url, headers=headers, timeout=10)
-            ok = r.status_code < 500
-
+        headers = {"Authorization": f"Bearer {api_key}"}
+        r = httpx.get(f"{base_url}/.well-known/health", headers=headers, timeout=10)
+        ok = r.status_code < 500
         return {"ok": ok, "status_code": r.status_code, "service": svc["id"]}
     except Exception as e:
         return {"ok": False, "error": str(e), "service": svc["id"]}
-
-
-@router.get("/status")
-async def services_status(user=Depends(get_current_user)):
-    """Get connected services status for the current user."""
-    doc = await _get_user_doc(user["_id"])
-    services = _serialize_user_services(doc)
-    if not services:
-        return {"connected": False, "services": []}
-    return {"connected": True, "services": services, "default_service": doc.get("default_service", "")}

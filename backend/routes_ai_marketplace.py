@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -100,35 +101,42 @@ async def connect_provider(req: ConnectProviderRequest, user=Depends(get_current
     """Save (or update) a provider's API key / settings for the current user."""
     import logging
     logger_lib = logging.getLogger("wehive.ai_marketplace")
+    logger_lib.info("connect: provider_id=%r api_key set=%r", req.provider_id, bool(req.api_key))
 
-    if req.provider_id not in PROVIDER_REGISTRY:
-        logger_lib.warning("connect: unknown provider_id=%s", req.provider_id)
-        raise HTTPException(400, f"Unknown provider: {req.provider_id}")
+    try:
+        if req.provider_id not in PROVIDER_REGISTRY:
+            logger_lib.warning("connect: unknown provider_id=%s", req.provider_id)
+            raise HTTPException(400, f"Unknown provider: {req.provider_id}")
 
-    meta = PROVIDER_REGISTRY[req.provider_id]
-    api_key_val = req.api_key or ""
-    if meta["requires_key"] and not api_key_val.strip():
-        raise HTTPException(400, f"API key required for {meta['name']}")
+        meta = PROVIDER_REGISTRY[req.provider_id]
+        api_key_val = (req.api_key or "").strip()
+        if meta["requires_key"] and not api_key_val:
+            raise HTTPException(400, f"API key required for {meta['name']}")
 
-    req_base_url = req.base_url or None
-    req_model = req.model or None
+        req_base_url = req.base_url
+        req_model = req.model
 
-    existing = await db["ai_settings"].find_one({"user_id": user["_id"]}) or {}
-    providers = existing.get("providers", {})
-    providers[req.provider_id] = {
-        "key": api_key_val,
-        "base_url": req_base_url or meta.get("base_url", ""),
-        "model": req_model or (meta.get("models", [""])[0] if meta.get("models") else ""),
-        "connected_at": datetime.utcnow().isoformat(),
-    }
+        existing = await db["ai_settings"].find_one({"user_id": user["_id"]}) or {}
+        providers = existing.get("providers", {})
+        providers[req.provider_id] = {
+            "key": api_key_val,
+            "base_url": req_base_url or meta.get("base_url", ""),
+            "model": req_model or (meta.get("models", [""])[0] if meta.get("models") else ""),
+            "connected_at": datetime.utcnow().isoformat(),
+        }
 
-    update = {"$set": {"providers": providers, "updated_at": datetime.utcnow()}}
-    if "user_id" not in existing:
-        update["$setOnInsert"] = {"user_id": user["_id"], "created_at": datetime.utcnow()}
+        update = {"$set": {"providers": providers, "updated_at": datetime.utcnow()}}
+        if "user_id" not in existing:
+            update["$setOnInsert"] = {"user_id": user["_id"], "created_at": datetime.utcnow()}
 
-    await db["ai_settings"].update_one({"user_id": user["_id"]}, update, upsert=True)
-
-    return {"ok": True, "provider_id": req.provider_id, "message": f"Connected to {meta['name']}"}
+        await db["ai_settings"].update_one({"user_id": user["_id"]}, update, upsert=True)
+        logger_lib.info("connect: saved provider_id=%s for user=%s", req.provider_id, user["_id"])
+        return {"ok": True, "provider_id": req.provider_id, "message": f"Connected to {meta['name']}"}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger_lib.exception("connect: unexpected error provider_id=%s: %s", req.provider_id, exc)
+        raise HTTPException(500, f"Internal error: {exc}")
 
 
 @router.post("/set-active")
