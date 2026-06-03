@@ -72,7 +72,7 @@ if _raw_origins:
             _exact_origins.append(o)
 
 if not _exact_origins and not _wildcard_regexes:
-    _allow_origins = ['https://wehive.in', 'https://www.wehive.in']
+    _allow_origins = ['https://wehive.co.in', 'https://www.wehive.co.in']
     _origin_regex = None
 elif _exact_origins and not _wildcard_regexes:
     _allow_origins = _exact_origins

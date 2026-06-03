@@ -4,7 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 MONGO_URL = os.environ['MONGO_URL']
 DB_NAME = os.environ.get('DB_NAME', 'wehive')
 
-client = AsyncIOMotorClient(MONGO_URL)
+client = AsyncIOMotorClient(MONGO_URL, serverSelectionTimeoutMS=5000)
 db = client[DB_NAME]
 
 # Collections
