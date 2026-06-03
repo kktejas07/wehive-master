@@ -15,6 +15,13 @@ groq            GroqCloud (ultra-fast inference)
 cohere          Cohere API
 anthropic       Claude API
 openai          OpenAI GPT (fallback / paid)
+fireworks       Fireworks AI (ultra-fast inference)
+together        Together AI (hosted open-source models)
+deepseek        DeepSeek (open-weight models)
+azure           Azure OpenAI (Microsoft hosted)
+google          Google AI / Gemini API
+voyage          Voyage AI (embeddings & reranking)
+sambanova       SambaNova (enterprise open models)
 """
 
 from __future__ import annotations
@@ -46,6 +53,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
         "default_url": "http://localhost:11434",
         "models": ["llama3.2", "llama3.1", "mistral", "gemma2", "phi4"],
         "docs": "https://github.com/ollama/ollama/blob/main/docs/api.md",
+        "powered_by_tagline": "Powered by Ollama in Association with We Hive",
     },
     "openrouter": {
         "name": "OpenRouter",
@@ -63,6 +71,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
             "openai/gpt-4o",
         ],
         "docs": "https://openrouter.ai/docs",
+        "powered_by_tagline": "Powered by OpenRouter in Association with We Hive",
     },
     "huggingface": {
         "name": "Hugging Face",
@@ -78,6 +87,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
             "HuggingFaceH4/zephyr-orpo-141b-A35b-v0.1",
         ],
         "docs": "https://huggingface.co/docs/api-inference/index",
+        "powered_by_tagline": "Powered by Hugging Face in Association with We Hive",
     },
     "mistral": {
         "name": "Mistral AI",
@@ -93,6 +103,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
             "codestral-latest",
         ],
         "docs": "https://docs.mistral.ai",
+        "powered_by_tagline": "Powered by Mistral AI in Association with We Hive",
     },
     "groq": {
         "name": "Groq",
@@ -109,6 +120,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
             "gemma2-9b-it",
         ],
         "docs": "https://console.groq.com/docs",
+        "powered_by_tagline": "Powered by Groq in Association with We Hive",
     },
     "cohere": {
         "name": "Cohere",
@@ -120,6 +132,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
         "base_url": "https://api.cohere.com/v1",
         "models": ["command-r-plus", "command-r", "command-nightly"],
         "docs": "https://docs.cohere.com",
+        "powered_by_tagline": "Powered by Cohere in Association with We Hive",
     },
     "anthropic": {
         "name": "Anthropic (Claude)",
@@ -135,6 +148,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
             "claude-3-opus-20240229",
         ],
         "docs": "https://docs.anthropic.com",
+        "powered_by_tagline": "Powered by Anthropic in Association with We Hive",
     },
     "openai": {
         "name": "OpenAI",
@@ -146,6 +160,106 @@ PROVIDER_REGISTRY: dict[str, dict] = {
         "base_url": "https://api.openai.com/v1",
         "models": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"],
         "docs": "https://platform.openai.com/docs",
+        "powered_by_tagline": "Powered by OpenAI in Association with We Hive",
+    },
+    "fireworks": {
+        "name": "Fireworks AI",
+        "description": "Ultra-fast inference for open and commercial models with high throughput",
+        "website": "https://fireworks.ai",
+        "requires_key": True,
+        "key_label": "API Key",
+        "key_placeholder": "fw_...",
+        "base_url": "https://api.fireworks.ai/v1",
+        "models": [
+            "accounts/fireworks/models/llama-v3p1-405b-instruct",
+            "accounts/fireworks/models/llama-v3p1-70b-instruct",
+            "accounts/fireworks/models/mixtral-8x7b-instruct",
+            "accounts/fireworks/models/qwen2p5-72b-instruct",
+        ],
+        "docs": "https://docs.fireworks.ai",
+        "powered_by_tagline": "Powered by Fireworks AI in Association with We Hive",
+    },
+    "together": {
+        "name": "Together AI",
+        "description": "Hosted inference for leading open-source models at competitive prices",
+        "website": "https://together.ai",
+        "requires_key": True,
+        "key_label": "API Key",
+        "key_placeholder": "tgk_...",
+        "base_url": "https://api.together.xyz/v1",
+        "models": [
+            "togethercomputer/llama-3.2-405B-FT",
+            "togethercomputer/llama-3.2-70B-Instruct",
+            "mistralai/Mistral-Large-Instruct-2411",
+            "Qwen/Qwen2.5-72B-Instruct",
+        ],
+        "docs": "https://docs.together.ai",
+        "powered_by_tagline": "Powered by Together AI in Association with We Hive",
+    },
+    "deepseek": {
+        "name": "DeepSeek",
+        "description": "DeepSeek Coder and DeepSeek Chat — open-weight models at low cost",
+        "website": "https://deepseek.com",
+        "requires_key": True,
+        "key_label": "API Key",
+        "key_placeholder": "sk-...",
+        "base_url": "https://api.deepseek.com/v1",
+        "models": ["deepseek-chat", "deepseek-coder", "deepseek-coder-v2"],
+        "docs": "https://platform.deepseek.com/docs",
+        "powered_by_tagline": "Powered by DeepSeek in Association with We Hive",
+    },
+    "azure": {
+        "name": "Azure OpenAI",
+        "description": "GPT-4o, GPT-4o-mini and other OpenAI models deployed on Microsoft Azure",
+        "website": "https://azure.microsoft.com/services/cognitive-services/openai/",
+        "requires_key": True,
+        "key_label": "API Key",
+        "key_placeholder": "...",
+        "base_url": "",
+        "models": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-35-turbo"],
+        "docs": "https://learn.microsoft.com/azure/ai-services/openai/",
+        "powered_by_tagline": "Powered by Azure OpenAI in Association with We Hive",
+    },
+    "google": {
+        "name": "Google AI (Gemini)",
+        "description": "Gemini 2.5 Flash and other Gemini models via Google AI API",
+        "website": "https://ai.google.dev",
+        "requires_key": True,
+        "key_label": "API Key",
+        "key_placeholder": "AIza...",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta",
+        "models": [
+            "gemini-2.5-flash-preview-05-20",
+            "gemini-2.0-flash",
+            "gemini-1.5-pro",
+            "gemini-1.5-flash",
+        ],
+        "docs": "https://ai.google.dev/docs",
+        "powered_by_tagline": "Powered by Google AI in Association with We Hive",
+    },
+    "voyage": {
+        "name": "Voyage AI",
+        "description": "High-quality embeddings and reranking for semantic search and RAG workloads",
+        "website": "https://voyageai.com",
+        "requires_key": True,
+        "key_label": "API Key",
+        "key_placeholder": "voyage-...",
+        "base_url": "https://api.voyageai.com/v1",
+        "models": ["voyage-large-2", "voyage-code-2", "voyage-multimodal-3"],
+        "docs": "https://docs.voyageai.com",
+        "powered_by_tagline": "Powered by Voyage AI in Association with We Hive",
+    },
+    "sambanova": {
+        "name": "SambaNova",
+        "description": "Samba-1 endpoint — fast, affordable inference for enterprise-grade open models",
+        "website": "https://sambanova.ai",
+        "requires_key": True,
+        "key_label": "API Key",
+        "key_placeholder": "...",
+        "base_url": "https://api.sambanova.ai/v1",
+        "models": ["Samba-1-Large", "Samba-1-Medium", "Samba-1-Micro"],
+        "docs": "https://docs.sambanova.ai",
+        "powered_by_tagline": "Powered by SambaNova in Association with We Hive",
     },
 }
 
@@ -219,7 +333,7 @@ class OllamaProvider(BaseProvider):
 
 
 class OpenAICompatProvider(BaseProvider):
-    """Generic OpenAI-compatible provider (OpenAI, Groq, Mistral, OpenRouter)."""
+    """Generic OpenAI-compatible provider (OpenAI, Groq, Mistral, OpenRouter, Together, DeepSeek, Fireworks, SambaNova, Azure)."""
 
     async def chat(self, system_prompt: str, user_prompt: str, max_tokens: int = 1024) -> str:
         if not self.key or not self.base_url:
@@ -294,7 +408,6 @@ class HuggingFaceProvider(BaseProvider):
             return str(data)
 
     async def chat_with_image(self, system_prompt: str, user_prompt: str, image_b64: str, mime: str, max_tokens: int = 1024) -> str:
-        # HF doesn't have a unified vision endpoint; fallback to text-only
         logger.warning("HF vision not supported, using text only")
         return await self.chat(system_prompt, user_prompt, max_tokens)
 
@@ -374,7 +487,7 @@ class CohereProvider(BaseProvider):
         payload = {
             "model": self.model or "command-r-plus",
             "message": user_prompt,
-            " preamble": system_prompt,
+            "preamble": system_prompt,
             "max_tokens": max_tokens,
         }
         async with httpx.AsyncClient(timeout=120.0) as client:
@@ -388,11 +501,54 @@ class CohereProvider(BaseProvider):
         return await self.chat(system_prompt, user_prompt, max_tokens)
 
 
+class GoogleProvider(BaseProvider):
+    """Google Gemini API via generic endpoint."""
+
+    async def chat(self, system_prompt: str, user_prompt: str, max_tokens: int = 1024) -> str:
+        if not self.key:
+            raise RuntimeError("Google AI API key required")
+        url = f"{self.base_url}/models/{self.model or 'gemini-2.0-flash'}:generateContent?key={self.key}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [
+                {"parts": [{"text": f"{system_prompt}\n\n{user_prompt}"}]}
+            ],
+            "generationConfig": {"maxOutputTokens": max_tokens},
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            r = await client.post(url, headers=headers, json=payload)
+            r.raise_for_status()
+            data = r.json()
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+
+    async def chat_with_image(self, system_prompt: str, user_prompt: str, image_b64: str, mime: str, max_tokens: int = 1024) -> str:
+        if not self.key:
+            raise RuntimeError("Google AI API key required")
+        mime_map = {"image/jpeg": "jpeg", "image/png": "png", "image/webp": "webp"}
+        mediatype = mime_map.get(mime, "jpeg")
+        url = f"{self.base_url}/models/{self.model or 'gemini-2.0-flash'}:generateContent?key={self.key}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [
+                {"parts": [
+                    {"text": system_prompt + "\n\n" + user_prompt},
+                    {"inline_data": {"mime_type": mediatype, "data": image_b64}},
+                ]}
+            ],
+            "generationConfig": {"maxOutputTokens": max_tokens},
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            r = await client.post(url, headers=headers, json=payload)
+            r.raise_for_status()
+            data = r.json()
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+
+
 # ---------------------------------------------------------------------------
 # Provider factory
 # ---------------------------------------------------------------------------
 
-PROVIDER_CLASSES = {
+PROVIDER_CLASSES: dict[str, type[BaseProvider]] = {
     "ollama": OllamaProvider,
     "openrouter": OpenAICompatProvider,
     "huggingface": HuggingFaceProvider,
@@ -401,13 +557,19 @@ PROVIDER_CLASSES = {
     "cohere": CohereProvider,
     "anthropic": AnthropicProvider,
     "openai": OpenAICompatProvider,
+    "fireworks": OpenAICompatProvider,
+    "together": OpenAICompatProvider,
+    "deepseek": OpenAICompatProvider,
+    "azure": OpenAICompatProvider,
+    "google": GoogleProvider,
+    "voyage": OpenAICompatProvider,
+    "sambanova": OpenAICompatProvider,
 }
 
 
 def get_provider(provider_id: str, key: str = "", base_url: str = "", model: str = "") -> BaseProvider:
     """Factory: return instantiated provider."""
     cls = PROVIDER_CLASSES.get(provider_id, OpenAICompatProvider)
-    # Derive base_url from registry if not provided
     if not base_url and provider_id in PROVIDER_REGISTRY:
         reg = PROVIDER_REGISTRY[provider_id]
         base_url = reg.get("base_url", "")
@@ -424,20 +586,7 @@ class AIMarketplace:
     """Routes LLM calls to the user's selected provider."""
 
     def __init__(self):
-        self.db = None  # set at runtime from db.py
-
-    def _user_settings(self, user_id: str) -> dict:
-        """Fetch user's AI marketplace settings from DB."""
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-            coro = self.db["ai_settings"].find_one({"user_id": user_id})
-            doc = loop.run_until_complete(coro)
-            if doc:
-                return doc
-        except Exception:
-            pass
-        return {}
+        self.db = None
 
     async def get_active_provider(self, user_id: str) -> tuple[BaseProvider, str] | tuple[None, str]:
         """Return (provider, provider_id) for the given user, or (None, '')."""
@@ -463,6 +612,21 @@ class AIMarketplace:
             raise RuntimeError("No AI provider configured. Please set one in Settings → AI Marketplace.")
         return await provider.chat(system_prompt, user_prompt, max_tokens)
 
+    async def chat_with_info(self, user_id: str, system_prompt: str, user_prompt: str, max_tokens: int = 1024) -> tuple[str, dict]:
+        """Returns (reply_text, provider_info) so callers can include the tagline."""
+        provider, pid = await self.get_active_provider(user_id)
+        if provider is None:
+            raise RuntimeError("No AI provider configured. Please set one in Settings → AI Marketplace.")
+        reply = await provider.chat(system_prompt, user_prompt, max_tokens)
+        meta = PROVIDER_REGISTRY.get(pid, {})
+        provider_info = {
+            "id": pid,
+            "name": meta.get("name", pid),
+            "model": provider.model,
+            "powered_by_tagline": meta.get("powered_by_tagline", f"Powered by {meta.get('name', pid)} in Association with We Hive"),
+        }
+        return reply, provider_info
+
     async def chat_with_image(self, user_id: str, system_prompt: str, user_prompt: str, image_b64: str, mime: str, max_tokens: int = 1024) -> str:
         provider, pid = await self.get_active_provider(user_id)
         if provider is None:
@@ -470,5 +634,4 @@ class AIMarketplace:
         return await provider.chat_with_image(system_prompt, user_prompt, image_b64, mime, max_tokens)
 
 
-# Singleton instance
 marketplace = AIMarketplace()

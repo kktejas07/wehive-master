@@ -54,6 +54,7 @@ class ChatMessageRequest(BaseModel):
 class ChatMessageResponse(BaseModel):
     user_message: dict
     assistant_message: dict
+    provider_info: dict
 
 
 class ChatSessionItem(BaseModel):
@@ -140,7 +141,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         user_id = user['_id'] if user else None
         if not user_id:
             raise HTTPException(401, 'Authentication required for AI chat')
-        reply_text = await marketplace.chat(
+        reply_text, provider_info = await marketplace.chat_with_info(
             user_id=user_id,
             system_prompt=SYSTEM_PROMPT,
             user_prompt=text,
@@ -154,6 +155,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
             "+91 91132 56726 for an immediate answer."
         )
         logger.exception('Marketplace error: %s', e)
+        provider_info = {}
 
     assistant_msg = {
         '_id': str(uuid.uuid4()),
@@ -186,4 +188,5 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
             'id': assistant_msg['_id'], 'role': 'assistant', 'text': reply_text,
             'created_at': assistant_msg['created_at'].isoformat(),
         },
+        provider_info=provider_info,
     )

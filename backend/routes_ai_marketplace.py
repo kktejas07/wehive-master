@@ -61,6 +61,7 @@ async def list_providers(user=Depends(get_current_user)):
                 "key_placeholder": meta.get("key_placeholder", ""),
                 "models": meta.get("models", []),
                 "docs": meta.get("docs", ""),
+                "powered_by_tagline": meta.get("powered_by_tagline", f"Powered by {meta['name']} in Association with We Hive"),
             }
             for pid, meta in PROVIDER_REGISTRY.items()
         ]
@@ -78,11 +79,14 @@ async def get_my_providers(user=Depends(get_current_user)):
     for pid, cfg in providers.items():
         key = cfg.get("key", "")
         masked_key = key[:6] + "..." + key[-4:] if len(key) > 10 else "***"
+        meta = PROVIDER_REGISTRY.get(pid, {})
         masked.append({
             "provider_id": pid,
+            "name": meta.get("name", pid),
             "masked_key": masked_key,
             "base_url": cfg.get("base_url", ""),
             "model": cfg.get("model", ""),
+            "powered_by_tagline": meta.get("powered_by_tagline", f"Powered by {meta.get('name', pid)} in Association with We Hive"),
         })
 
     return {
@@ -195,5 +199,6 @@ async def connection_status(user=Depends(get_current_user)):
             "id": active,
             "name": meta.get("name", active),
             "model": cfg.get("model", ""),
+            "powered_by_tagline": meta.get("powered_by_tagline", f"Powered by {meta.get('name', active)} in Association with We Hive"),
         },
     }

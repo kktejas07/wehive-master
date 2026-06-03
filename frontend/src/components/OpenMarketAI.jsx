@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Sparkles, Loader2, Send, MessageSquare, Trash2 } from 'lucide-react';
+import { Sparkles, Loader2, Send, MessageSquare, Trash2, Info } from 'lucide-react';
 import { useAuth, API } from '../context/AuthContext';
 
 const SUGGESTIONS = [
@@ -46,6 +46,7 @@ export default function OpenMarketAI({ onClose }) {
   });
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [providerInfo, setProviderInfo] = useState(null);
   const scroller = useRef(null);
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function OpenMarketAI({ onClose }) {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const r = await axios.post(
         `${API}/chatbot/sessions`,
-        { title: 'Open AI' },
+        { title: 'Open Market AI' },
         { headers }
       );
       const sid = r.data.session_id;
@@ -76,10 +77,14 @@ export default function OpenMarketAI({ onClose }) {
         { text: q },
         { headers }
       );
-      const assistantMsg = { id: 'a-' + Date.now(), role: 'assistant', text: ar.data.assistant_message?.text || 'I\'m sorry, I couldn\'t generate a response. Please try again.', at: new Date().toISOString() };
+      const replyText = ar.data.assistant_message?.text || "I'm sorry, I couldn't generate a response. Please try again.";
+      if (ar.data.provider_info) {
+        setProviderInfo(ar.data.provider_info);
+      }
+      const assistantMsg = { id: 'a-' + Date.now(), role: 'assistant', text: replyText, at: new Date().toISOString() };
       setMessages((m) => [...m.filter(x => x.id !== userMsg.id), userMsg, assistantMsg]);
     } catch {
-      const errMsg = { id: 'e-' + Date.now(), role: 'assistant', text: 'I\'m having trouble connecting right now. Please try again or contact support@wehive.in.', at: new Date().toISOString() };
+      const errMsg = { id: 'e-' + Date.now(), role: 'assistant', text: "I'm having trouble connecting right now. Please try again or contact support@wehive.in.", at: new Date().toISOString() };
       setMessages((m) => [...m.filter(x => x.id !== userMsg.id), userMsg, errMsg]);
     } finally {
       setSending(false);
@@ -115,6 +120,15 @@ export default function OpenMarketAI({ onClose }) {
           </button>
         )}
       </div>
+
+      {providerInfo && (
+        <div className="flex items-center gap-2 bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-700))]/20 rounded-xl px-4 py-2.5">
+          <Info className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+          <span className="text-[12px] font-semibold text-[hsl(var(--blue-700))]">
+            {providerInfo.powered_by_tagline || `Powered by ${providerInfo.name || 'AI'} in Association with We Hive`}
+          </span>
+        </div>
+      )}
 
       {messages.length === 0 && (
         <div className="bg-[hsl(var(--soft-bg))] rounded-2xl border border-black/8 p-5">
@@ -156,7 +170,7 @@ export default function OpenMarketAI({ onClose }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') onSend(); }}
-          placeholder="Ask Eva anything about visas, travel, or documents…"
+          placeholder="Ask Eva anything about visas, travel, or documents..."
           className="flex-1 h-11 rounded-full border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-5 text-[14px] text-[hsl(var(--blue-900))] transition"
         />
         <button
