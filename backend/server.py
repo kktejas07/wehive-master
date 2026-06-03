@@ -25,6 +25,7 @@ from routes_ai_docs import router as ai_docs_router  # noqa: E402
 from routes_payments import router as payments_router  # noqa: E402
 from routes_notifications import router as notifications_router  # noqa: E402
 from routes_referrals import router as referrals_router  # noqa: E402
+from routes_ai_marketplace import router as ai_marketplace_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from db import countries_v2  # noqa: E402
 
@@ -63,6 +64,7 @@ api_router.include_router(ai_docs_router)
 api_router.include_router(payments_router)
 api_router.include_router(notifications_router)
 api_router.include_router(referrals_router)
+api_router.include_router(ai_marketplace_router)
 
 app.include_router(api_router)
 

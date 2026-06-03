@@ -671,7 +671,11 @@ async def admin_integrations(_=Depends(get_current_admin)):
     smtp_pwd = os.environ.get('SMTP_PASSWORD', '')
     smtp_ok = bool(smtp_user) and smtp_pwd and 'REPLACE' not in smtp_pwd
 
-    emergent_llm = os.environ.get('EMERGENT_LLM_KEY', '')
+    # AI Marketplace — counts any connected provider as 'configured'
+    ai_doc = await db['ai_settings'].find_one({}) or {}
+    ai_providers = ai_doc.get('providers', {})
+    ai_active = ai_doc.get('active_provider', '')
+    ai_configured = len(ai_providers) > 0
 
     return {
         'otp_channel': otp_channel,
@@ -698,11 +702,15 @@ async def admin_integrations(_=Depends(get_current_admin)):
                 'action': 'Generate a Gmail App Password and update backend/.env::SMTP_PASSWORD',
             },
             {
-                'id': 'emergent_llm',
-                'name': 'Emergent Universal LLM key',
-                'status': 'configured' if emergent_llm else 'missing',
-                'details': {'key': _mask(emergent_llm, 6)},
-                'action': 'Powers chatbot, passport vision scan and flight suggestions.',
+                'id': 'ai_marketplace',
+                'name': 'AI Marketplace',
+                'status': 'configured' if ai_configured else 'missing',
+                'details': {
+                    'active_provider': ai_active,
+                    'connected_count': len(ai_providers),
+                    'providers': list(ai_providers.keys()),
+                },
+                'action': 'Connect an AI provider in Settings → AI Marketplace.',
             },
         ],
     }

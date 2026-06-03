@@ -1,10 +1,10 @@
-"""AI-powered flight suggestions.
+"""AI-powered flight suggestions using AI Marketplace.
 
-We don't have a paid Amadeus / Kiwi key, but we can lean on Gemini via the
-Emergent LLM key to generate *realistic* cheapest / most-popular / fastest
-flight options between an origin (typically BLR or DEL) and the destination
-country's main airport. Results are cached per (country, origin) for 6 hours
-in Mongo so we don't pay for the same prompt twice during a session.
+We use the user's selected AI provider to generate *realistic* cheapest /
+most-popular / fastest flight options between an origin (typically BLR or DEL)
+and the destination country's main airport. Results are cached per
+(country, origin) for 6 hours in Mongo so we don't pay for the same prompt
+twice during a session.
 
 The shape returned is intentionally similar to what an Amadeus offer would
 look like, so the frontend can swap providers later without churn.
@@ -21,16 +21,16 @@ import re
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-
+from ai_marketplace import marketplace
+from auth_utils import get_current_user
 from db import db, countries_v2 as countries_col
 
 router = APIRouter(prefix="/flights", tags=["flights"])
 logger = logging.getLogger("wehive.flights")
+marketplace.db = db
 
-EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 CACHE_TTL = timedelta(hours=6)
 flights_cache = db["flights_cache"]
 
@@ -84,7 +84,7 @@ def _parse_json(text: str) -> dict | None:
     if not text:
         return None
     t = text.strip()
-    if t.startswith("```"):
+    if t.startswith("`"):
         t = t.strip("`")
         if t.lower().startswith("json"):
             t = t[4:]
@@ -128,25 +128,20 @@ def _normalise(payload: dict, country_id: str) -> list[dict[str, Any]]:
     return out
 
 
-async def _generate(country: dict, origin: str) -> list[dict[str, Any]]:
-    if not EMERGENT_KEY:
-        raise HTTPException(503, "AI service not configured")
+async def _generate(user_id: str, country: dict, origin: str) -> list[dict[str, Any]]:
     origin_city = ORIGIN_CITY.get(origin.upper(), origin)
-    chat = (
-        LlmChat(
-            api_key=EMERGENT_KEY,
-            session_id=f"flights-{country.get('id')}-{origin}",
-            system_message="You are a precise flight pricing assistant. You always reply with valid JSON only.",
-        )
-        .with_model("gemini", "gemini-2.5-flash")
-    )
     prompt = PROMPT.format(
         origin=origin.upper(),
         origin_city=origin_city,
         country_name=country.get("name") or country.get("id"),
     )
     try:
-        reply = await chat.send_message(UserMessage(text=prompt))
+        reply = await marketplace.chat(
+            user_id=user_id,
+            system_prompt="You are a precise flight pricing assistant. You always reply with valid JSON only.",
+            user_prompt=prompt,
+            max_tokens=1024,
+        )
     except Exception as e:
         logger.exception("flights LLM failed: %s", e)
         raise HTTPException(502, "Flight suggestions service is busy. Please try again.") from e
@@ -164,6 +159,7 @@ async def suggest_flights(
     country: str = Query(..., description="Country id (lowercase ISO-2)"),
     origin: str = Query("BLR", description="Origin IATA — BLR / DEL / BOM …"),
     refresh: bool = Query(False, description="Bypass the 6 h cache"),
+    user=Depends(get_current_user),
 ):
     country_id = country.strip().lower()
     origin = origin.strip().upper() or "BLR"
@@ -186,7 +182,7 @@ async def suggest_flights(
                 "generated_at": cached.get("created_at").isoformat() if cached.get("created_at") else None,
             }
 
-    routes = await _generate(country_doc, origin)
+    routes = await _generate(user["_id"], country_doc, origin)
     now = datetime.utcnow()
     await flights_cache.update_one(
         {"_id": key},

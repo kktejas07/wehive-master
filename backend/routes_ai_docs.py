@@ -1,4 +1,4 @@
-"""AI-powered document generation — cover letters, SOPs, and risk analysis."""
+"""AI-powered document generation — routed through AI Marketplace."""
 
 from __future__ import annotations
 
@@ -13,15 +13,12 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-
+from ai_marketplace import marketplace
 from auth_utils import get_current_user
 from db import applications
 
 router = APIRouter(prefix='/apps', tags=['ai-docs'])
 logger = logging.getLogger('wehive.ai-docs')
-
-EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
 
 class CoverLetterRequest(BaseModel):
@@ -43,7 +40,7 @@ def _parse_json(text: str) -> dict | None:
     if not text:
         return None
     t = text.strip()
-    if t.startswith('```'):
+    if t.startswith('`'):
         t = t.strip('`')
         if t.lower().startswith('json'):
             t = t[4:]
@@ -61,20 +58,13 @@ def _parse_json(text: str) -> dict | None:
         return None
 
 
-async def _call_gemini(prompt: str, session_id: str) -> str:
-    if not EMERGENT_KEY:
-        raise HTTPException(503, 'AI service not configured')
-    chat = LlmChat(
-        api_key=EMERGENT_KEY,
-        session_id=session_id,
-        system_message='You are a professional visa consultant assistant. Be thorough, accurate, and helpful.',
-    ).with_model('gemini', 'gemini-2.5-flash')
-    try:
-        reply = await chat.send_message(UserMessage(text=prompt))
-    except Exception as e:
-        logger.exception('Gemini call failed: %s', e)
-        raise HTTPException(502, 'AI service is temporarily unavailable. Please try again.')
-    return (reply or '').strip()
+async def _call_ai(user_id: str, prompt: str, session_id: str) -> str:
+    return await marketplace.chat(
+        user_id=user_id,
+        system_prompt='You are a professional visa consultant assistant. Be thorough, accurate, and helpful.',
+        user_prompt=prompt,
+        max_tokens=2048,
+    )
 
 
 def _serialize(d: dict) -> dict:
@@ -123,7 +113,7 @@ The letter should be 250–400 words, professional in tone, and include:
 
 Do NOT invent specific details. Use placeholders like [COMPANY NAME] where real info is missing.
 """
-    letter = await _call_gemini(prompt, session_id)
+    letter = await _call_ai(user['_id'], prompt, session_id)
     if not letter:
         raise HTTPException(502, 'Could not generate cover letter. Please try again.')
 
@@ -205,10 +195,10 @@ Rules:
 - Last day should include departure prep
 - Include a mix of popular tourist spots and local hidden gems
 """
-    raw = await _call_gemini(prompt, session_id)
+    raw = await _call_ai(user['_id'], prompt, session_id)
 
     t = raw.strip()
-    if t.startswith('```'):
+    if t.startswith('`'):
         t = t.strip('`')
         if t.lower().startswith('json'):
             t = t[4:]
@@ -307,10 +297,10 @@ Return ONLY a JSON object (no markdown, no prose):
   "approvals_needed": ["list of things that should be verified before submission"]
 }}
 """
-    raw = await _call_gemini(prompt, session_id)
+    raw = await _call_ai(user['_id'], prompt, session_id)
 
     t = raw.strip()
-    if t.startswith('```'):
+    if t.startswith('`'):
         t = t.strip('`')
         if t.lower().startswith('json'):
             t = t[4:]

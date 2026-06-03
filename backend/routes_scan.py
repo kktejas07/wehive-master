@@ -1,4 +1,4 @@
-"""AI document scanning — Gemini vision via emergentintegrations.
+"""AI document scanning — routed through AI Marketplace.
 
 Premium-only endpoints that accept an uploaded image (passport page or
 supporting document) and return a structured JSON with the fields we can
@@ -17,16 +17,15 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
-
+from ai_marketplace import marketplace
 from auth_utils import get_current_user
 from db import applications, scans
 import storage as r2
 
 router = APIRouter(prefix='/scan', tags=['scan'])
 logger = logging.getLogger('wehive.scan')
+marketplace.db = scans.database  # bind to same db client
 
-EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 MAX_SCAN_BYTES = 8 * 1024 * 1024  # 8MB
 ALLOWED_MIME = {'image/jpeg', 'image/png', 'image/webp'}
 
@@ -121,9 +120,8 @@ def _parse_json(text: str) -> dict:
     if not text:
         return {}
     t = text.strip()
-    if t.startswith('```'):
+    if t.startswith('`'):
         t = t.strip('`')
-        # Remove leading "json\n"
         if t.lower().startswith('json'):
             t = t[4:]
         t = t.strip()
@@ -139,42 +137,20 @@ def _parse_json(text: str) -> dict:
         return {'_parse_error': str(e), '_raw': text[:2000]}
 
 
-async def _call_gemini_vision(
-    prompt: str, image_bytes: bytes, mime: str, session_id: str
+async def _call_ai_vision(
+    user_id: str, prompt: str, image_bytes: bytes, mime: str
 ) -> str:
-    if not EMERGENT_KEY:
-        raise HTTPException(503, 'AI service not configured')
-    chat = LlmChat(
-        api_key=EMERGENT_KEY,
-        session_id=session_id,
-        system_message='You are a careful, concise document-analysis assistant.',
-    ).with_model('gemini', 'gemini-2.5-flash')
+    from ai_marketplace import marketplace
     b64 = base64.b64encode(image_bytes).decode('utf-8')
-    msg = UserMessage(
-        text=prompt,
-        file_contents=[ImageContent(image_base64=b64)],
+    reply = await marketplace.chat_with_image(
+        user_id=user_id,
+        system_prompt='You are a careful, concise document-analysis assistant.',
+        user_prompt=prompt,
+        image_b64=b64,
+        mime=mime,
+        max_tokens=1024,
     )
-    try:
-        reply = await chat.send_message(msg)
-    except Exception as e:
-        err = str(e)
-        logger.exception('Gemini vision call failed: %s', err)
-        low = err.lower()
-        if 'budget' in low or 'exceed' in low:
-            raise HTTPException(
-                status_code=402,
-                detail='AI credits exhausted. Please top up your Emergent key to continue scanning.',
-            )
-        if 'invalid_argument' in low or 'unable to process input image' in low:
-            raise HTTPException(
-                status_code=422,
-                detail='That image could not be analysed. Try a clearer photo of the passport data page.',
-            )
-        raise HTTPException(
-            status_code=502,
-            detail='AI service is temporarily unavailable. Please try again in a moment.',
-        )
-    return (reply or '').strip()
+    return reply
 
 
 async def _read_upload(file: UploadFile) -> bytes:
@@ -198,15 +174,14 @@ async def scan_passport(
 ):
     _ensure_premium(user)
     content = await _read_upload(file)
-    session_id = f"scan-passport-{uuid.uuid4()}"
-    raw = await _call_gemini_vision(PASSPORT_PROMPT, content, file.content_type, session_id)
+    raw = await _call_ai_vision(user['_id'], PASSPORT_PROMPT, content, file.content_type or 'image/jpeg')
     extracted = _parse_json(raw)
 
     result = {
         '_id': str(uuid.uuid4()),
         'user_id': user['_id'],
         'kind': 'passport',
-        'model': 'gemini-2.5-flash',
+        'model': 'ai-marketplace',
         'extracted': extracted,
         'raw': raw if '_parse_error' in extracted else None,
         'application_id': application_id,
@@ -275,18 +250,17 @@ async def scan_document(
 ):
     _ensure_premium(user)
     content = await _read_upload(file)
-    session_id = f"scan-doc-{uuid.uuid4()}"
     prompt = DOCUMENT_PROMPT
     if hint:
         prompt = prompt + f"\n\nUser hint about the document: {hint.strip()}"
-    raw = await _call_gemini_vision(prompt, content, file.content_type, session_id)
+    raw = await _call_ai_vision(user['_id'], prompt, content, file.content_type or 'image/jpeg')
     extracted = _parse_json(raw)
 
     result = {
         '_id': str(uuid.uuid4()),
         'user_id': user['_id'],
         'kind': 'document',
-        'model': 'gemini-2.5-flash',
+        'model': 'ai-marketplace',
         'extracted': extracted,
         'raw': raw if '_parse_error' in extracted else None,
         'application_id': application_id,
