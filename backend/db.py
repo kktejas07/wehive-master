@@ -16,6 +16,9 @@ leads = db['leads']
 countries_v2 = db['countries_v2']
 flights_cache = db['flights_cache']
 scans = db['scans']
+payments = db['payments']
+notifications_col = db['notifications']
+referrals_col = db['referrals']
 
 
 async def ensure_indexes():
@@ -26,7 +29,13 @@ async def ensure_indexes():
     await applications.create_index('user_id')
     await holiday_plans.create_index('user_id')
     await scans.create_index([('user_id', 1), ('created_at', -1)])
-    # Admin audit log
+    await payments.create_index([('user_id', 1)])
+    await payments.create_index([('razorpay_order_id', 1)], sparse=True)
+    await notifications_col.create_index([('user_id', 1), ('created_at', -1)])
+    await referrals_col.create_index('user_id')
+    await referrals_col.create_index('code', unique=True)
+    await db['referral_transactions'].create_index('referrer_id')
+    await db['referral_transactions'].create_index('referred_id')
     await db['admin_audit'].create_index([('at', -1)])
     await db['admin_audit'].create_index([('entity_type', 1), ('at', -1)])
     # Admin auth support

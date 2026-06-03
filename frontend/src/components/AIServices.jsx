@@ -16,7 +16,7 @@ const AI_TOOLS = [
     desc: 'AI generates professional visa cover letters and statements of purpose tailored to your application.',
     cta: 'Write my cover letter',
     badge: 'Popular',
-    href: '/account',
+    href: '/account?tab=aitools',
   },
   {
     id: 'itinerary',
@@ -26,7 +26,7 @@ const AI_TOOLS = [
     desc: 'Get a personalised day-by-day travel plan — activities, meals, budget estimates — in seconds.',
     cta: 'Plan my trip',
     badge: 'New',
-    href: '/account',
+    href: '/account?tab=aitools',
   },
   {
     id: 'risk',
@@ -36,7 +36,7 @@ const AI_TOOLS = [
     desc: 'AI reviews your documents and flags issues before you submit — so nothing gets rejected.',
     cta: 'Check my risk',
     badge: 'New',
-    href: '/account',
+    href: '/account?tab=aitools',
   },
   {
     id: 'checklist',
@@ -46,7 +46,7 @@ const AI_TOOLS = [
     desc: 'Tell us your destination, purpose, and nationality — AI generates your personalised checklist.',
     cta: 'Build my checklist',
     badge: null,
-    href: '/account',
+    href: '/account?tab=aitools',
   },
   {
     id: 'chatbot',
@@ -56,7 +56,7 @@ const AI_TOOLS = [
     desc: 'Ask anything: "Can I visit Japan with an Indian passport?" Get instant answers from our AI consultant.',
     cta: 'Chat with Eva',
     badge: null,
-    href: '/',
+    href: null,
   },
 ];
 
@@ -93,6 +93,10 @@ function AIToolCard({ tool, index, isAuthed }) {
       <div className="mt-5">
         {tool.id === 'chatbot' ? (
           <button
+            onClick={() => {
+              const ev = new CustomEvent('open-chatbot');
+              window.dispatchEvent(ev);
+            }}
             className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold text-[hsl(var(--accent))] hover:gap-2.5 transition-all"
           >
             {tool.cta} <ArrowRight className="w-3.5 h-3.5" />

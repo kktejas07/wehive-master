@@ -6,13 +6,21 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine } from 'lucide-react';
+import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
 import ScansTab from '../components/account/ScansTab';
+import AICoverLetterModal from '../components/AICoverLetterModal';
+import AIItineraryModal from '../components/AIItineraryModal';
+import AIRiskAnalysisModal from '../components/AIRiskAnalysisModal';
+import OpenMarketAI from '../components/OpenMarketAI';
+import PremiumGate from '../components/PremiumGate';
+import { Share2, Copy, Check, Users, Gift } from 'lucide-react';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },
   { id: 'applications', label: 'Applications', Icon: FileText },
+  { id: 'referrals', label: 'Referrals', Icon: Users },
+  { id: 'aitools', label: 'AI Tools', Icon: Sparkles },
   { id: 'scans', label: 'My scans', Icon: ScanLine },
   { id: 'plans', label: 'Saved plans', Icon: Compass },
   { id: 'settings', label: 'Settings', Icon: Settings },
@@ -269,6 +277,146 @@ function PlansTab({ token }) {
   );
 }
 
+function AIToolsTab({ token, isPremium }) {
+  const [apps, setApps] = useState(null);
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [activeModal, setActiveModal] = useState(null);
+  const [premiumGate, setPremiumGate] = useState(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    axios
+      .get(`${API}/users/me/applications`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => setApps(r.data || []))
+      .catch(() => setApps([]));
+  }, [token]);
+
+  const openTool = (app) => {
+    if (!app || app.status === 'draft') {
+      toast({ title: 'Submit your application first', description: 'AI tools are available after your application is submitted.' });
+      return;
+    }
+    setSelectedApp(app);
+    setActiveModal('cover-letter');
+  };
+
+  const handleToolClick = (toolId) => {
+    if (!isPremium) {
+      setPremiumGate(toolId);
+      return;
+    }
+    if (!selectedApp || selectedApp.status === 'draft') {
+      toast({ title: 'Select an application first', description: 'Tap an application above to use this tool.' });
+      return;
+    }
+    setActiveModal(toolId);
+  };
+
+  const statusColor = (s) => {
+    if (s === 'approved') return 'bg-emerald-100 text-emerald-700';
+    if (s === 'in_review') return 'bg-amber-100 text-amber-700';
+    if (s === 'rejected') return 'bg-red-100 text-red-700';
+    if (s === 'submitted') return 'bg-blue-100 text-blue-700';
+    return 'bg-slate-100 text-slate-700';
+  };
+
+  if (!apps) return <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" />;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          AI Tools
+        </h2>
+        <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/55">
+          Select an application to use an AI tool. Tools work best after submission.
+        </p>
+      </div>
+
+      {apps.length === 0 ? (
+        <EmptyState
+          title="No applications yet"
+          sub="Start a visa application from any country page — then come back to use AI tools."
+          cta={{ to: '/', label: 'Browse countries' }}
+        />
+      ) : (
+        <div className="space-y-3">
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
+            Your applications — tap one to use AI tools
+          </div>
+          {apps.map((a) => (
+            <button
+              key={a.id}
+              onClick={() => openTool(a)}
+              className="w-full flex items-center justify-between gap-4 rounded-2xl bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 p-5 text-left transition"
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
+                    {a.country_id?.toUpperCase()} · {a.visa_type}
+                  </span>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold capitalize ${statusColor(a.status)}`}>
+                    {(a.status || 'draft').replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="mt-0.5 text-[12.5px] text-[hsl(var(--blue-900))]/55">
+                  #{a.id?.slice(0, 8).toUpperCase()}
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-[hsl(var(--blue-900))]/40 shrink-0" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {[
+          { id: 'cover-letter', label: 'Cover Letter / SOP', Icon: FileText, color: '#0a2c8a', desc: 'Write a professional cover letter' },
+          { id: 'itinerary', label: 'AI Itinerary', Icon: Compass, color: '#f59e0b', desc: 'Plan your day-by-day trip' },
+          { id: 'risk', label: 'Risk Analyser', Icon: Check, color: '#dc2626', desc: 'Check rejection risk before submitting' },
+        ].map(({ id, label, Icon, color, desc }) => (
+          <button
+            key={id}
+            onClick={() => handleToolClick(id)}
+            className="rounded-2xl border border-black/8 bg-white p-4 text-left hover:border-[hsl(var(--accent))]/30 transition"
+          >
+            <div className="h-10 w-10 rounded-xl inline-flex items-center justify-center mb-3" style={{ background: `${color}15` }}>
+              <Icon className="w-5 h-5" style={{ color }} />
+            </div>
+            <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{label}</div>
+            <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-0.5">{desc}</div>
+          </button>
+        ))}
+      </div>
+
+      <PremiumGate
+        open={!!premiumGate}
+        onClose={() => setPremiumGate(null)}
+        feature={premiumGate === 'cover-letter' ? 'Cover Letter / SOP Writer' : premiumGate === 'itinerary' ? 'AI Itinerary Planner' : 'Risk Analyser'}
+      />
+      <AICoverLetterModal
+        open={activeModal === 'cover-letter'}
+        onClose={() => setActiveModal(null)}
+        applicationId={selectedApp?.id}
+        country_id={selectedApp?.country_id}
+        visa_type={selectedApp?.visa_type}
+        formData={selectedApp?.form_data}
+      />
+      <AIItineraryModal
+        open={activeModal === 'itinerary'}
+        onClose={() => setActiveModal(null)}
+        applicationId={selectedApp?.id}
+        country_id={selectedApp?.country_id}
+      />
+      <AIRiskAnalysisModal
+        open={activeModal === 'risk'}
+        onClose={() => setActiveModal(null)}
+        applicationId={selectedApp?.id}
+      />
+    </div>
+  );
+}
+
 function SettingsTab({ user, token, onUpdated }) {
   const { toast } = useToast();
   const [name, setName] = useState(user.name || '');
@@ -383,6 +531,111 @@ function SettingsTab({ user, token, onUpdated }) {
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save changes'}
         </Button>
       </div>
+
+      <div className="mt-10 pt-8 border-t border-black/8">
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="w-4 h-4 text-[hsl(var(--accent))]" />
+          <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--accent))]">Open Market AI</span>
+        </div>
+        <OpenMarketAI />
+      </div>
+    </div>
+  );
+}
+
+function ReferralsTab({ token }) {
+  const { toast } = useToast();
+  const [code, setCode] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    axios.get(`${API}/referrals/code`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => setCode(r.data.code))
+      .catch(() => {});
+    axios.get(`${API}/referrals/stats`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => setStats(r.data))
+      .catch(() => {});
+  }, [token]);
+
+  const handleShare = async (medium) => {
+    if (!code) return;
+    const url = `${window.location.origin}/signup?ref=${code}`;
+    const text = `Apply for your visa with WeHive — use my referral code ${code} to get ₹500 off your first application! ${url}`;
+    if (medium === 'copy') {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ title: 'Referral code copied!' });
+    } else if (medium === 'whatsapp') {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    } else if (medium === 'email') {
+      window.open(`mailto:?subject=WeHive referral&body=${encodeURIComponent(text)}`, '_blank');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          Referral Program
+        </h2>
+        <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/55">
+          Share your code — earn ₹500 credit for every friend who applies.
+        </p>
+      </div>
+
+      <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--accent))] p-6 sm:p-8 text-white">
+        <div className="flex items-center gap-2 mb-3">
+          <Gift className="w-5 h-5 text-white/70" />
+          <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/70">Your referral code</span>
+        </div>
+        <div className="text-4xl font-display font-extrabold tracking-[0.1em] mb-6">{code || '---------'}</div>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => handleShare('copy')}
+            className="inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 px-5 py-2.5 text-[13px] font-bold transition"
+          >
+            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copied ? 'Copied!' : 'Copy code'}
+          </button>
+          <button
+            onClick={() => handleShare('whatsapp')}
+            className="inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-600 px-5 py-2.5 text-[13px] font-bold transition"
+          >
+            Share on WhatsApp
+          </button>
+          <button
+            onClick={() => handleShare('email')}
+            className="inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 px-5 py-2.5 text-[13px] font-bold transition"
+          >
+            Share via Email
+          </button>
+        </div>
+      </div>
+
+      {stats && (
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: 'Total referrals', value: stats.total_referrals || 0 },
+            { label: 'Credits earned', value: `₹${stats.total_earned || 0}` },
+            { label: 'Pending', value: `₹${stats.pending_reward || 0}` },
+          ].map((s) => (
+            <div key={s.label} className="rounded-2xl bg-white border border-black/5 p-5 text-center">
+              <div className="text-[24px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.value}</div>
+              <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-1">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="rounded-2xl border border-dashed border-black/15 p-6 text-center">
+        <div className="text-[14px] text-[hsl(var(--blue-900))]/55">
+          <strong>How it works:</strong> Share your code with friends. When they apply and pay, you earn ₹500 credit. Credits can be redeemed on your next visa application.
+        </div>
+      </div>
     </div>
   );
 }
@@ -458,6 +711,8 @@ export default function Account() {
             <div className="rounded-3xl bg-white border border-black/5 p-8 min-h-[420px]">
               {tab === 'profile' && <ProfileTab user={user} token={token} onUpdated={refreshUser} />}
               {tab === 'applications' && <ApplicationsTab token={token} />}
+              {tab === 'referrals' && <ReferralsTab token={token} />}
+              {tab === 'aitools' && <AIToolsTab token={token} isPremium={user?.is_premium} />}
               {tab === 'scans' && <ScansTab user={user} token={token} />}
               {tab === 'plans' && <PlansTab token={token} />}
               {tab === 'settings' && <SettingsTab user={user} token={token} onUpdated={refreshUser} />}

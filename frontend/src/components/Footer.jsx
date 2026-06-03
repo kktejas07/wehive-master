@@ -111,7 +111,7 @@ export default function Footer() {
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               All systems normal
             </span>
-            <span>SOC 2 · GDPR · PCI</span>
+            <span>256-bit SSL · SOC 2 · GDPR · PCI</span>
           </div>
         </div>
       </div>

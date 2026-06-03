@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import DocumentChecklist, { getReadyCount } from '../components/DocumentChecklist';
+import DocumentChecklist, { getReadyCount, DocumentExpirationWarnings } from '../components/DocumentChecklist';
 import ApplicationTimeline from '../components/ApplicationTimeline';
 import ConsultantChat from '../components/ConsultantChat';
 import AIScanModal from '../components/AIScanModal';

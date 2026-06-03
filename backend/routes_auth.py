@@ -10,6 +10,7 @@ from auth_utils import (
 )
 from otp_providers import deliver_otp
 from db import users, otps
+from routes_referrals import REFERRAL_REWARD_INR
 import os
 import uuid
 
@@ -111,7 +112,23 @@ async def verify_otp(req: VerifyOtpRequest):
             'created_at': now,
             'updated_at': now,
         }
-        # Only set email or phone field if it has a value
+        if req.referral_code:
+            referrer = await db['referrals'].find_one({'code': req.referral_code.strip().upper()})
+            if referrer and referrer['user_id'] != user['_id']:
+                user['referred_by'] = referrer['user_id']
+                await db['referral_transactions'].update_one(
+                    {'_id': f'pending-{user["_id"]}'},
+                    {'$setOnInsert': {
+                        '_id': f'pending-{user["_id"]}',
+                        'referrer_id': referrer['user_id'],
+                        'referred_id': user['_id'],
+                        'referred_email': identifier if kind == 'email' else '',
+                        'amount_inr': REFERRAL_REWARD_INR,
+                        'status': 'pending',
+                        'created_at': now,
+                    }},
+                    upsert=True,
+                )
         if kind == 'email':
             user['email'] = identifier
         else:

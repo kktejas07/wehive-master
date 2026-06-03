@@ -65,7 +65,7 @@ function OtpDigits({ value, onChange, length = 6 }) {
   );
 }
 
-export default function AuthCard({ mode }) {
+export default function AuthCard({ mode, referralCode }) {
   const { sendOtp, verifyOtp, isAuthed } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -110,7 +110,7 @@ export default function AuthCard({ mode }) {
     }
     setVerifying(true);
     try {
-      await verifyOtp({ identifier, code: otp, name: isSignup ? name : undefined });
+      await verifyOtp({ identifier, code: otp, name: isSignup ? name : undefined, referral_code: referralCode });
       toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
       navigate('/account', { replace: true });
     } catch (e) {

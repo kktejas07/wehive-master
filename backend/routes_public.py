@@ -1,4 +1,4 @@
-"""Public read-only endpoints — pricing config + published events.
+"""Public read-only endpoints — pricing config + published events + tracking.
 
 These let the SPA reflect admin changes (base fees / surcharge / GST / event
 banners) without requiring an admin login.
@@ -6,7 +6,7 @@ banners) without requiring an admin login.
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 
 from db import db
 from routes_admin import _load_pricing, _serialize_event
@@ -14,6 +14,8 @@ from routes_admin import _load_pricing, _serialize_event
 router = APIRouter(prefix='/public', tags=['public'])
 
 events_col = db['events']
+applications_col = db['applications']
+countries_col = db['countries_v2']
 
 
 @router.get('/pricing')
@@ -24,6 +26,32 @@ async def public_pricing():
         'surcharge_inr': cfg['surcharge_inr'],
         'gst_rate': cfg['gst_rate'],
         'currency': cfg['currency'],
+    }
+
+
+@router.get('/track/{application_id}')
+async def track_application(application_id: str):
+    """Public endpoint to track an application's status — no auth required."""
+    app = await applications_col.find_one({'_id': application_id}, {'_id': 0})
+    if not app:
+        raise HTTPException(404, 'Application not found')
+
+    country = None
+    cid = app.get('country_id', '')
+    if cid:
+        country = await countries_col.find_one({'id': cid}, {'_id': 0, 'name': 1})
+
+    timeline = app.get('timeline') or []
+    return {
+        'id': app.get('_id'),
+        'country_id': cid,
+        'country_name': country.get('name') if country else cid.upper(),
+        'visa_type': app.get('visa_type', 'Tourist'),
+        'status': app.get('status', 'draft'),
+        'timeline': timeline,
+        'estimated_date': app.get('estimated_date'),
+        'submitted_at': app.get('submitted_at'),
+        'updated_at': app.get('updated_at'),
     }
 
 

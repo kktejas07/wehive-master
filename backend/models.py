@@ -31,7 +31,8 @@ class SendOtpResponse(BaseModel):
 class VerifyOtpRequest(BaseModel):
     identifier: str
     code: str
-    name: Optional[str] = None  # for signup completion
+    name: Optional[str] = None
+    referral_code: Optional[str] = None
 
 
 class AuthTokens(BaseModel):
