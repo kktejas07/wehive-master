@@ -22,7 +22,7 @@ from routes_admin import router as admin_router  # noqa: E402
 from routes_admin_auth import router as admin_auth_router, ensure_seed_admin  # noqa: E402
 from routes_public import router as public_router  # noqa: E402
 from routes_ai_docs import router as ai_docs_router  # noqa: E402
-from seed_countries import seed_countries  # noqa: E402
+from seed_countries import seed as seed_countries  # noqa: E402
 from db import countries_v2  # noqa: E402
 
 app = FastAPI(title='We Hive API', version='1.0.0')
