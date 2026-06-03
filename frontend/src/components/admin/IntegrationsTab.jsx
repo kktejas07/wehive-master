@@ -1,17 +1,25 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, Plug, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, Plug, CheckCircle2, AlertTriangle, Trash2, TestTube, X, KeyRound, ChevronDown } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
 const CHANNELS = [
-  { id: 'mock',             label: 'Mock (123456)',         hint: 'Dev-friendly — always uses the code `123456`.' },
-  { id: 'auto',             label: 'Auto',                  hint: 'Route email → SMTP, phone → WhatsApp; falls back to mock if creds missing.' },
-  { id: 'twilio_sms',       label: 'Twilio SMS',            hint: 'Requires TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER.' },
-  { id: 'twilio_whatsapp',  label: 'Twilio WhatsApp',       hint: 'Requires sandbox opt-in or an approved WA sender.' },
-  { id: 'email',            label: 'Email (SMTP)',          hint: 'Gmail requires an App Password.' },
+  { id: 'mock',             label: 'Mock (123456)',        hint: 'Dev-friendly — always uses the code `123456`.' },
+  { id: 'auto',            label: 'Auto',                hint: 'Route email → SMTP, phone → WhatsApp; falls back to mock if creds missing.' },
+  { id: 'twilio_sms',      label: 'Twilio SMS',           hint: 'Requires TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER.' },
+  { id: 'twilio_whatsapp', label: 'Twilio WhatsApp',       hint: 'Requires sandbox opt-in or an approved WA sender.' },
+  { id: 'email',           label: 'Email (SMTP)',           hint: 'Gmail requires an App Password.' },
 ];
+
+const CATEGORY_ICONS = {
+  visa_apis: '🔐',
+  travel_booking: '✈️',
+  payments_forex: '💳',
+  travel_insurance: '🛡️',
+  appt_slots: '📅',
+};
 
 function StatusBadge({ status }) {
   if (status === 'configured') {
@@ -23,25 +31,135 @@ function StatusBadge({ status }) {
   return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/15 text-red-300 text-[11px] font-bold uppercase tracking-[0.14em]"><AlertTriangle className="w-3 h-3" /> Missing</span>;
 }
 
+function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTest, onSetDefault, connecting, testing }) {
+  const [showForm, setShowForm] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [baseUrl, setBaseUrl] = useState(svc.base_url || '');
+
+  const handleTest = async () => {
+    if (!apiKey && !isConnected) return;
+    await onTest(svc.id, apiKey, baseUrl);
+  };
+
+  const handleConnect = async () => {
+    if (svc.requires_key && !apiKey) return;
+    await onConnect(svc.id, apiKey, baseUrl);
+    setApiKey('');
+    setShowForm(false);
+  };
+
+  return (
+    <div className="border-b border-white/5 last:border-0 py-3 px-1">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-[13px] font-bold text-white">{svc.name}</div>
+          <div className="text-[11.5px] text-slate-400 mt-0.5">{svc.description}</div>
+          {svc.features && svc.features.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {svc.features.map(f => (
+                <span key={f} className="text-[10px] font-semibold bg-white/5 text-slate-400 px-2 py-0.5 rounded-full">
+                  {f.replace(/_/g, ' ')}
+                </span>
+              ))}
+            </div>
+          )}
+          {svc.powered_by_tagline && (
+            <div className="text-[10px] text-slate-500 mt-1">{svc.powered_by_tagline}</div>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {!isConnected ? (
+            <button
+              onClick={() => setShowForm(v => !v)}
+              className="text-[11px] font-bold text-[hsl(var(--accent))] hover:text-white px-3 py-1.5 rounded-lg border border-[hsl(var(--accent))]/30 hover:border-[hsl(var(--accent))] transition"
+            >
+              Connect
+            </button>
+          ) : (
+            <>
+              {isDefault && <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">Default</span>}
+              {!isDefault && (
+                <button onClick={() => onSetDefault(svc.id)} className="text-[11px] font-bold text-slate-400 hover:text-white px-2 py-1 rounded-lg hover:bg-white/5 transition">Set Default</button>
+              )}
+              <button onClick={() => onDisconnect(svc.id)} className="p-1 rounded text-red-400 hover:text-red-300 hover:bg-red-500/10 transition">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {showForm && (
+        <div className="mt-3 bg-white/5 rounded-lg p-3 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-bold text-slate-300">Connect {svc.name}</span>
+            <button onClick={() => setShowForm(false)} className="p-1 rounded hover:bg-white/10 transition"><X className="w-3.5 h-3.5 text-slate-400" /></button>
+          </div>
+          {svc.requires_key && (
+            <div>
+              <label className="block text-[11px] font-bold text-slate-400 mb-1">{svc.key_label}</label>
+              <div className="relative">
+                <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder={svc.key_placeholder}
+                  className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 focus:border-[hsl(var(--accent))]/50 outline-none" />
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-2 pt-1">
+            <button onClick={handleTest} disabled={testing || (svc.requires_key && !apiKey)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-[11px] font-bold text-slate-400 hover:bg-white/5 disabled:opacity-40 transition">
+              {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />} Test
+            </button>
+            <button onClick={handleConnect} disabled={connecting || (svc.requires_key && !apiKey)}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[hsl(var(--accent))] text-white text-[11px] font-bold hover:bg-[hsl(var(--accent))]/80 disabled:opacity-40 transition">
+              {connecting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plug className="w-3 h-3" />} Connect
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function IntegrationsTab() {
   const { token } = useAdminAuth();
   const { toast } = useToast();
-  const [data, setData] = useState(null);
+  const [otpData, setOtpData] = useState(null);
+  const [thirdPartyData, setThirdPartyData] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [testing, setTesting] = useState(false);
 
-  const load = useCallback(async () => {
+  const loadIntegrations = useCallback(async () => {
     const r = await adminClient(token).get('/integrations');
-    setData(r.data);
+    setOtpData(r.data);
   }, [token]);
 
-  useEffect(() => { load(); }, [load]);
+  const loadThirdParty = useCallback(async () => {
+    try {
+      const [catRes, svcRes] = await Promise.all([
+        adminClient(token).get('/third-party/categories'),
+        adminClient(token).get('/third-party/admin/my-services'),
+      ]);
+      setCategories(catRes.data.categories || []);
+      setThirdPartyData(svcRes.data);
+    } catch (e) {
+      console.error('third party load error', e?.response?.data);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    loadIntegrations();
+    loadThirdParty();
+  }, [loadIntegrations, loadThirdParty]);
 
   const setChannel = async (id) => {
     setBusy(true);
     try {
       await adminClient(token).patch('/integrations', { OTP_CHANNEL: id });
       toast({ title: `OTP channel set to ${id}` });
-      await load();
+      await loadIntegrations();
     } catch (e) {
       toast({ title: 'Failed', description: e?.response?.data?.detail || e.message });
     } finally {
@@ -49,30 +167,71 @@ export default function IntegrationsTab() {
     }
   };
 
-  if (!data) {
-    return (
-      <>
-        <AdminHeader title="Integrations" />
-        <Panel><Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--accent))]" /></Panel>
-      </>
-    );
-  }
+  const handleConnect = async (serviceId, apiKey, baseUrl) => {
+    setConnecting(true);
+    try {
+      await adminClient(token).post('/third-party/admin/connect', { service_id: serviceId, api_key: apiKey, base_url: baseUrl });
+      toast({ title: 'Service connected' });
+      await loadThirdParty();
+    } catch (e) {
+      toast({ title: 'Connection failed', description: e?.response?.data?.detail });
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async (serviceId) => {
+    try {
+      await adminClient(token).delete(`/third-party/admin/disconnect/${serviceId}`);
+      toast({ title: 'Disconnected' });
+      await loadThirdParty();
+    } catch {
+      toast({ title: 'Failed to disconnect', variant: 'destructive' });
+    }
+  };
+
+  const handleTest = async (serviceId, apiKey, baseUrl) => {
+    setTesting(true);
+    try {
+      const res = await adminClient(token).post('/third-party/admin/test', { service_id: serviceId, api_key: apiKey, base_url: baseUrl });
+      if (res.data.ok) {
+        toast({ title: 'Connection successful' });
+      } else {
+        toast({ title: 'Test failed', description: res.data.error, variant: 'destructive' });
+      }
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const handleSetDefault = async (serviceId) => {
+    try {
+      await adminClient(token).post('/third-party/admin/set-default', { service_id: serviceId });
+      toast({ title: 'Default updated' });
+      await loadThirdParty();
+    } catch {
+      toast({ title: 'Failed', variant: 'destructive' });
+    }
+  };
+
+  const connectedIds = new Set((thirdPartyData?.services || []).map(s => s.service_id));
 
   return (
     <div data-testid="admin-integrations-tab">
       <AdminHeader
-        title="API integrations"
-        subtitle="Connect Twilio, SMTP and the Emergent LLM key. Switch OTP routing in one click."
+        title="Integrations"
+        subtitle="Manage OTP channels, third-party APIs, and AI provider connections."
       />
 
+      {/* OTP Channel */}
       <Panel className="mb-4">
         <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400">Active OTP channel</div>
         <div className="mt-1 text-[22px] font-display font-extrabold text-white capitalize">
-          {data.otp_channel.replace('_', ' ')}
+          {(otpData?.otp_channel || 'unknown').replace('_', ' ')}
         </div>
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {CHANNELS.map((c) => {
-            const active = data.otp_channel === c.id;
+            const active = otpData?.otp_channel === c.id;
             return (
               <button
                 key={c.id}
@@ -96,31 +255,45 @@ export default function IntegrationsTab() {
         </div>
       </Panel>
 
-      <div className="grid lg:grid-cols-3 gap-4">
-        {data.services.map((s) => (
-          <Panel key={s.id} data-testid={`integration-${s.id}`}>
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2">
-                <span className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 text-[hsl(var(--accent))]">
-                  <Plug className="w-4 h-4" />
-                </span>
-                <div className="text-[13px] font-bold text-white">{s.name}</div>
+      {/* Third-party Services */}
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <div className="text-[14px] font-bold text-white">Third-Party Services</div>
+          <div className="text-[12px] text-slate-400 mt-0.5">Platform-wide API connections managed by admin</div>
+        </div>
+        {thirdPartyData?.connected && (
+          <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-1 rounded-full">
+            {thirdPartyData.services.length} connected
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        {(categories || []).map(cat => (
+          <Panel key={cat.id}>
+            <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-white/5">
+              <span className="text-lg">{CATEGORY_ICONS[cat.id] || '🔌'}</span>
+              <div>
+                <div className="text-[13.5px] font-bold text-white">{cat.name}</div>
+                <div className="text-[11.5px] text-slate-400">{cat.description}</div>
               </div>
-              <StatusBadge status={s.status} />
             </div>
-            <dl className="mt-4 space-y-2">
-              {Object.entries(s.details).map(([k, v]) => (
-                <div key={k} className="flex justify-between items-center gap-2 text-[12.5px]">
-                  <dt className="text-slate-500 uppercase tracking-[0.14em] font-bold text-[10.5px]">{k.replace(/_/g, ' ')}</dt>
-                  <dd className="text-slate-200 font-mono truncate">{v || '—'}</dd>
-                </div>
+            <div>
+              {cat.services.map(svc => (
+                <ServiceRow
+                  key={svc.id}
+                  svc={svc}
+                  isConnected={connectedIds.has(svc.id)}
+                  isDefault={thirdPartyData?.default_service === svc.id}
+                  onConnect={handleConnect}
+                  onDisconnect={handleDisconnect}
+                  onTest={handleTest}
+                  onSetDefault={handleSetDefault}
+                  connecting={connecting}
+                  testing={testing}
+                />
               ))}
-            </dl>
-            {s.action && (
-              <div className="mt-4 rounded-lg bg-white/5 p-2.5 text-[11.5px] text-slate-400 leading-snug">
-                {s.action}
-              </div>
-            )}
+            </div>
           </Panel>
         ))}
       </div>

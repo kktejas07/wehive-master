@@ -18,6 +18,14 @@ import {
   Trash2,
   AlertCircle,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from './ui/dialog';
 
 const ICONS = {
   ollama: Server,
@@ -39,10 +47,13 @@ export default function AIMarketplaceSettings() {
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [testing, setTesting] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
   const [model, setModel] = useState('');
+
   const [status, setStatus] = useState(null);
 
   const headers = { Authorization: `Bearer ${token}` };
@@ -69,11 +80,28 @@ export default function AIMarketplaceSettings() {
     fetchData();
   }, [token]);
 
+  const openConnectModal = (p) => {
+    const meta = providers.find(pr => pr.id === p.id);
+    setSelectedProvider(p.id);
+    setApiKey('');
+    setBaseUrl(p.id === 'ollama' ? 'http://localhost:11434' : '');
+    setModel(meta?.models?.[0] || '');
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedProvider(null);
+    setApiKey('');
+    setBaseUrl('');
+    setModel('');
+  };
+
   const handleConnect = async () => {
     if (!selectedProvider) return;
     setConnecting(true);
     try {
-      const meta = providers.find((p) => p.id === selectedProvider);
+      const meta = providers.find(p => p.id === selectedProvider);
       await axios.post(
         `${API}/ai-marketplace/connect`,
         {
@@ -84,13 +112,11 @@ export default function AIMarketplaceSettings() {
         },
         { headers }
       );
-      toast({ title: `${meta.name} connected` });
-      setApiKey('');
-      setBaseUrl('');
-      setModel('');
-      setSelectedProvider(null);
+      toast({ title: `${meta?.name} connected successfully` });
+      closeModal();
       await fetchData();
     } catch (e) {
+      console.error('AI Marketplace connect error:', e?.response?.data);
       toast({ title: 'Connection failed', description: e?.response?.data?.detail || 'Try again', variant: 'destructive' });
     } finally {
       setConnecting(false);
@@ -101,7 +127,7 @@ export default function AIMarketplaceSettings() {
     if (!selectedProvider) return;
     setTesting(true);
     try {
-      const meta = providers.find((p) => p.id === selectedProvider);
+      const meta = providers.find(p => p.id === selectedProvider);
       const res = await axios.post(
         `${API}/ai-marketplace/test`,
         {
@@ -139,12 +165,13 @@ export default function AIMarketplaceSettings() {
       await axios.delete(`${API}/ai-marketplace/disconnect/${pid}`, { headers });
       toast({ title: 'Provider disconnected' });
       await fetchData();
-    } catch (e) {
+    } catch {
       toast({ title: 'Failed to disconnect', variant: 'destructive' });
     }
   };
 
-  const connectedIds = myProviders.map((p) => p.provider_id);
+  const connectedIds = myProviders.map(p => p.provider_id);
+  const selectedMeta = providers.find(p => p.id === selectedProvider);
 
   if (loading) {
     return (
@@ -157,7 +184,6 @@ export default function AIMarketplaceSettings() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
           AI Marketplace
@@ -167,7 +193,6 @@ export default function AIMarketplaceSettings() {
         </p>
       </div>
 
-      {/* Active status */}
       {status?.active ? (
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
           <Check className="w-5 h-5 text-emerald-600" />
@@ -189,15 +214,14 @@ export default function AIMarketplaceSettings() {
         </div>
       )}
 
-      {/* Connected providers */}
       {myProviders.length > 0 && (
         <div>
           <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-3">
             Connected Providers
           </h3>
           <div className="space-y-2">
-            {myProviders.map((p) => {
-              const meta = providers.find((pr) => pr.id === p.provider_id);
+            {myProviders.map(p => {
+              const meta = providers.find(pr => pr.id === p.provider_id);
               const isActive = activeProvider === p.provider_id;
               const Icon = ICONS[p.provider_id] || Plug;
               return (
@@ -249,33 +273,23 @@ export default function AIMarketplaceSettings() {
         </div>
       )}
 
-      {/* Add new provider */}
       <div>
         <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-3">
           Add Provider
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {providers.map((p) => {
+          {providers.map(p => {
             const isConnected = connectedIds.includes(p.id);
             const Icon = ICONS[p.id] || Plug;
             return (
               <button
                 key={p.id}
-                onClick={() => {
-                  if (!isConnected) {
-                    setSelectedProvider(p.id);
-                    setApiKey('');
-                    setBaseUrl('');
-                    setModel(p.models?.[0] || '');
-                  }
-                }}
+                onClick={() => !isConnected && openConnectModal(p)}
                 disabled={isConnected}
                 className={`text-left p-4 rounded-xl border transition ${
                   isConnected
-                    ? 'bg-emerald-50/50 border-emerald-100 opacity-60'
-                    : selectedProvider === p.id
-                    ? 'bg-[hsl(var(--blue-50))] border-[hsl(var(--blue-700))]'
-                    : 'bg-white border-black/5 hover:border-[hsl(var(--blue-700))]/30'
+                    ? 'bg-emerald-50/50 border-emerald-100 opacity-60 cursor-default'
+                    : 'bg-white border-black/5 hover:border-[hsl(var(--blue-700))]/30 cursor-pointer'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -296,96 +310,102 @@ export default function AIMarketplaceSettings() {
         </div>
       </div>
 
-      {/* Connection form */}
-      {selectedProvider && (
-        <div className="bg-[hsl(var(--soft-bg))] rounded-xl border border-black/5 p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-[14px] font-bold text-[hsl(var(--blue-900))]">
-              Connect {providers.find((p) => p.id === selectedProvider)?.name}
-            </h4>
-            <button
-              onClick={() => setSelectedProvider(null)}
-              className="p-1 rounded hover:bg-black/5 transition"
-            >
-              <X className="w-4 h-4" />
-            </button>
+      <Dialog open={modalOpen} onOpenChange={open => !open && closeModal()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">
+              Connect {selectedMeta?.name}
+            </DialogTitle>
+            <DialogDescription className="text-[13px] text-[hsl(var(--blue-900))]/55">
+              Enter your credentials to connect to {selectedMeta?.name}.
+              {selectedMeta?.website && (
+                <a
+                  href={selectedMeta.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-1 inline-flex items-center gap-0.5 text-[hsl(var(--blue-700))] hover:underline"
+                >
+                  Visit website <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {selectedMeta?.requires_key && (
+              <div>
+                <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
+                  {selectedMeta.key_label}
+                </label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/30" />
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={e => setApiKey(e.target.value)}
+                    placeholder={selectedMeta.key_placeholder}
+                    className="w-full h-10 pl-9 pr-3 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition"
+                  />
+                </div>
+              </div>
+            )}
+
+            {selectedProvider === 'ollama' && (
+              <div>
+                <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
+                  Base URL
+                </label>
+                <input
+                  type="text"
+                  value={baseUrl}
+                  onChange={e => setBaseUrl(e.target.value)}
+                  placeholder="http://localhost:11434"
+                  className="w-full h-10 px-3 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition"
+                />
+              </div>
+            )}
+
+            {selectedMeta?.models?.length > 0 && (
+              <div>
+                <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
+                  Model
+                </label>
+                <div className="relative">
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/30 pointer-events-none" />
+                  <select
+                    value={model}
+                    onChange={e => setModel(e.target.value)}
+                    className="w-full h-10 px-3 pr-8 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition bg-white appearance-none"
+                  >
+                    {selectedMeta.models.map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
-          {(() => {
-            const meta = providers.find((p) => p.id === selectedProvider);
-            return (
-              <>
-                {meta?.requires_key && (
-                  <div>
-                    <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
-                      {meta.key_label}
-                    </label>
-                    <div className="relative">
-                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/30" />
-                      <input
-                        type="password"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        placeholder={meta.key_placeholder}
-                        className="w-full h-10 pl-9 pr-3 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition"
-                      />
-                    </div>
-                  </div>
-                )}
-                {selectedProvider === 'ollama' && (
-                  <div>
-                    <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
-                      Base URL
-                    </label>
-                    <input
-                      type="text"
-                      value={baseUrl}
-                      onChange={(e) => setBaseUrl(e.target.value)}
-                      placeholder="http://localhost:11434"
-                      className="w-full h-10 px-3 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition"
-                    />
-                  </div>
-                )}
-                {meta?.models?.length > 0 && (
-                  <div>
-                    <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
-                      Model
-                    </label>
-                    <select
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                      className="w-full h-10 px-3 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition bg-white"
-                    >
-                      {meta.models.map((m) => (
-                        <option key={m} value={m}>{m}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </>
-            );
-          })}
-
-          <div className="flex items-center gap-2 pt-2">
+          <DialogFooter className="gap-2 sm:gap-0">
             <button
               onClick={handleTest}
-              disabled={testing || (!apiKey && providers.find((p) => p.id === selectedProvider)?.requires_key)}
+              disabled={testing || (selectedMeta?.requires_key && !apiKey)}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-black/10 text-[13px] font-bold text-[hsl(var(--blue-900))]/70 hover:bg-white disabled:opacity-50 transition"
             >
               {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-              Test Connection
+              Test
             </button>
             <button
               onClick={handleConnect}
-              disabled={connecting}
+              disabled={connecting || (selectedMeta?.requires_key && !apiKey)}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[hsl(var(--blue-700))] text-white text-[13px] font-bold hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 transition"
             >
               {connecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plug className="w-3.5 h-3.5" />}
               Connect
             </button>
-          </div>
-        </div>
-      )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
