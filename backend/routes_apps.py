@@ -11,6 +11,7 @@ from fastapi.responses import StreamingResponse, FileResponse, RedirectResponse
 from pydantic import BaseModel
 
 from auth_utils import get_current_user
+from config import CONSULTANT_NAME, CONSULTANT_AUTO_REPLY
 from db import db, applications
 import storage as r2
 
@@ -235,8 +236,8 @@ async def post_message(application_id: str, payload: dict, user=Depends(get_curr
     auto = {
         '_id': str(uuid.uuid4()),
         'from': 'consultant',
-        'name': 'Kiran · Senior consultant',
-        'text': 'Got it — I\'ll review and get back within 4 hours during business hours (Mon–Sat 09:00–18:00 IST).',
+        'name': CONSULTANT_NAME,
+        'text': CONSULTANT_AUTO_REPLY,
         'at': now,
     }
     await applications.update_one(

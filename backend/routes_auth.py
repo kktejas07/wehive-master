@@ -13,16 +13,9 @@ from db import users, otps
 import os
 import uuid
 
+from config import ADMIN_EMAILS, MOCK_CODE, OTP_TTL_MIN
+
 router = APIRouter(prefix='/auth', tags=['auth'])
-
-MOCK_CODE = os.environ.get('MOCK_OTP_CODE', '').strip()
-OTP_TTL_MIN = int(os.environ.get('OTP_TTL_MINUTES', '10'))
-
-ADMIN_EMAILS = {
-    e.strip().lower()
-    for e in os.environ.get('ADMIN_EMAILS', '').split(',')
-    if e.strip()
-}
 
 
 def _is_admin(u: dict) -> bool:

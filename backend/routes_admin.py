@@ -10,6 +10,7 @@ import csv
 import io
 import os
 import uuid
+import threading
 from datetime import datetime, timedelta
 from typing import Optional, List, Literal
 
@@ -18,20 +19,17 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from admin_auth import get_current_admin_flex
+from config import ADMIN_EMAILS
+from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS
 from audit import record as audit_record, recent as audit_recent
 from db import db, users, applications, holiday_plans, leads, otps
+from serializers import public_user
 
 router = APIRouter(prefix='/admin', tags=['admin'])
 
 countries_col = db['countries_v2']
 settings_col = db['settings']
 events_col = db['events']
-
-ADMIN_EMAILS = {
-    e.strip().lower()
-    for e in os.environ.get('ADMIN_EMAILS', '').split(',')
-    if e.strip()
-}
 
 
 # ---------- auth ----------
@@ -44,20 +42,7 @@ async def get_current_admin(user=Depends(get_current_admin_flex)):
 
 
 def _public_user(u: dict) -> dict:
-    email = (u.get('email') or '').lower()
-    return {
-        'id': u.get('_id'),
-        'name': u.get('name'),
-        'email': u.get('email'),
-        'phone': u.get('phone'),
-        'is_premium': bool(u.get('is_premium', False)),
-        'is_staff': bool(u.get('is_staff', False)),
-        'is_admin': bool(u.get('is_admin', False)) or email in ADMIN_EMAILS,
-        'staff_role': u.get('staff_role'),
-        'premium_since': u.get('premium_since').isoformat() if isinstance(u.get('premium_since'), datetime) else u.get('premium_since'),
-        'created_at': u.get('created_at').isoformat() if isinstance(u.get('created_at'), datetime) else u.get('created_at'),
-        'updated_at': u.get('updated_at').isoformat() if isinstance(u.get('updated_at'), datetime) else u.get('updated_at'),
-    }
+    return public_user(u, include_admin_flag=True)
 
 
 def _serialize_app(a: dict) -> dict:
@@ -84,21 +69,15 @@ def _serialize_app(a: dict) -> dict:
     return out
 
 
-# ---------- fee logic (mirrored from the front-end) ----------
-DEFAULT_BASE_FEE_BY_TYPE = {
-    'Tourist': 3500,
-    'Business': 4500,
-    'Student': 5500,
-    'Work': 7500,
-    'Transit': 2500,
-    'Medical': 4500,
-}
-DEFAULT_SURCHARGE_INR = 350
-DEFAULT_GST_RATE = 0.18
+from fee_calculator import (
+    DEFAULT_BASE_FEE_BY_TYPE, DEFAULT_SURCHARGE_INR, DEFAULT_GST_RATE,
+    revenue_for as _revenue_for_shared,
+)
 
-# In-process cache so we don't hit Mongo for every revenue calc.
+# Thread-safe in-process cache so we don't hit Mongo for every revenue calc.
 # Invalidated on PATCH /admin/pricing.
 _pricing_cache: Optional[dict] = None
+_pricing_lock = threading.Lock()
 
 
 async def _load_pricing() -> dict:
@@ -114,36 +93,21 @@ async def _load_pricing() -> dict:
         'currency': doc.get('currency', 'INR'),
         'updated_at': doc.get('updated_at'),
     }
-    _pricing_cache = cfg
+    with _pricing_lock:
+        _pricing_cache = cfg
     return cfg
 
 
 def _bust_pricing_cache() -> None:
     global _pricing_cache
-    _pricing_cache = None
+    with _pricing_lock:
+        _pricing_cache = None
 
 
 async def _revenue_for(app: dict, country: Optional[dict]) -> int:
     """Return estimated revenue (INR) for a single application."""
     pricing = await _load_pricing()
-    applicants = max(1, int(app.get('applicants') or 1))
-    visa_type = app.get('visa_type') or 'Tourist'
-    base = int(pricing['base_fees'].get(visa_type, DEFAULT_BASE_FEE_BY_TYPE.get(visa_type, 3500)))
-    surcharge = pricing['surcharge_inr']
-    gst_rate = pricing['gst_rate']
-    govt_inr = 0
-    appt = 0
-    if country:
-        cats = country.get('categories') or {}
-        cat = cats.get(visa_type) if isinstance(cats, dict) else None
-        if isinstance(cat, dict):
-            govt_inr = int(cat.get('fees_inr') or 0)
-        if country.get('requires_appointment'):
-            appt = int(country.get('appointment_fee_inr') or 0)
-    taxable = base + surcharge + appt
-    gst = round(taxable * gst_rate)
-    per = govt_inr + base + surcharge + appt + gst
-    return per * applicants
+    return await _revenue_for_shared(app, country, pricing)
 
 
 # ---------- me ----------
@@ -166,11 +130,11 @@ async def admin_metrics(_=Depends(get_current_admin)):
     new_users_7 = await users.count_documents({'created_at': {'$gte': since_7}})
 
     total_apps = await applications.count_documents({})
-    drafts = await applications.count_documents({'status': 'draft'})
-    submitted = await applications.count_documents({'status': 'submitted'})
-    in_review = await applications.count_documents({'status': 'in_review'})
-    approved = await applications.count_documents({'status': 'approved'})
-    rejected = await applications.count_documents({'status': 'rejected'})
+    drafts = await applications.count_documents({'status': AppStatus.DRAFT.value})
+    submitted = await applications.count_documents({'status': AppStatus.SUBMITTED.value})
+    in_review = await applications.count_documents({'status': AppStatus.IN_REVIEW.value})
+    approved = await applications.count_documents({'status': AppStatus.APPROVED.value})
+    rejected = await applications.count_documents({'status': AppStatus.REJECTED.value})
     new_apps_30 = await applications.count_documents({'created_at': {'$gte': since_30}})
 
     total_countries = await countries_col.count_documents({})
@@ -182,9 +146,8 @@ async def admin_metrics(_=Depends(get_current_admin)):
     revenue_total = 0
     revenue_30 = 0
     # Build a lookup of countries we care about by id
-    billable_statuses = ['submitted', 'in_review', 'approved']
     cache: dict = {}
-    cur = applications.find({'status': {'$in': billable_statuses}})
+    cur = applications.find({'status': {'$in': [s.value for s in BILLABLE_STATUSES]}})
     async for a in cur:
         cid = (a.get('country_id') or '').lower()
         country = cache.get(cid)
@@ -426,13 +389,7 @@ async def admin_update_application(application_id: str, patch: AppPatch, admin=D
     events = list(app.get('timeline') or [])
     if patch.status and patch.status != app.get('status'):
         update['status'] = patch.status
-        label_map = {
-            'submitted': 'Submitted to embassy',
-            'in_review': 'In consular review',
-            'approved': 'Visa approved',
-            'rejected': 'Visa rejected',
-            'draft': 'Moved back to draft',
-        }
+        label_map = STATUS_LABELS
         events.append({
             'id': str(uuid.uuid4()),
             'status': patch.status,
@@ -444,7 +401,7 @@ async def admin_update_application(application_id: str, patch: AppPatch, admin=D
     elif patch.note:
         events.append({
             'id': str(uuid.uuid4()),
-            'status': app.get('status') or 'draft',
+            'status': app.get('status') or AppStatus.DRAFT.value,
             'label': 'Admin note',
             'at': now,
             'note': patch.note,
@@ -862,7 +819,7 @@ async def export_countries_csv(_=Depends(get_current_admin)):
 @router.get('/export/revenue.csv')
 async def export_revenue_csv(_=Depends(get_current_admin)):
     rows = [['date', 'application_id', 'country', 'visa_type', 'applicants', 'status', 'revenue_inr']]
-    billable = ['submitted', 'in_review', 'approved']
+    billable = [s.value for s in BILLABLE_STATUSES]
     cache: dict = {}
     async for a in applications.find({'status': {'$in': billable}}).sort('created_at', -1):
         cid = (a.get('country_id') or '').lower()

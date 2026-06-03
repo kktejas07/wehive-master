@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel, EmailStr, Field
 
 from admin_auth import (
-    ADMIN_EMAILS, MAX_ATTEMPTS,
+    MAX_ATTEMPTS,
     hash_password, verify_password, password_strength_issue,
     sign_admin_jwt, decode_admin_jwt,
     generate_reset_token, hash_token,
@@ -26,6 +26,7 @@ from admin_auth import (
     send_reset_email_or_log,
     get_current_admin_flex,
 )
+from config import ADMIN_EMAILS
 from db import users, db
 
 router = APIRouter(prefix='/admin-auth', tags=['admin-auth'])
