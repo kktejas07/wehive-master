@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Grid2X2, Map as MapIcon, Sparkle, Loader2, Compass } from 'lucide-react';
+import { Grid2X2, Map as MapIcon, Sparkle, Loader2, Compass, Search } from 'lucide-react';
 import { COUNTRIES } from '../data/mock';
 import { API } from '../context/AuthContext';
 import { landmarkFor } from '../lib/landmarks';
@@ -25,6 +25,7 @@ function CountryCard({ c, index = 0 }) {
   const types = c.visa_types || [];
   const cardImage = landmarkFor(c) || IMG[c.id] || c.flag_url;
   const hasRichImage = !!(landmarkFor(c) || IMG[c.id]);
+  const documents = c.documents || ['Passport'];
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -53,7 +54,7 @@ function CountryCard({ c, index = 0 }) {
           {!hasRichImage && (
             <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/85 to-[hsl(var(--blue-900))]/85" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
         {/* Visa type badges - top */}
         {!isNoVisa && types.length > 0 && (
@@ -79,39 +80,50 @@ function CountryCard({ c, index = 0 }) {
           </div>
         )}
 
-        <div className="absolute bottom-[42%] left-1/2 -translate-x-1/2 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white/95 ring-2 ring-white/40 backdrop-blur flex items-center justify-center text-[22px] sm:text-[26px] leading-none shadow-lg">
-          <span>{c.flag}</span>
-        </div>
-
         <div className="absolute left-0 right-0 bottom-0 p-3 sm:p-4 text-white">
-          <div className="text-center text-[15px] sm:text-[20px] lg:text-[22px] font-display font-extrabold tracking-tight uppercase truncate">
-            {c.name}
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[12px] sm:text-[14px] font-display font-bold tracking-tight truncate">
+              {c.name}
+            </span>
+            <span className="text-[16px] sm:text-[18px]">{c.flag}</span>
           </div>
+
           {isNoVisa ? (
-            <div className="mt-3 text-center text-[11px] uppercase tracking-[0.16em] text-white/80 font-bold">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-white/80 font-bold">
               No Visa Required
             </div>
           ) : (
-            <div className="mt-2.5 grid grid-cols-3 gap-1 text-[9px] sm:text-[10px] uppercase tracking-[0.1em] text-white/65 font-bold border-t border-white/15 pt-2.5">
-              <div>
-                <div>Type</div>
-                <div className="text-white text-[10.5px] sm:text-[12px] font-bold mt-0.5 truncate">
-                  {types[0] || 'E-VISA'}
+            <>
+              <div className="grid grid-cols-3 gap-2 mt-2 text-[9px] sm:text-[10px] uppercase tracking-[0.08em] text-white/60 font-bold">
+                <div>
+                  <div>Type</div>
+                  <div className="text-white text-[11px] sm:text-[12px] font-bold mt-0.5 truncate">
+                    {types[0] || 'E-VISA'}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div>Valid</div>
+                  <div className="text-white text-[11px] sm:text-[12px] font-bold mt-0.5 truncate">
+                    {c.validity || c.valid}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div>Fees</div>
+                  <div className="text-white text-[11px] sm:text-[12px] font-bold mt-0.5 truncate">
+                    ${c.fees_usd ?? c.fees}
+                  </div>
                 </div>
               </div>
-              <div className="text-center">
-                <div>Valid</div>
-                <div className="text-white text-[10.5px] sm:text-[12px] font-bold mt-0.5 truncate">
-                  {c.validity || c.valid}
+              <div className="mt-2 pt-2 border-t border-white/10">
+                <div className="text-[9px] uppercase tracking-[0.08em] text-white/50 mb-1">Documents:</div>
+                <div className="text-[10px] text-white/80 truncate">
+                  {Array.isArray(documents) ? documents.slice(0, 3).join(', ') : documents}
                 </div>
               </div>
-              <div className="text-right">
-                <div>Fees</div>
-                <div className="text-white text-[10.5px] sm:text-[12px] font-bold mt-0.5 truncate">
-                  ${c.fees_usd ?? c.fees}
-                </div>
+              <div className="mt-2 text-[10px] text-[hsl(var(--accent))] font-bold cursor-pointer hover:underline">
+                Get emergency assistance →
               </div>
-            </div>
+            </>
           )}
         </div>
       </motion.article>
@@ -183,6 +195,7 @@ export default function CountryGrid({ filters }) {
   const [view, setView] = useState('grid');
   const [allItems, setAllItems] = useState(null);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const PAGE_SIZE = 20;
 
   const params = useMemo(() => {
@@ -226,15 +239,24 @@ export default function CountryGrid({ filters }) {
 
   const items = useMemo(() => {
     if (!allItems) return null;
-    const sorted = [...allItems].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    let filtered = allItems;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      filtered = allItems.filter(c => (c.name || '').toLowerCase().includes(q));
+    }
+    const sorted = [...filtered].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     const start = (page - 1) * PAGE_SIZE;
-    return sorted.slice(start, start + PAGE_SIZE);
-  }, [allItems, page]);
+    return { items: sorted.slice(start, start + PAGE_SIZE), total: filtered.length };
+  }, [allItems, page, search]);
+
+  const displayedItems = items?.items ?? null;
+  const totalCount = items?.total ?? 0;
 
   const totalPages = useMemo(() => {
     if (!allItems) return 0;
-    return Math.ceil(allItems.length / PAGE_SIZE);
-  }, [allItems]);
+    const count = search.trim() ? totalCount : allItems.length;
+    return Math.ceil(count / PAGE_SIZE);
+  }, [allItems, totalCount, search]);
 
   const showEvents = filters?.view === 'events';
   const showHolidays = filters?.view === 'holidays';
@@ -282,6 +304,24 @@ export default function CountryGrid({ filters }) {
                   ? 'Destinations Indian passport holders can enter visa-free or with a visa-on-arrival. Tap a country to see the holiday plan.'
                   : 'Real ETA. Real fees. No hidden charges. Tap a country to see everything you need before you apply.'}
             </p>
+            <div className="mt-4 relative w-full max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/40" />
+              <input
+                type="text"
+                placeholder="Search country..."
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-black/10 bg-white text-[14px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 focus:outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 transition"
+              />
+              {search && (
+                <button
+                  onClick={() => { setSearch(''); setPage(1); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-900))] text-[16px]"
+                >
+                  ×
+                </button>
+              )}
+            </div>
           </div>
 
           {!showEvents && (
@@ -312,23 +352,23 @@ export default function CountryGrid({ filters }) {
 
         {showEvents ? (
           <EventsBoard />
-        ) : items === null ? (
+        ) : displayedItems === null ? (
           <div className="py-20 flex items-center justify-center">
             <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" />
           </div>
-        ) : items.length === 0 ? (
+        ) : displayedItems.length === 0 ? (
           <EmptyResults />
         ) : view === 'grid' ? (
           <>
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-              {items.map((c, i) => (
+              {displayedItems.map((c, i) => (
                 <CountryCard key={c.id} c={c} index={i} />
               ))}
             </div>
             {totalPages > 1 && (
               <div className="mt-8 flex flex-col items-center gap-3">
                 <span className="text-[13px] text-[hsl(var(--blue-900))]/55">
-                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, allItems.length)} of {allItems.length} countries
+                  {search.trim() ? `${totalCount} result${totalCount !== 1 ? 's' : ''} for "${search}"` : `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, search.trim() ? totalCount : allItems.length)} of ${search.trim() ? totalCount : allItems.length} countries`}
                 </span>
                 <Pagination>
                   <PaginationContent>
@@ -367,7 +407,7 @@ export default function CountryGrid({ filters }) {
             )}
           </>
         ) : (
-          <MapPlaceholder items={items} />
+          <MapPlaceholder items={displayedItems || items?.items || []} />
         )}
       </div>
     </section>
