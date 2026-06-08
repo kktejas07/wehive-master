@@ -29,7 +29,7 @@ const TRUST_POINTS = [
 
 export default function OnTimeGuarantee() {
   return (
-    <section className="relative py-20 sm:py-28 bg-[hsl(var(--blue-900))] overflow-hidden">
+    <section className="relative py-16 sm:py-24 bg-[hsl(var(--blue-900))] overflow-hidden">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[hsl(var(--accent))] rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-400 rounded-full blur-[100px]" />
