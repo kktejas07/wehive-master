@@ -52,7 +52,7 @@ function DealCard({ deal, category, onCall }) {
       onClick={onCall}
     >
       {discount >= 30 && (
-        <div className="absolute top-3 left-3 z-10">
+        <div className="absolute top-3 right-3 z-10">
           <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-white text-[10px] font-bold uppercase tracking-wider">
             {discount}% OFF
           </span>
