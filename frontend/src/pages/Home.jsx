@@ -19,11 +19,11 @@ export default function Home() {
     <div>
       <Navbar />
       <Hero filters={filters} onFilters={setFilters} />
+      <CountryGrid filters={filters} />
       <StatsStrip />
       <PressStrip />
       <EventsBanner />
       <AIServices />
-      <CountryGrid filters={filters} />
       <HowItWorks />
       <Testimonials />
       <Faq />
