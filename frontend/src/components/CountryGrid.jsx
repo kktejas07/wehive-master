@@ -36,7 +36,7 @@ function CountryCard({ c, index = 0 }) {
         <motion.article
           whileHover={{ y: -4 }}
           transition={{ duration: 0.25 }}
-          className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]"
+          className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]"
         >
           {cardImage ? (
             <img
@@ -320,7 +320,7 @@ export default function CountryGrid({ filters }) {
           <EmptyResults />
         ) : view === 'grid' ? (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
               {items.map((c, i) => (
                 <CountryCard key={c.id} c={c} index={i} />
               ))}
