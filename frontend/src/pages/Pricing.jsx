@@ -33,63 +33,65 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
   };
 
   return (
-    <div
-      className={`relative rounded-3xl p-8 ${
-        plan.highlighted
-          ? 'bg-[hsl(var(--blue-900))] text-white border border-white/10 shadow-[0_30px_70px_-30px_rgba(10,44,138,0.6)]'
-          : 'bg-white text-[hsl(var(--blue-900))] border border-black/5'
-      }`}
-    >
-      {plan.highlighted && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-[hsl(var(--accent))] text-white text-[11px] uppercase tracking-[0.16em] font-bold px-3 py-1">
-          Most popular
-        </div>
-      )}
-      <div className={`text-[11px] uppercase tracking-[0.16em] font-bold ${plan.highlighted ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/65'}`}>
-        {plan.tag}
-      </div>
-      <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">{plan.name}</h3>
-      <div className="mt-5 flex items-baseline gap-1">
-        <span className="font-display font-extrabold text-[64px] leading-none tracking-[-0.04em]">${(plan.price / 100).toFixed(2)}</span>
-        <span className={plan.highlighted ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/65'}>/ visa application</span>
-      </div>
-      <button
-        onClick={handleSubscribe}
-        disabled={loading || (isPremium && isCurrentPlan(plan.id))}
-        className={`mt-6 w-full rounded-full h-12 font-bold transition flex items-center justify-center gap-2 ${
-          isPremium && isCurrentPlan(plan.id)
-            ? 'bg-emerald-100 text-emerald-700 cursor-default'
-            : plan.highlighted
-              ? 'bg-white text-[hsl(var(--blue-900))] hover:bg-white/90'
-              : 'btn-primary text-white hover:opacity-90'
+    <div className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 hover:shadow-[0_30px_70px_-20px_rgba(99,102,241,0.4)] transition-all duration-300 hover:-translate-y-1">
+      <div
+        className={`relative rounded-[22px] p-8 h-full ${
+          plan.highlighted
+            ? 'bg-[hsl(var(--blue-900))] text-white'
+            : 'bg-white text-[hsl(var(--blue-900))]'
         }`}
       >
-        {loading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : isPremium && isCurrentPlan(plan.id) ? (
-          <>
-            <CheckCircle2 className="w-4 h-4" /> Current plan
-          </>
-        ) : (
-          <>
-            {isPremium ? 'Switch to ' : 'Choose '}{plan.name} <ArrowRight className="w-4 h-4" />
-          </>
+        {plan.highlighted && (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[11px] uppercase tracking-[0.16em] font-bold px-3 py-1">
+            Most popular
+          </div>
         )}
-      </button>
-      <ul className="mt-7 space-y-3">
-        {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-2.5 text-[14.5px]">
-            <span
-              className={`mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full ${
-                plan.highlighted ? 'bg-white/12 text-white' : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'
-              }`}
-            >
-              <CheckCircle2 className="w-3 h-3" />
-            </span>
-            <span className={plan.highlighted ? 'text-white/90' : ''}>{f}</span>
-          </li>
-        ))}
-      </ul>
+        <div className={`text-[11px] uppercase tracking-[0.16em] font-bold ${plan.highlighted ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/65'}`}>
+          {plan.tag}
+        </div>
+        <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">{plan.name}</h3>
+        <div className="mt-5 flex items-baseline gap-1">
+          <span className="font-display font-extrabold text-[64px] leading-none tracking-[-0.04em]">${(plan.price / 100).toFixed(2)}</span>
+          <span className={plan.highlighted ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/65'}>/ visa application</span>
+        </div>
+        <button
+          onClick={handleSubscribe}
+          disabled={loading || (isPremium && isCurrentPlan(plan.id))}
+          className={`mt-6 w-full rounded-full h-12 font-bold transition flex items-center justify-center gap-2 ${
+            isPremium && isCurrentPlan(plan.id)
+              ? 'bg-emerald-100 text-emerald-700 cursor-default'
+              : plan.highlighted
+                ? 'bg-white text-[hsl(var(--blue-900))] hover:bg-white/90'
+                : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90'
+          }`}
+        >
+          {loading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : isPremium && isCurrentPlan(plan.id) ? (
+            <>
+              <CheckCircle2 className="w-4 h-4" /> Current plan
+            </>
+          ) : (
+            <>
+              {isPremium ? 'Switch to ' : 'Choose '}{plan.name} <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+        <ul className="mt-7 space-y-3">
+          {plan.features.map((f) => (
+            <li key={f} className="flex items-start gap-2.5 text-[14.5px]">
+              <span
+                className={`mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full ${
+                  plan.highlighted ? 'bg-white/12 text-white' : 'bg-gradient-to-br from-blue-500/10 to-purple-500/10 text-[hsl(var(--blue-700))]'
+                }`}
+              >
+                <CheckCircle2 className="w-3 h-3" />
+              </span>
+              <span className={plan.highlighted ? 'text-white/90' : ''}>{f}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
