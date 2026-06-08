@@ -205,18 +205,24 @@ export default function CountryGrid({ filters }) {
 
   const params = useMemo(() => {
     const p = {};
-    if (filters?.visaTypeId && filters.visaTypeId !== 'all') {
+    if (filters?.visa_type && filters.visa_type !== 'All Visa Types') {
       const map = {
-        tourist: 'Tourist', business: 'Business', student: 'Student',
-        work: 'Work', transit: 'Transit', medical: 'Medical',
+        'Tourist': 'Tourist', 'Business': 'Business', 'Student': 'Student',
+        'Work': 'Work', 'Transit': 'Transit', 'Medical': 'Medical',
       };
-      p.visa_type = map[filters.visaTypeId];
+      p.visa_type = map[filters.visa_type] || filters.visa_type;
     }
-    if (filters?.deliveryId && filters.deliveryId !== 'any') {
-      p.delivery = filters.deliveryId;
+    if (filters?.delivery && filters.delivery !== 'Any Time') {
+      const deliveryMap = {
+        'Same Day': 'same_day', '48–72 hours': 'rush', '5–15 days': 'standard',
+      };
+      p.delivery = deliveryMap[filters.delivery] || filters.delivery;
     }
-    if (filters?.documentsId && filters.documentsId !== 'any') {
-      p.documents = filters.documentsId;
+    if (filters?.documents && filters.documents !== 'Any Documents') {
+      const docsMap = {
+        'Minimal (passport only)': 'minimal', 'Standard set': 'standard',
+      };
+      p.documents = docsMap[filters.documents] || filters.documents;
     }
     if (filters?.view === 'holidays') {
       p.no_visa = true;
