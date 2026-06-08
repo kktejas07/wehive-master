@@ -25,7 +25,12 @@ function CountryCard({ c, index = 0 }) {
   const types = c.visa_types || [];
   const cardImage = landmarkFor(c) || IMG[c.id] || c.flag_url;
   const hasRichImage = !!(landmarkFor(c) || IMG[c.id]);
-  const documents = c.documents || ['Passport'];
+  const categories = c.categories || {};
+  const firstCategory = categories.Tourist || categories[Object.keys(categories)[0]] || {};
+  const validity = c.validity || firstCategory.validity || '90 DAYS';
+  const fees_usd = c.fees_usd ?? firstCategory.fees_usd ?? firstCategory.fees?.usd ?? 0;
+  const documents = c.documents || firstCategory.documents || ['Passport'];
+  const delivery = c.delivery || {};
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -104,13 +109,13 @@ function CountryCard({ c, index = 0 }) {
                 <div className="text-center">
                   <div>Valid</div>
                   <div className="text-white text-[11px] sm:text-[12px] font-bold mt-0.5 truncate">
-                    {c.validity || c.valid}
+                    {validity}
                   </div>
                 </div>
                 <div className="text-right">
                   <div>Fees</div>
                   <div className="text-white text-[11px] sm:text-[12px] font-bold mt-0.5 truncate">
-                    ${c.fees_usd ?? c.fees}
+                    ${fees_usd || c.fees}
                   </div>
                 </div>
               </div>
@@ -133,9 +138,9 @@ function CountryCard({ c, index = 0 }) {
             {isNoVisa ? 'Holiday planner' : 'Standard delivery'}
           </div>
           <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] inline-flex items-center gap-2">
-            {isNoVisa ? `${c.holiday_default_days} days suggested` : `${c.delivery?.standard_days ?? 7} days`}
-            {!isNoVisa && c.delivery?.same_day && (
-              <DeliveryCountdown compact deliveryDays={c.delivery?.standard_days ?? 7} />
+            {isNoVisa ? `${c.holiday_default_days || 7} days suggested` : `${delivery.standard_days ?? 7} days`}
+            {!isNoVisa && delivery.same_day && (
+              <DeliveryCountdown compact deliveryDays={delivery.standard_days ?? 7} />
             )}
           </div>
         </div>
@@ -224,8 +229,8 @@ export default function CountryGrid({ filters }) {
     const timer = setTimeout(() => {
       axios
         .get(`${API}/countries`, { params })
-        .then((r) => mounted && setAllItems(r.data?.length ? r.data : COUNTRIES))
-        .catch(() => mounted && setAllItems(COUNTRIES));
+        .then((r) => mounted && setAllItems(r.data?.length ? r.data : []))
+        .catch(() => mounted && setAllItems([]));
     }, 300);
     return () => {
       mounted = false;
