@@ -23,9 +23,9 @@ RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
 PAYMENT_BYPASS_ENABLED = os.environ.get('PAYMENT_BYPASS_ENABLED', '').lower() in ('1', 'true', 'yes')
 
 PLANS = {
-    'lite': {'name': 'Lite', 'amount_inr': 49, 'description': 'One visa application with expert review'},
-    'standard': {'name': 'Standard', 'amount_inr': 99, 'description': 'Most popular — priority support, on-time guarantee'},
-    'concierge': {'name': 'Concierge', 'amount_inr': 249, 'description': 'Dedicated specialist, 24/7 phone support'},
+    'lite': {'name': 'Lite', 'amount_usd': 399, 'description': 'One visa application with expert review'},
+    'standard': {'name': 'Standard', 'amount_usd': 799, 'description': 'Most popular — priority support, on-time guarantee'},
+    'concierge': {'name': 'Concierge', 'amount_usd': 1099, 'description': 'Dedicated specialist, 24/7 phone support'},
 }
 
 
@@ -71,7 +71,7 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
             'plan_id': req.plan_id,
             'razorpay_order_id': mock_order_id,
             'razorpay_payment_id': None,
-            'amount_inr': plan['amount_inr'],
+            'amount_usd': plan['amount_usd'],
             'status': 'mock',
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow(),
@@ -79,8 +79,8 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
         await payments.insert_one(payment_doc)
         return {
             'order_id': mock_order_id,
-            'amount': plan['amount_inr'],
-            'currency': 'INR',
+            'amount': plan['amount_usd'],
+            'currency': 'USD',
             'plan_id': req.plan_id,
             'razorpay_key': 'mock',
         }
@@ -92,13 +92,13 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
     if not client:
         raise HTTPException(503, 'Payment gateway unavailable')
 
-    amount_paise = plan['amount_inr'] * 100
+    amount_cents = plan['amount_usd']
     receipt = f"wehive-{user['_id']}-{req.plan_id}-{uuid.uuid4().hex[:8]}"
 
     try:
         order = client.order.create({
-            'amount': amount_paise,
-            'currency': 'INR',
+            'amount': amount_cents,
+            'currency': 'USD',
             'receipt': receipt,
             'notes': {
                 'user_id': user['_id'],
@@ -115,8 +115,8 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
         'plan_id': req.plan_id,
         'razorpay_order_id': order.get('id'),
         'razorpay_payment_id': None,
-        'amount_inr': plan['amount_inr'],
-        'status': 'created',
+'amount_usd': plan['amount_usd'],
+            'status': 'created',
         'created_at': datetime.utcnow(),
         'updated_at': datetime.utcnow(),
     }
@@ -124,8 +124,8 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
 
     return {
         'order_id': order.get('id'),
-        'amount': plan['amount_inr'],
-        'currency': 'INR',
+        'amount': plan['amount_usd'],
+        'currency': 'USD',
         'plan_id': req.plan_id,
         'razorpay_key': RAZORPAY_KEY_ID,
     }
@@ -252,10 +252,10 @@ async def razorpay_webhook(payload: dict, x_razorpay_signature: str = Header(Non
 async def get_plans():
     return {
         'plans': [
-            {'id': k, 'name': v['name'], 'amount_inr': v['amount_inr'], 'description': v['description']}
+            {'id': k, 'name': v['name'], 'amount_usd': v['amount_usd'], 'description': v['description']}
             for k, v in PLANS.items()
         ],
-        'currency': 'INR',
+        'currency': 'USD',
     }
 
 
@@ -266,7 +266,7 @@ async def my_subscription(user=Depends(get_current_user)):
         payments_list.append({
             'id': p['_id'],
             'plan_id': p.get('plan_id'),
-            'amount_inr': p.get('amount_inr'),
+            'amount_usd': p.get('amount_usd'),
             'status': p.get('status'),
             'created_at': p.get('created_at').isoformat() if p.get('created_at') else None,
         })
