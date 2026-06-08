@@ -93,9 +93,29 @@ export default function EventsBanner({
   limit = 4,
   heading = 'Featured offers',
 }: EventsBannerProps) {
-  const [items] = useState<EventItem[]>(FALLBACK_EVENTS.slice(0, limit));
+  const [items, setItems] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (items.length === 0) return null;
+  useEffect(() => {
+    let mounted = true;
+    axios.get(`${API}/public/events`, { params: { limit } })
+      .then((r) => {
+        if (mounted && r.data?.items?.length) {
+          setItems(r.data.items.slice(0, limit));
+        } else {
+          setItems(FALLBACK_EVENTS.slice(0, limit));
+        }
+      })
+      .catch(() => {
+        if (mounted) setItems(FALLBACK_EVENTS.slice(0, limit));
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => { mounted = false; };
+  }, [limit]);
+
+  if (loading || items.length === 0) return null;
 
   return (
     <section className="py-16 bg-white" data-testid="events-banner-section">

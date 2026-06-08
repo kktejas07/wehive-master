@@ -11,6 +11,7 @@ import DealsSection from '../components/DealsSection';
 import EventsBanner from '../components/EventsBanner';
 import StatsStrip from '../components/StatsStrip';
 import AIServices from '../components/AIServices';
+import OnTimeGuarantee from '../components/OnTimeGuarantee';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 
 export default function Home() {
@@ -20,6 +21,7 @@ export default function Home() {
       <Navbar />
       <Hero filters={filters} onFilters={setFilters} />
       <CountryGrid filters={filters} />
+      <OnTimeGuarantee />
       <StatsStrip />
       <DealsSection />
       <EventsBanner />

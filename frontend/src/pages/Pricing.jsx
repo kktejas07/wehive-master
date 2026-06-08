@@ -50,7 +50,7 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
       </div>
       <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">{plan.name}</h3>
       <div className="mt-5 flex items-baseline gap-1">
-        <span className="font-display font-extrabold text-[64px] leading-none tracking-[-0.04em]">₹{plan.price}</span>
+        <span className="font-display font-extrabold text-[64px] leading-none tracking-[-0.04em]">${(plan.price / 100).toFixed(2)}</span>
         <span className={plan.highlighted ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/65'}>/ visa application</span>
       </div>
       <button
@@ -111,7 +111,7 @@ export default function Pricing() {
       setPlans(r.data.plans.map((p) => ({
         id: p.id,
         name: p.name,
-        price: p.amount_inr,
+        price: p.amount_usd,
         tag: p.description,
         highlighted: p.id === 'standard',
         features: p.id === 'lite'

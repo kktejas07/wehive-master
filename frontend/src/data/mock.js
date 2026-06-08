@@ -692,7 +692,7 @@ export const FAQS = [
 export const PRESS = ['TechCrunch', 'Forbes', 'Bloomberg', 'The Verge', 'Wired', 'Condé Nast Traveler'];
 
 // Pricing constants — extracted for clarity (review fix)
-export const PRICING = { LITE: 49, STANDARD: 99, CONCIERGE: 249 };
+export const PRICING = { LITE: 399, STANDARD: 799, CONCIERGE: 1099 };
 
 export const PLANS = [
   { id: 'lite', name: 'Lite', price: PRICING.LITE, tag: 'For occasional travel', features: ['One visa application', 'Document review by an expert', 'Email support', '7–10 day processing'] },
