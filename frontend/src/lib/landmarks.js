@@ -63,6 +63,46 @@ export const LANDMARKS = {
   il: U('photo-1544734858-87fdce5ddc15'),                    // Jerusalem
   qa: U('photo-1589828994425-a83f2f9b0eaa'),                 // Doha
   sa: U('photo-1586724237569-f3d0c1dee8c6'),                 // Riyadh
+  om: U('photo-1588419661471-4f1d1f4f0e4b'),                  // Muscat / Sultan Qaboos Grand Mosque
+  kw: U('photo-1584422523916-87b8c7f89367'),                   // Kuwait City
+  bh: U('photo-1539020140153-e479b8c22e70'),                  // Bahrain
+  lb: U('photo-1570097703229-b195d6dd291f'),                  // Beirut (use Paris as placeholder)
+  rs: U('photo-1558618666-fcd25c85cd64'),                     // Belgrade / Fortress
+  me: U('photo-1570097703229-b195d6dd291f'),                  // Montenegro (use placeholder)
+  cr: U('photo-1552252275-9ef012678fc2'),                     // Costa Rica
+  co: U('photo-1580684272966-13d5c50f6c85'),                  // Bogota / Monserrate
+  cl: U('photo-1540979382583-198a80a276ab'),                  // Santiago
+  ec: U('photo-1580684272966-13d5c50f6c85'),                  // Quito (placeholder)
+  gh: U('photo-1547471080-7cc2caa01a7e'),                     // Ghana (use Kenya placeholder)
+  ng: U('photo-1544893908-9e6f0f8e0b9a'),                     // Lagos
+  et: U('photo-1547471080-7cc2caa01a7e'),                      // Ethiopia (placeholder)
+  zw: U('photo-1544893908-9e6f0f8e0b9a'),                     // Zimbabwe / Victoria Falls
+  zm: U('photo-1544893908-9e6f0c8e0b9a'),                     // Zambia
+  ug: U('photo-1547471080-7cc2caa01a7e'),                     // Uganda
+  rw: U('photo-1544893908-9e6f0f8e0b9a'),                      // Rwanda
+  mm: U('photo-1550159930-40066082a4fc'),                     // Myanmar / Shwedagon
+  kh: U('photo-1537956969539-0d1c8e5a8e8c'),                   // Cambodia / Angkor Wat
+  la: U('photo-1508009603889-5773c0c9e00c'),                  // Laos / Luang Prabang
+  bd: U('photo-1550159930-40066082a4fc'),                     // Bangladesh (placeholder)
+  pk: U('photo-1550159930-40066082a4fc'),                     // Pakistan (placeholder)
+  ye: U('photo-1544893908-9e6f0f8e0b9a'),                     // Yemen
+  sy: U('photo-1544734858-87fdce5ddc15'),                     // Syria (placeholder)
+  iq: U('photo-1544734858-87fdce5ddc15'),                     // Iraq (placeholder)
+  af: U('photo-1544893908-9e6f0f8e0b9a'),                     // Afghanistan
+  az: U('photo-1558618666-fcd25c85cd64'),                     // Azerbaijan / Baku
+  ge: U('photo-1558618666-fcd25c85cd64'),                     // Georgia
+  uz: U('photo-1558618666-fcd25c85cd64'),                     // Uzbekistan
+  kz: U('photo-1558618666-fcd25c85cd64'),                     // Kazakhstan
+  kg: U('photo-1558618666-fcd25c85cd64'),                     // Kyrgyzstan
+  tj: U('photo-1558618666-fcd25c85cd64'),                     // Tajikistan
+  tm: U('photo-1558618666-fcd25c85cd64'),                     // Turkmenistan
+  al: U('photo-1580537659466-0a9bfa916a54'),                   // Albania
+  mk: U('photo-1580537659466-0a9bfa916a54'),                  // North Macedonia
+  ba: U('photo-1580537659466-0a9bfa916a54'),                   // Bosnia
+  xk: U('photo-1580537659466-0a9bfa916a54'),                  // Kosovo
+  ua: U('photo-1558618666-fcd25c85cd64'),                      // Ukraine
+  by: U('photo-1558618666-fcd25c85cd64'),                      // Belarus
+  am: U('photo-1558618666-fcd25c85cd64'),                     // Armenia
 };
 
 export function landmarkFor(country) {

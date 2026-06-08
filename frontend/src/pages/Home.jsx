@@ -7,7 +7,7 @@ import HowItWorks from '../components/HowItWorks';
 import Testimonials from '../components/Testimonials';
 import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
-import PressStrip from '../components/PressStrip';
+import DealsSection from '../components/DealsSection';
 import EventsBanner from '../components/EventsBanner';
 import StatsStrip from '../components/StatsStrip';
 import AIServices from '../components/AIServices';
@@ -21,7 +21,7 @@ export default function Home() {
       <Hero filters={filters} onFilters={setFilters} />
       <CountryGrid filters={filters} />
       <StatsStrip />
-      <PressStrip />
+      <DealsSection />
       <EventsBanner />
       <AIServices />
       <HowItWorks />
