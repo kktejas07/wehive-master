@@ -630,6 +630,9 @@ export default function UniversityComparison() {
   const [showFilters, setShowFilters] = useState(false);
   const [compareView, setCompareView] = useState('cards');
   const [gridView, setGridView] = useState('grid');
+  const [sortBy, setSortBy] = useState('rank');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     axios.get(`${API}/universities`, { params: { limit: 100 } })
