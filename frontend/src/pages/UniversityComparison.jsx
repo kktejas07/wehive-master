@@ -42,14 +42,11 @@ const STUDENT_COUNTRIES = [
 
 function UniversityCard({ uni, onCompare, isComparing }) {
   return (
-    <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10" style={{
-      background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/50%) 100%)',
-    }}>
-      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white">
       <div className="relative z-10 p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg">
+            <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-2xl shadow-lg">
               {uni.flag}
             </div>
             <div>
@@ -175,19 +172,16 @@ function CompareTable({ universities }) {
   ];
 
   return (
-    <div className="relative rounded-2xl overflow-hidden" style={{
-      background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/50%) 100%)',
-    }}>
-      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/5 to-[hsl(var(--accent))]/5 pointer-events-none" />
+    <div className="relative rounded-2xl overflow-hidden bg-white">
       <div className="relative z-10 overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-black/5 bg-white/50">
               <th className="text-left p-4 font-bold text-[hsl(var(--blue-900))]/60 text-[13px]">Metric</th>
               {universities.map((uni) => (
-                <th key={uni.id} className="p-4 text-center min-w-[180px] bg-gradient-to-b from-white to-[hsl(var(--blue-50)/30%)]">
+                <th key={uni.id} className="p-4 text-center min-w-[180px] bg-[hsl(var(--blue-50))]/30">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-xl shadow-lg">
+                    <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-xl shadow-lg">
                       {uni.flag}
                     </div>
                     <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
