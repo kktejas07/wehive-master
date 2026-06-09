@@ -69,7 +69,7 @@ function AIToolCard({ tool, index, isAuthed }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative rounded-2xl border border-black/8 bg-white p-5 sm:p-6 hover:border-[hsl(var(--accent))]/30 hover:shadow-[0_12px_40px_-12px_rgba(10,44,138,0.18)] transition-all"
+      className="group relative rounded-2xl border border-black/8 bg-white p-5 sm:p-6 hover:border-[hsl(var(--accent))] hover:shadow-[0_12px_40px_-12px_rgba(10,44,138,0.18)] transition-all"
     >
       {tool.badge && (
         <span className={`absolute top-4 right-4 text-[10px] uppercase tracking-[0.14em] font-bold px-2.5 py-0.5 rounded-full ${
@@ -118,10 +118,7 @@ function AIToolCard({ tool, index, isAuthed }) {
           </Link>
         )}
       </div>
-      <div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-        style={{ background: `linear-gradient(135deg, ${tool.color}08 0%, transparent 60%)` }}
-      />
+      
     </motion.div>
   );
 }
