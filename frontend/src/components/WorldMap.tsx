@@ -98,12 +98,10 @@ function FlightPath({ from, to, progress, color }: { from: { x: number; y: numbe
         fill={color}
         style={{
           filter: `drop-shadow(0 0 6px ${color})`,
+          offsetPath: `path('M ${from.x}% ${from.y}% Q ${midX}% ${midY}% ${to.x}% ${to.y}%')`,
         }}
         animate={{
           offsetDistance: ['0%', '100%'],
-        }}
-        style={{
-          offsetPath: `path('M ${from.x}% ${from.y}% Q ${midX}% ${midY}% ${to.x}% ${to.y}%')`,
         }}
       />
     </svg>

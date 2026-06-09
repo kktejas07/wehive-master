@@ -13,7 +13,7 @@ import {
   ArrowRight,
   Star,
   CheckCircle2,
-  Visa,
+  FileText,
   Sparkles,
 } from 'lucide-react';
 
@@ -271,7 +271,7 @@ export default function MapView() {
             className="mt-12 rounded-[24px] bg-gradient-to-r from-[hsl(var(--blue-900))] to-[hsl(var(--blue-700))] p-8 text-center"
           >
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
-              <Visa className="w-8 h-8 text-white" />
+              <FileText className="w-8 h-8 text-white" />
             </div>
             <h3 className="font-display font-extrabold text-[24px] text-white">
               Need Help Choosing a Visa?
