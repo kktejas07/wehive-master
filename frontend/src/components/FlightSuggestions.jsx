@@ -10,8 +10,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Plane, TrendingUp, Sparkles, Clock, Loader2, ExternalLink, RefreshCw } from 'lucide-react';
 import { API } from '../context/AuthContext';
-
-const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
+import { inr } from '../lib/utils';
 
 const FALLBACK = {
   ae: [

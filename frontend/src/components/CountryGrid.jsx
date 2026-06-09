@@ -8,6 +8,7 @@ import { API } from '../context/AuthContext';
 import { landmarkFor } from '../lib/landmarks';
 import DeliveryCountdown from './DeliveryCountdown';
 import Reveal from './Reveal';
+import { SkeletonGrid } from './ui/skeleton';
 import {
   Pagination,
   PaginationContent,
@@ -364,9 +365,7 @@ export default function CountryGrid({ filters }) {
         {showEvents ? (
           <EventsBoard />
         ) : displayedItems === null ? (
-          <div className="py-20 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" />
-          </div>
+          <SkeletonGrid count={20} />
         ) : displayedItems.length === 0 ? (
           <EmptyResults />
         ) : view === 'grid' ? (

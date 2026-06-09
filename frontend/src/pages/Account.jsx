@@ -8,6 +8,7 @@ import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
+import { statusColor } from '../lib/utils';
 import ScansTab from '../components/account/ScansTab';
 import AICoverLetterModal from '../components/AICoverLetterModal';
 import AIItineraryModal from '../components/AIItineraryModal';
@@ -211,13 +212,6 @@ function ApplicationsTab({ token }) {
       />
     );
   }
-  const statusColor = (s) => {
-    if (s === 'approved') return 'bg-emerald-100 text-emerald-700';
-    if (s === 'in_review') return 'bg-amber-100 text-amber-700';
-    if (s === 'rejected') return 'bg-red-100 text-red-700';
-    if (s === 'submitted') return 'bg-blue-100 text-blue-700';
-    return 'bg-slate-100 text-slate-700';
-  };
   return (
     <div className="space-y-3">
       {items.map((a) => (
@@ -311,14 +305,6 @@ function AIToolsTab({ token, isPremium }) {
       return;
     }
     setActiveModal(toolId);
-  };
-
-  const statusColor = (s) => {
-    if (s === 'approved') return 'bg-emerald-100 text-emerald-700';
-    if (s === 'in_review') return 'bg-amber-100 text-amber-700';
-    if (s === 'rejected') return 'bg-red-100 text-red-700';
-    if (s === 'submitted') return 'bg-blue-100 text-blue-700';
-    return 'bg-slate-100 text-slate-700';
   };
 
   if (!apps) return <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" />;

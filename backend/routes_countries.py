@@ -115,7 +115,8 @@ async def country_holiday_plan(country_id: str):
     c = await _get_one(country_id)
     if not c:
         raise HTTPException(404, 'Country not found')
+    plan = get_holiday_plan(c.get('id') or country_id.lower(), country_meta=c)
     return {
         'country': _strip_mongo(c),
-        'plan': get_holiday_plan(c.get('id') or country_id.lower()),
+        'plan': plan,
     }
