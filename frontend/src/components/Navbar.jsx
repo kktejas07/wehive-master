@@ -12,7 +12,9 @@ import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 const NAV = [
   { id: 'home', label: 'nav.home', to: '/' },
-  { id: 'services', label: 'nav.services', to: '/#services' },
+  { id: 'visa', label: 'Visa', to: '/#countries' },
+  { id: 'student', label: 'Student Visa', to: '/student-visa' },
+  { id: 'universities', label: 'Universities', to: '/universities' },
   { id: 'pricing', label: 'nav.pricing', to: '/pricing' },
   { id: 'about', label: 'nav.about', to: '/about' },
 ];
