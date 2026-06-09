@@ -11,6 +11,8 @@ import {
   BookOpen, DollarSign, Calendar, MapPin, ArrowRight,
   Filter, Loader2, TrendingUp, Shield, Zap,
   Atom, Cog, Briefcase, Heart, Scale, Palette, BookMarked,
+  LayoutGrid, List, Table2, BarChart3, ArrowUpDown,
+  TrendingDown, Minus, ChevronRight, Crown, Target,
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth, API } from '../context/AuthContext';
@@ -42,11 +44,13 @@ const STUDENT_COUNTRIES = [
 
 function UniversityCard({ uni, onCompare, isComparing }) {
   return (
-    <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white">
+    <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] opacity-0 group-hover:opacity-100 transition-opacity" />
+
       <div className="relative z-10 p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-2xl shadow-lg">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg shadow-[hsl(var(--blue-700))]/20">
               {uni.flag}
             </div>
             <div>
@@ -149,43 +153,127 @@ function UniversityCard({ uni, onCompare, isComparing }) {
   );
 }
 
+function UniversityListItem({ uni, onCompare, isComparing }) {
+  return (
+    <div className="relative rounded-2xl overflow-hidden bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 transition-all duration-300">
+      <div className="flex items-stretch">
+        <div className="w-24 sm:w-32 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex flex-col items-center justify-center p-4 text-white shrink-0">
+          <div className="text-3xl mb-1">{uni.flag}</div>
+          <div className="text-[10px] font-bold text-white/70">#{uni.rank}</div>
+        </div>
+
+        <div className="flex-1 p-4 sm:p-6">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <h3 className="font-bold text-[hsl(var(--blue-900))] text-[16px]">{uni.short_name}</h3>
+              <p className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.name}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
+              {uni.scholarships && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div className="p-3 rounded-xl bg-[hsl(var(--soft-bg))]">
+              <div className="text-[10px] text-[hsl(var(--blue-900))]/50 mb-1">Tuition</div>
+              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">
+                {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-[hsl(var(--soft-bg))]">
+              <div className="text-[10px] text-[hsl(var(--blue-900))]/50 mb-1">IELTS</div>
+              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni.ielts_min}+</div>
+            </div>
+            <div className="p-3 rounded-xl bg-emerald-50">
+              <div className="text-[10px] text-emerald-600/70 mb-1">Employment</div>
+              <div className="text-[14px] font-bold text-emerald-600">{uni.就业率}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-[hsl(--accent)/10]">
+              <div className="text-[10px] text-[hsl(var(--accent))]/70 mb-1">Avg Salary</div>
+              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">${uni.avg_salary_usd?.toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "rounded-xl transition-all",
+                isComparing
+                  ? "border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))] text-white"
+                  : "border-black/10"
+              )}
+              onClick={() => onCompare(uni)}
+            >
+              {isComparing ? <Check className="w-4 h-4 mr-1" /> : null}
+              {isComparing ? 'Added' : 'Compare'}
+            </Button>
+            <Link
+              to={`/student-visa?university=${uni.id}`}
+              className="inline-flex items-center gap-2 rounded-xl btn-primary text-white h-10 px-5 text-[13px] font-bold shadow-md"
+            >
+              Apply <ArrowRight className="w-4 h-4" />
+            </Link>
+            <button className="text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline">
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CompareTable({ universities }) {
   if (universities.length === 0) return null;
 
   const metrics = [
-    { key: 'rank', label: 'World Rank', format: (v) => `#${v}` },
-    { key: 'qs_rank', label: 'QS Rank', format: (v) => `#${v}` },
-    { key: 'times_rank', label: 'Times Rank', format: (v) => `#${v}` },
-    { key: 'tuition_usd', label: 'Tuition (USD)', format: (v) => v === 0 ? 'Free' : `$${v?.toLocaleString()}` },
-    { key: 'living_cost_usd', label: 'Living Cost', format: (v) => `$${v?.toLocaleString()}` },
-    { key: 'students', label: 'Total Students', format: (v) => v?.toLocaleString() },
-    { key: 'intl_students', label: 'Intl Students', format: (v) => v?.toLocaleString() },
-    { key: 'ielts_min', label: 'Min IELTS', format: (v) => `${v}` },
-    { key: 'toefl_min', label: 'Min TOEFL', format: (v) => `${v}` },
-    { key: 'gre_required', label: 'GRE Required', format: (v) => v ? 'Yes' : 'No' },
-    { key: 'gmat_required', label: 'GMAT Required', format: (v) => v ? 'Yes' : 'No' },
-    { key: 'scholarships', label: 'Scholarships', format: (v) => v ? 'Yes' : 'No' },
-    { key: '录取率', label: 'Acceptance', format: (v) => v },
-    { key: '就业率', label: 'Employment', format: (v) => v },
-    { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => `$${v?.toLocaleString()}` },
-    { key: 'intakes', label: 'Intakes', format: (v) => v?.join(', ') },
+    { key: 'rank', label: 'World Rank', format: (v) => `#${v}`, icon: Target, color: 'blue' },
+    { key: 'qs_rank', label: 'QS Rank', format: (v) => `#${v}`, icon: Award, color: 'blue' },
+    { key: 'tuition_usd', label: 'Tuition (USD)', format: (v) => v === 0 ? 'Free' : `$${v?.toLocaleString()}`, icon: DollarSign, color: 'accent' },
+    { key: 'living_cost_usd', label: 'Living Cost', format: (v) => `$${v?.toLocaleString()}`, icon: DollarSign, color: 'gray' },
+    { key: 'students', label: 'Total Students', format: (v) => v?.toLocaleString(), icon: Users, color: 'gray' },
+    { key: 'intl_students', label: 'Intl Students', format: (v) => v?.toLocaleString(), icon: Globe2, color: 'blue' },
+    { key: 'ielts_min', label: 'Min IELTS', format: (v) => `${v}`, icon: BookOpen, color: 'green' },
+    { key: 'toefl_min', label: 'Min TOEFL', format: (v) => `${v}`, icon: BookOpen, color: 'green' },
+    { key: 'gre_required', label: 'GRE Required', format: (v) => v ? 'Yes' : 'No', icon: Check, color: v => v ? 'emerald' : 'gray' },
+    { key: 'gmat_required', label: 'GMAT Required', format: (v) => v ? 'Yes' : 'No', icon: Check, color: v => v ? 'emerald' : 'gray' },
+    { key: 'scholarships', label: 'Scholarships', format: (v) => v ? 'Yes' : 'No', icon: Crown, color: v => v ? 'amber' : 'gray' },
+    { key: '就业率', label: 'Employment', format: (v) => v, icon: TrendingUp, color: 'emerald' },
+    { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => `$${v?.toLocaleString()}`, icon: TrendingUp, color: 'emerald' },
   ];
 
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-white">
-      <div className="relative z-10 overflow-x-auto">
+    <div className="relative rounded-2xl overflow-hidden bg-white border border-black/5">
+      <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-black/5 bg-white/50">
-              <th className="text-left p-4 font-bold text-[hsl(var(--blue-900))]/60 text-[13px]">Metric</th>
-              {universities.map((uni) => (
-                <th key={uni.id} className="p-4 text-center min-w-[180px] bg-[hsl(var(--blue-50))]/30">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-xl shadow-lg">
-                      {uni.flag}
+            <tr className="border-b border-black/5">
+              <th className="text-left p-5 font-bold text-[hsl(var(--blue-900))]/60 text-[13px] bg-[hsl(var(--soft-bg))]">Metric</th>
+              {universities.map((uni, idx) => (
+                <th key={uni.id} className={cn(
+                  "p-5 text-center min-w-[200px]",
+                  idx === 0 ? "bg-[hsl(var(--blue-50))]" : idx === universities.length - 1 ? "bg-[hsl(var(--blue-50))]" : "bg-[hsl(var(--blue-50))]/50"
+                )}>
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg shadow-[hsl(var(--blue-700))]/30">
+                        {uni.flag}
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[hsl(var(--accent))] text-white text-[10px] font-bold flex items-center justify-center shadow">
+                        #{uni.rank}
+                      </div>
                     </div>
-                    <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
-                    <div className="text-[11px] text-[hsl(var(--blue-900))]/60">{uni.country_name}</div>
+                    <div>
+                      <div className="font-bold text-[hsl(var(--blue-900))] text-[16px]">{uni.short_name}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.name}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
+                      {uni.scholarships && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
+                    </div>
                   </div>
                 </th>
               ))}
@@ -193,39 +281,52 @@ function CompareTable({ universities }) {
           </thead>
           <tbody>
             {metrics.map((metric, idx) => (
-              <tr key={metric.key} className={`border-b border-black/5 ${idx % 2 === 0 ? 'bg-white/30' : 'bg-white/10'} hover:bg-[hsl(var(--blue-50)]/30 transition-colors`}>
+              <tr key={metric.key} className={cn(
+                "border-b border-black/5 transition-colors hover:bg-[hsl(var(--blue-50))]/30",
+                idx % 2 === 0 ? "bg-white" : "bg-[hsl(var(--soft-bg))]/30"
+              )}>
                 <td className="p-4 text-[13px] text-[hsl(var(--blue-900))]/70 font-medium">
-                  {metric.label}
+                  <div className="flex items-center gap-2">
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center",
+                      metric.color === 'blue' && "bg-[hsl(var(--blue-100))]",
+                      metric.color === 'accent' && "bg-[hsl(var(--accent))]/10",
+                      metric.color === 'emerald' && "bg-emerald-100",
+                      metric.color === 'amber' && "bg-amber-100",
+                      metric.color === 'gray' && "bg-gray-100"
+                    )}>
+                      {(() => {
+                        const IconComponent = metric.icon;
+                        return <IconComponent className={cn(
+                          "w-4 h-4",
+                          metric.color === 'blue' && "text-[hsl(var(--blue-700))]",
+                          metric.color === 'accent' && "text-[hsl(var(--accent))]",
+                          metric.color === 'emerald' && "text-emerald-600",
+                          metric.color === 'amber' && "text-amber-600",
+                          metric.color === 'gray' && "text-gray-500"
+                        )} />;
+                      })()}
+                    </div>
+                    {metric.label}
+                  </div>
                 </td>
                 {universities.map((uni) => (
-                  <td key={uni.id} className="p-4 text-center text-[14px] font-bold text-[hsl(var(--blue-900))]">
-                    {metric.format(uni[metric.key])}
+                  <td key={uni.id} className="p-4 text-center">
+                    <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">
+                      {metric.format(uni[metric.key])}
+                    </span>
                   </td>
                 ))}
               </tr>
             ))}
-            <tr>
+            <tr className="bg-gradient-to-r from-[hsl(var(--blue-50))] to-white">
               <td className="p-4 text-[13px] text-[hsl(var(--blue-900))]/70 font-medium">Popular Courses</td>
               {universities.map((uni) => (
                 <td key={uni.id} className="p-4 text-center">
-                  <div className="flex flex-wrap justify-center gap-1">
-                    {uni.popular_courses?.map((c) => (
-                      <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
+                  <div className="flex flex-wrap justify-center gap-1.5">
+                    {uni.popular_courses?.slice(0, 3).map((c) => (
+                      <span key={c} className="text-[11px] px-3 py-1 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
                         {c}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <td className="p-4 text-[13px] text-[hsl(var(--blue-900))]/70 font-medium">Facilities</td>
-              {universities.map((uni) => (
-                <td key={uni.id} className="p-4 text-center">
-                  <div className="flex flex-wrap justify-center gap-1">
-                    {uni.facilities?.map((f) => (
-                      <span key={f} className="text-[11px] px-2 py-0.5 rounded-full bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/60">
-                        {f}
                       </span>
                     ))}
                   </div>
@@ -238,9 +339,9 @@ function CompareTable({ universities }) {
                 <td key={uni.id} className="p-4 text-center">
                   <Link
                     to={`/student-visa?university=${uni.id}`}
-                    className="inline-flex items-center gap-2 rounded-full btn-primary text-white h-10 px-5 text-[13px] font-bold"
+                    className="inline-flex items-center gap-2 rounded-full btn-primary text-white h-11 px-6 text-[13px] font-bold shadow-lg shadow-[hsl(var(--blue-700))]/20"
                   >
-                    Apply <ArrowRight className="w-4 h-4" />
+                    Apply Now <ArrowRight className="w-4 h-4" />
                   </Link>
                 </td>
               ))}
@@ -248,6 +349,256 @@ function CompareTable({ universities }) {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+function CompareCards({ universities }) {
+  if (universities.length === 0) return null;
+
+  const getBestValue = (key) => {
+    const values = universities.map(u => u[key]).filter(v => v !== undefined && v !== null && v !== '' && v !== 'Varies');
+    if (key === 'tuition_usd') {
+      return Math.min(...values);
+    }
+    if (key === '就业率' || key === 'avg_salary_usd' || key === 'ielts_min') {
+      return Math.max(...values);
+    }
+    return null;
+  };
+
+  const isBestValue = (uni, key) => {
+    const best = getBestValue(key);
+    if (best === null) return false;
+    return uni[key] === best;
+  };
+
+  const metrics = [
+    { key: 'rank', label: 'World Rank', format: (v) => `#${v}`, higher: false },
+    { key: 'tuition_usd', label: 'Tuition', format: (v) => v === 0 ? 'Free' : `$${v?.toLocaleString()}`, higher: false },
+    { key: 'ielts_min', label: 'IELTS', format: (v) => `${v}`, higher: true },
+    { key: '就业率', label: 'Employment', format: (v) => v, higher: true },
+    { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => `$${v?.toLocaleString()}`, higher: true },
+    { key: 'intl_students', label: 'Intl Students', format: (v) => v?.toLocaleString(), higher: true },
+  ];
+
+  return (
+    <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {universities.map((uni, idx) => (
+        <div key={uni.id} className={cn(
+          "relative rounded-2xl overflow-hidden bg-white border-2 transition-all duration-300",
+          idx === 0 ? "border-[hsl(var(--blue-700))] shadow-xl shadow-[hsl(var(--blue-700))]/10" : "border-black/5 hover:border-[hsl(var(--blue-700))]/30"
+        )}>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))]" />
+
+          <div className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg">
+                  {uni.flag}
+                </div>
+                <div>
+                  <h3 className="font-bold text-[hsl(var(--blue-900))] text-[18px]">{uni.short_name}</h3>
+                  <p className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.country_name}</p>
+                </div>
+              </div>
+              <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white text-[12px] font-bold shadow">
+                #{uni.rank}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {metrics.map((metric) => {
+                const isBest = isBestValue(uni, metric.key);
+                return (
+                  <div key={metric.key} className={cn(
+                    "flex items-center justify-between p-3 rounded-xl transition-colors",
+                    isBest ? "bg-emerald-50 border border-emerald-200" : "bg-[hsl(var(--soft-bg))]"
+                  )}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] text-[hsl(var(--blue-900))]/60">{metric.label}</span>
+                      {isBest && <Crown className="w-3.5 h-3.5 text-amber-500" />}
+                    </div>
+                    <span className={cn(
+                      "font-bold text-[14px]",
+                      isBest ? "text-emerald-600" : "text-[hsl(var(--blue-900))]"
+                    )}>
+                      {metric.format(uni[metric.key])}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {uni.popular_courses?.slice(0, 3).map((course) => (
+                <span key={course} className="text-[11px] px-3 py-1 rounded-full bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
+                  {course}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="px-6 py-4 bg-gradient-to-r from-[hsl(var(--soft-bg))] to-white border-t border-black/5">
+            <Link
+              to={`/student-visa?university=${uni.id}`}
+              className="inline-flex items-center justify-center gap-2 rounded-xl btn-primary text-white h-11 w-full text-[14px] font-bold"
+            >
+              Apply Now <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CompareBars({ universities }) {
+  if (universities.length === 0) return null;
+
+  const metrics = [
+    { key: 'rank', label: 'World Ranking', higher: false, max: 500 },
+    { key: 'tuition_usd', label: 'Tuition Fee', higher: false, max: 60000 },
+    { key: 'living_cost_usd', label: 'Living Cost', higher: false, max: 25000 },
+    { key: 'ielts_min', label: 'IELTS Score', higher: true, max: 9 },
+    { key: '就业率', label: 'Employment Rate', higher: true, max: 100, suffix: '%' },
+    { key: 'avg_salary_usd', label: 'Avg Salary', higher: true, max: 200000 },
+  ];
+
+  const colors = [
+    'from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))]',
+    'from-emerald-600 to-emerald-400',
+    'from-purple-600 to-purple-400',
+    'from-amber-600 to-amber-400',
+  ];
+
+  return (
+    <div className="space-y-6">
+      {metrics.map((metric, idx) => {
+        const values = universities.map(u => parseFloat(u[metric.key]) || 0);
+        const maxVal = Math.max(...values);
+        const normalizedMax = maxVal > 0 ? maxVal : 1;
+
+        return (
+          <div key={metric.key} className="bg-white rounded-2xl p-6 border border-black/5">
+            <h4 className="text-[14px] font-bold text-[hsl(var(--blue-900))] mb-4">{metric.label}</h4>
+            <div className="space-y-4">
+              {universities.map((uni, uIdx) => {
+                const value = parseFloat(uni[metric.key]) || 0;
+                const percentage = (value / normalizedMax) * 100;
+                const isBest = metric.higher ? value === Math.max(...values) : value === Math.min(...values);
+
+                return (
+                  <div key={uni.id} className="flex items-center gap-4">
+                    <div className="w-20 text-[12px] font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
+                    <div className="flex-1 relative">
+                      <div className="h-8 bg-[hsl(var(--soft-bg))] rounded-lg overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-lg transition-all duration-500",
+                            `bg-gradient-to-r ${colors[uIdx % colors.length]}`,
+                            !metric.higher && percentage < 30 && "from-emerald-500 to-emerald-400"
+                          )}
+                          style={{ width: `${Math.max(percentage, 8)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="w-24 text-right">
+                      <span className={cn(
+                        "text-[14px] font-bold",
+                        isBest ? "text-emerald-600" : "text-[hsl(var(--blue-900))]"
+                      )}>
+                        {metric.suffix === '%' ? `${value}%` : metric.key === 'avg_salary_usd' ? `$${value.toLocaleString()}` : value}
+                      </span>
+                      {isBest && <Crown className="inline w-3.5 h-3.5 text-amber-500 ml-1" />}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="flex flex-wrap gap-4">
+        {universities.map((uni) => (
+          <Link
+            key={uni.id}
+            to={`/student-visa?university=${uni.id}`}
+            className="flex-1 min-w-[200px] inline-flex items-center justify-center gap-2 rounded-xl btn-primary text-white h-12 text-[14px] font-bold shadow-lg"
+          >
+            Apply to {uni.short_name} <ArrowRight className="w-4 h-4" />
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CompareList({ universities }) {
+  if (universities.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      {universities.map((uni, idx) => (
+        <div key={uni.id} className={cn(
+          "relative rounded-2xl overflow-hidden bg-white border transition-all duration-300",
+          idx === 0 ? "border-[hsl(var(--blue-700))] shadow-lg shadow-[hsl(var(--blue-700))]/10" : "border-black/5 hover:border-[hsl(var(--blue-700))]/30"
+        )}>
+          <div className="flex items-stretch">
+            <div className="w-24 sm:w-32 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex flex-col items-center justify-center p-4 text-white">
+              <div className="text-3xl mb-1">{uni.flag}</div>
+              <div className="text-[10px] font-bold text-white/70">#{uni.rank}</div>
+            </div>
+
+            <div className="flex-1 p-4 sm:p-6">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="font-bold text-[hsl(var(--blue-900))] text-[16px]">{uni.short_name}</h3>
+                  <p className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.name}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
+                  {uni.scholarships && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-[hsl(var(--soft-bg))]">
+                  <div className="text-[10px] text-[hsl(var(--blue-900))]/50 mb-1">Tuition</div>
+                  <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">
+                    {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl bg-[hsl(var(--soft-bg))]">
+                  <div className="text-[10px] text-[hsl(var(--blue-900))]/50 mb-1">IELTS</div>
+                  <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni.ielts_min}+</div>
+                </div>
+                <div className="p-3 rounded-xl bg-emerald-50">
+                  <div className="text-[10px] text-emerald-600/70 mb-1">Employment</div>
+                  <div className="text-[14px] font-bold text-emerald-600">{uni.就业率}</div>
+                </div>
+                <div className="p-3 rounded-xl bg-[hsl(--accent)/10]">
+                  <div className="text-[10px] text-[hsl(var(--accent))]/70 mb-1">Avg Salary</div>
+                  <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">${uni.avg_salary_usd?.toLocaleString()}</div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  to={`/student-visa?university=${uni.id}`}
+                  className="inline-flex items-center gap-2 rounded-xl btn-primary text-white h-10 px-5 text-[13px] font-bold shadow-md"
+                >
+                  Apply <ArrowRight className="w-4 h-4" />
+                </Link>
+                <button className="text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline">
+                  View Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -277,6 +628,8 @@ export default function UniversityComparison() {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [compareList, setCompareList] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [compareView, setCompareView] = useState('cards');
+  const [gridView, setGridView] = useState('grid');
 
   useEffect(() => {
     axios.get(`${API}/universities`, { params: { limit: 100 } })
@@ -475,10 +828,58 @@ export default function UniversityComparison() {
       {compareList.length >= 2 && (
         <section className="py-8 bg-white border-b border-black/5">
           <div className="max-w-7xl mx-auto px-5 sm:px-8">
-            <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))] mb-6">
-              Comparison View
-            </h2>
-            <CompareTable universities={compareList} />
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+                Comparison View
+              </h2>
+              <div className="flex items-center gap-2 p-1 rounded-xl bg-[hsl(var(--soft-bg))]">
+                <button
+                  onClick={() => setCompareView('cards')}
+                  className={cn(
+                    "p-2 rounded-lg transition-all",
+                    compareView === 'cards' ? "bg-white shadow-sm text-[hsl(var(--blue-700))]" : "text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))]"
+                  )}
+                  title="Card View"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setCompareView('bars')}
+                  className={cn(
+                    "p-2 rounded-lg transition-all",
+                    compareView === 'bars' ? "bg-white shadow-sm text-[hsl(var(--blue-700))]" : "text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))]"
+                  )}
+                  title="Bar Chart View"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setCompareView('list')}
+                  className={cn(
+                    "p-2 rounded-lg transition-all",
+                    compareView === 'list' ? "bg-white shadow-sm text-[hsl(var(--blue-700))]" : "text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))]"
+                  )}
+                  title="List View"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setCompareView('table')}
+                  className={cn(
+                    "p-2 rounded-lg transition-all",
+                    compareView === 'table' ? "bg-white shadow-sm text-[hsl(var(--blue-700))]" : "text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))]"
+                  )}
+                  title="Table View"
+                >
+                  <Table2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {compareView === 'cards' && <CompareCards universities={compareList} />}
+            {compareView === 'bars' && <CompareBars universities={compareList} />}
+            {compareView === 'list' && <CompareList universities={compareList} />}
+            {compareView === 'table' && <CompareTable universities={compareList} />}
           </div>
         </section>
       )}
@@ -489,6 +890,28 @@ export default function UniversityComparison() {
             <h2 className="font-display font-extrabold text-[24px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
               {filteredUniversities.length} Universities found
             </h2>
+            <div className="flex items-center gap-2 p-1 rounded-xl bg-[hsl(var(--soft-bg))]">
+              <button
+                onClick={() => setGridView('grid')}
+                className={cn(
+                  "p-2 rounded-lg transition-all",
+                  gridView === 'grid' ? "bg-white shadow-sm text-[hsl(var(--blue-700))]" : "text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))]"
+                )}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setGridView('list')}
+                className={cn(
+                  "p-2 rounded-lg transition-all",
+                  gridView === 'list' ? "bg-white shadow-sm text-[hsl(var(--blue-700))]" : "text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))]"
+                )}
+                title="List View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {loading ? (
@@ -504,10 +927,21 @@ export default function UniversityComparison() {
                 Clear filters
               </Button>
             </div>
-          ) : (
+          ) : gridView === 'grid' ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredUniversities.map((uni) => (
                 <UniversityCard
+                  key={uni.id}
+                  uni={uni}
+                  onCompare={handleCompare}
+                  isComparing={!!compareList.find((u) => u.id === uni.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredUniversities.map((uni) => (
+                <UniversityListItem
                   key={uni.id}
                   uni={uni}
                   onCompare={handleCompare}
