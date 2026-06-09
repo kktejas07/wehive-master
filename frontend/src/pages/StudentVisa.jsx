@@ -162,7 +162,7 @@ export default function StudentVisa() {
 
   return (
     <div className="bg-white">
-      <Navbar />
+      <Navbar variant="light" />
 
       <section className="pt-28 pb-16 bg-gradient-to-br from-[hsl(var(--blue-900))] to-[hsl(var(--blue-700))] text-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
