@@ -21,7 +21,7 @@ export default function UserMenu() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
+      <>
         <button
           onClick={() => openAuth('login')}
           className="hidden sm:inline-flex items-center px-3 py-2 rounded-full text-[13px] font-bold text-[hsl(var(--blue-900))]/80 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))] transition"
@@ -34,7 +34,7 @@ export default function UserMenu() {
         >
           {t('cta.signUp')}
         </button>
-      </div>
+      </>
     );
   }
 
