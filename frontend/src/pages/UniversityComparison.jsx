@@ -656,6 +656,35 @@ export default function UniversityComparison() {
     return true;
   });
 
+  const sortedUniversities = [...filteredUniversities].sort((a, b) => {
+    switch (sortBy) {
+      case 'tuition_asc':
+        return (a.tuition_usd || 0) - (b.tuition_usd || 0);
+      case 'tuition_desc':
+        return (b.tuition_usd || 0) - (a.tuition_usd || 0);
+      case 'rank':
+        return (a.rank || 999) - (b.rank || 999);
+      case 'qs_rank':
+        return (a.qs_rank || 999) - (b.qs_rank || 999);
+      case 'ielts':
+        return (a.ielts_min || 0) - (b.ielts_min || 0);
+      case 'employment':
+        const empA = parseFloat(String(a.就业率 || '0%').replace('%', ''));
+        const empB = parseFloat(String(b.就业率 || '0%').replace('%', ''));
+        return empB - empA;
+      case 'salary':
+        return (b.avg_salary_usd || 0) - (a.avg_salary_usd || 0);
+      default:
+        return (a.rank || 999) - (b.rank || 999);
+    }
+  });
+
+  const totalPages = Math.ceil(sortedUniversities.length / itemsPerPage);
+  const paginatedUniversities = sortedUniversities.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const handleCompare = (uni) => {
     if (compareList.find((u) => u.id === uni.id)) {
       setCompareList(compareList.filter((u) => u.id !== uni.id));
@@ -668,6 +697,12 @@ export default function UniversityComparison() {
     setSearch('');
     setSelectedCountry(null);
     setSelectedCourses([]);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (newSort) => {
+    setSortBy(newSort);
+    setCurrentPage(1);
   };
 
   const hasFilters = search || selectedCountry || selectedCourses.length > 0;
@@ -886,9 +921,9 @@ export default function UniversityComparison() {
 
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <h2 className="font-display font-extrabold text-[24px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
-              {filteredUniversities.length} Universities found
+              {sortedUniversities.length} Universities found
             </h2>
             <div className="flex items-center gap-2 p-1 rounded-xl bg-[hsl(var(--soft-bg))]">
               <button
@@ -918,7 +953,7 @@ export default function UniversityComparison() {
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" />
             </div>
-          ) : filteredUniversities.length === 0 ? (
+          ) : sortedUniversities.length === 0 ? (
             <div className="text-center py-20">
               <GraduationCap className="w-12 h-12 text-[hsl(var(--blue-900))]/30 mx-auto" />
               <h3 className="mt-4 text-[18px] font-bold text-[hsl(var(--blue-900))]">No universities found</h3>
@@ -929,7 +964,7 @@ export default function UniversityComparison() {
             </div>
           ) : gridView === 'grid' ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredUniversities.map((uni) => (
+              {paginatedUniversities.map((uni) => (
                 <UniversityCard
                   key={uni.id}
                   uni={uni}
@@ -949,6 +984,61 @@ export default function UniversityComparison() {
                 />
               ))}
             </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="h-10 w-10 p-0 rounded-lg border-black/10 disabled:opacity-50"
+              >
+                <ChevronUp className="w-4 h-4 rotate-[-90deg]" />
+              </Button>
+
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={cn(
+                      "h-10 w-10 rounded-lg text-[14px] font-bold transition-all",
+                      currentPage === pageNum
+                        ? "bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white shadow-md"
+                        : "bg-white text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))] border border-black/10"
+                    )}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="h-10 w-10 p-0 rounded-lg border-black/10 disabled:opacity-50"
+              >
+                <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+              </Button>
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <p className="mt-4 text-center text-[13px] text-[hsl(var(--blue-900))]/60">
+              Page {currentPage} of {totalPages} — Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedUniversities.length)} of {sortedUniversities.length} universities
+            </p>
           )}
         </div>
       </section>
