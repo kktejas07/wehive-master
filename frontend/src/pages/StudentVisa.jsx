@@ -78,16 +78,10 @@ function CountryCard({ c, onSelect, selected }) {
       onClick={() => onSelect(c.id)}
       className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden group ${
         selected === c.id
-          ? 'border-[hsl(var(--blue-700))]'
-          : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30'
+          ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
+          : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white hover:bg-[hsl(var(--blue-50))]'
       }`}
-      style={{
-        background: selected === c.id
-          ? 'linear-gradient(135deg, hsl(var(--blue-50)) 0%, hsl(var(--blue-100)/50%) 100%)'
-          : 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/30%) 100%)',
-      }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/0 to-[hsl(var(--accent))]/0 group-hover:from-[hsl(var(--blue-700))]/5 group-hover:to-[hsl(var(--accent))]/5 transition-all duration-300" />
       <div className="relative z-10">
         <div className="text-3xl mb-2">{c.flag}</div>
         <div className="font-bold text-[hsl(var(--blue-900))]">{c.name}</div>
@@ -248,7 +242,6 @@ export default function StudentVisa() {
                     : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white hover:bg-[hsl(var(--blue-50))]'
                 }`}
               >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[hsl(var(--accent))]/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors duration-300 ${
                   selectedCourse === course.id
                     ? 'bg-white/20'
@@ -282,15 +275,11 @@ export default function StudentVisa() {
                   .map((uni) => (
                     <div
                       key={uni.id}
-                      className="relative rounded-2xl p-5 overflow-hidden group transition-all duration-300 hover:shadow-lg hover:shadow-[hsl(var(--blue-700))]/10"
-                      style={{
-                        background: 'linear-gradient(135deg, hsl(var(--blue-50)) 0%, #ffffff 100%)',
-                      }}
+                      className="relative rounded-2xl p-5 bg-white hover:bg-[hsl(var(--blue-50))] transition-all duration-300 hover:shadow-lg hover:shadow-[hsl(var(--blue-700))]/10"
                     >
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full" />
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white text-xl">
+                          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-white text-xl">
                             {uni.flag}
                           </div>
                           <div>
@@ -470,12 +459,8 @@ export default function StudentVisa() {
             {INTAKE_TIMES.map((intake, i) => (
               <div
                 key={intake.season}
-                className="relative rounded-2xl overflow-hidden group"
-                style={{
-                  background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--soft-bg)) 100%)',
-                }}
+className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var(--blue-50))] transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/0 to-[hsl(var(--accent))]/0 group-hover:from-[hsl(var(--blue-700))]/5 group-hover:to-[hsl(var(--accent))]/5 transition-all duration-300" />
                 <div className="relative z-10 p-7 border border-black/5 rounded-2xl bg-white/80 backdrop-blur">
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`w-12 h-12 rounded-xl ${intake.color} flex items-center justify-center text-white shadow-lg`}>
@@ -508,14 +493,10 @@ export default function StudentVisa() {
               return (
                 <div
                   key={doc.title}
-                  className="relative rounded-2xl p-6 text-center overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10"
-                  style={{
-                    background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/50%) 100%)',
-                  }}
+                  className="relative rounded-2xl p-6 text-center overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white"
                 >
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="relative z-10">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center mx-auto shadow-lg shadow-[hsl(var(--blue-700))]/20">
+                    <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--blue-700))] flex items-center justify-center mx-auto shadow-lg shadow-[hsl(var(--blue-700))]/20">
                       <Icon className="w-7 h-7 text-white" />
                     </div>
                     <div className="mt-4 font-bold text-[15px] text-[hsl(var(--blue-900))]">{doc.title}</div>
