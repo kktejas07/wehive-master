@@ -6,9 +6,9 @@ import { BRAND } from '../data/mock';
 
 const CATEGORIES = [
   { id: 'flights', label: 'Flights', icon: Plane },
+  { id: 'hotels', label: 'Hotels', icon: Hotel },
   { id: 'buses', label: 'Buses', icon: Bus },
   { id: 'cars', label: 'Car Rentals', icon: Car },
-  { id: 'hotels', label: 'Hotels', icon: Hotel },
 ];
 
 const DEALS = {
@@ -60,7 +60,7 @@ function DealCard({ deal, category, onCall }) {
       className="relative flex-shrink-0 w-[260px] sm:w-[290px] rounded-2xl bg-white border border-black/8 shadow-sm overflow-hidden cursor-pointer group"
       onClick={onCall}
     >
-      {discount >= 30 && (
+      {discount >= 20 && (
         <div className="absolute top-3 right-3 z-10">
           <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-white text-[10px] font-bold uppercase tracking-wider">
             {discount}% OFF
