@@ -244,14 +244,9 @@ export default function StudentVisa() {
                 onClick={() => setSelectedCourse(selectedCourse === course.id ? null : course.id)}
                 className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden group ${
                   selectedCourse === course.id
-                    ? 'border-[hsl(var(--blue-700))] shadow-lg shadow-[hsl(var(--blue-700))]/20'
-                    : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30'
+                    ? 'border-[hsl(var(--blue-700))] shadow-lg shadow-[hsl(var(--blue-700))]/20 bg-[hsl(var(--blue-700))]'
+                    : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white hover:bg-[hsl(var(--blue-50))]'
                 }`}
-                style={{
-                  background: selectedCourse === course.id
-                    ? 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--blue-500)) 100%)'
-                    : 'linear-gradient(135deg, #ffffff 0%, hsl(var(--soft-bg)) 100%)',
-                }}
               >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[hsl(var(--accent))]/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors duration-300 ${
