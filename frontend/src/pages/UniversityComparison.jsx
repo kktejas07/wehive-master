@@ -44,21 +44,21 @@ const STUDENT_COUNTRIES = [
 
 function UniversityCard({ uni, onCompare, isComparing }) {
   return (
-    <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20">
+    <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 flex flex-col h-full min-h-[420px]">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] opacity-0 group-hover:opacity-100 transition-opacity" />
 
-      <div className="relative z-10 p-6">
+      <div className="relative z-10 p-6 flex flex-col flex-1">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg shadow-[hsl(var(--blue-700))]/20">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg shadow-[hsl(var(--blue-700))]/20 shrink-0">
               {uni.flag}
             </div>
-            <div>
-              <h3 className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</h3>
-              <p className="text-[13px] text-[hsl(var(--blue-900))]/60">{uni.name}</p>
+            <div className="min-w-0">
+              <h3 className="font-bold text-[hsl(var(--blue-900))] truncate">{uni.short_name}</h3>
+              <p className="text-[13px] text-[hsl(var(--blue-900))]/60 truncate">{uni.name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white text-[11px] font-bold shadow">
               #{uni.rank}
             </div>
@@ -66,50 +66,50 @@ function UniversityCard({ uni, onCompare, isComparing }) {
         </div>
 
         <div className="mt-4 flex items-center gap-2 flex-wrap">
-          <Badge className="bg-gradient-to-r from-[hsl(var(--blue-100))] to-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] text-[11px] border-0">
+          <Badge className="bg-gradient-to-r from-[hsl(var(--blue-100))] to-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] text-[11px] border-0 shrink-0">
             {uni.type}
           </Badge>
-          <Badge className={uni.scholarships ? 'bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-700 text-[11px] border-0' : 'bg-gray-100 text-gray-600 text-[11px] border-0'}>
+          <Badge className={uni.scholarships ? 'bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-700 text-[11px] border-0 shrink-0' : 'bg-gray-100 text-gray-600 text-[11px] border-0 shrink-0'}>
             {uni.scholarships ? 'Scholarships' : 'No scholarships'}
           </Badge>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div className="flex items-center gap-2 text-[13px]">
-            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--accent))]/10 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--accent))]/10 flex items-center justify-center shrink-0">
               <DollarSign className="w-4 h-4 text-[hsl(var(--accent))]" />
             </div>
-            <div>
-              <span className="text-[hsl(var(--blue-900))]/50 text-[11px]">Tuition</span>
-              <span className="font-bold text-[hsl(var(--blue-900))] block">
+            <div className="min-w-0">
+              <span className="text-[hsl(var(--blue-900))]/50 text-[11px] block">Tuition</span>
+              <span className="font-bold text-[hsl(var(--blue-900))] block truncate">
                 {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2 text-[13px]">
-            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--blue-100))] flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--blue-100))] flex items-center justify-center shrink-0">
               <Users className="w-4 h-4 text-[hsl(var(--blue-700))]" />
             </div>
-            <div>
-              <span className="text-[hsl(var(--blue-900))]/50 text-[11px]">Intl Students</span>
-              <span className="font-bold text-[hsl(var(--blue-900))] block">{uni.intl_students?.toLocaleString()}</span>
+            <div className="min-w-0">
+              <span className="text-[hsl(var(--blue-900))]/50 text-[11px] block">Intl Students</span>
+              <span className="font-bold text-[hsl(var(--blue-900))] block truncate">{uni.intl_students?.toLocaleString()}</span>
             </div>
           </div>
           <div className="flex items-center gap-2 text-[13px]">
-            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--blue-100))] flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--blue-100))] flex items-center justify-center shrink-0">
               <Award className="w-4 h-4 text-[hsl(var(--blue-700))]" />
             </div>
-            <div>
-              <span className="text-[hsl(var(--blue-900))]/50 text-[11px]">IELTS</span>
+            <div className="min-w-0">
+              <span className="text-[hsl(var(--blue-900))]/50 text-[11px] block">IELTS</span>
               <span className="font-bold text-[hsl(var(--blue-900))] block">{uni.ielts_min}+</span>
             </div>
           </div>
           <div className="flex items-center gap-2 text-[13px]">
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
             </div>
-            <div>
-              <span className="text-[hsl(var(--blue-900))]/50 text-[11px]">Employment</span>
+            <div className="min-w-0">
+              <span className="text-[hsl(var(--blue-900))]/50 text-[11px] block">Employment</span>
               <span className="font-bold text-[hsl(var(--blue-900))] block">{uni.就业率}</span>
             </div>
           </div>
@@ -119,15 +119,17 @@ function UniversityCard({ uni, onCompare, isComparing }) {
           {uni.popular_courses?.slice(0, 3).map((course) => (
             <span
               key={course}
-              className="text-[11px] px-3 py-1 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]"
+              className="text-[11px] px-3 py-1 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] shrink-0"
             >
               {course}
             </span>
           ))}
         </div>
+
+        <div className="mt-auto pt-4"></div>
       </div>
 
-      <div className="relative z-10 px-6 py-4 bg-gradient-to-r from-[hsl(var(--soft-bg))] to-white flex items-center gap-2 border-t border-black/5">
+      <div className="relative z-10 px-6 py-4 bg-gradient-to-r from-[hsl(var(--soft-bg))] to-white flex items-center gap-2 border-t border-black/5 shrink-0">
         <Button
           variant="outline"
           size="sm"
@@ -155,29 +157,29 @@ function UniversityCard({ uni, onCompare, isComparing }) {
 
 function UniversityListItem({ uni, onCompare, isComparing }) {
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 transition-all duration-300">
-      <div className="flex items-stretch">
+    <div className="relative rounded-2xl overflow-hidden bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 transition-all duration-300 min-h-[140px]">
+      <div className="flex items-stretch h-full">
         <div className="w-24 sm:w-32 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex flex-col items-center justify-center p-4 text-white shrink-0">
           <div className="text-3xl mb-1">{uni.flag}</div>
           <div className="text-[10px] font-bold text-white/70">#{uni.rank}</div>
         </div>
 
-        <div className="flex-1 p-4 sm:p-6">
+        <div className="flex-1 p-4 sm:p-6 flex flex-col">
           <div className="flex items-start justify-between mb-3">
-            <div>
-              <h3 className="font-bold text-[hsl(var(--blue-900))] text-[16px]">{uni.short_name}</h3>
-              <p className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.name}</p>
+            <div className="min-w-0">
+              <h3 className="font-bold text-[hsl(var(--blue-900))] text-[16px] truncate">{uni.short_name}</h3>
+              <p className="text-[12px] text-[hsl(var(--blue-900))]/60 truncate">{uni.name}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
               {uni.scholarships && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-auto">
             <div className="p-3 rounded-xl bg-[hsl(var(--soft-bg))]">
               <div className="text-[10px] text-[hsl(var(--blue-900))]/50 mb-1">Tuition</div>
-              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">
+              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">
                 {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
               </div>
             </div>
@@ -191,16 +193,16 @@ function UniversityListItem({ uni, onCompare, isComparing }) {
             </div>
             <div className="p-3 rounded-xl bg-[hsl(--accent)/10]">
               <div className="text-[10px] text-[hsl(var(--accent))]/70 mb-1">Avg Salary</div>
-              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">${uni.avg_salary_usd?.toLocaleString()}</div>
+              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">${uni.avg_salary_usd?.toLocaleString()}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mt-4">
             <Button
               variant="outline"
               size="sm"
               className={cn(
-                "rounded-xl transition-all",
+                "rounded-xl transition-all shrink-0",
                 isComparing
                   ? "border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))] text-white"
                   : "border-black/10"
@@ -212,11 +214,11 @@ function UniversityListItem({ uni, onCompare, isComparing }) {
             </Button>
             <Link
               to={`/student-visa?university=${uni.id}`}
-              className="inline-flex items-center gap-2 rounded-xl btn-primary text-white h-10 px-5 text-[13px] font-bold shadow-md"
+              className="inline-flex items-center gap-2 rounded-xl btn-primary text-white h-10 px-5 text-[13px] font-bold shadow-md shrink-0"
             >
               Apply <ArrowRight className="w-4 h-4" />
             </Link>
-            <button className="text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline">
+            <button className="text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline shrink-0">
               View Details
             </button>
           </div>
