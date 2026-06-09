@@ -10,6 +10,7 @@ import {
   Search, ChevronDown, ChevronUp, X, Check,
   BookOpen, DollarSign, Calendar, MapPin, ArrowRight,
   Filter, Loader2, TrendingUp, Shield, Zap,
+  Atom, Cog, Briefcase, Heart, Scale, Palette, BookMarked,
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth, API } from '../context/AuthContext';
@@ -17,13 +18,13 @@ import { cn } from '../lib/utils';
 import { inr } from '../lib/utils';
 
 const COURSE_CATEGORIES = [
-  { id: 'stem', label: 'STEM', icon: '🔬' },
-  { id: 'engineering', label: 'Engineering', icon: '⚙️' },
-  { id: 'business', label: 'Business', icon: '💼' },
-  { id: 'medicine', label: 'Medicine', icon: '🏥' },
-  { id: 'law', label: 'Law', icon: '⚖️' },
-  { id: 'arts', label: 'Arts', icon: '🎨' },
-  { id: 'social', label: 'Social Sciences', icon: '📚' },
+  { id: 'stem', label: 'STEM', icon: Atom },
+  { id: 'engineering', label: 'Engineering', icon: Cog },
+  { id: 'business', label: 'Business', icon: Briefcase },
+  { id: 'medicine', label: 'Medicine', icon: Heart },
+  { id: 'law', label: 'Law', icon: Scale },
+  { id: 'arts', label: 'Arts', icon: Palette },
+  { id: 'social', label: 'Social Sciences', icon: BookMarked },
 ];
 
 const STUDENT_COUNTRIES = [
@@ -41,11 +42,14 @@ const STUDENT_COUNTRIES = [
 
 function UniversityCard({ uni, onCompare, isComparing }) {
   return (
-    <div className="bg-white rounded-2xl border border-black/5 overflow-hidden hover:shadow-lg transition-all">
-      <div className="p-6">
+    <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10" style={{
+      background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/50%) 100%)',
+    }}>
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative z-10 p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg">
               {uni.flag}
             </div>
             <div>
@@ -54,43 +58,59 @@ function UniversityCard({ uni, onCompare, isComparing }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-[11px]">
-              #{uni.rank} World
-            </Badge>
+            <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white text-[11px] font-bold shadow">
+              #{uni.rank}
+            </div>
           </div>
         </div>
 
         <div className="mt-4 flex items-center gap-2 flex-wrap">
-          <Badge className="bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] text-[11px]">
+          <Badge className="bg-gradient-to-r from-[hsl(var(--blue-100))] to-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] text-[11px] border-0">
             {uni.type}
           </Badge>
-          <Badge className="bg-emerald-50 text-emerald-700 text-[11px]">
+          <Badge className={uni.scholarships ? 'bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-700 text-[11px] border-0' : 'bg-gray-100 text-gray-600 text-[11px] border-0'}>
             {uni.scholarships ? 'Scholarships' : 'No scholarships'}
           </Badge>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div className="flex items-center gap-2 text-[13px]">
-            <DollarSign className="w-4 h-4 text-[hsl(var(--accent))]" />
-            <span className="text-[hsl(var(--blue-900))]/70">Tuition:</span>
-            <span className="font-bold text-[hsl(var(--blue-900))]">
-              {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
-            </span>
+            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--accent))]/10 flex items-center justify-center">
+              <DollarSign className="w-4 h-4 text-[hsl(var(--accent))]" />
+            </div>
+            <div>
+              <span className="text-[hsl(var(--blue-900))]/50 text-[11px]">Tuition</span>
+              <span className="font-bold text-[hsl(var(--blue-900))] block">
+                {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-2 text-[13px]">
-            <Users className="w-4 h-4 text-[hsl(var(--accent))]" />
-            <span className="text-[hsl(var(--blue-900))]/70">Intl:</span>
-            <span className="font-bold text-[hsl(var(--blue-900))]">{uni.intl_students?.toLocaleString()}</span>
+            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--blue-100))] flex items-center justify-center">
+              <Users className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+            </div>
+            <div>
+              <span className="text-[hsl(var(--blue-900))]/50 text-[11px]">Intl Students</span>
+              <span className="font-bold text-[hsl(var(--blue-900))] block">{uni.intl_students?.toLocaleString()}</span>
+            </div>
           </div>
           <div className="flex items-center gap-2 text-[13px]">
-            <Award className="w-4 h-4 text-[hsl(var(--accent))]" />
-            <span className="text-[hsl(var(--blue-900))]/70">IELTS:</span>
-            <span className="font-bold text-[hsl(var(--blue-900))]">{uni.ielts_min}+</span>
+            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--blue-100))] flex items-center justify-center">
+              <Award className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+            </div>
+            <div>
+              <span className="text-[hsl(var(--blue-900))]/50 text-[11px]">IELTS</span>
+              <span className="font-bold text-[hsl(var(--blue-900))] block">{uni.ielts_min}+</span>
+            </div>
           </div>
           <div className="flex items-center gap-2 text-[13px]">
-            <TrendingUp className="w-4 h-4 text-[hsl(var(--accent))]" />
-            <span className="text-[hsl(var(--blue-900))]/70">Employment:</span>
-            <span className="font-bold text-[hsl(var(--blue-900))]">{uni.就业率}</span>
+            <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div>
+              <span className="text-[hsl(var(--blue-900))]/50 text-[11px]">Employment</span>
+              <span className="font-bold text-[hsl(var(--blue-900))] block">{uni.就业率}</span>
+            </div>
           </div>
         </div>
 
@@ -98,7 +118,7 @@ function UniversityCard({ uni, onCompare, isComparing }) {
           {uni.popular_courses?.slice(0, 3).map((course) => (
             <span
               key={course}
-              className="text-[11px] px-2 py-1 rounded-full bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/70"
+              className="text-[11px] px-3 py-1 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]"
             >
               {course}
             </span>
@@ -106,13 +126,15 @@ function UniversityCard({ uni, onCompare, isComparing }) {
         </div>
       </div>
 
-      <div className="px-6 py-4 bg-[hsl(var(--soft-bg))] flex items-center gap-2">
+      <div className="relative z-10 px-6 py-4 bg-gradient-to-r from-[hsl(var(--soft-bg))] to-white flex items-center gap-2 border-t border-black/5">
         <Button
           variant="outline"
           size="sm"
           className={cn(
-            "flex-1 rounded-full",
-            isComparing && "border-[hsl(var(--blue-700))] text-[hsl(var(--blue-700))]"
+            "flex-1 rounded-xl transition-all duration-300",
+            isComparing
+              ? "border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))] text-white"
+              : "border-black/10 hover:border-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]"
           )}
           onClick={() => onCompare(uni)}
         >
@@ -121,7 +143,7 @@ function UniversityCard({ uni, onCompare, isComparing }) {
         </Button>
         <Link
           to={`/student-visa?university=${uni.id}`}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-full btn-primary text-white h-10 text-[13px] font-bold"
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl btn-primary text-white h-10 text-[13px] font-bold shadow-lg shadow-[hsl(var(--blue-700))]/20"
         >
           Apply <ArrowRight className="w-4 h-4" />
         </Link>
@@ -153,16 +175,19 @@ function CompareTable({ universities }) {
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-black/5 overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="relative rounded-2xl overflow-hidden" style={{
+      background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/50%) 100%)',
+    }}>
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/5 to-[hsl(var(--accent))]/5 pointer-events-none" />
+      <div className="relative z-10 overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-black/5">
+            <tr className="border-b border-black/5 bg-white/50">
               <th className="text-left p-4 font-bold text-[hsl(var(--blue-900))]/60 text-[13px]">Metric</th>
               {universities.map((uni) => (
-                <th key={uni.id} className="p-4 text-center min-w-[180px]">
+                <th key={uni.id} className="p-4 text-center min-w-[180px] bg-gradient-to-b from-white to-[hsl(var(--blue-50)/30%)]">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-10 h-10 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-xl">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-xl shadow-lg">
                       {uni.flag}
                     </div>
                     <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
@@ -173,8 +198,8 @@ function CompareTable({ universities }) {
             </tr>
           </thead>
           <tbody>
-            {metrics.map((metric) => (
-              <tr key={metric.key} className="border-b border-black/5 hover:bg-[hsl(var(--soft-bg))]">
+            {metrics.map((metric, idx) => (
+              <tr key={metric.key} className={`border-b border-black/5 ${idx % 2 === 0 ? 'bg-white/30' : 'bg-white/10'} hover:bg-[hsl(var(--blue-50)]/30 transition-colors`}>
                 <td className="p-4 text-[13px] text-[hsl(var(--blue-900))]/70 font-medium">
                   {metric.label}
                 </td>
@@ -191,7 +216,7 @@ function CompareTable({ universities }) {
                 <td key={uni.id} className="p-4 text-center">
                   <div className="flex flex-wrap justify-center gap-1">
                     {uni.popular_courses?.map((c) => (
-                      <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]">
+                      <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
                         {c}
                       </span>
                     ))}
@@ -329,19 +354,19 @@ export default function UniversityComparison() {
                 placeholder="Search universities..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-12 h-12 rounded-xl border-black/10"
+                className="pl-12 h-12 rounded-xl border-black/10 bg-white shadow-sm focus:shadow-md focus:shadow-[hsl(var(--blue-700))]/10 transition-shadow"
               />
             </div>
             <div className="flex gap-3">
               <Button
                 variant="outline"
-                className="h-12 px-4 rounded-xl border-black/10"
+                className="h-12 px-4 rounded-xl border-black/10 bg-white shadow-sm hover:shadow-md transition-shadow"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
+                <Filter className="w-4 h-4 mr-2 text-[hsl(var(--blue-700))]" />
+                <span className="text-[hsl(var(--blue-900))]">Filters</span>
                 {hasFilters && (
-                  <Badge className="ml-2 bg-[hsl(var(--accent))] text-white text-[10px] h-5 w-5 rounded-full p-0 items-center justify-center">
+                  <Badge className="ml-2 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--red-600))] text-white text-[10px] h-5 w-5 rounded-full p-0 items-center justify-center shadow-sm">
                     {selectedCourses.length + (selectedCountry ? 1 : 0)}
                   </Badge>
                 )}
@@ -355,18 +380,21 @@ export default function UniversityComparison() {
           </div>
 
           {showFilters && (
-            <div className="mt-6 bg-white rounded-2xl border border-black/5 p-6">
-              <div className="grid md:grid-cols-2 gap-8">
+            <div className="mt-6 rounded-2xl border border-black/5 p-6 overflow-hidden relative" style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/50%) 100%)',
+            }}>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full" />
+              <div className="relative z-10 grid md:grid-cols-2 gap-8">
                 <div>
                   <h3 className="text-[14px] font-bold text-[hsl(var(--blue-900))] mb-4">Country</h3>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSelectedCountry(null)}
                       className={cn(
-                        "px-4 py-2 rounded-full text-[13px] font-bold transition-all",
+                        "px-4 py-2 rounded-xl text-[13px] font-bold transition-all shadow-sm",
                         !selectedCountry
-                          ? "bg-[hsl(var(--blue-700))] text-white"
-                          : "bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))]"
+                          ? "bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white shadow-md"
+                          : "bg-white text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))] border border-black/5"
                       )}
                     >
                       All Countries
@@ -376,10 +404,10 @@ export default function UniversityComparison() {
                         key={c.id}
                         onClick={() => setSelectedCountry(c.id === selectedCountry ? null : c.id)}
                         className={cn(
-                          "px-4 py-2 rounded-full text-[13px] font-bold transition-all flex items-center gap-2",
+                          "px-4 py-2 rounded-xl text-[13px] font-bold transition-all flex items-center gap-2 shadow-sm",
                           selectedCountry === c.id
-                            ? "bg-[hsl(var(--blue-700))] text-white"
-                            : "bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))]"
+                            ? "bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white shadow-md"
+                            : "bg-white text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))] border border-black/5"
                         )}
                       >
                         <span>{c.flag}</span> {c.name}
@@ -402,13 +430,14 @@ export default function UniversityComparison() {
                           }
                         }}
                         className={cn(
-                          "px-4 py-2 rounded-full text-[13px] font-bold transition-all flex items-center gap-2",
+                          "px-4 py-2 rounded-xl text-[13px] font-bold transition-all flex items-center gap-2 shadow-sm",
                           selectedCourses.includes(course.id)
-                            ? "bg-[hsl(var(--blue-700))] text-white"
-                            : "bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))]"
+                            ? "bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white shadow-md"
+                            : "bg-white text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))] border border-black/5"
                         )}
                       >
-                        <span>{course.icon}</span> {course.label}
+                        <course.icon className="w-4 h-4" />
+                        {course.label}
                       </button>
                     ))}
                   </div>

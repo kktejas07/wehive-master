@@ -10,6 +10,7 @@ import {
   GraduationCap, Clock, Briefcase, Globe2, Calendar, Award,
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
   Globe, MapPin, Visa, FileText, Shield, Zap, Search, Filter,
+  Atom, Cog, Heart, Scale, Palette, BookMarked,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -61,13 +62,13 @@ const DOCUMENTS = [
 ];
 
 const COURSE_CATEGORIES = [
-  { id: 'stem', label: 'STEM', icon: '🔬', description: 'Science, Technology, Engineering, Mathematics' },
-  { id: 'engineering', label: 'Engineering', icon: '⚙️', description: 'Mechanical, Electrical, Civil, Computer' },
-  { id: 'business', label: 'Business', icon: '💼', description: 'MBA, Finance, Marketing, Management' },
-  { id: 'medicine', label: 'Medicine', icon: '🏥', description: 'MBBS, Pharmacy, Nursing, Public Health' },
-  { id: 'law', label: 'Law', icon: '⚖️', description: 'LLB, LLM, International Law' },
-  { id: 'arts', label: 'Arts', icon: '🎨', description: 'Design, Fine Arts, Architecture' },
-  { id: 'social', label: 'Social Sciences', icon: '📚', description: 'Economics, Psychology, Sociology' },
+  { id: 'stem', label: 'STEM', icon: Atom, description: 'Science, Technology, Engineering, Mathematics' },
+  { id: 'engineering', label: 'Engineering', icon: Cog, description: 'Mechanical, Electrical, Civil, Computer' },
+  { id: 'business', label: 'Business', icon: Briefcase, description: 'MBA, Finance, Marketing, Management' },
+  { id: 'medicine', label: 'Medicine', icon: Heart, description: 'MBBS, Pharmacy, Nursing, Public Health' },
+  { id: 'law', label: 'Law', icon: Scale, description: 'LLB, LLM, International Law' },
+  { id: 'arts', label: 'Arts', icon: Palette, description: 'Design, Fine Arts, Architecture' },
+  { id: 'social', label: 'Social Sciences', icon: BookMarked, description: 'Economics, Psychology, Sociology' },
 ];
 
 function CountryCard({ c, onSelect, selected }) {
@@ -75,19 +76,27 @@ function CountryCard({ c, onSelect, selected }) {
   return (
     <button
       onClick={() => onSelect(c.id)}
-      className={`text-left p-5 rounded-2xl border-2 transition-all ${
+      className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden group ${
         selected === c.id
-          ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
-          : 'border-black/5 bg-white hover:border-[hsl(var(--blue-700))]/30'
+          ? 'border-[hsl(var(--blue-700))]'
+          : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30'
       }`}
+      style={{
+        background: selected === c.id
+          ? 'linear-gradient(135deg, hsl(var(--blue-50)) 0%, hsl(var(--blue-100)/50%) 100%)'
+          : 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/30%) 100%)',
+      }}
     >
-      <div className="text-3xl mb-2">{c.flag}</div>
-      <div className="font-bold text-[hsl(var(--blue-900))]">{c.name}</div>
-      {meta.processing_weeks && (
-        <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">
-          {meta.processing_weeks}
-        </div>
-      )}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/0 to-[hsl(var(--accent))]/0 group-hover:from-[hsl(var(--blue-700))]/5 group-hover:to-[hsl(var(--accent))]/5 transition-all duration-300" />
+      <div className="relative z-10">
+        <div className="text-3xl mb-2">{c.flag}</div>
+        <div className="font-bold text-[hsl(var(--blue-900))]">{c.name}</div>
+        {meta.processing_weeks && (
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">
+            {meta.processing_weeks}
+          </div>
+        )}
+      </div>
     </button>
   );
 }
@@ -229,19 +238,31 @@ export default function StudentVisa() {
           </div>
 
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {COURSE_CATEGORIES.map((course) => (
+            {COURSE_CATEGORIES.map((course, idx) => (
               <button
                 key={course.id}
                 onClick={() => setSelectedCourse(selectedCourse === course.id ? null : course.id)}
-                className={`text-left p-5 rounded-2xl border-2 transition-all ${
+                className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden group ${
                   selectedCourse === course.id
-                    ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
-                    : 'border-black/5 bg-white hover:border-[hsl(var(--blue-700))]/30'
+                    ? 'border-[hsl(var(--blue-700))] shadow-lg shadow-[hsl(var(--blue-700))]/20'
+                    : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30'
                 }`}
+                style={{
+                  background: selectedCourse === course.id
+                    ? 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--blue-500)) 100%)'
+                    : 'linear-gradient(135deg, #ffffff 0%, hsl(var(--soft-bg)) 100%)',
+                }}
               >
-                <div className="text-3xl mb-2">{course.icon}</div>
-                <div className="font-bold text-[hsl(var(--blue-900))]">{course.label}</div>
-                <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">{course.description}</div>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[hsl(var(--accent))]/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors duration-300 ${
+                  selectedCourse === course.id
+                    ? 'bg-white/20'
+                    : 'bg-[hsl(var(--blue-50))]'
+                }`}>
+                  <course.icon className={`w-6 h-6 ${selectedCourse === course.id ? 'text-white' : 'text-[hsl(var(--blue-700))]'}`} />
+                </div>
+                <div className={`font-bold text-[hsl(var(--blue-900))] ${selectedCourse === course.id ? 'text-white' : ''}`}>{course.label}</div>
+                <div className={`text-[12px] mt-1 ${selectedCourse === course.id ? 'text-white/80' : 'text-[hsl(var(--blue-900))]/60'}`}>{course.description}</div>
               </button>
             ))}
           </div>
@@ -264,34 +285,42 @@ export default function StudentVisa() {
                   .filter(u => u.courses?.includes(selectedCourse) && u.country === selected)
                   .slice(0, 3)
                   .map((uni) => (
-                    <div key={uni.id} className="bg-[hsl(var(--soft-bg))] rounded-xl p-5">
-                      <div className="flex items-center gap-3">
-                        <div className="text-2xl">{uni.flag}</div>
-                        <div>
-                          <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
-                          <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.name}</div>
+                    <div
+                      key={uni.id}
+                      className="relative rounded-2xl p-5 overflow-hidden group transition-all duration-300 hover:shadow-lg hover:shadow-[hsl(var(--blue-700))]/10"
+                      style={{
+                        background: 'linear-gradient(135deg, hsl(var(--blue-50)) 0%, #ffffff 100%)',
+                      }}
+                    >
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white text-xl">
+                            {uni.flag}
+                          </div>
+                          <div>
+                            <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
+                            <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.name}</div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="mt-3 flex items-center justify-between">
-                        <div className="text-[13px]">
-                          <span className="text-[hsl(var(--blue-900))]/60">Tuition:</span>{' '}
-                          <span className="font-bold text-[hsl(var(--blue-900))]">
-                            {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
-                          </span>
+                        <div className="mt-3 flex items-center justify-between">
+                          <div className="text-[13px]">
+                            <span className="text-[hsl(var(--blue-900))]/60">Tuition:</span>{' '}
+                            <span className="font-bold text-[hsl(var(--blue-900))]">
+                              {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
+                            </span>
+                          </div>
+                          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white text-[10px] font-bold">
+                            #{uni.rank} World
+                          </div>
                         </div>
-                        <Badge className="bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] text-[10px]">
-                          #{uni.rank} World
-                        </Badge>
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-1">
-                        {uni.popular_courses?.filter(c => {
-                          const courseData = COURSE_CATEGORIES.find(cat => cat.id === selectedCourse);
-                          return true;
-                        }).slice(0, 2).map((course) => (
-                          <span key={course} className="text-[11px] px-2 py-0.5 rounded-full bg-white text-[hsl(var(--blue-900))]/60">
-                            {course}
-                          </span>
-                        ))}
+                        <div className="mt-3 flex flex-wrap gap-1">
+                          {uni.popular_courses?.slice(0, 2).map((course) => (
+                            <span key={course} className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
+                              {course}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -332,10 +361,14 @@ export default function StudentVisa() {
                 {studentMeta.note || `${selectedCountry?.name} student visa details and requirements`}
               </p>
 
-              <div className="mt-6 bg-white rounded-2xl border border-black/5 p-6">
-                <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))] mb-4">
-                  Visa Details
-                </div>
+              <div className="mt-6 rounded-2xl border border-black/5 p-6 overflow-hidden relative" style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/30%) 100%)',
+                }}>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full" />
+                <div className="relative z-10">
+                  <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))] mb-4">
+                    Visa Details
+                  </div>
                 <ComparisonRow
                   label="Processing time"
                   value={studentMeta.processing_weeks || 'Varies'}
@@ -374,11 +407,15 @@ export default function StudentVisa() {
                     Apply for {selectedCountry?.name} <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
+                </div>
               </div>
             </div>
 
             <aside className="lg:col-span-5">
-              <div className="rounded-2xl bg-[hsl(var(--blue-900))] text-white p-7 sticky top-28">
+              <div className="relative rounded-2xl overflow-hidden p-7 sticky top-28" style={{
+                background: 'linear-gradient(135deg, hsl(var(--blue-900)) 0%, hsl(var(--blue-700)) 50%, hsl(var(--blue-500)) 100%)',
+              }}>
+                <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-[hsl(var(--accent))]/20 to-transparent rounded-tl-full" />
                 <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/70">
                   Why apply with We Hive
                 </div>
@@ -436,17 +473,26 @@ export default function StudentVisa() {
           </p>
           <div className="mt-8 grid md:grid-cols-3 gap-6">
             {INTAKE_TIMES.map((intake, i) => (
-              <div key={intake.season} className="bg-white rounded-2xl border border-black/5 p-7">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-10 h-10 rounded-xl ${intake.color} flex items-center justify-center text-white`}>
-                    <Calendar className="w-5 h-5" />
+              <div
+                key={intake.season}
+                className="relative rounded-2xl overflow-hidden group"
+                style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--soft-bg)) 100%)',
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/0 to-[hsl(var(--accent))]/0 group-hover:from-[hsl(var(--blue-700))]/5 group-hover:to-[hsl(var(--accent))]/5 transition-all duration-300" />
+                <div className="relative z-10 p-7 border border-black/5 rounded-2xl bg-white/80 backdrop-blur">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-12 h-12 rounded-xl ${intake.color} flex items-center justify-center text-white shadow-lg`}>
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/55 font-bold">Intake</div>
+                      <div className="font-bold text-[16px] text-[hsl(var(--blue-900))]">{intake.months}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/55 font-bold">Intake</div>
-                    <div className="font-bold text-[16px] text-[hsl(var(--blue-900))]">{intake.months}</div>
-                  </div>
+                  <IntakeCard intake={intake} index={i} />
                 </div>
-                <IntakeCard intake={intake} index={i} />
               </div>
             ))}
           </div>
@@ -462,15 +508,24 @@ export default function StudentVisa() {
             Country-specific add-ons (SOPs, English test scores, sponsorship letters) are listed on each country page — these four are the constant.
           </p>
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {DOCUMENTS.map((doc) => {
+            {DOCUMENTS.map((doc, idx) => {
               const Icon = doc.icon;
               return (
-                <div key={doc.title} className="bg-white rounded-2xl border border-black/5 p-6 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--blue-50))] flex items-center justify-center mx-auto">
-                    <Icon className="w-6 h-6 text-[hsl(var(--blue-700))]" />
+                <div
+                  key={doc.title}
+                  className="relative rounded-2xl p-6 text-center overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10"
+                  style={{
+                    background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/50%) 100%)',
+                  }}
+                >
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative z-10">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center mx-auto shadow-lg shadow-[hsl(var(--blue-700))]/20">
+                      <Icon className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="mt-4 font-bold text-[15px] text-[hsl(var(--blue-900))]">{doc.title}</div>
+                    <div className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{doc.desc}</div>
                   </div>
-                  <div className="mt-4 font-bold text-[15px] text-[hsl(var(--blue-900))]">{doc.title}</div>
-                  <div className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{doc.desc}</div>
                 </div>
               );
             })}
