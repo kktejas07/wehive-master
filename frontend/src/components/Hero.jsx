@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ArrowRight, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from './ui/button';
 import FilterBar, { DEFAULT_FILTERS } from './FilterBar';
 import { COUNTRIES, BRAND } from '../data/mock';
@@ -10,7 +10,13 @@ import HeroSearchLive from './HeroSearchLive';
 
 function TrustPill() {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-white border border-black/5 shadow-sm px-3.5 py-1.5 text-[12.5px]">
+    <motion.div
+      initial={{ opacity: 0, y: -10, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="inline-flex items-center gap-2 rounded-full bg-white border border-black/5 shadow-sm px-3.5 py-1.5 text-[12.5px]"
+      whileHover={{ scale: 1.02, boxShadow: '0 4px 20px rgba(10,44,138,0.15)' }}
+    >
       <span className="relative inline-flex h-2 w-2">
         <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-60" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -18,7 +24,27 @@ function TrustPill() {
       <span className="text-[hsl(var(--blue-900))] font-semibold">12,000+ visas processed</span>
       <span className="text-[hsl(var(--blue-900))]/40">·</span>
       <span className="text-[hsl(var(--blue-900))]/70">98.6% approval</span>
-    </div>
+    </motion.div>
+  );
+}
+
+function FloatingBadge({ icon, text, delay }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay, duration: 0.5 }}
+      className="absolute bg-white/80 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 shadow-lg"
+      style={{
+        animation: `float ${3 + delay}s ease-in-out infinite`,
+        animationDelay: `${delay}s`,
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-[hsl(var(--accent))]">{icon}</span>
+        <span className="text-[11px] font-bold text-[hsl(var(--blue-900))]">{text}</span>
+      </div>
+    </motion.div>
   );
 }
 

@@ -2,6 +2,42 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { TrendingUp, Globe2, ShieldCheck, Clock, Sparkles, Award, LucideIcon } from 'lucide-react';
 
+const FLOATING_FLAGS = [
+  { flag: '🇺🇸', name: 'USA', top: '8%', left: '5%', delay: 0 },
+  { flag: '🇬🇧', name: 'UK', top: '15%', right: '8%', delay: 0.5 },
+  { flag: '🇦🇺', name: 'Australia', bottom: '12%', left: '10%', delay: 1 },
+  { flag: '🇯🇵', name: 'Japan', bottom: '20%', right: '5%', delay: 1.5 },
+  { flag: '🇨🇦', name: 'Canada', top: '30%', left: '2%', delay: 2 },
+  { flag: '🇩🇪', name: 'Germany', top: '40%', right: '3%', delay: 2.5 },
+  { flag: '🇸🇬', name: 'Singapore', bottom: '8%', left: '25%', delay: 3 },
+  { flag: '🇫🇷', name: 'France', top: '5%', right: '20%', delay: 0.8 },
+  { flag: '🇮🇳', name: 'India', bottom: '25%', right: '15%', delay: 1.2 },
+  { flag: '🇦🇪', name: 'UAE', top: '25%', left: '8%', delay: 2.2 },
+];
+
+function FloatingFlagBadge({ flag, name, delay, style }: { flag: string; name: string; delay: number; style: React.CSSProperties }) {
+  return (
+    <motion.div
+      className="absolute z-20 hidden lg:flex"
+      style={style}
+      initial={{ opacity: 0, scale: 0, y: 20 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.5, type: 'spring', damping: 15 }}
+      whileHover={{ scale: 1.15, y: -5, z: 50 }}
+      title={name}
+    >
+      <div className="relative flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border border-white/30 rounded-full px-3 py-1.5 shadow-lg">
+        <span className="text-xl">{flag}</span>
+        <span className="text-[10px] font-bold text-[hsl(var(--blue-900))]">{name}</span>
+        <span
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
+        />
+      </div>
+    </motion.div>
+  );
+}
+
 interface CountUpProps {
   to: number;
   suffix?: string;
@@ -21,7 +57,6 @@ function CountUp({ to, suffix = '', prefix = '', duration = 1.6 }: CountUpProps)
     const tick = (t: number) => {
       const elapsed = (t - start) / 1000;
       const progress = Math.min(elapsed / duration, 1);
-      // ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setV(Math.round(to * eased));
       if (progress < 1) raf = requestAnimationFrame(tick);
@@ -54,10 +89,19 @@ const STATS: StatItem[] = [
 export default function StatsStrip() {
   return (
     <section
-      className="relative z-10 pt-8 pb-10 bg-white"
+      className="relative z-10 pt-8 pb-10 bg-white overflow-hidden"
       data-testid="hero-stats-strip"
       aria-label="Wehive platform stats"
     >
+      {FLOATING_FLAGS.map((f, i) => {
+        const style: React.CSSProperties = {};
+        if (f.top) style.top = f.top;
+        if (f.bottom) style.bottom = f.bottom;
+        if (f.left) style.left = f.left;
+        if (f.right) style.right = f.right;
+        return <FloatingFlagBadge key={i} {...f} style={style} />;
+      })}
+
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="rounded-[28px] glass-tint-navy aurora-grain p-5 sm:p-7 relative">
           <div className="flex items-center gap-2 justify-center mb-5">
