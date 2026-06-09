@@ -18,14 +18,13 @@ import { Button } from './ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { computeFees } from './FeeBreakdown';
+import { inr } from '../lib/utils';
 
 const todayPlus = (days) => {
   const d = new Date();
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 };
-
-const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
 
 export default function ApplicationReviewModal({
   open,

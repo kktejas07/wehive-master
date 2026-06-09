@@ -34,6 +34,7 @@
 import { useState } from 'react';
 import { Users, Plus, Minus, Info, BadgeCheck } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+import { inr } from '../lib/utils';
 
 export let PER_EXTRA_APPLICANT_INR = 350;
 export let GST_RATE = 0.18;
@@ -106,8 +107,6 @@ export function computeFees({ category, applicants = 1, country, visaType }) {
     baseFeeUnit: base,
   };
 }
-
-const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
 
 function ApplicantsStepper({ value, onChange }) {
   const { t } = useI18n();

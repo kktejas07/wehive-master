@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Bus, Car, Sparkle, Phone, ChevronRight, Clock } from 'lucide-react';
+import { Plane, Bus, Car, Hotel, Sparkle, Phone, ChevronRight, Clock } from 'lucide-react';
 import Reveal from './Reveal';
 import { BRAND } from '../data/mock';
 
@@ -8,6 +8,7 @@ const CATEGORIES = [
   { id: 'flights', label: 'Flights', icon: Plane },
   { id: 'buses', label: 'Buses', icon: Bus },
   { id: 'cars', label: 'Car Rentals', icon: Car },
+  { id: 'hotels', label: 'Hotels', icon: Hotel },
 ];
 
 const DEALS = {
@@ -36,6 +37,14 @@ const DEALS = {
     { id: 'c4', company: 'Drivezy', location: 'Goa', price: 1999, original: 2899, vehicle: 'Thar', type: 'Self Drive', rating: 4.7, seats: 4, fuel: 'Diesel', fuelType: ' Diesel' },
     { id: 'c5', company: 'Carrent', location: 'Hyderabad', price: 1099, original: 1599, vehicle: 'WagonR', type: 'Self Drive', rating: 4.1, seats: 4, fuel: 'Petrol', fuelType: ' Petrol' },
     { id: 'c6', company: 'EcoRent', location: 'Chennai', price: 1399, original: 1999, vehicle: 'Baleno', type: 'Self Drive', rating: 4.5, seats: 5, fuel: 'Petrol', fuelType: ' Petrol' },
+  ],
+  hotels: [
+    { id: 'h1', name: 'Taj Palace', location: 'New Delhi', price: 6499, original: 8999, rating: 4.8, rooms: 'Deluxe King', amenities: 'Pool, Spa, WiFi', category: 'Luxury' },
+    { id: 'h2', name: 'Marriott Suites', location: 'Bangalore', price: 5299, original: 7499, rating: 4.6, rooms: 'Executive Suite', amenities: 'Gym, WiFi, Breakfast', category: 'Premium' },
+    { id: 'h3', name: 'Hyatt Regency', location: 'Mumbai', price: 4799, original: 6999, rating: 4.5, rooms: 'King Room', amenities: 'Pool, WiFi, Parking', category: 'Premium' },
+    { id: 'h4', name: 'Holiday Inn', location: 'Chennai', price: 3299, original: 4599, rating: 4.3, rooms: 'Standard Double', amenities: 'WiFi, Breakfast, Parking', category: 'Business' },
+    { id: 'h5', name: 'ITC Grand Chola', location: 'Chennai', price: 7999, original: 10999, rating: 4.9, rooms: 'Towers Room', amenities: 'Pool, Spa, Restaurant', category: 'Luxury' },
+    { id: 'h6', name: 'Lemon Tree Premier', location: 'Goa', price: 2999, original: 4299, rating: 4.2, rooms: 'Superior Room', amenities: 'Pool, WiFi, Bar', category: 'Standard' },
   ],
 };
 
@@ -122,6 +131,26 @@ function DealCard({ deal, category, onCall }) {
             </div>
           </>
         )}
+
+        {category === 'hotels' && (
+          <>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{deal.name}</span>
+              <span className="text-[10px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.category}</span>
+            </div>
+            <div className="text-[11px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.location} · {deal.rooms}</div>
+            <div className="text-[10px] text-[hsl(var(--blue-900))]/50 mb-2">{deal.amenities}</div>
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/night</span>
+                <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/night</span></div>
+              </div>
+              <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors">
+                <Phone className="w-3.5 h-3.5" /> Call
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </motion.div>
   );
@@ -173,7 +202,7 @@ export default function DealsSection() {
             Exclusive deals
           </div>
           <h2 className="mt-3 text-[26px] sm:text-[36px] lg:text-[42px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            Flights, Buses & <span className="text-[hsl(var(--accent))]">Car Rentals.</span>
+            Flights, Hotels, Buses & <span className="text-[hsl(var(--accent))]">Car Rentals.</span>
           </h2>
           <p className="mt-2 text-[14px] sm:text-[15px] text-[hsl(var(--blue-900))]/60 max-w-xl">
             Real-time deals from top providers. Tap to call our travel desk for instant booking.
