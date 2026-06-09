@@ -30,6 +30,7 @@ const TrackStatus = lazy(() => import('./pages/TrackStatus'));
 const Help = lazy(() => import('./pages/Help'));
 const StudentVisa = lazy(() => import('./pages/StudentVisa'));
 const UniversityComparison = lazy(() => import('./pages/UniversityComparison'));
+const MapView = lazy(() => import('./pages/MapView'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -68,6 +69,7 @@ function AnimatedRoutes() {
           <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
           <Route path="/universities" element={<PageTransition><UniversityComparison /></PageTransition>} />
+          <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
           <Route path="*" element={<PageTransition><Home /></PageTransition>} />
         </Routes>

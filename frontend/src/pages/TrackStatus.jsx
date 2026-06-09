@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import SuccessRibbon from '../components/SuccessRibbon';
 import { API } from '../context/AuthContext';
 import { Loader2, CheckCircle2, Clock, XCircle, AlertCircle, ChevronRight, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -62,10 +63,17 @@ export default function TrackStatus() {
   const [app, setApp] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showSuccessRibbon, setShowSuccessRibbon] = useState(false);
 
   useEffect(() => {
     axios.get(`${API}/public/track/${id}`)
-      .then((r) => { setApp(r.data); setLoading(false); })
+      .then((r) => {
+        setApp(r.data);
+        setLoading(false);
+        if (r.data.status === 'approved') {
+          setTimeout(() => setShowSuccessRibbon(true), 1000);
+        }
+      })
       .catch((e) => { setError(e?.response?.data?.detail || 'Application not found'); setLoading(false); });
   }, [id]);
 
@@ -112,6 +120,12 @@ export default function TrackStatus() {
 
   return (
     <div className="bg-[hsl(var(--soft-bg))] min-h-screen">
+      <SuccessRibbon
+        isVisible={showSuccessRibbon}
+        onClose={() => setShowSuccessRibbon(false)}
+        applicationId={id}
+        applicantName={app?.name || app?.applicant_name || 'Traveler'}
+      />
       <Navbar />
       <main className="pt-28 pb-16">
         <div className="max-w-2xl mx-auto px-5">
