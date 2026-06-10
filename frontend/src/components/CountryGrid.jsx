@@ -21,11 +21,83 @@ import {
 // Local image lookup by id (frontend has the curated images)
 const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
 
+// Fallback images for countries without landmark or IMG
+const FALLBACK_IMAGES = {
+  id: 'https://images.unsplash.com/photo-1537996194471-76f2285d6b4f?auto=format&fit=crop&w=900&q=80',
+  my: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=900&q=80',
+  th: 'https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=900&q=80',
+  vn: 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=900&q=80',
+  ph: 'https://images.unsplash.com/photo-1518509562904-e7ef99cddc85?auto=format&fit=crop&w=900&q=80',
+  lk: 'https://images.unsplash.com/photo-1581275288578-bda6f3bb3b1f?auto=format&fit=crop&w=900&q=80',
+  mv: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=900&q=80',
+  np: 'https://images.unsplash.com/photo-1605640840605-14ac1855827b?auto=format&fit=crop&w=900&q=80',
+  bt: 'https://images.unsplash.com/photo-1573483587902-9c7adb3ca80e?auto=format&fit=crop&w=900&q=80',
+  bd: 'https://images.unsplash.com/photo-1550159930-40066082a4fc?auto=format&fit=crop&w=900&q=80',
+  pk: 'https://images.unsplash.com/photo-1550159930-40066082a4fc?auto=format&fit=crop&w=900&q=80',
+  mm: 'https://images.unsplash.com/photo-1550159930-40066082a4fc?auto=format&fit=crop&w=900&q=80',
+  kh: 'https://images.unsplash.com/photo-1537956969539-0d1c8e5a8e8c?auto=format&fit=crop&w=900&q=80',
+  la: 'https://images.unsplash.com/photo-1508009603889-5773c0c9e00c?auto=format&fit=crop&w=900&q=80',
+  ru: 'https://images.unsplash.com/photo-1513326738677-b964603b136d?auto=format&fit=crop&w=900&q=80',
+  ua: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  kz: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  uz: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  az: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  ge: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  tr: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=900&q=80',
+  eg: 'https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=900&q=80',
+  za: 'https://images.unsplash.com/photo-1545906198-b91dba30c2bf?auto=format&fit=crop&w=900&q=80',
+  ke: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=900&q=80',
+  tz: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=900&q=80',
+  ma: 'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?auto=format&fit=crop&w=900&q=80',
+  ng: 'https://images.unsplash.com/photo-1544893908-9e6f0f8e0b9a?auto=format&fit=crop&w=900&q=80',
+  gh: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=900&q=80',
+  et: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=900&q=80',
+  ug: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=900&q=80',
+  rw: 'https://images.unsplash.com/photo-1544893908-9e6f0f8e0b9a?auto=format&fit=crop&w=900&q=80',
+  zm: 'https://images.unsplash.com/photo-1544893908-9e6f0f8e0b9a?auto=format&fit=crop&w=900&q=80',
+  zw: 'https://images.unsplash.com/photo-1544893908-9e6f0f8e0b9a?auto=format&fit=crop&w=900&q=80',
+  br: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=900&q=80',
+  mx: 'https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?auto=format&fit=crop&w=900&q=80',
+  ar: 'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=900&q=80',
+  pe: 'https://images.unsplash.com/photo-1531065208531-4036c0dba3ca?auto=format&fit=crop&w=900&q=80',
+  cl: 'https://images.unsplash.com/photo-1540979382583-198a80a276ab?auto=format&fit=crop&w=900&q=80',
+  co: 'https://images.unsplash.com/photo-1580684272966-13d5c50f6c85?auto=format&fit=crop&w=900&q=80',
+  ec: 'https://images.unsplash.com/photo-1580684272966-13d5c50f6c85?auto=format&fit=crop&w=900&q=80',
+  cr: 'https://images.unsplash.com/photo-1552252275-9ef012678fc2?auto=format&fit=crop&w=900&q=80',
+  rs: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  me: 'https://images.unsplash.com/photo-1570097703229-b195d6dd291f?auto=format&fit=crop&w=900&q=80',
+  al: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?auto=format&fit=crop&w=900&q=80',
+  xk: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?auto=format&fit=crop&w=900&q=80',
+  mk: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?auto=format&fit=crop&w=900&q=80',
+  ba: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?auto=format&fit=crop&w=900&q=80',
+  by: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  am: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  kg: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  tj: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  tm: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
+  iq: 'https://images.unsplash.com/photo-1544734858-87fdce5ddc15?auto=format&fit=crop&w=900&q=80',
+  sy: 'https://images.unsplash.com/photo-1544734858-87fdce5ddc15?auto=format&fit=crop&w=900&q=80',
+  ye: 'https://images.unsplash.com/photo-1544893908-9e6f0f8e0b9a?auto=format&fit=crop&w=900&q=80',
+  af: 'https://images.unsplash.com/photo-1544893908-9e6f0f8e0b9a?auto=format&fit=crop&w=900&q=80',
+  jo: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?auto=format&fit=crop&w=900&q=80',
+  il: 'https://images.unsplash.com/photo-1544734858-87fdce5ddc15?auto=format&fit=crop&w=900&q=80',
+  lb: 'https://images.unsplash.com/photo-1570097703229-b195d6dd291f?auto=format&fit=crop&w=900&q=80',
+  qa: 'https://images.unsplash.com/photo-1589828994425-a83f2f9b0eaa?auto=format&fit=crop&w=900&q=80',
+  sa: 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=900&q=80',
+  om: 'https://images.unsplash.com/photo-1588419661471-4f1d1f4f0e4b?auto=format&fit=crop&w=900&q=80',
+  kw: 'https://images.unsplash.com/photo-1584422523916-87b8c7f89367?auto=format&fit=crop&w=900&q=80',
+  bh: 'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=900&q=80',
+};
+
 function CountryCard({ c, index = 0 }) {
   const isNoVisa = c.no_visa;
   const types = c.visa_types || [];
-  const cardImage = landmarkFor(c) || IMG[c.id] || c.flag_url;
-  const hasRichImage = !!(landmarkFor(c) || IMG[c.id]);
+  const landmark = landmarkFor(c);
+  const imgFromMock = IMG[c.id];
+  const fallbackImg = FALLBACK_IMAGES[c.id];
+  const cardImage = landmark || imgFromMock || fallbackImg || c.flag_url;
+  const hasRichImage = !!(landmark || imgFromMock);
+  const hasFallbackImage = !hasRichImage && !!fallbackImg;
   const categories = c.categories || {};
   const firstCategory = categories.Tourist || categories[Object.keys(categories)[0]] || {};
   const validity = c.validity || firstCategory.validity || '90 DAYS';
@@ -51,13 +123,16 @@ function CountryCard({ c, index = 0 }) {
               alt={c.name}
               loading="lazy"
               className={`absolute inset-0 h-full w-full transition-transform duration-[900ms] group-hover:scale-[1.06] ${
-                hasRichImage ? 'object-cover' : 'object-cover scale-150 blur-md opacity-60'
+                hasRichImage ? 'object-cover' : hasFallbackImage ? 'object-cover' : 'object-cover scale-150 blur-md opacity-60'
               }`}
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
           )}
-          {!hasRichImage && (
+          {hasFallbackImage && (
+            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/60 to-[hsl(var(--blue-900))]/60" />
+          )}
+          {!hasRichImage && !hasFallbackImage && (
             <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/85 to-[hsl(var(--blue-900))]/85" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />

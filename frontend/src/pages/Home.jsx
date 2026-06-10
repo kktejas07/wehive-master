@@ -5,17 +5,17 @@ import Hero from '../components/Hero';
 import CountryGrid from '../components/CountryGrid';
 import HowItWorks from '../components/HowItWorks';
 import Testimonials from '../components/Testimonials';
-import AnimatedTestimonials from '../components/ui/animated-testimonials';
+
 import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
 import DealsSection from '../components/DealsSection';
-import FeaturedOffers from '../components/FeaturedOffers';
+
 import EventsBanner from '../components/EventsBanner';
 import StatsStrip from '../components/StatsStrip';
 import AIServices from '../components/AIServices';
 import OnTimeGuarantee from '../components/OnTimeGuarantee';
 import WorldMap from '../components/WorldMap';
-import Marquee3DGrid from '../components/Marquee3DGrid';
+
 import LiveTickerMarquee from '../components/LiveTickerMarquee';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 import { motion } from 'framer-motion';
@@ -96,16 +96,13 @@ export default function Home() {
       <LiveTickerMarquee />
       <CountryGrid filters={filters} />
       <GlobalReachSection />
-      <Marquee3DGrid />
       <OnTimeGuarantee />
       <StatsStrip />
       <DealsSection />
-      <FeaturedOffers />
       <EventsBanner />
       <AIServices />
       <HowItWorks />
       <Testimonials />
-      <AnimatedTestimonials />
       <Faq />
       <CtaBanner />
       <Footer />
