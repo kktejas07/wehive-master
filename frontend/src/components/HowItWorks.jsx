@@ -6,6 +6,8 @@ import {
 import { motion } from 'framer-motion';
 import { FEATURES, STEPS, STATS, SERVICES } from '../data/mock';
 import Reveal from './Reveal';
+import TextFlipAnimation from './ui/TextFlipAnimation';
+import { GlowingEffect } from './ui/glowing-effect';
 
 const ICONS = {
   ScanLine, ShieldCheck, Headphones, Lock,
@@ -44,13 +46,24 @@ function FeatureCard({ feature, index = 0 }) {
       <motion.div
         whileHover={{ y: -3 }}
         transition={{ duration: 0.25 }}
-        className="rounded-2xl border border-black/5 bg-white p-6 hover:border-[hsl(var(--blue-700))]/15 hover:shadow-[0_20px_40px_-25px_rgba(10,44,138,0.3)] transition"
+        className="relative rounded-2xl border border-black/5 bg-white p-6 hover:border-[hsl(var(--blue-700))]/15 hover:shadow-[0_20px_40px_-25px_rgba(10,44,138,0.3)] transition"
       >
-        <div className="h-11 w-11 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-[hsl(var(--blue-700))]">
-          <Icon className="w-5 h-5" />
+        <GlowingEffect
+          blur={25}
+          borderWidth={2}
+          spread={30}
+          glow={true}
+          color="hsl(var(--blue-700))"
+          proximity={60}
+          inactiveZone={0.02}
+        />
+        <div className="relative z-10">
+          <div className="h-11 w-11 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-[hsl(var(--blue-700))]">
+            <Icon className="w-5 h-5" />
+          </div>
+          <h4 className="mt-5 text-[16.5px] font-bold tracking-tight text-[hsl(var(--blue-900))]">{feature.title}</h4>
+          <p className="mt-1.5 text-[14px] leading-relaxed text-[hsl(var(--blue-900))]/65">{feature.desc}</p>
         </div>
-        <h4 className="mt-5 text-[16.5px] font-bold tracking-tight text-[hsl(var(--blue-900))]">{feature.title}</h4>
-        <p className="mt-1.5 text-[14px] leading-relaxed text-[hsl(var(--blue-900))]/65">{feature.desc}</p>
       </motion.div>
     </Reveal>
   );
@@ -62,13 +75,24 @@ function ServiceCard({ service, index = 0 }) {
     <Reveal index={index}>
       <motion.div
         whileHover={{ y: -4, transition: { duration: 0.25 } }}
-        className="group rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--accent))]/30 hover:bg-[hsl(var(--blue-700))] hover:text-white transition-colors duration-300"
+        className="group relative rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--accent))]/30 hover:bg-[hsl(var(--blue-700))] hover:text-white transition-colors duration-300"
       >
-        <div className="h-12 w-12 rounded-xl bg-[hsl(var(--accent))]/10 group-hover:bg-white/15 flex items-center justify-center text-[hsl(var(--accent))] group-hover:text-white transition-colors">
-          <Icon className="w-5 h-5" />
+        <GlowingEffect
+          blur={20}
+          borderWidth={2}
+          spread={35}
+          glow={true}
+          color="hsl(var(--accent))"
+          proximity={60}
+          inactiveZone={0.02}
+        />
+        <div className="relative z-10">
+          <div className="h-12 w-12 rounded-xl bg-[hsl(var(--accent))]/10 group-hover:bg-white/15 flex items-center justify-center text-[hsl(var(--accent))] group-hover:text-white transition-colors">
+            <Icon className="w-5 h-5" />
+          </div>
+          <h4 className="mt-5 text-[17px] font-bold tracking-tight">{service.title}</h4>
+          <p className="mt-1.5 text-[13.5px] leading-relaxed opacity-75">{service.desc}</p>
         </div>
-        <h4 className="mt-5 text-[17px] font-bold tracking-tight">{service.title}</h4>
-        <p className="mt-1.5 text-[13.5px] leading-relaxed opacity-75">{service.desc}</p>
       </motion.div>
     </Reveal>
   );
@@ -94,7 +118,9 @@ export default function HowItWorks() {
             How We Hive works
           </div>
           <h2 className="mt-3 text-[32px] sm:text-[52px] leading-[1.05] font-display font-extrabold tracking-[-0.03em]">
-            <span className="gradient-text-hover">Three steps. Zero stress.</span>{' '}
+            <span className="gradient-text-hover">
+              <TextFlipAnimation words={['Three steps.', 'Visa sorted.', 'Travel ready.']} className="text-[hsl(var(--blue-900))]" interval={4000} />
+            </span>{' '}
             <span className="gradient-text">One promise.</span>
           </h2>
           <p className="mt-4 text-[15px] sm:text-[16px] leading-relaxed text-[hsl(var(--blue-900))]/65 max-w-2xl">
