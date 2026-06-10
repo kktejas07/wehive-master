@@ -1,9 +1,50 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Sparkles, Sun, Briefcase, GraduationCap, Palmtree, ArrowRight, Star, Clock, CheckCircle2, ShieldCheck, Users, Timer, Zap, Percent, MapPin, Eye } from 'lucide-react';
+import { API } from '../context/AuthContext';
 
-const FEATURED_OFFERS = [
+const CATEGORY_MAP = {
+  holiday: { label: 'Holiday', icon: Palmtree, gradient: 'from-rose-500 to-pink-600', bgGradient: 'from-rose-50 to-pink-50', borderColor: 'border-rose-200', accent: 'text-rose-600', badge: 'Popular', badgeIcon: Star },
+  business: { label: 'Business', icon: Briefcase, gradient: 'from-blue-600 to-indigo-700', bgGradient: 'from-blue-50 to-indigo-50', borderColor: 'border-blue-200', accent: 'text-blue-600', badge: 'Priority', badgeIcon: Zap },
+  student: { label: 'Student', icon: GraduationCap, gradient: 'from-emerald-600 to-teal-700', bgGradient: 'from-emerald-50 to-teal-50', borderColor: 'border-emerald-200', accent: 'text-emerald-600', badge: 'Scholarship', badgeIcon: Star },
+  tourist: { label: 'Limited Offer', icon: Sparkles, gradient: 'from-amber-500 to-orange-600', bgGradient: 'from-amber-50 to-orange-50', borderColor: 'border-amber-200', accent: 'text-amber-600', badge: '40% OFF', badgeIcon: Percent },
+  promo: { label: 'Limited Offer', icon: Sparkles, gradient: 'from-amber-500 to-orange-600', bgGradient: 'from-amber-50 to-orange-50', borderColor: 'border-amber-200', accent: 'text-amber-600', badge: '40% OFF', badgeIcon: Percent },
+};
+
+const FALLBACK_COUNTRIES = {
+  holiday: [
+    { name: 'Maldives', flag: '🇲🇻', price: '₹5,999' },
+    { name: 'Bali', flag: '🇮🇩', price: '₹3,999' },
+    { name: 'Dubai', flag: '🇦🇪', price: '₹4,999' },
+    { name: 'Seychelles', flag: '🇸🇨', price: '₹8,999' },
+    { name: 'Mauritius', flag: '🇲🇺', price: '₹7,499' },
+  ],
+  business: [
+    { name: 'USA', flag: '🇺🇸', price: '₹15,999' },
+    { name: 'UK', flag: '🇬🇧', price: '₹12,499' },
+    { name: 'UAE', flag: '🇦🇪', price: '₹6,999' },
+    { name: 'Singapore', flag: '🇸🇬', price: '₹4,999' },
+    { name: 'Germany', flag: '🇩🇪', price: '₹11,999' },
+  ],
+  student: [
+    { name: 'USA', flag: '🇺🇸', price: '₹12,999' },
+    { name: 'Canada', flag: '🇨🇦', price: '₹10,999' },
+    { name: 'UK', flag: '🇬🇧', price: '₹11,499' },
+    { name: 'Australia', flag: '🇦🇺', price: '₹13,999' },
+    { name: 'Germany', flag: '🇩🇪', price: '₹7,999' },
+  ],
+  tourist: [
+    { name: 'Japan', flag: '🇯🇵', price: '₹6,999' },
+    { name: 'Thailand', flag: '🇹🇭', price: '₹4,999' },
+    { name: 'Singapore', flag: '🇸🇬', price: '₹4,999' },
+    { name: 'UAE', flag: '🇦🇪', price: '₹5,999' },
+    { name: 'Spain', flag: '🇪🇸', price: '₹9,999' },
+  ],
+};
+
+const FEATURED_OFFERS_FALLBACK = [
   {
     category: 'Limited Offer',
     icon: Sparkles,
@@ -476,6 +517,81 @@ function OfferDetailPanel({ offer, onClose }) {
 
 export default function FeaturedOffers() {
   const [selectedOffer, setSelectedOffer] = useState(null);
+  const [offers, setOffers] = useState(FEATURED_OFFERS_FALLBACK);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchOffers = async () => {
+      try {
+        const res = await axios.get(`${API}/public/events`, { params: { limit: 4 } });
+        if (mounted && res.data?.items?.length) {
+          const mapped = res.data.items.map((item) => {
+            const cat = CATEGORY_MAP[item.tag] || CATEGORY_MAP.promo;
+            return {
+              category: cat.label,
+              icon: cat.icon,
+              title: item.title,
+              description: item.subtitle || '',
+              gradient: cat.gradient,
+              bgGradient: cat.bgGradient,
+              borderColor: cat.borderColor,
+              accent: cat.accent,
+              badge: cat.badge,
+              badgeIcon: cat.badgeIcon,
+              countries: FALLBACK_COUNTRIES[item.tag] || FALLBACK_COUNTRIES.tourist,
+              validUntil: item.ends_at ? new Date(item.ends_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Ongoing',
+              daysLeft: item.ends_at ? Math.ceil((new Date(item.ends_at) - new Date()) / (1000 * 60 * 60 * 24)) : null,
+              perks: [
+                { icon: Timer, text: 'Express 3-5 days' },
+                { icon: ShieldCheck, text: 'Free insurance' },
+                { icon: Zap, text: 'Priority support' },
+              ],
+              rating: 4.8,
+              reviews: 2847,
+              bookings: '1.2K+',
+              priceFrom: '₹4,999',
+              processing: '3-5 days',
+              highlight: item.sort_order === 1,
+              testimonial: null,
+              image: item.image_url || 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=400&auto=format',
+              cta_url: item.cta_url,
+            };
+          });
+          setOffers(mapped);
+        }
+      } catch (err) {
+        if (mounted) console.warn('Failed to fetch offers, using fallback');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    fetchOffers();
+    return () => { mounted = false; };
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-12 sm:py-16 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+              <Sparkles className="w-3.5 h-3.5" />
+              Featured Offers
+            </div>
+            <h2 className="font-display font-extrabold text-[26px] sm:text-[38px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+              Curated Promotions & Seasonal Picks
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-80 rounded-2xl bg-[hsl(var(--soft-bg))] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative py-12 sm:py-16 bg-white overflow-hidden">
@@ -512,7 +628,7 @@ export default function FeaturedOffers() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {FEATURED_OFFERS.map((offer, i) => (
+          {offers.map((offer, i) => (
             <OfferCard
               key={offer.category}
               offer={offer}

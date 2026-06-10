@@ -487,3 +487,80 @@ div[class*="emergent" i][style*="position: fixed"] { display: none !important; }
   opacity: 1;
   animation: gradient-flow 1.5s ease infinite;
 }
+
+/* Text flip animation styles */
+.text-flip-container {
+  perspective: 1000px;
+  display: inline-block;
+}
+
+.text-flip-word {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Smooth text flip with scale and opacity */
+@keyframes text-flip-in {
+  0% {
+    transform: rotateX(-90deg) translateY(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: rotateX(0deg) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes text-flip-out {
+  0% {
+    transform: rotateX(90deg) translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: rotateX(0deg) translateY(0);
+    opacity: 0;
+  }
+}
+
+/* Slide up flip variant */
+@keyframes slide-up-in {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up-out {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* Bounce flip variant */
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3) rotateX(-90deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05) rotateX(10deg);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(0.95) rotateX(-5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotateX(0deg);
+    opacity: 1;
+  }
+}

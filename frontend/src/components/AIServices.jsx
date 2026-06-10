@@ -6,6 +6,8 @@ import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
 import { API } from '../context/AuthContext';
 import Reveal from './Reveal';
+import TextFlipAnimation from './ui/TextFlipAnimation';
+import { GlowingEffect } from './ui/glowing-effect';
 
 const AI_TOOLS = [
   {
@@ -71,6 +73,15 @@ function AIToolCard({ tool, index, isAuthed }) {
       transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="group relative rounded-2xl border border-black/8 bg-white p-5 sm:p-6 hover:border-[hsl(var(--accent))] hover:shadow-[0_12px_40px_-12px_rgba(10,44,138,0.18)] transition-all"
     >
+      <GlowingEffect
+        blur={30}
+        borderWidth={2}
+        spread={40}
+        glow={true}
+        color={tool.color}
+        proximity={80}
+        inactiveZone={0.01}
+      />
       {tool.badge && (
         <span className={`absolute top-4 right-4 text-[10px] uppercase tracking-[0.14em] font-bold px-2.5 py-0.5 rounded-full ${
           tool.badge === 'New' ? 'bg-emerald-100 text-emerald-700' : 'bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))]'
@@ -133,8 +144,13 @@ export default function AIServices() {
             Powered by AI
           </div>
           <h2 className="font-display font-extrabold text-[28px] sm:text-[40px] lg:text-[48px] tracking-[-0.03em]">
-            <span className="gradient-text-hover">Your visa application,</span>{' '}
-            <span className="gradient-text">supercharged by AI.</span>
+            <span className="gradient-text-hover">Your</span>{' '}
+            <TextFlipAnimation
+              words={['visa application', 'travel plans', 'dream destinations']}
+              className="gradient-text-hover"
+              interval={3500}
+            />
+            <span className="gradient-text"> supercharged by AI.</span>
           </h2>
           <p className="mt-4 text-[15px] sm:text-[17px] text-[hsl(var(--blue-900))]/60 max-w-2xl mx-auto">
             From auto-filling forms to rejection risk analysis — our AI handles the tedious parts so you can focus on the journey.

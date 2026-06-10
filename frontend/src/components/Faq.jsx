@@ -3,6 +3,7 @@ import { Plus, Minus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FAQS } from '../data/mock';
 import Reveal from './Reveal';
+import TextFlipAnimation from './ui/TextFlipAnimation';
 
 function FaqItem({ item, isOpen, onToggle }) {
   return (
@@ -43,8 +44,12 @@ export default function Faq() {
             FAQ
           </div>
           <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[44px] leading-[1.08] font-display font-extrabold tracking-[-0.03em]">
-            <span className="gradient-text-hover">Questions, answered.</span>{' '}
-            <span className="gradient-text">Honestly.</span>
+            <span className="gradient-text-hover">Questions,</span>{' '}
+            <TextFlipAnimation
+              words={['answered.', 'solved.', 'clarified.']}
+              className="gradient-text"
+              interval={4000}
+            />
           </h2>
         </Reveal>
         <div className="mt-10 sm:mt-12 divide-y divide-black/8 border-y border-black/8">
