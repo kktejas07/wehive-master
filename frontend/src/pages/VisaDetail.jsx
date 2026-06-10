@@ -17,6 +17,11 @@ import DocsList from '../components/visa/DocsList';
 import AssistCard from '../components/visa/AssistCard';
 import VisaFaqSection from '../components/visa/VisaFaqSection';
 import OtherCountries from '../components/visa/OtherCountries';
+import VisaComparison from '../components/visa/VisaComparison';
+import AppointmentMonitor from '../components/visa/AppointmentMonitor';
+import GuidedFormSection from '../components/visa/GuidedFormSection';
+import InterviewPrep from '../components/visa/InterviewPrep';
+import EligibilityChecker from '../components/visa/EligibilityChecker';
 
 export default function VisaDetail() {
   const { id } = useParams();
@@ -119,6 +124,11 @@ export default function VisaDetail() {
       </section>
 
       <VisaFaqSection countryName={country.name} />
+      <VisaComparison countryName={country.name} />
+      <AppointmentMonitor countryName={country.name} />
+      <GuidedFormSection countryName={country.name} />
+      <InterviewPrep countryName={country.name} />
+      <EligibilityChecker countryName={country.name} />
       <FlightSuggestions country={country} />
       <OtherCountries list={others} />
       <Footer />
