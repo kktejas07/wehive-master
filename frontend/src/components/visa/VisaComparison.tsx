@@ -78,8 +78,10 @@ export default function VisaComparison({ countryName }) {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="font-display font-extrabold text-[28px] sm:text-[38px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            We optimize for approval, not submission
+          <h2 className="font-display font-extrabold text-[28px] sm:text-[38px] tracking-[-0.03em]">
+            <span className="gradient-text-hover">We optimize for approval,</span>
+            <br />
+            <span className="gradient-text">not submission</span>
           </h2>
           <p className="mt-3 text-[15px] text-[hsl(var(--blue-900))]/60 max-w-xl mx-auto">
             Here&apos;s the comparison between others and We Hive for your {countryName} visa.

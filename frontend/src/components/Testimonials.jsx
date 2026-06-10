@@ -60,9 +60,9 @@ export default function Testimonials() {
           <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             Loved by travelers
           </div>
-          <h2 className="mt-3 text-[30px] sm:text-[48px] leading-[1.05] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            4.9 stars across 12,000+ visas.{' '}
-            <span className="text-[hsl(var(--accent))]">And counting.</span>
+          <h2 className="mt-3 text-[30px] sm:text-[48px] leading-[1.05] font-display font-extrabold tracking-[-0.03em]">
+            <span className="gradient-text-hover">4.9 stars across 12,000+ visas.</span>{' '}
+            <span className="gradient-text">And counting.</span>
           </h2>
         </Reveal>
       </div>

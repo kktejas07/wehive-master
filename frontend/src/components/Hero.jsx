@@ -108,8 +108,8 @@ export default function Hero({ filters, onFilters }) {
           transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mx-auto max-w-5xl font-display font-extrabold text-[40px] leading-[1.05] sm:text-[64px] sm:leading-[1.02] lg:text-[80px] lg:leading-[1.0] tracking-[-0.035em] text-[hsl(var(--blue-900))] text-balance"
         >
-          {t('hero.headline')}{' '}
-          <span className="text-[hsl(var(--accent))]">{t('hero.headlineAccent')}</span>
+          <span className="gradient-text-hover">{t('hero.headline')}</span>{' '}
+          <span className="gradient-text">{t('hero.headlineAccent')}</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 12 }}

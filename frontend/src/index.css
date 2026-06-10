@@ -420,3 +420,70 @@ div[class*="emergent" i][style*="position: fixed"] { display: none !important; }
 .skeleton-stagger > *:nth-child(8) { animation-delay: 525ms; }
 .skeleton-stagger > *:nth-child(9) { animation-delay: 600ms; }
 .skeleton-stagger > *:nth-child(10) { animation-delay: 675ms; }
+
+/* Gradient text hover effect (x.ai style) */
+.gradient-text-hover {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--blue-900)) 0%,
+    hsl(var(--blue-700)) 40%,
+    hsl(var(--accent)) 60%,
+    hsl(var(--blue-700)) 80%,
+    hsl(var(--blue-900)) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gradient-text-hover:hover {
+  background-position: -100% center;
+}
+
+/* Gradient text static (for spans inside headings) */
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--blue-700)) 0%,
+    hsl(var(--accent)) 50%,
+    hsl(var(--blue-700)) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-flow 3s ease infinite;
+}
+@keyframes gradient-flow {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+/* Outlined gradient text on hover */
+.gradient-outline-text {
+  position: relative;
+  display: inline-block;
+}
+.gradient-outline-text::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--blue-700)),
+    hsl(var(--accent)),
+    hsl(var(--blue-700))
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 0;
+  transition: opacity 0.4s ease, background-position 0.6s ease;
+}
+.gradient-outline-text:hover::after {
+  opacity: 1;
+  animation: gradient-flow 1.5s ease infinite;
+}
