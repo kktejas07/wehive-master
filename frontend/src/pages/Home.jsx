@@ -36,8 +36,8 @@ function GlobalReachSection() {
             <Globe className="w-3.5 h-3.5" />
             Global Network
           </div>
-          <h2 className="font-display font-extrabold text-[26px] sm:text-[36px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            Our Visa Routes Worldwide
+          <h2 className="font-display font-extrabold text-[26px] sm:text-[36px] tracking-[-0.03em]">
+            <span className="gradient-text-hover">Our Visa Routes</span> Worldwide
           </h2>
           <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/60 max-w-xl mx-auto">
             Connecting you to 250+ destinations across 6 continents with real-time flight path animations

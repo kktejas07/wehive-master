@@ -67,9 +67,9 @@ export default function CategoryDetails({
           <span className="text-base leading-none">{country.flag}</span>
           {cat.name} · Valid {cat.validity}
         </div>
-        <h1 className="mt-4 font-display font-extrabold text-[42px] sm:text-[64px] leading-[1.0] tracking-[-0.035em] text-[hsl(var(--blue-900))]">
-          {country.name}{' '}
-          <span className="text-[hsl(var(--accent))]">{cat.name.toLowerCase()}.</span>
+        <h1 className="mt-4 font-display font-extrabold text-[42px] sm:text-[64px] leading-[1.0] tracking-[-0.035em]">
+          <span className="gradient-text-hover">{country.name}</span>{' '}
+          <span className="gradient-text">{cat.name.toLowerCase()}.</span>
         </h1>
         <p className="mt-5 text-[17px] leading-relaxed text-[hsl(var(--blue-900))]/65 max-w-xl">
           Apply in 12 minutes. Approved in {cat.processing_days} days. Backed by{' '}

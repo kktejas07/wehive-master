@@ -42,9 +42,9 @@ export default function Faq() {
           <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             FAQ
           </div>
-          <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[44px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            Questions, answered.{' '}
-            <span className="text-[hsl(var(--accent))]">Honestly.</span>
+          <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[44px] leading-[1.08] font-display font-extrabold tracking-[-0.03em]">
+            <span className="gradient-text-hover">Questions, answered.</span>{' '}
+            <span className="gradient-text">Honestly.</span>
           </h2>
         </Reveal>
         <div className="mt-10 sm:mt-12 divide-y divide-black/8 border-y border-black/8">

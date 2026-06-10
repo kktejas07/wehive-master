@@ -34,8 +34,8 @@ export default function InterviewPrep({ countryName }) {
             <MessageSquare className="w-3.5 h-3.5" />
             Interview Preparation
           </div>
-          <h2 className="font-display font-extrabold text-[26px] sm:text-[36px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            Mock {countryName} Interview Tool
+          <h2 className="font-display font-extrabold text-[26px] sm:text-[36px] tracking-[-0.03em]">
+            <span className="gradient-text-hover">Mock {countryName} Interview Tool</span>
           </h2>
           <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60 max-w-xl mx-auto">
             This is a crucial piece to your approval and we have built an extensive bot (fully free for you!) to train and understand where you stand.

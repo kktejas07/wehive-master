@@ -93,9 +93,9 @@ export default function HowItWorks() {
           <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             How We Hive works
           </div>
-          <h2 className="mt-3 text-[32px] sm:text-[52px] leading-[1.05] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            Three steps. Zero stress.{' '}
-            <span className="text-[hsl(var(--accent))]">One promise.</span>
+          <h2 className="mt-3 text-[32px] sm:text-[52px] leading-[1.05] font-display font-extrabold tracking-[-0.03em]">
+            <span className="gradient-text-hover">Three steps. Zero stress.</span>{' '}
+            <span className="gradient-text">One promise.</span>
           </h2>
           <p className="mt-4 text-[15px] sm:text-[16px] leading-relaxed text-[hsl(var(--blue-900))]/65 max-w-2xl">
             Honest timelines, transparent fees, and a senior consultant on

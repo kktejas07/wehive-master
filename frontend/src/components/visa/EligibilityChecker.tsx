@@ -55,8 +55,8 @@ export default function EligibilityChecker({ countryName }) {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <h2 className="font-display font-extrabold text-[26px] sm:text-[36px] tracking-[-0.03em] text-white">
-            Had a {countryName} visa before?
+          <h2 className="font-display font-extrabold text-[26px] sm:text-[36px] tracking-[-0.03em]">
+            <span className="gradient-text">Had a {countryName} visa before?</span>
           </h2>
           <p className="mt-3 text-[14px] text-white/70 max-w-xl mx-auto">
             You may qualify for automatic visa renewal or dropbox processing.

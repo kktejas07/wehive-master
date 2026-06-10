@@ -132,9 +132,9 @@ export default function AIServices() {
             <Sparkles className="w-3.5 h-3.5" />
             Powered by AI
           </div>
-          <h2 className="font-display font-extrabold text-[28px] sm:text-[40px] lg:text-[48px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            Your visa application,{' '}
-            <span className="text-[hsl(var(--accent))]">supercharged by AI.</span>
+          <h2 className="font-display font-extrabold text-[28px] sm:text-[40px] lg:text-[48px] tracking-[-0.03em]">
+            <span className="gradient-text-hover">Your visa application,</span>{' '}
+            <span className="gradient-text">supercharged by AI.</span>
           </h2>
           <p className="mt-4 text-[15px] sm:text-[17px] text-[hsl(var(--blue-900))]/60 max-w-2xl mx-auto">
             From auto-filling forms to rejection risk analysis — our AI handles the tedious parts so you can focus on the journey.
