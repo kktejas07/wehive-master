@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from ai_marketplace import marketplace
 from auth_utils import get_current_user
 from db import applications
+from serializers import serialize_doc
 
 router = APIRouter(prefix='/apps', tags=['ai-docs'])
 logger = logging.getLogger('wehive.ai-docs')
@@ -65,15 +66,6 @@ async def _call_ai(user_id: str, prompt: str, session_id: str) -> str:
         user_prompt=prompt,
         max_tokens=2048,
     )
-
-
-def _serialize(d: dict) -> dict:
-    out = dict(d)
-    out['id'] = out.pop('_id', out.get('id'))
-    for k, v in list(out.items()):
-        if isinstance(v, datetime):
-            out[k] = v.isoformat()
-    return out
 
 
 # ---------- Cover Letter / SOP ----------

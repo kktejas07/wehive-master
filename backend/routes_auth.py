@@ -10,7 +10,7 @@ from auth_utils import (
 )
 from otp_providers import deliver_otp
 from db import users, otps
-from routes_referrals import REFERRAL_REWARD_INR
+from constants import REFERRAL_REWARD_INR
 import os
 import uuid
 

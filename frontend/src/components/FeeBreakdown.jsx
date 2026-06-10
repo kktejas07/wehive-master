@@ -36,10 +36,7 @@ import { Users, Plus, Minus, Info, BadgeCheck } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { inr } from '../lib/utils';
 
-export let PER_EXTRA_APPLICANT_INR = 350;
-export let GST_RATE = 0.18;
-
-export let BASE_FEE_BY_TYPE = {
+const DEFAULT_BASE_FEE_BY_TYPE = {
   Tourist:  3500,
   Business: 4500,
   Student:  5500,
@@ -48,25 +45,34 @@ export let BASE_FEE_BY_TYPE = {
   Medical:  4000,
 };
 
-/** Override module-level pricing constants with admin-configured values. */
+const pricingState = {
+  baseFees: { ...DEFAULT_BASE_FEE_BY_TYPE },
+  surchargeInr: 350,
+  gstRate: 0.18,
+};
+
+export const PER_EXTRA_APPLICANT_INR = pricingState.surchargeInr;
+export const GST_RATE = pricingState.gstRate;
+export const BASE_FEE_BY_TYPE = pricingState.baseFees;
+
 export function setPricing({ base_fees, surcharge_inr, gst_rate } = {}) {
   if (base_fees && typeof base_fees === 'object') {
-    BASE_FEE_BY_TYPE = { ...BASE_FEE_BY_TYPE, ...base_fees };
+    pricingState.baseFees = { ...DEFAULT_BASE_FEE_BY_TYPE, ...base_fees };
   }
-  if (Number.isFinite(Number(surcharge_inr))) PER_EXTRA_APPLICANT_INR = Number(surcharge_inr);
-  if (Number.isFinite(Number(gst_rate))) GST_RATE = Number(gst_rate);
+  if (Number.isFinite(Number(surcharge_inr))) pricingState.surchargeInr = Number(surcharge_inr);
+  if (Number.isFinite(Number(gst_rate))) pricingState.gstRate = Number(gst_rate);
 }
 
 export function baseFeeFor(visaType, categoryName = '') {
-  if (visaType && BASE_FEE_BY_TYPE[visaType] != null) return BASE_FEE_BY_TYPE[visaType];
-  // Fallback: try to detect from the category name
+  const fees = pricingState.baseFees;
+  if (visaType && fees[visaType] != null) return fees[visaType];
   const n = (categoryName || '').toLowerCase();
-  if (n.includes('student') || n.includes('f1') || n.includes('admission')) return BASE_FEE_BY_TYPE.Student;
-  if (n.includes('work') || n.includes('employment') || n.includes('h1')) return BASE_FEE_BY_TYPE.Work;
-  if (n.includes('business')) return BASE_FEE_BY_TYPE.Business;
-  if (n.includes('transit')) return BASE_FEE_BY_TYPE.Transit;
-  if (n.includes('medical')) return BASE_FEE_BY_TYPE.Medical;
-  return BASE_FEE_BY_TYPE.Tourist;
+  if (n.includes('student') || n.includes('f1') || n.includes('admission')) return fees.Student;
+  if (n.includes('work') || n.includes('employment') || n.includes('h1')) return fees.Work;
+  if (n.includes('business')) return fees.Business;
+  if (n.includes('transit')) return fees.Transit;
+  if (n.includes('medical')) return fees.Medical;
+  return fees.Tourist;
 }
 
 export function computeFees({ category, applicants = 1, country, visaType }) {
@@ -83,11 +89,9 @@ export function computeFees({ category, applicants = 1, country, visaType }) {
 
   const application = (govtPer + base) * n;
   const appointment = apptPer * n;
-  const surcharge = (n - 1) * PER_EXTRA_APPLICANT_INR;
+  const surcharge = (n - 1) * pricingState.surchargeInr;
 
-  // GST applies to base + appointment portions only (never to govt fee).
-  // Surcharge is folded into the GST line for display.
-  const gstOnService = Math.round((base * n + apptPer * n) * GST_RATE);
+  const gstOnService = Math.round((base * n + apptPer * n) * pricingState.gstRate);
   const gstDisplay = gstOnService + surcharge;
 
   const total = application + appointment + gstDisplay;

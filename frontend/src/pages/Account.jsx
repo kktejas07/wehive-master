@@ -10,12 +10,12 @@ import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, C
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
 import { statusColor } from '../lib/utils';
 import ScansTab from '../components/account/ScansTab';
-import AICoverLetterModal from '../components/AICoverLetterModal';
-import AIItineraryModal from '../components/AIItineraryModal';
-import AIRiskAnalysisModal from '../components/AIRiskAnalysisModal';
+import AICoverLetterModal from '../components/ai/AICoverLetterModal';
+import AIItineraryModal from '../components/ai/AIItineraryModal';
+import AIRiskAnalysisModal from '../components/ai/AIRiskAnalysisModal';
 import OpenMarketAI from '../components/OpenMarketAI';
 import PremiumGate from '../components/PremiumGate';
-import AIMarketplaceSettings from '../components/AIMarketplaceSettings';
+import AIMarketplaceSettings from '../components/ai/AIMarketplaceSettings';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },

@@ -14,11 +14,9 @@ from pydantic import BaseModel
 
 from auth_utils import get_current_user
 from db import db, users, referrals_col
+from constants import REFERRAL_REWARD_INR
 
 router = APIRouter(prefix='/referrals', tags=['referrals'])
-
-REFERRAL_REWARD_INR = 500
-MIN_DEPOSIT_FOR_REWARD = 2000
 
 
 def _gen_code(length=8):

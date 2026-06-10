@@ -6,6 +6,7 @@ from models import UpdateProfileRequest, ApplicationCreate, Application, SavedPl
 from auth_utils import get_current_user
 from constants import AppStatus
 from db import users, applications, holiday_plans
+from serializers import serialize_doc
 import uuid
 
 router = APIRouter(prefix='/users', tags=['users'])
@@ -55,13 +56,13 @@ async def create_application(req: ApplicationCreate, user=Depends(get_current_us
         'updated_at': now,
     }
     await applications.insert_one(app)
-    return _serialize(app)
+    return serialize_doc(app)
 
 
 @router.get('/me/applications')
 async def list_applications(user=Depends(get_current_user)):
     cur = applications.find({'user_id': user['_id']}).sort('created_at', -1)
-    return [_serialize(d) async for d in cur]
+    return [serialize_doc(d) async for d in cur]
 
 
 @router.post('/me/saved-plans')
@@ -75,13 +76,13 @@ async def save_plan(req: SavedPlanCreate, user=Depends(get_current_user)):
         'created_at': datetime.utcnow(),
     }
     await holiday_plans.insert_one(rec)
-    return _serialize(rec)
+    return serialize_doc(rec)
 
 
 @router.get('/me/saved-plans')
 async def list_saved_plans(user=Depends(get_current_user)):
     cur = holiday_plans.find({'user_id': user['_id']}).sort('created_at', -1)
-    return [_serialize(d) async for d in cur]
+    return [serialize_doc(d) async for d in cur]
 
 
 # ---------- Premium (demo: self-toggle, replace with Stripe checkout later) ----------
@@ -106,11 +107,3 @@ async def downgrade_from_premium(user=Depends(get_current_user)):
         {'$set': {'is_premium': False, 'updated_at': now}, '$unset': {'premium_since': ''}},
     )
     return {'ok': True, 'is_premium': False}
-
-
-def _serialize(d: dict) -> dict:
-    out = dict(d)
-    out['id'] = out.pop('_id')
-    if 'created_at' in out and hasattr(out['created_at'], 'isoformat'):
-        out['created_at'] = out['created_at'].isoformat()
-    return out
