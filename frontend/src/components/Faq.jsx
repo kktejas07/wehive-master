@@ -43,8 +43,8 @@ export default function Faq() {
           <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             FAQ
           </div>
-          <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[44px] leading-[1.08] font-display font-extrabold tracking-[-0.03em]">
-            <span className="gradient-text-hover">Questions,</span>{' '}
+          <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[44px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <span>Questions,</span>{' '}
             <TextFlipAnimation
               words={['answered.', 'solved.', 'clarified.']}
               className="gradient-text"

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TextFlipAnimation({ words, className = '', interval = 3000 }) {
@@ -13,16 +13,20 @@ export default function TextFlipAnimation({ words, className = '', interval = 30
   }, [words.length, interval]);
 
   return (
-    <span className={`inline-flex relative ${className}`}>
+    <span className={`inline-block relative ${className}`} style={{ WebkitTextFillColor: 'initial' }}>
       <AnimatePresence mode="wait">
         <motion.span
           key={currentIndex}
-          initial={{ rotateX: -90, opacity: 0, y: -20 }}
+          initial={{ rotateX: -90, opacity: 0, y: -10 }}
           animate={{ rotateX: 0, opacity: 1, y: 0 }}
-          exit={{ rotateX: 90, opacity: 0, y: 20 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-block origin-center"
-          style={{ display: 'inline-block' }}
+          exit={{ rotateX: 90, opacity: 0, y: 10 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="inline-block"
+          style={{ 
+            display: 'inline-block',
+            backfaceVisibility: 'hidden',
+            WebkitFontSmoothing: 'antialiased',
+          }}
         >
           {words[currentIndex]}
         </motion.span>
