@@ -9,7 +9,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 
 from db import db
-from routes_admin import _load_pricing, _serialize_event
+from pricing import load_pricing
+from serializers import serialize_event
 
 router = APIRouter(prefix='/public', tags=['public'])
 
@@ -20,7 +21,7 @@ countries_col = db['countries_v2']
 
 @router.get('/pricing')
 async def public_pricing():
-    cfg = await _load_pricing()
+    cfg = await load_pricing()
     return {
         'base_fees': cfg['base_fees'],
         'surcharge_inr': cfg['surcharge_inr'],
@@ -70,5 +71,5 @@ async def public_events(
         {'$or': [{'ends_at': None}, {'ends_at': {'$gte': now}}, {'ends_at': {'$exists': False}}]},
     ]
     cur = events_col.find(filt).sort([('sort_order', 1), ('created_at', -1)]).limit(limit)
-    items = [_serialize_event(e) async for e in cur]
+    items = [serialize_event(e) async for e in cur]
     return {'items': items, 'total': len(items)}

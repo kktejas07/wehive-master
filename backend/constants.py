@@ -25,3 +25,6 @@ STATUS_LABELS = {
     AppStatus.REJECTED: 'Visa rejected',
     AppStatus.DRAFT: 'Moved back to draft',
 }
+
+REFERRAL_REWARD_INR = 500
+MIN_DEPOSIT_FOR_REWARD = 2000

@@ -184,19 +184,6 @@ export const COUNTRIES = [
     popular: true,
   },
   {
-    id: 'it',
-    name: 'Italy',
-    flag: '\u{1F1EE}\u{1F1F9}',
-    type: 'SCHENGEN',
-    valid: '90 DAYS',
-    fees: '$95',
-    image:
-      'https://images.unsplash.com/photo-1552832230-c0197dd311b5?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
-    eta: '11 May 2025, 8:30 AM',
-    processing: '10–15 days',
-    popular: true,
-  },
-  {
     id: 'nl',
     name: 'Netherlands',
     flag: '\u{1F1F3}\u{1F1F1}',
@@ -249,19 +236,6 @@ export const COUNTRIES = [
     popular: false,
   },
   {
-    id: 'jp',
-    name: 'Japan',
-    flag: '\u{1F1EF}\u{1F1F5}',
-    type: 'E-VISA',
-    valid: '90 DAYS',
-    fees: '$45',
-    image:
-      'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
-    eta: '12 May 2025, 9:22 AM',
-    processing: '5–7 days',
-    popular: true,
-  },
-  {
     id: 'kr',
     name: 'South Korea',
     flag: '\u{1F1F0}\u{1F1F7}',
@@ -288,19 +262,6 @@ export const COUNTRIES = [
     popular: true,
   },
   {
-    id: 'th',
-    name: 'Thailand',
-    flag: '\u{1F1F9}\u{1F1ED}',
-    type: 'E-VISA',
-    valid: '60 DAYS',
-    fees: '$40',
-    image:
-      'https://images.unsplash.com/photo-1528181304800-259b08848526?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
-    eta: '6 May 2025, 7:50 AM',
-    processing: '5 days',
-    popular: true,
-  },
-  {
     id: 'my',
     name: 'Malaysia',
     flag: '\u{1F1F2}\u{1F1FE}',
@@ -311,32 +272,6 @@ export const COUNTRIES = [
       'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
     eta: '7 May 2025, 9:00 AM',
     processing: '3–5 days',
-    popular: true,
-  },
-  {
-    id: 'sg',
-    name: 'Singapore',
-    flag: '\u{1F1F8}\u{1F1EC}',
-    type: 'E-VISA',
-    valid: '63 DAYS',
-    fees: '$30',
-    image:
-      'https://images.unsplash.com/photo-1565967511849-76a60a516170?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
-    eta: '29 Apr 2025, 9:52 AM',
-    processing: '3–5 days',
-    popular: true,
-  },
-  {
-    id: 'ae',
-    name: 'UAE',
-    flag: '\u{1F1E6}\u{1F1EA}',
-    type: 'E-VISA',
-    valid: '60 DAYS',
-    fees: '$80',
-    image:
-      'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
-    eta: '13 May 2025, 9:39 AM',
-    processing: '2–4 days',
     popular: true,
   },
   {
@@ -496,19 +431,6 @@ export const COUNTRIES = [
     popular: false,
   },
   {
-    id: 'au',
-    name: 'Australia',
-    flag: '\u{1F1E6}\u{1F1FA}',
-    type: 'E-VISA',
-    valid: '12 MONTHS',
-    fees: '$160',
-    image:
-      'https://images.unsplash.com/photo-1523059623039-a9ed027e7fad?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
-    eta: '3 May 2025, 9:48 AM',
-    processing: '7–10 days',
-    popular: true,
-  },
-  {
     id: 'nz',
     name: 'New Zealand',
     flag: '\u{1F1F3}\u{1F1FF}',
@@ -520,19 +442,6 @@ export const COUNTRIES = [
     eta: '4 May 2025, 10:20 AM',
     processing: '7–10 days',
     popular: false,
-  },
-  {
-    id: 'ca',
-    name: 'Canada',
-    flag: '\u{1F1E8}\u{1F1E6}',
-    type: 'E-VISA',
-    valid: '5 YEARS',
-    fees: '$120',
-    image:
-      'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
-    eta: '18 May 2025, 9:12 AM',
-    processing: '14 days',
-    popular: true,
   },
   {
     id: 'mx',

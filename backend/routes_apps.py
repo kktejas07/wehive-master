@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from auth_utils import get_current_user
 from config import CONSULTANT_NAME, CONSULTANT_AUTO_REPLY
 from db import db, applications
+from serializers import serialize_doc
 import storage as r2
 
 router = APIRouter(prefix='/users/me/applications', tags=['applications'])
@@ -24,15 +25,6 @@ ALLOWED_MIME = {
     'application/pdf', 'image/jpeg', 'image/png', 'image/webp',
     'image/heic', 'image/heif', 'application/octet-stream',
 }
-
-# ---------- helpers ----------
-def _serialize(d: dict) -> dict:
-    out = dict(d)
-    out['id'] = out.pop('_id', out.get('id'))
-    for k, v in list(out.items()):
-        if isinstance(v, datetime):
-            out[k] = v.isoformat()
-    return out
 
 
 async def _get_app_for_user(application_id: str, user_id: str):

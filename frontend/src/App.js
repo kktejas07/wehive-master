@@ -28,6 +28,7 @@ const HolidayPlanner = lazy(() => import('./pages/HolidayPlanner'));
 const ApplicationDetail = lazy(() => import('./pages/ApplicationDetail'));
 const TrackStatus = lazy(() => import('./pages/TrackStatus'));
 const Help = lazy(() => import('./pages/Help'));
+const Contact = lazy(() => import('./pages/Contact'));
 const StudentVisa = lazy(() => import('./pages/StudentVisa'));
 const UniversityComparison = lazy(() => import('./pages/UniversityComparison'));
 const MapView = lazy(() => import('./pages/MapView'));
@@ -67,6 +68,7 @@ function AnimatedRoutes() {
           <Route path="/account/applications/:id" element={<PageTransition><ApplicationDetail /></PageTransition>} />
           <Route path="/track/:id" element={<PageTransition><TrackStatus /></PageTransition>} />
           <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
+          <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
           <Route path="/universities" element={<PageTransition><UniversityComparison /></PageTransition>} />
           <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />

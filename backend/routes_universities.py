@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 from data import UNIVERSITIES
 
@@ -29,7 +29,7 @@ async def list_universities(
 async def get_university(university_id: str):
     uni = next((u for u in UNIVERSITIES if u['id'] == university_id), None)
     if not uni:
-        return {'error': 'University not found'}, 404
+        raise HTTPException(404, 'University not found')
     return uni
 
 

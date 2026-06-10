@@ -12,7 +12,7 @@ import DealsSection from '../components/DealsSection';
 
 import EventsBanner from '../components/EventsBanner';
 import StatsStrip from '../components/StatsStrip';
-import AIServices from '../components/AIServices';
+import AIServices from '../components/ai/AIServices';
 import OnTimeGuarantee from '../components/OnTimeGuarantee';
 import WorldMap from '../components/WorldMap';
 

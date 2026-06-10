@@ -23,7 +23,8 @@ from config import ADMIN_EMAILS
 from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS
 from audit import record as audit_record, recent as audit_recent
 from db import db, users, applications, holiday_plans, leads, otps
-from serializers import public_user
+from serializers import public_user, serialize_event
+from pricing import load_pricing, invalidate_pricing_cache
 
 router = APIRouter(prefix='/admin', tags=['admin'])
 
@@ -74,39 +75,10 @@ from fee_calculator import (
     revenue_for as _revenue_for_shared,
 )
 
-# Thread-safe in-process cache so we don't hit Mongo for every revenue calc.
-# Invalidated on PATCH /admin/pricing.
-_pricing_cache: Optional[dict] = None
-_pricing_lock = threading.Lock()
-
-
-async def _load_pricing() -> dict:
-    """Read pricing config from `settings.pricing`, fall back to defaults."""
-    global _pricing_cache
-    if _pricing_cache is not None:
-        return _pricing_cache
-    doc = await settings_col.find_one({'_id': 'pricing'}) or {}
-    cfg = {
-        'base_fees': {**DEFAULT_BASE_FEE_BY_TYPE, **(doc.get('base_fees') or {})},
-        'surcharge_inr': int(doc.get('surcharge_inr', DEFAULT_SURCHARGE_INR)),
-        'gst_rate': float(doc.get('gst_rate', DEFAULT_GST_RATE)),
-        'currency': doc.get('currency', 'INR'),
-        'updated_at': doc.get('updated_at'),
-    }
-    with _pricing_lock:
-        _pricing_cache = cfg
-    return cfg
-
-
-def _bust_pricing_cache() -> None:
-    global _pricing_cache
-    with _pricing_lock:
-        _pricing_cache = None
-
 
 async def _revenue_for(app: dict, country: Optional[dict]) -> int:
     """Return estimated revenue (INR) for a single application."""
-    pricing = await _load_pricing()
+    pricing = await load_pricing()
     return await _revenue_for_shared(app, country, pricing)
 
 
@@ -485,7 +457,7 @@ class PricingPatch(BaseModel):
 
 @router.get('/pricing')
 async def admin_get_pricing(_=Depends(get_current_admin)):
-    cfg = await _load_pricing()
+    cfg = await load_pricing()
     return {
         'base_fees': cfg['base_fees'],
         'surcharge_inr': cfg['surcharge_inr'],
@@ -502,7 +474,7 @@ async def admin_get_pricing(_=Depends(get_current_admin)):
 
 @router.patch('/pricing')
 async def admin_update_pricing(patch: PricingPatch, admin=Depends(get_current_admin)):
-    before = await _load_pricing()
+    before = await load_pricing()
     update = {k: v for k, v in patch.model_dump(exclude_none=True).items()}
     if not update:
         raise HTTPException(400, 'Nothing to update')
@@ -521,8 +493,8 @@ async def admin_update_pricing(patch: PricingPatch, admin=Depends(get_current_ad
     await settings_col.update_one(
         {'_id': 'pricing'}, {'$set': update}, upsert=True,
     )
-    _bust_pricing_cache()
-    after = await _load_pricing()
+    invalidate_pricing_cache()
+    after = await load_pricing()
     await audit_record(
         admin, 'update', 'pricing', 'global',
         before={k: before.get(k) for k in update.keys() if k != 'updated_at'},
@@ -566,18 +538,6 @@ class EventPatch(BaseModel):
     tag: Optional[str] = None
 
 
-def _serialize_event(e: dict) -> dict:
-    out: dict = {'id': e.get('_id')}
-    for k, v in e.items():
-        if k == '_id':
-            continue
-        if isinstance(v, datetime):
-            out[k] = v.isoformat()
-        else:
-            out[k] = v
-    return out
-
-
 @router.get('/events')
 async def admin_list_events(
     _=Depends(get_current_admin),
@@ -591,7 +551,7 @@ async def admin_list_events(
         rx = {'$regex': q, '$options': 'i'}
         filt['$or'] = [{'title': rx}, {'subtitle': rx}, {'description': rx}]
     cur = events_col.find(filt).sort([('sort_order', 1), ('created_at', -1)])
-    items = [_serialize_event(e) async for e in cur]
+    items = [serialize_event(e) async for e in cur]
     return {'items': items, 'total': len(items)}
 
 
@@ -606,7 +566,7 @@ async def admin_create_event(payload: EventCreate, admin=Depends(get_current_adm
     }
     await events_col.insert_one(doc)
     await audit_record(admin, 'create', 'event', doc['_id'], after={'title': doc.get('title'), 'tag': doc.get('tag'), 'is_published': doc.get('is_published')})
-    return _serialize_event(doc)
+    return serialize_event(doc)
 
 
 @router.patch('/events/{event_id}')
@@ -626,7 +586,7 @@ async def admin_update_event(event_id: str, payload: EventPatch, admin=Depends(g
         after={k: fresh.get(k) for k in update.keys() if k != 'updated_at'},
         extra={'title': existing.get('title')},
     )
-    return _serialize_event(fresh)
+    return serialize_event(fresh)
 
 
 @router.delete('/events/{event_id}')

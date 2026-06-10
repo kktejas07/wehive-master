@@ -46,3 +46,29 @@ def public_admin(u: dict) -> dict:
         'password_updated_at': _serialize_datetime(u.get('password_updated_at')),
         'created_at': _serialize_datetime(u.get('created_at')),
     }
+
+
+def serialize_doc(d: dict, *, convert_timeline: bool = False) -> dict:
+    out = dict(d)
+    out['id'] = out.pop('_id', out.get('id'))
+    for k, v in list(out.items()):
+        if isinstance(v, datetime):
+            out[k] = v.isoformat()
+    if convert_timeline and 'timeline' in out and isinstance(out['timeline'], list):
+        out['timeline'] = [
+            {**e, 'at': e['at'].isoformat() if isinstance(e.get('at'), datetime) else e.get('at')}
+            for e in out['timeline']
+        ]
+    return out
+
+
+def serialize_event(e: dict) -> dict:
+    out: dict = {'id': e.get('_id')}
+    for k, v in e.items():
+        if k == '_id':
+            continue
+        if isinstance(v, datetime):
+            out[k] = v.isoformat()
+        else:
+            out[k] = v
+    return out
