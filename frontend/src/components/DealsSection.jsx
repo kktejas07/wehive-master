@@ -161,8 +161,8 @@ function CategorySection({ category, deals }) {
 
   return (
     <div className="py-8 sm:py-10 border-b border-black/5 last:border-0">
-      <div className="px-5 sm:px-8">
-        <div className="flex items-center gap-2.5 mb-5">
+      <div className="px-5 sm:px-8 mb-5">
+        <div className="flex items-center gap-2.5">
           <div className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[hsl(var(--blue-700))] text-white">
             <Icon className="w-4 h-4" />
           </div>
@@ -173,14 +173,14 @@ function CategorySection({ category, deals }) {
         </div>
       </div>
 
-      <div className="relative">
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory px-5 sm:px-8">
+      <div className="-mx-5 sm:-mx-8 px-5 sm:px-8">
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
           {deals.map((deal, i) => (
             <div key={deal.id} className="snap-start">
               <DealCard
                 deal={deal}
                 category={category.id}
-                onCall={() => window.location.href = `tel:${BRAND.phoneRaw}`}
+                onCall={() => window.open(`tel:${BRAND.phoneRaw}`, '_blank')}
               />
             </div>
           ))}
@@ -229,7 +229,7 @@ export default function DealsSection() {
           })}
         </div>
 
-        <div className="rounded-2xl bg-white border border-black/8 shadow-sm overflow-hidden">
+        <div className="rounded-2xl bg-white border border-black/8 shadow-sm overflow-x-auto">
           {CATEGORIES.filter(c => activeTab === 'all' || c.id === activeTab).map((cat) => (
             <CategorySection key={cat.id} category={cat} deals={DEALS[cat.id]} />
           ))}
