@@ -218,6 +218,7 @@ export default function Contact() {
                 <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us</h3>
 <<<<<<< Updated upstream
 
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – Hyd</h3>
 
 =======
 =======
