@@ -161,7 +161,7 @@ function CategorySection({ category, deals }) {
 
   return (
     <div className="py-8 sm:py-10 border-b border-black/5 last:border-0">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+      <div className="px-5 sm:px-8">
         <div className="flex items-center gap-2.5 mb-5">
           <div className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[hsl(var(--blue-700))] text-white">
             <Icon className="w-4 h-4" />
@@ -171,19 +171,19 @@ function CategorySection({ category, deals }) {
             Live deals <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           </span>
         </div>
+      </div>
 
-        <div className="relative">
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-            {deals.map((deal, i) => (
-              <div key={deal.id} className="snap-start">
-                <DealCard
-                  deal={deal}
-                  category={category.id}
-                  onCall={() => window.location.href = `tel:${BRAND.phoneRaw}`}
-                />
-              </div>
-            ))}
-          </div>
+      <div className="relative">
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory px-5 sm:px-8">
+          {deals.map((deal, i) => (
+            <div key={deal.id} className="snap-start">
+              <DealCard
+                deal={deal}
+                category={category.id}
+                onCall={() => window.location.href = `tel:${BRAND.phoneRaw}`}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -229,7 +229,7 @@ export default function DealsSection() {
           })}
         </div>
 
-        <div className="rounded-2xl bg-white border border-black/8 overflow-hidden shadow-sm">
+        <div className="rounded-2xl bg-white border border-black/8 shadow-sm overflow-hidden">
           {CATEGORIES.filter(c => activeTab === 'all' || c.id === activeTab).map((cat) => (
             <CategorySection key={cat.id} category={cat} deals={DEALS[cat.id]} />
           ))}
@@ -237,7 +237,7 @@ export default function DealsSection() {
 
         <div className="mt-6 text-center">
           <button
-            onClick={() => window.location.href = `tel:${BRAND.phoneRaw}`}
+            onClick={() => window.open(`tel:${BRAND.phoneRaw}`, '_blank')}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[hsl(var(--blue-700))] text-white text-[14px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors"
           >
             <Phone className="w-4 h-4" />
