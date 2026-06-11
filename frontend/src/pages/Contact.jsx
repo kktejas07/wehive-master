@@ -76,15 +76,50 @@ export default function Contact() {
             transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
             className="text-center mb-12"
           >
+<<<<<<< Updated upstream
             <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
               Get in touch
             </div>
             <h1 className="mt-3 font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
               We'd love to hear from you
+=======
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+              className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]"
+            >
+              <span className="w-2 h-2 rounded-full bg-[hsl(var(--accent))] animate-pulse" />
+              Fly with WeHive
+            </motion.div>
+            <h1 className="mt-3 font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="inline-block"
+              >
+                Let's plan your fly
+              </motion.span>
+              <br />
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+                className="inline-block text-[hsl(var(--accent))]"
+              >
+                over a nice coffee
+              </motion.span>
+>>>>>>> Stashed changes
             </h1>
-            <p className="mt-4 text-[16px] text-[hsl(var(--blue-900))]/65 max-w-lg mx-auto">
-              Have a question about your visa application or want to explore options? Our team is ready to help.
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+              className="mt-4 text-[16px] text-[hsl(var(--blue-900))]/65 max-w-lg mx-auto"
+            >
+              Have a question about your visa or passport? Grab a coffee, and let's chat about your travel dreams.
+            </motion.p>
           </motion.div>
 
           <div className="grid lg:grid-cols-5 gap-8">
@@ -207,12 +242,50 @@ export default function Contact() {
               </div>
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
+<<<<<<< Updated upstream
                 <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us</h3>
+=======
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Fly with WeHive – India</h3>
+>>>>>>> Stashed changes
                 <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
                   Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103
                 </p>
                 <a
+<<<<<<< Updated upstream
                   href="https://maps.google.com/?q=Shanti+Plaza+Moka+Road+Ballari"
+=======
+                  href="https://maps.google.com/?q=WeHive+Flat+201+Mathrusree+Nagar+Miyapur+Hyderabad+Telangana+500049"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
+                >
+                  Open in Maps →
+                </a>
+              </div>
+
+              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Fly with WeHive – Ballari</h3>
+                <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
+                  Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103
+                </p>
+                <a
+                  href="https://maps.google.com/?q=Shanti+Plaza+Moka+Road+Gandhi+Nagar+Ballari+Karnataka+583103"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
+                >
+                  Open in Maps →
+                </a>
+              </div>
+
+              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Fly with WeHive – USA</h3>
+                <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
+                  Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512
+                </p>
+                <a
+                  href="https://maps.google.com/?q=Building+B+339+Princeton-Hightstown+Road+East+Windsor+NJ+08512"
+>>>>>>> Stashed changes
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"

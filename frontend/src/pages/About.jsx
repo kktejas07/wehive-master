@@ -37,7 +37,11 @@ function ContactCard() {
       <div className="relative">
         <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/70">Visit us</div>
         <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">
+<<<<<<< Updated upstream
           Walk into our Ballari office
+=======
+          Fly with WeHive
+>>>>>>> Stashed changes
         </h3>
         <ul className="mt-6 space-y-3">
           {items.map(({ id, Icon, label, href }) => (
