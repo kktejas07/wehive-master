@@ -216,9 +216,15 @@ export default function Contact() {
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
                 <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us</h3>
+<<<<<<< Updated upstream
 
                 <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – India</h3>
 
+=======
+=======
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – HYD</h3>
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
                   WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049
                 </p>
@@ -234,7 +240,7 @@ export default function Contact() {
               </div>
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Fly with WeHive – Ballari</h3>
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – BLL</h3>
                 <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
                   Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103
                 </p>
@@ -249,7 +255,7 @@ export default function Contact() {
               </div>
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Fly with WeHive – USA</h3>
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – EWR</h3>
                 <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
                   Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512
                 </p>
