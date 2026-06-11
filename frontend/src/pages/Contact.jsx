@@ -215,21 +215,11 @@ export default function Contact() {
               </div>
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us</h3>
-<<<<<<< Updated upstream
-
                 <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – Hyd</h3>
-
-=======
-=======
-                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – HYD</h3>
->>>>>>> Stashed changes
->>>>>>> Stashed changes
                 <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
                   WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049
                 </p>
                 <a
-                  href="https://maps.google.com/?q=Shanti+Plaza+Moka+Road+Ballari"
                   href="https://maps.google.com/?q=WeHive+Flat+201+Mathrusree+Nagar+Miyapur+Hyderabad+Telangana+500049"
                   target="_blank"
                   rel="noopener noreferrer"
