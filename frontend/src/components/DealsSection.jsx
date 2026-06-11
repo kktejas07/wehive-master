@@ -67,7 +67,7 @@ function DealCard({ deal, category, onCall }) {
         </div>
       )}
 
-      <div className="p-4 pt-8">
+      <div className="p-4 pt-10">
         {category === 'flights' && (
           <>
             <div className="flex items-center justify-between mb-3">
@@ -87,7 +87,7 @@ function DealCard({ deal, category, onCall }) {
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
               </div>
               <button onClick={(e) => { e.stopPropagation(); onCall(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors active:bg-[hsl(var(--blue-900))]">
-                <Phone className="w-3.5 h-3.5" /> Call
+                <Phone className="w-3.5 h-3.5 text-white" /> Call
               </button>
             </div>
           </>
@@ -106,7 +106,7 @@ function DealCard({ deal, category, onCall }) {
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
               </div>
               <button onClick={(e) => { e.stopPropagation(); onCall(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors active:bg-[hsl(var(--blue-900))]">
-                <Phone className="w-3.5 h-3.5" /> Call
+                <Phone className="w-3.5 h-3.5 text-white" /> Call
               </button>
             </div>
           </>
@@ -125,7 +125,7 @@ function DealCard({ deal, category, onCall }) {
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/day</span></div>
               </div>
               <button onClick={(e) => { e.stopPropagation(); onCall(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors active:bg-[hsl(var(--blue-900))]">
-                <Phone className="w-3.5 h-3.5" /> Call
+                <Phone className="w-3.5 h-3.5 text-white" /> Call
               </button>
             </div>
           </>
@@ -145,7 +145,7 @@ function DealCard({ deal, category, onCall }) {
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/night</span></div>
               </div>
               <button onClick={(e) => { e.stopPropagation(); onCall(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors active:bg-[hsl(var(--blue-900))]">
-                <Phone className="w-3.5 h-3.5" /> Call
+                <Phone className="w-3.5 h-3.5 text-white" /> Call
               </button>
             </div>
           </>
