@@ -16,6 +16,7 @@ const NAV = [
   { id: 'student', label: 'Student Visa', to: '/student-visa' },
   { id: 'universities', label: 'Universities', to: '/universities' },
   { id: 'pricing', label: 'nav.pricing', to: '/pricing' },
+  { id: 'fly', label: 'Fly with WeHive', to: '/contact' },
   { id: 'about', label: 'nav.about', to: '/about' },
 ];
 
