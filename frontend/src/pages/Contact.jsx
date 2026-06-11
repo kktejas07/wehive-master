@@ -80,11 +80,19 @@ export default function Contact() {
               Fly with WeHive
             </div>
             <h1 className="mt-3 font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+              We'd love to hear from you
+
               Let's plan your journey
+
             </h1>
-            <p className="mt-4 text-[16px] text-[hsl(var(--blue-900))]/65 max-w-lg mx-auto">
-              Have a question about your visa application or want to explore options? Our team is ready to help.
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+              className="mt-4 text-[16px] text-[hsl(var(--blue-900))]/65 max-w-lg mx-auto"
+            >
+              Have a question about your visa or passport? Grab a coffee, and let's chat about your travel dreams.
+            </motion.p>
           </motion.div>
 
           <div className="grid lg:grid-cols-5 gap-8">
@@ -207,11 +215,15 @@ export default function Contact() {
               </div>
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us</h3>
+
                 <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – India</h3>
+
                 <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
                   WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049
                 </p>
                 <a
+                  href="https://maps.google.com/?q=Shanti+Plaza+Moka+Road+Ballari"
                   href="https://maps.google.com/?q=WeHive+Flat+201+Mathrusree+Nagar+Miyapur+Hyderabad+Telangana+500049"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -222,12 +234,28 @@ export default function Contact() {
               </div>
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – USA</h3>
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Fly with WeHive – Ballari</h3>
+                <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
+                  Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103
+                </p>
+                <a
+                  href="https://maps.google.com/?q=Shanti+Plaza+Moka+Road+Gandhi+Nagar+Ballari+Karnataka+583103"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
+                >
+                  Open in Maps →
+                </a>
+              </div>
+
+              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
+                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Fly with WeHive – USA</h3>
                 <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
                   Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512
                 </p>
                 <a
                   href="https://maps.google.com/?q=Building+B+339+Princeton-Hightstown+Road+East+Windsor+NJ+08512"
+
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
