@@ -49,7 +49,7 @@ export default function CtaBanner() {
                 <span className="text-[hsl(var(--accent))]">before your coffee.</span>
               </h2>
               <p className="mt-4 sm:mt-5 text-[15px] sm:text-[18px] leading-relaxed text-white/70 max-w-xl">
-                Walk into our Ballari office, call us, or start online. Pay
+                Walk into our Hyderabad office, call us, or start online. Pay
                 only when you are ready to submit.
               </p>
               <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">

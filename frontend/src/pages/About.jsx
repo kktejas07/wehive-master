@@ -30,6 +30,7 @@ function ContactCard() {
     { id: 'p', Icon: Phone, label: BRAND.phone, href: `tel:${BRAND.phoneRaw}` },
     { id: 'e', Icon: Mail, label: BRAND.email, href: `mailto:${BRAND.email}` },
     { id: 'a', Icon: MapPin, label: BRAND.address },
+    { id: 'u', Icon: MapPin, label: BRAND.usaAddress },
   ];
   return (
     <div className="rounded-3xl bg-[hsl(var(--blue-900))] text-white p-8 sm:p-10 relative overflow-hidden">
@@ -37,7 +38,7 @@ function ContactCard() {
       <div className="relative">
         <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/70">Visit us</div>
         <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">
-          Walk into our Ballari office
+          Walk into our Hyderabad office
         </h3>
         <ul className="mt-6 space-y-3">
           {items.map(({ id, Icon, label, href }) => (
@@ -73,7 +74,7 @@ export default function About() {
           <p className="mt-6 text-[18px] leading-relaxed text-[hsl(var(--blue-900))]/65 max-w-2xl">
             {BRAND.name} Immigration Services was founded with a simple
             promise — bridging dreams and connecting continents. From a small
-            office in Ballari we now process visas across 60+ countries, with
+            office in Hyderabad we now process visas across 60+ countries, with
             transparent fees, honest timelines, and real human counsellors who
             stay with you long after the stamp.
           </p>

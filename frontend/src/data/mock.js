@@ -1,4 +1,4 @@
-// Wehive — content tailored to wehive.co.in (Ballari, India)
+// Wehive — content tailored to wehive.co.in (Hyderabad, India & East Windsor, NJ, USA)
 // Real brand info pulled from https://wehive.co.in
 
 export const BRAND = {
@@ -9,7 +9,8 @@ export const BRAND = {
   phone: '+91 90007 34326',
   phoneRaw: '+919000734326',
   email: 'info@wehive.co.in',
-  address: 'Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari',
+  address: 'WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049',
+  usaAddress: 'Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512',
   hours: 'Mon – Sat · 09:00 – 18:00 IST',
 };
 
@@ -547,7 +548,7 @@ export const STEPS = [
   {
     id: 1,
     title: 'Talk to a counsellor',
-    desc: 'Walk in to our Ballari office or call us. We map your goal — work, study, immigration — to the right visa.',
+    desc: 'Walk in to our Hyderabad office or call us. We map your goal — work, study, immigration — to the right visa.',
   },
   {
     id: 2,
@@ -576,7 +577,7 @@ export const SERVICES = [
 export const FEATURES = [
   { id: 'aidoc', title: 'Document review by experts', desc: 'Every passport, photo and bank statement is reviewed by a senior consultant before submission.', icon: 'ScanLine' },
   { id: 'guarantee', title: 'On‑time guarantee', desc: 'If your visa is late through our fault, we refund the full service fee. No fine print.', icon: 'ShieldCheck' },
-  { id: 'humans', title: 'Real humans, walk‑in welcome', desc: 'Drop into our Ballari office anytime Mon–Sat. Calls answered in under three rings.', icon: 'Headphones' },
+  { id: 'humans', title: 'Real humans, walk‑in welcome', desc: 'Drop into our Hyderabad office anytime Mon–Sat. Calls answered in under three rings.', icon: 'Headphones' },
   { id: 'secure', title: 'Bank‑grade security', desc: 'Encrypted vault for every document. We delete originals 30 days after a successful visa.', icon: 'Lock' },
 ];
 
