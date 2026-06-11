@@ -2,9 +2,9 @@ import { useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader2, X, Calendar, MapPin, DollarSign, ChevronDown } from 'lucide-react';
-import { Button } from './ui/button';
-import { useAuth, API } from '../context/AuthContext';
-import { useToast } from '../hooks/use-toast';
+import { Button } from '../ui/button';
+import { useAuth, API } from '../../context/AuthContext';
+import { useToast } from '../../hooks/use-toast';
 
 const STYLES = [
   { value: 'balanced', label: 'Balanced' },

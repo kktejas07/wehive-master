@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API, useAuth } from '../context/AuthContext';
-import { useToast } from '../hooks/use-toast';
+import { API, useAuth } from '../../context/AuthContext';
+import { useToast } from '../../hooks/use-toast';
 import {
   Plug,
   Loader2,
@@ -25,7 +25,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from './ui/dialog';
+} from '../ui/dialog';
 
 const ICONS = {
   ollama: Server,

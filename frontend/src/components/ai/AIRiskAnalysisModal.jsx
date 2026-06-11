@@ -2,9 +2,9 @@ import { useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader2, X, ShieldAlert, CheckCircle2, AlertTriangle, XCircle, ChevronDown } from 'lucide-react';
-import { Button } from './ui/button';
-import { useAuth, API } from '../context/AuthContext';
-import { useToast } from '../hooks/use-toast';
+import { Button } from '../ui/button';
+import { useAuth, API } from '../../context/AuthContext';
+import { useToast } from '../../hooks/use-toast';
 
 const RISK_CONFIG = {
   low: { color: 'emerald', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: CheckCircle2, label: 'Low Risk' },

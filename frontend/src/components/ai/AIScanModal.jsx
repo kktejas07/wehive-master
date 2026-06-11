@@ -2,9 +2,9 @@ import { useRef, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Upload, Loader2, X, Check, AlertTriangle, Crown } from 'lucide-react';
-import { Button } from './ui/button';
-import { useAuth, API } from '../context/AuthContext';
-import { useToast } from '../hooks/use-toast';
+import { Button } from '../ui/button';
+import { useAuth, API } from '../../context/AuthContext';
+import { useToast } from '../../hooks/use-toast';
 
 const FIELD_LABELS = {
   full_name: 'Full name',

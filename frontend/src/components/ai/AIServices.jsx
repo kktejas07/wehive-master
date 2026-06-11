@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FileText, Calendar, ShieldAlert, ListChecks, MessageSquare, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { useAuth } from '../context/AuthContext';
-import { API } from '../context/AuthContext';
-import Reveal from './Reveal';
-import TextFlipAnimation from './ui/TextFlipAnimation';
-import { GlowingEffect } from './ui/glowing-effect';
+import { Button } from '../ui/button';
+import { useAuth } from '../../context/AuthContext';
+import { API } from '../../context/AuthContext';
+import Reveal from '../Reveal';
+import TextFlipAnimation from '../ui/TextFlipAnimation';
+import { GlowingEffect } from '../ui/glowing-effect';
 
 const AI_TOOLS = [
   {
