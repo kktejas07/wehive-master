@@ -3,7 +3,7 @@ import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
-  LogOut, ArrowLeft, Banknote, Megaphone, Settings,
+  LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 
@@ -14,6 +14,10 @@ const TABS = [
   { id: 'countries',    to: '/admin/countries',     label: 'Countries',    Icon: Globe,           testid: 'admin-nav-countries' },
   { id: 'pricing',      to: '/admin/pricing',       label: 'Pricing',      Icon: Banknote,        testid: 'admin-nav-pricing' },
   { id: 'events',       to: '/admin/events',        label: 'Events',       Icon: Megaphone,       testid: 'admin-nav-events' },
+  { id: 'requests',    to: '/admin/requests',      label: 'Requests',     Icon: ClipboardList,   testid: 'admin-nav-requests' },
+  { id: 'promotions',  to: '/admin/promotions',    label: 'Promotions',   Icon: Tag,             testid: 'admin-nav-promotions' },
+  { id: 'promocodes',  to: '/admin/promocodes',    label: 'Promo Codes',   Icon: Tag,             testid: 'admin-nav-promocodes' },
+  { id: 'agents',       to: '/admin/agents',        label: 'Agents',       Icon: Briefcase,       testid: 'admin-nav-agents' },
   { id: 'staff',        to: '/admin/staff',         label: 'Staff',        Icon: UserCog,         testid: 'admin-nav-staff' },
   { id: 'integrations', to: '/admin/integrations',  label: 'Integrations', Icon: Plug,            testid: 'admin-nav-integrations' },
   { id: 'exports',      to: '/admin/exports',       label: 'Exports',      Icon: Download,        testid: 'admin-nav-exports' },

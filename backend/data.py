@@ -2414,7 +2414,12 @@ HOLIDAY_PLANS: Dict[str, Dict[str, Any]] = {
 
 
 def get_country(country_id: str):
-    return next((c for c in COUNTRIES if c['id'] == country_id), None)
+    country = next((c for c in COUNTRIES if c['id'] == country_id), None)
+    if country:
+        country['application_fee'] = 20000
+        country['embassy_fee'] = country.get('fees_usd', 0) * 83 if country.get('fees_usd') else 0
+        country['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
+    return country
 
 
 def get_holiday_plan(country_id: str, country_meta: dict = None):

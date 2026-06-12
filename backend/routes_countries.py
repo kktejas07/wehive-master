@@ -99,6 +99,10 @@ async def list_countries(
         items = [c for c in items if c.get('no_visa')]
     if limit:
         items = items[:limit]
+    for c in items:
+        c['application_fee'] = 20000
+        c['embassy_fee'] = (c.get('fees_usd') or 0) * 83
+        c['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
     return items
 
 
@@ -107,6 +111,9 @@ async def country_detail(country_id: str):
     c = await _get_one(country_id)
     if not c:
         raise HTTPException(404, 'Country not found')
+    c['application_fee'] = 20000
+    c['embassy_fee'] = (c.get('fees_usd') or 0) * 83
+    c['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
     return _strip_mongo(c)
 
 

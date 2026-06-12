@@ -1,13 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Send, Loader2, MessageCircle } from 'lucide-react';
+import { Send, Loader2, MessageCircle, Calendar, Clock, Video, CheckCircle2, X } from 'lucide-react';
 import { API } from '../context/AuthContext';
+import { Button } from './ui/button';
+
+const TIME_SLOTS = [
+  { day: 'Mon, Jun 15', slots: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'] },
+  { day: 'Tue, Jun 16', slots: ['10:00 AM', '1:00 PM', '3:00 PM', '5:00 PM'] },
+  { day: 'Wed, Jun 17', slots: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'] },
+  { day: 'Thu, Jun 18', slots: ['10:00 AM', '12:00 PM', '3:00 PM', '5:00 PM'] },
+  { day: 'Fri, Jun 19', slots: ['9:00 AM', '11:00 AM', '2:00 PM'] },
+];
 
 export default function ConsultantChat({ applicationId, token }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const scroller = useRef(null);
 
   const scrollDown = () => {
@@ -60,8 +73,89 @@ export default function ConsultantChat({ applicationId, token }) {
             Online · replies within 4 hours
           </div>
         </div>
-        <MessageCircle className="w-4 h-4 text-[hsl(var(--blue-900))]/35" />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setShowBooking(!showBooking); setBookingConfirmed(false); }}
+            className={`h-9 px-3 rounded-full text-[12px] font-bold transition flex items-center gap-1.5 ${
+              showBooking ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))]'
+            }`}
+          >
+            <Video className="w-3.5 h-3.5" /> Book call
+          </button>
+          <MessageCircle className="w-4 h-4 text-[hsl(var(--blue-900))]/35" />
+        </div>
       </header>
+
+      {showBooking && (
+        <div className="border-b border-black/5 p-5 bg-gradient-to-r from-[hsl(var(--blue-50))] to-white">
+          {bookingConfirmed ? (
+            <div className="text-center py-4">
+              <div className="inline-flex h-12 w-12 rounded-full bg-emerald-100 items-center justify-center mb-3">
+                <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+              </div>
+              <h3 className="font-bold text-[15px] text-[hsl(var(--blue-900))]">Call booked!</h3>
+              <p className="text-[13px] text-[hsl(var(--blue-900))]/60 mt-1">
+                {selectedDay} at {selectedSlot}
+              </p>
+              <p className="text-[12px] text-[hsl(var(--blue-900))]/45 mt-1">
+                A calendar invite has been sent. We&apos;ll send a Google Meet link 15 min before.
+              </p>
+              <button
+                onClick={() => { setShowBooking(false); setBookingConfirmed(false); }}
+                className="mt-3 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline"
+              >
+                Close
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Book a 1:1 video call</div>
+                  <div className="text-[12px] text-[hsl(var(--blue-900))]/60">Free for application holders</div>
+                </div>
+                <button onClick={() => setShowBooking(false)} className="p-1 hover:bg-black/5 rounded-full">
+                  <X className="w-4 h-4 text-[hsl(var(--blue-900))]/50" />
+                </button>
+              </div>
+              <div className="space-y-2 max-h-[240px] overflow-y-auto">
+                {TIME_SLOTS.map(day => (
+                  <div key={day.day}>
+                    <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]/60 mb-1.5 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" /> {day.day}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {day.slots.map(slot => {
+                        const isSelected = selectedDay === day.day && selectedSlot === slot;
+                        return (
+                          <button
+                            key={slot}
+                            onClick={() => { setSelectedDay(day.day); setSelectedSlot(slot); }}
+                            className={`px-3 py-1.5 rounded-full text-[12px] font-bold transition ${
+                              isSelected
+                                ? 'bg-[hsl(var(--blue-700))] text-white'
+                                : 'bg-white border border-black/10 text-[hsl(var(--blue-900))]/70 hover:border-[hsl(var(--blue-700))]/30'
+                            }`}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button
+                onClick={() => { if (selectedDay && selectedSlot) setBookingConfirmed(true); }}
+                disabled={!selectedDay || !selectedSlot}
+                className="mt-3 w-full h-10 rounded-full btn-accent text-white font-bold text-[13px]"
+              >
+                <Video className="w-4 h-4 mr-1.5" /> Confirm booking
+              </Button>
+            </>
+          )}
+        </div>
+      )}
 
       <div ref={scroller} className="flex-1 p-5 space-y-3 overflow-y-auto bg-[hsl(var(--soft-bg))]">
         {loading ? (

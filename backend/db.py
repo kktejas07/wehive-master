@@ -21,6 +21,12 @@ notifications_col = db['notifications']
 referrals_col = db['referrals']
 ai_settings = db['ai_settings']
 third_party_settings = db['third_party_settings']
+profile_change_requests = db['profile_change_requests']
+universities_col = db['universities_v2']
+promotions_col = db['promotions']
+agents_col = db['agents']
+agent_students_col = db['agent_students']
+commissions_col = db['commissions']
 
 
 async def ensure_indexes():
@@ -49,3 +55,4 @@ async def ensure_indexes():
     await db['settings'].create_index('_id')
     await db['profile_change_requests'].create_index([('user_id', 1), ('created_at', -1)])
     await db['profile_change_requests'].create_index([('status', 1), ('created_at', -1)])
+

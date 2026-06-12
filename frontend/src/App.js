@@ -31,8 +31,21 @@ const TrackStatus = lazy(() => import('./pages/TrackStatus'));
 const Help = lazy(() => import('./pages/Help'));
 const Contact = lazy(() => import('./pages/Contact'));
 const StudentVisa = lazy(() => import('./pages/StudentVisa'));
+const VisaInterview = lazy(() => import('./pages/VisaInterview'));
 const UniversityComparison = lazy(() => import('./pages/UniversityComparison'));
+const UniversityDetail = lazy(() => import('./pages/UniversityDetail'));
 const MapView = lazy(() => import('./pages/MapView'));
+const AgentLogin = lazy(() => import('./pages/AgentLogin'));
+const AgentDashboard = lazy(() => import('./pages/AgentDashboard'));
+const AgentApplications = lazy(() => import('./pages/AgentApplications'));
+const AgentStudents = lazy(() => import('./pages/AgentStudents'));
+const VisaScheduling = lazy(() => import('./pages/VisaScheduling'));
+const AgentPortal = lazy(() => import('./pages/AgentPortal'));
+const StudentResources = lazy(() => import('./pages/StudentResources'));
+const IntakeCalendar = lazy(() => import('./pages/IntakeCalendar'));
+const SharedShortlist = lazy(() => import('./pages/SharedShortlist'));
+const FinancialTools = lazy(() => import('./pages/FinancialTools'));
+const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -71,8 +84,18 @@ function AnimatedRoutes() {
           <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
+          <Route path="/visa-interview" element={<PageTransition><VisaInterview /></PageTransition>} />
           <Route path="/universities" element={<PageTransition><UniversityComparison /></PageTransition>} />
+          <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
+          <Route path="/resources" element={<PageTransition><StudentResources /></PageTransition>} />
+          <Route path="/intake-calendar" element={<PageTransition><IntakeCalendar /></PageTransition>} />
+          <Route path="/shared/:token" element={<PageTransition><SharedShortlist /></PageTransition>} />
+          <Route path="/financial-tools" element={<PageTransition><FinancialTools /></PageTransition>} />
+          <Route path="/agent-training" element={<PageTransition><AgentTraining /></PageTransition>} />
+          <Route path="/visa-scheduling" element={<PageTransition><VisaScheduling /></PageTransition>} />
+          <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
+          <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
           <Route path="*" element={<PageTransition><Home /></PageTransition>} />
         </Routes>
