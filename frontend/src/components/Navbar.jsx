@@ -16,7 +16,6 @@ const NAV = [
   { id: 'student', label: 'Student', to: '/student-visa' },
   { id: 'universities', label: 'Universities', to: '/universities' },
   { id: 'resources', label: 'Resources', to: '/resources' },
-  { id: 'agent', label: 'Agent', to: '/agent' },
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
   { id: 'about', label: 'About', to: '/about' },
   { id: 'fly', label: 'Fly', to: '/contact' },
