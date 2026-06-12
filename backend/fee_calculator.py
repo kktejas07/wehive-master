@@ -58,6 +58,26 @@ def compute_fees(
     }
 
 
+def compute_multi_university_fees(university_count: int) -> dict:
+    """Fee for multi-university applications.
+    1–3 universities: flat ₹20,000
+    4+ universities: ₹20,000 + ₹3,000 per extra university
+    """
+    count = max(1, university_count)
+    if count <= 3:
+        application_fee = FLAT_APPLICATION_FEE_INR
+    else:
+        application_fee = FLAT_APPLICATION_FEE_INR + (count - 3) * 3000
+    gst = round(application_fee * DEFAULT_GST_RATE)
+    total = application_fee + gst
+    return {
+        'university_count': count,
+        'application_fee': application_fee,
+        'gst': gst,
+        'total': total,
+    }
+
+
 async def revenue_for(app: dict, country: Optional[dict], pricing: Optional[dict] = None) -> int:
     applicants = max(1, int(app.get('applicants') or 1))
     visa_type = app.get('visa_type') or 'Tourist'
