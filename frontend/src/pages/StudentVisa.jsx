@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { inr } from '../lib/utils';
@@ -367,6 +368,93 @@ export default function StudentVisa() {
               className="inline-flex items-center gap-2 rounded-full btn-primary text-white h-12 px-8 font-bold"
             >
               Browse all universities <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-[hsl(var(--soft-bg))] border-y border-black/5">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <GraduationCap className="w-3.5 h-3.5" /> Schools & Programs
+          </div>
+          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+            Universities in {selectedCountry?.name}
+          </h2>
+          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+            Explore programs offered by universities in {selectedCountry?.name}. Select multiple universities and apply with a single application.
+          </p>
+
+          {universities.filter(u => u.country === selected).length === 0 ? (
+            <div className="mt-8 text-center py-12 bg-white rounded-2xl border border-black/5">
+              <BookOpen className="w-10 h-10 text-[hsl(var(--blue-900))]/30 mx-auto" />
+              <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60">
+                No universities listed for {selectedCountry?.name} yet.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {universities.filter(u => u.country === selected).map((uni) => (
+                <div
+                  key={uni.id}
+                  className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-xl shrink-0">
+                      {uni.flag}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/60 truncate">{uni.name}</div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
+                        <span className="text-[11px] text-[hsl(var(--blue-900))]/50">#{uni.rank}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {(uni.popular_courses || []).slice(0, 4).map((course) => (
+                      <span key={course} className="text-[11px] px-2.5 py-1 rounded-full bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
+                        {COURSE_ID_TO_NAME[course] || course}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-4 text-[12px]">
+                    <span className="text-[hsl(var(--blue-900))]/60">
+                      Tuition: <strong className="text-[hsl(var(--blue-900))]">{uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}</strong>
+                    </span>
+                    <span className="text-[hsl(var(--blue-900))]/60">
+                      IELTS: <strong className="text-[hsl(var(--blue-900))]">{uni.ielts_min}+</strong>
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex items-center gap-2">
+                    <Link
+                      to={`/university/${uni.id}`}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-black/10 h-9 text-[12px] font-bold text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/30 transition-all"
+                    >
+                      View details
+                    </Link>
+                    <Link
+                      to={`/student-visa?university=${uni.id}`}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl btn-primary text-white h-9 text-[12px] font-bold"
+                    >
+                      Apply <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 flex items-center justify-center">
+            <Link
+              to={`/universities?country=${selected}`}
+              className="inline-flex items-center gap-2 rounded-full bg-white border border-black/10 text-[hsl(var(--blue-700))] h-12 px-8 font-bold hover:border-[hsl(var(--blue-700))]/30 transition-all"
+            >
+              View all universities in {selectedCountry?.name} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>

@@ -16,11 +16,13 @@ import {
   TrendingDown, Minus, ChevronRight, Crown, Target,
   Calculator, Sparkles, SlidersHorizontal, Bookmark,
   Share2, Copy, Trash2, ExternalLink, FileText,
+  Square, CheckSquare,
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth, API } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import { inr } from '../lib/utils';
+import MultiUniversityApplyModal from '../components/MultiUniversityApplyModal';
 
 const COURSE_CATEGORIES = [
   { id: 'stem', label: 'STEM', icon: Atom },
@@ -74,10 +76,25 @@ const STUDENT_COUNTRIES = [
   { id: 'hr', name: 'Croatia', flag: '🇭🇷' },
 ];
 
-function UniversityCard({ uni, onCompare, isComparing, isSaved, onSave }) {
+function UniversityCard({ uni, onCompare, isComparing, isSaved, onSave, isSelected, onToggleSelect }) {
   return (
-    <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 flex flex-col h-full min-h-[420px]">
+    <div className={cn(
+      "relative rounded-2xl overflow-hidden group transition-all duration-300 bg-white border flex flex-col h-full min-h-[420px]",
+      isSelected
+        ? "border-[hsl(var(--blue-700))] shadow-xl shadow-[hsl(var(--blue-700))]/10"
+        : "border-black/5 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 hover:border-[hsl(var(--blue-700))]/20"
+    )}>
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <button
+        onClick={() => onToggleSelect(uni)}
+        className={cn(
+          "absolute top-4 left-4 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all",
+          isSelected ? "bg-[hsl(var(--blue-700))] text-white" : "bg-white/80 text-[hsl(var(--blue-900))]/40 hover:bg-[hsl(var(--blue-50))] hover:text-[hsl(var(--blue-700))]"
+        )}
+        title={isSelected ? "Deselect" : "Select for application"}
+      >
+        {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+      </button>
       <button
         onClick={() => onSave(uni)}
         className={cn(
@@ -197,9 +214,22 @@ function UniversityCard({ uni, onCompare, isComparing, isSaved, onSave }) {
   );
 }
 
-function UniversityListItem({ uni, onCompare, isComparing, isSaved, onSave }) {
+function UniversityListItem({ uni, onCompare, isComparing, isSaved, onSave, isSelected, onToggleSelect }) {
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 transition-all duration-300 min-h-[140px]">
+    <div className={cn(
+      "relative rounded-2xl overflow-hidden bg-white border transition-all duration-300 min-h-[140px]",
+      isSelected ? "border-[hsl(var(--blue-700))] shadow-lg shadow-[hsl(var(--blue-700))]/10" : "border-black/5 hover:border-[hsl(var(--blue-700))]/20"
+    )}>
+      <button
+        onClick={() => onToggleSelect(uni)}
+        className={cn(
+          "absolute top-4 left-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all",
+          isSelected ? "bg-[hsl(var(--blue-700))] text-white" : "bg-white/80 text-[hsl(var(--blue-900))]/40 hover:bg-[hsl(var(--blue-50))] hover:text-[hsl(var(--blue-700))]"
+        )}
+        title={isSelected ? "Deselect" : "Select for application"}
+      >
+        {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+      </button>
       <button
         onClick={() => onSave(uni)}
         className={cn(
@@ -810,6 +840,8 @@ export default function UniversityComparison() {
   const [shortlistLoading, setShortlistLoading] = useState(false);
   const [showShortlist, setShowShortlist] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+  const [selectedForApply, setSelectedForApply] = useState([]);
+  const [showApplyModal, setShowApplyModal] = useState(false);
   const itemsPerPage = 20;
 
   const loadShortlist = () => {
@@ -923,6 +955,14 @@ export default function UniversityComparison() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const toggleSelect = (uni) => {
+    if (selectedForApply.find((u) => u.id === uni.id)) {
+      setSelectedForApply(selectedForApply.filter((u) => u.id !== uni.id));
+    } else {
+      setSelectedForApply([...selectedForApply, uni]);
+    }
+  };
 
   const handleCompare = (uni) => {
     if (compareList.find((u) => u.id === uni.id)) {
@@ -1236,6 +1276,8 @@ export default function UniversityComparison() {
                   uni={uni}
                   onCompare={handleCompare}
                   isComparing={!!compareList.find((u) => u.id === uni.id)}
+                  isSelected={!!selectedForApply.find((u) => u.id === uni.id)}
+                  onToggleSelect={toggleSelect}
                 />
               ))}
             </div>
@@ -1247,8 +1289,39 @@ export default function UniversityComparison() {
                   uni={uni}
                   onCompare={handleCompare}
                   isComparing={!!compareList.find((u) => u.id === uni.id)}
+                  isSelected={!!selectedForApply.find((u) => u.id === uni.id)}
+                  onToggleSelect={toggleSelect}
                 />
               ))}
+            </div>
+          )}
+
+          {selectedForApply.length > 0 && (
+            <div className="sticky bottom-4 mt-6 z-30">
+              <div className="mx-auto max-w-lg rounded-2xl bg-[hsl(var(--blue-900))] text-white shadow-2xl shadow-[hsl(var(--blue-900))]/30 p-4 flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-[14px] font-bold">{selectedForApply.length} universit{selectedForApply.length === 1 ? 'y' : 'ies'} selected</span>
+                  <div className="text-[11px] text-white/60 mt-0.5">
+                    {selectedForApply.length <= 3
+                      ? 'Flat ₹20,000 application fee'
+                      : `₹20,000 + ₹${(selectedForApply.length - 3) * 3000} for extras`}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedForApply([])}
+                    className="text-[12px] text-white/60 hover:text-white px-2"
+                  >
+                    Clear
+                  </button>
+                  <Button
+                    onClick={() => setShowApplyModal(true)}
+                    className="rounded-xl bg-white text-[hsl(var(--blue-900))] hover:bg-white/90 font-bold h-10 px-5"
+                  >
+                    Apply now <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1400,6 +1473,12 @@ export default function UniversityComparison() {
 
       <Footer />
       {showCalculator && <ScholarshipCalculator onClose={() => setShowCalculator(false)} />}
+      {showApplyModal && (
+        <MultiUniversityApplyModal
+          universities={selectedForApply}
+          onClose={() => { setShowApplyModal(false); setSelectedForApply([]); }}
+        />
+      )}
     </div>
   );
 }

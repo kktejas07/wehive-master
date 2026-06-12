@@ -140,4 +140,12 @@ class Lead(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class UniversityApplicationCreate(BaseModel):
+    university_ids: List[str]
+    country_id: str
+    visa_type: str = 'Student'
+    travel_date: Optional[str] = None
+    primary_applicant: Optional[PrimaryApplicant] = None
+
+
 AuthTokens.model_rebuild()
