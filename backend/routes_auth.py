@@ -108,15 +108,10 @@ async def send_otp(req: SendOtpRequest):
     delivered = False
     channel_used = kind
 
-    if kind == 'email':
-        from email_otp_service import send_otp_email
-        delivered = await send_otp_email(identifier, otp_code, req.purpose)
-    elif kind in ('phone', 'sms', 'whatsapp'):
-        from whatsapp_otp_service import send_whatsapp_otp
-        delivered = await send_whatsapp_otp(identifier, otp_code, req.purpose)
-        channel_used = 'whatsapp'
-    else:
-        raise HTTPException(status_code=400, detail=f'Invalid channel: {kind}')
+    if kind != 'email':
+        raise HTTPException(status_code=400, detail='Only email OTP is supported')
+    from email_otp_service import send_otp_email
+    delivered = await send_otp_email(identifier, otp_code, req.purpose)
 
     if not delivered:
         raise HTTPException(status_code=400, detail=f'Failed to deliver OTP via {channel_used}. Check provider configuration.')
