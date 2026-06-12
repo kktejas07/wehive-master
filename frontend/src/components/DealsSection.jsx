@@ -208,7 +208,7 @@ export default function DealsSection() {
           </p>
         </Reveal>
 
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-2 mb-6 flex-wrap">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -228,8 +228,8 @@ export default function DealsSection() {
           })}
         </div>
 
-        <div className="rounded-2xl bg-white border border-black/8 shadow-sm overflow-x-auto">
-          {CATEGORIES.filter(c => activeTab === 'all' || c.id === activeTab).map((cat) => (
+        <div className="rounded-2xl bg-white border border-black/8 shadow-sm">
+          {CATEGORIES.filter((c) => c.id === activeTab).map((cat) => (
             <CategorySection key={cat.id} category={cat} deals={DEALS[cat.id]} />
           ))}
         </div>
