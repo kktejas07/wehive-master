@@ -66,8 +66,11 @@ _wildcard_regexes: list[str] = []
 if _raw_origins:
     for o in [x.strip() for x in _raw_origins.split(',') if x.strip()]:
         if '*' in o:
-            pattern = re.escape(o).replace(r'\*', '[^/]+')
+            pattern = re.escape(o).replace(r'\*', '[^/]*')
             _wildcard_regexes.append(f'^{pattern}$')
+            bare = o.replace('*.', '').replace('*', '')
+            if bare not in _exact_origins:
+                _exact_origins.append(bare)
         else:
             _exact_origins.append(o)
 
