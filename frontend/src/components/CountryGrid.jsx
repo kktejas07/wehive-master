@@ -23,32 +23,39 @@ const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
 
 const _wikiCache = {};
 
-async function fetchCommonsImage(countryName) {
+async function fetchCountryImage(countryName) {
   if (!countryName) return null;
   const key = countryName.toLowerCase().trim();
   if (_wikiCache[key] !== undefined) return _wikiCache[key];
   try {
-    const q = encodeURIComponent(`${countryName} travel landmark`);
-    const searchUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${q}&srlimit=5&format=json&origin=*`;
-    const res = await fetch(searchUrl);
-    if (!res.ok) { _wikiCache[key] = null; return null; }
-    const data = await res.json();
-    const pages = data?.query?.search || [];
-    let imgUrl = null;
-    for (const page of pages) {
-      const title = page.title;
-      if (!title || title.includes('Flag') || title.includes('flag') || title.includes('icon') || title.includes('Logo') || title.includes('logo') || title.includes('Emblem') || title.includes('Coat of arms') || title.includes('Locator')) continue;
-      const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`;
-      const infoRes = await fetch(infoUrl);
-      if (!infoRes.ok) continue;
-      const infoData = await infoRes.json();
-      const imgPages = infoData?.query?.pages || {};
-      const match = Object.values(imgPages)[0];
-      imgUrl = match?.imageinfo?.[0]?.thumburl || match?.imageinfo?.[0]?.url || null;
-      if (imgUrl) break;
+    const pageRes = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(countryName)}`
+    );
+    if (!pageRes.ok) { _wikiCache[key] = null; return null; }
+    const pageData = await pageRes.json();
+    const title = pageData.title;
+    const thumb = pageData?.thumbnail?.source;
+    const pageImg = pageData?.originalimage?.source;
+
+    if (pageImg && !pageImg.includes('Flag_of_') && !pageImg.includes('Coat_of_arms') && !pageImg.includes('Emblem')) {
+      const largeUrl = pageImg.replace(/\/thumb\//, '/').replace(/\/\d+px-[^\/]+$/, '');
+      _wikiCache[key] = largeUrl; return largeUrl;
     }
-    _wikiCache[key] = imgUrl;
-    return imgUrl;
+
+    const imagesRes = await fetch(
+      `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&generator=images&gimlimit=50&prop=imageinfo&iiprop=url&format=json&origin=*`
+    );
+    if (!imagesRes.ok) { _wikiCache[key] = thumb || null; return thumb || null; }
+    const imagesData = await imagesRes.json();
+    const pages = imagesData?.query?.pages || {};
+    const exclude = ['Flag', 'Coat_of_arms', 'Emblem', 'Logo', 'Map', 'Locator', 'Orthographic', 'Commons-logo', 'Decrease', 'Increase', 'blank', 'location'];
+    const imageUrls = Object.values(pages)
+      .map(p => p?.imageinfo?.[0]?.url)
+      .filter(url => url && !exclude.some(ex => url.includes(ex)));
+
+    const result = imageUrls[0] || thumb || null;
+    _wikiCache[key] = result;
+    return result;
   } catch {
     _wikiCache[key] = null;
     return null;
@@ -65,7 +72,7 @@ function CountryCard({ c, index = 0 }) {
 
   useEffect(() => {
     if (!landmark && !imgFromMock) {
-      fetchCommonsImage(c.name).then(setCommonsImg);
+      fetchCountryImage(c.name).then(setCommonsImg);
     }
   }, [c.name, landmark, imgFromMock]);
   const categories = c.categories || {};
