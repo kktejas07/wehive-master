@@ -23,19 +23,32 @@ const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
 
 const _wikiCache = {};
 
-async function fetchWikiImage(countryName) {
+async function fetchCommonsImage(countryName) {
   if (!countryName) return null;
   const key = countryName.toLowerCase().trim();
   if (_wikiCache[key] !== undefined) return _wikiCache[key];
   try {
-    const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(countryName)}`
-    );
+    const q = encodeURIComponent(`${countryName} travel landmark`);
+    const searchUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${q}&srlimit=5&format=json&origin=*`;
+    const res = await fetch(searchUrl);
     if (!res.ok) { _wikiCache[key] = null; return null; }
     const data = await res.json();
-    const img = data?.thumbnail?.source || data?.originalimage?.source || null;
-    _wikiCache[key] = img;
-    return img;
+    const pages = data?.query?.search || [];
+    let imgUrl = null;
+    for (const page of pages) {
+      const title = page.title;
+      if (!title || title.includes('Flag') || title.includes('flag') || title.includes('icon') || title.includes('Logo') || title.includes('logo') || title.includes('Emblem') || title.includes('Coat of arms') || title.includes('Locator')) continue;
+      const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`;
+      const infoRes = await fetch(infoUrl);
+      if (!infoRes.ok) continue;
+      const infoData = await infoRes.json();
+      const imgPages = infoData?.query?.pages || {};
+      const match = Object.values(imgPages)[0];
+      imgUrl = match?.imageinfo?.[0]?.thumburl || match?.imageinfo?.[0]?.url || null;
+      if (imgUrl) break;
+    }
+    _wikiCache[key] = imgUrl;
+    return imgUrl;
   } catch {
     _wikiCache[key] = null;
     return null;
@@ -47,14 +60,14 @@ function CountryCard({ c, index = 0 }) {
   const types = c.visa_types || [];
   const landmark = landmarkFor(c);
   const imgFromMock = IMG[c.id];
-  const [wikiImg, setWikiImg] = useState(null);
-  const cardImage = landmark || imgFromMock || wikiImg || c.flag_url;
+  const [commonsImg, setCommonsImg] = useState(null);
+  const cardImage = landmark || imgFromMock || commonsImg;
 
   useEffect(() => {
-    if (!landmark && !imgFromMock && !c.flag_url) {
-      fetchWikiImage(c.name).then(setWikiImg);
+    if (!landmark && !imgFromMock) {
+      fetchCommonsImage(c.name).then(setCommonsImg);
     }
-  }, [c.name, landmark, imgFromMock, c.flag_url]);
+  }, [c.name, landmark, imgFromMock]);
   const categories = c.categories || {};
   const firstCategory = categories.Tourist || categories[Object.keys(categories)[0]] || {};
   const validity = c.validity || firstCategory.validity || '90 DAYS';
@@ -74,12 +87,16 @@ function CountryCard({ c, index = 0 }) {
           transition={{ duration: 0.25 }}
           className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]"
         >
-          <img
-            src={cardImage}
-            alt={c.name}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] group-hover:scale-[1.06]"
-          />
+          {cardImage ? (
+            <img
+              src={cardImage}
+              alt={c.name}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] group-hover:scale-[1.06]"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
         {/* Visa type badges - top */}
