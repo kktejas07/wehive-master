@@ -5,11 +5,24 @@ export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
+let _currency = 'INR';
+let _locale = 'en-IN';
+
+export function setCurrency(code) {
+  _currency = code || 'INR';
+  _locale = code === 'USD' ? 'en-US' : code === 'EUR' ? 'de-DE' : code === 'GBP' ? 'en-GB' : 'en-IN';
+}
+
+export function getCurrency() {
+  return _currency;
+}
+
 export function inr(n) {
   try {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
+    return new Intl.NumberFormat(_locale, { style: 'currency', currency: _currency, maximumFractionDigits: 0 }).format(n || 0);
   } catch {
-    return `₹${n || 0}`;
+    const sym = { INR: '₹', USD: '$', EUR: '€', GBP: '£' }[_currency] || _currency;
+    return `${sym}${n || 0}`;
   }
 }
 

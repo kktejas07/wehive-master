@@ -119,14 +119,14 @@ export default function PricingTab() {
         </div>
       </Panel>
 
-      <div className="grid lg:grid-cols-2 gap-4">
+      <div className="grid lg:grid-cols-3 gap-4">
         <Panel>
           <div className="text-[13px] font-bold text-white inline-flex items-center gap-2">
             <Banknote className="w-4 h-4 text-[hsl(var(--accent))]" /> Surcharge
           </div>
           <p className="mt-1 text-[12px] text-slate-400">Folded into GST taxable base.</p>
           <div className="mt-3 relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[13px]">₹</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[13px]">{draft.currency === 'INR' ? '₹' : draft.currency === 'USD' ? '$' : draft.currency === 'EUR' ? '€' : '₹'}</span>
             <input
               data-testid="pricing-surcharge"
               type="number"
@@ -156,6 +156,25 @@ export default function PricingTab() {
             <div className="mt-1.5 text-[11.5px] text-slate-500">
               = {(Number(draft.gst_rate || 0) * 100).toFixed(1)}%
             </div>
+          </div>
+        </Panel>
+
+        <Panel>
+          <div className="text-[13px] font-bold text-white inline-flex items-center gap-2">
+            <Globe className="w-4 h-4 text-[hsl(var(--accent))]" /> Currency
+          </div>
+          <p className="mt-1 text-[12px] text-slate-400">Default currency for all fee displays.</p>
+          <div className="mt-3">
+            <select
+              value={draft.currency || 'INR'}
+              onChange={(e) => setDraft({ ...draft, currency: e.target.value })}
+              className="w-full h-11 px-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] text-[14px] text-white outline-none appearance-none"
+            >
+              <option value="INR">INR (₹)</option>
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+            </select>
           </div>
         </Panel>
       </div>
