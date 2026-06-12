@@ -71,6 +71,20 @@ const COURSE_CATEGORIES = [
   { id: 'social', label: 'Social Sciences', icon: BookMarked, description: 'Economics, Psychology, Sociology' },
 ];
 
+const COURSE_ID_TO_NAME = {
+  stem: 'STEM',
+  engineering: 'Engineering',
+  business: 'Business',
+  medicine: 'Medicine',
+  law: 'Law',
+  arts: 'Arts',
+  social: 'Social Sciences',
+};
+
+function getDisplayCourses(popularCourses = []) {
+  return popularCourses.map(c => COURSE_ID_TO_NAME[c] || c);
+}
+
 function CountryCard({ c, onSelect, selected }) {
   const meta = c.student_meta || {};
   return (
@@ -299,7 +313,7 @@ export default function StudentVisa() {
                           </div>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-1">
-                          {uni.popular_courses?.slice(0, 2).map((course) => (
+                          {getDisplayCourses(uni.popular_courses || []).slice(0, 2).map((course) => (
                             <span key={course} className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
                               {course}
                             </span>
