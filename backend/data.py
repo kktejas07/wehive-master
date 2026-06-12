@@ -2418,7 +2418,7 @@ def get_country(country_id: str):
     if country:
         country['application_fee'] = 20000
         country['embassy_fee'] = country.get('fees_usd', 0) * 83 if country.get('fees_usd') else 0
-        country['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
+        country['fee_disclaimer'] = 'Flat ₹20,000 application fee per applicant — includes our service fees and the applicable government/embassy fee.'
     return country
 
 

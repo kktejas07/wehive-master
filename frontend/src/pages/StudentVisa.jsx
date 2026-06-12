@@ -11,7 +11,8 @@ import {
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
   Globe, MapPin, Visa, FileText, Shield, Zap, Search, Filter,
   Atom, Cog, Heart, Scale, Palette, BookMarked, MessageCircle,
-  Sparkles, Target, Calculator, Home,
+  Sparkles, Target, Calculator, Home, DollarSign, TrendingUp,
+  BarChart3, Info, ExternalLink,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -81,6 +82,28 @@ const COURSE_ID_TO_NAME = {
   arts: 'Arts',
   social: 'Social Sciences',
 };
+
+const SCORE_REQUIREMENTS = [
+  { id: 'ielts', label: 'IELTS', icon: BookOpen, min: '6.0', max: '7.5', avg: '6.5', format: 'Band score (0–9)', desc: 'Most widely accepted English test for student visas worldwide.' },
+  { id: 'toefl', label: 'TOEFL', icon: Globe2, min: '80', max: '100', avg: '90', format: 'iBT score (0–120)', desc: 'Preferred by US universities. Accepted globally.' },
+  { id: 'pte', label: 'PTE Academic', icon: Star, min: '50', max: '70', avg: '60', format: 'Score (10–90)', desc: 'Fast results (48 hrs). Accepted in UK, AU, NZ, CA.' },
+  { id: 'gre', label: 'GRE', icon: BarChart3, min: '300', max: '330', avg: '315', format: 'Verbal + Quant (260–340)', desc: 'Required for most US graduate programs. Some EU schools accept.' },
+  { id: 'gmat', label: 'GMAT', icon: TrendingUp, min: '550', max: '750', avg: '650', format: 'Score (200–800)', desc: 'Required for top MBA programs worldwide.' },
+  { id: 'duolingo', label: 'Duolingo English', icon: Globe, min: '100', max: '130', avg: '115', format: 'Score (10–160)', desc: 'Affordable at-home test. Accepted by 4500+ institutions.' },
+];
+
+const ANNUAL_BUDGETS = [
+  { country: 'us', name: 'United States', flag: '🇺🇸', tuition_min: 20000, tuition_max: 60000, living_min: 12000, living_max: 24000, currency: 'USD' },
+  { country: 'uk', name: 'United Kingdom', flag: '🇬🇧', tuition_min: 15000, tuition_max: 38000, living_min: 12000, living_max: 18000, currency: 'GBP' },
+  { country: 'de', name: 'Germany', flag: '🇩🇪', tuition_min: 0, tuition_max: 3000, living_min: 11000, living_max: 14000, currency: 'EUR' },
+  { country: 'it', name: 'Italy', flag: '🇮🇹', tuition_min: 2000, tuition_max: 20000, living_min: 10000, living_max: 15000, currency: 'EUR' },
+  { country: 'es', name: 'Spain', flag: '🇪🇸', tuition_min: 2000, tuition_max: 18000, living_min: 9000, living_max: 14000, currency: 'EUR' },
+  { country: 'pl', name: 'Poland', flag: '🇵🇱', tuition_min: 2000, tuition_max: 8000, living_min: 6000, living_max: 10000, currency: 'EUR' },
+  { country: 'at', name: 'Austria', flag: '🇦🇹', tuition_min: 0, tuition_max: 2000, living_min: 11000, living_max: 14000, currency: 'EUR' },
+  { country: 'pt', name: 'Portugal', flag: '🇵🇹', tuition_min: 3000, tuition_max: 12000, living_min: 8000, living_max: 12000, currency: 'EUR' },
+  { country: 'gr', name: 'Greece', flag: '🇬🇷', tuition_min: 2000, tuition_max: 8000, living_min: 7000, living_max: 11000, currency: 'EUR' },
+  { country: 'hr', name: 'Croatia', flag: '🇭🇷', tuition_min: 2000, tuition_max: 6000, living_min: 7000, living_max: 10000, currency: 'EUR' },
+];
 
 function getDisplayCourses(popularCourses = []) {
   return popularCourses.map(c => COURSE_ID_TO_NAME[c] || c);
@@ -345,6 +368,128 @@ export default function StudentVisa() {
             >
               Browse all universities <ArrowRight className="w-4 h-4" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <DollarSign className="w-3.5 h-3.5" /> Annual Budget
+          </div>
+          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+            Estimated annual budget by country
+          </h2>
+          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+            Tuition and living costs vary by university and city. Below are typical ranges.
+          </p>
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[600px]">
+              <thead>
+                <tr className="border-b border-black/10">
+                  <th className="text-left py-3 pr-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Country</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Tuition (annual)</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Living costs (annual)</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Total (min)</th>
+                  <th className="text-left py-3 pl-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Currency</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ANNUAL_BUDGETS.map(b => {
+                  const totalMin = b.tuition_min + b.living_min;
+                  const totalMax = b.tuition_max + b.living_max;
+                  return (
+                    <tr key={b.country} className="border-b border-black/5 hover:bg-[hsl(var(--blue-50))] transition">
+                      <td className="py-3 pr-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{b.flag}</span>
+                          <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{b.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-[14px] text-[hsl(var(--blue-900))]">
+                        {b.tuition_min === 0 ? 'Free' : `${b.tuition_min?.toLocaleString()}`}
+                        {b.tuition_max > 0 && b.tuition_min > 0 ? ` – ${b.tuition_max?.toLocaleString()}` : ''}
+                      </td>
+                      <td className="py-3 px-4 text-[14px] text-[hsl(var(--blue-900))]">
+                        {b.living_min?.toLocaleString()} – {b.living_max?.toLocaleString()}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">
+                          {totalMin?.toLocaleString()} – {totalMax?.toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="py-3 pl-4 text-[13px] text-[hsl(var(--blue-900))]/60">{b.currency}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 flex items-start gap-2 text-[12px] text-[hsl(var(--blue-900))]/55">
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+            <span>Figures are indicative. Actual costs depend on university, program, and lifestyle. Use our Cost of Living Calculator for a precise estimate.</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-[hsl(var(--soft-bg))]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <BookOpen className="w-3.5 h-3.5" /> Score Requirements
+          </div>
+          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+            English proficiency & entrance exams
+          </h2>
+          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+            Most universities require one or more of these test scores. Requirements vary by program and institution.
+          </p>
+          <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {SCORE_REQUIREMENTS.map(s => {
+              const Icon = s.icon;
+              return (
+                <div key={s.id} className="rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white shadow-lg">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-[17px] text-[hsl(var(--blue-900))]">{s.label}</div>
+                      <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{s.format}</div>
+                    </div>
+                  </div>
+                  <p className="text-[13px] text-[hsl(var(--blue-900))]/65 leading-relaxed mb-4">{s.desc}</p>
+                  <div className="flex items-center gap-4 text-center">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Min</div>
+                      <div className="text-[18px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.min}</div>
+                    </div>
+                    <div className="w-px h-8 bg-black/10" />
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Avg</div>
+                      <div className="text-[18px] font-display font-extrabold text-[hsl(var(--accent))]">{s.avg}</div>
+                    </div>
+                    <div className="w-px h-8 bg-black/10" />
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Max</div>
+                      <div className="text-[18px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.max}</div>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-black/5">
+                    <Link to="/universities" className="inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline group-hover:gap-2 transition-all">
+                      Check university requirements <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-6 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200 p-5">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-[13px] text-amber-800">
+                <span className="font-bold">Pro tip:</span> Check each university&apos;s specific requirements on their website. Some programs may waive English tests if you studied in English-medium institutions. Most test scores are valid for 2 years.
+              </div>
+            </div>
           </div>
         </div>
       </section>
