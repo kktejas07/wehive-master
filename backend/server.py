@@ -141,8 +141,8 @@ async def on_startup():
             logger.info('Countries collection already has %d docs', count)
         logger.info('Indexes ensured. OTP channel = %s', os.environ.get('OTP_CHANNEL', 'mock'))
         uni_count = await db['universities_v2'].estimated_document_count()
-        if uni_count == 0:
-            logger.info('Universities collection empty — seeding …')
+        if uni_count < 100:
+            logger.info('Universities count low (%d) — (re)seeding …', uni_count)
             res = await seed_universities()
             logger.info('Seeded universities: %s', res)
         else:

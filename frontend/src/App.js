@@ -1,7 +1,7 @@
 import { useEffect, lazy, Suspense } from 'react';
 import axios from 'axios';
 import './App.css';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, API } from './context/AuthContext';
 import { FirebaseAuthProvider } from './context/FirebaseAuthContext';
@@ -33,7 +33,6 @@ const Help = lazy(() => import('./pages/Help'));
 const Contact = lazy(() => import('./pages/Contact'));
 const StudentVisa = lazy(() => import('./pages/StudentVisa'));
 const VisaInterview = lazy(() => import('./pages/VisaInterview'));
-const UniversityComparison = lazy(() => import('./pages/UniversityComparison'));
 const UniversityDetail = lazy(() => import('./pages/UniversityDetail'));
 const MapView = lazy(() => import('./pages/MapView'));
 const AgentLogin = lazy(() => import('./pages/AgentLogin'));
@@ -89,7 +88,7 @@ function AnimatedRoutes() {
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
           <Route path="/visa-interview" element={<PageTransition><VisaInterview /></PageTransition>} />
-          <Route path="/universities" element={<PageTransition><UniversityComparison /></PageTransition>} />
+          <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
           <Route path="/resources" element={<PageTransition><StudentResources /></PageTransition>} />

@@ -25,6 +25,7 @@ from audit import record as audit_record, recent as audit_recent
 from db import db, users, applications, holiday_plans, leads, otps
 from serializers import public_user, serialize_event
 from pricing import load_pricing, invalidate_pricing_cache
+from seed_universities import seed as seed_universities
 
 router = APIRouter(prefix='/admin', tags=['admin'])
 
@@ -834,3 +835,12 @@ async def export_revenue_csv(_=Depends(get_current_admin)):
             str(await _revenue_for(a, country)),
         ])
     return _csv_response(rows, 'wehive-revenue.csv')
+
+
+@router.post('/re-seed-universities')
+async def admin_re_seed_universities(admin=Depends(get_current_admin_flex)):
+    try:
+        result = await seed_universities()
+        return {'ok': True, 'result': result}
+    except Exception as e:
+        raise HTTPException(500, f'Re-seed failed: {e}')

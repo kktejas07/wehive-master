@@ -191,7 +191,7 @@ export default function StudentVisa() {
         setLoading(false);
       });
 
-    axios.get(`${API}/universities`, { params: { limit: 100 } })
+    axios.get(`${API}/universities`, { params: { limit: 500 } })
       .then(r => setUniversities(r.data || []))
       .catch(() => setUniversities([]));
   }, []);
@@ -818,11 +818,9 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
           <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { icon: Sparkles, label: 'Visa Interview Simulator', desc: 'Practice mock embassy interviews with scoring', href: '/visa-interview', color: 'bg-violet-500' },
-              { icon: Calculator, label: 'Cost of Living Calculator', desc: 'Compare tuition, rent, food, and transport costs', href: '/universities', color: 'bg-emerald-500' },
-              { icon: Target, label: 'Scholarship Matcher', desc: 'Find scholarships matching your profile', href: '/universities', color: 'bg-amber-500' },
-              { icon: MessageCircle, label: 'Alumni Mentor Network', desc: 'Connect with alumni from target universities', href: '/account?tab=mentors', color: 'bg-blue-500' },
-              { icon: Home, label: 'Student Housing', desc: 'Find accommodation near your university', href: '/account?tab=housing', color: 'bg-rose-500' },
-              { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate university-specific documents', href: '/universities', color: 'bg-purple-500' },
+              { icon: Calculator, label: 'Scholarship Matcher', desc: 'Find scholarships matching your profile', href: '/student-visa', color: 'bg-amber-500' },
+              { icon: Home, label: 'Cost of Living Calculator', desc: 'Compare tuition, rent, food, and transport costs', href: '/student-visa', color: 'bg-emerald-500' },
+              { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate university-specific application documents', href: '/student-visa', color: 'bg-purple-500' },
             ].map(tool => (
               <Link
                 key={tool.label}
