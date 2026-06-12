@@ -44,6 +44,15 @@ export function AuthProvider({ children }) {
     }
   }, [token, fetchMe]);
 
+  const loginWithPassword = useCallback(async (email, password) => {
+    const res = await axios.post(`${API}/auth/login`, { email, password });
+    const { access_token, user: u } = res.data;
+    localStorage.setItem(TOKEN_KEY, access_token);
+    setToken(access_token);
+    setUser(u);
+    return res.data;
+  }, []);
+
   const sendOtp = useCallback(async ({ identifier, channel = 'email', purpose = 'login' }) => {
     const res = await axios.post(`${API}/auth/send-otp`, { identifier, channel, purpose });
     return res.data;
@@ -81,6 +90,7 @@ export function AuthProvider({ children }) {
     token,
     loading,
     isAuthed: !!user,
+    loginWithPassword,
     sendOtp,
     verifyOtp,
     logout,

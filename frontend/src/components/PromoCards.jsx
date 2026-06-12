@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -107,15 +104,7 @@ function PromoCard({ card, index }) {
 }
 
 export default function PromoCards() {
-  const [cards, setCards] = useState(null);
-
-  useEffect(() => {
-    axios.get(`${API}/promotions?promo_type=card`)
-      .then((r) => setCards(r.data?.length ? r.data : FALLBACK_CARDS))
-      .catch(() => setCards(FALLBACK_CARDS));
-  }, []);
-
-  const display = cards || FALLBACK_CARDS;
+  const display = FALLBACK_CARDS;
 
   return (
     <section className="py-16 sm:py-20 bg-[hsl(var(--soft-bg))]">
