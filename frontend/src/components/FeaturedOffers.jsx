@@ -4,6 +4,7 @@ import axios from 'axios';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Sparkles, Sun, Briefcase, GraduationCap, Palmtree, ArrowRight, Star, Clock, CheckCircle2, ShieldCheck, Users, Timer, Zap, Percent, MapPin, Eye } from 'lucide-react';
 import { API } from '../context/AuthContext';
+import { BRAND } from '../data/mock';
 
 const CATEGORY_MAP = {
   holiday: { label: 'Holiday', icon: Palmtree, gradient: 'from-rose-500 to-pink-600', bgGradient: 'from-rose-50 to-pink-50', borderColor: 'border-rose-200', accent: 'text-rose-600', badge: 'Popular', badgeIcon: Star },
@@ -504,7 +505,7 @@ function OfferDetailPanel({ offer, onClose }) {
             <span>{offer.bookings} booked</span>
           </div>
           <a
-            href="tel:+919113256726"
+            href={`tel:${BRAND.phoneRaw}`}
             className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r ${offer.gradient} text-white text-[13px] font-bold hover:shadow-lg transition-all`}
           >
             Book Now <ArrowRight className="w-4 h-4" />
@@ -652,7 +653,7 @@ export default function FeaturedOffers() {
           className="mt-8 text-center"
         >
           <a
-            href="tel:+919113256726"
+            href={`tel:${BRAND.phoneRaw}`}
             className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--blue-700))] text-white px-6 py-3 text-[14px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors"
           >
             <Sparkles className="w-4 h-4" />

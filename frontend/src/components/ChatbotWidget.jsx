@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { API, useAuth } from '../context/AuthContext';
+import { BRAND } from '../data/mock';
 import { useI18n } from '../context/I18nContext';
 
 const KEY_SESSION = 'wehive_chat_session';
@@ -111,7 +112,7 @@ export default function ChatbotWidget() {
         {
           id: 'err-' + Date.now(),
           role: 'assistant',
-          text: 'Hmm, I could not reply. Please try again or reach our team at +91 91132 56726.',
+          text: `Hmm, I could not reply. Please try again or reach our team at ${BRAND.phone}.`,
         },
       ]);
     } finally {

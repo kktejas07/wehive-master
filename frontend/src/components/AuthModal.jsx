@@ -277,7 +277,7 @@ export default function AuthModal() {
                 <button
                   type="button"
                   disabled={cd > 0 || sending}
-                  onClick={handleSubmit(onSend)}
+                  onClick={onSend}
                   className="text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-50"
                 >
                   {cd > 0 ? `Resend in ${cd}s` : 'Resend code'}
