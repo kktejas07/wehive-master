@@ -15,7 +15,7 @@ import {
   LayoutGrid, List, Table2, BarChart3, ArrowUpDown,
   TrendingDown, Minus, ChevronRight, Crown, Target,
   Calculator, Sparkles, SlidersHorizontal, Bookmark,
-  Share2, Copy, Trash2, ExternalLink,
+  Share2, Copy, Trash2, ExternalLink, FileText,
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth, API } from '../context/AuthContext';
