@@ -1,6 +1,4 @@
 """Twilio messaging provider — used for WhatsApp notifications (non-OTP).
-
-OTP delivery now uses email_otp_service (SMTP) and whatsapp_otp_service (GetOTP.co).
 """
 
 import os
@@ -94,17 +92,12 @@ def _send_email(to: str, subject: str, body: str) -> bool:
 
 
 async def deliver_otp(identifier: str, kind: str, code: str) -> Tuple[bool, str, bool]:
-    """Legacy OTP delivery — preserved for backward compatibility.
-    Delegates to the new services (email_otp_service / whatsapp_otp_service).
-    """
-    if kind == 'email':
-        from email_otp_service import send_otp_email
-        ok = await send_otp_email(identifier, code)
-        return ok, 'email', False
-    else:
-        from whatsapp_otp_service import send_whatsapp_otp
-        ok = await send_whatsapp_otp(identifier, code)
-        return ok, 'whatsapp', False
+    """Legacy OTP delivery — preserved for backward compatibility."""
+    if kind != 'email':
+        return False, kind, False
+    from email_otp_service import send_otp_email
+    ok = await send_otp_email(identifier, code)
+    return ok, 'email', False
 
 
 async def deliver_whatsapp_message(to: str, message: str) -> dict:

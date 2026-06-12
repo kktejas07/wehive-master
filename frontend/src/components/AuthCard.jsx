@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare } from 'lucide-react';
+import { Mail, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -96,7 +96,6 @@ export default function AuthCard({ mode, referralCode }) {
   const [identifier, setIdentifier] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [otpChannel, setOtpChannel] = useState('email');
   const [step, setStep] = useState('input');
   const [otp, setOtp] = useState('');
   const [sending, setSending] = useState(false);
@@ -177,12 +176,12 @@ export default function AuthCard({ mode, referralCode }) {
 
   const onSendOtp = async () => {
     if (!identifier.trim()) {
-      toast({ title: `Enter your ${otpChannel === 'email' ? 'email' : 'mobile number'}` });
+      toast({ title: 'Enter your email' });
       return;
     }
     setSending(true);
     try {
-      const data = await sendOtp({ identifier, channel: otpChannel, purpose: isSignup ? 'signup' : 'login' });
+      const data = await sendOtp({ identifier, channel: 'email', purpose: isSignup ? 'signup' : 'login' });
       setOtpInfo(data);
       setStep('otp');
       setCountdown(60);
@@ -205,7 +204,7 @@ export default function AuthCard({ mode, referralCode }) {
       await verifyOtp({
         identifier,
         code: otp,
-        channel: otpChannel,
+        channel: 'email',
         name: isSignup ? name : undefined,
         referral_code: referralCode,
       });
@@ -224,7 +223,7 @@ export default function AuthCard({ mode, referralCode }) {
     await onSendOtp();
   };
 
-  const placeholder = otpChannel === 'email' ? 'you@example.com' : '+91 98765 43210';
+  const placeholder = 'you@example.com';
 
   return (
     <motion.div
@@ -278,7 +277,7 @@ export default function AuthCard({ mode, referralCode }) {
             ? 'Quick one-click sign in with your Google account.'
             : tab === 'emailpwd'
               ? isSignup ? 'Create account with email and password.' : 'Sign in with your email and password.'
-              : `We'll send a code via ${otpChannel === 'email' ? 'email' : 'WhatsApp'}.`}
+              : "We'll send a code via email."}
       </motion.p>
 
       {step === 'input' ? (
@@ -345,29 +344,11 @@ export default function AuthCard({ mode, referralCode }) {
               )}
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  {otpChannel === 'email' ? 'Email address' : 'Mobile number'}
+                  Email address
                 </label>
                 <input value={identifier} onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={placeholder} inputMode={otpChannel === 'email' ? 'email' : 'tel'}
+                  placeholder={placeholder} inputMode="email"
                   className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
-              </div>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setOtpChannel('email')}
-                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
-                    otpChannel === 'email'
-                      ? 'bg-[hsl(var(--blue-700))] text-white'
-                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
-                  }`}>
-                  <Mail className="w-3.5 h-3.5 inline-block mr-1" /> Email
-                </button>
-                <button type="button" onClick={() => setOtpChannel('phone')}
-                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
-                    otpChannel === 'phone'
-                      ? 'bg-[hsl(var(--blue-700))] text-white'
-                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
-                  }`}>
-                  <Phone className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
-                </button>
               </div>
               <Button disabled={sending} onClick={onSendOtp}
                 className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
