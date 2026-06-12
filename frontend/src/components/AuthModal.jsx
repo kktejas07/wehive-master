@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { X, Mail, Phone, ArrowLeft, Loader2, Check, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from './ui/button';
@@ -162,7 +163,7 @@ export default function AuthModal() {
                 <div>
                   <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
                   <input {...register('name')} placeholder="e.g. Priya Sharma"
-                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
+                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
                   {errors.name && <p className="mt-1 text-[12px] text-red-500">{errors.name.message}</p>}
                 </div>
               )}
@@ -172,7 +173,7 @@ export default function AuthModal() {
                 </label>
                 <input {...register('identifier')} placeholder={channel === 'email' ? 'you@example.com' : '+91 98765 43210'}
                   inputMode={channel === 'email' ? 'email' : 'tel'}
-                  className={`w-full h-12 rounded-xl border ${errors.identifier ? 'border-red-500' : 'border-black/10'} focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition`} />
+                  className={`w-full h-12 rounded-xl border ${errors.identifier ? 'border-red-500' : 'border-black/10'} focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white`} />
                 {errors.identifier && <p className="mt-1 text-[12px] text-red-500">{errors.identifier.message}</p>}
               </div>
               <div className="flex gap-2">
@@ -220,7 +221,12 @@ export default function AuthModal() {
             </div>
           )}
           <div id="recaptcha-container" />
-          <p className="mt-6 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
+          <div className="mt-4 pt-3 border-t border-black/5 text-center">
+            <Link to="/admin/login" onClick={closeAuth} className="text-[12px] font-bold text-[hsl(var(--blue-700))]/60 hover:text-[hsl(var(--blue-700))] transition-colors">
+              Agent? Sign in to your dashboard →
+            </Link>
+          </div>
+          <p className="mt-4 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
             By continuing you agree to our Terms and acknowledge our Privacy Policy.
           </p>
         </div>

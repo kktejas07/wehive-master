@@ -32,7 +32,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
   if (orientation === 'horizontal') {
     return (
-      <nav className="hidden lg:flex items-center gap-0.5 overflow-x-auto scrollbar-none">
+      <nav className="hidden lg:flex items-center gap-1 overflow-x-auto overflow-y-hidden scrollbar-none mx-1.5 flex-1 min-w-0 justify-center">
         {NAV.map((item) => (
           <NavLink
             key={item.id}
@@ -40,7 +40,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
             end={item.to === '/'}
             className={({ isActive }) =>
               cn(
-                'px-2.5 xl:px-3.5 py-2 text-[13px] xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap',
+                'px-2.5 lg:px-3 py-1.5 text-[12.5px] xl:text-[13.5px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap shrink-0',
                 isActive ? activeClass : inactiveClass
               )
             }
@@ -76,7 +76,7 @@ function PhoneBlock() {
   return (
     <a
       href={`tel:${BRAND.phoneRaw}`}
-      className="hidden xl:inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--red-600))] text-white pr-4 pl-1.5 py-1.5 transition-colors group"
+      className="hidden 2xl:inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--red-600))] text-white pr-4 pl-1.5 py-1.5 transition-colors group"
     >
       <span className="h-8 w-8 rounded-full bg-white/15 group-hover:bg-white/25 inline-flex items-center justify-center">
         <Phone className="w-3.5 h-3.5" />
@@ -161,7 +161,7 @@ export default function Navbar({ variant = 'default' }) {
       )}
     >
       <div className={cn(
-        'max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between gap-3 transition-[height] duration-300',
+        '        max-w-[1440px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 transition-[height] duration-300',
         scrolled ? 'h-[68px] sm:h-[76px]' : 'h-[110px] sm:h-[130px]'
       )}>
         <Link to="/" className="flex items-center gap-2 group shrink-0 relative">
