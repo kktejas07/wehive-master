@@ -302,7 +302,7 @@ export default function AuthCard({ mode, referralCode }) {
           {tab === 'google' ? (
             <div className="space-y-4">
               <Button disabled={googleLoading} onClick={onGoogleLogin} variant="outline"
-                className="w-full h-12 rounded-full border-2 border-black/10 font-bold text-[15px] flex items-center gap-3 hover:bg-[hsl(var(--soft-bg))]">
+                className="w-full h-12 rounded-full border-2 border-black/10 font-bold text-[15px] flex items-center gap-3 hover:bg-[hsl(var(--blue-50))] hover:text-[hsl(var(--blue-700))]">
                 {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleIcon />}
                 Continue with Google
               </Button>
