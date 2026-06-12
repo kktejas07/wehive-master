@@ -114,7 +114,7 @@ async def send_otp(req: SendOtpRequest):
     delivered = await send_otp_email(identifier, otp_code, req.purpose)
 
     if not delivered:
-        raise HTTPException(status_code=502, detail=f'Failed to deliver OTP via {channel_used}')
+        raise HTTPException(status_code=400, detail=f'Failed to deliver OTP via {channel_used}. Check provider configuration.')
 
     return SendOtpResponse(
         sent=True,
