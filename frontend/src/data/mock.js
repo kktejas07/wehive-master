@@ -9,8 +9,9 @@ export const BRAND = {
   phone: '+91 90007 34326',
   phoneRaw: '+919000734326',
   email: 'info@wehive.co.in',
-  address: 'WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049',
-  usaAddress: 'Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512',
+  address: 'WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049, India',
+  ballariAddress: 'Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103, India',
+  usaAddress: 'Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512, USA',
   hours: 'Mon – Sat · 09:00 – 18:00 IST',
 };
 
