@@ -163,7 +163,7 @@ export default function AuthModal() {
                 <div>
                   <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
                   <input {...register('name')} placeholder="e.g. Priya Sharma"
-                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
+                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
                   {errors.name && <p className="mt-1 text-[12px] text-red-500">{errors.name.message}</p>}
                 </div>
               )}
@@ -173,7 +173,7 @@ export default function AuthModal() {
                 </label>
                 <input {...register('identifier')} placeholder={channel === 'email' ? 'you@example.com' : '+91 98765 43210'}
                   inputMode={channel === 'email' ? 'email' : 'tel'}
-                  className={`w-full h-12 rounded-xl border ${errors.identifier ? 'border-red-500' : 'border-black/10'} focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition`} />
+                  className={`w-full h-12 rounded-xl border ${errors.identifier ? 'border-red-500' : 'border-black/10'} focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white`} />
                 {errors.identifier && <p className="mt-1 text-[12px] text-red-500">{errors.identifier.message}</p>}
               </div>
               <div className="flex gap-2">
