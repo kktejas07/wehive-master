@@ -104,7 +104,7 @@ export default function SettingsTab() {
   const [settings, setSettings] = useState({});
   const [originals, setOriginals] = useState({});
 
-  const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications'];
+  const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications', 'getotp'];
 
   useEffect(() => {
     const fetchAll = async () => {
