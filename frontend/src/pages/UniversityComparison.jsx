@@ -900,7 +900,7 @@ export default function UniversityComparison() {
   };
 
   useEffect(() => {
-    axios.get(`${API}/universities`, { params: { limit: 500 } })
+    axios.get(`${API}/universities`, { params: { limit: 15000 } })
       .then((r) => {
         setUniversities(r.data || []);
         setLoading(false);

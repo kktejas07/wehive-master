@@ -15,7 +15,7 @@ async def list_universities(
     q: Optional[str] = Query(None),
     country: Optional[str] = Query(None),
     course: Optional[str] = Query(None),
-    limit: int = Query(50, ge=1, le=200),
+    limit: int = Query(50, ge=1, le=15000),
     skip: int = Query(0, ge=0),
 ) -> List[dict]:
     flt: dict = {}
