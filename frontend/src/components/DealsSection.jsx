@@ -172,7 +172,7 @@ function CategorySection({ category, deals }) {
         </div>
       </div>
 
-      <div className="-mx-5 sm:-mx-8 px-5 sm:px-8">
+      <div className="px-5 sm:px-8">
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
           {deals.map((deal, i) => (
             <div key={deal.id} className="snap-start">
