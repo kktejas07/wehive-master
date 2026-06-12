@@ -7,16 +7,14 @@ from models import (
     FirebaseSyncRequest, FirebasePhoneSyncRequest,
 )
 from auth_utils import (
-    classify_identifier, normalize_phone, gen_otp, otp_expiry, sign_jwt, mask,
+    classify_identifier, normalize_phone, sign_jwt, mask,
     get_current_user,
 )
-from otp_providers import deliver_otp
-from db import users, otps
+from db import db, users
 from constants import REFERRAL_REWARD_INR
-import os
 import uuid
 
-from config import ADMIN_EMAILS, MOCK_CODE, OTP_TTL_MIN, FIREBASE_PROJECT_ID, FIREBASE_CREDENTIALS
+from config import ADMIN_EMAILS, OTP_TTL_MIN, FIREBASE_PROJECT_ID, FIREBASE_CREDENTIALS
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -48,74 +46,21 @@ def _public(u: dict) -> PublicUser:
     )
 
 
-@router.post('/send-otp', response_model=SendOtpResponse)
-async def send_otp(req: SendOtpRequest):
-    kind = classify_identifier(req.identifier)
-    identifier = normalize_phone(req.identifier) if kind == 'phone' else req.identifier.lower()
-
-    code = MOCK_CODE if MOCK_CODE and os.environ.get('OTP_CHANNEL', 'mock') == 'mock' else gen_otp()
-    expires = otp_expiry()
-
-    # Replace any existing OTP for this identifier+kind
-    await otps.delete_many({'identifier': identifier, 'channel': kind})
-    await otps.insert_one({
-        '_id': str(uuid.uuid4()),
-        'identifier': identifier,
-        'channel': kind,
-        'code': code,
-        'attempts': 0,
-        'expires_at': expires,
-        'purpose': req.purpose,
-        'created_at': datetime.utcnow(),
-    })
-
-    delivered, channel_used, is_mock = deliver_otp(identifier, kind, code)
-    if not delivered:
-        raise HTTPException(status_code=502, detail='Failed to deliver OTP')
-
-    return SendOtpResponse(
-        sent=True,
-        channel=channel_used,
-        masked=mask(identifier),
-        dev_code=code if is_mock else None,
-        ttl_seconds=OTP_TTL_MIN * 60,
-    )
-
-
-@router.post('/verify-otp', response_model=AuthTokens)
-async def verify_otp(req: VerifyOtpRequest):
-    kind = classify_identifier(req.identifier)
-    identifier = normalize_phone(req.identifier) if kind == 'phone' else req.identifier.lower()
-    record = await otps.find_one({'identifier': identifier, 'channel': kind})
-    if not record:
-        raise HTTPException(status_code=400, detail='OTP not requested or expired')
-    if record['expires_at'] < datetime.utcnow():
-        await otps.delete_one({'_id': record['_id']})
-        raise HTTPException(status_code=400, detail='OTP expired')
-    if record.get('attempts', 0) >= 5:
-        raise HTTPException(status_code=429, detail='Too many attempts. Request a new code.')
-    if record['code'] != req.code.strip():
-        await otps.update_one({'_id': record['_id']}, {'$inc': {'attempts': 1}})
-        raise HTTPException(status_code=400, detail='Invalid code')
-
-    # OTP valid \u2014 consume it
-    await otps.delete_one({'_id': record['_id']})
-
-    # Find or create user
+async def _find_or_create_user(identifier: str, kind: str, name: str = '', referral_code: str = ''):
     field = 'email' if kind == 'email' else 'phone'
     user = await users.find_one({field: identifier})
     now = datetime.utcnow()
     if not user:
         user = {
             '_id': str(uuid.uuid4()),
-            'name': req.name or '',
+            'name': name or '',
             'email_verified': kind == 'email',
             'phone_verified': kind == 'phone',
             'created_at': now,
             'updated_at': now,
         }
-        if req.referral_code:
-            referrer = await db['referrals'].find_one({'code': req.referral_code.strip().upper()})
+        if referral_code:
+            referrer = await db['referrals'].find_one({'code': referral_code.strip().upper()})
             if referrer and referrer['user_id'] != user['_id']:
                 user['referred_by'] = referrer['user_id']
                 await db['referral_transactions'].update_one(
@@ -138,11 +83,66 @@ async def verify_otp(req: VerifyOtpRequest):
         await users.insert_one(user)
     else:
         update = {f'{kind}_verified': True, 'updated_at': now}
-        if req.name and not user.get('name'):
-            update['name'] = req.name
+        if name and not user.get('name'):
+            update['name'] = name
         await users.update_one({'_id': user['_id']}, {'$set': update})
         user = await users.find_one({'_id': user['_id']})
+    return user
 
+
+@router.post('/send-otp', response_model=SendOtpResponse)
+async def send_otp(req: SendOtpRequest):
+    from otp_service import generate_otp, store_otp, check_rate_limit, increment_resend
+
+    kind = req.channel or classify_identifier(req.identifier)
+    identifier = normalize_phone(req.identifier) if kind == 'phone' else req.identifier.lower()
+
+    rate_limit_error = await check_rate_limit(identifier)
+    if rate_limit_error:
+        raise HTTPException(status_code=429, detail=rate_limit_error)
+
+    otp_code = generate_otp()
+    await store_otp(identifier, kind, otp_code, purpose=req.purpose)
+    await increment_resend(identifier, kind)
+
+    delivered = False
+    channel_used = kind
+
+    if kind == 'email':
+        from email_otp_service import send_otp_email
+        delivered = await send_otp_email(identifier, otp_code, req.purpose)
+    elif kind in ('phone', 'sms', 'whatsapp'):
+        from whatsapp_otp_service import send_whatsapp_otp
+        delivered = await send_whatsapp_otp(identifier, otp_code, req.purpose)
+        channel_used = 'whatsapp'
+    else:
+        raise HTTPException(status_code=400, detail=f'Invalid channel: {kind}')
+
+    if not delivered:
+        raise HTTPException(status_code=502, detail=f'Failed to deliver OTP via {channel_used}')
+
+    return SendOtpResponse(
+        sent=True,
+        channel=channel_used,
+        masked=mask(identifier),
+        dev_code=None,
+        ttl_seconds=OTP_TTL_MIN * 60,
+    )
+
+
+@router.post('/verify-otp', response_model=AuthTokens)
+async def verify_otp(req: VerifyOtpRequest):
+    from otp_service import consume_otp
+
+    kind = req.channel or classify_identifier(req.identifier)
+    identifier = normalize_phone(req.identifier) if kind in ('phone', 'sms', 'whatsapp') else req.identifier.lower()
+    channel = 'email' if kind == 'email' else kind
+
+    result = await consume_otp(identifier, req.code.strip(), channel)
+    if not result['ok']:
+        raise HTTPException(status_code=400, detail=result['error'])
+
+    user = await _find_or_create_user(identifier, channel, req.name or '', req.referral_code or '')
     token = sign_jwt(user['_id'])
     return AuthTokens(access_token=token, user=_public(user))
 

@@ -1,30 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, Chrome } from 'lucide-react';
+import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useToast } from '../hooks/use-toast';
-import { getRecaptchaVerifier, sendPhoneOtp, verifyPhoneOtp } from '../lib/firebase';
-import axios from 'axios';
-import { API } from '../context/AuthContext';
-
-const FIREBASE_ERRORS = {
-  'auth/invalid-phone-number': 'Invalid phone number format. Use e.g. +919876543210',
-  'auth/too-many-requests': 'Too many attempts. Please wait and try again.',
-  'auth/invalid-verification-code': 'Invalid code. Please try again.',
-  'auth/code-expired': 'Code expired. Request a new one.',
-  'auth/network-request-failed': 'Network error. Check your connection.',
-  'auth/popup-closed-by-user': '',
-};
-
-function friendlyFirebaseError(error) {
-  const msg = FIREBASE_ERRORS[error.code];
-  if (msg) return msg;
-  if (error.code?.startsWith('auth/')) return error.message || 'Authentication error';
-  return error.message || 'Something went wrong';
-}
 
 function TabsInline({ value, onChange }) {
   return (
@@ -32,7 +13,7 @@ function TabsInline({ value, onChange }) {
       {[
         { id: 'google', label: 'Google', Icon: Chrome },
         { id: 'emailpwd', label: 'Email', Icon: Mail },
-        { id: 'phone', label: 'Mobile', Icon: Phone },
+        { id: 'otp', label: 'OTP', Icon: MessageSquare },
       ].map((opt) => {
         const Icon = opt.Icon;
         const active = value === opt.id;
@@ -107,7 +88,7 @@ function GoogleIcon() {
 }
 
 export default function AuthCard({ mode, referralCode }) {
-  const { isAuthed } = useAuth();
+  const { sendOtp, verifyOtp, isAuthed } = useAuth();
   const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent } = useFirebaseAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -115,15 +96,15 @@ export default function AuthCard({ mode, referralCode }) {
   const [identifier, setIdentifier] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [otpChannel, setOtpChannel] = useState('email');
   const [step, setStep] = useState('input');
   const [otp, setOtp] = useState('');
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
-  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [otpInfo, setOtpInfo] = useState(null);
   const [countdown, setCountdown] = useState(0);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailPwdLoading, setEmailPwdLoading] = useState(false);
-  const recaptchaRef = useRef(null);
   const timerRef = useRef(null);
 
   const isSignup = mode === 'signup';
@@ -133,26 +114,19 @@ export default function AuthCard({ mode, referralCode }) {
   }, [isAuthed, navigate]);
 
   useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
   useEffect(() => {
     if (countdown > 0) {
       timerRef.current = setInterval(() => {
         setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current);
-            return 0;
-          }
+          if (prev <= 1) { clearInterval(timerRef.current); return 0; }
           return prev - 1;
         });
       }, 1000);
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [countdown]);
 
   const onGoogleLogin = async () => {
@@ -187,8 +161,7 @@ export default function AuthCard({ mode, referralCode }) {
         toast({ title: 'Verification email sent', description: 'Check your email to verify your account.' });
       } else {
         await loginWithEmail(identifier, password);
-        const user = firebaseUser;
-        if (user && !user.emailVerified) {
+        if (firebaseUser && !firebaseUser.emailVerified) {
           toast({ title: 'Verify your email', description: 'Please verify your email address.' });
         } else {
           toast({ title: 'Welcome to We Hive', description: 'Signed in with email.' });
@@ -196,70 +169,50 @@ export default function AuthCard({ mode, referralCode }) {
         }
       }
     } catch (e) {
-      toast({ title: 'Auth failed', description: friendlyFirebaseError(e) });
+      toast({ title: 'Auth failed', description: e.message });
     } finally {
       setEmailPwdLoading(false);
     }
   };
 
-  const normalizePhone = (phone) => {
-    let cleaned = phone.replace(/\s+/g, '').replace(/-/g, '');
-    if (!cleaned.startsWith('+')) {
-      if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
-      cleaned = `+91${cleaned}`;
-    }
-    return cleaned;
-  };
-
-  const onSendPhoneOtp = async () => {
+  const onSendOtp = async () => {
     if (!identifier.trim()) {
-      toast({ title: 'Enter your mobile number' });
-      return;
-    }
-    const phone = normalizePhone(identifier);
-    if (!/^\+[1-9]\d{6,14}$/.test(phone)) {
-      toast({ title: 'Invalid phone number', description: 'Use international format e.g. +919876543210' });
+      toast({ title: `Enter your ${otpChannel === 'email' ? 'email' : 'mobile number'}` });
       return;
     }
     setSending(true);
     try {
-      getRecaptchaVerifier('recaptcha-container');
-      const result = await sendPhoneOtp(phone);
-      setConfirmationResult(result);
-      setIdentifier(phone);
+      const data = await sendOtp({ identifier, channel: otpChannel, purpose: isSignup ? 'signup' : 'login' });
+      setOtpInfo(data);
       setStep('otp');
-      setCountdown(30);
-      toast({ title: 'Code sent', description: `OTP sent to ${phone.replace(/.(?=.{4})/g, '*')}` });
+      setCountdown(60);
+      toast({ title: 'Code sent', description: `via ${data.channel} to ${data.masked}` });
     } catch (e) {
-      toast({ title: 'Could not send code', description: friendlyFirebaseError(e) });
+      const msg = e?.response?.data?.detail || 'Could not send code. Try again.';
+      toast({ title: 'Failed to send', description: msg });
     } finally {
       setSending(false);
     }
   };
 
-  const onVerifyPhoneOtp = async () => {
+  const onVerifyOtp = async () => {
     if (otp.length !== 6) {
       toast({ title: 'Enter the 6-digit code' });
       return;
     }
-    if (!confirmationResult) {
-      toast({ title: 'Session expired', description: 'Please request a new code.' });
-      return;
-    }
     setVerifying(true);
     try {
-      const { idToken } = await verifyPhoneOtp(confirmationResult, otp);
-      const res = await axios.post(`${API}/auth/firebase-phone-sync`, {
-        id_token: idToken,
+      await verifyOtp({
+        identifier,
+        code: otp,
+        channel: otpChannel,
         name: isSignup ? name : undefined,
         referral_code: referralCode,
       });
-      const { access_token } = res.data;
-      localStorage.setItem('wehive_token', access_token);
       toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
-      window.location.href = '/account';
+      navigate('/account', { replace: true });
     } catch (e) {
-      const msg = e.response?.data?.detail || friendlyFirebaseError(e);
+      const msg = e?.response?.data?.detail || 'Invalid code. Try again.';
       toast({ title: 'Verification failed', description: msg });
     } finally {
       setVerifying(false);
@@ -267,11 +220,11 @@ export default function AuthCard({ mode, referralCode }) {
   };
 
   const onResend = async () => {
-    if (countdown > 0) return;
-    await onSendPhoneOtp();
+    if (countdown > 0 || sending) return;
+    await onSendOtp();
   };
 
-  const placeholder = tab === 'phone' ? '+91 98765 43210' : 'you@example.com';
+  const placeholder = otpChannel === 'email' ? 'you@example.com' : '+91 98765 43210';
 
   return (
     <motion.div
@@ -320,17 +273,13 @@ export default function AuthCard({ mode, referralCode }) {
         className="mt-1.5 text-[14px] text-[hsl(var(--blue-900))]/60"
       >
         {step === 'otp'
-          ? `Code sent to ${identifier?.replace(/.(?=.{4})/g, '*')}`
+          ? `Code sent to ${otpInfo?.masked || identifier}`
           : tab === 'google'
             ? 'Quick one-click sign in with your Google account.'
             : tab === 'emailpwd'
-              ? isSignup
-                ? 'Create account with email and password.'
-                : 'Sign in with your email and password.'
-              : 'We will send a 6-digit code via SMS to your mobile.'}
+              ? isSignup ? 'Create account with email and password.' : 'Sign in with your email and password.'
+              : `We'll send a code via ${otpChannel === 'email' ? 'email' : 'WhatsApp'}.`}
       </motion.p>
-
-      <div id="recaptcha-container" ref={recaptchaRef} />
 
       {step === 'input' ? (
         <div className="mt-6 space-y-5">
@@ -340,17 +289,9 @@ export default function AuthCard({ mode, referralCode }) {
 
           {tab === 'google' ? (
             <div className="space-y-4">
-              <Button
-                disabled={googleLoading}
-                onClick={onGoogleLogin}
-                variant="outline"
-                className="w-full h-12 rounded-full border-2 border-black/10 font-bold text-[15px] flex items-center gap-3 hover:bg-[hsl(var(--soft-bg))]"
-              >
-                {googleLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <GoogleIcon />
-                )}
+              <Button disabled={googleLoading} onClick={onGoogleLogin} variant="outline"
+                className="w-full h-12 rounded-full border-2 border-black/10 font-bold text-[15px] flex items-center gap-3 hover:bg-[hsl(var(--soft-bg))]">
+                {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleIcon />}
                 Continue with Google
               </Button>
               <div className="text-center text-[13px] text-[hsl(var(--blue-900))]/60">
@@ -364,52 +305,27 @@ export default function AuthCard({ mode, referralCode }) {
             <form onSubmit={onEmailPwdSubmit} className="space-y-4">
               {isSignup && (
                 <div>
-                  <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                    Your name
-                  </label>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Priya Sharma"
-                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition"
-                  />
+                  <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
+                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma"
+                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
                 </div>
               )}
               <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  Email address
-                </label>
-                <input
-                  type="email"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition"
-                />
+                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Email address</label>
+                <input type="email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com"
+                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
               </div>
               <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min. 8 characters"
-                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition"
-                />
+                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Password</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
+                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
               </div>
-              <Button
-                type="submit"
-                disabled={emailPwdLoading}
-                className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]"
-              >
+              <Button type="submit" disabled={emailPwdLoading}
+                className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
                 {emailPwdLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isSignup ? 'Create account' : 'Sign in'}
               </Button>
               {verificationSent && (
-                <p className="text-center text-[13px] text-green-600 font-semibold">
-                  Verification email sent! Check your inbox.
-                </p>
+                <p className="text-center text-[13px] text-green-600 font-semibold">Verification email sent! Check your inbox.</p>
               )}
               <div className="text-center text-[13px] text-[hsl(var(--blue-900))]/60">
                 {isSignup ? 'Already have an account? ' : 'New to We Hive? '}
@@ -422,42 +338,44 @@ export default function AuthCard({ mode, referralCode }) {
             <>
               {isSignup && (
                 <div>
-                  <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                    Your name
-                  </label>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Priya Sharma"
-                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition"
-                  />
+                  <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
+                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma"
+                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
                 </div>
               )}
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  Mobile number
+                  {otpChannel === 'email' ? 'Email address' : 'Mobile number'}
                 </label>
-                <input
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={placeholder}
-                  inputMode="tel"
-                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition"
-                />
+                <input value={identifier} onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder={placeholder} inputMode={otpChannel === 'email' ? 'email' : 'tel'}
+                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
               </div>
-              <Button
-                disabled={sending}
-                onClick={onSendPhoneOtp}
-                className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]"
-              >
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setOtpChannel('email')}
+                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                    otpChannel === 'email'
+                      ? 'bg-[hsl(var(--blue-700))] text-white'
+                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
+                  }`}>
+                  <Mail className="w-3.5 h-3.5 inline-block mr-1" /> Email
+                </button>
+                <button type="button" onClick={() => setOtpChannel('phone')}
+                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                    otpChannel === 'phone'
+                      ? 'bg-[hsl(var(--blue-700))] text-white'
+                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
+                  }`}>
+                  <Phone className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
+                </button>
+              </div>
+              <Button disabled={sending} onClick={onSendOtp}
+                className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send code'}
               </Button>
               <div className="text-center text-[13px] text-[hsl(var(--blue-900))]/60">
                 {isSignup ? 'Already have an account? ' : 'New to We Hive? '}
-                <Link
-                  to={isSignup ? '/login' : '/signup'}
-                  className="font-bold text-[hsl(var(--blue-700))] hover:underline"
-                >
+                <Link to={isSignup ? '/login' : '/signup'} className="font-bold text-[hsl(var(--blue-700))] hover:underline">
                   {isSignup ? 'Sign in' : 'Create account'}
                 </Link>
               </div>
@@ -467,31 +385,21 @@ export default function AuthCard({ mode, referralCode }) {
       ) : (
         <div className="mt-7 space-y-5">
           <OtpDigits value={otp} onChange={setOtp} />
-          <Button
-            disabled={verifying || otp.length !== 6}
-            onClick={onVerifyPhoneOtp}
-            className="w-full h-12 rounded-full btn-primary text-white font-bold text-[15px]"
-          >
+          <Button disabled={verifying || otp.length !== 6} onClick={onVerifyOtp}
+            className="w-full h-12 rounded-full btn-primary text-white font-bold text-[15px]">
             {verifying ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <span className="inline-flex items-center gap-1">
-                <Check className="w-4 h-4" /> Verify & continue
-              </span>
+              <span className="inline-flex items-center gap-1"><Check className="w-4 h-4" /> Verify & continue</span>
             )}
           </Button>
           <div className="flex items-center justify-between text-[13px]">
-            <button
-              onClick={() => setStep('input')}
-              className="inline-flex items-center gap-1 text-[hsl(var(--blue-700))] font-bold hover:underline"
-            >
+            <button onClick={() => setStep('input')}
+              className="inline-flex items-center gap-1 text-[hsl(var(--blue-700))] font-bold hover:underline">
               <ArrowLeft className="w-3.5 h-3.5" /> Edit
             </button>
-            <button
-              disabled={sending || countdown > 0}
-              onClick={onResend}
-              className="text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-50"
-            >
+            <button disabled={sending || countdown > 0} onClick={onResend}
+              className="text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-50">
               {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
             </button>
           </div>

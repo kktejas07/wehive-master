@@ -1,13 +1,6 @@
-"""OTP delivery providers — pluggable via OTP_CHANNEL env var.
+"""Twilio messaging provider — used for WhatsApp notifications (non-OTP).
 
-Channels:
-  - mock          : prints to logs, returns code in dev_code response
-  - twilio_sms    : Twilio SMS for phone numbers
-  - twilio_whatsapp : Twilio WhatsApp for phone numbers (international friendly)
-  - email         : SMTP for email addresses
-
-If a phone identifier is supplied while the global channel is `email`, we'll
-fall back to mock (and vice versa). For `auto`, we pick by identifier type.
+OTP delivery now uses email_otp_service (SMTP) and whatsapp_otp_service (GetOTP.co).
 """
 
 import os
@@ -100,36 +93,18 @@ def _send_email(to: str, subject: str, body: str) -> bool:
         return False
 
 
-def deliver_otp(identifier: str, kind: str, code: str) -> Tuple[bool, str, bool]:
-    """Returns (delivered, channel_used, is_mock).
-
-    `kind` is 'email' or 'phone' (classified from identifier).
-    Resolves global OTP_CHANNEL into the actual transport.
+async def deliver_otp(identifier: str, kind: str, code: str) -> Tuple[bool, str, bool]:
+    """Legacy OTP delivery — preserved for backward compatibility.
+    Delegates to the new services (email_otp_service / whatsapp_otp_service).
     """
-    cfg = _env('OTP_CHANNEL', 'mock').lower()
-    body = f'Your We Hive verification code is {code}. It expires in 10 minutes.'
-
-    # Decide channel
-    if cfg == 'mock':
-        logger.info('[MOCK OTP] %s -> %s', identifier, code)
-        return True, 'mock', True
-    if cfg in ('auto', 'twilio_sms') and kind == 'phone':
-        ok = _send_twilio_sms(identifier, body)
-        if ok:
-            return True, 'sms', False
-    if cfg in ('auto', 'twilio_whatsapp') and kind == 'phone':
-        ok = _send_twilio_whatsapp(identifier, body)
-        if ok:
-            return True, 'whatsapp', False
-    if cfg in ('auto', 'email') and kind == 'email':
-        ok = _send_email(identifier, 'Your We Hive verification code', body)
-        if ok:
-            return True, 'email', False
-
-    # Fallback to mock if real provider not configured
-    logger.warning('OTP_CHANNEL=%s but real provider not ready for %s. Fallback to mock.', cfg, identifier)
-    logger.info('[MOCK OTP fallback] %s -> %s', identifier, code)
-    return True, 'mock', True
+    if kind == 'email':
+        from email_otp_service import send_otp_email
+        ok = await send_otp_email(identifier, code)
+        return ok, 'email', False
+    else:
+        from whatsapp_otp_service import send_whatsapp_otp
+        ok = await send_whatsapp_otp(identifier, code)
+        return ok, 'whatsapp', False
 
 
 async def deliver_whatsapp_message(to: str, message: str) -> dict:

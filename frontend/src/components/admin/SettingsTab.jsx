@@ -376,6 +376,45 @@ export default function SettingsTab() {
         </div>
       </Section>
 
+      {/* WhatsApp OTP (GetOTP.co) */}
+      <Section title="WhatsApp OTP (GetOTP.co)" icon={Smartphone}>
+        <SecretField
+          label="RapidAPI Key"
+          tooltip="Your RapidAPI key for the GetOTP.co API — get it from rapidapi.com/getotpco"
+          value={s('getotp').rapidapi_key || ''}
+          onChange={(v) => setField('getotp', 'rapidapi_key', v)}
+        />
+        <Field
+          label="RapidAPI Host"
+          tooltip="RapidAPI host e.g. getotp-co-send-otps-via-whatsapp-globally-for-free.p.rapidapi.com"
+          value={s('getotp').rapidapi_host || ''}
+          onChange={(v) => setField('getotp', 'rapidapi_host', v)}
+        />
+        <Field
+          label="Base URL"
+          tooltip="API base URL (optional — defaults to the RapidAPI endpoint)"
+          value={s('getotp').base_url || ''}
+          onChange={(v) => setField('getotp', 'base_url', v)}
+        />
+        <Field
+          label="Message Template"
+          tooltip="Use {otp} and {minutes} as placeholders e.g. 'Your code: {otp}. Expires in {minutes} min'"
+          value={s('getotp').message_template || ''}
+          onChange={(v) => setField('getotp', 'message_template', v)}
+        />
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            onClick={() => handleSave('getotp')}
+            disabled={saving === 'getotp' || !hasChanges('getotp')}
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white font-bold text-[13px] transition"
+          >
+            {saving === 'getotp' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            Save GetOTP
+          </button>
+          {!hasChanges('getotp') && <span className="text-[11px] text-slate-500">Saved</span>}
+        </div>
+      </Section>
+
       {/* General */}
       <Section title="General" icon={MessageSquare}>
         <Field

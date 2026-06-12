@@ -11,7 +11,7 @@ def _uuid() -> str:
 # ----- Auth ----- #
 class SendOtpRequest(BaseModel):
     identifier: str = Field(..., description='Email or E.164 phone (e.g. +9191xxxxx)')
-    channel: Literal['email', 'sms', 'whatsapp', 'auto'] = 'auto'
+    channel: Literal['email', 'sms', 'whatsapp', 'phone'] = 'email'
     purpose: Literal['login', 'signup'] = 'login'
 
     @field_validator('identifier')
@@ -24,13 +24,14 @@ class SendOtpResponse(BaseModel):
     sent: bool
     channel: str
     masked: str
-    dev_code: Optional[str] = None  # populated only in mock mode
+    dev_code: Optional[str] = None
     ttl_seconds: int
 
 
 class VerifyOtpRequest(BaseModel):
     identifier: str
     code: str
+    channel: str = 'email'
     name: Optional[str] = None
     referral_code: Optional[str] = None
 

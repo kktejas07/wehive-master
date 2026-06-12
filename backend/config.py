@@ -12,7 +12,6 @@ JWT_EXPIRES_HOURS = int(os.environ.get('JWT_EXPIRES_HOURS', '720'))
 
 RESET_TOKEN_TTL_MIN = int(os.environ.get('RESET_TOKEN_TTL_MINUTES', '30'))
 
-MOCK_CODE = os.environ.get('MOCK_OTP_CODE', '').strip()
 OTP_TTL_MIN = int(os.environ.get('OTP_TTL_MINUTES', '10'))
 
 CONSULTANT_NAME = os.environ.get('CONSULTANT_NAME', 'Kiran · Senior consultant')
