@@ -21,14 +21,40 @@ import {
 // Local image lookup by id (frontend has the curated images)
 const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
 
+const _wikiCache = {};
+
+async function fetchWikiImage(countryName) {
+  if (!countryName) return null;
+  const key = countryName.toLowerCase().trim();
+  if (_wikiCache[key] !== undefined) return _wikiCache[key];
+  try {
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(countryName)}`
+    );
+    if (!res.ok) { _wikiCache[key] = null; return null; }
+    const data = await res.json();
+    const img = data?.thumbnail?.source || data?.originalimage?.source || null;
+    _wikiCache[key] = img;
+    return img;
+  } catch {
+    _wikiCache[key] = null;
+    return null;
+  }
+}
+
 function CountryCard({ c, index = 0 }) {
   const isNoVisa = c.no_visa;
   const types = c.visa_types || [];
   const landmark = landmarkFor(c);
   const imgFromMock = IMG[c.id];
-  const cardImage = landmark || imgFromMock || c.flag_url;
-  const hasRichImage = !!(landmark || imgFromMock);
-  const hasFallbackImage = !hasRichImage;
+  const [wikiImg, setWikiImg] = useState(null);
+  const cardImage = landmark || imgFromMock || wikiImg || c.flag_url;
+
+  useEffect(() => {
+    if (!landmark && !imgFromMock && !c.flag_url) {
+      fetchWikiImage(c.name).then(setWikiImg);
+    }
+  }, [c.name, landmark, imgFromMock, c.flag_url]);
   const categories = c.categories || {};
   const firstCategory = categories.Tourist || categories[Object.keys(categories)[0]] || {};
   const validity = c.validity || firstCategory.validity || '90 DAYS';
@@ -48,24 +74,12 @@ function CountryCard({ c, index = 0 }) {
           transition={{ duration: 0.25 }}
           className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]"
         >
-          {cardImage ? (
-            <img
-              src={cardImage}
-              alt={c.name}
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] group-hover:scale-[1.06]"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
-          )}
-          {hasFallbackImage && (
-            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/60 to-[hsl(var(--blue-900))]/60" />
-          )}
-          {hasFallbackImage && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-8xl opacity-40 select-none">{c.flag}</span>
-            </div>
-          )}
+          <img
+            src={cardImage}
+            alt={c.name}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] group-hover:scale-[1.06]"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
         {/* Visa type badges - top */}
