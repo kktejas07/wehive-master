@@ -5,7 +5,8 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from pydantic import BaseModel
 from db import db
-from auth_utils import get_current_user, get_current_admin
+from auth_utils import get_current_user
+from admin_auth import get_current_admin_flex as get_current_admin
 
 router = APIRouter(prefix='/promotions', tags=['promotions'])
 
