@@ -92,3 +92,9 @@ async def get_current_user_optional(authorization: Optional[str] = Header(defaul
         return await get_current_user(authorization)
     except HTTPException:
         return None
+
+
+from admin_auth import hash_password, verify_password
+
+def create_access_token(data: dict) -> str:
+    return sign_jwt(data['sub'])

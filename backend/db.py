@@ -52,19 +52,7 @@ async def ensure_indexes():
     await db['login_attempts'].create_index('last_attempt_at', expireAfterSeconds=60 * 60)
     await ai_settings.create_index('user_id')
     await third_party_settings.create_index('_id')
-<<<<<<< Updated upstream
     await db['settings'].create_index('_id')
-=======
-    await profile_change_requests.create_index([('user_id', 1), ('created_at', -1)])
-    await profile_change_requests.create_index([('status', 1), ('created_at', -1)])
-    await universities_col.create_index([('country', 1), ('rank', 1)])
-    await universities_col.create_index([('name', 'text'), ('short_name', 'text')])
-    await promotions_col.create_index([('active', 1), ('position', 1)])
-    await promotions_col.create_index([('expires_at', 1)], sparse=True)
-    await agents_col.create_index('user_id', unique=True, sparse=True)
-    await agents_col.create_index('status')
-    await agent_students_col.create_index([('agent_id', 1), ('created_at', -1)])
-    await agent_students_col.create_index('email', sparse=True)
-    await commissions_col.create_index([('agent_id', 1), ('created_at', -1)])
-    await commissions_col.create_index([('status', 1), ('created_at', -1)])
->>>>>>> Stashed changes
+    await db['profile_change_requests'].create_index([('user_id', 1), ('created_at', -1)])
+    await db['profile_change_requests'].create_index([('status', 1), ('created_at', -1)])
+

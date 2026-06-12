@@ -11,15 +11,15 @@ import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 const NAV = [
-  { id: 'home', label: 'nav.home', to: '/' },
+  { id: 'home', label: 'Home', to: '/' },
   { id: 'visa', label: 'Visa', to: '/#countries' },
-  { id: 'student', label: 'Student Visa', to: '/student-visa' },
+  { id: 'student', label: 'Student', to: '/student-visa' },
   { id: 'universities', label: 'Universities', to: '/universities' },
   { id: 'resources', label: 'Resources', to: '/resources' },
-  { id: 'agent', label: 'Agent Portal', to: '/agent' },
-  { id: 'pricing', label: 'nav.pricing', to: '/pricing' },
-  { id: 'fly', label: 'Fly with WeHive', to: '/contact' },
-  { id: 'about', label: 'nav.about', to: '/about' },
+  { id: 'agent', label: 'Agent', to: '/agent' },
+  { id: 'pricing', label: 'Pricing', to: '/pricing' },
+  { id: 'about', label: 'About', to: '/about' },
+  { id: 'fly', label: 'Fly', to: '/contact' },
 ];
 
 function NavLinks({ orientation = 'horizontal', light = false }) {
@@ -32,7 +32,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
   if (orientation === 'horizontal') {
     return (
-      <nav className="hidden lg:flex items-center gap-1">
+      <nav className="hidden lg:flex items-center gap-0.5 overflow-x-auto scrollbar-none">
         {NAV.map((item) => (
           <NavLink
             key={item.id}
@@ -40,7 +40,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
             end={item.to === '/'}
             className={({ isActive }) =>
               cn(
-                'px-4 py-2 text-[14px] font-bold tracking-tight rounded-full transition-colors',
+                'px-2.5 xl:px-3.5 py-2 text-[13px] xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap',
                 isActive ? activeClass : inactiveClass
               )
             }
