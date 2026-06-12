@@ -5,37 +5,32 @@ from settings_service import get_all
 
 logger = logging.getLogger('wehive.whatsapp_otp')
 
-DEFAULT_MESSAGE_TEMPLATE = 'Your We Hive verification code is: {otp}. It expires in {minutes} minutes.'
-
 
 async def send_whatsapp_otp(phone: str, otp_code: str, purpose: str = 'login') -> bool:
     cfg = await get_all('getotp')
-    api_key = cfg.get('rapidapi_key') or ''
+    rapidapi_key = cfg.get('rapidapi_key') or ''
     api_host = cfg.get('rapidapi_host') or ''
+    api_key = cfg.get('api_key') or ''
     base_url = cfg.get('base_url') or 'https://getotp-co-send-otps-via-whatsapp-globally-for-free.p.rapidapi.com'
 
-    if not api_key or not api_host:
-        logger.warning('GetOTP.co not configured — cannot send WhatsApp OTP to %s', phone)
+    if not rapidapi_key or not api_host or not api_key:
+        logger.warning('GetOTP.co not fully configured — cannot send WhatsApp OTP to %s', phone)
         return False
 
-    message = cfg.get('message_template') or DEFAULT_MESSAGE_TEMPLATE
-    message = message.replace('{otp}', otp_code).replace('{minutes}', str(cfg.get('otp_expiry_minutes', 10)))
-
     headers = {
-        'x-rapidapi-key': api_key,
+        'x-rapidapi-key': rapidapi_key,
         'x-rapidapi-host': api_host,
-        'Content-Type': 'application/json',
     }
 
-    payload = {
-        'phoneNumber': phone,
-        'message': message,
+    params = {
+        'key': api_key,
         'otp': otp_code,
+        'to': phone,
     }
 
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.post(f'{base_url}/send', json=payload, headers=headers)
+            resp = await client.get(f'{base_url}/api', params=params, headers=headers)
             data = resp.json()
             if resp.status_code == 200 and data.get('success'):
                 logger.info('WhatsApp OTP sent to %s via GetOTP.co', phone)

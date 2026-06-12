@@ -390,17 +390,17 @@ export default function SettingsTab() {
           value={s('getotp').rapidapi_host || ''}
           onChange={(v) => setField('getotp', 'rapidapi_host', v)}
         />
+        <SecretField
+          label="GetOTP.co API Key"
+          tooltip="Your GetOTP.co API key (different from the RapidAPI key) — passed as &key= in the API call"
+          value={s('getotp').api_key || ''}
+          onChange={(v) => setField('getotp', 'api_key', v)}
+        />
         <Field
           label="Base URL"
           tooltip="API base URL (optional — defaults to the RapidAPI endpoint)"
           value={s('getotp').base_url || ''}
           onChange={(v) => setField('getotp', 'base_url', v)}
-        />
-        <Field
-          label="Message Template"
-          tooltip="Use {otp} and {minutes} as placeholders e.g. 'Your code: {otp}. Expires in {minutes} min'"
-          value={s('getotp').message_template || ''}
-          onChange={(v) => setField('getotp', 'message_template', v)}
         />
         <div className="flex items-center gap-3 pt-2">
           <button
