@@ -4,6 +4,7 @@ import json
 
 from models import (
     SendOtpRequest, SendOtpResponse, VerifyOtpRequest, AuthTokens, PublicUser,
+    FirebaseSyncRequest,
 )
 from auth_utils import (
     classify_identifier, normalize_phone, gen_otp, otp_expiry, sign_jwt, mask,
