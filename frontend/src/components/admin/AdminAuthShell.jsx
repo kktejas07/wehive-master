@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { BRAND } from '../../data/mock';
 
 export default function AdminAuthShell({ title, subtitle, children, footer }) {
@@ -39,19 +41,33 @@ export default function AdminAuthShell({ title, subtitle, children, footer }) {
 }
 
 export function Field({ label, testid, type = 'text', value, onChange, placeholder, autoComplete, disabled }) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === 'password';
   return (
     <label className="block">
       <span className="block text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400 mb-1.5">{label}</span>
-      <input
-        data-testid={testid}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        disabled={disabled}
-        className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] focus:bg-black/40 text-[14px] text-white placeholder:text-slate-600 outline-none transition disabled:opacity-60"
-      />
+      <div className="relative">
+        <input
+          data-testid={testid}
+          type={isPassword && show ? 'text' : type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          disabled={disabled}
+          className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] focus:bg-black/40 text-[14px] text-white placeholder:text-slate-600 outline-none transition disabled:opacity-60 pr-10"
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            tabIndex={-1}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition"
+          >
+            {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        )}
+      </div>
     </label>
   );
 }
