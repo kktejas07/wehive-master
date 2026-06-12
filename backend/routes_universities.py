@@ -5,6 +5,24 @@ from data import UNIVERSITIES
 router = APIRouter(prefix='/universities', tags=['universities'])
 
 
+def _normalize_uni(u: dict) -> dict:
+    """Return a copy with normalized keys so consumers never see leading-space typos."""
+    out = dict(u)
+    # Fix leading-space typo present in a few seed entries
+    if ' scholarships' in out:
+        out['scholarships'] = out.pop(' scholarships')
+    if ' intakes' in out:
+        out['intakes'] = out.pop(' intakes')
+    # Ensure optional fields at least exist as None / N/A so templates don't crash
+    if '就业率' not in out:
+        out['就业率'] = None
+    if 'avg_salary_usd' not in out:
+        out['avg_salary_usd'] = None
+    if '录取率' not in out:
+        out['录取率'] = None
+    return out
+
+
 @router.get('')
 async def list_universities(
     q: Optional[str] = Query(None, description='Search by university name'),
@@ -22,7 +40,7 @@ async def list_universities(
         items = [u for u in items if course.lower() in [c.lower() for c in u.get('courses', [])]]
     if limit:
         items = items[:limit]
-    return items
+    return [_normalize_uni(u) for u in items]
 
 
 @router.get('/{university_id}')
@@ -30,7 +48,7 @@ async def get_university(university_id: str):
     uni = next((u for u in UNIVERSITIES if u['id'] == university_id), None)
     if not uni:
         raise HTTPException(404, 'University not found')
-    return uni
+    return _normalize_uni(uni)
 
 
 @router.get('/countries/list')

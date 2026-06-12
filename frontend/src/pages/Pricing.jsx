@@ -108,9 +108,17 @@ export default function Pricing() {
 
   const isPremium = user?.is_premium;
 
+  const FALLBACK_PLANS = [
+    { id: 'lite', name: 'Lite', price: 399, tag: 'One visa application with expert review', highlighted: false, features: ['One visa application', 'Document review by expert', 'Email support', '7–10 day processing'] },
+    { id: 'standard', name: 'Standard', price: 799, tag: 'Most popular — priority support, on-time guarantee', highlighted: true, features: ['Everything in Lite', 'Priority chat support', 'On-time guarantee', 'Up to 4 applicants', 'Real-time tracking'] },
+    { id: 'concierge', name: 'Concierge', price: 1099, tag: 'Dedicated specialist, 24/7 phone support', highlighted: false, features: ['Everything in Standard', 'Dedicated visa specialist', 'Same-day rush eligible', 'Up to 8 applicants', '24/7 phone support'] },
+  ];
+
   useEffect(() => {
     axios.get(`${API}/payments/plans`).then((r) => {
-      setPlans(r.data.plans.map((p) => ({
+      const data = r.data?.plans || [];
+      if (data.length === 0) throw new Error('No plans');
+      setPlans(data.map((p) => ({
         id: p.id,
         name: p.name,
         price: p.amount_usd,
@@ -123,7 +131,10 @@ export default function Pricing() {
           : ['Everything in Standard', 'Dedicated visa specialist', 'Same-day rush eligible', 'Up to 8 applicants', '24/7 phone support'],
       })));
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch(() => {
+      setPlans(FALLBACK_PLANS);
+      setLoading(false);
+    });
   }, []);
 
   const isCurrentPlan = (id) => user?.is_premium;

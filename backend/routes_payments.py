@@ -168,15 +168,13 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
         raise HTTPException(503, 'Payment gateway not configured')
 
     payload = f"{req.razorpay_order_id}|{req.razorpay_payment_id}"
-    expected = hmac.sha256(RAZORPAY_KEY_SECRET.encode()).hexdigest()
-    if not hmac.compare_digest(expected, req.razorpay_signature.encode()):
-        generated = hmac.new(
-            RAZORPAY_KEY_SECRET.encode(),
-            payload.encode(),
-            hashlib.sha256
-        ).hexdigest()
-        if not hmac.compare_digest(generated, req.razorpay_signature):
-            raise HTTPException(400, 'Invalid signature')
+    generated = hmac.new(
+        RAZORPAY_KEY_SECRET.encode(),
+        payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    if not hmac.compare_digest(generated, req.razorpay_signature):
+        raise HTTPException(400, 'Invalid signature')
 
     now = datetime.utcnow()
     await payments.update_one(

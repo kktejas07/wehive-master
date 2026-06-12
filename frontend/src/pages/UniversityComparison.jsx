@@ -43,6 +43,21 @@ function getDisplayCourses(popularCourses = []) {
   return (popularCourses || []).map(c => COURSE_ID_TO_NAME[c] || c);
 }
 
+function safeEmploymentRate(uni) {
+  return uni?.就业率 || uni?.employment_rate || 'N/A';
+}
+
+function safeAvgSalary(uni) {
+  const val = uni?.avg_salary_usd;
+  if (val == null || val === '') return 'N/A';
+  return `$${Number(val).toLocaleString()}`;
+}
+
+function safeScholarships(uni) {
+  return !!(uni?.scholarships || uni?.[' scholarships']);
+}
+
+
 const STUDENT_COUNTRIES = [
   { id: 'us', name: 'United States', flag: '🇺🇸' },
   { id: 'uk', name: 'United Kingdom', flag: '🇬🇧' },
@@ -83,8 +98,8 @@ function UniversityCard({ uni, onCompare, isComparing }) {
           <Badge className="bg-gradient-to-r from-[hsl(var(--blue-100))] to-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] text-[11px] border-0 shrink-0">
             {uni.type}
           </Badge>
-          <Badge className={uni.scholarships ? 'bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-700 text-[11px] border-0 shrink-0' : 'bg-gray-100 text-gray-600 text-[11px] border-0 shrink-0'}>
-            {uni.scholarships ? 'Scholarships' : 'No scholarships'}
+          <Badge className={safeScholarships(uni) ? 'bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-700 text-[11px] border-0 shrink-0' : 'bg-gray-100 text-gray-600 text-[11px] border-0 shrink-0'}>
+            {safeScholarships(uni) ? 'Scholarships' : 'No scholarships'}
           </Badge>
         </div>
 
@@ -124,7 +139,7 @@ function UniversityCard({ uni, onCompare, isComparing }) {
             </div>
             <div className="min-w-0">
               <span className="text-[hsl(var(--blue-900))]/50 text-[11px] block">Employment</span>
-              <span className="font-bold text-[hsl(var(--blue-900))] block">{uni.就业率}</span>
+              <span className="font-bold text-[hsl(var(--blue-900))] block">{safeEmploymentRate(uni)}</span>
             </div>
           </div>
         </div>
@@ -186,7 +201,7 @@ function UniversityListItem({ uni, onCompare, isComparing }) {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
-              {uni.scholarships && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
+              {safeScholarships(uni) && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
             </div>
           </div>
 
@@ -203,11 +218,11 @@ function UniversityListItem({ uni, onCompare, isComparing }) {
             </div>
             <div className="p-3 rounded-xl bg-emerald-50">
               <div className="text-[10px] text-emerald-600/70 mb-1">Employment</div>
-              <div className="text-[14px] font-bold text-emerald-600">{uni.就业率}</div>
+              <div className="text-[14px] font-bold text-emerald-600">{safeEmploymentRate(uni)}</div>
             </div>
             <div className="p-3 rounded-xl bg-[hsl(--accent)/10]">
               <div className="text-[10px] text-[hsl(var(--accent))]/70 mb-1">Avg Salary</div>
-              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">${uni.avg_salary_usd?.toLocaleString()}</div>
+              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">{safeAvgSalary(uni)}</div>
             </div>
           </div>
 
@@ -257,8 +272,8 @@ function CompareTable({ universities }) {
     { key: 'gre_required', label: 'GRE Required', format: (v) => v ? 'Yes' : 'No', icon: Check, color: v => v ? 'emerald' : 'gray' },
     { key: 'gmat_required', label: 'GMAT Required', format: (v) => v ? 'Yes' : 'No', icon: Check, color: v => v ? 'emerald' : 'gray' },
     { key: 'scholarships', label: 'Scholarships', format: (v) => v ? 'Yes' : 'No', icon: Crown, color: v => v ? 'amber' : 'gray' },
-    { key: '就业率', label: 'Employment', format: (v) => v, icon: TrendingUp, color: 'emerald' },
-    { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => `$${v?.toLocaleString()}`, icon: TrendingUp, color: 'emerald' },
+    { key: '就业率', label: 'Employment', format: (v) => v || 'N/A', icon: TrendingUp, color: 'emerald' },
+    { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => v ? `$${Number(v).toLocaleString()}` : 'N/A', icon: TrendingUp, color: 'emerald' },
   ];
 
   return (
@@ -288,7 +303,7 @@ function CompareTable({ universities }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
-                      {uni.scholarships && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
+                      {safeScholarships(uni) && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
                     </div>
                   </div>
                 </th>
@@ -377,7 +392,7 @@ function CompareCards({ universities }) {
     if (key === 'tuition_usd') {
       return Math.min(...values);
     }
-    if (key === '就业率' || key === 'avg_salary_usd' || key === 'ielts_min') {
+    if (key === '就业率' || key === 'employment_rate' || key === 'avg_salary_usd' || key === 'ielts_min') {
       return Math.max(...values);
     }
     return null;
@@ -393,8 +408,8 @@ function CompareCards({ universities }) {
     { key: 'rank', label: 'World Rank', format: (v) => `#${v}`, higher: false },
     { key: 'tuition_usd', label: 'Tuition', format: (v) => v === 0 ? 'Free' : `$${v?.toLocaleString()}`, higher: false },
     { key: 'ielts_min', label: 'IELTS', format: (v) => `${v}`, higher: true },
-    { key: '就业率', label: 'Employment', format: (v) => v, higher: true },
-    { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => `$${v?.toLocaleString()}`, higher: true },
+    { key: '就业率', label: 'Employment', format: (v) => v || 'N/A', higher: true },
+    { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => v ? `$${Number(v).toLocaleString()}` : 'N/A', higher: true },
     { key: 'intl_students', label: 'Intl Students', format: (v) => v?.toLocaleString(), higher: true },
   ];
 
@@ -575,7 +590,7 @@ function CompareList({ universities }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
-                  {uni.scholarships && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
+                  {safeScholarships(uni) && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] border-0">Scholarship</Badge>}
                 </div>
               </div>
 
@@ -592,11 +607,11 @@ function CompareList({ universities }) {
                 </div>
                 <div className="p-3 rounded-xl bg-emerald-50">
                   <div className="text-[10px] text-emerald-600/70 mb-1">Employment</div>
-                  <div className="text-[14px] font-bold text-emerald-600">{uni.就业率}</div>
+                  <div className="text-[14px] font-bold text-emerald-600">{safeEmploymentRate(uni)}</div>
                 </div>
                 <div className="p-3 rounded-xl bg-[hsl(--accent)/10]">
                   <div className="text-[10px] text-[hsl(var(--accent))]/70 mb-1">Avg Salary</div>
-                  <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">${uni.avg_salary_usd?.toLocaleString()}</div>
+                  <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{safeAvgSalary(uni)}</div>
                 </div>
               </div>
 
@@ -688,11 +703,11 @@ export default function UniversityComparison() {
       case 'ielts':
         return (a.ielts_min || 0) - (b.ielts_min || 0);
       case 'employment':
-        const empA = parseFloat(String(a.就业率 || '0%').replace('%', ''));
-        const empB = parseFloat(String(b.就业率 || '0%').replace('%', ''));
+        const empA = parseFloat(String(safeEmploymentRate(a) || '0%').replace('%', ''));
+        const empB = parseFloat(String(safeEmploymentRate(b) || '0%').replace('%', ''));
         return empB - empA;
       case 'salary':
-        return (b.avg_salary_usd || 0) - (a.avg_salary_usd || 0);
+        return (Number(b.avg_salary_usd) || 0) - (Number(a.avg_salary_usd) || 0);
       default:
         return (a.rank || 999) - (b.rank || 999);
     }
