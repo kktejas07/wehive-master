@@ -35,6 +35,10 @@ class VerifyOtpRequest(BaseModel):
     referral_code: Optional[str] = None
 
 
+class FirebaseSyncRequest(BaseModel):
+    id_token: str
+
+
 class AuthTokens(BaseModel):
     access_token: str
     token_type: str = 'bearer'

@@ -4,6 +4,7 @@ import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, API } from './context/AuthContext';
+import { FirebaseAuthProvider } from './context/FirebaseAuthContext';
 import { I18nProvider } from './context/I18nContext';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -87,14 +88,16 @@ function App() {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <I18nProvider>
             <AuthProvider>
-              <PricingLoader />
-              <ScrollToTop />
-              <ErrorBoundary>
-                <AnimatedRoutes />
-              </ErrorBoundary>
-              <AuthModal />
-              <ChatbotWidget />
-              <Toaster />
+              <FirebaseAuthProvider>
+                <PricingLoader />
+                <ScrollToTop />
+                <ErrorBoundary>
+                  <AnimatedRoutes />
+                </ErrorBoundary>
+                <AuthModal />
+                <ChatbotWidget />
+                <Toaster />
+              </FirebaseAuthProvider>
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>
