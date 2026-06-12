@@ -47,3 +47,5 @@ async def ensure_indexes():
     await ai_settings.create_index('user_id')
     await third_party_settings.create_index('_id')
     await db['settings'].create_index('_id')
+    await db['profile_change_requests'].create_index([('user_id', 1), ('created_at', -1)])
+    await db['profile_change_requests'].create_index([('status', 1), ('created_at', -1)])
