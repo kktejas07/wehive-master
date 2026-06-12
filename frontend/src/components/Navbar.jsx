@@ -32,7 +32,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
   if (orientation === 'horizontal') {
     return (
-      <nav className="hidden lg:flex items-center gap-1 overflow-x-auto overflow-y-hidden scrollbar-none mx-1.5 flex-1 min-w-0 justify-center">
+      <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 mx-1 flex-1 min-w-0 justify-center">
         {NAV.map((item) => (
           <NavLink
             key={item.id}
@@ -40,7 +40,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
             end={item.to === '/'}
             className={({ isActive }) =>
               cn(
-                'px-2.5 lg:px-3 py-1.5 text-[12.5px] xl:text-[13.5px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap shrink-0',
+                'px-2 lg:px-2.5 xl:px-3.5 py-1.5 text-[11.5px] xl:text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap',
                 isActive ? activeClass : inactiveClass
               )
             }
