@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SuccessRibbon from '../components/SuccessRibbon';
 import { API } from '../context/AuthContext';
-import { Loader2, CheckCircle2, Clock, XCircle, AlertCircle, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Loader2, CheckCircle2, Clock, XCircle, AlertCircle, ChevronRight, ShieldCheck, Upload, Bell, Calendar, FileText, ListChecks, BellRing } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const STATUS_CONFIG = {
@@ -64,6 +64,20 @@ export default function TrackStatus() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccessRibbon, setShowSuccessRibbon] = useState(false);
+  const [notifications, setNotifications] = useState({ email: true, sms: false, push: true });
+  const [deadlines] = useState([
+    { label: 'Document submission', days: 14, critical: true },
+    { label: 'Embassy appointment', days: 30, critical: false },
+    { label: 'Expected decision', days: 60, critical: false },
+  ]);
+  const [documents, setDocuments] = useState([
+    { id: 'passport', label: 'Passport copy', uploaded: true },
+    { id: 'photo', label: 'Passport photo', uploaded: true },
+    { id: 'bank', label: 'Bank statements', uploaded: false },
+    { id: 'admit', label: 'Admission letter', uploaded: false },
+    { id: 'sop', label: 'Statement of Purpose', uploaded: false },
+    { id: 'insurance', label: 'Travel insurance', uploaded: false },
+  ]);
 
   useEffect(() => {
     axios.get(`${API}/public/track/${id}`)
@@ -189,8 +203,100 @@ export default function TrackStatus() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="mt-6 grid grid-cols-3 gap-3"
+          >
+            {deadlines.map(d => {
+              const urgent = d.days <= 7 && d.critical;
+              return (
+                <div key={d.label} className={`rounded-2xl p-4 text-center border ${urgent ? 'bg-red-50 border-red-200' : 'bg-white border-black/5'}`}>
+                  <div className={`text-[24px] font-display font-extrabold ${urgent ? 'text-red-600' : 'text-[hsl(var(--blue-900))]'}`}>
+                    {d.days}d
+                  </div>
+                  <div className="text-[11px] text-[hsl(var(--blue-900))]/55 mt-0.5">{d.label}</div>
+                  {urgent && <AlertCircle className="w-3.5 h-3.5 text-red-500 mx-auto mt-1" />}
+                </div>
+              );
+            })}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-6 rounded-3xl bg-white border border-black/5 p-6 sm:p-8 text-center"
+            className="mt-6 rounded-3xl bg-white border border-black/5 p-6 sm:p-8"
+          >
+            <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55 mb-4">
+              <ListChecks className="w-4 h-4" /> Document Checklist
+            </div>
+            <div className="space-y-2">
+              {documents.map(doc => (
+                <label key={doc.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-[hsl(var(--soft-bg))] cursor-pointer transition">
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${doc.uploaded ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-black/20'}`}>
+                    {doc.uploaded ? <CheckCircle2 className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-black/20" />}
+                  </div>
+                  <span className={`flex-1 text-[14px] ${doc.uploaded ? 'text-[hsl(var(--blue-900))] line-through opacity-50' : 'text-[hsl(var(--blue-900))]'}`}>
+                    {doc.label}
+                  </span>
+                  {!doc.uploaded && (
+                    <button
+                      onClick={() => setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, uploaded: true } : d))}
+                      className="text-[11px] px-3 py-1 rounded-full bg-[hsl(var(--blue-700))] text-white font-bold"
+                    >
+                      <Upload className="w-3 h-3 mr-1 inline" /> Upload
+                    </button>
+                  )}
+                </label>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t border-black/5 flex items-center justify-between text-[13px]">
+              <span className="text-[hsl(var(--blue-900))]/60">
+                {documents.filter(d => d.uploaded).length}/{documents.length} uploaded
+              </span>
+              <div className="w-32 h-2 rounded-full bg-[hsl(var(--soft-bg))] overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 rounded-full transition-all"
+                  style={{ width: `${(documents.filter(d => d.uploaded).length / documents.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mt-6 rounded-3xl bg-white border border-black/5 p-6 sm:p-8"
+          >
+            <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55 mb-4">
+              <Bell className="w-4 h-4" /> Notification Preferences
+            </div>
+            <div className="space-y-3">
+              {[
+                { key: 'email', label: 'Email updates', desc: 'Get notified about status changes via email' },
+                { key: 'sms', label: 'SMS alerts', desc: 'Receive text message for urgent updates' },
+                { key: 'push', label: 'Push notifications', desc: 'Browser notifications for real-time updates' },
+              ].map(n => (
+                <label key={n.key} className="flex items-center justify-between p-3 rounded-xl hover:bg-[hsl(var(--soft-bg))] cursor-pointer transition">
+                  <div>
+                    <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{n.label}</div>
+                    <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{n.desc}</div>
+                  </div>
+                  <div
+                    onClick={() => setNotifications(prev => ({ ...prev, [n.key]: !prev[n.key] }))}
+                    className={`relative w-11 h-6 rounded-full transition cursor-pointer ${notifications[n.key] ? 'bg-[hsl(var(--blue-700))]' : 'bg-black/15'}`}
+                  >
+                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition ${notifications[n.key] ? 'left-[22px]' : 'left-0.5'}`} />
+                  </div>
+                </label>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t border-black/5 flex items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/55">
+              <BellRing className="w-3.5 h-3.5" /> You&apos;ll receive deadline reminders and status updates.
+            </div>
+          </motion.div>
+
+          <motion.div
           >
             <div className="text-[14px] text-[hsl(var(--blue-900))]/60">
               Need help? Contact our consultant team

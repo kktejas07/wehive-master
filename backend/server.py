@@ -29,8 +29,14 @@ from routes_ai_marketplace import router as ai_marketplace_router  # noqa: E402
 from routes_third_party import router as third_party_router  # noqa: E402
 from routes_universities import router as universities_router  # noqa: E402
 from routes_communication import router as communication_router  # noqa: E402
+from routes_profile_requests import router as profile_requests_router  # noqa: E402
+from routes_promotions import router as promotions_router  # noqa: E402
+from routes_agents import router as agents_router  # noqa: E402
+from routes_visa_scheduling import router as visa_scheduling_router  # noqa: E402
+from routes_shortlist import router as shortlist_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
-from db import countries_v2  # noqa: E402
+from seed_universities import seed as seed_universities  # noqa: E402
+from db import countries_v2, db  # noqa: E402
 
 app = FastAPI(title='We Hive API', version='1.0.0')
 
@@ -71,6 +77,11 @@ api_router.include_router(ai_marketplace_router)
 api_router.include_router(third_party_router)
 api_router.include_router(universities_router)
 api_router.include_router(communication_router)
+api_router.include_router(profile_requests_router)
+api_router.include_router(promotions_router)
+api_router.include_router(agents_router)
+api_router.include_router(visa_scheduling_router)
+api_router.include_router(shortlist_router)
 
 app.include_router(api_router)
 
@@ -126,7 +137,18 @@ async def on_startup():
             logger.info('Seeded countries: %s', res)
         else:
             logger.info('Countries collection already has %d docs', count)
+<<<<<<< Updated upstream
         logger.info('Startup complete')
+=======
+        logger.info('Indexes ensured. OTP channel = %s', os.environ.get('OTP_CHANNEL', 'mock'))
+        uni_count = await db['universities_v2'].estimated_document_count()
+        if uni_count == 0:
+            logger.info('Universities collection empty — seeding …')
+            res = await seed_universities()
+            logger.info('Seeded universities: %s', res)
+        else:
+            logger.info('Universities collection has %d docs', uni_count)
+>>>>>>> Stashed changes
     except Exception as e:
         logger.exception('Startup failure: %s', e)
 

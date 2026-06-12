@@ -22,6 +22,12 @@ router = APIRouter(prefix='/apps', tags=['ai-docs'])
 logger = logging.getLogger('wehive.ai-docs')
 
 
+class GenerateDocRequest(BaseModel):
+    type: str
+    university_id: Optional[str] = None
+    context: Optional[dict] = None
+
+
 class CoverLetterRequest(BaseModel):
     purpose: str
     applicant_name: str
@@ -35,6 +41,43 @@ class CoverLetterRequest(BaseModel):
 
 class RiskAnalysisRequest(BaseModel):
     focus_areas: Optional[list[str]] = None
+
+
+# ---------- Generic SOP / LOR Generation ----------
+@router.post('/generate-doc')
+async def generate_doc(req: GenerateDocRequest, user=Depends(get_current_user)):
+    from data import UNIVERSITIES
+    uni = None
+    if req.university_id:
+        uni = next((u for u in UNIVERSITIES if u['id'] == req.university_id), None)
+    ctx = req.context or {}
+    
+    if req.type == 'sop':
+        prompt = f"""Write a compelling Statement of Purpose for {uni['name'] if uni else 'university'}.
+Context: {ctx.get('country', 'general')}
+Applicant background: {ctx.get('background', '')}
+Achievements: {ctx.get('achievements', '')}
+Goals: {ctx.get('goal', '')}
+Program: {ctx.get('program', '')}
+Write in a professional, compelling tone. Include:
+1. Opening hook about the applicant's motivation
+2. Academic background and preparation
+3. Why this specific university and program
+4. Career goals and how the program fits
+5. Closing statement"""
+    elif req.type == 'lor':
+        prompt = f"""Write a professional Letter of Recommendation for a student applying to {uni['name'] if uni else 'university'}.
+Relationship: {ctx.get('background', '')}
+Key strengths: {ctx.get('strength', '')}
+Achievements: {ctx.get('achievements', '')}
+Focus: {ctx.get('focus', 'academic performance and potential')}
+Write in a formal, supportive tone."""
+    else:
+        raise HTTPException(400, 'Invalid document type')
+
+    session_id = f'doc-gen-{uuid.uuid4()}'
+    raw = await _call_ai(user['_id'], prompt, session_id)
+    return {'content': raw, 'type': req.type, 'university_id': req.university_id}
 
 
 def _parse_json(text: str) -> dict | None:

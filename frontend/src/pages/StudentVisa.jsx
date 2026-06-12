@@ -10,7 +10,8 @@ import {
   GraduationCap, Clock, Briefcase, Globe2, Calendar, Award,
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
   Globe, MapPin, Visa, FileText, Shield, Zap, Search, Filter,
-  Atom, Cog, Heart, Scale, Palette, BookMarked,
+  Atom, Cog, Heart, Scale, Palette, BookMarked, MessageCircle,
+  Sparkles, Target, Calculator, Home,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -569,6 +570,42 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-[hsl(var(--soft-bg))] border-t border-black/5">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+            Study abroad tools
+          </h2>
+          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+            Everything you need for a successful study abroad journey.
+          </p>
+          <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { icon: Sparkles, label: 'Visa Interview Simulator', desc: 'Practice mock embassy interviews with scoring', href: '/visa-interview', color: 'bg-violet-500' },
+              { icon: Calculator, label: 'Cost of Living Calculator', desc: 'Compare tuition, rent, food, and transport costs', href: '/universities', color: 'bg-emerald-500' },
+              { icon: Target, label: 'Scholarship Matcher', desc: 'Find scholarships matching your profile', href: '/universities', color: 'bg-amber-500' },
+              { icon: MessageCircle, label: 'Alumni Mentor Network', desc: 'Connect with alumni from target universities', href: '/account?tab=mentors', color: 'bg-blue-500' },
+              { icon: Home, label: 'Student Housing', desc: 'Find accommodation near your university', href: '/account?tab=housing', color: 'bg-rose-500' },
+              { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate university-specific documents', href: '/universities', color: 'bg-purple-500' },
+            ].map(tool => (
+              <Link
+                key={tool.label}
+                to={tool.href}
+                className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group"
+              >
+                <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
+                  <tool.icon className="w-6 h-6" />
+                </div>
+                <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
+                <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
+                <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">
+                  Open <ChevronRight className="w-3 h-3" />
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

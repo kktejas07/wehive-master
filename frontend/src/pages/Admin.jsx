@@ -11,7 +11,14 @@ import IntegrationsTab from '../components/admin/IntegrationsTab';
 import ExportsTab from '../components/admin/ExportsTab';
 import PricingTab from '../components/admin/PricingTab';
 import EventsTab from '../components/admin/EventsTab';
+<<<<<<< Updated upstream
 import SettingsTab from '../components/admin/SettingsTab';
+=======
+import RequestsTab from '../components/admin/RequestsTab';
+import PromotionsTab from '../components/admin/PromotionsTab';
+import PromoCodesTab from '../components/admin/PromoCodesTab';
+import AgentsTab from '../components/admin/AgentsTab';
+>>>>>>> Stashed changes
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
@@ -58,6 +65,10 @@ function AdminRoutes() {
                 <Route path="countries" element={<CountriesTab />} />
                 <Route path="pricing" element={<PricingTab />} />
                 <Route path="events" element={<EventsTab />} />
+                <Route path="requests" element={<RequestsTab />} />
+                <Route path="promotions" element={<PromotionsTab />} />
+                <Route path="promocodes" element={<PromoCodesTab />} />
+                <Route path="agents" element={<AgentsTab />} />
                 <Route path="staff" element={<StaffTab />} />
                 <Route path="integrations" element={<IntegrationsTab />} />
                 <Route path="exports" element={<ExportsTab />} />

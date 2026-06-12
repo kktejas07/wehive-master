@@ -246,6 +246,15 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
           <span>{t('fee.noAppointment')}</span>
         </div>
       )}
+
+      <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 mt-3">
+        <div className="flex items-start gap-2 text-[12px] text-amber-800">
+          <Info className="w-4 h-4 shrink-0 mt-0.5" />
+          <div>
+            <span className="font-bold">Note:</span> Fees may vary based on government regulations and service charges. Please verify current rates at the time of application. The ₹20,000 application fee includes our service fees and the applicable government/embassy fee.
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

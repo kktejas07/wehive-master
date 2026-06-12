@@ -17,6 +17,7 @@ import OnTimeGuarantee from '../components/OnTimeGuarantee';
 import WorldMap from '../components/WorldMap';
 
 import LiveTickerMarquee from '../components/LiveTickerMarquee';
+import PromoCards from '../components/PromoCards';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 import { motion } from 'framer-motion';
 import { Globe, ArrowRight, Sparkles } from 'lucide-react';
@@ -190,6 +191,7 @@ export default function Home() {
       <OnTimeGuarantee />
       <StatsStrip />
       <DealsSection />
+      <PromoCards />
       <EventsBanner />
       <AIServices />
       <HowItWorks />

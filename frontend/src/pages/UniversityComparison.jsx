@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../components/ui/sheet';
 import {
   GraduationCap, Globe2, Clock, Award, Users, Star,
   Search, ChevronDown, ChevronUp, X, Check,
@@ -13,6 +14,8 @@ import {
   Atom, Cog, Briefcase, Heart, Scale, Palette, BookMarked,
   LayoutGrid, List, Table2, BarChart3, ArrowUpDown,
   TrendingDown, Minus, ChevronRight, Crown, Target,
+  Calculator, Sparkles, SlidersHorizontal, Bookmark,
+  Share2, Copy, Trash2, ExternalLink,
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth, API } from '../context/AuthContext';
@@ -71,10 +74,20 @@ const STUDENT_COUNTRIES = [
   { id: 'hr', name: 'Croatia', flag: '🇭🇷' },
 ];
 
-function UniversityCard({ uni, onCompare, isComparing }) {
+function UniversityCard({ uni, onCompare, isComparing, isSaved, onSave }) {
   return (
     <div className="relative rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 flex flex-col h-full min-h-[420px]">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <button
+        onClick={() => onSave(uni)}
+        className={cn(
+          "absolute top-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all",
+          isSaved ? "bg-emerald-500 text-white" : "bg-white/80 text-[hsl(var(--blue-900))]/40 hover:bg-emerald-50 hover:text-emerald-600"
+        )}
+        title={isSaved ? "Remove from shortlist" : "Add to shortlist"}
+      >
+        <Bookmark className={cn("w-4 h-4", isSaved && "fill-current")} />
+      </button>
 
       <div className="relative z-10 p-6 flex flex-col flex-1">
         <div className="flex items-start justify-between">
@@ -174,19 +187,29 @@ function UniversityCard({ uni, onCompare, isComparing }) {
           {isComparing ? 'Added' : 'Compare'}
         </Button>
         <Link
-          to={`/student-visa?university=${uni.id}`}
+          to={`/university/${uni.id}`}
           className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl btn-primary text-white h-10 text-[13px] font-bold shadow-lg shadow-[hsl(var(--blue-700))]/20"
         >
-          Apply <ArrowRight className="w-4 h-4" />
+          View <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </div>
   );
 }
 
-function UniversityListItem({ uni, onCompare, isComparing }) {
+function UniversityListItem({ uni, onCompare, isComparing, isSaved, onSave }) {
   return (
     <div className="relative rounded-2xl overflow-hidden bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 transition-all duration-300 min-h-[140px]">
+      <button
+        onClick={() => onSave(uni)}
+        className={cn(
+          "absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all",
+          isSaved ? "bg-emerald-500 text-white" : "bg-white/80 text-[hsl(var(--blue-900))]/40 hover:bg-emerald-50 hover:text-emerald-600"
+        )}
+        title={isSaved ? "Remove from shortlist" : "Add to shortlist"}
+      >
+        <Bookmark className={cn("w-4 h-4", isSaved && "fill-current")} />
+      </button>
       <div className="flex items-stretch h-full">
         <div className="w-24 sm:w-32 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex flex-col items-center justify-center p-4 text-white shrink-0">
           <div className="text-3xl mb-1">{uni.flag}</div>
@@ -650,6 +673,124 @@ function FilterSection({ title, children }) {
   );
 }
 
+function ScholarshipCalculator({ onClose }) {
+  const [ielts, setIelts] = useState(7.0);
+  const [gre, setGre] = useState(320);
+  const [gmat, setGmat] = useState(650);
+  const [gpa, setGpa] = useState(80);
+  const [budget, setBudget] = useState(50000);
+  const [results, setResults] = useState(null);
+
+  const calculate = () => {
+    const matched = [];
+    const UNIVERSITIES_DATA = [
+      { id: 'mit', short_name: 'MIT', country: 'US', flag: '🇺🇸', rank: 1, tuition_usd: 55790, scholarships: true, ielts_min: 7.0, gre_required: true, gmat_required: false },
+      { id: 'stanford', short_name: 'Stanford', country: 'US', flag: '🇺🇸', rank: 3, tuition_usd: 56169, scholarships: true, ielts_min: 7.0, gre_required: true, gmat_required: false },
+      { id: 'harvard', short_name: 'Harvard', country: 'US', flag: '🇺🇸', rank: 2, tuition_usd: 55807, scholarships: true, ielts_min: 7.5, gre_required: false, gmat_required: true },
+      { id: 'oxford', short_name: 'Oxford', country: 'UK', flag: '🇬🇧', rank: 2, tuition_usd: 35000, scholarships: true, ielts_min: 7.0, gre_required: false, gmat_required: false },
+      { id: 'cambridge', short_name: 'Cambridge', country: 'UK', flag: '🇬🇧', rank: 3, tuition_usd: 34000, scholarships: true, ielts_min: 7.0, gre_required: false, gmat_required: false },
+      { id: 'imperial', short_name: 'Imperial', country: 'UK', flag: '🇬🇧', rank: 10, tuition_usd: 33000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'tum', short_name: 'TUM', country: 'DE', flag: '🇩🇪', rank: 50, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'lmu', short_name: 'LMU Munich', country: 'DE', flag: '🇩🇪', rank: 45, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'polimi', short_name: 'Polimi', country: 'IT', flag: '🇮🇹', rank: 145, tuition_usd: 4000, scholarships: true, ielts_min: 6.0, gre_required: false, gmat_required: false },
+      { id: 'unibo', short_name: 'Unibo', country: 'IT', flag: '🇮🇹', rank: 120, tuition_usd: 4000, scholarships: true, ielts_min: 6.0, gre_required: false, gmat_required: false },
+      { id: 'tuwien', short_name: 'TU Vienna', country: 'AT', flag: '🇦🇹', rank: 180, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'uniwien', short_name: 'Uni Wien', country: 'AT', flag: '🇦🇹', rank: 150, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'unide', short_name: 'UW', country: 'PL', flag: '🇵🇱', rank: 260, tuition_usd: 5000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'jagiellonian', short_name: 'JU', country: 'PL', flag: '🇵🇱', rank: 240, tuition_usd: 4500, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'nova', short_name: 'NOVA', country: 'PT', flag: '🇵🇹', rank: 300, tuition_usd: 6000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: true },
+    ];
+    for (const uni of UNIVERSITIES_DATA) {
+      let score = 0;
+      let reasons = [];
+      if (uni.scholarships) { score += 30; reasons.push('Has scholarships'); }
+      if (ielts >= uni.ielts_min) { score += 25; reasons.push(`IELTS ${ielts} meets ${uni.ielts_min}+`); }
+      else { score -= 20; reasons.push(`IELTS too low (need ${uni.ielts_min})`); }
+      if (!uni.gre_required && !uni.gmat_required) { score += 15; reasons.push('No GRE/GMAT required'); }
+      else if (uni.gre_required && gre >= 320) { score += 15; reasons.push(`GRE ${gre} qualifies`); }
+      else if (uni.gmat_required && gmat >= 650) { score += 15; reasons.push(`GMAT ${gmat} qualifies`); }
+      if (uni.tuition_usd <= budget) { score += 20; reasons.push(`Within budget ($${uni.tuition_usd?.toLocaleString()})`); }
+      if (gpa >= 85) { score += 10; reasons.push('Strong academics'); }
+      matched.push({ ...uni, matchScore: score, reasons });
+    }
+    matched.sort((a, b) => b.matchScore - a.matchScore);
+    setResults(matched.slice(0, 10));
+  };
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 font-display font-extrabold text-[20px]">
+            <Calculator className="w-5 h-5 text-[hsl(var(--accent))]" /> Scholarship Eligibility Calculator
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-5 mt-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">IELTS Score</label>
+              <input type="range" min="5" max="9" step="0.5" value={ielts} onChange={(e) => setIelts(parseFloat(e.target.value))} className="w-full mt-1" />
+              <div className="text-center text-[15px] font-bold text-[hsl(var(--blue-700))]">{ielts}</div>
+            </div>
+            <div>
+              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">GRE Score (out of 340)</label>
+              <input type="range" min="260" max="340" step="1" value={gre} onChange={(e) => setGre(parseInt(e.target.value))} className="w-full mt-1" />
+              <div className="text-center text-[15px] font-bold text-[hsl(var(--blue-700))]">{gre}</div>
+            </div>
+            <div>
+              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">GMAT Score (out of 800)</label>
+              <input type="range" min="500" max="800" step="10" value={gmat} onChange={(e) => setGmat(parseInt(e.target.value))} className="w-full mt-1" />
+              <div className="text-center text-[15px] font-bold text-[hsl(var(--blue-700))]">{gmat}</div>
+            </div>
+            <div>
+              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Academic % (or GPA)</label>
+              <input type="range" min="50" max="100" step="1" value={gpa} onChange={(e) => setGpa(parseInt(e.target.value))} className="w-full mt-1" />
+              <div className="text-center text-[15px] font-bold text-[hsl(var(--blue-700))]">{gpa}%</div>
+            </div>
+          </div>
+          <div>
+            <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Budget (USD/year)</label>
+            <div className="flex items-center gap-3 mt-1">
+              <input type="range" min="0" max="60000" step="1000" value={budget} onChange={(e) => setBudget(parseInt(e.target.value))} className="flex-1" />
+              <span className="text-[15px] font-bold text-[hsl(var(--blue-700))] w-28 text-right">${budget.toLocaleString()}</span>
+            </div>
+          </div>
+          <Button onClick={calculate} className="w-full rounded-xl btn-accent text-white font-bold h-11">
+            <Sparkles className="w-4 h-4 mr-2" /> Find My Matching Universities
+          </Button>
+          {results && (
+            <div className="space-y-3">
+              <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]/60 uppercase tracking-wider">Matching Universities</div>
+              {results.map((uni) => {
+                const eligible = uni.matchScore >= 50;
+                return (
+                  <div key={uni.id} className={cn(
+                    "p-4 rounded-xl border flex items-center gap-3",
+                    eligible ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-200"
+                  )}>
+                    <span className="text-2xl">{uni.flag}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{uni.short_name}</span>
+                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">{uni.matchScore}/100</span>
+                        {eligible ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold">Eligible</span> : <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-bold">Partial</span>}
+                      </div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">{uni.reasons.slice(0, 3).join(' · ')}</div>
+                    </div>
+                    <div className="text-right text-[13px] font-bold text-[hsl(var(--blue-900))]">
+                      {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function UniversityComparison() {
   const { isAuthed, openAuth } = useAuth();
   const [universities, setUniversities] = useState([]);
@@ -663,7 +804,68 @@ export default function UniversityComparison() {
   const [gridView, setGridView] = useState('grid');
   const [sortBy, setSortBy] = useState('rank');
   const [currentPage, setCurrentPage] = useState(1);
+  const [scholarshipOnly, setScholarshipOnly] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [shortlist, setShortlist] = useState([]);
+  const [shortlistLoading, setShortlistLoading] = useState(false);
+  const [showShortlist, setShowShortlist] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
   const itemsPerPage = 20;
+
+  const loadShortlist = () => {
+    if (!isAuthed) return;
+    setShortlistLoading(true);
+    axios.get(`${API}/users/me/shortlist`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => setShortlist(r.data || []))
+      .catch(() => setShortlist([]))
+      .finally(() => setShortlistLoading(false));
+  };
+
+  useEffect(() => {
+    if (isAuthed) loadShortlist();
+    else {
+      try {
+        const local = JSON.parse(localStorage.getItem('wehive_shortlist') || '[]');
+        setShortlist(local.map(s => ({ ...s, university_id: s.id || s.university_id })));
+      } catch { setShortlist([]); }
+    }
+  }, [isAuthed]);
+
+  const toggleShortlist = async (uni) => {
+    const isSaved = shortlist.some((s) => (s.university_id || s.id) === uni.id);
+    if (isSaved) {
+      if (isAuthed) {
+        await axios.delete(`${API}/users/me/shortlist/${uni.id}`, { headers: { Authorization: `Bearer ${token}` } });
+      }
+      const updated = shortlist.filter((s) => (s.university_id || s.id) !== uni.id);
+      setShortlist(updated);
+      try { localStorage.setItem('wehive_shortlist', JSON.stringify(updated)); } catch {}
+    } else {
+      if (isAuthed) {
+        await axios.post(`${API}/users/me/shortlist/${uni.id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      }
+      const item = {
+        university_id: uni.id, university_name: uni.name, short_name: uni.short_name,
+        country: uni.country, flag: uni.flag, rank: uni.rank, tuition_usd: uni.tuition_usd,
+      };
+      const updated = [...shortlist, item];
+      setShortlist(updated);
+      try { localStorage.setItem('wehive_shortlist', JSON.stringify(updated)); } catch {}
+    }
+  };
+
+  const createShareLink = async () => {
+    if (!isAuthed) { openAuth('login'); return; }
+    if (shortlist.length < 2) return;
+    try {
+      const r = await axios.post(`${API}/users/me/shortlist/share`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setShareUrl(window.location.origin + r.data.share_url);
+    } catch {}
+  };
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+  };
 
   useEffect(() => {
     axios.get(`${API}/universities`, { params: { limit: 100 } })
@@ -685,6 +887,9 @@ export default function UniversityComparison() {
       return false;
     }
     if (selectedCourses.length > 0 && !selectedCourses.some((c) => uni.courses?.includes(c))) {
+      return false;
+    }
+    if (scholarshipOnly && !uni.scholarships) {
       return false;
     }
     return true;
@@ -731,6 +936,7 @@ export default function UniversityComparison() {
     setSearch('');
     setSelectedCountry(null);
     setSelectedCourses([]);
+    setScholarshipOnly(false);
     setCurrentPage(1);
   };
 
@@ -739,7 +945,7 @@ export default function UniversityComparison() {
     setCurrentPage(1);
   };
 
-  const hasFilters = search || selectedCountry || selectedCourses.length > 0;
+  const hasFilters = search || selectedCountry || selectedCourses.length > 0 || scholarshipOnly;
 
   return (
     <div className="bg-white">
@@ -783,9 +989,17 @@ export default function UniversityComparison() {
                 <span className="text-[hsl(var(--blue-900))]">Filters</span>
                 {hasFilters && (
                   <Badge className="ml-2 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--red-600))] text-white text-[10px] h-5 w-5 rounded-full p-0 items-center justify-center shadow-sm">
-                    {selectedCourses.length + (selectedCountry ? 1 : 0)}
+                    {selectedCourses.length + (selectedCountry ? 1 : 0) + (scholarshipOnly ? 1 : 0)}
                   </Badge>
                 )}
+              </Button>
+              <Button
+                variant="outline"
+                className="h-12 px-4 rounded-xl border-black/10 bg-white shadow-sm hover:shadow-md transition-shadow"
+                onClick={() => setShowCalculator(true)}
+              >
+                <Calculator className="w-4 h-4 mr-2 text-[hsl(var(--accent))]" />
+                <span className="text-[hsl(var(--blue-900))]">Scholarship Fit</span>
               </Button>
               {hasFilters && (
                 <Button variant="ghost" className="h-12 px-4 rounded-xl" onClick={clearFilters}>
@@ -856,6 +1070,24 @@ export default function UniversityComparison() {
                         {course.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-[14px] font-bold text-[hsl(var(--blue-900))] mb-4">Scholarship</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setScholarshipOnly(!scholarshipOnly)}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-[13px] font-bold transition-all shadow-sm flex items-center gap-2",
+                        scholarshipOnly
+                          ? "bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow-md"
+                          : "bg-white text-[hsl(var(--blue-900))]/70 hover:bg-emerald-50 border border-black/5"
+                      )}
+                    >
+                      <Crown className="w-4 h-4" />
+                      Scholarships Only {scholarshipOnly && <Check className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1077,6 +1309,39 @@ export default function UniversityComparison() {
         </div>
       </section>
 
+      <section className="py-16 bg-[hsl(var(--soft-bg))] border-y border-black/5">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="text-center mb-8">
+            <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+              More tools for your journey
+            </h2>
+            <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+              Explore additional resources to help you study abroad.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: Sparkles, label: 'Visa Interview Simulator', desc: 'Practice mock embassy interviews', href: '/visa-interview', color: 'bg-violet-500' },
+              { icon: Calculator, label: 'Scholarship Matcher', desc: 'Find matching scholarships', href: '#', color: 'bg-amber-500' },
+              { icon: Calculator, label: 'Cost of Living', desc: 'Calculate expenses per city', href: '#', color: 'bg-emerald-500' },
+              { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate application documents', href: '#', color: 'bg-purple-500' },
+            ].map(tool => (
+              <Link
+                key={tool.label}
+                to={tool.href}
+                className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group"
+              >
+                <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
+                  <tool.icon className="w-6 h-6" />
+                </div>
+                <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
+                <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 bg-[hsl(var(--blue-900))] text-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
@@ -1134,6 +1399,7 @@ export default function UniversityComparison() {
       </section>
 
       <Footer />
+      {showCalculator && <ScholarshipCalculator onClose={() => setShowCalculator(false)} />}
     </div>
   );
 }
