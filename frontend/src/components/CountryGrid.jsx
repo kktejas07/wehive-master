@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Grid2X2, Map as MapIcon, Sparkle, Loader2, Compass, Search } from 'lucide-react';
 import { COUNTRIES } from '../data/mock';
 import { API } from '../context/AuthContext';
-import { landmarkFor } from '../lib/landmarks';
+import { landmarkFor, LANDMARKS } from '../lib/landmarks';
 import DeliveryCountdown from './DeliveryCountdown';
 import Reveal from './Reveal';
 import { SkeletonGrid } from './ui/skeleton';
@@ -21,22 +21,14 @@ import {
 // Local image lookup by id (frontend has the curated images)
 const IMG = COUNTRIES.reduce((m, c) => ({ ...m, [c.id]: c.image }), {});
 
-const ISO_OVERRIDES = { uk: 'gb' };
-
-function flagCdnUrl(countryId) {
-  const code = ISO_OVERRIDES[countryId] || countryId;
-  return `https://flagcdn.com/w160/${code}.png`;
-}
-
 function CountryCard({ c, index = 0 }) {
   const isNoVisa = c.no_visa;
   const types = c.visa_types || [];
   const landmark = landmarkFor(c);
   const imgFromMock = IMG[c.id];
-  const flagUrl = flagCdnUrl(c.id);
-  const cardImage = landmark || imgFromMock || flagUrl || c.flag_url;
+  const cardImage = landmark || imgFromMock || c.flag_url;
   const hasRichImage = !!(landmark || imgFromMock);
-  const hasFallbackImage = !hasRichImage && !!flagUrl;
+  const hasFallbackImage = !hasRichImage;
   const categories = c.categories || {};
   const firstCategory = categories.Tourist || categories[Object.keys(categories)[0]] || {};
   const validity = c.validity || firstCategory.validity || '90 DAYS';
@@ -61,9 +53,7 @@ function CountryCard({ c, index = 0 }) {
               src={cardImage}
               alt={c.name}
               loading="lazy"
-              className={`absolute inset-0 h-full w-full transition-transform duration-[900ms] group-hover:scale-[1.06] ${
-                hasRichImage ? 'object-cover' : hasFallbackImage ? 'object-cover' : 'object-cover scale-150 blur-md opacity-60'
-              }`}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] group-hover:scale-[1.06]"
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
@@ -71,8 +61,10 @@ function CountryCard({ c, index = 0 }) {
           {hasFallbackImage && (
             <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/60 to-[hsl(var(--blue-900))]/60" />
           )}
-          {!hasRichImage && !hasFallbackImage && (
-            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))]/85 to-[hsl(var(--blue-900))]/85" />
+          {hasFallbackImage && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-8xl opacity-40 select-none">{c.flag}</span>
+            </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
