@@ -29,6 +29,20 @@ const COURSE_CATEGORIES = [
   { id: 'social', label: 'Social Sciences', icon: BookMarked },
 ];
 
+const COURSE_ID_TO_NAME = {
+  stem: 'STEM',
+  engineering: 'Engineering',
+  business: 'Business',
+  medicine: 'Medicine',
+  law: 'Law',
+  arts: 'Arts',
+  social: 'Social Sciences',
+};
+
+function getDisplayCourses(popularCourses = []) {
+  return (popularCourses || []).map(c => COURSE_ID_TO_NAME[c] || c);
+}
+
 const STUDENT_COUNTRIES = [
   { id: 'us', name: 'United States', flag: '🇺🇸' },
   { id: 'uk', name: 'United Kingdom', flag: '🇬🇧' },
@@ -116,7 +130,7 @@ function UniversityCard({ uni, onCompare, isComparing }) {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {uni.popular_courses?.slice(0, 3).map((course) => (
+          {getDisplayCourses(uni.popular_courses || []).slice(0, 3).map((course) => (
             <span
               key={course}
               className="text-[11px] px-3 py-1 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] shrink-0"
@@ -326,7 +340,7 @@ function CompareTable({ universities }) {
               {universities.map((uni) => (
                 <td key={uni.id} className="p-4 text-center">
                   <div className="flex flex-wrap justify-center gap-1.5">
-                    {uni.popular_courses?.slice(0, 3).map((c) => (
+                    {getDisplayCourses(uni.popular_courses || []).slice(0, 3).map((c) => (
                       <span key={c} className="text-[11px] px-3 py-1 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
                         {c}
                       </span>
@@ -433,7 +447,7 @@ function CompareCards({ universities }) {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-1.5">
-              {uni.popular_courses?.slice(0, 3).map((course) => (
+              {getDisplayCourses(uni.popular_courses || []).slice(0, 3).map((course) => (
                 <span key={course} className="text-[11px] px-3 py-1 rounded-full bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
                   {course}
                 </span>
