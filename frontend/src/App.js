@@ -14,6 +14,7 @@ import PageTransition from './components/PageTransition';
 import RouteFallback from './components/RouteFallback';
 import { Toaster } from './components/ui/toaster';
 import { setPricing } from './components/FeeBreakdown';
+import { setCurrency } from './lib/utils';
 
 // Lazy-loaded route components — each becomes its own JS chunk so the
 // landing page boots fast and other pages stream in only when visited.
@@ -50,7 +51,10 @@ const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 function PricingLoader() {
   useEffect(() => {
     const timer = setTimeout(() => {
-      axios.get(`${API}/public/pricing`).then((r) => setPricing(r.data)).catch(() => {});
+      axios.get(`${API}/public/pricing`).then((r) => {
+        setPricing(r.data);
+        if (r.data.currency) setCurrency(r.data.currency);
+      }).catch(() => {});
     }, 5000);
     return () => clearTimeout(timer);
   }, []);

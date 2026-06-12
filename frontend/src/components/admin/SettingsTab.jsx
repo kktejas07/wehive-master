@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Loader2, Save, Eye, EyeOff, Info, ChevronDown, ChevronRight,
   CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone,
@@ -76,10 +76,10 @@ function Field({ label, tooltip, value, onChange, placeholder }) {
   );
 }
 
-function Section({ title, icon: Icon, defaultOpen, children }) {
+function Section({ id: sectionId, title, icon: Icon, defaultOpen, children }) {
   const [open, setOpen] = useState(defaultOpen !== false);
   return (
-    <Panel className="mb-5">
+    <Panel id={sectionId} className="mb-5 scroll-mt-24">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center justify-between w-full text-left"
@@ -126,6 +126,17 @@ export default function SettingsTab() {
     fetchAll();
   }, []);
 
+  const [activeSection, setActiveSection] = useState('firebase');
+
+  const SECTION_META = {
+    firebase: { label: 'Firebase', icon: Globe },
+    razorpay: { label: 'Razorpay', icon: CreditCard },
+    smtp: { label: 'SMTP Email', icon: Mail },
+    twilio: { label: 'Twilio', icon: Smartphone },
+    notifications: { label: 'Notifications', icon: Bell },
+    general: { label: 'General', icon: MessageSquare },
+  };
+
   const setField = (ns, key, val) =>
     setSettings((prev) => ({ ...prev, [ns]: { ...prev[ns], [key]: val } }));
 
@@ -146,6 +157,8 @@ export default function SettingsTab() {
     }
   };
 
+  const sectionRefs = useMemo(() => ({}), []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -163,8 +176,32 @@ export default function SettingsTab() {
         subtitle="Configure all platform integrations — saved to database, applied instantly without redeployment"
       />
 
+      <div className="sticky top-0 z-10 bg-[#0b1020] pt-4 pb-2 flex gap-1 overflow-x-auto scrollbar-none border-b border-white/5 mb-4">
+        {NAMESPACES.map((ns) => {
+          const meta = SECTION_META[ns] || { label: ns, icon: Globe };
+          const Icon = meta.icon;
+          return (
+            <button
+              key={ns}
+              onClick={() => {
+                setActiveSection(ns);
+                document.getElementById(`section-${ns}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-bold transition ${
+                activeSection === ns
+                  ? 'bg-[hsl(var(--accent))] text-white'
+                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {meta.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Firebase */}
-      <Section title="Firebase Authentication" icon={Globe}>
+      <Section id="section-firebase" title="Firebase Authentication" icon={Globe}>
         <SecretField
           label="API Key"
           tooltip="Public Firebase Web API key from Project Settings → General → Web apps"
@@ -215,7 +252,7 @@ export default function SettingsTab() {
       </Section>
 
       {/* Razorpay */}
-      <Section title="Razorpay Payments" icon={CreditCard}>
+      <Section id="section-razorpay" title="Razorpay Payments" icon={CreditCard}>
         <SecretField
           label="Key ID"
           tooltip="Razorpay API Key ID (rzp_live_... or rzp_test_...)"
@@ -248,7 +285,7 @@ export default function SettingsTab() {
       </Section>
 
       {/* SMTP */}
-      <Section title="SMTP Email" icon={Mail}>
+      <Section id="section-smtp" title="SMTP Email" icon={Mail}>
         <Field
           label="SMTP Host"
           tooltip="Email server e.g. smtp.gmail.com, smtp.sendgrid.net"
@@ -299,7 +336,7 @@ export default function SettingsTab() {
       </Section>
 
       {/* Twilio */}
-      <Section title="Twilio SMS / WhatsApp" icon={Smartphone}>
+      <Section id="section-twilio" title="Twilio SMS / WhatsApp" icon={Smartphone}>
         <SecretField
           label="Account SID"
           tooltip="Twilio Account SID from twilio.com/console"
@@ -338,7 +375,7 @@ export default function SettingsTab() {
       </Section>
 
       {/* Notifications */}
-      <Section title="Notifications (Telegram / Discord / WhatsApp)" icon={Bell}>
+      <Section id="section-notifications" title="Notifications (Telegram / Discord / WhatsApp)" icon={Bell}>
         <SecretField
           label="Telegram Bot Token"
           tooltip="From BotFather — used to send admin notifications via Telegram"
@@ -379,7 +416,7 @@ export default function SettingsTab() {
 
 
       {/* General */}
-      <Section title="General" icon={MessageSquare}>
+      <Section id="section-general" title="General" icon={MessageSquare}>
         <Field
           label="Frontend URL"
           tooltip="Public site URL used in emails and redirects"

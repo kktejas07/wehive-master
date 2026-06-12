@@ -1,9 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Loader2, Save, RotateCcw, Percent, Banknote } from 'lucide-react';
+import { Loader2, Save, RotateCcw, Percent, Banknote, Globe, Search } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, inr } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
+
+const CURRENCIES = [
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham' },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+  { code: 'THB', symbol: '฿', name: 'Thai Baht' },
+  { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit' },
+  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+  { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
+];
 
 const VISA_TYPES = ['Tourist', 'Business', 'Student', 'Work', 'Transit', 'Medical'];
 
@@ -119,14 +136,14 @@ export default function PricingTab() {
         </div>
       </Panel>
 
-      <div className="grid lg:grid-cols-2 gap-4">
+      <div className="grid lg:grid-cols-3 gap-4">
         <Panel>
           <div className="text-[13px] font-bold text-white inline-flex items-center gap-2">
             <Banknote className="w-4 h-4 text-[hsl(var(--accent))]" /> Surcharge
           </div>
           <p className="mt-1 text-[12px] text-slate-400">Folded into GST taxable base.</p>
           <div className="mt-3 relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[13px]">₹</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[13px]">{draft.currency === 'INR' ? '₹' : draft.currency === 'USD' ? '$' : draft.currency === 'EUR' ? '€' : '₹'}</span>
             <input
               data-testid="pricing-surcharge"
               type="number"
@@ -155,6 +172,44 @@ export default function PricingTab() {
             />
             <div className="mt-1.5 text-[11.5px] text-slate-500">
               = {(Number(draft.gst_rate || 0) * 100).toFixed(1)}%
+            </div>
+          </div>
+        </Panel>
+
+        <Panel>
+          <div className="text-[13px] font-bold text-white inline-flex items-center gap-2">
+            <Globe className="w-4 h-4 text-[hsl(var(--accent))]" /> Currency
+          </div>
+          <p className="mt-1 text-[12px] text-slate-400">Default currency for all fee displays.</p>
+          <div className="mt-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 w-4 h-4 text-slate-500 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search currency..."
+                value={draft._currencySearch || ''}
+                onChange={(e) => setDraft({ ...draft, _currencySearch: e.target.value })}
+                className="w-full h-11 pl-9 pr-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] text-[14px] text-white outline-none"
+              />
+            </div>
+            <div className="mt-1.5 max-h-36 overflow-y-auto space-y-0.5 scrollbar-thin">
+              {CURRENCIES.filter((c) =>
+                !draft._currencySearch ||
+                c.code.toLowerCase().includes(draft._currencySearch.toLowerCase()) ||
+                c.name.toLowerCase().includes(draft._currencySearch.toLowerCase())
+              ).map((c) => (
+                <button
+                  key={c.code}
+                  onClick={() => setDraft({ ...draft, currency: c.code, _currencySearch: '' })}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-[13px] font-bold transition ${
+                    (draft.currency || 'INR') === c.code
+                      ? 'bg-[hsl(var(--accent))]/20 text-white'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  {c.code} ({c.symbol}) — {c.name}
+                </button>
+              ))}
             </div>
           </div>
         </Panel>

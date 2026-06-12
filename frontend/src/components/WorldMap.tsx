@@ -177,16 +177,15 @@ export default function WorldMap({ className = '', showConnections = true, anima
 
   return (
     <div className={`relative w-full h-full bg-gradient-to-br from-[hsl(var(--blue-900))]/5 to-[hsl(var(--blue-50))] rounded-2xl overflow-hidden ${className}`}>
-      <div
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(10,44,138,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(10,44,138,0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '30px 30px',
-        }}
-      />
+      <svg className="absolute inset-0 w-full h-full opacity-15 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+        <path fill="#0A2C8A" d="M18,22 Q20,18 24,20 Q28,18 30,22 Q32,20 34,23 Q32,28 28,30 Q26,35 22,38 Q18,36 16,32 Q14,28 16,24Z" />
+        <path fill="#0A2C8A" d="M48,26 Q52,24 56,26 Q58,24 60,26 Q62,28 60,32 Q58,34 54,34 Q50,36 48,32 Q46,30 48,26Z" />
+        <path fill="#0A2C8A" d="M56,30 Q60,28 64,30 Q68,28 72,30 Q76,28 80,30 Q84,32 86,36 Q88,40 86,44 Q84,48 80,50 Q76,52 72,50 Q68,48 64,46 Q60,44 56,42 Q54,38 54,34 Q54,32 56,30Z" />
+        <path fill="#0A2C8A" d="M48,36 Q52,34 56,36 Q58,38 56,42 Q54,44 50,44 Q46,42 46,38 Q46,36 48,36Z" />
+        <path fill="#0A2C8A" d="M82,66 Q86,64 90,66 Q92,68 90,72 Q88,76 84,76 Q80,74 80,70 Q80,68 82,66Z" />
+        <path fill="#0A2C8A" d="M24,38 Q28,36 32,38 Q36,40 38,44 Q40,48 38,52 Q36,56 32,58 Q28,60 24,58 Q20,56 18,52 Q16,48 18,44 Q20,40 24,38Z" />
+        <path fill="#0A2C8A" d="M48,36 Q52,34 54,38 Q52,42 50,44 Q48,42 48,38Z" />
+      </svg>
 
       {dots.map((dot, i) => (
         <AnimatedDot key={i} {...dot} />
