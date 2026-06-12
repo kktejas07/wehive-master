@@ -30,6 +30,7 @@ function ContactCard() {
     { id: 'p', Icon: Phone, label: BRAND.phone, href: `tel:${BRAND.phoneRaw}` },
     { id: 'e', Icon: Mail, label: BRAND.email, href: `mailto:${BRAND.email}` },
     { id: 'a', Icon: MapPin, label: BRAND.address },
+    { id: 'b', Icon: MapPin, label: BRAND.ballariAddress },
     { id: 'u', Icon: MapPin, label: BRAND.usaAddress },
   ];
   return (
