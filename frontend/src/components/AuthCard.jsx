@@ -418,7 +418,12 @@ export default function AuthCard({ mode, referralCode }) {
         </div>
       )}
       <div id="recaptcha-container" />
-      <p className="mt-6 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
+      <div className="mt-5 pt-4 border-t border-black/5 text-center">
+        <Link to="/admin/login" className="text-[12px] font-bold text-[hsl(var(--blue-700))]/60 hover:text-[hsl(var(--blue-700))] transition-colors">
+          Agent? Sign in to your dashboard →
+        </Link>
+      </div>
+      <p className="mt-4 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
         By continuing you agree to our Terms and Privacy Policy.
       </p>
     </motion.div>
