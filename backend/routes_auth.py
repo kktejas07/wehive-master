@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
 import json
+from pydantic import BaseModel, Field
 
 from models import (
     SendOtpRequest, SendOtpResponse, VerifyOtpRequest, AuthTokens, PublicUser,
@@ -10,6 +11,7 @@ from auth_utils import (
     classify_identifier, normalize_phone, sign_jwt, mask,
     get_current_user,
 )
+from admin_auth import verify_password
 from db import db, users
 from constants import REFERRAL_REWARD_INR
 import uuid
@@ -17,6 +19,23 @@ import uuid
 from config import ADMIN_EMAILS, OTP_TTL_MIN, FIREBASE_PROJECT_ID, FIREBASE_CREDENTIALS
 
 router = APIRouter(prefix='/auth', tags=['auth'])
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@router.post('/login', response_model=AuthTokens)
+async def user_login(req: LoginRequest):
+    email = req.email.lower().strip()
+    user = await users.find_one({'email': email})
+    if not user or not user.get('password_hash'):
+        raise HTTPException(401, 'Invalid email or password')
+    if not verify_password(req.password, user['password_hash']):
+        raise HTTPException(401, 'Invalid email or password')
+    token = sign_jwt(user['_id'])
+    return AuthTokens(access_token=token, user=_public(user))
 
 
 def _is_admin(u: dict) -> bool:
