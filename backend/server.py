@@ -126,7 +126,7 @@ async def on_startup():
             logger.info('Seeded countries: %s', res)
         else:
             logger.info('Countries collection already has %d docs', count)
-        logger.info('Indexes ensured. OTP channel = %s', os.environ.get('OTP_CHANNEL', 'mock'))
+        logger.info('Startup complete')
     except Exception as e:
         logger.exception('Startup failure: %s', e)
 

@@ -46,3 +46,4 @@ async def ensure_indexes():
     await db['login_attempts'].create_index('last_attempt_at', expireAfterSeconds=60 * 60)
     await ai_settings.create_index('user_id')
     await third_party_settings.create_index('_id')
+    await db['settings'].create_index('_id')

@@ -14,6 +14,7 @@ from serializers import serialize_event
 
 router = APIRouter(prefix='/public', tags=['public'])
 
+settings_col = db['settings']
 events_col = db['events']
 applications_col = db['applications']
 countries_col = db['countries_v2']
@@ -73,3 +74,27 @@ async def public_events(
     cur = events_col.find(filt).sort([('sort_order', 1), ('created_at', -1)]).limit(limit)
     items = [serialize_event(e) async for e in cur]
     return {'items': items, 'total': len(items)}
+
+
+@router.get('/firebase-config')
+async def public_firebase_config():
+    """Public Firebase web config for the frontend — stored in DB via admin settings."""
+    doc = await settings_col.find_one({'_id': 'firebase'}) or {}
+    config = doc.get('config', {})
+    if not config:
+        return {
+            'configured': False,
+            'config': {},
+        }
+    return {
+        'configured': True,
+        'config': {
+            'apiKey': config.get('apiKey', ''),
+            'authDomain': config.get('authDomain', ''),
+            'projectId': config.get('projectId', ''),
+            'storageBucket': config.get('storageBucket', ''),
+            'messagingSenderId': config.get('messagingSenderId', ''),
+            'appId': config.get('appId', ''),
+            'measurementId': config.get('measurementId', ''),
+        },
+    }

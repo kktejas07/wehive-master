@@ -4,7 +4,7 @@ import json
 
 from models import (
     SendOtpRequest, SendOtpResponse, VerifyOtpRequest, AuthTokens, PublicUser,
-    FirebaseSyncRequest,
+    FirebaseSyncRequest, FirebasePhoneSyncRequest,
 )
 from auth_utils import (
     classify_identifier, normalize_phone, gen_otp, otp_expiry, sign_jwt, mask,
@@ -206,6 +206,57 @@ async def firebase_sync(req: FirebaseSyncRequest):
         user = await users.find_one({'firebase_uid': firebase_uid})
         if not user:
             raise HTTPException(status_code=400, detail='No email associated with Firebase account')
+
+    token = sign_jwt(user['_id'])
+    return AuthTokens(access_token=token, user=_public(user))
+
+
+@router.post('/firebase-phone-sync', response_model=AuthTokens)
+async def firebase_phone_sync(req: FirebasePhoneSyncRequest):
+    from firebase_utils import verify_firebase_token
+
+    decoded = await verify_firebase_token(req.id_token)
+
+    phone = decoded.get('phone_number')
+    if not phone:
+        raise HTTPException(status_code=400, detail='No phone number in Firebase token')
+
+    now = datetime.utcnow()
+    user = await users.find_one({'phone': phone})
+
+    if not user:
+        user = {
+            '_id': str(uuid.uuid4()),
+            'name': req.name or '',
+            'phone': phone,
+            'phone_verified': True,
+            'created_at': now,
+            'updated_at': now,
+        }
+        if req.referral_code:
+            referrer = await db['referrals'].find_one({'code': req.referral_code.strip().upper()})
+            if referrer and referrer['user_id'] != user['_id']:
+                user['referred_by'] = referrer['user_id']
+                await db['referral_transactions'].update_one(
+                    {'_id': f'pending-{user["_id"]}'},
+                    {'$setOnInsert': {
+                        '_id': f'pending-{user["_id"]}',
+                        'referrer_id': referrer['user_id'],
+                        'referred_id': user['_id'],
+                        'referred_email': '',
+                        'amount_inr': REFERRAL_REWARD_INR,
+                        'status': 'pending',
+                        'created_at': now,
+                    }},
+                    upsert=True,
+                )
+        await users.insert_one(user)
+    else:
+        update = {'phone_verified': True, 'updated_at': now}
+        if req.name and not user.get('name'):
+            update['name'] = req.name
+        await users.update_one({'_id': user['_id']}, {'$set': update})
+        user = await users.find_one({'_id': user['_id']})
 
     token = sign_jwt(user['_id'])
     return AuthTokens(access_token=token, user=_public(user))

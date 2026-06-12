@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { initFirebase, sendPhoneOtp, verifyPhoneOtp } from '../lib/firebase';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 export const API = `${BACKEND_URL}/api`;
@@ -19,7 +20,12 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(!!token);
   const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
+  const [authMode, setAuthMode] = useState('login');
+  const [firebaseReady, setFirebaseReady] = useState(false);
+
+  useEffect(() => {
+    initFirebase().then(() => setFirebaseReady(true)).catch(() => setFirebaseReady(true));
+  }, []);
 
   const fetchMe = useCallback(async (t) => {
     try {
@@ -45,12 +51,19 @@ export function AuthProvider({ children }) {
   }, [token, fetchMe]);
 
   const sendOtp = useCallback(async ({ identifier, purpose = 'login' }) => {
-    const res = await axios.post(`${API}/auth/send-otp`, { identifier, purpose });
-    return res.data;
+    const confirmationResult = await sendPhoneOtp(identifier);
+    return { sent: true, confirmationResult, masked: identifier.replace(/.(?=.{4})/g, '*') };
   }, []);
 
-  const verifyOtp = useCallback(async ({ identifier, code, name, referral_code }) => {
-    const res = await axios.post(`${API}/auth/verify-otp`, { identifier, code, name, referral_code });
+  const verifyOtp = useCallback(async ({ identifier, code, name, referral_code, confirmationResult }) => {
+    const { idToken } = await verifyPhoneOtp(confirmationResult, code);
+
+    const res = await axios.post(`${API}/auth/firebase-phone-sync`, {
+      id_token: idToken,
+      name: name || '',
+      referral_code: referral_code || '',
+    });
+
     const { access_token, user: u } = res.data;
     localStorage.setItem(TOKEN_KEY, access_token);
     setToken(access_token);
@@ -79,6 +92,7 @@ export function AuthProvider({ children }) {
     token,
     loading,
     isAuthed: !!user,
+    firebaseReady,
     sendOtp,
     verifyOtp,
     logout,

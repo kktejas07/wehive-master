@@ -3,7 +3,7 @@ import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
-  LogOut, ArrowLeft, Banknote, Megaphone,
+  LogOut, ArrowLeft, Banknote, Megaphone, Settings,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 
@@ -17,6 +17,7 @@ const TABS = [
   { id: 'staff',        to: '/admin/staff',         label: 'Staff',        Icon: UserCog,         testid: 'admin-nav-staff' },
   { id: 'integrations', to: '/admin/integrations',  label: 'Integrations', Icon: Plug,            testid: 'admin-nav-integrations' },
   { id: 'exports',      to: '/admin/exports',       label: 'Exports',      Icon: Download,        testid: 'admin-nav-exports' },
+  { id: 'settings',     to: '/admin/settings',      label: 'Settings',     Icon: Settings,        testid: 'admin-nav-settings' },
 ];
 
 export default function AdminShell({ children }) {

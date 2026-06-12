@@ -696,6 +696,47 @@ async def admin_update_integrations(payload: IntegrationSettings, _=Depends(get_
     return {'ok': True, **update}
 
 
+class FirebaseSettings(BaseModel):
+    apiKey: Optional[str] = None
+    authDomain: Optional[str] = None
+    projectId: Optional[str] = None
+    storageBucket: Optional[str] = None
+    messagingSenderId: Optional[str] = None
+    appId: Optional[str] = None
+    measurementId: Optional[str] = None
+
+
+@router.get('/settings/firebase')
+async def admin_get_firebase_settings(_=Depends(get_current_admin)):
+    doc = await settings_col.find_one({'_id': 'firebase'}) or {}
+    config = doc.get('config', {})
+    return {
+        'configured': bool(config.get('apiKey')),
+        'config': {
+            'apiKey': config.get('apiKey', ''),
+            'authDomain': config.get('authDomain', ''),
+            'projectId': config.get('projectId', ''),
+            'storageBucket': config.get('storageBucket', ''),
+            'messagingSenderId': config.get('messagingSenderId', ''),
+            'appId': config.get('appId', ''),
+            'measurementId': config.get('measurementId', ''),
+        } if config else {},
+    }
+
+
+@router.put('/settings/firebase')
+async def admin_update_firebase_settings(payload: FirebaseSettings, _=Depends(get_current_admin)):
+    update = {k: v for k, v in payload.model_dump(exclude_none=True).items() if v}
+    if not update:
+        raise HTTPException(400, 'Nothing to update')
+    await settings_col.update_one(
+        {'_id': 'firebase'},
+        {'$set': {'config': update, 'updated_at': datetime.utcnow()}},
+        upsert=True,
+    )
+    return {'ok': True}
+
+
 # ---------- exports ----------
 def _csv_response(rows: List[List[str]], filename: str) -> StreamingResponse:
     buf = io.StringIO()

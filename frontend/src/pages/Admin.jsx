@@ -11,6 +11,7 @@ import IntegrationsTab from '../components/admin/IntegrationsTab';
 import ExportsTab from '../components/admin/ExportsTab';
 import PricingTab from '../components/admin/PricingTab';
 import EventsTab from '../components/admin/EventsTab';
+import SettingsTab from '../components/admin/SettingsTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
@@ -60,6 +61,7 @@ function AdminRoutes() {
                 <Route path="staff" element={<StaffTab />} />
                 <Route path="integrations" element={<IntegrationsTab />} />
                 <Route path="exports" element={<ExportsTab />} />
+                <Route path="settings" element={<SettingsTab />} />
                 <Route path="*" element={<OverviewTab />} />
               </Routes>
             </AdminShell>

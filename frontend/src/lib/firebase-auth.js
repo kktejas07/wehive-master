@@ -1,4 +1,3 @@
-import { initializeApp } from 'firebase/app';
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -9,17 +8,29 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from 'firebase/auth';
-import { auth } from './firebase';
+import { initFirebase, getFirebaseAuth, getFirebaseIdToken } from './firebase';
+
+let _auth = null;
+
+async function ensureAuth() {
+  if (!_auth) {
+    const { auth } = await initFirebase();
+    _auth = auth;
+  }
+  return _auth;
+}
 
 const googleProvider = new GoogleAuthProvider();
 
 export const firebaseAuth = {
   google: async () => {
+    const auth = await ensureAuth();
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   },
 
   emailSignup: async (email, password, name) => {
+    const auth = await ensureAuth();
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(result.user, { displayName: name });
     await sendEmailVerification(result.user);
@@ -27,6 +38,7 @@ export const firebaseAuth = {
   },
 
   emailLogin: async (email, password) => {
+    const auth = await ensureAuth();
     const result = await signInWithEmailAndPassword(auth, email, password);
     return result.user;
   },
@@ -36,18 +48,15 @@ export const firebaseAuth = {
   },
 
   logout: async () => {
+    const auth = await ensureAuth();
     await signOut(auth);
   },
 
   onAuthChange: (callback) => {
-    return onAuthStateChanged(auth, callback);
+    ensureAuth().then((auth) => {
+      onAuthStateChanged(auth, callback);
+    });
   },
 };
 
-export const getFirebaseIdToken = async () => {
-  const user = auth.currentUser;
-  if (user) {
-    return await user.getIdToken();
-  }
-  return null;
-};
+export { getFirebaseIdToken };

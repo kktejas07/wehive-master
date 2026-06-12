@@ -6,6 +6,25 @@ import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useToast } from '../hooks/use-toast';
+import { getRecaptchaVerifier, sendPhoneOtp, verifyPhoneOtp } from '../lib/firebase';
+import axios from 'axios';
+import { API } from '../context/AuthContext';
+
+const FIREBASE_ERRORS = {
+  'auth/invalid-phone-number': 'Invalid phone number format. Use e.g. +919876543210',
+  'auth/too-many-requests': 'Too many attempts. Please wait and try again.',
+  'auth/invalid-verification-code': 'Invalid code. Please try again.',
+  'auth/code-expired': 'Code expired. Request a new one.',
+  'auth/network-request-failed': 'Network error. Check your connection.',
+  'auth/popup-closed-by-user': '',
+};
+
+function friendlyFirebaseError(error) {
+  const msg = FIREBASE_ERRORS[error.code];
+  if (msg) return msg;
+  if (error.code?.startsWith('auth/')) return error.message || 'Authentication error';
+  return error.message || 'Something went wrong';
+}
 
 function TabsInline({ value, onChange }) {
   return (
@@ -49,6 +68,13 @@ function OtpDigits({ value, onChange, length = 6 }) {
   const handleKey = (idx, e) => {
     if (e.key === 'Backspace' && !value[idx] && idx > 0) refs.current[idx - 1]?.focus();
   };
+  const handlePaste = (e) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length);
+    if (pasted) {
+      e.preventDefault();
+      onChange(pasted);
+    }
+  };
   return (
     <div className="flex justify-center gap-2">
       {Array.from({ length }).map((_, i) => (
@@ -58,7 +84,9 @@ function OtpDigits({ value, onChange, length = 6 }) {
           value={value[i] || ''}
           onChange={(e) => handle(i, e.target.value)}
           onKeyDown={(e) => handleKey(i, e)}
+          onPaste={i === 0 ? handlePaste : undefined}
           inputMode="numeric"
+          autoComplete="one-time-code"
           maxLength={1}
           className="w-12 h-14 rounded-xl border-2 border-black/10 focus:border-[hsl(var(--blue-700))] outline-none text-center text-[22px] font-bold text-[hsl(var(--blue-900))] transition"
         />
@@ -79,7 +107,7 @@ function GoogleIcon() {
 }
 
 export default function AuthCard({ mode, referralCode }) {
-  const { sendOtp, verifyOtp, isAuthed } = useAuth();
+  const { isAuthed } = useAuth();
   const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent } = useFirebaseAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -91,15 +119,41 @@ export default function AuthCard({ mode, referralCode }) {
   const [otp, setOtp] = useState('');
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
-  const [otpInfo, setOtpInfo] = useState(null);
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [countdown, setCountdown] = useState(0);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailPwdLoading, setEmailPwdLoading] = useState(false);
+  const recaptchaRef = useRef(null);
+  const timerRef = useRef(null);
 
   const isSignup = mode === 'signup';
 
   useEffect(() => {
     if (isAuthed) navigate('/account', { replace: true });
   }, [isAuthed, navigate]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (countdown > 0) {
+      timerRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [countdown]);
 
   const onGoogleLogin = async () => {
     setGoogleLoading(true);
@@ -131,62 +185,93 @@ export default function AuthCard({ mode, referralCode }) {
       if (isSignup) {
         await signupWithEmail(identifier, password, name);
         toast({ title: 'Verification email sent', description: 'Check your email to verify your account.' });
-        setVerificationSent(true);
       } else {
         await loginWithEmail(identifier, password);
         const user = firebaseUser;
         if (user && !user.emailVerified) {
           toast({ title: 'Verify your email', description: 'Please verify your email address.' });
-          setVerificationSent(true);
         } else {
           toast({ title: 'Welcome to We Hive', description: 'Signed in with email.' });
           navigate('/account', { replace: true });
         }
       }
     } catch (e) {
-      toast({ title: 'Auth failed', description: e.message });
+      toast({ title: 'Auth failed', description: friendlyFirebaseError(e) });
     } finally {
       setEmailPwdLoading(false);
     }
   };
 
-  const onSend = async () => {
+  const normalizePhone = (phone) => {
+    let cleaned = phone.replace(/\s+/g, '').replace(/-/g, '');
+    if (!cleaned.startsWith('+')) {
+      if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
+      cleaned = `+91${cleaned}`;
+    }
+    return cleaned;
+  };
+
+  const onSendPhoneOtp = async () => {
     if (!identifier.trim()) {
-      toast({ title: 'Enter your ' + (tab === 'phone' ? 'mobile number' : 'email') });
+      toast({ title: 'Enter your mobile number' });
+      return;
+    }
+    const phone = normalizePhone(identifier);
+    if (!/^\+[1-9]\d{6,14}$/.test(phone)) {
+      toast({ title: 'Invalid phone number', description: 'Use international format e.g. +919876543210' });
       return;
     }
     setSending(true);
     try {
-      const data = await sendOtp({ identifier, purpose: isSignup ? 'signup' : 'login' });
-      setOtpInfo(data);
+      getRecaptchaVerifier('recaptcha-container');
+      const result = await sendPhoneOtp(phone);
+      setConfirmationResult(result);
+      setIdentifier(phone);
       setStep('otp');
-      if (data.dev_code) toast({ title: 'Dev OTP', description: `Mock code: ${data.dev_code}` });
-      else toast({ title: 'Code sent', description: `via ${data.channel} to ${data.masked}` });
+      setCountdown(30);
+      toast({ title: 'Code sent', description: `OTP sent to ${phone.replace(/.(?=.{4})/g, '*')}` });
     } catch (e) {
-      toast({ title: 'Could not send code', description: e?.response?.data?.detail || 'Try again' });
+      toast({ title: 'Could not send code', description: friendlyFirebaseError(e) });
     } finally {
       setSending(false);
     }
   };
 
-  const onVerify = async () => {
+  const onVerifyPhoneOtp = async () => {
     if (otp.length !== 6) {
-      toast({ title: 'Enter the 6\u2011digit code' });
+      toast({ title: 'Enter the 6-digit code' });
+      return;
+    }
+    if (!confirmationResult) {
+      toast({ title: 'Session expired', description: 'Please request a new code.' });
       return;
     }
     setVerifying(true);
     try {
-      await verifyOtp({ identifier, code: otp, name: isSignup ? name : undefined, referral_code: referralCode });
+      const { idToken } = await verifyPhoneOtp(confirmationResult, otp);
+      const res = await axios.post(`${API}/auth/firebase-phone-sync`, {
+        id_token: idToken,
+        name: isSignup ? name : undefined,
+        referral_code: referralCode,
+      });
+      const { access_token } = res.data;
+      localStorage.setItem('wehive_token', access_token);
       toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
-      navigate('/account', { replace: true });
+      window.location.href = '/account';
     } catch (e) {
-      toast({ title: 'Verification failed', description: e?.response?.data?.detail || 'Invalid code' });
+      const msg = e.response?.data?.detail || friendlyFirebaseError(e);
+      toast({ title: 'Verification failed', description: msg });
     } finally {
       setVerifying(false);
     }
   };
 
-  const placeholder = tab === 'phone' ? '+91 9XXXX XXXXX' : 'you@example.com';
+  const onResend = async () => {
+    if (countdown > 0) return;
+    await onSendPhoneOtp();
+  };
+
+  const placeholder = tab === 'phone' ? '+91 98765 43210' : 'you@example.com';
 
   return (
     <motion.div
@@ -235,15 +320,17 @@ export default function AuthCard({ mode, referralCode }) {
         className="mt-1.5 text-[14px] text-[hsl(var(--blue-900))]/60"
       >
         {step === 'otp'
-          ? `Code sent to ${otpInfo?.masked || identifier}`
+          ? `Code sent to ${identifier?.replace(/.(?=.{4})/g, '*')}`
           : tab === 'google'
             ? 'Quick one-click sign in with your Google account.'
             : tab === 'emailpwd'
               ? isSignup
                 ? 'Create account with email and password.'
                 : 'Sign in with your email and password.'
-              : `We will send a 6\u2011digit code by ${tab === 'phone' ? 'WhatsApp / SMS' : 'email'}.`}
+              : 'We will send a 6-digit code via SMS to your mobile.'}
       </motion.p>
+
+      <div id="recaptcha-container" ref={recaptchaRef} />
 
       {step === 'input' ? (
         <div className="mt-6 space-y-5">
@@ -333,32 +420,34 @@ export default function AuthCard({ mode, referralCode }) {
             </form>
           ) : (
             <>
+              {isSignup && (
+                <div>
+                  <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
+                    Your name
+                  </label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Priya Sharma"
+                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition"
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  Your name
-                </label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Priya Sharma"
-                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  {tab === 'phone' ? 'Mobile number' : 'Email address'}
+                  Mobile number
                 </label>
                 <input
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   placeholder={placeholder}
-                  inputMode={tab === 'phone' ? 'tel' : 'email'}
+                  inputMode="tel"
                   className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition"
                 />
               </div>
               <Button
                 disabled={sending}
-                onClick={onSend}
+                onClick={onSendPhoneOtp}
                 className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]"
               >
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send code'}
@@ -380,7 +469,7 @@ export default function AuthCard({ mode, referralCode }) {
           <OtpDigits value={otp} onChange={setOtp} />
           <Button
             disabled={verifying || otp.length !== 6}
-            onClick={onVerify}
+            onClick={onVerifyPhoneOtp}
             className="w-full h-12 rounded-full btn-primary text-white font-bold text-[15px]"
           >
             {verifying ? (
@@ -399,11 +488,11 @@ export default function AuthCard({ mode, referralCode }) {
               <ArrowLeft className="w-3.5 h-3.5" /> Edit
             </button>
             <button
-              disabled={sending}
-              onClick={onSend}
+              disabled={sending || countdown > 0}
+              onClick={onResend}
               className="text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-50"
             >
-              Resend code
+              {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
             </button>
           </div>
         </div>

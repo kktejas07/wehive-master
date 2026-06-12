@@ -6,6 +6,24 @@ import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { getAuthSchema } from '../lib/schemas';
+import { getRecaptchaVerifier, sendPhoneOtp, verifyPhoneOtp } from '../lib/firebase';
+import axios from 'axios';
+import { API } from '../context/AuthContext';
+
+const FIREBASE_ERRORS = {
+  'auth/invalid-phone-number': 'Invalid phone number format. Use e.g. +919876543210',
+  'auth/too-many-requests': 'Too many attempts. Please wait and try again.',
+  'auth/invalid-verification-code': 'Invalid code. Please try again.',
+  'auth/code-expired': 'Code expired. Request a new one.',
+  'auth/network-request-failed': 'Network error. Check your connection.',
+};
+
+function friendlyFirebaseError(error) {
+  const msg = FIREBASE_ERRORS[error.code];
+  if (msg) return msg;
+  if (error.code?.startsWith('auth/')) return error.message || 'Authentication error';
+  return error.message || 'Something went wrong';
+}
 
 function useCountdown(seconds, restartKey) {
   const [t, setT] = useState(seconds);
@@ -63,6 +81,13 @@ function OtpDigits({ value, onChange, length = 6 }) {
       refs.current[idx - 1]?.focus();
     }
   };
+  const handlePaste = (e) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length);
+    if (pasted) {
+      e.preventDefault();
+      onChange(pasted);
+    }
+  };
   return (
     <div className="flex justify-center gap-2">
       {Array.from({ length }).map((_, i) => (
@@ -72,7 +97,9 @@ function OtpDigits({ value, onChange, length = 6 }) {
           value={value[i] || ''}
           onChange={(e) => handle(i, e.target.value)}
           onKeyDown={(e) => handleKey(i, e)}
+          onPaste={i === 0 ? handlePaste : undefined}
           inputMode="numeric"
+          autoComplete="one-time-code"
           maxLength={1}
           className="w-12 h-14 sm:w-12 sm:h-14 rounded-xl border-2 border-black/10 focus:border-[hsl(var(--blue-700))] outline-none text-center text-[22px] font-bold text-[hsl(var(--blue-900))] transition"
         />
@@ -82,14 +109,14 @@ function OtpDigits({ value, onChange, length = 6 }) {
 }
 
 export default function AuthModal() {
-  const { authOpen, authMode, closeAuth, sendOtp, verifyOtp, setAuthMode } = useAuth();
+  const { authOpen, authMode, closeAuth, setAuthMode } = useAuth();
   const { toast } = useToast();
   const [tab, setTab] = useState('phone');
   const [step, setStep] = useState('input');
   const [otp, setOtp] = useState('');
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
-  const [otpInfo, setOtpInfo] = useState(null);
+  const [confirmationResult, setConfirmationResult] = useState(null);
   const [resendKey, setResendKey] = useState(0);
   const cd = useCountdown(30, resendKey);
 
@@ -112,56 +139,79 @@ export default function AuthModal() {
       setStep('input');
       setOtp('');
       setTab('phone');
-      setOtpInfo(null);
+      setConfirmationResult(null);
       form.reset({ name: '', identifier: '' });
     }
   }, [authOpen, authMode]);
 
   if (!authOpen) return null;
 
-  const placeholder = tab === 'phone' ? '+91 9XXXX XXXXX' : 'you@example.com';
+  const placeholder = tab === 'phone' ? '+91 98765 43210' : 'you@example.com';
 
-  const onSend = handleSubmit(async (data) => {
+  const normalizePhone = (phone) => {
+    let cleaned = phone.replace(/\s+/g, '').replace(/-/g, '');
+    if (!cleaned.startsWith('+')) {
+      if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
+      cleaned = `+91${cleaned}`;
+    }
+    return cleaned;
+  };
+
+  const onSendPhoneOtp = handleSubmit(async (data) => {
+    const phone = normalizePhone(data.identifier);
+    if (!/^\+[1-9]\d{6,14}$/.test(phone)) {
+      toast({ title: 'Invalid phone number', description: 'Use international format e.g. +919876543210' });
+      return;
+    }
     setSending(true);
     try {
-      const payload = { identifier: data.identifier, purpose: isSignup ? 'signup' : 'login' };
-      if (isSignup && data.name) payload.name = data.name;
-      const result = await sendOtp(payload);
-      setOtpInfo(result);
+      getRecaptchaVerifier('recaptcha-container');
+      const result = await sendPhoneOtp(phone);
+      setConfirmationResult(result);
       setStep('otp');
       setResendKey((k) => k + 1);
-      if (result.dev_code) {
-        toast({ title: 'Dev OTP', description: `Mock code: ${result.dev_code}` });
-      } else {
-        toast({ title: 'Code sent', description: `via ${result.channel} to ${result.masked}` });
-      }
+      toast({ title: 'Code sent', description: `OTP sent to ${phone.replace(/.(?=.{4})/g, '*')}` });
     } catch (e) {
-      toast({ title: 'Could not send code', description: e?.response?.data?.detail || 'Try again' });
+      toast({ title: 'Could not send code', description: friendlyFirebaseError(e) });
     } finally {
       setSending(false);
     }
   });
 
-  const onVerify = async () => {
+  const onVerifyPhoneOtp = async () => {
     if (otp.length !== 6) {
-      toast({ title: 'Enter the 6\u2011digit code' });
+      toast({ title: 'Enter the 6-digit code' });
+      return;
+    }
+    if (!confirmationResult) {
+      toast({ title: 'Session expired', description: 'Please request a new code.' });
       return;
     }
     setVerifying(true);
     try {
+      const { idToken } = await verifyPhoneOtp(confirmationResult, otp);
       const formData = form.getValues();
-      await verifyOtp({
-        identifier: formData.identifier,
-        code: otp,
-        name: isSignup ? formData.name : undefined
+      const res = await axios.post(`${API}/auth/firebase-phone-sync`, {
+        id_token: idToken,
+        name: isSignup ? formData.name : undefined,
       });
+      const { access_token } = res.data;
+      localStorage.setItem('wehive_token', access_token);
       toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
       closeAuth();
+      window.location.href = '/account';
     } catch (e) {
-      toast({ title: 'Verification failed', description: e?.response?.data?.detail || 'Invalid code' });
+      const msg = e.response?.data?.detail || friendlyFirebaseError(e);
+      toast({ title: 'Verification failed', description: msg });
     } finally {
       setVerifying(false);
     }
+  };
+
+  const onResend = async () => {
+    if (cd > 0) return;
+    const data = form.getValues();
+    await onSendPhoneOtp(data);
   };
 
   return (
@@ -182,6 +232,8 @@ export default function AuthModal() {
         </button>
 
         <div className="p-7 sm:p-9">
+          <div id="recaptcha-container" />
+
           <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             <ShieldCheck className="w-3.5 h-3.5" /> Secure access
           </div>
@@ -194,12 +246,12 @@ export default function AuthModal() {
           </h2>
           <p className="mt-1.5 text-[14px] text-[hsl(var(--blue-900))]/60">
             {step === 'input'
-              ? 'We will send a 6\u2011digit code by ' + (tab === 'phone' ? 'WhatsApp / SMS' : 'email') + '.'
-              : `Code sent to ${otpInfo?.masked || identifierValue}`}
+              ? 'We will send a 6-digit code via SMS to your mobile.'
+              : `Code sent to ${identifierValue?.replace(/.(?=.{4})/g, '*')}`}
           </p>
 
           {step === 'input' ? (
-            <form onSubmit={onSend} className="mt-6 space-y-5">
+            <form onSubmit={onSendPhoneOtp} className="mt-6 space-y-5">
               <div className="flex justify-center">
                 <Tabs value={tab} onChange={(t) => { setTab(t); form.setValue('identifier', ''); }} />
               </div>
@@ -255,7 +307,7 @@ export default function AuthModal() {
               <OtpDigits value={otp} onChange={setOtp} />
               <Button
                 disabled={verifying || otp.length !== 6}
-                onClick={onVerify}
+                onClick={onVerifyPhoneOtp}
                 className="w-full h-12 rounded-full btn-primary text-white font-bold text-[15px]"
               >
                 {verifying ? (
@@ -277,7 +329,7 @@ export default function AuthModal() {
                 <button
                   type="button"
                   disabled={cd > 0 || sending}
-                  onClick={onSend}
+                  onClick={onResend}
                   className="text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-50"
                 >
                   {cd > 0 ? `Resend in ${cd}s` : 'Resend code'}

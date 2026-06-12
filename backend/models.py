@@ -39,6 +39,12 @@ class FirebaseSyncRequest(BaseModel):
     id_token: str
 
 
+class FirebasePhoneSyncRequest(BaseModel):
+    id_token: str
+    name: Optional[str] = None
+    referral_code: Optional[str] = None
+
+
 class AuthTokens(BaseModel):
     access_token: str
     token_type: str = 'bearer'
