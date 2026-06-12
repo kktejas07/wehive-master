@@ -17,9 +17,6 @@ from db import db, users, payments
 
 router = APIRouter(prefix='/payments', tags=['payments'])
 
-RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
-RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
-RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
 PAYMENT_BYPASS_ENABLED = os.environ.get('PAYMENT_BYPASS_ENABLED', '').lower() in ('1', 'true', 'yes')
 
 PLANS = {
@@ -29,10 +26,14 @@ PLANS = {
 }
 
 
-def _get_razorpay():
+async def _get_razorpay():
+    from settings_service import get_razorpay_keys
     try:
+        key_id, key_secret, _ = await get_razorpay_keys()
+        if not key_id or not key_secret:
+            return None
         import razorpay
-        client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+        client = razorpay.Client(auth=(key_id, key_secret))
         return client
     except Exception:
         return None
@@ -59,6 +60,8 @@ class VerifyRequest(BaseModel):
 
 @router.post('/create-order', response_model=OrderResponse)
 async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
+    from settings_service import get_razorpay_keys
+
     plan = PLANS.get(req.plan_id)
     if not plan:
         raise HTTPException(400, 'Invalid plan_id')
@@ -85,10 +88,11 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
             'razorpay_key': 'mock',
         }
 
-    if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
-        raise HTTPException(503, 'Payment gateway not configured')
+    key_id, _, _ = await get_razorpay_keys()
+    if not key_id:
+        raise HTTPException(503, 'Payment gateway not configured — set Razorpay keys in admin Settings')
 
-    client = _get_razorpay()
+    client = await _get_razorpay()
     if not client:
         raise HTTPException(503, 'Payment gateway unavailable')
 
@@ -115,8 +119,8 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
         'plan_id': req.plan_id,
         'razorpay_order_id': order.get('id'),
         'razorpay_payment_id': None,
-'amount_usd': plan['amount_usd'],
-            'status': 'created',
+        'amount_usd': plan['amount_usd'],
+        'status': 'created',
         'created_at': datetime.utcnow(),
         'updated_at': datetime.utcnow(),
     }
@@ -127,12 +131,14 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
         'amount': plan['amount_usd'],
         'currency': 'USD',
         'plan_id': req.plan_id,
-        'razorpay_key': RAZORPAY_KEY_ID,
+        'razorpay_key': key_id,
     }
 
 
 @router.post('/verify')
 async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
+    from settings_service import get_razorpay_keys
+
     plan = PLANS.get(req.plan_id)
     if not plan:
         raise HTTPException(400, 'Invalid plan_id')
@@ -164,12 +170,13 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
             'plan': plan['name'],
         }
 
-    if not RAZORPAY_KEY_SECRET:
+    _, key_secret, _ = await get_razorpay_keys()
+    if not key_secret:
         raise HTTPException(503, 'Payment gateway not configured')
 
     payload = f"{req.razorpay_order_id}|{req.razorpay_payment_id}"
     generated = hmac.new(
-        RAZORPAY_KEY_SECRET.encode(),
+        key_secret.encode(),
         payload.encode(),
         hashlib.sha256
     ).hexdigest()
@@ -201,12 +208,15 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
 @router.post('/webhook')
 async def razorpay_webhook(payload: dict, x_razorpay_signature: str = Header(None)):
     """Razorpay sends this when a payment succeeds or fails."""
-    if not RAZORPAY_WEBHOOK_SECRET:
+    from settings_service import get_razorpay_keys
+
+    _, _, webhook_secret = await get_razorpay_keys()
+    if not webhook_secret:
         raise HTTPException(503, 'Webhook not configured')
 
     if x_razorpay_signature:
         digest = hmac.new(
-            RAZORPAY_WEBHOOK_SECRET.encode(),
+            webhook_secret.encode(),
             str(payload).encode(),
             hashlib.sha256
         ).hexdigest()
