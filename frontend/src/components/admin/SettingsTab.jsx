@@ -79,7 +79,7 @@ function Field({ label, tooltip, value, onChange, placeholder }) {
 function Section({ id: sectionId, title, icon: Icon, defaultOpen, children }) {
   const [open, setOpen] = useState(defaultOpen !== false);
   return (
-    <Panel id={sectionId} className="mb-5 scroll-mt-24">
+    <Panel id={sectionId} className="mb-5 scroll-mt-[140px]">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center justify-between w-full text-left"
@@ -157,7 +157,24 @@ export default function SettingsTab() {
     }
   };
 
-  const sectionRefs = useMemo(() => ({}), []);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const id = entry.target.id.replace('section-', '');
+            setActiveSection(id);
+          }
+        }
+      },
+      { rootMargin: '-100px 0px -70% 0px' }
+    );
+    for (const ns of NAMESPACES) {
+      const el = document.getElementById(`section-${ns}`);
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, [loading]);
 
   if (loading) {
     return (
