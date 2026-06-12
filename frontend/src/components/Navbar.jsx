@@ -7,7 +7,6 @@ import { BRAND } from '../data/mock';
 import UserMenu from './UserMenu';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationBell from './NotificationBell';
-import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 const NAV = [
@@ -203,7 +202,6 @@ export default function Navbar({ variant = 'default' }) {
         <NavLinks light={isLight} />
 
         <div className="flex items-center gap-1.5">
-          <ThemeToggle />
           <NotificationBell />
           <PhoneBlock />
           <UserMenu />
