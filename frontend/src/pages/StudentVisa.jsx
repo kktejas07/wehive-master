@@ -191,7 +191,7 @@ export default function StudentVisa() {
         setLoading(false);
       });
 
-    axios.get(`${API}/universities`, { params: { limit: 500 } })
+    axios.get(`${API}/universities`, { params: { limit: 15000 } })
       .then(r => setUniversities(r.data || []))
       .catch(() => setUniversities([]));
   }, []);
