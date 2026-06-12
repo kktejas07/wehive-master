@@ -78,7 +78,7 @@ function FlightPath({ from, to, progress, color }: { from: { x: number; y: numbe
   const currentY = from.y + (to.y - from.y) * progress;
 
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: 'visible' }}>
+    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: 'visible' }} viewBox="0 0 100 100">
       <defs>
         <linearGradient id={`grad-${from.x}-${to.x}`} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor={color} stopOpacity="0" />
@@ -87,7 +87,7 @@ function FlightPath({ from, to, progress, color }: { from: { x: number; y: numbe
         </linearGradient>
       </defs>
       <path
-        d={`M ${from.x}% ${from.y}% Q ${midX}% ${midY}% ${to.x}% ${to.y}%`}
+        d={`M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
         fill="none"
         stroke={`url(#grad-${from.x}-${to.x})`}
         strokeWidth="1"
