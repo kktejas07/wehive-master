@@ -108,7 +108,7 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider>
           <I18nProvider>
             <AuthProvider>
               <FirebaseAuthProvider>
