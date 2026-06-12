@@ -3,11 +3,7 @@ import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
-<<<<<<< Updated upstream
-  LogOut, ArrowLeft, Banknote, Megaphone, Settings,
-=======
-  LogOut, ArrowLeft, Banknote, Megaphone, ClipboardList, Tag, Briefcase,
->>>>>>> Stashed changes
+  LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 
