@@ -23,10 +23,10 @@ function FooterColumn({ col }) {
 
 function FooterBrand() {
   const socials = [
-    { id: 'tw', Icon: Twitter },
-    { id: 'ig', Icon: Instagram },
-    { id: 'li', Icon: Linkedin },
-    { id: 'yt', Icon: Youtube },
+    { id: 'tw', Icon: Twitter, href: 'https://twitter.com/wehive' },
+    { id: 'ig', Icon: Instagram, href: 'https://instagram.com/wehive' },
+    { id: 'li', Icon: Linkedin, href: 'https://linkedin.com/company/wehive' },
+    { id: 'yt', Icon: Youtube, href: 'https://youtube.com/@wehive' },
   ];
   return (
     <div className="lg:col-span-4">
@@ -43,10 +43,12 @@ function FooterBrand() {
         Expert guidance, transparent processes, and a smooth journey from start to finish.
       </p>
       <div className="mt-7 flex items-center gap-3">
-        {socials.map(({ id, Icon }) => (
+        {socials.map(({ id, Icon, href }) => (
           <a
             key={id}
-            href="#"
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
             className="h-10 w-10 inline-flex items-center justify-center rounded-full border border-white/15 hover:border-white/40 hover:bg-white/5 transition-colors"
             aria-label="social"
           >

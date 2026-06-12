@@ -80,10 +80,23 @@ export default function Contact() {
               Fly with WeHive
             </div>
             <h1 className="mt-3 font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-              We'd love to hear from you
-
-              Let's plan your journey
-
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="inline-block"
+              >
+                Let's plan your fly
+              </motion.span>
+              <br />
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+                className="inline-block text-[hsl(var(--accent))]"
+              >
+                over a nice coffee
+              </motion.span>
             </h1>
             <motion.p
               initial={{ opacity: 0, y: 10 }}
