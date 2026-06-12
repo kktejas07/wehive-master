@@ -5,6 +5,7 @@ import { Loader2, CheckCircle2, XCircle, ArrowRight, ShieldCheck, Lock, Building
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API, useAuth } from '../context/AuthContext';
+import { getCurrency } from '../lib/utils';
 
 function loadRazorpayCDN() {
   return new Promise((resolve) => {
@@ -51,7 +52,7 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
         </div>
         <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">{plan.name}</h3>
         <div className="mt-5 flex items-baseline gap-1">
-          <span className="font-display font-extrabold text-[64px] leading-none tracking-[-0.04em]">${(plan.price / 100).toFixed(2)}</span>
+          <span className="font-display font-extrabold text-[64px] leading-none tracking-[-0.04em]">{getCurrency() === 'INR' ? '₹' : getCurrency() === 'USD' ? '$' : getCurrency() === 'EUR' ? '€' : getCurrency() === 'GBP' ? '£' : '$'}{(plan.price / 100).toFixed(2)}</span>
           <span className={plan.highlighted ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/65'}>/ visa application</span>
         </div>
         <button
@@ -156,7 +157,7 @@ export default function Pricing() {
       const options = {
         key: razorpay_key,
         amount: r.data.amount * 100,
-        currency: 'INR',
+        currency: getCurrency(),
         name: 'We Hive',
         description: `Premium ${selectedPlanId} plan`,
         order_id,
