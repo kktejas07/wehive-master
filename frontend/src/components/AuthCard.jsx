@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mail, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare } from 'lucide-react';
+import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -89,13 +89,14 @@ function GoogleIcon() {
 
 export default function AuthCard({ mode, referralCode }) {
   const { sendOtp, verifyOtp, isAuthed } = useAuth();
-  const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent } = useFirebaseAuth();
+  const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent, phoneOtp, verifyPhoneOtpCode } = useFirebaseAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [tab, setTab] = useState('google');
   const [identifier, setIdentifier] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [otpChannel, setOtpChannel] = useState('email');
   const [step, setStep] = useState('input');
   const [otp, setOtp] = useState('');
   const [sending, setSending] = useState(false);
@@ -176,18 +177,26 @@ export default function AuthCard({ mode, referralCode }) {
 
   const onSendOtp = async () => {
     if (!identifier.trim()) {
-      toast({ title: 'Enter your email' });
+      toast({ title: otpChannel === 'email' ? 'Enter your email' : 'Enter your mobile number' });
       return;
     }
     setSending(true);
     try {
-      const data = await sendOtp({ identifier, channel: 'email', purpose: isSignup ? 'signup' : 'login' });
-      setOtpInfo(data);
-      setStep('otp');
-      setCountdown(60);
-      toast({ title: 'Code sent', description: `via ${data.channel} to ${data.masked}` });
+      if (otpChannel === 'phone') {
+        const info = await phoneOtp(identifier);
+        setOtpInfo(info);
+        setStep('otp');
+        setCountdown(60);
+        toast({ title: 'Code sent', description: `via WhatsApp to ${info.masked}` });
+      } else {
+        const data = await sendOtp({ identifier, channel: 'email', purpose: isSignup ? 'signup' : 'login' });
+        setOtpInfo(data);
+        setStep('otp');
+        setCountdown(60);
+        toast({ title: 'Code sent', description: `via ${data.channel} to ${data.masked}` });
+      }
     } catch (e) {
-      const msg = e?.response?.data?.detail || 'Could not send code. Try again.';
+      const msg = e?.response?.data?.detail || e?.message || 'Could not send code. Try again.';
       toast({ title: 'Failed to send', description: msg });
     } finally {
       setSending(false);
@@ -201,17 +210,21 @@ export default function AuthCard({ mode, referralCode }) {
     }
     setVerifying(true);
     try {
-      await verifyOtp({
-        identifier,
-        code: otp,
-        channel: 'email',
-        name: isSignup ? name : undefined,
-        referral_code: referralCode,
-      });
+      if (otpChannel === 'phone') {
+        await verifyPhoneOtpCode(otp);
+      } else {
+        await verifyOtp({
+          identifier,
+          code: otp,
+          channel: 'email',
+          name: isSignup ? name : undefined,
+          referral_code: referralCode,
+        });
+      }
       toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
       navigate('/account', { replace: true });
     } catch (e) {
-      const msg = e?.response?.data?.detail || 'Invalid code. Try again.';
+      const msg = e?.response?.data?.detail || e?.message || 'Invalid code. Try again.';
       toast({ title: 'Verification failed', description: msg });
     } finally {
       setVerifying(false);
@@ -223,7 +236,7 @@ export default function AuthCard({ mode, referralCode }) {
     await onSendOtp();
   };
 
-  const placeholder = 'you@example.com';
+  const placeholder = otpChannel === 'email' ? 'you@example.com' : '+91 98765 43210';
 
   return (
     <motion.div
@@ -277,7 +290,7 @@ export default function AuthCard({ mode, referralCode }) {
             ? 'Quick one-click sign in with your Google account.'
             : tab === 'emailpwd'
               ? isSignup ? 'Create account with email and password.' : 'Sign in with your email and password.'
-              : "We'll send a code via email."}
+              : `We'll send a code via ${otpChannel === 'email' ? 'email' : 'WhatsApp'}.`}
       </motion.p>
 
       {step === 'input' ? (
@@ -344,11 +357,29 @@ export default function AuthCard({ mode, referralCode }) {
               )}
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  Email address
+                  {otpChannel === 'email' ? 'Email address' : 'Mobile number'}
                 </label>
                 <input value={identifier} onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={placeholder} inputMode="email"
+                  placeholder={placeholder} inputMode={otpChannel === 'email' ? 'email' : 'tel'}
                   className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition" />
+              </div>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setOtpChannel('email')}
+                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                    otpChannel === 'email'
+                      ? 'bg-[hsl(var(--blue-700))] text-white'
+                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
+                  }`}>
+                  <Mail className="w-3.5 h-3.5 inline-block mr-1" /> Email
+                </button>
+                <button type="button" onClick={() => setOtpChannel('phone')}
+                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                    otpChannel === 'phone'
+                      ? 'bg-[hsl(var(--blue-700))] text-white'
+                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
+                  }`}>
+                  <Phone className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
+                </button>
               </div>
               <Button disabled={sending} onClick={onSendOtp}
                 className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
@@ -386,6 +417,7 @@ export default function AuthCard({ mode, referralCode }) {
           </div>
         </div>
       )}
+      <div id="recaptcha-container" />
       <p className="mt-6 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
         By continuing you agree to our Terms and Privacy Policy.
       </p>

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { X, Mail, ArrowLeft, Loader2, Check, ShieldCheck } from 'lucide-react';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { X, Mail, Phone, ArrowLeft, Loader2, Check, ShieldCheck } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
+import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useToast } from '../hooks/use-toast';
 import { getAuthSchema } from '../lib/schemas';
 
@@ -49,7 +50,9 @@ function OtpDigits({ value, onChange, length = 6 }) {
 
 export default function AuthModal() {
   const { authOpen, authMode, closeAuth, sendOtp, verifyOtp, setAuthMode } = useAuth();
+  const { phoneOtp, verifyPhoneOtpCode } = useFirebaseAuth();
   const { toast } = useToast();
+  const [channel, setChannel] = useState('email');
   const [step, setStep] = useState('input');
   const [otp, setOtp] = useState('');
   const [sending, setSending] = useState(false);
@@ -59,7 +62,7 @@ export default function AuthModal() {
   const cd = useCountdown(60, resendKey);
 
   const isSignup = authMode === 'signup';
-  const schema = getAuthSchema(isSignup, 'email');
+  const schema = useMemo(() => getAuthSchema(isSignup, channel), [isSignup, channel]);
 
   const form = useForm({ resolver: zodResolver(schema), defaultValues: { name: '', identifier: '' } });
   const { register, handleSubmit, formState: { errors }, watch } = form;
@@ -67,7 +70,7 @@ export default function AuthModal() {
 
   useEffect(() => {
     if (authOpen) {
-      setStep('input'); setOtp(''); setOtpInfo(null);
+      setStep('input'); setOtp(''); setChannel('email'); setOtpInfo(null);
       form.reset({ name: '', identifier: '' });
     }
   }, [authOpen, authMode]);
@@ -77,17 +80,25 @@ export default function AuthModal() {
   const onSend = handleSubmit(async (data) => {
     setSending(true);
     try {
-      const result = await sendOtp({
-        identifier: data.identifier,
-        channel: 'email',
-        purpose: isSignup ? 'signup' : 'login',
-      });
-      setOtpInfo(result);
-      setStep('otp');
-      setResendKey((k) => k + 1);
-      toast({ title: 'Code sent', description: `via ${result.channel} to ${result.masked}` });
+      if (channel === 'phone') {
+        const info = await phoneOtp(data.identifier);
+        setOtpInfo(info);
+        setStep('otp');
+        setResendKey((k) => k + 1);
+        toast({ title: 'Code sent', description: `via WhatsApp to ${info.masked}` });
+      } else {
+        const result = await sendOtp({
+          identifier: data.identifier,
+          channel: 'email',
+          purpose: isSignup ? 'signup' : 'login',
+        });
+        setOtpInfo(result);
+        setStep('otp');
+        setResendKey((k) => k + 1);
+        toast({ title: 'Code sent', description: `via ${result.channel} to ${result.masked}` });
+      }
     } catch (e) {
-      toast({ title: 'Could not send code', description: e?.response?.data?.detail || 'Try again' });
+      toast({ title: 'Could not send code', description: e?.response?.data?.detail || e?.message || 'Try again' });
     } finally {
       setSending(false);
     }
@@ -98,17 +109,21 @@ export default function AuthModal() {
     setVerifying(true);
     try {
       const formData = form.getValues();
-      await verifyOtp({
-        identifier: formData.identifier,
-        code: otp,
-        channel: 'email',
-        name: isSignup ? formData.name : undefined,
-      });
+      if (channel === 'phone') {
+        await verifyPhoneOtpCode(otp);
+      } else {
+        await verifyOtp({
+          identifier: formData.identifier,
+          code: otp,
+          channel: 'email',
+          name: isSignup ? formData.name : undefined,
+        });
+      }
       toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
       closeAuth();
       window.location.href = '/account';
     } catch (e) {
-      toast({ title: 'Verification failed', description: e?.response?.data?.detail || 'Invalid code' });
+      toast({ title: 'Verification failed', description: e?.response?.data?.detail || e?.message || 'Invalid code' });
     } finally {
       setVerifying(false);
     }
@@ -137,7 +152,7 @@ export default function AuthModal() {
             {step === 'input' ? (isSignup ? 'Create your account' : 'Sign in to We Hive') : 'Enter the verification code'}
           </h2>
           <p className="mt-1.5 text-[14px] text-[hsl(var(--blue-900))]/60">
-            {step === 'input' ? "We'll send a code via email."
+            {step === 'input' ? `We'll send a code via ${channel === 'email' ? 'email' : 'WhatsApp'}.`
               : `Code sent to ${otpInfo?.masked || identifierValue}`}
           </p>
 
@@ -153,12 +168,24 @@ export default function AuthModal() {
               )}
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  Email address
+                  {channel === 'email' ? 'Email address' : 'Mobile number'}
                 </label>
-                <input {...register('identifier')} placeholder="you@example.com"
-                  inputMode="email"
+                <input {...register('identifier')} placeholder={channel === 'email' ? 'you@example.com' : '+91 98765 43210'}
+                  inputMode={channel === 'email' ? 'email' : 'tel'}
                   className={`w-full h-12 rounded-xl border ${errors.identifier ? 'border-red-500' : 'border-black/10'} focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition`} />
                 {errors.identifier && <p className="mt-1 text-[12px] text-red-500">{errors.identifier.message}</p>}
+              </div>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setChannel('email')}
+                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                    channel === 'email' ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'}`}>
+                  <Mail className="w-3.5 h-3.5 inline-block mr-1" /> Email
+                </button>
+                <button type="button" onClick={() => setChannel('phone')}
+                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                    channel === 'phone' ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'}`}>
+                  <Phone className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
+                </button>
               </div>
               <Button type="submit" disabled={sending}
                 className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
@@ -192,6 +219,7 @@ export default function AuthModal() {
               </div>
             </div>
           )}
+          <div id="recaptcha-container" />
           <p className="mt-6 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
             By continuing you agree to our Terms and acknowledge our Privacy Policy.
           </p>

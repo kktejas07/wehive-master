@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { auth } from '../lib/firebase';
+import { auth, sendPhoneOtp, verifyPhoneOtp, getRecaptchaVerifier } from '../lib/firebase';
 import { firebaseAuth, getFirebaseIdToken } from '../lib/firebase-auth';
 import axios from 'axios';
 
@@ -18,6 +18,7 @@ export function FirebaseAuthProvider({ children }) {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [phoneConfirmation, setPhoneConfirmation] = useState(null);
 
   useEffect(() => {
     const unsubscribe = firebaseAuth.onAuthChange((user) => {
@@ -76,6 +77,23 @@ export function FirebaseAuthProvider({ children }) {
     await firebaseAuth.logout();
   }, []);
 
+  const phoneOtp = useCallback(async (phoneNumber) => {
+    const verifier = getRecaptchaVerifier();
+    const confirmation = await sendPhoneOtp(phoneNumber);
+    setPhoneConfirmation(confirmation);
+    return { sent: true, masked: phoneNumber.slice(0, 3) + '****' + phoneNumber.slice(-2) };
+  }, []);
+
+  const verifyPhoneOtpCode = useCallback(async (code) => {
+    if (!phoneConfirmation) throw new Error('No OTP sent');
+    const { user, idToken } = await verifyPhoneOtp(phoneConfirmation, code);
+    setPhoneConfirmation(null);
+    const res = await axios.post(`${API}/auth/firebase-sync`, { id_token: idToken });
+    const { access_token, user: backendUser } = res.data;
+    localStorage.setItem('wehive_token', access_token);
+    return { access_token, user: backendUser };
+  }, [phoneConfirmation]);
+
   const value = {
     firebaseUser,
     loading,
@@ -87,6 +105,8 @@ export function FirebaseAuthProvider({ children }) {
     resendVerification,
     logout,
     syncWithBackend,
+    phoneOtp,
+    verifyPhoneOtpCode,
   };
 
   return (
