@@ -5,28 +5,9 @@ from db import universities_col
 router = APIRouter(prefix='/universities', tags=['universities'])
 
 
-<<<<<<< Updated upstream
-def _normalize_uni(u: dict) -> dict:
-    """Return a copy with normalized keys so consumers never see leading-space typos."""
-    out = dict(u)
-    # Fix leading-space typo present in a few seed entries
-    if ' scholarships' in out:
-        out['scholarships'] = out.pop(' scholarships')
-    if ' intakes' in out:
-        out['intakes'] = out.pop(' intakes')
-    # Ensure optional fields at least exist as None / N/A so templates don't crash
-    if '就业率' not in out:
-        out['就业率'] = None
-    if 'avg_salary_usd' not in out:
-        out['avg_salary_usd'] = None
-    if '录取率' not in out:
-        out['录取率'] = None
-    return out
-=======
 def _serialize(doc: dict) -> dict:
     doc.pop('_id', None)
     return doc
->>>>>>> Stashed changes
 
 
 @router.get('')
@@ -41,20 +22,6 @@ async def list_universities(
     if country:
         flt['country'] = country.lower()
     if course:
-<<<<<<< Updated upstream
-        items = [u for u in items if course.lower() in [c.lower() for c in u.get('courses', [])]]
-    if limit:
-        items = items[:limit]
-    return [_normalize_uni(u) for u in items]
-
-
-@router.get('/{university_id}')
-async def get_university(university_id: str):
-    uni = next((u for u in UNIVERSITIES if u['id'] == university_id), None)
-    if not uni:
-        raise HTTPException(404, 'University not found')
-    return _normalize_uni(uni)
-=======
         flt['courses'] = course.lower()
     if q:
         flt['$text'] = {'$search': q}
@@ -63,7 +30,6 @@ async def get_university(university_id: str):
     cursor = universities_col.find(flt, {'_id': 0}).sort(sort_field, 1).skip(skip).limit(limit)
     results = [doc async for doc in cursor]
 
-    # Fallback: text index may not exist yet — do in-memory filter
     if q and not results:
         ql = q.lower()
         flt2 = {k: v for k, v in flt.items() if k != '$text'}
@@ -89,7 +55,6 @@ async def count_universities(
         flt['courses'] = course.lower()
     total = await universities_col.count_documents(flt)
     return {'total': total}
->>>>>>> Stashed changes
 
 
 @router.get('/countries/list')
@@ -126,4 +91,9 @@ async def get_university(university_id: str):
     doc = await universities_col.find_one({'id': university_id}, {'_id': 0})
     if not doc:
         raise HTTPException(404, 'University not found')
+    doc = dict(doc)
+    if ' scholarships' in doc:
+        doc['scholarships'] = doc.pop(' scholarships')
+    if ' intakes' in doc:
+        doc['intakes'] = doc.pop(' intakes')
     return doc

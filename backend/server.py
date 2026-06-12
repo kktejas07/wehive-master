@@ -137,9 +137,6 @@ async def on_startup():
             logger.info('Seeded countries: %s', res)
         else:
             logger.info('Countries collection already has %d docs', count)
-<<<<<<< Updated upstream
-        logger.info('Startup complete')
-=======
         logger.info('Indexes ensured. OTP channel = %s', os.environ.get('OTP_CHANNEL', 'mock'))
         uni_count = await db['universities_v2'].estimated_document_count()
         if uni_count == 0:
@@ -148,7 +145,6 @@ async def on_startup():
             logger.info('Seeded universities: %s', res)
         else:
             logger.info('Universities collection has %d docs', uni_count)
->>>>>>> Stashed changes
     except Exception as e:
         logger.exception('Startup failure: %s', e)
 
