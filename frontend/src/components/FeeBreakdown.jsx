@@ -75,10 +75,18 @@ export function baseFeeFor(visaType, categoryName = '') {
   return fees.Tourist;
 }
 
+const SUBSCRIPTION_TIERS = [
+  { max: 1, name: 'Lite' },
+  { max: 4, name: 'Standard' },
+  { max: Infinity, name: 'Concierge' },
+];
+
 export function computeFees({ category, applicants = 1, country, visaType }) {
   const n = Math.max(1, Number(applicants) || 1);
   const govtPer = Number(category?.fees_inr || 0);
   const base = baseFeeFor(visaType, category?.name);
+
+  const tier = SUBSCRIPTION_TIERS.find((t) => n <= t.max) || SUBSCRIPTION_TIERS[2];
 
   const isVisaFree =
     !!country?.no_visa ||
@@ -87,19 +95,22 @@ export function computeFees({ category, applicants = 1, country, visaType }) {
   const requiresAppt = !!country?.requires_appointment && !isVisaFree;
   const apptPer = requiresAppt ? Number(country?.appointment_fee_inr || 0) : 0;
 
-  const application = (govtPer + base) * n;
+  const embassyFee = govtPer * n;
+  const serviceFee = base * n;
   const appointment = apptPer * n;
   const surcharge = (n - 1) * pricingState.surchargeInr;
 
   const gstOnService = Math.round((base * n + apptPer * n) * pricingState.gstRate);
   const gstDisplay = gstOnService + surcharge;
 
-  const total = application + appointment + gstDisplay;
+  const total = embassyFee + serviceFee + appointment + gstDisplay;
 
   return {
     govt: govtPer * n,
     base: base * n,
-    application,
+    embassyFee,
+    serviceFee,
+    application: embassyFee + serviceFee,
     appointment,
     requiresAppointment: requiresAppt,
     isVisaFree,
@@ -109,6 +120,7 @@ export function computeFees({ category, applicants = 1, country, visaType }) {
     total,
     applicants: n,
     baseFeeUnit: base,
+    tier: tier.name,
   };
 }
 
@@ -165,14 +177,19 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
   const lines = [];
   const nStr = String(applicants);
   const sPlural = applicants > 1 ? 's' : '';
-  const applicationSub = fees.isVisaFree
-    ? t('fee.applicationSubFree').replace('{n}', nStr).replace('{s}', sPlural)
-    : t('fee.applicationSubEmbassy').replace('{n}', nStr).replace('{s}', sPlural);
+  if (fees.embassyFee > 0) {
+    lines.push({
+      id: 'embassy',
+      label: 'Embassy fee',
+      amount: fees.embassyFee,
+      sub: `Government/embassy fee · ${nStr} applicant${sPlural}.`,
+    });
+  }
   lines.push({
-    id: 'application',
-    label: t('fee.application'),
-    amount: fees.application,
-    sub: applicationSub,
+    id: 'service',
+    label: `Service fee (${fees.tier})`,
+    amount: fees.serviceFee,
+    sub: `Document review, prep, submission and tracking · ${nStr} applicant${sPlural}. ${fees.tier} plan included.`,
   });
   if (fees.requiresAppointment && fees.appointment > 0) {
     lines.push({
@@ -251,7 +268,7 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
         <div className="flex items-start gap-2 text-[12px] text-amber-800">
           <Info className="w-4 h-4 shrink-0 mt-0.5" />
           <div>
-            <span className="font-bold">Note:</span> Fees may vary based on government regulations and service charges. Please verify current rates at the time of application. The ₹20,000 application fee includes our service fees and the applicable government/embassy fee.
+            <span className="font-bold">Note:</span> Fees may vary based on government regulations and service charges. Please verify current rates at the time of application. The <span className="font-bold">{fees.tier}</span> plan service fee is included in the total. Embassy fees are set by the destination country and are subject to change.
           </div>
         </div>
       </div>
