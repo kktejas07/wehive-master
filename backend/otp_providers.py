@@ -130,3 +130,19 @@ def deliver_otp(identifier: str, kind: str, code: str) -> Tuple[bool, str, bool]
     logger.warning('OTP_CHANNEL=%s but real provider not ready for %s. Fallback to mock.', cfg, identifier)
     logger.info('[MOCK OTP fallback] %s -> %s', identifier, code)
     return True, 'mock', True
+
+
+async def deliver_whatsapp_message(to: str, message: str) -> dict:
+    """Send a WhatsApp message via Twilio (non-OTP, for notifications/invites)."""
+    client = _twilio_client()
+    if not client:
+        return {'ok': False, 'error': 'Twilio not configured'}
+
+    from_addr = _env('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886')
+    to_addr = to if to.startswith('whatsapp:') else f'whatsapp:{to}'
+    try:
+        msg = client.messages.create(to=to_addr, from_=from_addr, body=message)
+        return {'ok': True, 'sid': msg.sid}
+    except Exception as e:
+        logger.error('WhatsApp message send failed: %s', e)
+        return {'ok': False, 'error': str(e)}

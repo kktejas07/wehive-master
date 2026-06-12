@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
+import json
 
 from models import (
     SendOtpRequest, SendOtpResponse, VerifyOtpRequest, AuthTokens, PublicUser,
@@ -14,7 +15,7 @@ from constants import REFERRAL_REWARD_INR
 import os
 import uuid
 
-from config import ADMIN_EMAILS, MOCK_CODE, OTP_TTL_MIN
+from config import ADMIN_EMAILS, MOCK_CODE, OTP_TTL_MIN, FIREBASE_PROJECT_ID, FIREBASE_CREDENTIALS
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -148,3 +149,62 @@ async def verify_otp(req: VerifyOtpRequest):
 @router.get('/me', response_model=PublicUser)
 async def me(user=Depends(get_current_user)):
     return _public(user)
+
+
+@router.post('/firebase-sync', response_model=AuthTokens)
+async def firebase_sync(req: FirebaseSyncRequest):
+    if not FIREBASE_PROJECT_ID:
+        raise HTTPException(status_code=503, detail='Firebase not configured')
+
+    import firebase_admin
+    from firebase_admin import credentials, auth
+
+    if not firebase_admin._apps:
+        if FIREBASE_CREDENTIALS:
+            cred_dict = json.loads(FIREBASE_CREDENTIALS)
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred, {'projectId': FIREBASE_PROJECT_ID})
+        else:
+            raise HTTPException(status_code=503, detail='Firebase credentials not configured')
+
+    try:
+        decoded = auth.verify_id_token(req.id_token)
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f'Invalid Firebase token: {str(e)}')
+
+    firebase_uid = decoded['uid']
+    email = decoded.get('email')
+    name = decoded.get('name', '')
+    picture = decoded.get('picture')
+
+    now = datetime.utcnow()
+
+    if email:
+        user = await users.find_one({'email': email})
+        if not user:
+            user = {
+                '_id': str(uuid.uuid4()),
+                'name': name,
+                'email': email,
+                'email_verified': decoded.get('email_verified', False),
+                'firebase_uid': firebase_uid,
+                'avatar_url': picture,
+                'created_at': now,
+                'updated_at': now,
+            }
+            await users.insert_one(user)
+        else:
+            update = {'updated_at': now, 'firebase_uid': firebase_uid}
+            if picture:
+                update['avatar_url'] = picture
+            if name and not user.get('name'):
+                update['name'] = name
+            await users.update_one({'_id': user['_id']}, {'$set': update})
+            user = await users.find_one({'_id': user['_id']})
+    else:
+        user = await users.find_one({'firebase_uid': firebase_uid})
+        if not user:
+            raise HTTPException(status_code=400, detail='No email associated with Firebase account')
+
+    token = sign_jwt(user['_id'])
+    return AuthTokens(access_token=token, user=_public(user))

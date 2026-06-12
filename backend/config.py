@@ -20,3 +20,6 @@ CONSULTANT_AUTO_REPLY = os.environ.get(
     'CONSULTANT_AUTO_REPLY',
     "Got it — I'll review and get back within 4 hours during business hours (Mon–Sat 09:00–18:00 IST)."
 )
+
+FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID', '')
+FIREBASE_CREDENTIALS = os.environ.get('FIREBASE_CREDENTIALS', '')

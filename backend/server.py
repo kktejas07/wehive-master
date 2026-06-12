@@ -28,6 +28,7 @@ from routes_referrals import router as referrals_router  # noqa: E402
 from routes_ai_marketplace import router as ai_marketplace_router  # noqa: E402
 from routes_third_party import router as third_party_router  # noqa: E402
 from routes_universities import router as universities_router  # noqa: E402
+from routes_communication import router as communication_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from db import countries_v2  # noqa: E402
 
@@ -69,6 +70,7 @@ api_router.include_router(referrals_router)
 api_router.include_router(ai_marketplace_router)
 api_router.include_router(third_party_router)
 api_router.include_router(universities_router)
+api_router.include_router(communication_router)
 
 app.include_router(api_router)
 
