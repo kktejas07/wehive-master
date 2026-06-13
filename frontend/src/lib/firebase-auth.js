@@ -53,9 +53,11 @@ export const firebaseAuth = {
   },
 
   onAuthChange: (callback) => {
+    let unsub = null;
     ensureAuth().then((auth) => {
-      onAuthStateChanged(auth, callback);
+      unsub = onAuthStateChanged(auth, callback);
     });
+    return () => { if (unsub) unsub(); };
   },
 };
 
