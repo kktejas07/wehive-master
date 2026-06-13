@@ -6,6 +6,7 @@ import {
   FileText, Search, ChevronRight, Loader2, ArrowLeft,
   LogOut, LayoutDashboard, Users,
 } from 'lucide-react';
+import Pagination from '../components/admin/Pagination';
 
 const STATUS_COLORS = {
   draft: 'bg-amber-100 text-amber-700',
@@ -28,15 +29,21 @@ export default function AgentApplications() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 15;
 
   useEffect(() => {
     const token = localStorage.getItem('agent_token');
     if (!token) { navigate('/agent/login'); return; }
+    setLoading(true);
     axios.get(`${API}/agent/applications`, {
       headers: { Authorization: `Bearer ${token}` },
-      params: { status: statusFilter || undefined, search: search || undefined },
-    }).then(r => setApps(r.data || [])).catch(() => navigate('/agent/login')).finally(() => setLoading(false));
-  }, [statusFilter]);
+      params: { status: statusFilter || undefined, search: search || undefined, limit: pageSize, skip },
+    }).then(r => { setApps(r.data.items || []); setTotal(r.data.total || 0); }).catch(() => navigate('/agent/login')).finally(() => setLoading(false));
+  }, [statusFilter, skip]);
+
+  const handleSearch = () => { setSkip(0); };
 
   const handleLogout = () => { localStorage.removeItem('agent_token'); navigate('/agent/login'); };
 
@@ -74,9 +81,9 @@ export default function AgentApplications() {
         <div className="flex flex-wrap gap-3 mb-6">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/40" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search applications..." className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none pl-10 pr-4 text-[14px]" />
+            <input value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { setSkip(0); setLoading(true); } }} placeholder="Search applications..." className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none pl-10 pr-4 text-[14px]" />
           </div>
-          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] bg-white">
+          <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setSkip(0); }} className="h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] bg-white">
             <option value="">All statuses</option>
             {Object.keys(STATUS_COLORS).map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
           </select>
@@ -119,6 +126,7 @@ export default function AgentApplications() {
                 </tbody>
               </table>
             </div>
+            {total > pageSize && <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
           </div>
         )}
       </main>
