@@ -34,14 +34,16 @@ MANIFEST_PATH = HERE / "manifest.json"
 OUTPUT_DIR = HERE / "output"
 
 API_URL = "https://api.together.xyz/v1/images/generations"
-MODEL = "black-forest-labs/FLUX.1-schnell-Free"
+MODEL = "black-forest-labs/FLUX.1-schnell"
 
 STYLE_SUFFIX = (
-    "Modern flat-vector illustration blended with semi-realistic digital art. "
-    "Bright natural daylight, beautiful blue sky with soft white clouds. "
-    "Vibrant but elegant professional colors. Clean composition, centered subject, "
-    "plenty of negative space. No text, no flags, no logos, no watermarks, no people crowds. "
-    "Premium travel illustration style suitable for a luxury visa consultancy website."
+    "Premium travel destination artwork in modern flat-vector style blended with semi-realistic digital painting. "
+    "Golden hour warm sunlight, deep blue sky with soft white clouds, vibrant yet elegant color palette. "
+    "Clean composition with the main landmark centered, plenty of breathing room around the subject. "
+    "Highly detailed architecture and landscape elements. "
+    "No text, no country names, no flags, no logos, no watermarks, no borders, no frames, no people crowded. "
+    "Portrait vertical orientation suitable for a luxury travel card. "
+    "Award-winning travel illustration quality."
 )
 
 
@@ -84,7 +86,7 @@ def generate_image(api_key: str, prompt: str, width: int = 1024, height: int = 7
                 "prompt": prompt,
                 "width": width,
                 "height": height,
-                "steps": 4,
+                "steps": 8,
                 "n": 1,
             },
             headers={
@@ -95,10 +97,11 @@ def generate_image(api_key: str, prompt: str, width: int = 1024, height: int = 7
         )
         resp.raise_for_status()
         data = resp.json()
-        b64 = data.get("data", [{}])[0].get("b64_json")
+        item = data.get("data", [{}])[0]
+        b64 = item.get("b64_json")
         if b64:
             return base64.b64decode(b64)
-        url = data.get("data", [{}])[0].get("url")
+        url = item.get("url")
         if url:
             r = httpx.get(url, timeout=60)
             r.raise_for_status()
@@ -116,7 +119,7 @@ def main():
     parser.add_argument("--resume-from", type=int, default=0, help="Resume from this index")
     parser.add_argument("--dry-run", action="store_true", help="Print prompts without generating")
     parser.add_argument("--width", type=int, default=1024, help="Image width (default: 1024)")
-    parser.add_argument("--height", type=int, default=768, help="Image height (default: 768)")
+    parser.add_argument("--height", type=int, default=1536, help="Image height (default: 1536 — 2:3 portrait)")
     parser.add_argument("--delay", type=float, default=1.5, help="Delay between API calls (default: 1.5s)")
     args = parser.parse_args()
 
