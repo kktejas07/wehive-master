@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-"""Generate premium travel illustrations for every country using OpenAI DALL-E 3.
+"""Generate premium travel illustrations for every country using Replicate (Flux).
 
 Usage:
-    # Generate all countries (requires OPENAI_API_KEY in env):
+    export REPLICATE_API_TOKEN="r8_..."
     python generate.py
 
-    # Generate a specific country:
+    # Generate a single country:
     python generate.py --country india
 
-    # Resume from a specific index (e.g. if interrupted):
+    # Resume from index (if interrupted):
     python generate.py --resume-from 50
 
-    # Dry-run — print prompts without calling API:
+    # Dry-run — print prompts only:
     python generate.py --dry-run
 
 Requirements:
-    pip install openai pillow httpx
+    pip install replicate httpx
 """
 
 import json
@@ -26,22 +26,14 @@ import argparse
 from pathlib import Path
 
 import httpx
-from openai import OpenAI
+import replicate
 
 
 HERE = Path(__file__).parent
 MANIFEST_PATH = HERE / "manifest.json"
 OUTPUT_DIR = HERE / "output"
 
-SYSTEM_PROMPT = (
-    "You are a world-class travel illustrator. Generate a premium destination illustration "
-    "in a modern flat-vector blended with soft semi-realistic digital art style. "
-    "Bright natural daylight, beautiful blue sky with soft clouds, vibrant but elegant colors. "
-    "Clean composition with plenty of negative space. "
-    "No text, no country names, no flags, no logos, no watermarks, no borders, no frames, "
-    "no UI elements, no crowds of tourists. "
-    "The artwork should feel premium, trustworthy, and suitable for a professional visa consultancy website."
-)
+MODEL = "black-forest-labs/flux-schnell"
 
 STYLE_SUFFIX = (
     "Modern flat-vector illustration blended with semi-realistic digital art. "
@@ -82,16 +74,19 @@ def build_prompt(entry: dict) -> str:
     )
 
 
-def generate_image(client: OpenAI, prompt: str, size: str = "1792x1024") -> str | None:
+def generate_image(prompt: str, aspect_ratio: str = "16:9") -> str | None:
     try:
-        resp = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size=size,
-            quality="hd",
-            n=1,
+        output = replicate.run(
+            MODEL,
+            input={
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio,
+                "num_outputs": 1,
+                "go_fast": True,
+                "num_inference_steps": 4,
+            },
         )
-        return resp.data[0].url
+        return output[0] if output else None
     except Exception as e:
         print(f"  API error: {e}", file=sys.stderr)
         return None
@@ -109,20 +104,19 @@ def download_image(url: str, dest: Path) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate premium country illustrations")
+    parser = argparse.ArgumentParser(description="Generate premium country illustrations via Replicate")
     parser.add_argument("--country", help="Generate only this country (filename or name)")
     parser.add_argument("--resume-from", type=int, default=0, help="Resume from this index")
     parser.add_argument("--dry-run", action="store_true", help="Print prompts without generating")
-    parser.add_argument("--size", default="1792x1024", help='Image size (default: 1792x1024)')
-    parser.add_argument("--delay", type=float, default=3.0, help="Delay between API calls in seconds")
+    parser.add_argument("--aspect-ratio", default="16:9", help='Aspect ratio (default: 16:9)')
+    parser.add_argument("--delay", type=float, default=2.0, help="Delay between API calls (default: 2s)")
     args = parser.parse_args()
 
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key and not args.dry_run:
-        print("Error: OPENAI_API_KEY environment variable not set", file=sys.stderr)
+    api_token = os.environ.get("REPLICATE_API_TOKEN")
+    if not api_token and not args.dry_run:
+        print("Error: REPLICATE_API_TOKEN environment variable not set", file=sys.stderr)
         sys.exit(1)
 
-    client = None if args.dry_run else OpenAI(api_key=api_key)
     manifest = load_manifest()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -130,6 +124,11 @@ def main():
     total = len(manifest)
     success = 0
     skipped = 0
+
+    print(f"Model: {MODEL}")
+    print(f"Aspect ratio: {args.aspect_ratio}")
+    print(f"Total countries: {total}")
+    print()
 
     for idx, entry in enumerate(manifest):
         if idx < start_idx:
@@ -150,14 +149,15 @@ def main():
 
         prompt = build_prompt(entry)
         print(f"[{idx+1}/{total}] {filename}")
-        print(f"  Prompt: {prompt[:120]}...")
+        print(f"  {entry['country']} — {entry['landmark']}")
+        print(f"  Prompt: {prompt[:100]}...")
 
         if args.dry_run:
             print()
             continue
 
         print("  Generating...", end=" ", flush=True)
-        url = generate_image(client, prompt, args.size)
+        url = generate_image(prompt, args.aspect_ratio)
         if not url:
             print("FAILED")
             continue
