@@ -6,6 +6,7 @@ environment variable OR when `users.is_admin == true` in the database.
 """
 from __future__ import annotations
 
+import base64 as _b64
 import csv
 import io
 import os
@@ -18,7 +19,7 @@ import json as _json
 
 import httpx as _httpx
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -815,6 +816,168 @@ async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
         'failed': failed,
         'results': results,
     }
+
+
+def _r2_client_from_cfg(cfg: dict):
+    import boto3
+    from botocore.config import Config
+    account_id = cfg.get('account_id', '')
+    endpoint = cfg.get('endpoint') or f'https://{account_id}.r2.cloudflarestorage.com'
+    return boto3.client(
+        's3',
+        endpoint_url=endpoint,
+        aws_access_key_id=cfg.get('access_key_id', ''),
+        aws_secret_access_key=cfg.get('secret_access_key', ''),
+        region_name='auto',
+        config=Config(signature_version='s3v4', retries={'max_attempts': 3}),
+    ), cfg.get('bucket', ''), (cfg.get('public_url') or '').rstrip('/')
+
+
+async def _get_r2_settings():
+    from settings_service import get_all as _get_settings
+    cfg = await _get_settings('r2')
+    if not cfg:
+        raise HTTPException(400, 'R2 not configured — fill in R2 Storage settings first')
+    if not all([cfg.get('account_id'), cfg.get('access_key_id'), cfg.get('secret_access_key'), cfg.get('bucket')]):
+        raise HTTPException(400, 'Missing required R2 settings')
+    return cfg
+
+
+@router.get('/destinations/r2-status')
+async def admin_r2_status(_=Depends(get_current_admin)):
+    """Check which destination images exist on R2."""
+    cfg = await _get_r2_settings()
+    client, bucket, _ = _r2_client_from_cfg(cfg)
+    manifest = _load_manifest()
+    results = []
+    for entry in manifest:
+        filename = entry['filename']
+        key = f'destinations/{filename}'
+        try:
+            client.head_object(Bucket=bucket, Key=key)
+            results.append({'filename': filename, 'country': entry['country'], 'onR2': True})
+        except Exception:
+            results.append({'filename': filename, 'country': entry['country'], 'onR2': False})
+    return {'items': results, 'total': len(results), 'onR2': sum(1 for r in results if r['onR2'])}
+
+
+@router.post('/destinations/upload-image')
+async def admin_upload_destination(
+    country: str = Query(..., description='Country name'),
+    file: UploadFile = File(...),
+    _=Depends(get_current_admin),
+):
+    """Upload a single destination image to R2 (replaces existing if any)."""
+    cfg = await _get_r2_settings()
+    client, bucket, public_url = _r2_client_from_cfg(cfg)
+
+    manifest = _load_manifest()
+    entry = next((e for e in manifest if e['country'].lower() == country.lower()), None)
+    if not entry:
+        raise HTTPException(404, f'Country "{country}" not found in manifest')
+
+    filename = entry['filename']
+    content = await file.read()
+    key = f'destinations/{filename}'
+
+    client.put_object(Bucket=bucket, Key=key, Body=content, ContentType=file.content_type or 'image/webp')
+    url = f'{public_url}/{key}' if public_url else ''
+
+    return {'filename': filename, 'country': country, 'url': url}
+
+
+@router.post('/destinations/regenerate')
+async def admin_regenerate_destination(
+    country: str = Query(..., description='Country name'),
+    _=Depends(get_current_admin),
+):
+    """Regenerate a destination image via Together AI and upload to R2."""
+    manifest = _load_manifest()
+    entry = next((e for e in manifest if e['country'].lower() == country.lower()), None)
+    if not entry:
+        raise HTTPException(404, f'Country "{country}" not found in manifest')
+
+    # Read R2 settings + Together key
+    cfg = await _get_r2_settings()
+    client, bucket, public_url = _r2_client_from_cfg(cfg)
+
+    together_key = os.environ.get('TOGETHER_API_KEY', '')
+    if not together_key:
+        raise HTTPException(400, 'TOGETHER_API_KEY environment variable not set')
+
+    # Build prompt
+    style_suffix = (
+        'Premium travel destination artwork in modern flat-vector style blended with semi-realistic digital painting. '
+        'Golden hour warm sunlight, deep blue sky with soft white clouds, vibrant yet elegant color palette. '
+        'Clean composition with the main landmark centered, plenty of breathing room around the subject. '
+        'Highly detailed architecture and landscape elements. '
+        'STRICT RULES: Absolutely NO text, NO letters, NO words, NO numbers, NO typography of any kind. '
+        'NO flags, NO logos, NO watermarks, NO people crowds. '
+        'Portrait 2:3 vertical orientation suitable for a luxury travel card.'
+    )
+    prompt = f'Premium travel illustration of {entry["country"]}: {entry["landmark"]}. {style_suffix}'
+
+    # Call Together AI
+    resp = _httpx.post(
+        'https://api.together.xyz/v1/images/generations',
+        json={
+            'model': 'black-forest-labs/FLUX.1-schnell',
+            'prompt': prompt,
+            'width': 1024,
+            'height': 1536,
+            'steps': 8,
+            'n': 1,
+        },
+        headers={'Authorization': f'Bearer {together_key}', 'Content-Type': 'application/json'},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    item = data.get('data', [{}])[0]
+    b64 = item.get('b64_json')
+    if isinstance(b64, str):
+        image_data = _b64.b64decode(b64)
+    elif b64:
+        image_data = b64
+    elif item.get('url'):
+        r = _httpx.get(item['url'], timeout=60)
+        r.raise_for_status()
+        image_data = r.content
+    else:
+        raise HTTPException(502, 'AI generation returned no image data')
+
+    # Upload to R2
+    filename = entry['filename']
+    key = f'destinations/{filename}'
+    client.put_object(Bucket=bucket, Key=key, Body=image_data, ContentType='image/webp')
+    url = f'{public_url}/{key}' if public_url else ''
+
+    # Also save locally
+    local_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'public', 'images', 'destinations', filename)
+    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+    with open(local_path, 'wb') as f:
+        f.write(image_data)
+
+    return {'filename': filename, 'country': country, 'url': url, 'size_kb': round(len(image_data) / 1024)}
+
+
+@router.delete('/destinations/r2-image')
+async def admin_delete_r2_destination(
+    country: str = Query(..., description='Country name'),
+    _=Depends(get_current_admin),
+):
+    """Delete a destination image from R2."""
+    cfg = await _get_r2_settings()
+    client, bucket, _ = _r2_client_from_cfg(cfg)
+
+    manifest = _load_manifest()
+    entry = next((e for e in manifest if e['country'].lower() == country.lower()), None)
+    if not entry:
+        raise HTTPException(404, f'Country "{country}" not found in manifest')
+
+    key = f'destinations/{entry["filename"]}'
+    client.delete_object(Bucket=bucket, Key=key)
+    return {'filename': entry['filename'], 'country': country, 'deleted': True}
 
 
 # ---------- exports ----------
