@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   Loader2, Upload, Cloud, CheckCircle2, XCircle, Image as ImageIcon,
-  Search, Trash2, RefreshCw, FileUp, X,
+  Search, Trash2, RefreshCw, FileUp, X, Database,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -126,6 +126,7 @@ export default function DestinationsTab() {
   const [r2Status, setR2Status] = useState({});
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [results, setResults] = useState(null);
   const [search, setSearch] = useState('');
   const [preview, setPreview] = useState(null);
@@ -155,6 +156,20 @@ export default function DestinationsTab() {
   }, []);
 
   useEffect(() => { fetchAll(); }, []);
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      const client = adminClient();
+      await client.post('/destinations/seed-manifest');
+      toast({ title: 'Manifest seeded successfully', variant: 'success' });
+      fetchAll();
+    } catch (e) {
+      toast({ title: 'Seed failed', description: e.response?.data?.detail || e.message, variant: 'error' });
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const handleSync = async () => {
     setSyncing(true);
@@ -196,7 +211,7 @@ export default function DestinationsTab() {
     <div>
       <AdminHeader
         title="Destination Images"
-        subtitle="Manage 252 AI-generated country illustrations — upload, regenerate, or sync to Cloudflare R2 CDN"
+        subtitle={`Manage ${items.length || '...'} AI-generated country illustrations — upload, regenerate, or sync to Cloudflare R2 CDN`}
         right={
           <button
             onClick={handleSync}
@@ -313,7 +328,22 @@ export default function DestinationsTab() {
           })}
         </div>
 
-        {filtered.length === 0 && (
+        {items.length === 0 && (
+          <div className="text-center py-16 text-slate-500">
+            <Database className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <p className="text-[16px] font-bold text-white mb-1">No Destination Data</p>
+            <p className="text-[13px] mb-5">manifest.json not found on server. Seed the data from the Git repository.</p>
+            <button
+              onClick={handleSeed}
+              disabled={seeding}
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 text-white font-bold text-[13px] transition"
+            >
+              {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+              {seeding ? 'Seeding...' : 'Seed Manifest from Repo'}
+            </button>
+          </div>
+        )}
+        {items.length > 0 && filtered.length === 0 && (
           <div className="text-center py-16 text-slate-500">
             <ImageIcon className="w-8 h-8 mx-auto mb-3 opacity-50" />
             <p className="text-[14px] font-semibold">No countries match "{search}"</p>

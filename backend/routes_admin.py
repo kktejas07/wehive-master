@@ -730,20 +730,52 @@ async def admin_update_settings(namespace: str, payload: NamespaceSettings, _=De
 
 
 # ---------- destinations (destination images) ----------
-MANIFEST_PATH = os.path.join(os.path.dirname(__file__), '..', 'destination-illustrations', 'manifest.json')
+MANIFEST_COLLECTION_ID = 'destinations_manifest'
 
 
-def _load_manifest():
-    if os.path.exists(MANIFEST_PATH):
-        with open(MANIFEST_PATH) as f:
+def _find_manifest_file():
+    base = os.path.dirname(os.path.abspath(__file__))
+    for candidate in [
+        os.path.join(base, '..', 'destination-illustrations', 'manifest.json'),
+        os.path.join(base, '..', '..', 'destination-illustrations', 'manifest.json'),
+        os.path.join(base, 'manifest.json'),
+        '/app/destination-illustrations/manifest.json',
+    ]:
+        if os.path.exists(candidate):
+            return candidate
+    return None
+
+
+async def _load_manifest():
+    path = _find_manifest_file()
+    if path:
+        with open(path) as f:
             return _json.load(f)
-    return []
+    doc = await settings_col.find_one({'_id': MANIFEST_COLLECTION_ID})
+    return (doc or {}).get('items', [])
 
 
 @router.get('/destinations')
 async def admin_list_destinations(_=Depends(get_current_admin)):
     """Return all destination images from the manifest."""
-    return {'items': _load_manifest(), 'total': len(_load_manifest())}
+    items = await _load_manifest()
+    return {'items': items, 'total': len(items)}
+
+
+@router.post('/destinations/seed-manifest')
+async def admin_seed_manifest(_=Depends(get_current_admin)):
+    """Seed manifest into DB from local file for production environments where the file may not exist."""
+    path = _find_manifest_file()
+    if not path:
+        raise HTTPException(404, 'manifest.json not found on server — upload it manually via the Destinations tab')
+    with open(path) as f:
+        items = _json.load(f)
+    await settings_col.replace_one(
+        {'_id': MANIFEST_COLLECTION_ID},
+        {'_id': MANIFEST_COLLECTION_ID, 'items': items},
+        upsert=True,
+    )
+    return {'seeded': len(items), 'source': path}
 
 
 @router.post('/destinations/sync-to-r2')
@@ -777,7 +809,7 @@ async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
         config=Config(signature_version='s3v4', retries={'max_attempts': 3}),
     )
 
-    manifest = _load_manifest()
+    manifest = await _load_manifest()
     results = []
     base_url = 'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations'
 
@@ -848,7 +880,7 @@ async def admin_r2_status(_=Depends(get_current_admin)):
     """Check which destination images exist on R2."""
     cfg = await _get_r2_settings()
     client, bucket, _ = _r2_client_from_cfg(cfg)
-    manifest = _load_manifest()
+    manifest = await _load_manifest()
     results = []
     for entry in manifest:
         filename = entry['filename']
@@ -871,7 +903,7 @@ async def admin_upload_destination(
     cfg = await _get_r2_settings()
     client, bucket, public_url = _r2_client_from_cfg(cfg)
 
-    manifest = _load_manifest()
+    manifest = await _load_manifest()
     entry = next((e for e in manifest if e['country'].lower() == country.lower()), None)
     if not entry:
         raise HTTPException(404, f'Country "{country}" not found in manifest')
@@ -892,7 +924,7 @@ async def admin_regenerate_destination(
     _=Depends(get_current_admin),
 ):
     """Regenerate a destination image via Together AI and upload to R2."""
-    manifest = _load_manifest()
+    manifest = await _load_manifest()
     entry = next((e for e in manifest if e['country'].lower() == country.lower()), None)
     if not entry:
         raise HTTPException(404, f'Country "{country}" not found in manifest')
@@ -970,7 +1002,7 @@ async def admin_delete_r2_destination(
     cfg = await _get_r2_settings()
     client, bucket, _ = _r2_client_from_cfg(cfg)
 
-    manifest = _load_manifest()
+    manifest = await _load_manifest()
     entry = next((e for e in manifest if e['country'].lower() == country.lower()), None)
     if not entry:
         raise HTTPException(404, f'Country "{country}" not found in manifest')
