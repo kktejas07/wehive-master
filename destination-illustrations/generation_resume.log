@@ -1,0 +1,158 @@
+Model: black-forest-labs/FLUX.1-schnell
+Size: 1024x1536
+Total countries: 220
+
+[95/220] uganda.webp
+  Uganda — Murchison Falls on Victoria Nile river
+  Generating... OK (142 KB)
+[96/220] SKIP  botswana.webp — already exists
+[97/220] SKIP  namibia.webp — already exists
+[98/220] SKIP  mozambique.webp — already exists
+[99/220] SKIP  angola.webp — already exists
+[100/220] SKIP  algeria.webp — already exists
+[101/220] SKIP  tunisia.webp — already exists
+[102/220] SKIP  sudan.webp — already exists
+[103/220] SKIP  senegal.webp — already exists
+[104/220] SKIP  ivory-coast.webp — already exists
+[105/220] SKIP  cameroon.webp — already exists
+[106/220] SKIP  madagascar.webp — already exists
+[107/220] SKIP  malawi.webp — already exists
+[108/220] SKIP  mauritania.webp — already exists
+[109/220] SKIP  lesotho.webp — already exists
+[110/220] SKIP  eswatini.webp — already exists
+[111/220] SKIP  djibouti.webp — already exists
+[112/220] SKIP  somalia.webp — already exists
+[113/220] SKIP  congo.webp — already exists
+[114/220] dr-congo.webp
+  DR Congo — Mount Nyiragongo lava glow over Goma
+  Generating... OK (152 KB)
+[115/220] SKIP  liberia.webp — already exists
+[116/220] SKIP  sierra-leone.webp — already exists
+[117/220] SKIP  togo.webp — already exists
+[118/220] SKIP  benin.webp — already exists
+[119/220] SKIP  burkina-faso.webp — already exists
+[120/220] SKIP  niger.webp — already exists
+[121/220] SKIP  mali.webp — already exists
+[122/220] SKIP  chad.webp — already exists
+[123/220] central-african-republic.webp
+  Central African Republic — Dzanga Sangha rainforest and forest elephants
+  Generating... OK (116 KB)
+[124/220] SKIP  equatorial-guinea.webp — already exists
+[125/220] SKIP  gabon.webp — already exists
+[126/220] SKIP  cape-verde.webp — already exists
+[127/220] SKIP  comoros.webp — already exists
+[128/220] SKIP  sao-tome-and-principe.webp — already exists
+[129/220] SKIP  south-sudan.webp — already exists
+[130/220] SKIP  eritrea.webp — already exists
+[131/220] SKIP  kuwait.webp — already exists
+[132/220] SKIP  jordan.webp — already exists
+[133/220] SKIP  lebanon.webp — already exists
+[134/220] SKIP  cyprus.webp — already exists
+[135/220] SKIP  malta.webp — already exists
+[136/220] SKIP  luxembourg.webp — already exists
+[137/220] SKIP  monaco.webp — already exists
+[138/220] SKIP  liechtenstein.webp — already exists
+[139/220] SKIP  andorra.webp — already exists
+[140/220] SKIP  san-marino.webp — already exists
+[141/220] SKIP  vatican-city.webp — already exists
+[142/220] SKIP  belarus.webp — already exists
+[143/220] SKIP  moldova.webp — already exists
+[144/220] SKIP  lithuania.webp — already exists
+[145/220] latvia.webp
+  Latvia — Riga central market and Daugava River skyline
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[146/220] SKIP  estonia.webp — already exists
+[147/220] SKIP  slovakia.webp — already exists
+[148/220] SKIP  slovenia.webp — already exists
+[149/220] SKIP  serbia.webp — already exists
+[150/220] SKIP  bosnia-and-herzegovina.webp — already exists
+[151/220] SKIP  montenegro.webp — already exists
+[152/220] SKIP  north-macedonia.webp — already exists
+[153/220] SKIP  albania.webp — already exists
+[154/220] SKIP  kosovo.webp — already exists
+[155/220] SKIP  afghanistan.webp — already exists
+[156/220] SKIP  pakistan.webp — already exists
+[157/220] SKIP  bangladesh.webp — already exists
+[158/220] iran.webp
+  Iran — Nasir al-Mulk Pink Mosque stained glass interior
+  Generating... OK (157 KB)
+[159/220] SKIP  iraq.webp — already exists
+[160/220] SKIP  syria.webp — already exists
+[161/220] SKIP  yemen.webp — already exists
+[162/220] SKIP  turkmenistan.webp — already exists
+[163/220] SKIP  kyrgyzstan.webp — already exists
+[164/220] SKIP  tajikistan.webp — already exists
+[165/220] SKIP  timor-leste.webp — already exists
+[166/220] papua-new-guinea.webp
+  Papua New Guinea — Kokoda Track jungle and Owen Stanley Range
+  Generating... OK (226 KB)
+[167/220] SKIP  solomon-islands.webp — already exists
+[168/220] SKIP  vanuatu.webp — already exists
+[169/220] SKIP  samoa.webp — already exists
+[170/220] SKIP  tonga.webp — already exists
+[171/220] SKIP  palau.webp — already exists
+[172/220] SKIP  micronesia.webp — already exists
+[173/220] marshall-islands.webp
+  Marshall Islands — Bikini Atoll coral reef and crystal lagoon
+  Generating... OK (133 KB)
+[174/220] SKIP  kiribati.webp — already exists
+[175/220] SKIP  nauru.webp — already exists
+[176/220] SKIP  tuvalu.webp — already exists
+[177/220] SKIP  cook-islands.webp — already exists
+[178/220] niue.webp
+  Niue — Limu Pools coral rock formations at coastline
+  Generating... OK (143 KB)
+[179/220] SKIP  cuba.webp — already exists
+[180/220] SKIP  haiti.webp — already exists
+[181/220] SKIP  dominica.webp — already exists
+[182/220] SKIP  saint-lucia.webp — already exists
+[183/220] SKIP  saint-kitts-and-nevis.webp — already exists
+[184/220] SKIP  saint-vincent-and-the-grenadines.webp — already exists
+[185/220] SKIP  grenada.webp — already exists
+[186/220] SKIP  antigua-and-barbuda.webp — already exists
+[187/220] SKIP  trinidad-and-tobago.webp — already exists
+[188/220] SKIP  belize.webp — already exists
+[189/220] SKIP  guatemala.webp — already exists
+[190/220] SKIP  honduras.webp — already exists
+[191/220] SKIP  el-salvador.webp — already exists
+[192/220] SKIP  nicaragua.webp — already exists
+[193/220] SKIP  puerto-rico.webp — already exists
+[194/220] guam.webp
+  Guam — Two Lovers Point cliff and Philippine Sea vista
+  Generating... OK (172 KB)
+[195/220] american-samoa.webp
+  American Samoa — Ofu Island white sand beach and turquoise reef
+  Generating... OK (177 KB)
+[196/220] SKIP  northern-mariana-islands.webp — already exists
+[197/220] SKIP  us-virgin-islands.webp — already exists
+[198/220] SKIP  british-virgin-islands.webp — already exists
+[199/220] SKIP  cayman-islands.webp — already exists
+[200/220] SKIP  bermuda.webp — already exists
+[201/220] SKIP  gibraltar.webp — already exists
+[202/220] SKIP  faroe-islands.webp — already exists
+[203/220] SKIP  greenland.webp — already exists
+[204/220] SKIP  aruba.webp — already exists
+[205/220] SKIP  curacao.webp — already exists
+[206/220] SKIP  sint-maarten.webp — already exists
+[207/220] SKIP  bonaire.webp — already exists
+[208/220] SKIP  reunion.webp — already exists
+[209/220] SKIP  mayotte.webp — already exists
+[210/220] SKIP  new-caledonia.webp — already exists
+[211/220] SKIP  french-polynesia.webp — already exists
+[212/220] SKIP  wallis-and-futuna.webp — already exists
+[213/220] SKIP  st-pierre-and-miquelon.webp — already exists
+[214/220] SKIP  st-barthelemy.webp — already exists
+[215/220] SKIP  st-martin.webp — already exists
+[216/220] SKIP  anguilla.webp — already exists
+[217/220] SKIP  montserrat.webp — already exists
+[218/220] SKIP  turks-and-caicos.webp — already exists
+[219/220] falkland-islands.webp
+  Falkland Islands — Stanley harbor and rolling green South Atlantic hills
+  Generating... OK (137 KB)
+[220/220] south-georgia.webp
+  South Georgia — Grytviken whaling station and snow-covered peaks
+  Generating... OK (117 KB)
+
+Done. Generated: 11, Skipped: 114, Total: 220

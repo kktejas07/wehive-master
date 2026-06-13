@@ -1,112 +1,359 @@
 /**
- * Curated landmark photo per ISO-2 / id.
- * Sourced from Unsplash. Free for commercial use under the Unsplash License.
- * Add more entries here as the catalogue grows.
+ * Destination image lookup per ISO-2 country code.
+ * Prefers local AI-generated illustrations; falls back to Unsplash stock photos
+ * or the mock data / Wikipedia API.
  */
+
 const U = (id, w = 900) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-// Keys are lowercase ISO-2 (also used as our internal `id`).
-export const LANDMARKS = {
-  us: U('photo-1485871981521-5b1fd3805eee'),                 // Statue of Liberty
-  uk: U('photo-1529655683826-aba9b3e77383'),                 // Big Ben
-  gb: U('photo-1529655683826-aba9b3e77383'),
-  jp: U('photo-1493976040374-85c8e12f0c0e'),                 // Tokyo Tower
-  fr: U('photo-1502602898657-3e91760cbb34'),                 // Eiffel Tower
-  sg: U('photo-1565967511849-76a60a516170'),                 // Marina Bay
-  ae: U('photo-1512453979798-5ea266f8880c'),                 // Burj Khalifa
-  au: U('photo-1506973035872-a4ec16b8e8d9'),                 // Sydney Opera House
-  ca: U('photo-1503614472-8c93d56e92ce'),                    // Niagara
-  it: U('photo-1552832230-c0197dd311b5'),                    // Colosseum
-  ch: U('photo-1530841377377-3ff06c0ca713'),                 // Matterhorn
-  th: U('photo-1528181304800-259b08848526'),                 // Grand Palace
-  de: U('photo-1467269204594-9661b134dd2b'),                 // Brandenburg Gate
-  np: U('photo-1605640840605-14ac1855827b'),                 // Himalayas
-  bt: U('photo-1573483587902-9c7adb3ca80e'),                 // Tiger's Nest
-  in: U('photo-1564507592333-c60657eea523'),                 // Taj Mahal
-  cn: U('photo-1508804185872-d7badad00f7d'),                 // Great Wall
-  kr: U('photo-1538485399081-7191377e8241'),                 // Gyeongbokgung
-  es: U('photo-1543783207-ec64e4d95325'),                    // Sagrada Familia
-  pt: U('photo-1518733057094-95b53143d2a7'),                 // Lisbon
-  gr: U('photo-1469796466635-455ede028aca'),                 // Santorini
-  tr: U('photo-1524231757912-21f4fe3a7200'),                 // Hagia Sophia
-  eg: U('photo-1539650116574-75c0c6d73f6e'),                 // Pyramids
-  za: U('photo-1545906198-b91dba30c2bf'),                    // Table Mountain
-  br: U('photo-1483729558449-99ef09a8c325'),                 // Christ the Redeemer
-  mx: U('photo-1518105779142-d975f22f1b0a'),                 // Chichen Itza
-  ar: U('photo-1589909202802-8f4aadce1849'),                 // Buenos Aires
-  pe: U('photo-1531065208531-4036c0dba3ca'),                 // Machu Picchu
-  ru: U('photo-1513326738677-b964603b136d'),                 // St Basil's
-  nl: U('photo-1534351590666-13e3e96c5017'),                 // Amsterdam canals
-  be: U('photo-1559113202-c916b8e44373'),                    // Brussels Grand Place
-  at: U('photo-1516550893923-42d28e5677af'),                 // Vienna
-  cz: U('photo-1519677100203-a0e668c92439'),                 // Prague
-  pl: U('photo-1519197924294-4ba991a11128'),                 // Warsaw
-  hu: U('photo-1541343672885-9be56236302a'),                 // Budapest
-  ie: U('photo-1551959607-edf03c10403c'),                    // Cliffs of Moher
-  is: U('photo-1504829857797-ddff29c27927'),                 // Iceland
-  no: U('photo-1502790671504-542ad42d5189'),                 // Norway fjords
-  se: U('photo-1509356843151-3e7d96241e11'),                 // Stockholm
-  fi: U('photo-1551817958-d9d86fb29431'),                    // Helsinki / aurora
-  dk: U('photo-1513622470522-26c3c8a854bc'),                 // Copenhagen
-  vn: U('photo-1528127269322-539801943592'),                 // Ha Long Bay
-  id: U('photo-1537996194471-76f2285d6b4f'),                 // Bali
-  my: U('photo-1596422846543-75c6fc197f07'),                 // Petronas Towers
-  ph: U('photo-1518509562904-e7ef99cddc85'),                 // Manila / beaches
-  lk: U('photo-1581275288578-bda6f3bb3b1f'),                 // Sigiriya
-  mv: U('photo-1514282401047-d79a71a590e8'),                 // Maldives
-  nz: U('photo-1507699622108-4be3abd695ad'),                 // Milford Sound
-  ke: U('photo-1547471080-7cc2caa01a7e'),                    // Maasai Mara
-  tz: U('photo-1516426122078-c23e76319801'),                 // Kilimanjaro
-  ma: U('photo-1489749798305-4fea3ae63d43'),                 // Marrakech
-  jo: U('photo-1580537659466-0a9bfa916a54'),                 // Petra
-  il: U('photo-1544734858-87fdce5ddc15'),                    // Jerusalem
-  qa: U('photo-1589828994425-a83f2f9b0eaa'),                 // Doha
-  sa: U('photo-1586724237569-f3d0c1dee8c6'),                 // Riyadh
-  om: U('photo-1588419661471-4f1d1f4f0e4b'),                  // Muscat / Sultan Qaboos Grand Mosque
-  kw: U('photo-1584422523916-87b8c7f89367'),                   // Kuwait City
-  bh: U('photo-1539020140153-e479b8c22e70'),                  // Bahrain
-  lb: U('photo-1570097703229-b195d6dd291f'),                  // Beirut (use Paris as placeholder)
-  rs: U('photo-1558618666-fcd25c85cd64'),                     // Belgrade / Fortress
-  me: U('photo-1570097703229-b195d6dd291f'),                  // Montenegro (use placeholder)
-  cr: U('photo-1552252275-9ef012678fc2'),                     // Costa Rica
-  co: U('photo-1580684272966-13d5c50f6c85'),                  // Bogota / Monserrate
-  cl: U('photo-1540979382583-198a80a276ab'),                  // Santiago
-  ec: U('photo-1580684272966-13d5c50f6c85'),                  // Quito (placeholder)
-  gh: U('photo-1547471080-7cc2caa01a7e'),                     // Ghana (use Kenya placeholder)
-  ng: U('photo-1544893908-9e6f0f8e0b9a'),                     // Lagos
-  et: U('photo-1547471080-7cc2caa01a7e'),                      // Ethiopia (placeholder)
-  zw: U('photo-1544893908-9e6f0f8e0b9a'),                     // Zimbabwe / Victoria Falls
-  zm: U('photo-1544893908-9e6f0c8e0b9a'),                     // Zambia
-  ug: U('photo-1547471080-7cc2caa01a7e'),                     // Uganda
-  rw: U('photo-1544893908-9e6f0f8e0b9a'),                      // Rwanda
-  mm: U('photo-1550159930-40066082a4fc'),                     // Myanmar / Shwedagon
-  kh: U('photo-1537956969539-0d1c8e5a8e8c'),                   // Cambodia / Angkor Wat
-  la: U('photo-1508009603889-5773c0c9e00c'),                  // Laos / Luang Prabang
-  bd: U('photo-1550159930-40066082a4fc'),                     // Bangladesh (placeholder)
-  pk: U('photo-1550159930-40066082a4fc'),                     // Pakistan (placeholder)
-  ye: U('photo-1544893908-9e6f0f8e0b9a'),                     // Yemen
-  sy: U('photo-1544734858-87fdce5ddc15'),                     // Syria (placeholder)
-  iq: U('photo-1544734858-87fdce5ddc15'),                     // Iraq (placeholder)
-  af: U('photo-1544893908-9e6f0f8e0b9a'),                     // Afghanistan
-  az: U('photo-1558618666-fcd25c85cd64'),                     // Azerbaijan / Baku
-  ge: U('photo-1558618666-fcd25c85cd64'),                     // Georgia
-  uz: U('photo-1558618666-fcd25c85cd64'),                     // Uzbekistan
-  kz: U('photo-1558618666-fcd25c85cd64'),                     // Kazakhstan
-  kg: U('photo-1558618666-fcd25c85cd64'),                     // Kyrgyzstan
-  tj: U('photo-1558618666-fcd25c85cd64'),                     // Tajikistan
-  tm: U('photo-1558618666-fcd25c85cd64'),                     // Turkmenistan
-  al: U('photo-1580537659466-0a9bfa916a54'),                   // Albania
-  mk: U('photo-1580537659466-0a9bfa916a54'),                  // North Macedonia
-  ba: U('photo-1580537659466-0a9bfa916a54'),                   // Bosnia
-  xk: U('photo-1580537659466-0a9bfa916a54'),                  // Kosovo
-  ua: U('photo-1558618666-fcd25c85cd64'),                      // Ukraine
-  by: U('photo-1558618666-fcd25c85cd64'),                      // Belarus
-  am: U('photo-1558618666-fcd25c85cd64'),                     // Armenia
+// Local AI-generated destination illustrations (241 countries, 2:3 portrait).
+// Generated via Flux on Together AI — see /destination-illustrations/.
+export const LOCALS = {
+  'ad': '/images/destinations/andorra.webp',
+  'ae': '/images/destinations/united-arab-emirates.webp',
+  'af': '/images/destinations/afghanistan.webp',
+  'ag': '/images/destinations/antigua-and-barbuda.webp',
+  'ai': '/images/destinations/anguilla.webp',
+  'al': '/images/destinations/albania.webp',
+  'am': '/images/destinations/armenia.webp',
+  'ao': '/images/destinations/angola.webp',
+  'aq': '/images/destinations/antarctica.webp',
+  'ar': '/images/destinations/argentina.webp',
+  'as': '/images/destinations/american-samoa.webp',
+  'at': '/images/destinations/austria.webp',
+  'au': '/images/destinations/australia.webp',
+  'aw': '/images/destinations/aruba.webp',
+  'ax': '/images/destinations/aland-islands.webp',
+  'az': '/images/destinations/azerbaijan.webp',
+  'ba': '/images/destinations/bosnia-and-herzegovina.webp',
+  'bb': '/images/destinations/barbados.webp',
+  'bd': '/images/destinations/bangladesh.webp',
+  'be': '/images/destinations/belgium.webp',
+  'bf': '/images/destinations/burkina-faso.webp',
+  'bg': '/images/destinations/bulgaria.webp',
+  'bh': '/images/destinations/bahrain.webp',
+  'bi': '/images/destinations/burundi.webp',
+  'bj': '/images/destinations/benin.webp',
+  'bl': '/images/destinations/st-barthelemy.webp',
+  'bm': '/images/destinations/bermuda.webp',
+  'bn': '/images/destinations/brunei.webp',
+  'bo': '/images/destinations/bolivia.webp',
+  'br': '/images/destinations/brazil.webp',
+  'bs': '/images/destinations/bahamas.webp',
+  'bt': '/images/destinations/bhutan.webp',
+  'bw': '/images/destinations/botswana.webp',
+  'by': '/images/destinations/belarus.webp',
+  'bz': '/images/destinations/belize.webp',
+  'ca': '/images/destinations/canada.webp',
+  'cd': '/images/destinations/dr-congo.webp',
+  'cf': '/images/destinations/central-african-republic.webp',
+  'ch': '/images/destinations/switzerland.webp',
+  'ci': '/images/destinations/ivory-coast.webp',
+  'ck': '/images/destinations/cook-islands.webp',
+  'cl': '/images/destinations/chile.webp',
+  'cm': '/images/destinations/cameroon.webp',
+  'cn': '/images/destinations/china.webp',
+  'co': '/images/destinations/colombia.webp',
+  'cr': '/images/destinations/costa-rica.webp',
+  'cu': '/images/destinations/cuba.webp',
+  'cv': '/images/destinations/cape-verde.webp',
+  'cx': '/images/destinations/christmas-island.webp',
+  'cy': '/images/destinations/cyprus.webp',
+  'cz': '/images/destinations/czech-republic.webp',
+  'de': '/images/destinations/germany.webp',
+  'dj': '/images/destinations/djibouti.webp',
+  'dk': '/images/destinations/denmark.webp',
+  'dm': '/images/destinations/dominica.webp',
+  'do': '/images/destinations/dominican-republic.webp',
+  'dz': '/images/destinations/algeria.webp',
+  'ec': '/images/destinations/ecuador.webp',
+  'ee': '/images/destinations/estonia.webp',
+  'eg': '/images/destinations/egypt.webp',
+  'eh': '/images/destinations/western-sahara.webp',
+  'er': '/images/destinations/eritrea.webp',
+  'es': '/images/destinations/spain.webp',
+  'et': '/images/destinations/ethiopia.webp',
+  'fi': '/images/destinations/finland.webp',
+  'fj': '/images/destinations/fiji.webp',
+  'fk': '/images/destinations/falkland-islands.webp',
+  'fm': '/images/destinations/micronesia.webp',
+  'fo': '/images/destinations/faroe-islands.webp',
+  'fr': '/images/destinations/france.webp',
+  'ga': '/images/destinations/gabon.webp',
+  'gb': '/images/destinations/united-kingdom.webp',
+  'gd': '/images/destinations/grenada.webp',
+  'ge': '/images/destinations/georgia.webp',
+  'gf': '/images/destinations/french-guiana.webp',
+  'gg': '/images/destinations/guernsey.webp',
+  'gh': '/images/destinations/ghana.webp',
+  'gi': '/images/destinations/gibraltar.webp',
+  'gl': '/images/destinations/greenland.webp',
+  'gm': '/images/destinations/gambia.webp',
+  'gn': '/images/destinations/guinea.webp',
+  'gp': '/images/destinations/guadeloupe.webp',
+  'gq': '/images/destinations/equatorial-guinea.webp',
+  'gr': '/images/destinations/greece.webp',
+  'gs': '/images/destinations/south-georgia.webp',
+  'gt': '/images/destinations/guatemala.webp',
+  'gu': '/images/destinations/guam.webp',
+  'gw': '/images/destinations/guinea-bissau.webp',
+  'gy': '/images/destinations/guyana.webp',
+  'hk': '/images/destinations/hong-kong.webp',
+  'hn': '/images/destinations/honduras.webp',
+  'hr': '/images/destinations/croatia.webp',
+  'ht': '/images/destinations/haiti.webp',
+  'hu': '/images/destinations/hungary.webp',
+  'id': '/images/destinations/indonesia.webp',
+  'ie': '/images/destinations/ireland.webp',
+  'il': '/images/destinations/israel.webp',
+  'im': '/images/destinations/isle-of-man.webp',
+  'in': '/images/destinations/india.webp',
+  'iq': '/images/destinations/iraq.webp',
+  'ir': '/images/destinations/iran.webp',
+  'is': '/images/destinations/iceland.webp',
+  'it': '/images/destinations/italy.webp',
+  'je': '/images/destinations/jersey.webp',
+  'jm': '/images/destinations/jamaica.webp',
+  'jo': '/images/destinations/jordan.webp',
+  'jp': '/images/destinations/japan.webp',
+  'ke': '/images/destinations/kenya.webp',
+  'kg': '/images/destinations/kyrgyzstan.webp',
+  'kh': '/images/destinations/cambodia.webp',
+  'ki': '/images/destinations/kiribati.webp',
+  'km': '/images/destinations/comoros.webp',
+  'kn': '/images/destinations/saint-kitts-and-nevis.webp',
+  'kp': '/images/destinations/north-korea.webp',
+  'kr': '/images/destinations/south-korea.webp',
+  'kw': '/images/destinations/kuwait.webp',
+  'ky': '/images/destinations/cayman-islands.webp',
+  'kz': '/images/destinations/kazakhstan.webp',
+  'la': '/images/destinations/laos.webp',
+  'lb': '/images/destinations/lebanon.webp',
+  'lc': '/images/destinations/saint-lucia.webp',
+  'li': '/images/destinations/liechtenstein.webp',
+  'lk': '/images/destinations/sri-lanka.webp',
+  'lr': '/images/destinations/liberia.webp',
+  'ls': '/images/destinations/lesotho.webp',
+  'lt': '/images/destinations/lithuania.webp',
+  'lu': '/images/destinations/luxembourg.webp',
+  'lv': '/images/destinations/latvia.webp',
+  'ly': '/images/destinations/libya.webp',
+  'ma': '/images/destinations/morocco.webp',
+  'mc': '/images/destinations/monaco.webp',
+  'md': '/images/destinations/moldova.webp',
+  'me': '/images/destinations/montenegro.webp',
+  'mf': '/images/destinations/st-martin.webp',
+  'mg': '/images/destinations/madagascar.webp',
+  'mh': '/images/destinations/marshall-islands.webp',
+  'mk': '/images/destinations/north-macedonia.webp',
+  'ml': '/images/destinations/mali.webp',
+  'mm': '/images/destinations/myanmar.webp',
+  'mn': '/images/destinations/mongolia.webp',
+  'mo': '/images/destinations/macau.webp',
+  'mp': '/images/destinations/northern-mariana-islands.webp',
+  'mq': '/images/destinations/martinique.webp',
+  'mr': '/images/destinations/mauritania.webp',
+  'ms': '/images/destinations/montserrat.webp',
+  'mt': '/images/destinations/malta.webp',
+  'mu': '/images/destinations/mauritius.webp',
+  'mv': '/images/destinations/maldives.webp',
+  'mw': '/images/destinations/malawi.webp',
+  'mx': '/images/destinations/mexico.webp',
+  'my': '/images/destinations/malaysia.webp',
+  'mz': '/images/destinations/mozambique.webp',
+  'na': '/images/destinations/namibia.webp',
+  'nc': '/images/destinations/new-caledonia.webp',
+  'ne': '/images/destinations/niger.webp',
+  'nf': '/images/destinations/norfolk-island.webp',
+  'ng': '/images/destinations/nigeria.webp',
+  'ni': '/images/destinations/nicaragua.webp',
+  'nl': '/images/destinations/netherlands.webp',
+  'no': '/images/destinations/norway.webp',
+  'np': '/images/destinations/nepal.webp',
+  'nr': '/images/destinations/nauru.webp',
+  'nu': '/images/destinations/niue.webp',
+  'nz': '/images/destinations/new-zealand.webp',
+  'om': '/images/destinations/oman.webp',
+  'pa': '/images/destinations/panama.webp',
+  'pe': '/images/destinations/peru.webp',
+  'pf': '/images/destinations/french-polynesia.webp',
+  'pg': '/images/destinations/papua-new-guinea.webp',
+  'ph': '/images/destinations/philippines.webp',
+  'pk': '/images/destinations/pakistan.webp',
+  'pl': '/images/destinations/poland.webp',
+  'pm': '/images/destinations/st-pierre-and-miquelon.webp',
+  'pr': '/images/destinations/puerto-rico.webp',
+  'ps': '/images/destinations/palestine.webp',
+  'pt': '/images/destinations/portugal.webp',
+  'pw': '/images/destinations/palau.webp',
+  'py': '/images/destinations/paraguay.webp',
+  'qa': '/images/destinations/qatar.webp',
+  're': '/images/destinations/reunion.webp',
+  'ro': '/images/destinations/romania.webp',
+  'rs': '/images/destinations/serbia.webp',
+  'ru': '/images/destinations/russia.webp',
+  'rw': '/images/destinations/rwanda.webp',
+  'sa': '/images/destinations/saudi-arabia.webp',
+  'sb': '/images/destinations/solomon-islands.webp',
+  'sc': '/images/destinations/seychelles.webp',
+  'sd': '/images/destinations/sudan.webp',
+  'se': '/images/destinations/sweden.webp',
+  'sg': '/images/destinations/singapore.webp',
+  'sh': '/images/destinations/saint-helena.webp',
+  'si': '/images/destinations/slovenia.webp',
+  'sj': '/images/destinations/svalbard.webp',
+  'sk': '/images/destinations/slovakia.webp',
+  'sl': '/images/destinations/sierra-leone.webp',
+  'sm': '/images/destinations/san-marino.webp',
+  'sn': '/images/destinations/senegal.webp',
+  'so': '/images/destinations/somalia.webp',
+  'sr': '/images/destinations/suriname.webp',
+  'ss': '/images/destinations/south-sudan.webp',
+  'st': '/images/destinations/sao-tome-and-principe.webp',
+  'sv': '/images/destinations/el-salvador.webp',
+  'sx': '/images/destinations/sint-maarten.webp',
+  'sy': '/images/destinations/syria.webp',
+  'sz': '/images/destinations/eswatini.webp',
+  'tc': '/images/destinations/turks-and-caicos.webp',
+  'td': '/images/destinations/chad.webp',
+  'tg': '/images/destinations/togo.webp',
+  'th': '/images/destinations/thailand.webp',
+  'tj': '/images/destinations/tajikistan.webp',
+  'tk': '/images/destinations/tokelau.webp',
+  'tl': '/images/destinations/timor-leste.webp',
+  'tm': '/images/destinations/turkmenistan.webp',
+  'tn': '/images/destinations/tunisia.webp',
+  'to': '/images/destinations/tonga.webp',
+  'tr': '/images/destinations/turkey.webp',
+  'tt': '/images/destinations/trinidad-and-tobago.webp',
+  'tv': '/images/destinations/tuvalu.webp',
+  'tw': '/images/destinations/taiwan.webp',
+  'tz': '/images/destinations/tanzania.webp',
+  'ua': '/images/destinations/ukraine.webp',
+  'ug': '/images/destinations/uganda.webp',
+  'uk': '/images/destinations/united-kingdom.webp',
+  'us': '/images/destinations/united-states.webp',
+  'uy': '/images/destinations/uruguay.webp',
+  'uz': '/images/destinations/uzbekistan.webp',
+  'va': '/images/destinations/vatican-city.webp',
+  'vc': '/images/destinations/saint-vincent-and-the-grenadines.webp',
+  've': '/images/destinations/venezuela.webp',
+  'vg': '/images/destinations/british-virgin-islands.webp',
+  'vi': '/images/destinations/us-virgin-islands.webp',
+  'vn': '/images/destinations/vietnam.webp',
+  'vu': '/images/destinations/vanuatu.webp',
+  'wf': '/images/destinations/wallis-and-futuna.webp',
+  'ws': '/images/destinations/samoa.webp',
+  'xk': '/images/destinations/kosovo.webp',
+  'ye': '/images/destinations/yemen.webp',
+  'yt': '/images/destinations/mayotte.webp',
+  'za': '/images/destinations/south-africa.webp',
+  'zm': '/images/destinations/zambia.webp',
+  'zw': '/images/destinations/zimbabwe.webp',
+};
+
+// Fallback: curated Unsplash stock photos for popular landmark-rich countries.
+const LANDMARKS = {
+  'us': U('photo-1485871981521-5b1fd3805eee'),
+  'uk': U('photo-1529655683826-aba9b3e77383'),
+  'gb': U('photo-1529655683826-aba9b3e77383'),
+  'jp': U('photo-1493976040374-85c8e12f0c0e'),
+  'fr': U('photo-1502602898657-3e91760cbb34'),
+  'sg': U('photo-1565967511849-76a60a516170'),
+  'ae': U('photo-1512453979798-5ea266f8880c'),
+  'au': U('photo-1506973035872-a4ec16b8e8d9'),
+  'ca': U('photo-1503614472-8c93d56e92ce'),
+  'it': U('photo-1552832230-c0197dd311b5'),
+  'ch': U('photo-1530841377377-3ff06c0ca713'),
+  'th': U('photo-1528181304800-259b08848526'),
+  'de': U('photo-1467269204594-9661b134dd2b'),
+  'np': U('photo-1605640840605-14ac1855827b'),
+  'bt': U('photo-1573483587902-9c7adb3ca80e'),
+  'in': U('photo-1564507592333-c60657eea523'),
+  'cn': U('photo-1508804185872-d7badad00f7d'),
+  'kr': U('photo-1538485399081-7191377e8241'),
+  'es': U('photo-1543783207-ec64e4d95325'),
+  'pt': U('photo-1518733057094-95b53143d2a7'),
+  'gr': U('photo-1469796466635-455ede028aca'),
+  'tr': U('photo-1524231757912-21f4fe3a7200'),
+  'eg': U('photo-1539650116574-75c0c6d73f6e'),
+  'za': U('photo-1545906198-b91dba30c2bf'),
+  'br': U('photo-1483729558449-99ef09a8c325'),
+  'mx': U('photo-1518105779142-d975f22f1b0a'),
+  'ar': U('photo-1589909202802-8f4aadce1849'),
+  'pe': U('photo-1531065208531-4036c0dba3ca'),
+  'ru': U('photo-1513326738677-b964603b136d'),
+  'nl': U('photo-1534351590666-13e3e96c5017'),
+  'be': U('photo-1559113202-c916b8e44373'),
+  'at': U('photo-1516550893923-42d28e5677af'),
+  'cz': U('photo-1519677100203-a0e668c92439'),
+  'pl': U('photo-1519197924294-4ba991a11128'),
+  'hu': U('photo-1541343672885-9be56236302a'),
+  'ie': U('photo-1551959607-edf03c10403c'),
+  'is': U('photo-1504829857797-ddff29c27927'),
+  'no': U('photo-1502790671504-542ad42d5189'),
+  'se': U('photo-1509356843151-3e7d96241e11'),
+  'fi': U('photo-1551817958-d9d86fb29431'),
+  'dk': U('photo-1513622470522-26c3c8a854bc'),
+  'vn': U('photo-1528127269322-539801943592'),
+  'id': U('photo-1537996194471-76f2285d6b4f'),
+  'my': U('photo-1596422846543-75c6fc197f07'),
+  'ph': U('photo-1518509562904-e7ef99cddc85'),
+  'lk': U('photo-1581275288578-bda6f3bb3b1f'),
+  'mv': U('photo-1514282401047-d79a71a590e8'),
+  'nz': U('photo-1507699622108-4be3abd695ad'),
+  'ke': U('photo-1547471080-7cc2caa01a7e'),
+  'tz': U('photo-1516426122078-c23e76319801'),
+  'ma': U('photo-1489749798305-4fea3ae63d43'),
+  'jo': U('photo-1580537659466-0a9bfa916a54'),
+  'il': U('photo-1544734858-87fdce5ddc15'),
+  'qa': U('photo-1589828994425-a83f2f9b0eaa'),
+  'sa': U('photo-1586724237569-f3d0c1dee8c6'),
+  'om': U('photo-1588419661471-4f1d1f4f0e4b'),
+  'kw': U('photo-1584422523916-87b8c7f89367'),
+  'bh': U('photo-1539020140153-e479b8c22e70'),
+  'lb': U('photo-1570097703229-b195d6dd291f'),
+  'rs': U('photo-1558618666-fcd25c85cd64'),
+  'me': U('photo-1570097703229-b195d6dd291f'),
+  'cr': U('photo-1552252275-9ef012678fc2'),
+  'co': U('photo-1580684272966-13d5c50f6c85'),
+  'cl': U('photo-1540979382583-198a80a276ab'),
+  'ec': U('photo-1580684272966-13d5c50f6c85'),
+  'gh': U('photo-1547471080-7cc2caa01a7e'),
+  'ng': U('photo-1544893908-9e6f0f8e0b9a'),
+  'et': U('photo-1547471080-7cc2caa01a7e'),
+  'zw': U('photo-1544893908-9e6f0f8e0b9a'),
+  'zm': U('photo-1544893908-9e6f0c8e0b9a'),
+  'ug': U('photo-1547471080-7cc2caa01a7e'),
+  'rw': U('photo-1544893908-9e6f0f8e0b9a'),
+  'mm': U('photo-1550159930-40066082a4fc'),
+  'kh': U('photo-1537956969539-0d1c8e5a8e8c'),
+  'la': U('photo-1508009603889-5773c0c9e00c'),
+  'bd': U('photo-1550159930-40066082a4fc'),
+  'pk': U('photo-1550159930-40066082a4fc'),
+  'ye': U('photo-1544893908-9e6f0f8e0b9a'),
+  'sy': U('photo-1544734858-87fdce5ddc15'),
+  'iq': U('photo-1544734858-87fdce5ddc15'),
+  'af': U('photo-1544893908-9e6f0f8e0b9a'),
+  'az': U('photo-1558618666-fcd25c85cd64'),
+  'ge': U('photo-1558618666-fcd25c85cd64'),
+  'uz': U('photo-1558618666-fcd25c85cd64'),
+  'kz': U('photo-1558618666-fcd25c85cd64'),
+  'kg': U('photo-1558618666-fcd25c85cd64'),
+  'tj': U('photo-1558618666-fcd25c85cd64'),
+  'tm': U('photo-1558618666-fcd25c85cd64'),
+  'al': U('photo-1580537659466-0a9bfa916a54'),
+  'mk': U('photo-1580537659466-0a9bfa916a54'),
+  'ba': U('photo-1580537659466-0a9bfa916a54'),
+  'xk': U('photo-1580537659466-0a9bfa916a54'),
+  'ua': U('photo-1558618666-fcd25c85cd64'),
+  'by': U('photo-1558618666-fcd25c85cd64'),
+  'am': U('photo-1558618666-fcd25c85cd64'),
 };
 
 export function landmarkFor(country) {
   if (!country) return null;
   const key = (country.id || country.iso2 || '').toLowerCase();
-  return LANDMARKS[key] || null;
+  return LOCALS[key] || LANDMARKS[key] || null;
 }
