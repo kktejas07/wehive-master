@@ -41,7 +41,9 @@ STYLE_SUFFIX = (
     "Golden hour warm sunlight, deep blue sky with soft white clouds, vibrant yet elegant color palette. "
     "Clean composition with the main landmark centered, plenty of breathing room around the subject. "
     "Highly detailed architecture and landscape elements. "
-    "No text, no country names, no flags, no logos, no watermarks, no borders, no frames, no people crowded. "
+    "STRICT RULES: Absolutely NO text, NO letters, NO words, NO names, NO numbers, NO typography of any kind anywhere in the image. "
+    "NO flags, NO logos, NO watermarks, NO borders, NO frames, NO people crowds. "
+    "The image must be completely free of any written language or characters. "
     "Portrait vertical orientation suitable for a luxury travel card. "
     "Award-winning travel illustration quality."
 )
