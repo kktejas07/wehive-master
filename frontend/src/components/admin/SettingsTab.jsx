@@ -1,9 +1,8 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Loader2, Save, Eye, EyeOff, Info, ChevronDown, ChevronRight,
+  Loader2, Save, Eye, EyeOff, Info,
   CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone,
 } from 'lucide-react';
-import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
@@ -76,26 +75,58 @@ function Field({ label, tooltip, value, onChange, placeholder }) {
   );
 }
 
-function Section({ id: sectionId, title, icon: Icon, defaultOpen, children }) {
-  const [open, setOpen] = useState(defaultOpen !== false);
-  return (
-    <Panel id={sectionId} className="mb-5 scroll-mt-[140px]">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between w-full text-left"
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-[hsl(var(--accent))]/15 flex items-center justify-center">
-            <Icon className="w-4 h-4 text-[hsl(var(--accent))]" />
-          </div>
-          <h3 className="text-[14px] font-bold text-white">{title}</h3>
-        </div>
-        {open ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-      </button>
-      {open && <div className="mt-5 space-y-4">{children}</div>}
-    </Panel>
-  );
-}
+const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications'];
+
+const SECTION_META = {
+  firebase: { label: 'Firebase', icon: Globe, title: 'Firebase Authentication' },
+  razorpay: { label: 'Razorpay', icon: CreditCard, title: 'Razorpay Payments' },
+  smtp: { label: 'SMTP Email', icon: Mail, title: 'SMTP Email' },
+  twilio: { label: 'Twilio', icon: Smartphone, title: 'Twilio SMS / WhatsApp' },
+  notifications: { label: 'Notifications', icon: Bell, title: 'Notifications (Telegram / Discord / WhatsApp)' },
+  general: { label: 'General', icon: MessageSquare, title: 'General' },
+};
+
+const FIELDS = {
+  firebase: [
+    { type: 'secret', key: 'apiKey', label: 'API Key', tooltip: 'Public Firebase Web API key from Project Settings → General → Web apps' },
+    { type: 'text', key: 'authDomain', label: 'Auth Domain', tooltip: 'Usually your-project-id.firebaseapp.com' },
+    { type: 'text', key: 'projectId', label: 'Project ID', tooltip: 'Firebase project identifier' },
+    { type: 'text', key: 'storageBucket', label: 'Storage Bucket', tooltip: 'Your-project-id.appspot.com or .firebasestorage.app' },
+    { type: 'secret', key: 'messagingSenderId', label: 'Messaging Sender ID', tooltip: 'Found in Firebase Cloud Messaging settings' },
+    { type: 'secret', key: 'appId', label: 'App ID', tooltip: 'Web app identifier — 1:xxxx:web:yyyy' },
+  ],
+  razorpay: [
+    { type: 'secret', key: 'key_id', label: 'Key ID', tooltip: 'Razorpay API Key ID (rzp_live_... or rzp_test_...)' },
+    { type: 'secret', key: 'key_secret', label: 'Key Secret', tooltip: 'Razorpay API Key Secret — keep this confidential' },
+    { type: 'secret', key: 'webhook_secret', label: 'Webhook Secret', tooltip: 'Secret set in Razorpay Dashboard → Settings → Webhooks for signature verification' },
+  ],
+  smtp: [
+    { type: 'text', key: 'host', label: 'SMTP Host', tooltip: 'Email server e.g. smtp.gmail.com, smtp.sendgrid.net' },
+    { type: 'text', key: 'port', label: 'SMTP Port', tooltip: 'Usually 587 (TLS) or 465 (SSL)' },
+    { type: 'text', key: 'user', label: 'Username', tooltip: 'Full email address or SMTP login user' },
+    { type: 'secret', key: 'password', label: 'Password', tooltip: 'SMTP password or App Password (Google requires an App Password)' },
+    { type: 'text', key: 'from_address', label: 'From Address', tooltip: 'Sender email e.g. noreply@wehive.co.in' },
+    { type: 'text', key: 'from_name', label: 'From Name', tooltip: 'Display name e.g. We Hive' },
+  ],
+  twilio: [
+    { type: 'secret', key: 'account_sid', label: 'Account SID', tooltip: 'Twilio Account SID from twilio.com/console' },
+    { type: 'secret', key: 'auth_token', label: 'Auth Token', tooltip: 'Twilio Auth Token — keep this confidential' },
+    { type: 'text', key: 'sms_from', label: 'SMS From Number', tooltip: 'Twilio phone number for SMS e.g. +1234567890' },
+    { type: 'text', key: 'whatsapp_from', label: 'WhatsApp From Number', tooltip: 'Twilio WhatsApp sender e.g. whatsapp:+14155238886' },
+  ],
+  notifications: [
+    { type: 'secret', key: 'telegram_bot_token', label: 'Telegram Bot Token', tooltip: 'From BotFather — used to send admin notifications via Telegram' },
+    { type: 'text', key: 'telegram_chat_id', label: 'Telegram Chat ID', tooltip: 'Chat ID to receive notifications (get from @userinfobot)' },
+    { type: 'secret', key: 'discord_webhook_url', label: 'Discord Webhook URL', tooltip: 'Full Discord webhook URL for admin notifications' },
+    { type: 'text', key: 'whatsapp_group_invite', label: 'WhatsApp Group Invite', tooltip: 'Public WhatsApp group invite link for customer support' },
+  ],
+  general: [
+    { type: 'text', key: 'frontend_url', label: 'Frontend URL', tooltip: 'Public site URL used in emails and redirects' },
+    { type: 'text', key: 'whatsapp_number', label: 'Contact WhatsApp Number', tooltip: 'Business WhatsApp number for customer enquiries' },
+    { type: 'text', key: 'contact_email', label: 'Contact Email', tooltip: 'Support email displayed on contact pages' },
+    { type: 'text', key: 'consultant_name', label: 'Consultant Name', tooltip: 'Default consultant name shown in chatbot auto-reply' },
+  ],
+};
 
 export default function SettingsTab() {
   const { toast } = useToast();
@@ -103,8 +134,7 @@ export default function SettingsTab() {
   const [saving, setSaving] = useState(null);
   const [settings, setSettings] = useState({});
   const [originals, setOriginals] = useState({});
-
-  const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications'];
+  const [activeTab, setActiveTab] = useState('firebase');
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -126,55 +156,29 @@ export default function SettingsTab() {
     fetchAll();
   }, []);
 
-  const [activeSection, setActiveSection] = useState('firebase');
+  const ns = activeTab;
+  const meta = SECTION_META[ns];
+  const TabIcon = meta.icon;
+  const fields = FIELDS[ns] || [];
+  const values = settings[ns] || {};
+  const hasChanges = JSON.stringify(values) !== JSON.stringify(originals[ns]);
 
-  const SECTION_META = {
-    firebase: { label: 'Firebase', icon: Globe },
-    razorpay: { label: 'Razorpay', icon: CreditCard },
-    smtp: { label: 'SMTP Email', icon: Mail },
-    twilio: { label: 'Twilio', icon: Smartphone },
-    notifications: { label: 'Notifications', icon: Bell },
-    general: { label: 'General', icon: MessageSquare },
-  };
-
-  const setField = (ns, key, val) =>
+  const setField = (key, val) =>
     setSettings((prev) => ({ ...prev, [ns]: { ...prev[ns], [key]: val } }));
 
-  const hasChanges = (ns) =>
-    JSON.stringify(settings[ns]) !== JSON.stringify(originals[ns]);
-
-  const handleSave = async (ns) => {
+  const handleSave = async () => {
     setSaving(ns);
     try {
       const client = adminClient();
       await client.put(`/settings/${ns}`, { config: settings[ns] });
       setOriginals((prev) => ({ ...prev, [ns]: JSON.parse(JSON.stringify(settings[ns])) }));
-      toast({ title: `${ns} settings saved`, variant: 'success' });
+      toast({ title: `${meta.label} settings saved`, variant: 'success' });
     } catch (e) {
-      toast({ title: `Failed to save ${ns}`, description: e.response?.data?.detail || e.message, variant: 'error' });
+      toast({ title: `Failed to save ${meta.label}`, description: e.response?.data?.detail || e.message, variant: 'error' });
     } finally {
       setSaving(null);
     }
   };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const id = entry.target.id.replace('section-', '');
-            setActiveSection(id);
-          }
-        }
-      },
-      { rootMargin: '-100px 0px -70% 0px' }
-    );
-    for (const ns of NAMESPACES) {
-      const el = document.getElementById(`section-${ns}`);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
-  }, [loading]);
 
   if (loading) {
     return (
@@ -184,7 +188,7 @@ export default function SettingsTab() {
     );
   }
 
-  const s = (ns) => settings[ns] || {};
+  const changedTabs = NAMESPACES.filter((n) => JSON.stringify(settings[n]) !== JSON.stringify(originals[n]));
 
   return (
     <div>
@@ -193,283 +197,79 @@ export default function SettingsTab() {
         subtitle="Configure all platform integrations — saved to database, applied instantly without redeployment"
       />
 
-      <div className="sticky top-0 z-10 bg-[#0b1020] pt-4 pb-2 flex gap-1 overflow-x-auto scrollbar-none border-b border-white/5 mb-4">
-        {NAMESPACES.map((ns) => {
-          const meta = SECTION_META[ns] || { label: ns, icon: Globe };
-          const Icon = meta.icon;
+      <div className="sticky top-0 z-10 bg-[#0b1020] pt-4 pb-3 flex gap-1 overflow-x-auto scrollbar-none border-b border-white/5 mb-6">
+        {NAMESPACES.map((n) => {
+          const m = SECTION_META[n] || { label: n, icon: Globe };
+          const Icon = m.icon;
+          const dirty = changedTabs.includes(n);
           return (
             <button
-              key={ns}
-              onClick={() => {
-                setActiveSection(ns);
-                document.getElementById(`section-${ns}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-bold transition ${
-                activeSection === ns
-                  ? 'bg-[hsl(var(--accent))] text-white'
+              key={n}
+              onClick={() => setActiveTab(n)}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-bold transition-all ${
+                activeTab === n
+                  ? 'bg-[hsl(var(--accent))] text-white shadow-[0_4px_20px_-6px_hsl(var(--accent))]'
                   : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
-              {meta.label}
+              <Icon className={`w-3.5 h-3.5 ${dirty && activeTab !== n ? 'text-amber-400' : ''}`} />
+              {m.label}
+              {dirty && activeTab !== n && <span className="ml-1 w-1.5 h-1.5 rounded-full bg-amber-400" />}
             </button>
           );
         })}
       </div>
 
-      {/* Firebase */}
-      <Section id="section-firebase" title="Firebase Authentication" icon={Globe}>
-        <SecretField
-          label="API Key"
-          tooltip="Public Firebase Web API key from Project Settings → General → Web apps"
-          value={s('firebase').apiKey || ''}
-          onChange={(v) => setField('firebase', 'apiKey', v)}
-        />
-        <Field
-          label="Auth Domain"
-          tooltip="Usually your-project-id.firebaseapp.com"
-          value={s('firebase').authDomain || ''}
-          onChange={(v) => setField('firebase', 'authDomain', v)}
-        />
-        <Field
-          label="Project ID"
-          tooltip="Firebase project identifier"
-          value={s('firebase').projectId || ''}
-          onChange={(v) => setField('firebase', 'projectId', v)}
-        />
-        <Field
-          label="Storage Bucket"
-          tooltip="Your-project-id.appspot.com or .firebasestorage.app"
-          value={s('firebase').storageBucket || ''}
-          onChange={(v) => setField('firebase', 'storageBucket', v)}
-        />
-        <SecretField
-          label="Messaging Sender ID"
-          tooltip="Found in Firebase Cloud Messaging settings"
-          value={s('firebase').messagingSenderId || ''}
-          onChange={(v) => setField('firebase', 'messagingSenderId', v)}
-        />
-        <SecretField
-          label="App ID"
-          tooltip="Web app identifier — 1:xxxx:web:yyyy"
-          value={s('firebase').appId || ''}
-          onChange={(v) => setField('firebase', 'appId', v)}
-        />
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={() => handleSave('firebase')}
-            disabled={saving === 'firebase' || !hasChanges('firebase')}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white font-bold text-[13px] transition"
-          >
-            {saving === 'firebase' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            Save Firebase
-          </button>
-          {!hasChanges('firebase') && <span className="text-[11px] text-slate-500">Saved</span>}
-        </div>
-      </Section>
+      <div className="animate-[fadeIn_0.2s_ease]">
+        <Panel className="mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-[hsl(var(--accent))]/15 flex items-center justify-center">
+                <TabIcon className="w-4.5 h-4.5 text-[hsl(var(--accent))]" />
+              </div>
+              <h3 className="text-[16px] font-bold text-white">{meta.title}</h3>
+            </div>
+            <div className="flex items-center gap-3">
+              {changedTabs.length > 1 && (
+                <span className="text-[11px] text-amber-400 font-semibold">
+                  {changedTabs.length} tabs unsaved
+                </span>
+              )}
+              <button
+                onClick={handleSave}
+                disabled={saving === ns || !hasChanges}
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 text-white font-bold text-[13px] transition"
+              >
+                {saving === ns ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                Save {meta.label}
+              </button>
+              {!hasChanges && <span className="text-[12px] text-emerald-400 font-semibold">All saved</span>}
+            </div>
+          </div>
 
-      {/* Razorpay */}
-      <Section id="section-razorpay" title="Razorpay Payments" icon={CreditCard}>
-        <SecretField
-          label="Key ID"
-          tooltip="Razorpay API Key ID (rzp_live_... or rzp_test_...)"
-          value={s('razorpay').key_id || ''}
-          onChange={(v) => setField('razorpay', 'key_id', v)}
-        />
-        <SecretField
-          label="Key Secret"
-          tooltip="Razorpay API Key Secret — keep this confidential"
-          value={s('razorpay').key_secret || ''}
-          onChange={(v) => setField('razorpay', 'key_secret', v)}
-        />
-        <SecretField
-          label="Webhook Secret"
-          tooltip="Secret set in Razorpay Dashboard → Settings → Webhooks for signature verification"
-          value={s('razorpay').webhook_secret || ''}
-          onChange={(v) => setField('razorpay', 'webhook_secret', v)}
-        />
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={() => handleSave('razorpay')}
-            disabled={saving === 'razorpay' || !hasChanges('razorpay')}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white font-bold text-[13px] transition"
-          >
-            {saving === 'razorpay' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            Save Razorpay
-          </button>
-          {!hasChanges('razorpay') && <span className="text-[11px] text-slate-500">Saved</span>}
-        </div>
-      </Section>
-
-      {/* SMTP */}
-      <Section id="section-smtp" title="SMTP Email" icon={Mail}>
-        <Field
-          label="SMTP Host"
-          tooltip="Email server e.g. smtp.gmail.com, smtp.sendgrid.net"
-          value={s('smtp').host || ''}
-          onChange={(v) => setField('smtp', 'host', v)}
-        />
-        <Field
-          label="SMTP Port"
-          tooltip="Usually 587 (TLS) or 465 (SSL)"
-          value={s('smtp').port || ''}
-          onChange={(v) => setField('smtp', 'port', v)}
-        />
-        <Field
-          label="Username"
-          tooltip="Full email address or SMTP login user"
-          value={s('smtp').user || ''}
-          onChange={(v) => setField('smtp', 'user', v)}
-        />
-        <SecretField
-          label="Password"
-          tooltip="SMTP password or App Password (Google requires an App Password)"
-          value={s('smtp').password || ''}
-          onChange={(v) => setField('smtp', 'password', v)}
-        />
-        <Field
-          label="From Address"
-          tooltip="Sender email e.g. noreply@wehive.co.in"
-          value={s('smtp').from_address || ''}
-          onChange={(v) => setField('smtp', 'from_address', v)}
-        />
-        <Field
-          label="From Name"
-          tooltip="Display name e.g. We Hive"
-          value={s('smtp').from_name || ''}
-          onChange={(v) => setField('smtp', 'from_name', v)}
-        />
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={() => handleSave('smtp')}
-            disabled={saving === 'smtp' || !hasChanges('smtp')}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white font-bold text-[13px] transition"
-          >
-            {saving === 'smtp' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            Save SMTP
-          </button>
-          {!hasChanges('smtp') && <span className="text-[11px] text-slate-500">Saved</span>}
-        </div>
-      </Section>
-
-      {/* Twilio */}
-      <Section id="section-twilio" title="Twilio SMS / WhatsApp" icon={Smartphone}>
-        <SecretField
-          label="Account SID"
-          tooltip="Twilio Account SID from twilio.com/console"
-          value={s('twilio').account_sid || ''}
-          onChange={(v) => setField('twilio', 'account_sid', v)}
-        />
-        <SecretField
-          label="Auth Token"
-          tooltip="Twilio Auth Token — keep this confidential"
-          value={s('twilio').auth_token || ''}
-          onChange={(v) => setField('twilio', 'auth_token', v)}
-        />
-        <Field
-          label="SMS From Number"
-          tooltip="Twilio phone number for SMS e.g. +1234567890"
-          value={s('twilio').sms_from || ''}
-          onChange={(v) => setField('twilio', 'sms_from', v)}
-        />
-        <Field
-          label="WhatsApp From Number"
-          tooltip="Twilio WhatsApp sender e.g. whatsapp:+14155238886"
-          value={s('twilio').whatsapp_from || ''}
-          onChange={(v) => setField('twilio', 'whatsapp_from', v)}
-        />
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={() => handleSave('twilio')}
-            disabled={saving === 'twilio' || !hasChanges('twilio')}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white font-bold text-[13px] transition"
-          >
-            {saving === 'twilio' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            Save Twilio
-          </button>
-          {!hasChanges('twilio') && <span className="text-[11px] text-slate-500">Saved</span>}
-        </div>
-      </Section>
-
-      {/* Notifications */}
-      <Section id="section-notifications" title="Notifications (Telegram / Discord / WhatsApp)" icon={Bell}>
-        <SecretField
-          label="Telegram Bot Token"
-          tooltip="From BotFather — used to send admin notifications via Telegram"
-          value={s('notifications').telegram_bot_token || ''}
-          onChange={(v) => setField('notifications', 'telegram_bot_token', v)}
-        />
-        <Field
-          label="Telegram Chat ID"
-          tooltip="Chat ID to receive notifications (get from @userinfobot)"
-          value={s('notifications').telegram_chat_id || ''}
-          onChange={(v) => setField('notifications', 'telegram_chat_id', v)}
-        />
-        <SecretField
-          label="Discord Webhook URL"
-          tooltip="Full Discord webhook URL for admin notifications"
-          value={s('notifications').discord_webhook_url || ''}
-          onChange={(v) => setField('notifications', 'discord_webhook_url', v)}
-        />
-        <Field
-          label="WhatsApp Group Invite"
-          tooltip="Public WhatsApp group invite link for customer support"
-          value={s('notifications').whatsapp_group_invite || ''}
-          onChange={(v) => setField('notifications', 'whatsapp_group_invite', v)}
-        />
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={() => handleSave('notifications')}
-            disabled={saving === 'notifications' || !hasChanges('notifications')}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white font-bold text-[13px] transition"
-          >
-            {saving === 'notifications' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            Save Notifications
-          </button>
-          {!hasChanges('notifications') && <span className="text-[11px] text-slate-500">Saved</span>}
-        </div>
-      </Section>
-
-
-
-      {/* General */}
-      <Section id="section-general" title="General" icon={MessageSquare}>
-        <Field
-          label="Frontend URL"
-          tooltip="Public site URL used in emails and redirects"
-          value={s('general').frontend_url || ''}
-          onChange={(v) => setField('general', 'frontend_url', v)}
-        />
-        <Field
-          label="Contact WhatsApp Number"
-          tooltip="Business WhatsApp number for customer enquiries"
-          value={s('general').whatsapp_number || ''}
-          onChange={(v) => setField('general', 'whatsapp_number', v)}
-        />
-        <Field
-          label="Contact Email"
-          tooltip="Support email displayed on contact pages"
-          value={s('general').contact_email || ''}
-          onChange={(v) => setField('general', 'contact_email', v)}
-        />
-        <Field
-          label="Consultant Name"
-          tooltip="Default consultant name shown in chatbot auto-reply"
-          value={s('general').consultant_name || ''}
-          onChange={(v) => setField('general', 'consultant_name', v)}
-        />
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={() => handleSave('general')}
-            disabled={saving === 'general' || !hasChanges('general')}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white font-bold text-[13px] transition"
-          >
-            {saving === 'general' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            Save General
-          </button>
-          {!hasChanges('general') && <span className="text-[11px] text-slate-500">Saved</span>}
-        </div>
-      </Section>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {fields.map((field) => (
+              <div key={field.key}>
+                {field.type === 'secret' ? (
+                  <SecretField
+                    label={field.label}
+                    tooltip={field.tooltip}
+                    value={values[field.key] || ''}
+                    onChange={(v) => setField(field.key, v)}
+                  />
+                ) : (
+                  <Field
+                    label={field.label}
+                    tooltip={field.tooltip}
+                    value={values[field.key] || ''}
+                    onChange={(v) => setField(field.key, v)}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
     </div>
   );
 }
