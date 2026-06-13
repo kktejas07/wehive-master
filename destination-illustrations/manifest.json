@@ -1098,5 +1098,120 @@
     "country": "South Georgia",
     "filename": "south-georgia.webp",
     "landmark": "Grytviken whaling station and snow-covered peaks"
+  },
+  {
+    "country": "Brunei",
+    "filename": "brunei.webp",
+    "landmark": "Omar Ali Saifuddien Mosque and water village on Brunei River"
+  },
+  {
+    "country": "Burundi",
+    "filename": "burundi.webp",
+    "landmark": "Lake Tanganyika coastline and Rusizi National Park"
+  },
+  {
+    "country": "Gambia",
+    "filename": "gambia.webp",
+    "landmark": "Kunta Kinteh Island and Atlantic Ocean beach coastline"
+  },
+  {
+    "country": "Guinea",
+    "filename": "guinea.webp",
+    "landmark": "Mount Nimba Nature Reserve rainforest and waterfall"
+  },
+  {
+    "country": "Guinea-Bissau",
+    "filename": "guinea-bissau.webp",
+    "landmark": "Bissagos Archipelago islands and Atlantic turquoise waters"
+  },
+  {
+    "country": "Libya",
+    "filename": "libya.webp",
+    "landmark": "Leptis Magna Roman ruins on Mediterranean coastline"
+  },
+  {
+    "country": "Macau",
+    "filename": "macau.webp",
+    "landmark": "Macau Tower and skyline with historic Portuguese architecture"
+  },
+  {
+    "country": "North Korea",
+    "filename": "north-korea.webp",
+    "landmark": "Ryugyong Hotel and Pyongyang skyline from Taedong River"
+  },
+  {
+    "country": "Palestine",
+    "filename": "palestine.webp",
+    "landmark": "Dome of the Rock on Temple Mount in Jerusalem old city"
+  },
+  {
+    "country": "Antarctica",
+    "filename": "antarctica.webp",
+    "landmark": "Icebergs and penguin colonies on Antarctic peninsula"
+  },
+  {
+    "country": "Saint Helena",
+    "filename": "saint-helena.webp",
+    "landmark": "Longwood House and rugged South Atlantic coastline"
+  },
+  {
+    "country": "Western Sahara",
+    "filename": "western-sahara.webp",
+    "landmark": "Sahara desert dunes and Atlantic coast beach"
+  },
+  {
+    "country": "Svalbard",
+    "filename": "svalbard.webp",
+    "landmark": "Arctic fjords and snow-covered mountain landscape"
+  },
+  {
+    "country": "French Guiana",
+    "filename": "french-guiana.webp",
+    "landmark": "Guiana Space Centre launch site and Amazon rainforest"
+  },
+  {
+    "country": "Martinique",
+    "filename": "martinique.webp",
+    "landmark": "Mount Pel\u00e9e volcano and Caribbean bay coastline"
+  },
+  {
+    "country": "Guadeloupe",
+    "filename": "guadeloupe.webp",
+    "landmark": "La Soufri\u00e8re volcano and tropical Caribbean beaches"
+  },
+  {
+    "country": "\u00c5land Islands",
+    "filename": "aland-islands.webp",
+    "landmark": "Archipelago sea with red wooden cabins and Baltic coastline"
+  },
+  {
+    "country": "Isle of Man",
+    "filename": "isle-of-man.webp",
+    "landmark": "Castle Rushen and green hills on Irish Sea coastline"
+  },
+  {
+    "country": "Jersey",
+    "filename": "jersey.webp",
+    "landmark": "Mont Orgueil castle and sandy bay beaches"
+  },
+  {
+    "country": "Guernsey",
+    "filename": "guernsey.webp",
+    "landmark": "St Peter Port harbor and Channel Island coastline"
+  },
+  {
+    "country": "Christmas Island",
+    "filename": "christmas-island.webp",
+    "landmark": "Red crab migration through tropical rainforest"
+  },
+  {
+    "country": "Norfolk Island",
+    "filename": "norfolk-island.webp",
+    "landmark": "Emily Bay palm-fringed beach and Pacific Ocean"
+  },
+  {
+    "country": "Tokelau",
+    "filename": "tokelau.webp",
+    "landmark": "Palm-fringed atoll and turquoise Pacific lagoon"
   }
 ]
