@@ -172,7 +172,7 @@ export default function WorldMap({ className = '', showConnections = true, anima
       />
 
       {/* Navy gradient overlay to blend the map into brand colours */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A2C8A]/10 via-transparent to-[#0A2C8A]/20" />
+      <div className="absolute inset-0 bg-[#0A2C8A]/30 mix-blend-multiply" />
 
       {mounted && (
         <>
