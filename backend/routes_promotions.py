@@ -48,12 +48,23 @@ async def create_promo(req: CreatePromoRequest, admin=Depends(get_current_admin)
 
 
 @router.get('')
-async def list_promos(season: Optional[str] = None, admin=Depends(get_current_admin)):
+async def list_promos(
+    season: Optional[str] = None,
+    admin=Depends(get_current_admin),
+    limit: int = Query(50, ge=1, le=200),
+    skip: int = Query(0, ge=0),
+):
     query = {}
     if season:
         query['season'] = season
-    promos = await db.promo_codes.find(query).sort('created_at', -1).to_list(100)
-    return promos
+    total = await db.promo_codes.count_documents(query)
+    promos = await db.promo_codes.find(query).sort('created_at', -1).skip(skip).limit(limit).to_list(limit)
+    return {'items': [_serialize(p) for p in promos], 'total': total, 'limit': limit, 'skip': skip}
+
+
+def _serialize(p):
+    p.pop('_id', None)
+    return p
 
 
 @router.get('/active')

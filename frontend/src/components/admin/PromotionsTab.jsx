@@ -5,6 +5,7 @@ import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import { API } from '../../context/AuthContext';
 import axios from 'axios';
+import Pagination from './Pagination';
 
 const EMPTY_FORM = {
   title: '',
@@ -153,14 +154,20 @@ export default function PromotionsTab() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 20;
 
   const headers = { Authorization: `Bearer ${token}` };
 
   const load = useCallback(() => {
-    axios.get(`${API}/admin/promotions`, { headers })
-      .then((r) => setItems(r.data))
+    axios.get(`${API}/admin/promotions`, { headers, params: { limit: pageSize, skip } })
+      .then((r) => {
+        setItems(r.data.items || r.data);
+        setTotal(r.data.total || (r.data.items || r.data || []).length);
+      })
       .catch(() => setItems([]));
-  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [token, skip]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { load(); }, [load]);
 
@@ -303,6 +310,7 @@ export default function PromotionsTab() {
             ))}
           </div>
         )}
+        {items && items.length > 0 && <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
       </Panel>
     </div>
   );

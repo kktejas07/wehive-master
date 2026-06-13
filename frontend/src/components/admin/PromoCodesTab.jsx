@@ -5,6 +5,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import { API } from '../../context/AuthContext';
+import Pagination from './Pagination';
 
 const SEASONS = [
   { id: 'all', label: 'All Seasons' },
@@ -23,6 +24,9 @@ export default function PromoCodesTab() {
   const { toast } = useToast();
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 20;
   const [showForm, setShowForm] = useState(false);
   const [copied, setCopied] = useState(null);
   const [form, setForm] = useState({
@@ -34,12 +38,13 @@ export default function PromoCodesTab() {
   const load = async () => {
     try {
       const token = getToken();
-      const r = await axios.get(`${API}/promotions`, { headers: { Authorization: `Bearer ${token}` } });
-      setPromos(r.data || []);
+      const r = await axios.get(`${API}/promotions`, { headers: { Authorization: `Bearer ${token}` }, params: { limit: pageSize, skip } });
+      setPromos(r.data.items || []);
+      setTotal(r.data.total || (r.data.items || []).length);
     } catch {} finally { setLoading(false); }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [skip]);
 
   const handleCreate = async () => {
     const token = getToken();
@@ -215,6 +220,7 @@ export default function PromoCodesTab() {
                 ))}
               </tbody>
             </table>
+            {promos.length > 0 && <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
           </div>
         )}
       </Panel>

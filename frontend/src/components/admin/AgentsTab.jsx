@@ -5,6 +5,7 @@ import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import { API } from '../../context/AuthContext';
 import axios from 'axios';
+import Pagination from './Pagination';
 
 const STATUS_FILTERS = [
   { value: '', label: 'All' },
@@ -186,13 +187,22 @@ export default function AgentsTab() {
   const [items, setItems] = useState(null);
   const [statusFilter, setStatusFilter] = useState('pending');
   const [q, setQ] = useState('');
+  const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 20;
 
   const load = useCallback(() => {
-    const params = statusFilter ? `?status=${statusFilter}` : '';
-    axios.get(`${API}/admin/agents${params}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => setItems(r.data))
+    const params = new URLSearchParams();
+    if (statusFilter) params.set('status', statusFilter);
+    params.set('limit', pageSize);
+    params.set('skip', skip);
+    axios.get(`${API}/admin/agents?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => {
+        setItems(r.data.items || r.data);
+        setTotal(r.data.total || (r.data.items || r.data || []).length);
+      })
       .catch(() => setItems([]));
-  }, [token, statusFilter]);
+  }, [token, statusFilter, skip]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -206,7 +216,7 @@ export default function AgentsTab() {
         <div className="flex flex-wrap items-center gap-3 p-4 border-b border-white/5">
           <div className="flex gap-2 flex-wrap">
             {STATUS_FILTERS.map(f => (
-              <button key={f.value} onClick={() => setStatusFilter(f.value)}
+              <button key={f.value} onClick={() => { setStatusFilter(f.value); setSkip(0); }}
                 className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${statusFilter === f.value ? 'bg-[hsl(var(--accent))] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
                 {f.label}{f.value === 'pending' && pending > 0 ? ` (${pending})` : ''}
               </button>
@@ -225,6 +235,7 @@ export default function AgentsTab() {
           {!items && <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>}
           {items && filtered?.length === 0 && <div className="py-12 text-center text-slate-400 text-[14px]">No agents found.</div>}
           {filtered?.map(agent => <AgentCard key={agent._id || agent.id} agent={agent} token={token} onRefresh={load} />)}
+          {items && filtered?.length > 0 && <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
         </div>
       </Panel>
     </div>

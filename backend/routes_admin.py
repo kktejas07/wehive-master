@@ -403,15 +403,17 @@ async def admin_update_application(application_id: str, patch: AppPatch, admin=D
 async def admin_list_countries(
     _=Depends(get_current_admin),
     q: Optional[str] = None,
-    limit: int = Query(500, ge=1, le=1000),
+    limit: int = Query(100, ge=1, le=500),
+    skip: int = Query(0, ge=0),
 ):
     filt: dict = {}
     if q:
         rx = {'$regex': q, '$options': 'i'}
         filt['$or'] = [{'name': rx}, {'id': rx}, {'iso2': rx}]
-    cur = countries_col.find(filt, {'_id': 0}).sort('name', 1).limit(limit)
+    total = await countries_col.count_documents(filt)
+    cur = countries_col.find(filt, {'_id': 0}).sort('name', 1).skip(skip).limit(limit)
     items = [doc async for doc in cur]
-    return {'items': items, 'total': len(items)}
+    return {'items': items, 'total': total, 'limit': limit, 'skip': skip}
 
 
 class CountryPatch(BaseModel):
@@ -549,6 +551,8 @@ async def admin_list_events(
     _=Depends(get_current_admin),
     tag: Optional[str] = None,
     q: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=200),
+    skip: int = Query(0, ge=0),
 ):
     filt: dict = {}
     if tag and tag != 'all':
@@ -556,9 +560,10 @@ async def admin_list_events(
     if q:
         rx = {'$regex': q, '$options': 'i'}
         filt['$or'] = [{'title': rx}, {'subtitle': rx}, {'description': rx}]
-    cur = events_col.find(filt).sort([('sort_order', 1), ('created_at', -1)])
+    total = await events_col.count_documents(filt)
+    cur = events_col.find(filt).sort([('sort_order', 1), ('created_at', -1)]).skip(skip).limit(limit)
     items = [serialize_event(e) async for e in cur]
-    return {'items': items, 'total': len(items)}
+    return {'items': items, 'total': total, 'limit': limit, 'skip': skip}
 
 
 @router.post('/events')
@@ -890,9 +895,96 @@ async def admin_seed_manifest(_=Depends(get_current_admin)):
     return {'seeded': len(items), 'source': path}
 
 
+@router.post('/destinations/sync-to-r2-stream')
+async def admin_sync_destinations_to_r2_stream(_=Depends(get_current_admin)):
+    """Upload all destination images to R2 with real-time progress via SSE stream."""
+    from settings_service import get_all as _get_settings
+    from fastapi.responses import StreamingResponse
+
+    cfg = await _get_settings('r2')
+    if not cfg:
+        raise HTTPException(400, 'R2 not configured — fill in R2 Storage settings first')
+
+    account_id = cfg.get('account_id', '')
+    access_key = cfg.get('access_key_id', '')
+    secret_key = cfg.get('secret_access_key', '')
+    bucket = cfg.get('bucket', '')
+    public_url = (cfg.get('public_url') or '').rstrip('/')
+    endpoint = cfg.get('endpoint') or f'https://{account_id}.r2.cloudflarestorage.com'
+
+    if not all([account_id, access_key, secret_key, bucket]):
+        raise HTTPException(400, 'Missing required R2 settings')
+
+    import json as _json_stream
+    import boto3 as _boto3
+    from botocore.config import Config as _BotoConfig
+
+    client = _boto3.client(
+        's3',
+        endpoint_url=endpoint,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name='auto',
+        config=_BotoConfig(signature_version='s3v4', retries={'max_attempts': 3}),
+    )
+
+    manifest = await _load_manifest()
+    base_url = 'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations'
+
+    async def event_stream():
+        yield f"data: {_json_stream.dumps({'event': 'start', 'total': len(manifest)})}\n\n"
+
+        uploaded = 0
+        skipped = 0
+        failed = 0
+
+        for i, entry in enumerate(manifest):
+            filename = entry['filename']
+            key = f'destinations/{filename}'
+
+            # Check if already on R2
+            try:
+                client.head_object(Bucket=bucket, Key=key)
+                skipped += 1
+                yield f"data: {_json_stream.dumps({'event': 'progress', 'index': i + 1, 'total': len(manifest), 'filename': filename, 'status': 'exists', 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
+                continue
+            except Exception:
+                pass
+
+            # Upload
+            try:
+                resp = _httpx.get(f'{base_url}/{filename}', timeout=30)
+                resp.raise_for_status()
+                client.put_object(
+                    Bucket=bucket,
+                    Key=key,
+                    Body=resp.content,
+                    ContentType='image/webp',
+                    ServerSideEncryption='AES256',
+                )
+                uploaded += 1
+                url = f'{public_url}/{key}' if public_url else ''
+                yield f"data: {_json_stream.dumps({'event': 'progress', 'index': i + 1, 'total': len(manifest), 'filename': filename, 'status': 'uploaded', 'url': url, 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
+            except Exception as e:
+                failed += 1
+                yield f"data: {_json_stream.dumps({'event': 'progress', 'index': i + 1, 'total': len(manifest), 'filename': filename, 'status': 'failed', 'error': str(e), 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
+
+        yield f"data: {_json_stream.dumps({'event': 'complete', 'total': len(manifest), 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
+        },
+    )
+
+
 @router.post('/destinations/sync-to-r2')
 async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
-    """Upload all destination images to Cloudflare R2 using configured settings."""
+    """Upload all destination images to Cloudflare R2 (returns result at end)."""
     from settings_service import get_all as _get_settings
 
     cfg = await _get_settings('r2')

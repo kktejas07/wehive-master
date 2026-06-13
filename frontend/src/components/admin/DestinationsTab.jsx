@@ -129,6 +129,7 @@ export default function DestinationsTab() {
   const [syncing, setSyncing] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [results, setResults] = useState(null);
+  const [syncProgress, setSyncProgress] = useState({ uploaded: 0, skipped: 0, failed: 0, total: 0, current: 0, log: [] });
   const [search, setSearch] = useState('');
   const [preview, setPreview] = useState(null);
   const [sortBy, setSortBy] = useState('name-asc');
@@ -182,19 +183,57 @@ export default function DestinationsTab() {
   const handleSync = async () => {
     setSyncing(true);
     setResults(null);
+    setSyncProgress({ uploaded: 0, skipped: 0, failed: 0, total: 0, current: 0, log: [] });
+
     try {
-      const client = adminClient();
-      const res = await client.post('/destinations/sync-to-r2');
-      setResults(res.data);
-      const { uploaded, skipped, failed, total } = res.data;
-      if (failed > 0) {
-        toast({ title: `Synced ${uploaded + skipped}/${total} (${failed} failed)`, variant: 'error' });
-      } else {
-        toast({ title: `All ${total} images synced to R2`, variant: 'success' });
+      const token = adminClient().defaults?.headers?.Authorization?.split(' ')[1] || '';
+      const baseUrl = process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in';
+      const response = await fetch(`${baseUrl}/api/admin/destinations/sync-to-r2-stream`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' },
+      });
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.event === 'start') {
+                setSyncProgress(prev => ({ ...prev, total: data.total }));
+              } else if (data.event === 'progress') {
+                setSyncProgress(prev => ({
+                  ...prev,
+                  current: data.index,
+                  uploaded: data.uploaded,
+                  skipped: data.skipped,
+                  failed: data.failed,
+                  log: [...prev.log, `[${data.index}/${data.total}] ${data.filename}: ${data.status}`],
+                }));
+              } else if (data.event === 'complete') {
+                setSyncProgress(prev => ({ ...prev, uploaded: data.uploaded, skipped: data.skipped, failed: data.failed }));
+                if (data.failed > 0) {
+                  toast({ title: `Synced ${data.uploaded + data.skipped}/${data.total} (${data.failed} failed)`, variant: 'error' });
+                } else {
+                  toast({ title: `All ${data.total} images synced to R2`, variant: 'success' });
+                }
+              }
+            } catch {}
+          }
+        }
       }
       fetchAll();
     } catch (e) {
-      toast({ title: 'Sync failed', description: e.response?.data?.detail || e.message, variant: 'error' });
+      toast({ title: 'Sync failed', description: e.message, variant: 'error' });
     } finally {
       setSyncing(false);
     }
@@ -253,6 +292,35 @@ export default function DestinationsTab() {
           </button>
         }
       />
+
+      {syncing && syncProgress.total > 0 && (
+        <Panel className="mb-4 border-[hsl(var(--accent))]/20">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[13px] font-bold text-white flex items-center gap-2">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[hsl(var(--accent))]" />
+                Syncing to R2 ({syncProgress.current}/{syncProgress.total})
+              </h4>
+              <div className="flex items-center gap-3 text-[11px]">
+                <span className="text-emerald-400 font-semibold">{syncProgress.uploaded} new</span>
+                <span className="text-slate-400">{syncProgress.skipped} already there</span>
+                {syncProgress.failed > 0 && <span className="text-red-400 font-semibold">{syncProgress.failed} failed</span>}
+              </div>
+            </div>
+            <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--accent))] to-emerald-400 transition-all duration-300"
+                style={{ width: `${syncProgress.total > 0 ? (syncProgress.current / syncProgress.total) * 100 : 0}%` }}
+              />
+            </div>
+            <div className="max-h-32 overflow-y-auto space-y-0.5 text-[10px] text-slate-500 font-mono">
+              {syncProgress.log.slice(-8).map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+      )}
 
       {results && (
         <Panel className="mb-6">

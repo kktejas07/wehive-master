@@ -4,6 +4,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, inr } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
+import Pagination from './Pagination';
 
 const VISA_TYPES = ['Tourist', 'Business', 'Student', 'Work', 'Transit', 'Medical'];
 
@@ -319,12 +320,16 @@ export default function CountriesTab() {
   const { token } = useAdminAuth();
   const [items, setItems] = useState(null);
   const [q, setQ] = useState('');
+  const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 100;
 
   const load = useCallback(async () => {
     setItems(null);
-    const r = await adminClient(token).get('/countries', { params: { q: q || undefined, limit: 500 } });
+    const r = await adminClient(token).get('/countries', { params: { q: q || undefined, limit: pageSize, skip } });
     setItems(r.data.items);
-  }, [token, q]);
+    setTotal(r.data.total || r.data.items.length);
+  }, [token, q, skip]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -340,7 +345,7 @@ export default function CountriesTab() {
           <input
             data-testid="admin-countries-search"
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => { setQ(e.target.value); setSkip(0); }}
             placeholder="Search by country name or ISO-2…"
             className="w-full h-10 pl-9 pr-3 rounded-xl bg-white/5 border border-white/10 focus:border-[hsl(var(--accent))] text-[13.5px] text-white placeholder:text-slate-500 outline-none"
           />
@@ -371,6 +376,7 @@ export default function CountriesTab() {
             ))}
           </tbody>
         </table>
+        {items && items.length > 0 && <div className="px-5 py-3"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
       </Panel>
     </div>
   );

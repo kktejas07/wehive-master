@@ -4,6 +4,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
+import Pagination from './Pagination';
 
 const EMPTY = {
   title: '',
@@ -121,12 +122,16 @@ export default function EventsTab() {
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
+  const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 24;
 
   const load = useCallback(async () => {
     setItems(null);
-    const r = await adminClient(token).get('/events', { params: { tag: filter === 'all' ? undefined : filter } });
+    const r = await adminClient(token).get('/events', { params: { tag: filter === 'all' ? undefined : filter, limit: pageSize, skip } });
     setItems(r.data.items);
-  }, [token, filter]);
+    setTotal(r.data.total || r.data.items.length);
+  }, [token, filter, skip]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -209,7 +214,7 @@ export default function EventsTab() {
             <button
               key={t}
               data-testid={`events-filter-${t}`}
-              onClick={() => setFilter(t)}
+              onClick={() => { setFilter(t); setSkip(0); }}
               className={`rounded-full px-3 py-1 text-[11.5px] font-bold uppercase tracking-[0.12em] border transition ${
                 filter === t
                   ? 'bg-[hsl(var(--accent))] text-white border-[hsl(var(--accent))]'
@@ -304,6 +309,9 @@ export default function EventsTab() {
             </article>
           ))}
         </div>
+      )}
+      {items && items.length > 0 && (
+        <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>
       )}
     </div>
   );
