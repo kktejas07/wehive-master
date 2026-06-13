@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, MapPin } from 'lucide-react';
 
 interface MapNode {
   id: string;
@@ -33,78 +32,61 @@ const NODES: MapNode[] = [
 ];
 
 const CONNECTIONS = [
-  { from: 'india', to: 'usa', duration: 18 },
-  { from: 'india', to: 'uk', duration: 10 },
-  { from: 'india', to: 'uae', duration: 3 },
-  { from: 'india', to: 'australia', duration: 9 },
-  { from: 'india', to: 'singapore', duration: 5 },
-  { from: 'india', to: 'japan', duration: 7 },
-  { from: 'usa', to: 'uk', duration: 8 },
-  { from: 'usa', to: 'canada', duration: 4 },
-  { from: 'usa', to: 'australia', duration: 16 },
-  { from: 'usa', to: 'japan', duration: 14 },
-  { from: 'uk', to: 'germany', duration: 2 },
-  { from: 'uk', to: 'france', duration: 1 },
-  { from: 'uk', to: 'uae', duration: 7 },
-  { from: 'uae', to: 'singapore', duration: 6 },
-  { from: 'australia', to: 'singapore', duration: 7 },
-  { from: 'australia', to: 'japan', duration: 9 },
-  { from: 'singapore', to: 'japan', duration: 5 },
-  { from: 'france', to: 'canada', duration: 8 },
-  { from: 'australia', to: 'newzealand', duration: 3 },
-  { from: 'japan', to: 'southkorea', duration: 2 },
+  { from: 'india', to: 'usa' }, { from: 'india', to: 'uk' }, { from: 'india', to: 'uae' },
+  { from: 'india', to: 'australia' }, { from: 'india', to: 'singapore' }, { from: 'india', to: 'japan' },
+  { from: 'usa', to: 'uk' }, { from: 'usa', to: 'canada' }, { from: 'usa', to: 'australia' },
+  { from: 'usa', to: 'japan' }, { from: 'uk', to: 'germany' }, { from: 'uk', to: 'france' },
+  { from: 'uk', to: 'uae' }, { from: 'uae', to: 'singapore' }, { from: 'australia', to: 'singapore' },
+  { from: 'australia', to: 'japan' }, { from: 'singapore', to: 'japan' }, { from: 'france', to: 'canada' },
+  { from: 'australia', to: 'newzealand' }, { from: 'japan', to: 'southkorea' },
 ];
 
-function AnimatedDot({ x, y, delay, color }: { x: number; y: number; delay: number; color: string }) {
-  return (
-    <motion.div
-      className="absolute w-2 h-2 rounded-full"
-      style={{ left: `${x}%`, top: `${y}%`, backgroundColor: color }}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: [0, 1.2, 1, 0], opacity: [0, 1, 1, 0] }}
-      transition={{ duration: 2, delay, repeat: Infinity }}
-    />
-  );
-}
-
-function FlightPath({ from, to, progress, color }: { from: { x: number; y: number }; to: { x: number; y: number }; progress: number; color: string }) {
+function FlightPath({ from, to, color }: { from: { x: number; y: number }; to: { x: number; y: number }; color: string }) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
-  const length = Math.sqrt(dx * dx + dy * dy);
-  const midX = (from.x + to.x) / 2 + (dy / length) * 8;
-  const midY = (from.y + to.y) / 2 - (dx / length) * 8;
-
-  const currentX = from.x + (to.x - from.x) * progress;
-  const currentY = from.y + (to.y - from.y) * progress;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const midX = (from.x + to.x) / 2 + (dy / dist) * 8;
+  const midY = (from.y + to.y) / 2 - (dx / dist) * 8;
 
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: 'visible' }} viewBox="0 0 100 100">
+    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
       <defs>
-        <linearGradient id={`grad-${from.x}-${to.x}`} x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={`fg-${Math.round(from.x+to.x+from.y+to.y)}`} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor={color} stopOpacity="0" />
-          <stop offset="50%" stopColor={color} stopOpacity="0.6" />
+          <stop offset="50%" stopColor={color} stopOpacity="0.5" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
       <path
         d={`M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
         fill="none"
-        stroke={`url(#grad-${from.x}-${to.x})`}
+        stroke={`url(#fg-${Math.round(from.x+to.x+from.y+to.y)})`}
         strokeWidth="1"
-        opacity="0.4"
-      />
-      <motion.circle
-        r="3"
-        fill={color}
-        style={{
-          filter: `drop-shadow(0 0 6px ${color})`,
-          offsetPath: `path('M ${from.x}% ${from.y}% Q ${midX}% ${midY}% ${to.x}% ${to.y}%')`,
-        }}
-        animate={{
-          offsetDistance: ['0%', '100%'],
-        }}
+        strokeDasharray="3 2"
+        opacity="0.5"
       />
     </svg>
+  );
+}
+
+function FlyingPlane({ from, to, delay }: { from: { x: number; y: number }; to: { x: number; y: number }; delay: number }) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const midX = (from.x + to.x) / 2 + (dy / dist) * 8;
+  const midY = (from.y + to.y) / 2 - (dx / dist) * 8;
+
+  return (
+    <motion.div
+      className="absolute w-4 h-4 z-10 pointer-events-none"
+      style={{ offsetPath: `path('M ${from.x}% ${from.y}% Q ${midX}% ${midY}% ${to.x}% ${to.y}%')` }}
+      animate={{ offsetDistance: ['0%', '100%'] }}
+      transition={{ duration: 5, delay, repeat: Infinity, ease: 'linear' }}
+    >
+      <svg viewBox="0 0 24 24" className="w-full h-full text-[hsl(var(--accent))]" fill="currentColor">
+        <path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+      </svg>
+    </motion.div>
   );
 }
 
@@ -114,30 +96,30 @@ function MapNodeComponent({ node, index, onHover, onLeave }: { node: MapNode; in
 
   return (
     <motion.div
-      className="absolute cursor-pointer"
+      className="absolute cursor-pointer z-20"
       style={{ left: `${node.x}%`, top: `${node.y}%`, transform: 'translate(-50%, -50%)' }}
       initial={{ scale: 0, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1, type: 'spring', damping: 12 }}
-      whileHover={{ scale: 1.3, z: 50 }}
+      whileHover={{ scale: 1.4, zIndex: 50 }}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
     >
       <div className="relative">
         <div
-          className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
-          style={{ backgroundColor: `${color}20`, borderColor: color }}
+          className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg border-2 border-white backdrop-blur-sm"
+          style={{ backgroundColor: `${color}30`, borderColor: color }}
         >
-          <span className="text-xl">{node.flag}</span>
+          <span className="text-xl drop-shadow-lg">{node.flag}</span>
         </div>
-        <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          <span className="text-[9px] font-bold text-[hsl(var(--blue-900))] bg-white/90 px-1.5 py-0.5 rounded shadow">
+        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
+          <span className="text-[10px] font-bold text-white bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-full shadow">
             {node.name}
           </span>
         </div>
         <span
-          className="absolute inset-0 rounded-full animate-ping opacity-30"
+          className="absolute inset-0 rounded-full animate-ping opacity-20"
           style={{ backgroundColor: color }}
         />
       </div>
@@ -145,92 +127,78 @@ function MapNodeComponent({ node, index, onHover, onLeave }: { node: MapNode; in
   );
 }
 
-export default function WorldMap({ className = '', showConnections = true, animated = true }: WorldMapProps) {
+export default function WorldMap({ className = '', showConnections = true }: WorldMapProps) {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [dots, setDots] = useState<Array<{ x: number; y: number; delay: number; color: string }>>([]);
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    if (!animated) return;
+  useEffect(() => { setMounted(true); }, []);
 
-    const newDots = Array.from({ length: 25 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 5,
-      color: ['#0A2C8A', '#E1212C', '#10B981', '#F59E0B'][Math.floor(Math.random() * 4)],
-    }));
-    setDots(newDots);
-
-    let p = 0;
-    const interval = setInterval(() => {
-      p = (p + 0.005) % 1;
-      setProgress(p);
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [animated]);
-
-  const getNodePosition = (id: string) => {
-    const node = NODES.find((n) => n.id === id);
-    return node ? { x: node.x, y: node.y } : { x: 0, y: 0 };
+  const pos = (id: string) => {
+    const n = NODES.find((x) => x.id === id);
+    return n ? { x: n.x, y: n.y } : { x: 0, y: 0 };
   };
 
+  const flights = showConnections
+    ? CONNECTIONS.filter((c) => !hoveredNode || c.from === hoveredNode || c.to === hoveredNode)
+    : [];
+
   return (
-    <div className={`relative w-full h-full bg-gradient-to-br from-[hsl(var(--blue-900))]/5 to-[hsl(var(--blue-50))] rounded-2xl overflow-hidden ${className}`}>
-      <svg className="absolute inset-0 w-full h-full opacity-15 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-        <path fill="#0A2C8A" d="M18,22 Q20,18 24,20 Q28,18 30,22 Q32,20 34,23 Q32,28 28,30 Q26,35 22,38 Q18,36 16,32 Q14,28 16,24Z" />
-        <path fill="#0A2C8A" d="M48,26 Q52,24 56,26 Q58,24 60,26 Q62,28 60,32 Q58,34 54,34 Q50,36 48,32 Q46,30 48,26Z" />
-        <path fill="#0A2C8A" d="M56,30 Q60,28 64,30 Q68,28 72,30 Q76,28 80,30 Q84,32 86,36 Q88,40 86,44 Q84,48 80,50 Q76,52 72,50 Q68,48 64,46 Q60,44 56,42 Q54,38 54,34 Q54,32 56,30Z" />
-        <path fill="#0A2C8A" d="M48,36 Q52,34 56,36 Q58,38 56,42 Q54,44 50,44 Q46,42 46,38 Q46,36 48,36Z" />
-        <path fill="#0A2C8A" d="M82,66 Q86,64 90,66 Q92,68 90,72 Q88,76 84,76 Q80,74 80,70 Q80,68 82,66Z" />
-        <path fill="#0A2C8A" d="M24,38 Q28,36 32,38 Q36,40 38,44 Q40,48 38,52 Q36,56 32,58 Q28,60 24,58 Q20,56 18,52 Q16,48 18,44 Q20,40 24,38Z" />
-        <path fill="#0A2C8A" d="M48,36 Q52,34 54,38 Q52,42 50,44 Q48,42 48,38Z" />
-      </svg>
+    <div className={`relative w-full h-full rounded-2xl overflow-hidden ${className}`}>
+      <img
+        src="/images/world-map.webp"
+        alt="World map"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
 
-      {dots.map((dot, i) => (
-        <AnimatedDot key={i} {...dot} />
-      ))}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/30" />
 
-      {showConnections &&
-        CONNECTIONS.map((conn, i) => {
-          const from = getNodePosition(conn.from);
-          const to = getNodePosition(conn.to);
-          const isActive = hoveredNode === conn.from || hoveredNode === conn.to;
-          return (
-            <FlightPath
-              key={i}
-              from={from}
-              to={to}
-              progress={progress}
-              color={isActive ? '#E1212C' : '#0A2C8A'}
+      {mounted && (
+        <>
+          {flights.map((conn, i) => {
+            const from = pos(conn.from);
+            const to = pos(conn.to);
+            const active = hoveredNode === conn.from || hoveredNode === conn.to;
+            return <FlightPath key={i} from={from} to={to} color={active ? '#E1212C' : '#0A2C8A'} />;
+          })}
+
+          {showConnections && CONNECTIONS.map((conn, i) => {
+            const from = pos(conn.from);
+            const to = pos(conn.to);
+            if (hoveredNode && conn.from !== hoveredNode && conn.to !== hoveredNode) return null;
+            return <FlyingPlane key={i} from={from} to={to} delay={i * 0.6} />;
+          })}
+
+          {NODES.map((node, i) => (
+            <MapNodeComponent
+              key={node.id}
+              node={node}
+              index={i}
+              onHover={() => setHoveredNode(node.id)}
+              onLeave={() => setHoveredNode(null)}
             />
-          );
-        })}
-
-      {NODES.map((node, i) => (
-        <MapNodeComponent
-          key={node.id}
-          node={node}
-          index={i}
-          onHover={() => setHoveredNode(node.id)}
-          onLeave={() => setHoveredNode(null)}
-        />
-      ))}
+          ))}
+        </>
+      )}
 
       <div className="absolute bottom-3 left-3 flex items-center gap-2">
         <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-sm rounded-full px-2.5 py-1 shadow">
-          <Plane className="w-3 h-3 text-[hsl(var(--blue-700))]" />
+          <svg viewBox="0 0 24 24" className="w-3 h-3 text-[hsl(var(--blue-700))]" fill="currentColor">
+            <path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+          </svg>
           <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]">Flight Routes</span>
         </div>
         <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-sm rounded-full px-2.5 py-1 shadow">
-          <MapPin className="w-3 h-3 text-[hsl(var(--accent))]" />
+          <svg viewBox="0 0 24 24" className="w-3 h-3 text-[hsl(var(--accent))]" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
           <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]">Visa Hubs</span>
         </div>
       </div>
 
-      <div className="absolute top-3 right-3 flex items-center gap-2">
+      <div className="absolute top-3 right-3 flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-2.5 py-1 shadow">
         <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]/60">Live Connections</span>
+        <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]/70">Live</span>
       </div>
     </div>
   );
