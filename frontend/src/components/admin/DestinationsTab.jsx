@@ -250,8 +250,6 @@ export default function DestinationsTab() {
     return `/images/destinations/${filename}`;
   };
 
-  const paginated = filtered.slice(page * pageSize, (page + 1) * pageSize);
-
   const filtered = items
     .filter((item) => {
       const matchesSearch = item.country.toLowerCase().includes(search.toLowerCase());
@@ -272,6 +270,8 @@ export default function DestinationsTab() {
         default: return 0;
       }
     });
+
+  const paginated = filtered.slice(page * pageSize, (page + 1) * pageSize);
 
   if (loading) {
     return (

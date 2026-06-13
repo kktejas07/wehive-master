@@ -7,6 +7,7 @@ import {
   LayoutDashboard, FileText, X, Mail, Phone, MapPin,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import Pagination from '../components/admin/Pagination';
 
 const NAV = [
   { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, href: '/agent/dashboard' },
@@ -21,20 +22,28 @@ export default function AgentStudents() {
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', country: '', course: '', education_level: '', notes: '' });
+  const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 20;
+
+  const token = () => localStorage.getItem('agent_token');
 
   useEffect(() => {
-    const token = localStorage.getItem('agent_token');
-    if (!token) { navigate('/agent/login'); return; }
+    if (!token()) { navigate('/agent/login'); return; }
     loadStudents();
-  }, []);
+  }, [skip]);
 
   const loadStudents = () => {
-    const token = localStorage.getItem('agent_token');
-    axios.get(`${API}/agent/students`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => setStudents(r.data || []))
+    setLoading(true);
+    axios.get(`${API}/agent/students?limit=${pageSize}&skip=${skip}${search ? `&search=${encodeURIComponent(search)}` : ''}`, {
+      headers: { Authorization: `Bearer ${token()}` }
+    })
+      .then(r => { setStudents(r.data.items || []); setTotal(r.data.total || 0); })
       .catch(() => navigate('/agent/login'))
       .finally(() => setLoading(false));
   };
+
+  const handleSearch = () => { setSkip(0); loadStudents(); };
 
   const handleAdd = async () => {
     const token = localStorage.getItem('agent_token');
@@ -43,8 +52,6 @@ export default function AgentStudents() {
     setForm({ name: '', email: '', phone: '', country: '', course: '', education_level: '', notes: '' });
     loadStudents();
   };
-
-  const filtered = students.filter(s => !search || s.name?.toLowerCase().includes(search.toLowerCase()) || s.email?.toLowerCase().includes(search.toLowerCase()));
 
   const handleLogout = () => { localStorage.removeItem('agent_token'); navigate('/agent/login'); };
 
@@ -72,7 +79,7 @@ export default function AgentStudents() {
               <ChevronRight className="w-3 h-3" />
               <span className="font-bold text-[hsl(var(--blue-900))]">Students</span>
             </div>
-            <h1 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">Students ({students.length})</h1>
+            <h1 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">Students ({total})</h1>
           </div>
           <Button onClick={() => setShowAdd(true)} className="rounded-full btn-accent text-white h-11 px-5 font-bold text-[13px]">
             <Plus className="w-4 h-4 mr-1" /> Add Student
@@ -81,19 +88,19 @@ export default function AgentStudents() {
 
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/40" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search students..." className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none pl-10 pr-4 text-[14px]" />
+          <input value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSearch()} placeholder="Search students..." className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none pl-10 pr-4 text-[14px]" />
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" /></div>
-        ) : filtered.length === 0 ? (
+        ) : students.length === 0 ? (
           <div className="rounded-3xl bg-white border border-black/5 p-12 text-center">
             <Users className="w-12 h-12 text-[hsl(var(--blue-900))]/20 mx-auto" />
             <p className="mt-3 text-[15px] text-[hsl(var(--blue-900))]/40">No students found</p>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(s => (
+            {students.map(s => (
               <div key={s._id} className="rounded-2xl bg-white border border-black/5 p-5 hover:shadow-lg transition-all">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white font-bold text-lg">
@@ -116,6 +123,7 @@ export default function AgentStudents() {
               </div>
             ))}
           </div>
+          {total > pageSize && <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
         )}
 
         {showAdd && (

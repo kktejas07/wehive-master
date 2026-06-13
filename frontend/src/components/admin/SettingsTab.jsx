@@ -163,10 +163,13 @@ export default function SettingsTab() {
       try {
         const client = adminClient();
         const results = {};
-        for (const ns of NAMESPACES) {
-          const res = await client.get(`/settings/${ns}`);
-          results[ns] = res.data.config || {};
-        }
+        const nsResults = await Promise.all(
+          NAMESPACES.map(async (ns) => {
+            const res = await client.get(`/settings/${ns}`);
+            return { ns, config: res.data.config || {} };
+          })
+        );
+        for (const { ns, config } of nsResults) results[ns] = config;
         setSettings(results);
         setOriginals(JSON.parse(JSON.stringify(results)));
         const brandingRes = await client.get('/branding');
