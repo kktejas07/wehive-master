@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate premium travel illustrations for every country using Replicate (Flux).
+"""Generate premium travel illustrations for every country using Together AI (Flux).
 
 Usage:
-    export REPLICATE_API_TOKEN="r8_..."
+    export TOGETHER_API_KEY="..."
     python generate.py
 
     # Generate a single country:
@@ -15,7 +15,7 @@ Usage:
     python generate.py --dry-run
 
 Requirements:
-    pip install replicate httpx
+    pip install httpx
 """
 
 import json
@@ -23,17 +23,18 @@ import os
 import sys
 import time
 import argparse
+import base64
 from pathlib import Path
 
 import httpx
-import replicate
 
 
 HERE = Path(__file__).parent
 MANIFEST_PATH = HERE / "manifest.json"
 OUTPUT_DIR = HERE / "output"
 
-MODEL = "black-forest-labs/flux-schnell"
+API_URL = "https://api.together.xyz/v1/images/generations"
+MODEL = "black-forest-labs/FLUX.1-schnell-Free"
 
 STYLE_SUFFIX = (
     "Modern flat-vector illustration blended with semi-realistic digital art. "
@@ -74,47 +75,54 @@ def build_prompt(entry: dict) -> str:
     )
 
 
-def generate_image(prompt: str, aspect_ratio: str = "16:9") -> str | None:
+def generate_image(api_key: str, prompt: str, width: int = 1024, height: int = 768) -> bytes | None:
     try:
-        output = replicate.run(
-            MODEL,
-            input={
+        resp = httpx.post(
+            API_URL,
+            json={
+                "model": MODEL,
                 "prompt": prompt,
-                "aspect_ratio": aspect_ratio,
-                "num_outputs": 1,
-                "go_fast": True,
-                "num_inference_steps": 4,
+                "width": width,
+                "height": height,
+                "steps": 4,
+                "n": 1,
             },
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            timeout=120,
         )
-        return output[0] if output else None
+        resp.raise_for_status()
+        data = resp.json()
+        b64 = data.get("data", [{}])[0].get("b64_json")
+        if b64:
+            return base64.b64decode(b64)
+        url = data.get("data", [{}])[0].get("url")
+        if url:
+            r = httpx.get(url, timeout=60)
+            r.raise_for_status()
+            return r.content
+        print(f"  Unexpected response: {str(data)[:200]}", file=sys.stderr)
+        return None
     except Exception as e:
         print(f"  API error: {e}", file=sys.stderr)
         return None
 
 
-def download_image(url: str, dest: Path) -> bool:
-    try:
-        resp = httpx.get(url, timeout=120, follow_redirects=True)
-        resp.raise_for_status()
-        dest.write_bytes(resp.content)
-        return True
-    except Exception as e:
-        print(f"  Download error: {e}", file=sys.stderr)
-        return False
-
-
 def main():
-    parser = argparse.ArgumentParser(description="Generate premium country illustrations via Replicate")
+    parser = argparse.ArgumentParser(description="Generate premium country illustrations via Together AI")
     parser.add_argument("--country", help="Generate only this country (filename or name)")
     parser.add_argument("--resume-from", type=int, default=0, help="Resume from this index")
     parser.add_argument("--dry-run", action="store_true", help="Print prompts without generating")
-    parser.add_argument("--aspect-ratio", default="16:9", help='Aspect ratio (default: 16:9)')
-    parser.add_argument("--delay", type=float, default=2.0, help="Delay between API calls (default: 2s)")
+    parser.add_argument("--width", type=int, default=1024, help="Image width (default: 1024)")
+    parser.add_argument("--height", type=int, default=768, help="Image height (default: 768)")
+    parser.add_argument("--delay", type=float, default=1.5, help="Delay between API calls (default: 1.5s)")
     args = parser.parse_args()
 
-    api_token = os.environ.get("REPLICATE_API_TOKEN")
-    if not api_token and not args.dry_run:
-        print("Error: REPLICATE_API_TOKEN environment variable not set", file=sys.stderr)
+    api_key = os.environ.get("TOGETHER_API_KEY")
+    if not api_key and not args.dry_run:
+        print("Error: TOGETHER_API_KEY environment variable not set", file=sys.stderr)
         sys.exit(1)
 
     manifest = load_manifest()
@@ -126,7 +134,7 @@ def main():
     skipped = 0
 
     print(f"Model: {MODEL}")
-    print(f"Aspect ratio: {args.aspect_ratio}")
+    print(f"Size: {args.width}x{args.height}")
     print(f"Total countries: {total}")
     print()
 
@@ -150,27 +158,23 @@ def main():
         prompt = build_prompt(entry)
         print(f"[{idx+1}/{total}] {filename}")
         print(f"  {entry['country']} — {entry['landmark']}")
-        print(f"  Prompt: {prompt[:100]}...")
 
         if args.dry_run:
             print()
             continue
 
         print("  Generating...", end=" ", flush=True)
-        url = generate_image(prompt, args.aspect_ratio)
-        if not url:
+        image_data = generate_image(api_key, prompt, args.width, args.height)
+        if not image_data:
             print("FAILED")
             continue
 
-        print("Downloading...", end=" ", flush=True)
         dest = OUTPUT_DIR / filename
-        if download_image(url, dest):
-            size_kb = dest.stat().st_size / 1024
-            print(f"OK ({size_kb:.0f} KB)")
-            success += 1
-            save_checkpoint(idx + 1)
-        else:
-            print("FAILED")
+        dest.write_bytes(image_data)
+        size_kb = dest.stat().st_size / 1024
+        print(f"OK ({size_kb:.0f} KB)")
+        success += 1
+        save_checkpoint(idx + 1)
 
         time.sleep(args.delay)
 
