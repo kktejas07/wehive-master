@@ -35,10 +35,10 @@ export default function AgentStudents() {
 
   const loadStudents = () => {
     setLoading(true);
-    axios.get(`${API}/agent/students?limit=${pageSize}&skip=${skip}${search ? `&search=${encodeURIComponent(search)}` : ''}`, {
-      headers: { Authorization: `Bearer ${token()}` }
-    })
-      .then(r => { setStudents(r.data.items || []); setTotal(r.data.total || 0); })
+    axios.get(`${API}/agent/students`, {
+      headers: { Authorization: `Bearer ${token()}` },
+      params: { limit: pageSize, skip, search: search || undefined },
+    }).then(r => { setStudents(r.data.items || []); setTotal(r.data.total || 0); })
       .catch(() => navigate('/agent/login'))
       .finally(() => setLoading(false));
   };
@@ -99,31 +99,33 @@ export default function AgentStudents() {
             <p className="mt-3 text-[15px] text-[hsl(var(--blue-900))]/40">No students found</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {students.map(s => (
-              <div key={s._id} className="rounded-2xl bg-white border border-black/5 p-5 hover:shadow-lg transition-all">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white font-bold text-lg">
-                    {s.name?.charAt(0) || '?'}
+          <>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {students.map(s => (
+                <div key={s._id} className="rounded-2xl bg-white border border-black/5 p-5 hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white font-bold text-lg">
+                      {s.name?.charAt(0) || '?'}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-[14px] text-[hsl(var(--blue-900))] truncate">{s.name}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{s.course || '—'}</div>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <div className="font-bold text-[14px] text-[hsl(var(--blue-900))] truncate">{s.name}</div>
-                    <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{s.course || '—'}</div>
+                  <div className="space-y-1.5 text-[12px] text-[hsl(var(--blue-900))]/60">
+                    {s.email && <div className="flex items-center gap-1.5"><Mail className="w-3 h-3" /> {s.email}</div>}
+                    {s.phone && <div className="flex items-center gap-1.5"><Phone className="w-3 h-3" /> {s.phone}</div>}
+                    {s.country && <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3" /> {s.country}</div>}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-black/5 flex items-center justify-between">
+                    <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold ${s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{s.status}</span>
+                    <span className="text-[11px] text-[hsl(var(--blue-900))]/40">{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</span>
                   </div>
                 </div>
-                <div className="space-y-1.5 text-[12px] text-[hsl(var(--blue-900))]/60">
-                  {s.email && <div className="flex items-center gap-1.5"><Mail className="w-3 h-3" /> {s.email}</div>}
-                  {s.phone && <div className="flex items-center gap-1.5"><Phone className="w-3 h-3" /> {s.phone}</div>}
-                  {s.country && <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3" /> {s.country}</div>}
-                </div>
-                <div className="mt-3 pt-3 border-t border-black/5 flex items-center justify-between">
-                  <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold ${s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{s.status}</span>
-                  <span className="text-[11px] text-[hsl(var(--blue-900))]/40">{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          {total > pageSize && <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
+              ))}
+            </div>
+            {total > pageSize && <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
+          </>
         )}
 
         {showAdd && (
