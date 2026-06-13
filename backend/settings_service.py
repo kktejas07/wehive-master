@@ -64,3 +64,11 @@ async def get_general_config() -> dict:
 
 async def get_notification_config() -> dict:
     return await _load('notifications')
+
+
+async def get_branding_config() -> dict:
+    return await _load('branding')
+
+
+async def get_r2_config() -> dict:
+    return await _load('r2')

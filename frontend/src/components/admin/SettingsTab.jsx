@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Loader2, Save, Eye, EyeOff, Info,
   CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud,
+  Palette, Upload as UploadIcon,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -75,7 +76,7 @@ function Field({ label, tooltip, value, onChange, placeholder }) {
   );
 }
 
-const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications', 'r2'];
+const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications', 'r2', 'branding'];
 
 const SECTION_META = {
   firebase: { label: 'Firebase', icon: Globe, title: 'Firebase Authentication' },
@@ -85,6 +86,7 @@ const SECTION_META = {
   notifications: { label: 'Notifications', icon: Bell, title: 'Notifications (Telegram / Discord / WhatsApp)' },
   general: { label: 'General', icon: MessageSquare, title: 'General' },
   r2: { label: 'R2 Storage', icon: Cloud, title: 'Cloudflare R2 Image Storage' },
+  branding: { label: 'Branding', icon: Palette, title: 'Site Branding & Assets' },
 };
 
 const FIELDS = {
@@ -135,6 +137,15 @@ const FIELDS = {
     { type: 'text', key: 'public_url', label: 'Public URL', tooltip: 'R2 public bucket URL e.g. https://pub-xxxxx.r2.dev or a custom domain' },
     { type: 'text', key: 'endpoint', label: 'Endpoint (optional)', tooltip: 'S3 endpoint — defaults to https://{account_id}.r2.cloudflarestorage.com' },
   ],
+  branding: [
+    { type: 'file', key: 'logo', label: 'Logo', tooltip: 'Main site logo — uploaded to R2, served via signed URL. PNG or SVG recommended.', accept: 'image/png,image/svg+xml,image/jpeg,image/webp' },
+    { type: 'file', key: 'favicon', label: 'Favicon', tooltip: 'Browser tab icon — uploaded to R2. PNG (32x32 or 48x48) recommended.', accept: 'image/png,image/x-icon,image/svg+xml' },
+    { type: 'file', key: 'og-image', label: 'OG Image', tooltip: 'Social sharing preview image (1200x630 recommended).', accept: 'image/png,image/jpeg,image/webp' },
+    { type: 'text', key: 'site_name', label: 'Site Name', tooltip: 'Used in page titles and SEO metadata (e.g. "We Hive")' },
+    { type: 'text', key: 'tagline', label: 'Tagline', tooltip: 'Short description shown in hero section and meta description' },
+    { type: 'text', key: 'primary_color', label: 'Primary Color', tooltip: 'CSS hex color e.g. #0A2C8A — used for buttons, accents, gradients' },
+    { type: 'text', key: 'accent_color', label: 'Accent Color', tooltip: 'CSS hex color e.g. #E1212C — used for highlights, badges, CTAs' },
+  ],
 };
 
 export default function SettingsTab() {
@@ -144,6 +155,8 @@ export default function SettingsTab() {
   const [settings, setSettings] = useState({});
   const [originals, setOriginals] = useState({});
   const [activeTab, setActiveTab] = useState('firebase');
+  const [uploading, setUploading] = useState(null);
+  const [brandingAssets, setBrandingAssets] = useState({});
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -156,6 +169,8 @@ export default function SettingsTab() {
         }
         setSettings(results);
         setOriginals(JSON.parse(JSON.stringify(results)));
+        const brandingRes = await client.get('/branding');
+        if (brandingRes.data?.assets) setBrandingAssets(brandingRes.data.assets);
       } catch (e) {
         toast({ title: 'Failed to load settings', variant: 'error' });
       } finally {
@@ -164,6 +179,24 @@ export default function SettingsTab() {
     };
     fetchAll();
   }, []);
+
+  const handleFileUpload = async (key, file) => {
+    setUploading(key);
+    try {
+      const client = adminClient();
+      const form = new FormData();
+      form.append('file', file);
+      form.append('key', key);
+      await client.post('/branding/upload', form);
+      toast({ title: `${key} uploaded to R2 successfully`, variant: 'success' });
+      const brandingRes = await client.get('/branding');
+      if (brandingRes.data?.assets) setBrandingAssets(brandingRes.data.assets);
+    } catch (e) {
+      toast({ title: `Upload ${key} failed`, description: e.response?.data?.detail || e.message, variant: 'error' });
+    } finally {
+      setUploading(null);
+    }
+  };
 
   const ns = activeTab;
   const meta = SECTION_META[ns];
@@ -266,6 +299,38 @@ export default function SettingsTab() {
                     value={values[field.key] || ''}
                     onChange={(v) => setField(field.key, v)}
                   />
+                ) : field.type === 'file' ? (
+                  <div>
+                    <label className="block">
+                      <span className="flex items-center text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400 mb-1.5">
+                        {field.label}
+                        {field.tooltip && <Tooltip text={field.tooltip} />}
+                      </span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <label className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[12px] font-bold transition cursor-pointer shrink-0">
+                        {uploading === field.key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadIcon className="w-3.5 h-3.5" />}
+                        {uploading === field.key ? 'Uploading...' : `Upload ${field.label}`}
+                        <input
+                          type="file"
+                          accept={field.accept || 'image/*'}
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(field.key, file);
+                          }}
+                        />
+                      </label>
+                      {brandingAssets[field.key]?.url && (
+                        <img src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-10 rounded-lg object-cover border border-white/10" />
+                      )}
+                    </div>
+                    {brandingAssets[field.key] && (
+                      <p className="mt-1 text-[10px] text-slate-500">
+                        Uploaded • {(brandingAssets[field.key].size / 1024).toFixed(1)} KB
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <Field
                     label={field.label}

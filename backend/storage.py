@@ -80,6 +80,7 @@ def upload_bytes(key: str, content: bytes, content_type: str = 'application/octe
             Key=key,
             Body=content,
             ContentType=content_type,
+            ServerSideEncryption='AES256',
         )
     except (BotoCoreError, ClientError) as e:
         logger.exception('R2 upload failed for %s: %s', key, e)

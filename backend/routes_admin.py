@@ -702,7 +702,7 @@ async def admin_update_integrations(payload: IntegrationSettings, _=Depends(get_
     return {'ok': True, **update}
 
 
-ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications', 'r2'}
+ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications', 'r2', 'branding'}
 
 
 @router.get('/settings/{namespace}')
@@ -727,6 +727,118 @@ async def admin_update_settings(namespace: str, payload: NamespaceSettings, _=De
         raise HTTPException(400, 'Nothing to update')
     await set_all(namespace, payload.config)
     return {'ok': True}
+
+
+# ---------- branding assets ----------
+
+from fastapi import UploadFile, File
+from settings_service import get_r2_config
+
+BRANDING_BUCKET_KEY = 'branding'
+
+
+def _r2_client_from_settings(r2_cfg: dict):
+    """Build a boto3 S3 client for R2 from the stored settings."""
+    import boto3
+    from botocore.config import Config as BotoConfig
+    endpoint = r2_cfg.get('endpoint') or f"https://{r2_cfg.get('account_id', '')}.r2.cloudflarestorage.com"
+    return boto3.client(
+        's3',
+        endpoint_url=endpoint,
+        aws_access_key_id=r2_cfg.get('access_key_id', ''),
+        aws_secret_access_key=r2_cfg.get('secret_access_key', ''),
+        region_name='auto',
+        config=BotoConfig(signature_version='s3v4'),
+    )
+
+
+@router.post('/branding/upload')
+async def admin_upload_branding(
+    file: UploadFile = File(...),
+    key: str = 'logo',
+    _=Depends(get_current_admin),
+):
+    """Upload a branding asset (logo, favicon, etc.) to R2 with SSE-S3 encryption."""
+    allowed_keys = {'logo', 'favicon', 'og-image'}
+    if key not in allowed_keys:
+        raise HTTPException(400, f'Invalid key. Allowed: {", ".join(sorted(allowed_keys))}')
+    r2_cfg = await get_r2_config()
+    if not r2_cfg.get('access_key_id'):
+        raise HTTPException(400, 'R2 is not configured')
+    s3 = _r2_client_from_settings(r2_cfg)
+    bucket = r2_cfg.get('bucket', '')
+    ext = file.filename.rsplit('.', 1)[-1] if '.' in (file.filename or '') else 'png'
+    obj_key = f'{BRANDING_BUCKET_KEY}/{key}.{ext}'
+    content = await file.read()
+    s3.put_object(
+        Bucket=bucket,
+        Key=obj_key,
+        Body=content,
+        ContentType=file.content_type or 'application/octet-stream',
+        ServerSideEncryption='AES256',
+    )
+    public_url = (r2_cfg.get('public_url') or '').rstrip('/')
+    return {
+        'ok': True,
+        'key': obj_key,
+        'url': f'{public_url}/{obj_key}' if public_url else None,
+    }
+
+
+@router.get('/branding/asset/{key}')
+async def admin_get_branding_asset(key: str, _=Depends(get_current_admin)):
+    """Return a signed URL for a branding asset stored on R2."""
+    r2_cfg = await get_r2_config()
+    if not r2_cfg.get('access_key_id'):
+        raise HTTPException(400, 'R2 is not configured')
+    s3 = _r2_client_from_settings(r2_cfg)
+    bucket = r2_cfg.get('bucket', '')
+    try:
+        resp = s3.head_object(Bucket=bucket, Key=f'{BRANDING_BUCKET_KEY}/{key}')
+        ext = key.rsplit('.', 1)[-1] if '.' in key else 'png'
+        content_type = resp.get('ContentType', f'image/{ext}')
+    except Exception:
+        # Try to find the file by listing matching keys
+        try:
+            objs = s3.list_objects_v2(Bucket=bucket, Prefix=f'{BRANDING_BUCKET_KEY}/{key}')
+            if not objs.get('Contents'):
+                raise HTTPException(404, f'No branding asset found for key: {key}')
+            obj_key = objs['Contents'][0]['Key']
+            ext = obj_key.rsplit('.', 1)[-1] if '.' in obj_key else 'png'
+        except Exception:
+            raise HTTPException(404, f'Branding asset not found: {key}')
+    obj_key = f'{BRANDING_BUCKET_KEY}/{key}'
+    url = s3.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': bucket, 'Key': obj_key},
+        ExpiresIn=86400,
+    )
+    return {'url': url}
+
+
+@router.get('/branding')
+async def admin_get_branding(_=Depends(get_current_admin)):
+    """Return all branding asset URLs with signed links."""
+    r2_cfg = await get_r2_config()
+    if not r2_cfg.get('access_key_id'):
+        return {'configured': False, 'assets': {}}
+    s3 = _r2_client_from_settings(r2_cfg)
+    bucket = r2_cfg.get('bucket', '')
+    assets = {}
+    try:
+        objs = s3.list_objects_v2(Bucket=bucket, Prefix=f'{BRANDING_BUCKET_KEY}/')
+        for obj in objs.get('Contents', []):
+            name = obj['Key'].split('/')[-1]
+            base = name.rsplit('.', 1)[0] if '.' in name else name
+            url = s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': bucket, 'Key': obj['Key']},
+                ExpiresIn=86400,
+            )
+            assets[base] = {'key': obj['Key'], 'url': url, 'size': obj['Size']}
+    except Exception:
+        pass
+    return {'configured': True, 'assets': assets}
 
 
 # ---------- destinations (destination images) ----------
@@ -831,6 +943,7 @@ async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
                 Key=key,
                 Body=resp.content,
                 ContentType='image/webp',
+                ServerSideEncryption='AES256',
             )
             url = f'{public_url}/{key}' if public_url else ''
             results.append({'filename': filename, 'status': 'uploaded', 'url': url})
@@ -893,6 +1006,24 @@ async def admin_r2_status(_=Depends(get_current_admin)):
     return {'items': results, 'total': len(results), 'onR2': sum(1 for r in results if r['onR2'])}
 
 
+@router.get('/destinations/signed-url')
+async def admin_destination_signed_url(filename: str = Query(...), _=Depends(get_current_admin)):
+    """Return a signed URL for a destination image stored on R2."""
+    cfg = await _get_r2_settings()
+    client, bucket, public_url = _r2_client_from_cfg(cfg)
+    key = f'destinations/{filename}'
+    try:
+        client.head_object(Bucket=bucket, Key=key)
+    except Exception:
+        raise HTTPException(404, f'Image {filename} not found on R2')
+    url = client.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': bucket, 'Key': key},
+        ExpiresIn=86400,
+    )
+    return {'filename': filename, 'url': url}
+
+
 @router.post('/destinations/upload-image')
 async def admin_upload_destination(
     country: str = Query(..., description='Country name'),
@@ -912,7 +1043,7 @@ async def admin_upload_destination(
     content = await file.read()
     key = f'destinations/{filename}'
 
-    client.put_object(Bucket=bucket, Key=key, Body=content, ContentType=file.content_type or 'image/webp')
+    client.put_object(Bucket=bucket, Key=key, Body=content, ContentType=file.content_type or 'image/webp', ServerSideEncryption='AES256')
     url = f'{public_url}/{key}' if public_url else ''
 
     return {'filename': filename, 'country': country, 'url': url}
@@ -981,7 +1112,7 @@ async def admin_regenerate_destination(
     # Upload to R2
     filename = entry['filename']
     key = f'destinations/{filename}'
-    client.put_object(Bucket=bucket, Key=key, Body=image_data, ContentType='image/webp')
+    client.put_object(Bucket=bucket, Key=key, Body=image_data, ContentType='image/webp', ServerSideEncryption='AES256')
     url = f'{public_url}/{key}' if public_url else ''
 
     # Also save locally

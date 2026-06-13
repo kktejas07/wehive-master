@@ -1,13 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   Loader2, Upload, Cloud, CheckCircle2, XCircle, Image as ImageIcon,
-  Search, Trash2, RefreshCw, FileUp, X, Database,
+  Search, Trash2, RefreshCw, FileUp, X, Database, ArrowUpDown,
+  Grid3X3, List, Download, MoreVertical,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
-function PreviewModal({ item, onClose, onRefresh }) {
+function PreviewModal({ item, onClose, onRefresh, r2PublicUrl }) {
   const { toast } = useToast();
   const [regenerating, setRegenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -68,7 +69,7 @@ function PreviewModal({ item, onClose, onRefresh }) {
         </button>
         <div className="aspect-[2/3] bg-black/50">
           <img
-            src={`/images/destinations/${item.filename}`}
+            src={item.onR2 && r2PublicUrl ? `${r2PublicUrl}/destinations/${item.filename}` : `/images/destinations/${item.filename}`}
             alt={item.country}
             className="w-full h-full object-cover"
           />
@@ -130,14 +131,19 @@ export default function DestinationsTab() {
   const [results, setResults] = useState(null);
   const [search, setSearch] = useState('');
   const [preview, setPreview] = useState(null);
+  const [sortBy, setSortBy] = useState('name-asc');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('grid');
+  const [r2PublicUrl, setR2PublicUrl] = useState('');
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const client = adminClient();
-      const [destRes, r2Res] = await Promise.allSettled([
+      const [destRes, r2Res, r2SettingsRes] = await Promise.allSettled([
         client.get('/destinations'),
         client.get('/destinations/r2-status'),
+        adminClient().get('/settings/r2'),
       ]);
       const dests = destRes.value?.data?.items || [];
       const statusMap = {};
@@ -148,6 +154,8 @@ export default function DestinationsTab() {
       }
       setItems(dests);
       setR2Status(statusMap);
+      const r2Cfg = r2SettingsRes.value?.data?.config || {};
+      setR2PublicUrl((r2Cfg.public_url || '').replace(/\/$/, ''));
     } catch (e) {
       toast({ title: 'Failed to load destinations', variant: 'error' });
     } finally {
@@ -195,9 +203,31 @@ export default function DestinationsTab() {
   const r2Count = Object.values(r2Status).filter(Boolean).length;
   const localCount = items.length - r2Count;
 
-  const filtered = items.filter((item) =>
-    item.country.toLowerCase().includes(search.toLowerCase())
-  );
+  const getImageUrl = (filename, onR2) => {
+    if (onR2 && r2PublicUrl) return `${r2PublicUrl}/destinations/${filename}`;
+    return `/images/destinations/${filename}`;
+  };
+
+  const filtered = items
+    .filter((item) => {
+      const matchesSearch = item.country.toLowerCase().includes(search.toLowerCase());
+      if (statusFilter === 'all') return matchesSearch;
+      const onR2 = r2Status[item.filename];
+      if (statusFilter === 'r2') return matchesSearch && onR2;
+      if (statusFilter === 'local') return matchesSearch && !onR2;
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      const aR2 = r2Status[a.filename] ? 1 : 0;
+      const bR2 = r2Status[b.filename] ? 1 : 0;
+      switch (sortBy) {
+        case 'name-asc': return a.country.localeCompare(b.country);
+        case 'name-desc': return b.country.localeCompare(a.country);
+        case 'r2-first': return bR2 - aR2 || a.country.localeCompare(b.country);
+        case 'r2-last': return aR2 - bR2 || a.country.localeCompare(b.country);
+        default: return 0;
+      }
+    });
 
   if (loading) {
     return (
@@ -275,6 +305,43 @@ export default function DestinationsTab() {
             className="w-full h-10 pl-9 pr-4 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white placeholder:text-slate-600 outline-none focus:border-[hsl(var(--accent))] transition"
           />
         </div>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="h-10 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] font-semibold text-slate-300 outline-none focus:border-[hsl(var(--accent))] transition cursor-pointer"
+        >
+          <option value="all">All Status</option>
+          <option value="r2">On R2</option>
+          <option value="local">Local Only</option>
+        </select>
+
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="h-10 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] font-semibold text-slate-300 outline-none focus:border-[hsl(var(--accent))] transition cursor-pointer"
+        >
+          <option value="name-asc">A → Z</option>
+          <option value="name-desc">Z → A</option>
+          <option value="r2-first">R2 First</option>
+          <option value="r2-last">Local First</option>
+        </select>
+
+        <div className="flex items-center gap-1 ml-auto">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${viewMode === 'grid' ? 'bg-white/15 text-white' : 'text-slate-500 hover:text-white'}`}
+          >
+            <Grid3X3 className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${viewMode === 'list' ? 'bg-white/15 text-white' : 'text-slate-500 hover:text-white'}`}
+          >
+            <List className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
         <div className="flex items-center gap-3 text-[12px]">
           <span className="text-slate-400">{items.length} total</span>
           <span className="flex items-center gap-1 text-emerald-400 font-semibold">
@@ -287,46 +354,78 @@ export default function DestinationsTab() {
       </div>
 
       {preview && (
-        <PreviewModal item={preview} onClose={() => setPreview(null)} onRefresh={fetchAll} />
+        <PreviewModal item={preview} onClose={() => setPreview(null)} onRefresh={fetchAll} r2PublicUrl={r2PublicUrl} />
       )}
 
       <Panel>
-        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {filtered.map((item) => {
-            const onR2 = r2Status[item.filename];
-            return (
-              <div
-                key={item.filename}
-                className="rounded-xl overflow-hidden bg-black/30 border border-white/5 group cursor-pointer hover:border-white/20 transition"
-                onClick={() => setPreview({ ...item, onR2 })}
-              >
-                <div className="aspect-[2/3] bg-black/50 overflow-hidden relative">
-                  <img
-                    src={`/images/destinations/${item.filename}`}
-                    alt={item.country}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <div className="absolute top-2 right-2">
-                    {onR2 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/60 backdrop-blur-sm text-white text-[9px] font-bold">
-                        <CheckCircle2 className="w-2.5 h-2.5" /> R2
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-500/60 backdrop-blur-sm text-white text-[9px] font-bold">
-                        <Cloud className="w-2.5 h-2.5" /> local
-                      </span>
-                    )}
+        {viewMode === 'grid' ? (
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {filtered.map((item) => {
+              const onR2 = r2Status[item.filename];
+              return (
+                <div
+                  key={item.filename}
+                  className="rounded-xl overflow-hidden bg-black/30 border border-white/5 group cursor-pointer hover:border-white/20 transition"
+                  onClick={() => setPreview({ ...item, onR2 })}
+                >
+                  <div className="aspect-[2/3] bg-black/50 overflow-hidden relative">
+                    <img
+                      src={getImageUrl(item.filename, onR2)}
+                      alt={item.country}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-2 right-2">
+                      {onR2 ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/60 backdrop-blur-sm text-white text-[9px] font-bold">
+                          <CheckCircle2 className="w-2.5 h-2.5" /> R2
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-500/60 backdrop-blur-sm text-white text-[9px] font-bold">
+                          <Cloud className="w-2.5 h-2.5" /> local
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-2.5">
+                    <div className="text-[11px] font-bold text-white truncate">{item.country}</div>
+                    <div className="text-[10px] text-slate-500 truncate font-mono">{item.filename}</div>
                   </div>
                 </div>
-                <div className="p-2.5">
-                  <div className="text-[11px] font-bold text-white truncate">{item.country}</div>
-                  <div className="text-[10px] text-slate-500 truncate font-mono">{item.filename}</div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <div className="grid grid-cols-[40px_1fr_120px_100px] gap-3 px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-white/5">
+              <span></span>
+              <span>Country</span>
+              <span>Status</span>
+              <span>File</span>
+            </div>
+            {filtered.map((item, idx) => {
+              const onR2 = r2Status[item.filename];
+              return (
+                <div
+                  key={item.filename}
+                  className="grid grid-cols-[40px_1fr_120px_100px] gap-3 px-4 py-2.5 items-center rounded-lg hover:bg-white/5 cursor-pointer transition"
+                  onClick={() => setPreview({ ...item, onR2 })}
+                >
+                  <span className="text-[10px] text-slate-600 font-mono w-8 text-center">{idx + 1}</span>
+                  <div>
+                    <div className="text-[12px] font-semibold text-white">{item.country}</div>
+                    <div className="text-[10px] text-slate-500 font-mono">{item.filename}</div>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${onR2 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-500/10 text-slate-400'}`}>
+                    {onR2 ? <CheckCircle2 className="w-2.5 h-2.5" /> : <Cloud className="w-2.5 h-2.5" />}
+                    {onR2 ? 'R2' : 'Local'}
+                  </span>
+                  <span className="text-[10px] text-slate-600 font-mono truncate">{item.filename}</span>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {items.length === 0 && (
           <div className="text-center py-16 text-slate-500">
