@@ -1,0 +1,447 @@
+Model: black-forest-labs/FLUX.1-schnell
+Size: 1024x1536
+Total countries: 220
+
+[82/220] uruguay.webp
+  Uruguay — Punta del Este skyline and Atlantic coastline
+  Generating... OK (109 KB)
+[83/220] paraguay.webp
+  Paraguay — Panteon Nacional de los Heroes in Asuncion
+  Generating... OK (186 KB)
+[84/220] venezuela.webp
+  Venezuela — Angel Falls plunging from table mountain
+  Generating... OK (136 KB)
+[85/220] ecuador.webp
+  Ecuador — Galapagos Islands volcanic landscape and blue-footed boobies
+  Generating... OK (137 KB)
+[86/220] bolivia.webp
+  Bolivia — Salar de Uyuni salt flat mirror sky reflection
+  Generating... OK (71 KB)
+[87/220] guyana.webp
+  Guyana — Kaieteur Falls in Amazon rainforest
+  Generating... OK (140 KB)
+[88/220] suriname.webp
+  Suriname — Paramaribo wooden St Peter and Paul Cathedral
+  Generating... OK (169 KB)
+[89/220] zimbabwe.webp
+  Zimbabwe — Victoria Falls mist rising above Zambezi gorge
+  Generating... OK (215 KB)
+[90/220] zambia.webp
+  Zambia — Victoria Falls from Livingstone side with rainbow
+  Generating... OK (120 KB)
+[91/220] nigeria.webp
+  Nigeria — Zuma Rock towering above green Nigerian landscape
+  Generating... OK (205 KB)
+[92/220] ghana.webp
+  Ghana — Cape Coast Castle overlooking Atlantic Ocean
+  Generating... OK (173 KB)
+[93/220] ethiopia.webp
+  Ethiopia — Lalibela rock-hewn churches in Ethiopian highlands
+  Generating... OK (147 KB)
+[94/220] rwanda.webp
+  Rwanda — Volcanoes National Park and mountain gorilla habitat
+  Generating... OK (244 KB)
+[95/220] uganda.webp
+  Uganda — Murchison Falls on Victoria Nile river
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[96/220] botswana.webp
+  Botswana — Okavango Delta waterways with elephants
+  Generating... OK (113 KB)
+[97/220] namibia.webp
+  Namibia — Sossusvlei red dunes against bright blue sky
+  Generating... OK (81 KB)
+[98/220] mozambique.webp
+  Mozambique — Bazaruto Archipelago islands and Indian Ocean
+  Generating... OK (154 KB)
+[99/220] angola.webp
+  Angola — Kalandula Falls in Malanje highlands
+  Generating... OK (152 KB)
+[100/220] algeria.webp
+  Algeria — Notre Dame d'Afrique cathedral overlooking Algiers bay
+  Generating... OK (192 KB)
+[101/220] tunisia.webp
+  Tunisia — Amphitheater of El Jem under blue sky
+  Generating... OK (157 KB)
+[102/220] sudan.webp
+  Sudan — Meroe pyramids rising from Nubian desert
+  Generating... OK (104 KB)
+[103/220] senegal.webp
+  Senegal — African Renaissance Monument overlooking Dakar coast
+  Generating... OK (161 KB)
+[104/220] ivory-coast.webp
+  Ivory Coast — Basilica of Our Lady of Peace in Yamoussoukro
+  Generating... OK (169 KB)
+[105/220] cameroon.webp
+  Cameroon — Mount Cameroon volcano above Limbe coast
+  Generating... OK (139 KB)
+[106/220] madagascar.webp
+  Madagascar — Avenue of the Baobabs at sunset
+  Generating... OK (161 KB)
+[107/220] malawi.webp
+  Malawi — Lake Malawi shoreline with crystal clear water
+  Generating... OK (163 KB)
+[108/220] mauritania.webp
+  Mauritania — Chinguetti ancient mosque and Sahara dunes
+  Generating... OK (102 KB)
+[109/220] lesotho.webp
+  Lesotho — Maletsunyane Falls in highland mountainscape
+  Generating... OK (153 KB)
+[110/220] eswatini.webp
+  Eswatini — Sibebe Rock granite dome under blue sky
+  Generating... OK (212 KB)
+[111/220] djibouti.webp
+  Djibouti — Lake Assal salt flats and volcanic landscape
+  Generating... OK (102 KB)
+[112/220] somalia.webp
+  Somalia — Mogadishu Liido Beach and Indian Ocean coast
+  Generating... OK (137 KB)
+[113/220] congo.webp
+  Congo — Congo River winding through equatorial rainforest
+  Generating... OK (216 KB)
+[114/220] dr-congo.webp
+  DR Congo — Mount Nyiragongo lava glow over Goma
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[115/220] liberia.webp
+  Liberia — Monrovia Capitol Building and Atlantic coastline
+  Generating... OK (193 KB)
+[116/220] sierra-leone.webp
+  Sierra Leone — Freetown peninsula and Tacugama chimpanzee sanctuary
+  Generating... OK (218 KB)
+[117/220] togo.webp
+  Togo — Koutammakou Batammariba clay houses
+  Generating... OK (113 KB)
+[118/220] benin.webp
+  Benin — Ganvie stilt village on Lake Nokoué
+  Generating... OK (156 KB)
+[119/220] burkina-faso.webp
+  Burkina Faso — Loropeni ruins ancient stone walls
+  Generating... OK (109 KB)
+[120/220] niger.webp
+  Niger — W National Park river and savanna landscape
+  Generating... OK (174 KB)
+[121/220] mali.webp
+  Mali — Djinguereber Mosque in Timbuktu desert city
+  Generating... OK (106 KB)
+[122/220] chad.webp
+  Chad — Ennedi natural arches and sandstone formations
+  Generating... OK (105 KB)
+[123/220] central-african-republic.webp
+  Central African Republic — Dzanga Sangha rainforest and forest elephants
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[124/220] equatorial-guinea.webp
+  Equatorial Guinea — Malabo cathedral and Bioko island coastline
+  Generating... OK (183 KB)
+[125/220] gabon.webp
+  Gabon — Lopé National Park rainforest and savanna mosaic
+  Generating... OK (218 KB)
+[126/220] cape-verde.webp
+  Cape Verde — Mindelo harbor and Monte Cara mountain silhouette
+  Generating... OK (96 KB)
+[127/220] comoros.webp
+  Comoros — Mount Karthala volcano above Moroni coastline
+  Generating... OK (132 KB)
+[128/220] sao-tome-and-principe.webp
+  São Tomé and Príncipe — Pico Cão Grande volcanic plug in jungle
+  Generating... OK (152 KB)
+[129/220] south-sudan.webp
+  South Sudan — White Nile river in Juba savanna landscape
+  Generating... OK (102 KB)
+[130/220] eritrea.webp
+  Eritrea — Asmara Art Deco Fiat Tagliero building
+  Generating... OK (153 KB)
+[131/220] kuwait.webp
+  Kuwait — Kuwait Towers overlooking Arabian Gulf coastline
+  Generating... OK (129 KB)
+[132/220] jordan.webp
+  Jordan — Petra Treasury carved in rose-red canyon wall
+  Generating... OK (198 KB)
+[133/220] lebanon.webp
+  Lebanon — Jeita Grotto stalactite cave chamber
+  Generating... OK (193 KB)
+[134/220] cyprus.webp
+  Cyprus — Paphos harbor castle and Mediterranean Sea
+  Generating... OK (162 KB)
+[135/220] malta.webp
+  Malta — St John's Co-Cathedral in Valletta old city
+  Generating... OK (140 KB)
+[136/220] luxembourg.webp
+  Luxembourg — Adolphe Bridge and Luxembourg City skyline
+  Generating... OK (183 KB)
+[137/220] monaco.webp
+  Monaco — Monte Carlo Casino and Mediterranean marina
+  Generating... OK (188 KB)
+[138/220] liechtenstein.webp
+  Liechtenstein — Vaduz Castle above Alpine Rhine valley
+  Generating... OK (155 KB)
+[139/220] andorra.webp
+  Andorra — Grandvalira ski slopes and Pyrenees peaks
+  Generating... OK (160 KB)
+[140/220] san-marino.webp
+  San Marino — Guaita fortress on Monte Titano cliff
+  Generating... OK (149 KB)
+[141/220] vatican-city.webp
+  Vatican City — St Peter's Basilica dome and Vatican colonnade
+  Generating... OK (157 KB)
+[142/220] belarus.webp
+  Belarus — Mir Castle in lush green countryside
+  Generating... OK (160 KB)
+[143/220] moldova.webp
+  Moldova — Orheiul Vechi cave monastery in Raut valley
+  Generating... OK (174 KB)
+[144/220] lithuania.webp
+  Lithuania — Trakai Island Castle on Galve Lake
+  Generating... OK (133 KB)
+[145/220] latvia.webp
+  Latvia — Riga central market and Daugava River skyline
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[146/220] estonia.webp
+  Estonia — Toompea Castle and Tallinn medieval old town
+  Generating... OK (216 KB)
+[147/220] slovakia.webp
+  Slovakia — Bratislava Castle above Danube River
+  Generating... OK (173 KB)
+[148/220] slovenia.webp
+  Slovenia — Lake Bled island church and Julian Alps backdrop
+  Generating... OK (168 KB)
+[149/220] serbia.webp
+  Serbia — Kalemegdan Fortress and Belgrade confluence
+  Generating... OK (178 KB)
+[150/220] bosnia-and-herzegovina.webp
+  Bosnia and Herzegovina — Stari Most bridge over Neretva River in Mostar
+  Generating... OK (160 KB)
+[151/220] montenegro.webp
+  Montenegro — Bay of Kotor fjord with Perast islets
+  Generating... OK (106 KB)
+[152/220] north-macedonia.webp
+  North Macedonia — Lake Ohrid and Ohrid old town hillside
+  Generating... OK (221 KB)
+[153/220] albania.webp
+  Albania — Berat white Ottoman houses on Osum riverbank
+  Generating... OK (204 KB)
+[154/220] kosovo.webp
+  Kosovo — Gracanica Monastery in Pristina countryside
+  Generating... OK (220 KB)
+[155/220] afghanistan.webp
+  Afghanistan — Band-e-Amir blue lakes in Hindu Kush mountains
+  Generating... OK (131 KB)
+[156/220] pakistan.webp
+  Pakistan — Badshahi Mosque with Lahore skyline at sunset
+  Generating... OK (133 KB)
+[157/220] bangladesh.webp
+  Bangladesh — Lalbagh Fort and Dhaka skyline on Buriganga River
+  Generating... OK (91 KB)
+[158/220] iran.webp
+  Iran — Nasir al-Mulk Pink Mosque stained glass interior
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[159/220] iraq.webp
+  Iraq — Al-Mustansiriya School and Tigris River in Baghdad
+  Generating... OK (145 KB)
+[160/220] syria.webp
+  Syria — Umayyad Mosque courtyard in Damascus old city
+  Generating... OK (168 KB)
+[161/220] yemen.webp
+  Yemen — Shibam Hadhramaut mud skyscrapers in desert valley
+  Generating... OK (103 KB)
+[162/220] turkmenistan.webp
+  Turkmenistan — Door to Hell gas crater in Karakum Desert
+  Generating... OK (194 KB)
+[163/220] kyrgyzstan.webp
+  Kyrgyzstan — Ala-Kul lake and Tian Shan mountain panorama
+  Generating... OK (174 KB)
+[164/220] tajikistan.webp
+  Tajikistan — Pamir Highway and Iskanderkul lake in mountains
+  Generating... OK (134 KB)
+[165/220] timor-leste.webp
+  Timor-Leste — Atauro Island coral reef and crystal waters
+  Generating... OK (187 KB)
+[166/220] papua-new-guinea.webp
+  Papua New Guinea — Kokoda Track jungle and Owen Stanley Range
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[167/220] solomon-islands.webp
+  Solomon Islands — Mbonegi beach tropical island and palm trees
+  Generating... OK (105 KB)
+[168/220] vanuatu.webp
+  Vanuatu — Mount Yasur volcano glowing at night
+  Generating... OK (127 KB)
+[169/220] samoa.webp
+  Samoa — To Sua Ocean Trench and lush south coast
+  Generating... OK (208 KB)
+[170/220] tonga.webp
+  Tonga — Ha'apai islands turquoise lagoon and palm beach
+  Generating... OK (250 KB)
+[171/220] palau.webp
+  Palau — Rock Islands emerald lagoons and jellyfish lake
+  Generating... OK (182 KB)
+[172/220] micronesia.webp
+  Micronesia — Nan Madol ancient stone city on Pohnpei coast
+  Generating... OK (126 KB)
+[173/220] marshall-islands.webp
+  Marshall Islands — Bikini Atoll coral reef and crystal lagoon
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[174/220] kiribati.webp
+  Kiribati — Christmas Island palm-fringed Pacific beach
+  Generating... OK (169 KB)
+[175/220] nauru.webp
+  Nauru — Anibare Bay turquoise ocean and coral reef
+  Generating... OK (192 KB)
+[176/220] tuvalu.webp
+  Tuvalu — Funafuti islet and Pacific Ocean lagoon expanse
+  Generating... OK (101 KB)
+[177/220] cook-islands.webp
+  Cook Islands — Aitutaki island turquoise lagoon and palm motus
+  Generating... OK (151 KB)
+[178/220] niue.webp
+  Niue — Limu Pools coral rock formations at coastline
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[179/220] cuba.webp
+  Cuba — El Capitolio building with classic Havana cars
+  Generating... OK (193 KB)
+[180/220] haiti.webp
+  Haiti — Citadelle Laferrière mountaintop fortress
+  Generating... OK (132 KB)
+[181/220] dominica.webp
+  Dominica — Boiling Lake and Morne Trois Pitons National Park
+  Generating... OK (126 KB)
+[182/220] saint-lucia.webp
+  Saint Lucia — Pitons twin volcanic peaks rising from Caribbean
+  Generating... OK (160 KB)
+[183/220] saint-kitts-and-nevis.webp
+  Saint Kitts and Nevis — Brimstone Hill fortress overlooking Caribbean Sea
+  Generating... OK (122 KB)
+[184/220] saint-vincent-and-the-grenadines.webp
+  Saint Vincent and the Grenadines — Tobago Cays marine park and turquoise shallows
+  Generating... OK (172 KB)
+[185/220] grenada.webp
+  Grenada — Grand Anse beach and Grenada rainforest mountains
+  Generating... OK (156 KB)
+[186/220] antigua-and-barbuda.webp
+  Antigua and Barbuda — Nelson's Dockyard and English Harbour coastline
+  Generating... OK (180 KB)
+[187/220] trinidad-and-tobago.webp
+  Trinidad and Tobago — Pigeon Point beach and Caribbean palm shore
+  Generating... OK (222 KB)
+[188/220] belize.webp
+  Belize — Great Blue Hole coral reef from aerial view
+  Generating... OK (135 KB)
+[189/220] guatemala.webp
+  Guatemala — Tikal temple rising above rainforest canopy
+  Generating... OK (146 KB)
+[190/220] honduras.webp
+  Honduras — Copan Maya hieroglyphic stairway ruins
+  Generating... OK (173 KB)
+[191/220] el-salvador.webp
+  El Salvador — Santa Ana volcano and Coatepeque crater lake
+  Generating... OK (141 KB)
+[192/220] nicaragua.webp
+  Nicaragua — Granada cathedral and Mombacho volcano backdrop
+  Generating... OK (151 KB)
+[193/220] puerto-rico.webp
+  Puerto Rico — El Morro fort and Old San Juan colorful buildings
+  Generating... OK (166 KB)
+[194/220] guam.webp
+  Guam — Two Lovers Point cliff and Philippine Sea vista
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[195/220] american-samoa.webp
+  American Samoa — Ofu Island white sand beach and turquoise reef
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[196/220] northern-mariana-islands.webp
+  Northern Mariana Islands — Grotto dive site and Saipan limestone cliffs
+  Generating... OK (133 KB)
+[197/220] us-virgin-islands.webp
+  US Virgin Islands — Trunk Bay white sand beach and St John coastline
+  Generating... OK (104 KB)
+[198/220] british-virgin-islands.webp
+  British Virgin Islands — The Baths boulders and turquoise water on Virgin Gorda
+  Generating... OK (177 KB)
+[199/220] cayman-islands.webp
+  Cayman Islands — Seven Mile Beach and Grand Cayman turquoise water
+  Generating... OK (170 KB)
+[200/220] bermuda.webp
+  Bermuda — Horseshoe Bay pink sand beach and crystal water
+  Generating... OK (188 KB)
+[201/220] gibraltar.webp
+  Gibraltar — Rock of Gibraltar from Mediterranean approach
+  Generating... OK (105 KB)
+[202/220] faroe-islands.webp
+  Faroe Islands — Mulafossur waterfall and Gásadalur village Atlantic coast
+  Generating... OK (180 KB)
+[203/220] greenland.webp
+  Greenland — Ilulissat Icefjord and towering icebergs in Disko Bay
+  Generating... OK (124 KB)
+[204/220] aruba.webp
+  Aruba — Eagle Beach divi-divi trees and white sand
+  Generating... OK (208 KB)
+[205/220] curacao.webp
+  Curacao — Handelskade colorful Dutch buildings in Willemstad
+  Generating... OK (206 KB)
+[206/220] sint-maarten.webp
+  Sint Maarten — Maho Beach and Princess Juliana airport plane approach
+  Generating... OK (135 KB)
+[207/220] bonaire.webp
+  Bonaire — Washington Slagbaai park cactus landscape and coastline
+  Generating... OK (190 KB)
+[208/220] reunion.webp
+  Réunion — Piton de la Fournaise volcano crater landscape
+  Generating... OK (174 KB)
+[209/220] mayotte.webp
+  Mayotte — Mayotte lagoon and islet coral reef from air
+  Generating... OK (176 KB)
+[210/220] new-caledonia.webp
+  New Caledonia — Heart of Voh mangrove natural formation in lagoon
+  Generating... OK (137 KB)
+[211/220] french-polynesia.webp
+  French Polynesia — Bora Bora overwater bungalows in turquoise lagoon
+  Generating... OK (79 KB)
+[212/220] wallis-and-futuna.webp
+  Wallis and Futuna — Wallis Island lagoon and volcanic crater lakes
+  Generating... OK (198 KB)
+[213/220] st-pierre-and-miquelon.webp
+  Saint Pierre and Miquelon — Saint Pierre colorful harbor and North Atlantic coast
+  Generating... OK (178 KB)
+[214/220] st-barthelemy.webp
+  Saint Barthélemy — Gustavia harbor luxury yachts and Caribbean hillside
+  Generating... OK (181 KB)
+[215/220] st-martin.webp
+  Saint Martin — Orient Bay turquoise water and beach coastline
+  Generating... OK (217 KB)
+[216/220] anguilla.webp
+  Anguilla — Shoal Bay East white sand and turquoise Caribbean
+  Generating... OK (135 KB)
+[217/220] montserrat.webp
+  Montserrat — Soufrière Hills volcano dome above Plymouth
+  Generating... OK (124 KB)
+[218/220] turks-and-caicos.webp
+  Turks and Caicos — Grace Bay turquoise water and white sand beach
+  Generating... OK (164 KB)
+[219/220] falkland-islands.webp
+  Falkland Islands — Stanley harbor and rolling green South Atlantic hills
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+[220/220] south-georgia.webp
+  South Georgia — Grytviken whaling station and snow-covered peaks
+  Generating...   API error: Server error '500 Internal Server Error' for url 'https://api.together.xyz/v1/images/generations'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+FAILED
+
+Done. Generated: 127, Skipped: 0, Total: 220

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Grid2X2, Map as MapIcon, Sparkle, Loader2, Compass, Search } from 'lucide-react';
 import { COUNTRIES } from '../data/mock';
 import { API } from '../context/AuthContext';
-import { landmarkFor, LANDMARKS } from '../lib/landmarks';
+import { landmarkFor } from '../lib/landmarks';
 import DeliveryCountdown from './DeliveryCountdown';
 import Reveal from './Reveal';
 import { SkeletonGrid } from './ui/skeleton';
