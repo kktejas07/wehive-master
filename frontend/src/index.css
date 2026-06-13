@@ -301,6 +301,12 @@ code {
   50%      { background-position: 100% 50%; }
 }
 
+/* Fade in for tab transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Hide the platform "Made with Emergent" badge across all pages */
 a[href*="emergent.sh"],
 #emergent-badge,
