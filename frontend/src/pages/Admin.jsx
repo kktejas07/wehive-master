@@ -12,6 +12,7 @@ import ExportsTab from '../components/admin/ExportsTab';
 import PricingTab from '../components/admin/PricingTab';
 import EventsTab from '../components/admin/EventsTab';
 import SettingsTab from '../components/admin/SettingsTab';
+import DestinationsTab from '../components/admin/DestinationsTab';
 import RequestsTab from '../components/admin/RequestsTab';
 import PromotionsTab from '../components/admin/PromotionsTab';
 import PromoCodesTab from '../components/admin/PromoCodesTab';
@@ -70,6 +71,7 @@ function AdminRoutes() {
                 <Route path="integrations" element={<IntegrationsTab />} />
                 <Route path="exports" element={<ExportsTab />} />
                 <Route path="settings" element={<SettingsTab />} />
+                <Route path="destinations" element={<DestinationsTab />} />
                 <Route path="*" element={<OverviewTab />} />
               </Routes>
             </AdminShell>

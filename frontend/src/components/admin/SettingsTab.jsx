@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Loader2, Save, Eye, EyeOff, Info,
-  CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone,
+  CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -75,7 +75,7 @@ function Field({ label, tooltip, value, onChange, placeholder }) {
   );
 }
 
-const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications'];
+const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications', 'r2'];
 
 const SECTION_META = {
   firebase: { label: 'Firebase', icon: Globe, title: 'Firebase Authentication' },
@@ -84,6 +84,7 @@ const SECTION_META = {
   twilio: { label: 'Twilio', icon: Smartphone, title: 'Twilio SMS / WhatsApp' },
   notifications: { label: 'Notifications', icon: Bell, title: 'Notifications (Telegram / Discord / WhatsApp)' },
   general: { label: 'General', icon: MessageSquare, title: 'General' },
+  r2: { label: 'R2 Storage', icon: Cloud, title: 'Cloudflare R2 Image Storage' },
 };
 
 const FIELDS = {
@@ -125,6 +126,14 @@ const FIELDS = {
     { type: 'text', key: 'whatsapp_number', label: 'Contact WhatsApp Number', tooltip: 'Business WhatsApp number for customer enquiries' },
     { type: 'text', key: 'contact_email', label: 'Contact Email', tooltip: 'Support email displayed on contact pages' },
     { type: 'text', key: 'consultant_name', label: 'Consultant Name', tooltip: 'Default consultant name shown in chatbot auto-reply' },
+  ],
+  r2: [
+    { type: 'text', key: 'account_id', label: 'Account ID', tooltip: 'Cloudflare Account ID from dashboard URL: dash.cloudflare.com/{account_id}/r2' },
+    { type: 'secret', key: 'access_key_id', label: 'Access Key ID', tooltip: 'R2 API token Access Key ID — create in R2 → Manage R2 API Tokens' },
+    { type: 'secret', key: 'secret_access_key', label: 'Secret Access Key', tooltip: 'R2 API token Secret — keep this confidential' },
+    { type: 'text', key: 'bucket', label: 'Bucket Name', tooltip: 'R2 bucket name e.g. wehive' },
+    { type: 'text', key: 'public_url', label: 'Public URL', tooltip: 'R2 public bucket URL e.g. https://pub-xxxxx.r2.dev or a custom domain' },
+    { type: 'text', key: 'endpoint', label: 'Endpoint (optional)', tooltip: 'S3 endpoint — defaults to https://{account_id}.r2.cloudflarestorage.com' },
   ],
 };
 

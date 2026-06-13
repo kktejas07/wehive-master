@@ -14,6 +14,10 @@ import threading
 from datetime import datetime, timedelta
 from typing import Optional, List, Literal
 
+import json as _json
+
+import httpx as _httpx
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -697,7 +701,7 @@ async def admin_update_integrations(payload: IntegrationSettings, _=Depends(get_
     return {'ok': True, **update}
 
 
-ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications'}
+ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications', 'r2'}
 
 
 @router.get('/settings/{namespace}')
@@ -722,6 +726,95 @@ async def admin_update_settings(namespace: str, payload: NamespaceSettings, _=De
         raise HTTPException(400, 'Nothing to update')
     await set_all(namespace, payload.config)
     return {'ok': True}
+
+
+# ---------- destinations (destination images) ----------
+MANIFEST_PATH = os.path.join(os.path.dirname(__file__), '..', 'destination-illustrations', 'manifest.json')
+
+
+def _load_manifest():
+    if os.path.exists(MANIFEST_PATH):
+        with open(MANIFEST_PATH) as f:
+            return _json.load(f)
+    return []
+
+
+@router.get('/destinations')
+async def admin_list_destinations(_=Depends(get_current_admin)):
+    """Return all destination images from the manifest."""
+    return {'items': _load_manifest(), 'total': len(_load_manifest())}
+
+
+@router.post('/destinations/sync-to-r2')
+async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
+    """Upload all destination images to Cloudflare R2 using configured settings."""
+    from settings_service import get_all as _get_settings
+
+    cfg = await _get_settings('r2')
+    if not cfg:
+        raise HTTPException(400, 'R2 not configured — fill in R2 Storage settings first')
+
+    account_id = cfg.get('account_id', '')
+    access_key = cfg.get('access_key_id', '')
+    secret_key = cfg.get('secret_access_key', '')
+    bucket = cfg.get('bucket', '')
+    public_url = (cfg.get('public_url') or '').rstrip('/')
+    endpoint = cfg.get('endpoint') or f'https://{account_id}.r2.cloudflarestorage.com'
+
+    if not all([account_id, access_key, secret_key, bucket]):
+        raise HTTPException(400, 'Missing required R2 settings: account_id, access_key_id, secret_access_key, bucket')
+
+    import boto3
+    from botocore.config import Config
+
+    client = boto3.client(
+        's3',
+        endpoint_url=endpoint,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name='auto',
+        config=Config(signature_version='s3v4', retries={'max_attempts': 3}),
+    )
+
+    manifest = _load_manifest()
+    results = []
+    base_url = 'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations'
+
+    for entry in manifest:
+        filename = entry['filename']
+        key = f'destinations/{filename}'
+        try:
+            client.head_object(Bucket=bucket, Key=key)
+            results.append({'filename': filename, 'status': 'exists'})
+            continue
+        except Exception:
+            pass
+
+        try:
+            resp = _httpx.get(f'{base_url}/{filename}', timeout=30)
+            resp.raise_for_status()
+            client.put_object(
+                Bucket=bucket,
+                Key=key,
+                Body=resp.content,
+                ContentType='image/webp',
+            )
+            url = f'{public_url}/{key}' if public_url else ''
+            results.append({'filename': filename, 'status': 'uploaded', 'url': url})
+        except Exception as e:
+            results.append({'filename': filename, 'status': 'failed', 'error': str(e)})
+
+    uploaded = sum(1 for r in results if r['status'] == 'uploaded')
+    skipped = sum(1 for r in results if r['status'] == 'exists')
+    failed = sum(1 for r in results if r['status'] == 'failed')
+
+    return {
+        'total': len(manifest),
+        'uploaded': uploaded,
+        'skipped': skipped,
+        'failed': failed,
+        'results': results,
+    }
 
 
 # ---------- exports ----------
