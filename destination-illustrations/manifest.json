@@ -1030,11 +1030,6 @@
     "landmark": "Maho Beach and Princess Juliana airport plane approach"
   },
   {
-    "country": "Bonaire",
-    "filename": "bonaire.webp",
-    "landmark": "Washington Slagbaai park cactus landscape and coastline"
-  },
-  {
     "country": "R\u00e9union",
     "filename": "reunion.webp",
     "landmark": "Piton de la Fournaise volcano crater landscape"
@@ -1213,5 +1208,55 @@
     "country": "Tokelau",
     "filename": "tokelau.webp",
     "landmark": "Palm-fringed atoll and turquoise Pacific lagoon"
+  },
+  {
+    "country": "Bouvet Island",
+    "filename": "bouvet-island.webp",
+    "landmark": "Glacier-covered volcanic island rising from stormy Southern Ocean"
+  },
+  {
+    "country": "British Indian Ocean Territory",
+    "filename": "british-indian-ocean-territory.webp",
+    "landmark": "Crescent-shaped tropical atoll with turquoise lagoon and palm trees"
+  },
+  {
+    "country": "Cocos (Keeling) Islands",
+    "filename": "cocos-keeling-islands.webp",
+    "landmark": "Palm-fringed white sand beach lapped by crystal clear turquoise water"
+  },
+  {
+    "country": "Caribbean Netherlands",
+    "filename": "caribbean-netherlands.webp",
+    "landmark": "Colorful Dutch colonial buildings along a peaceful waterfront"
+  },
+  {
+    "country": "Curaçao",
+    "filename": "curacao.webp",
+    "landmark": "Handelskade row of vibrant pastel Dutch colonial buildings at sunset"
+  },
+  {
+    "country": "French Southern and Antarctic Lands",
+    "filename": "french-southern-and-antarctic-lands.webp",
+    "landmark": "Dramatic subantarctic landscape with rugged mountains and wild coastline"
+  },
+  {
+    "country": "Martinique",
+    "filename": "martinique.webp",
+    "landmark": "Mount Pelée volcano looming over lush tropical bay"
+  },
+  {
+    "country": "Pitcairn Islands",
+    "filename": "pitcairn-islands.webp",
+    "landmark": "Steep green volcanic cliffs dropping into deep blue South Pacific"
+  },
+  {
+    "country": "Republic of the Congo",
+    "filename": "republic-of-the-congo.webp",
+    "landmark": "Lush Congo Basin rainforest along a winding river"
+  },
+  {
+    "country": "United States Minor Outlying Islands",
+    "filename": "united-states-minor-outlying-islands.webp",
+    "landmark": "Remote Pacific atoll ringed by white sand and turquoise reef"
   }
 ]
