@@ -21,6 +21,14 @@ export function adminClient(passedToken) {
   });
 }
 
+export function apiClient(passedToken) {
+  const token = passedToken || preferredAdminToken();
+  return axios.create({
+    baseURL: API,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+}
+
 export function downloadCsv(passedToken, kind) {
   const token = passedToken || preferredAdminToken();
   const url = `${API}/admin/export/${kind}.csv`;

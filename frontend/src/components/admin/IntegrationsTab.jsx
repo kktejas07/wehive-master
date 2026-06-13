@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Loader2, Plug, CheckCircle2, AlertTriangle, Trash2, TestTube, X, KeyRound, ChevronDown } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient } from '../../lib/admin';
+import { adminClient, apiClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
@@ -139,8 +139,8 @@ export default function IntegrationsTab() {
   const loadThirdParty = useCallback(async () => {
     try {
       const [catRes, svcRes] = await Promise.all([
-        adminClient(token).get('/third-party/categories'),
-        adminClient(token).get('/third-party/admin/my-services'),
+        apiClient(token).get('/third-party/categories'),
+        apiClient(token).get('/third-party/admin/my-services'),
       ]);
       setCategories(catRes.data.categories || []);
       setThirdPartyData(svcRes.data);
@@ -170,7 +170,7 @@ export default function IntegrationsTab() {
   const handleConnect = async (serviceId, apiKey, baseUrl) => {
     setConnecting(true);
     try {
-      await adminClient(token).post('/third-party/admin/connect', { service_id: serviceId, api_key: apiKey, base_url: baseUrl });
+      await apiClient(token).post('/third-party/admin/connect', { service_id: serviceId, api_key: apiKey, base_url: baseUrl });
       toast({ title: 'Service connected' });
       await loadThirdParty();
     } catch (e) {
@@ -182,7 +182,7 @@ export default function IntegrationsTab() {
 
   const handleDisconnect = async (serviceId) => {
     try {
-      await adminClient(token).delete(`/third-party/admin/disconnect/${serviceId}`);
+      await apiClient(token).delete(`/third-party/admin/disconnect/${serviceId}`);
       toast({ title: 'Disconnected' });
       await loadThirdParty();
     } catch {
@@ -193,7 +193,7 @@ export default function IntegrationsTab() {
   const handleTest = async (serviceId, apiKey, baseUrl) => {
     setTesting(true);
     try {
-      const res = await adminClient(token).post('/third-party/admin/test', { service_id: serviceId, api_key: apiKey, base_url: baseUrl });
+      const res = await apiClient(token).post('/third-party/admin/test', { service_id: serviceId, api_key: apiKey, base_url: baseUrl });
       if (res.data.ok) {
         toast({ title: 'Connection successful' });
       } else {
@@ -206,7 +206,7 @@ export default function IntegrationsTab() {
 
   const handleSetDefault = async (serviceId) => {
     try {
-      await adminClient(token).post('/third-party/admin/set-default', { service_id: serviceId });
+      await apiClient(token).post('/third-party/admin/set-default', { service_id: serviceId });
       toast({ title: 'Default updated' });
       await loadThirdParty();
     } catch {

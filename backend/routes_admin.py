@@ -631,15 +631,21 @@ def _mask(value: str, keep: int = 4) -> str:
 
 @router.get('/integrations')
 async def admin_integrations(_=Depends(get_current_admin)):
+    from settings_service import get_all as _get_settings
     overrides = await settings_col.find_one({'_id': 'integrations'}) or {}
     otp_channel = overrides.get('OTP_CHANNEL', os.environ.get('OTP_CHANNEL', 'mock'))
 
-    twilio_sid = os.environ.get('TWILIO_ACCOUNT_SID', '')
-    twilio_token = os.environ.get('TWILIO_AUTH_TOKEN', '')
-    twilio_wa = os.environ.get('TWILIO_WHATSAPP_FROM', '')
+    # Check both DB settings and env vars for SMTP/Twilio config
+    twilio_cfg = await _get_settings('twilio')
+    smtp_cfg = await _get_settings('smtp')
 
-    smtp_user = os.environ.get('SMTP_USER', '')
-    smtp_pwd = os.environ.get('SMTP_PASSWORD', '')
+    twilio_sid = twilio_cfg.get('account_sid') or os.environ.get('TWILIO_ACCOUNT_SID', '')
+    twilio_token = twilio_cfg.get('auth_token') or os.environ.get('TWILIO_AUTH_TOKEN', '')
+    twilio_wa = twilio_cfg.get('whatsapp_from') or os.environ.get('TWILIO_WHATSAPP_FROM', '')
+    twilio_sms = twilio_cfg.get('sms_from') or os.environ.get('TWILIO_SMS_FROM', '')
+
+    smtp_user = smtp_cfg.get('user') or os.environ.get('SMTP_USER', '')
+    smtp_pwd = smtp_cfg.get('password') or os.environ.get('SMTP_PASSWORD', '')
     smtp_ok = bool(smtp_user) and smtp_pwd and 'REPLACE' not in smtp_pwd
 
     # AI Marketplace — counts any connected provider as 'configured'
