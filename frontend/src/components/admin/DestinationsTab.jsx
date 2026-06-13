@@ -7,6 +7,7 @@ import {
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
+import Pagination from './Pagination';
 
 function PreviewModal({ item, onClose, onRefresh, r2PublicUrl }) {
   const { toast } = useToast();
@@ -136,6 +137,8 @@ export default function DestinationsTab() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
   const [r2PublicUrl, setR2PublicUrl] = useState('');
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -246,6 +249,8 @@ export default function DestinationsTab() {
     if (onR2 && r2PublicUrl) return `${r2PublicUrl}/destinations/${filename}`;
     return `/images/destinations/${filename}`;
   };
+
+  const paginated = filtered.slice(page * pageSize, (page + 1) * pageSize);
 
   const filtered = items
     .filter((item) => {
@@ -428,7 +433,7 @@ export default function DestinationsTab() {
       <Panel>
         {viewMode === 'grid' ? (
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {filtered.map((item) => {
+            {paginated.map((item) => {
               const onR2 = r2Status[item.filename];
               return (
                 <div
@@ -479,7 +484,7 @@ export default function DestinationsTab() {
                   className="grid grid-cols-[40px_1fr_120px_100px] gap-3 px-4 py-2.5 items-center rounded-lg hover:bg-white/5 cursor-pointer transition"
                   onClick={() => setPreview({ ...item, onR2 })}
                 >
-                  <span className="text-[10px] text-slate-600 font-mono w-8 text-center">{idx + 1}</span>
+                  <span className="text-[10px] text-slate-600 font-mono w-8 text-center">{idx + page * pageSize + 1}</span>
                   <div>
                     <div className="text-[12px] font-semibold text-white">{item.country}</div>
                     <div className="text-[10px] text-slate-500 font-mono">{item.filename}</div>
@@ -516,6 +521,8 @@ export default function DestinationsTab() {
             <p className="text-[14px] font-semibold">No countries match "{search}"</p>
           </div>
         )}
+
+        {filtered.length > 0 && <Pagination skip={page * pageSize} limit={pageSize} total={filtered.length} onPageChange={(s) => setPage(Math.floor(s / pageSize))} />}
       </Panel>
     </div>
   );

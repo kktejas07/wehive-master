@@ -935,7 +935,6 @@ async def admin_sync_destinations_to_r2_stream(_=Depends(get_current_admin)):
     )
 
     manifest = await _load_manifest()
-    base_url = 'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations'
 
     async def event_stream():
         yield f"data: {_json_stream.dumps({'event': 'start', 'total': len(manifest)})}\n\n"
@@ -957,23 +956,34 @@ async def admin_sync_destinations_to_r2_stream(_=Depends(get_current_admin)):
             except Exception:
                 pass
 
-            # Upload
-            try:
-                resp = _httpx.get(f'{base_url}/{filename}', timeout=30)
-                resp.raise_for_status()
-                client.put_object(
-                    Bucket=bucket,
-                    Key=key,
-                    Body=resp.content,
-                    ContentType='image/webp',
-                    ServerSideEncryption='AES256',
-                )
-                uploaded += 1
-                url = f'{public_url}/{key}' if public_url else ''
-                yield f"data: {_json_stream.dumps({'event': 'progress', 'index': i + 1, 'total': len(manifest), 'filename': filename, 'status': 'uploaded', 'url': url, 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
-            except Exception as e:
+            # Upload - try multiple sources
+            source_urls = [
+                f'https://wehive.co.in/images/destinations/{filename}',
+                f'https://raw.githubusercontent.com/kktejas07/wehive-master/main/frontend/public/images/destinations/{filename}',
+                f'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations/{filename}',
+            ]
+            uploaded_ok = False
+            for src_url in source_urls:
+                try:
+                    resp = _httpx.get(src_url, timeout=30)
+                    resp.raise_for_status()
+                    client.put_object(
+                        Bucket=bucket,
+                        Key=key,
+                        Body=resp.content,
+                        ContentType='image/webp',
+                        ServerSideEncryption='AES256',
+                    )
+                    uploaded += 1
+                    url = f'{public_url}/{key}' if public_url else ''
+                    yield f"data: {_json_stream.dumps({'event': 'progress', 'index': i + 1, 'total': len(manifest), 'filename': filename, 'status': 'uploaded', 'url': url, 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
+                    uploaded_ok = True
+                    break
+                except Exception:
+                    continue
+            if not uploaded_ok:
                 failed += 1
-                yield f"data: {_json_stream.dumps({'event': 'progress', 'index': i + 1, 'total': len(manifest), 'filename': filename, 'status': 'failed', 'error': str(e), 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
+                yield f"data: {_json_stream.dumps({'event': 'progress', 'index': i + 1, 'total': len(manifest), 'filename': filename, 'status': 'failed', 'error': 'Image not found on any source', 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
 
         yield f"data: {_json_stream.dumps({'event': 'complete', 'total': len(manifest), 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
 
@@ -1021,7 +1031,11 @@ async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
 
     manifest = await _load_manifest()
     results = []
-    base_url = 'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations'
+    base_urls = [
+        'https://wehive.co.in/images/destinations',
+        'https://raw.githubusercontent.com/kktejas07/wehive-master/main/frontend/public/images/destinations',
+        'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations',
+    ]
 
     for entry in manifest:
         filename = entry['filename']
@@ -1033,20 +1047,26 @@ async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
         except Exception:
             pass
 
-        try:
-            resp = _httpx.get(f'{base_url}/{filename}', timeout=30)
-            resp.raise_for_status()
-            client.put_object(
-                Bucket=bucket,
-                Key=key,
-                Body=resp.content,
-                ContentType='image/webp',
-                ServerSideEncryption='AES256',
-            )
-            url = f'{public_url}/{key}' if public_url else ''
-            results.append({'filename': filename, 'status': 'uploaded', 'url': url})
-        except Exception as e:
-            results.append({'filename': filename, 'status': 'failed', 'error': str(e)})
+        uploaded = False
+        for base_url in base_urls:
+            try:
+                resp = _httpx.get(f'{base_url}/{filename}', timeout=30)
+                resp.raise_for_status()
+                client.put_object(
+                    Bucket=bucket,
+                    Key=key,
+                    Body=resp.content,
+                    ContentType='image/webp',
+                    ServerSideEncryption='AES256',
+                )
+                url = f'{public_url}/{key}' if public_url else ''
+                results.append({'filename': filename, 'status': 'uploaded', 'url': url, 'source': base_url})
+                uploaded = True
+                break
+            except Exception:
+                continue
+        if not uploaded:
+            results.append({'filename': filename, 'status': 'failed', 'error': 'Image not found on any source'})
 
     uploaded = sum(1 for r in results if r['status'] == 'uploaded')
     skipped = sum(1 for r in results if r['status'] == 'exists')

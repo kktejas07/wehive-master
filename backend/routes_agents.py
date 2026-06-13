@@ -120,7 +120,12 @@ async def agent_dashboard(agent=Depends(get_current_agent)):
 
 
 @router.get('/students')
-async def agent_students(search: Optional[str] = None, agent=Depends(get_current_agent)):
+async def agent_students(
+    search: Optional[str] = None,
+    agent=Depends(get_current_agent),
+    limit: int = Query(50, ge=1, le=200),
+    skip: int = Query(0, ge=0),
+):
     query = {'agent_id': agent['_id']}
     if search:
         query['$or'] = [
@@ -128,8 +133,9 @@ async def agent_students(search: Optional[str] = None, agent=Depends(get_current
             {'email': {'$regex': search, '$options': 'i'}},
             {'phone': {'$regex': search, '$options': 'i'}},
         ]
-    students = await db.agent_students.find(query).sort('created_at', -1).to_list(999)
-    return students
+    total = await db.agent_students.count_documents(query)
+    students = await db.agent_students.find(query).sort('created_at', -1).skip(skip).limit(limit).to_list(limit)
+    return {'items': students, 'total': total, 'limit': limit, 'skip': skip}
 
 
 @router.post('/students')
