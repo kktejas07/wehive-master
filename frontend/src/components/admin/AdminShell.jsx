@@ -36,7 +36,7 @@ export default function AdminShell({ children }) {
       <div className="grid lg:grid-cols-[260px_1fr] h-screen">
         <aside className="hidden lg:flex flex-col bg-[#0a0e1e] border-r border-white/5 p-5 overflow-y-auto">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-200 hover:text-white">
-            <img src={BRAND.logo} alt="We Hive" className="h-10 w-auto" />
+            <img src={BRAND.logo} alt="We Hive" className="h-10 w-auto brightness-0 invert" />
             <span className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-bold">Admin</span>
           </Link>
 

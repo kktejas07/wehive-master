@@ -159,13 +159,11 @@ const FIELDS = {
     { type: 'text', key: 'endpoint', label: 'Endpoint (optional)', tooltip: 'S3 endpoint — defaults to https://{account_id}.r2.cloudflarestorage.com' },
   ],
   branding: [
-    { type: 'file', key: 'logo', label: 'Logo', tooltip: 'Main site logo — uploaded to R2, served via signed URL. PNG or SVG recommended.', accept: 'image/png,image/svg+xml,image/jpeg,image/webp' },
+    { type: 'file', key: 'logo', label: 'Logo', tooltip: 'Main site logo — uploaded to R2, PNG/SVG recommended. On dark backgrounds (footer, admin) auto-renders as white.', accept: 'image/png,image/svg+xml,image/jpeg,image/webp' },
     { type: 'file', key: 'favicon', label: 'Favicon', tooltip: 'Browser tab icon — uploaded to R2. PNG (32x32 or 48x48) recommended.', accept: 'image/png,image/x-icon,image/svg+xml' },
     { type: 'file', key: 'og-image', label: 'OG Image', tooltip: 'Social sharing preview image (1200x630 recommended).', accept: 'image/png,image/jpeg,image/webp' },
     { type: 'text', key: 'site_name', label: 'Site Name', tooltip: 'Used in page titles and SEO metadata (e.g. "We Hive")' },
     { type: 'text', key: 'tagline', label: 'Tagline', tooltip: 'Short description shown in hero section and meta description' },
-    { type: 'text', key: 'primary_color', label: 'Primary Color', tooltip: 'CSS hex color e.g. #0A2C8A — used for buttons, accents, gradients' },
-    { type: 'text', key: 'accent_color', label: 'Accent Color', tooltip: 'CSS hex color e.g. #E1212C — used for highlights, badges, CTAs' },
   ],
 };
 
