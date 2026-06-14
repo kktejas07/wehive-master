@@ -20,32 +20,34 @@ const PLANE_PATH =
   'M12,0 L2.4,-1.8 L1.2,-1.8 L-1.2,-7.2 L-3.6,-7.2 L-3.6,-1.8 L-8.4,-1.8 L-9.6,-4.8 L-11.4,-4.8 L-11.4,0 L-11.4,4.8 L-9.6,4.8 L-8.4,1.8 L-3.6,1.8 L-3.6,7.2 L-1.2,7.2 L1.2,1.8 L2.4,1.8 Z';
 
 function PlaneAlongPath({
-  pathId,
+  path,
   delay,
   dur,
 }: {
-  pathId: string;
+  path: string;
   delay: number;
   dur: number;
 }) {
   return (
     <g filter="url(#plane-glow)">
-      <g>
-        {/* Comet tail */}
-        <ellipse cx={-18} cy={0} rx={14} ry={2.2} fill="white" opacity={0.18} />
-        {/* Airplane */}
-        <path d={PLANE_PATH} fill="white" />
-        <animate
-          attributeName="opacity"
-          values="0.55;1;0.55"
-          dur={`${dur}s`}
-          repeatCount="indefinite"
-          begin={`${delay}s`}
-        />
-        <animateMotion dur={`${dur}s`} repeatCount="indefinite" rotate="auto" begin={`${delay}s`}>
-          <mpath href={`#${pathId}`} />
-        </animateMotion>
-      </g>
+      {/* Comet tail */}
+      <ellipse cx={-18} cy={0} rx={14} ry={2.2} fill="white" opacity={0.18} />
+      {/* Airplane */}
+      <path d={PLANE_PATH} fill="white" />
+      <animate
+        attributeName="opacity"
+        values="0.55;1;0.55"
+        dur={`${dur}s`}
+        repeatCount="indefinite"
+        begin={`${delay}s`}
+      />
+      <animateMotion
+        path={path}
+        dur={`${dur}s`}
+        repeatCount="indefinite"
+        rotate="auto"
+        begin={`${delay}s`}
+      />
     </g>
   );
 }
@@ -159,11 +161,6 @@ export default function WorldMap({ className = '', showConnections = true }: Wor
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-
-          {/* Hidden paths used to drive airplane motion */}
-          {planePaths.map((p) => (
-            <path key={p.id} id={p.id} d={p.d} fill="none" stroke="none" />
-          ))}
         </defs>
 
         {/* Subtle grid */}
@@ -181,7 +178,7 @@ export default function WorldMap({ className = '', showConnections = true }: Wor
               />
             ))}
             {planePaths.map((p) => (
-              <PlaneAlongPath key={p.id} pathId={p.id} delay={p.delay} dur={p.dur} />
+              <PlaneAlongPath key={p.id} path={p.d} delay={p.delay} dur={p.dur} />
             ))}
           </>
         )}
