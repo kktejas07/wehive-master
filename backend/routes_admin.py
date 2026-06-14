@@ -94,6 +94,42 @@ async def admin_me(user=Depends(get_current_admin)):
     return _public_user(user)
 
 
+class ChangePasswordBody(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class UpdateProfileBody(BaseModel):
+    name: Optional[str] = None
+
+
+@router.put('/me')
+async def admin_update_me(payload: UpdateProfileBody, user=Depends(get_current_admin)):
+    update = {}
+    if payload.name:
+        update['name'] = payload.name
+    if update:
+        await db.users.update_one({'_id': user['_id']}, {'$set': update})
+        for k, v in update.items():
+            user[k] = v
+    return _public_user(user)
+
+
+@router.put('/change-password')
+async def admin_change_password(payload: ChangePasswordBody, user=Depends(get_current_admin)):
+    from auth_utils import verify_password, hash_password, password_strength_issue
+    if not verify_password(payload.current_password, user.get('password_hash', '')):
+        raise HTTPException(400, 'Current password is incorrect')
+    issue = password_strength_issue(payload.new_password)
+    if issue:
+        raise HTTPException(400, issue)
+    await db.users.update_one(
+        {'_id': user['_id']},
+        {'$set': {'password_hash': hash_password(payload.new_password)}},
+    )
+    return {'ok': True}
+
+
 # ---------- metrics ----------
 @router.get('/metrics')
 async def admin_metrics(_=Depends(get_current_admin)):

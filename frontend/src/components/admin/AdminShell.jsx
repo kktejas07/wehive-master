@@ -1,9 +1,12 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { adminClient } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
+  Key, User,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 
@@ -28,8 +31,26 @@ const TABS = [
 export default function AdminShell({ children }) {
   const { admin, logout } = useAdminAuth();
   const { pathname } = useLocation();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [pwModal, setPwModal] = useState(false);
+  const [pwForm, setPwForm] = useState({ current: '', new: '', confirm: '' });
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwError, setPwError] = useState('');
 
   const user = admin;
+
+  const handlePasswordChange = async () => {
+    if (pwForm.new !== pwForm.confirm) { setPwError('Passwords do not match'); return; }
+    setPwSaving(true); setPwError('');
+    try {
+      await adminClient().put('/change-password', { current_password: pwForm.current, new_password: pwForm.new });
+      setPwModal(false); setPwForm({ current: '', new: '', confirm: '' });
+    } catch (e) {
+      setPwError(e.response?.data?.detail || 'Password change failed');
+    } finally {
+      setPwSaving(false);
+    }
+  };
 
   return (
     <div className="h-screen bg-[#0b1020] text-slate-100" data-testid="admin-shell">
@@ -64,33 +85,49 @@ export default function AdminShell({ children }) {
           </nav>
 
           <div className="mt-auto pt-6 border-t border-white/5">
-            <div className="flex items-center gap-3 px-1">
-              <span className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/10">
-                <img
-                  src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })}
-                  alt="admin"
-                  className="h-full w-full object-cover"
-                />
-              </span>
-              <div className="min-w-0">
-                <div className="text-[13px] font-bold truncate">{user?.name || 'Admin'}</div>
-                <div className="text-[11px] text-slate-500 truncate">{user?.email}</div>
-              </div>
+            <div className="relative">
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="flex items-center gap-3 px-1 w-full hover:bg-white/5 rounded-xl py-2 -mx-1 transition"
+              >
+                <span className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/10 shrink-0">
+                  <img
+                    src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })}
+                    alt="admin"
+                    className="h-full w-full object-cover"
+                  />
+                </span>
+                <div className="min-w-0 text-left">
+                  <div className="text-[13px] font-bold truncate">{user?.name || 'Admin'}</div>
+                  <div className="text-[11px] text-slate-500 truncate">{user?.email}</div>
+                </div>
+              </button>
+
+              {profileOpen && (
+                <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl bg-[#111632] border border-white/10 shadow-2xl overflow-hidden z-50">
+                  <button
+                    onClick={() => { setPwModal(true); setProfileOpen(false); }}
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-semibold text-slate-300 hover:bg-white/5 transition"
+                  >
+                    <Key className="w-3.5 h-3.5" /> Change Password
+                  </button>
+                  <button
+                    onClick={() => { logout(); setProfileOpen(false); }}
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-semibold text-red-400 hover:bg-white/5 transition border-t border-white/5"
+                  >
+                    <LogOut className="w-3.5 h-3.5" /> Sign out
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+
+            <div className="mt-3">
               <Link
                 to="/"
-                className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/10 hover:border-white/30 py-1.5 text-[12px] font-bold text-slate-300"
+                className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/10 hover:border-white/30 py-1.5 px-4 text-[12px] font-bold text-slate-300 w-full"
               >
                 <ArrowLeft className="w-3 h-3" /> Site
               </Link>
-              <button
-                onClick={logout}
-                data-testid="admin-logout-btn"
-                className="inline-flex items-center justify-center gap-1 rounded-lg bg-white/5 hover:bg-white/10 py-1.5 text-[12px] font-bold text-slate-200"
-              >
-                <LogOut className="w-3 h-3" /> Sign out
-              </button>
             </div>
           </div>
         </aside>
@@ -117,6 +154,27 @@ export default function AdminShell({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Password Change Modal */}
+      {pwModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setPwModal(false)}>
+          <div className="rounded-2xl bg-[#111632] border border-white/10 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <h3 className="text-[16px] font-bold text-white mb-4">Change Password</h3>
+              <div className="space-y-3">
+                <input type="password" value={pwForm.current} onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))} placeholder="Current password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-600 outline-none focus:border-[hsl(var(--accent))]" />
+                <input type="password" value={pwForm.new} onChange={e => setPwForm(p => ({ ...p, new: e.target.value }))} placeholder="New password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-600 outline-none focus:border-[hsl(var(--accent))]" />
+                <input type="password" value={pwForm.confirm} onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))} placeholder="Confirm new password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-600 outline-none focus:border-[hsl(var(--accent))]" />
+                {pwError && <p className="text-[12px] text-red-400 font-semibold">{pwError}</p>}
+              </div>
+              <div className="flex gap-2 mt-5">
+                <button onClick={() => setPwModal(false)} className="flex-1 h-11 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-[13px] transition">Cancel</button>
+                <button onClick={handlePasswordChange} disabled={pwSaving || !pwForm.current || !pwForm.new} className="flex-1 h-11 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 text-white font-bold text-[13px] transition">{pwSaving ? 'Saving...' : 'Update Password'}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
