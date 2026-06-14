@@ -4,17 +4,12 @@ export interface Hub {
   flag: string;
   x: number;
   y: number;
-  /** Label offset from hub center (px) */
   labelDx?: number;
   labelDy?: number;
-  /** Tooltip offset from hub center (px) — only used when open */
   tooltipDx?: number;
   tooltipDy?: number;
-  /** Show tooltip on load (India in reference) */
-  defaultOpen?: boolean;
 }
 
-/** Coordinates aligned to the 100×50 viewBox */
 export const HUBS: Hub[] = [
   { id: 'canada',      name: 'Canada',         flag: 'ca', x: 13.5, y: 9.5,   labelDx: 0,   labelDy: -22 },
   { id: 'usa',         name: 'United States',  flag: 'us', x: 17,   y: 17,    labelDx: 14,  labelDy: -18 },
@@ -22,7 +17,7 @@ export const HUBS: Hub[] = [
   { id: 'france',      name: 'France',         flag: 'fr', x: 46.5, y: 15.5,  labelDx: -16, labelDy: 14  },
   { id: 'germany',     name: 'Germany',        flag: 'de', x: 49.5, y: 13.5,  labelDx: 16,  labelDy: -18 },
   { id: 'uae',         name: 'UAE',            flag: 'ae', x: 60.5, y: 27,    labelDx: 0,   labelDy: -22 },
-  { id: 'india',       name: 'India',          flag: 'in', x: 66.5, y: 26.5,  labelDx: 0,   labelDy: -22, tooltipDx: -90, tooltipDy: -60, defaultOpen: true },
+  { id: 'india',       name: 'India',          flag: 'in', x: 66.5, y: 26.5,  labelDx: 0,   labelDy: -22, tooltipDx: 0, tooltipDy: -120 },
   { id: 'singapore',   name: 'Singapore',      flag: 'sg', x: 78.5, y: 24.5,  labelDx: 14,  labelDy: 12  },
   { id: 'japan',       name: 'Japan',          flag: 'jp', x: 87.5, y: 19.5,  labelDx: 16,  labelDy: -18 },
   { id: 'south-korea', name: 'South Korea',    flag: 'kr', x: 85.5, y: 18.5,  labelDx: -20, labelDy: -18 },
@@ -48,7 +43,6 @@ export const CONNECTIONS: [string, string][] = [
   ['australia', 'new-zealand'],
 ];
 
-/** Routes that show animated plane icons */
 export const PLANE_ROUTES: [string, string][] = [
   ['india', 'usa'],
   ['india', 'uk'],
@@ -56,6 +50,8 @@ export const PLANE_ROUTES: [string, string][] = [
   ['usa', 'uk'],
   ['uae', 'singapore'],
   ['singapore', 'japan'],
+  ['japan', 'south-korea'],
+  ['australia', 'new-zealand'],
 ];
 
 export const NAVY = '#000B2E';

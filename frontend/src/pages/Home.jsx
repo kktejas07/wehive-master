@@ -51,9 +51,9 @@ function GlobalReachSection() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="rounded-[24px] overflow-hidden border border-black/5 shadow-lg"
+          className="relative w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-[24px] overflow-hidden border border-black/5 shadow-lg"
         >
-          <WorldMap className="h-[400px] sm:h-[450px]" animated showConnections />
+          <WorldMap className="absolute inset-0" showConnections />
         </motion.div>
 
         <motion.div
