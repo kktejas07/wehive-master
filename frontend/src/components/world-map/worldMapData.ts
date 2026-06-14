@@ -2,6 +2,7 @@ export interface Hub {
   id: string;
   name: string;
   flag: string;
+  /** Position in image pixel space (viewBox 0 0 1024 576) */
   x: number;
   y: number;
   labelDx?: number;
@@ -10,48 +11,51 @@ export interface Hub {
   tooltipDy?: number;
 }
 
+/** Background world map image (1024×576, 16:9) */
+export const MAP_IMAGE = '/images/world-map-dotted.png';
+export const MAP_W = 1024;
+export const MAP_H = 576;
+
+/** Hubs positioned on the dotted world map image (pixel coordinates). */
 export const HUBS: Hub[] = [
-  { id: 'canada',      name: 'Canada',         flag: 'ca', x: 24,   y: 10,    labelDx: 0,   labelDy: -22 },
-  { id: 'usa',         name: 'United States',  flag: 'us', x: 20,   y: 14,    labelDx: 8,   labelDy: -16 },
-  { id: 'uk',          name: 'United Kingdom', flag: 'gb', x: 49,   y: 9.5,   labelDx: -6,  labelDy: -20 },
-  { id: 'france',      name: 'France',         flag: 'fr', x: 50,   y: 12.5,  labelDx: -20, labelDy: 14  },
-  { id: 'germany',     name: 'Germany',        flag: 'de', x: 53.5, y: 10.5,  labelDx: 18,  labelDy: -16 },
-  { id: 'uae',         name: 'UAE',            flag: 'ae', x: 64.5, y: 18.5,  labelDx: -4,  labelDy: -22 },
-  { id: 'india',       name: 'India',          flag: 'in', x: 71,   y: 19.5,  labelDx: 6,   labelDy: -22, tooltipDx: 0, tooltipDy: -120 },
-  { id: 'singapore',   name: 'Singapore',      flag: 'sg', x: 78,   y: 24,    labelDx: 18,  labelDy: 10  },
-  { id: 'japan',       name: 'Japan',          flag: 'jp', x: 88.5, y: 15,    labelDx: 18,  labelDy: -12 },
-  { id: 'south-korea', name: 'South Korea',    flag: 'kr', x: 84.5, y: 15.5,  labelDx: -22, labelDy: -14 },
-  { id: 'australia',   name: 'Australia',      flag: 'au', x: 87,   y: 32,    labelDx: 6,   labelDy: -22 },
-  { id: 'new-zealand', name: 'New Zealand',    flag: 'nz', x: 94,   y: 38,    labelDx: 16,  labelDy: -6  },
+  { id: 'canada',      name: 'Canada',         flag: 'ca', x: 245, y: 120, labelDx: 0,   labelDy: -24 },
+  { id: 'usa',         name: 'United States',  flag: 'us', x: 162, y: 212, labelDx: 8,   labelDy: -18 },
+  { id: 'uk',          name: 'United Kingdom', flag: 'gb', x: 462, y: 156, labelDx: -8,  labelDy: -22 },
+  { id: 'france',      name: 'France',         flag: 'fr', x: 476, y: 192, labelDx: -22, labelDy: 16  },
+  { id: 'germany',     name: 'Germany',        flag: 'de', x: 500, y: 170, labelDx: 22,  labelDy: -16 },
+  { id: 'uae',         name: 'UAE',            flag: 'ae', x: 598, y: 262, labelDx: -4,  labelDy: -24 },
+  { id: 'india',       name: 'India',          flag: 'in', x: 652, y: 264, labelDx: 10,  labelDy: -24, tooltipDx: 0, tooltipDy: -130 },
+  { id: 'singapore',   name: 'Singapore',      flag: 'sg', x: 724, y: 332, labelDx: 22,  labelDy: 12  },
+  { id: 'japan',       name: 'Japan',          flag: 'jp', x: 862, y: 202, labelDx: 22,  labelDy: -14 },
+  { id: 'south-korea', name: 'South Korea',    flag: 'kr', x: 832, y: 212, labelDx: -26, labelDy: -16 },
+  { id: 'australia',   name: 'Australia',      flag: 'au', x: 824, y: 420, labelDx: 8,   labelDy: -24 },
+  { id: 'new-zealand', name: 'New Zealand',    flag: 'nz', x: 912, y: 470, labelDx: 20,  labelDy: -8  },
 ];
 
 export const CONNECTIONS: [string, string][] = [
   ['india', 'usa'],
+  ['india', 'canada'],
   ['india', 'uk'],
+  ['india', 'germany'],
+  ['india', 'france'],
   ['india', 'uae'],
   ['india', 'singapore'],
-  ['india', 'australia'],
   ['india', 'japan'],
+  ['india', 'south-korea'],
+  ['india', 'australia'],
+  ['australia', 'new-zealand'],
   ['usa', 'canada'],
-  ['usa', 'uk'],
+  ['usa', 'japan'],
   ['uk', 'germany'],
   ['uk', 'france'],
-  ['germany', 'uae'],
-  ['uae', 'singapore'],
-  ['singapore', 'japan'],
-  ['japan', 'south-korea'],
-  ['australia', 'new-zealand'],
 ];
 
+/** Routes that carry an animated airplane. */
 export const PLANE_ROUTES: [string, string][] = [
   ['india', 'usa'],
   ['india', 'uk'],
   ['india', 'australia'],
-  ['usa', 'uk'],
-  ['uae', 'singapore'],
-  ['singapore', 'japan'],
-  ['japan', 'south-korea'],
-  ['australia', 'new-zealand'],
+  ['usa', 'japan'],
 ];
 
 export const NAVY = '#000B2E';

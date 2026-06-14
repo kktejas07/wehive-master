@@ -1,12 +1,23 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { HUBS, CONNECTIONS, PLANE_ROUTES, NAVY, NAVY_LIGHT, ACCENT, DOT_COLOR } from './worldMapData';
-import { CONTINENT_PATHS } from './worldMapPaths';
+import {
+  HUBS,
+  CONNECTIONS,
+  PLANE_ROUTES,
+  MAP_IMAGE,
+  MAP_W,
+  MAP_H,
+  NAVY,
+} from './worldMapData';
 import { arc } from './worldMapUtils';
 import { useMapLayout } from './useMapLayout';
 import FlightRoutes from './FlightRoutes';
 import MapMarker from './MapMarker';
 import CountryLabel from './CountryLabel';
 import HubTooltip from './HubTooltip';
+
+/** Right-pointing airplane silhouette, centered at origin. */
+const PLANE_PATH =
+  'M12,0 L2.4,-1.8 L1.2,-1.8 L-1.2,-7.2 L-3.6,-7.2 L-3.6,-1.8 L-8.4,-1.8 L-9.6,-4.8 L-11.4,-4.8 L-11.4,0 L-11.4,4.8 L-9.6,4.8 L-8.4,1.8 L-3.6,1.8 L-3.6,7.2 L-1.2,7.2 L1.2,1.8 L2.4,1.8 Z';
 
 function PlaneAlongPath({
   pathId,
@@ -18,16 +29,23 @@ function PlaneAlongPath({
   dur: number;
 }) {
   return (
-    <g opacity={0.95}>
-      <g transform="translate(-1.5, 0)">
+    <g filter="url(#plane-glow)">
+      <g>
         {/* Comet tail */}
-        <ellipse cx={-1.2} cy={0} rx={2} ry={0.35} fill="white" opacity={0.25} />
-        {/* Plane body */}
-        <path d="M-0.8,-1 L3.2,0 L-0.8,1 L0,0 Z" fill="white" />
+        <ellipse cx={-18} cy={0} rx={14} ry={2.2} fill="white" opacity={0.18} />
+        {/* Airplane */}
+        <path d={PLANE_PATH} fill="white" />
+        <animate
+          attributeName="opacity"
+          values="0.55;1;0.55"
+          dur={`${dur}s`}
+          repeatCount="indefinite"
+          begin={`${delay}s`}
+        />
+        <animateMotion dur={`${dur}s`} repeatCount="indefinite" rotate="auto" begin={`${delay}s`}>
+          <mpath href={`#${pathId}`} />
+        </animateMotion>
       </g>
-      <animateMotion dur={`${dur}s`} repeatCount="indefinite" rotate="auto" begin={`${delay}s`}>
-        <mpath href={`#${pathId}`} />
-      </animateMotion>
     </g>
   );
 }
@@ -74,8 +92,8 @@ export default function WorldMap({ className = '', showConnections = true }: Wor
         return {
           id: `plane-path-${i}`,
           d: `M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`,
-          delay: i * 1.4,
-          dur: 7 + i * 1.1,
+          delay: i * 1.6,
+          dur: 9 + i * 1.4,
         };
       }),
     [pos],
@@ -91,35 +109,39 @@ export default function WorldMap({ className = '', showConnections = true }: Wor
       style={{ background: NAVY }}
       onMouseLeave={() => handleHover(null)}
     >
-      {/* Background fills entire container */}
+      {/* World map background image (not redrawn) */}
+      <img
+        src={MAP_IMAGE}
+        alt="World map"
+        className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+        draggable={false}
+      />
+
+      {/* Dark navy overlay for depth + contrast */}
+      <div className="absolute inset-0 bg-[#000B2E]/25 pointer-events-none" />
+
+      {/* Soft vignette */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse 80% 70% at 50% 50%, ${NAVY_LIGHT} 0%, ${NAVY} 70%, #000510 100%)`,
+          background:
+            'radial-gradient(ellipse 75% 80% at 50% 50%, transparent 40%, rgba(0,5,16,0.55) 100%)',
         }}
       />
 
-      {/* SVG map — fills container, maintains 2:1 aspect via meet */}
+      {/* Interactive SVG layer — shares the image coordinate space */}
       <svg
         className="absolute inset-0 w-full h-full"
-        viewBox="0 0 100 50"
+        viewBox={`0 0 ${MAP_W} ${MAP_H}`}
         preserveAspectRatio="xMidYMid meet"
       >
         <defs>
-          <pattern id="wm-grid" width="3" height="3" patternUnits="userSpaceOnUse">
-            <path d="M 3 0 L 0 0 0 3" fill="none" stroke="white" strokeWidth="0.025" opacity="0.05" />
-          </pattern>
-
-          <pattern id="wm-dots" width="0.32" height="0.32" patternUnits="userSpaceOnUse">
-            <circle cx="0.16" cy="0.16" r="0.065" fill={DOT_COLOR} opacity="0.75" />
-          </pattern>
-
-          <pattern id="wm-dots-bright" width="0.64" height="0.64" patternUnits="userSpaceOnUse">
-            <circle cx="0.32" cy="0.32" r="0.08" fill={ACCENT} opacity="0.35" />
+          <pattern id="wm-grid" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M 36 0 L 0 0 0 36" fill="none" stroke="white" strokeWidth="0.4" opacity="0.04" />
           </pattern>
 
           <filter id="hub-glow" x="-150%" y="-150%" width="400%" height="400%">
-            <feGaussianBlur stdDeviation="0.5" result="blur" />
+            <feGaussianBlur stdDeviation="5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -127,37 +149,27 @@ export default function WorldMap({ className = '', showConnections = true }: Wor
           </filter>
 
           <filter id="route-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="0.35" />
+            <feGaussianBlur stdDeviation="4" />
           </filter>
 
-          <filter id="map-glow" x="-5%" y="-5%" width="110%" height="110%">
-            <feGaussianBlur stdDeviation="0.15" result="blur" />
+          <filter id="plane-glow" x="-120%" y="-120%" width="340%" height="340%">
+            <feGaussianBlur stdDeviation="2.4" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
 
-          {/* Hidden paths for plane animation */}
+          {/* Hidden paths used to drive airplane motion */}
           {planePaths.map((p) => (
             <path key={p.id} id={p.id} d={p.d} fill="none" stroke="none" />
           ))}
         </defs>
 
-        <rect width="100" height="50" fill="url(#wm-grid)" />
+        {/* Subtle grid */}
+        <rect width={MAP_W} height={MAP_H} fill="url(#wm-grid)" />
 
-        <g fill="url(#wm-dots)" filter="url(#map-glow)">
-          {CONTINENT_PATHS.map((d, i) => (
-            <path key={i} d={d} fillRule="evenodd" />
-          ))}
-        </g>
-
-        <g fill="url(#wm-dots-bright)" opacity="0.5">
-          {CONTINENT_PATHS.map((d, i) => (
-            <path key={i} d={d} fillRule="evenodd" />
-          ))}
-        </g>
-
+        {/* Routes + planes */}
         {mounted && showConnections && (
           <>
             {CONNECTIONS.map(([a, b], i) => (
@@ -174,18 +186,14 @@ export default function WorldMap({ className = '', showConnections = true }: Wor
           </>
         )}
 
+        {/* Hub markers */}
         {mounted &&
           HUBS.map((h) => (
-            <MapMarker
-              key={h.id}
-              hub={h}
-              active={hovered === h.id}
-              onHover={handleHover}
-            />
+            <MapMarker key={h.id} hub={h} active={hovered === h.id} onHover={handleHover} />
           ))}
       </svg>
 
-      {/* HTML overlays — positioned via projection */}
+      {/* Country label pills (projected to screen pixels) */}
       {mounted &&
         HUBS.map((h) => {
           const p = toPixels(h.x, h.y);
@@ -201,6 +209,7 @@ export default function WorldMap({ className = '', showConnections = true }: Wor
           );
         })}
 
+      {/* Hover tooltip */}
       {mounted && activeHub && activePos && (
         <HubTooltip hub={activeHub} left={activePos.left} top={activePos.top} />
       )}

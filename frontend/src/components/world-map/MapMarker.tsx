@@ -18,8 +18,9 @@ export default function MapMarker({
       onMouseLeave={() => onHover(null)}
     >
       {/* Large invisible hit area */}
-      <circle cx={hub.x} cy={hub.y} r={2.5} fill="transparent" />
+      <circle cx={hub.x} cy={hub.y} r={26} fill="transparent" />
 
+      {/* Pulsing radar rings */}
       {[0, 1, 2].map((i) => (
         <motion.circle
           key={i}
@@ -27,31 +28,33 @@ export default function MapMarker({
           cy={hub.y}
           fill="none"
           stroke={BLUE_GLOW}
-          strokeWidth={0.1}
-          initial={{ r: 0.5, opacity: 0.45 }}
-          animate={{ r: 2.8, opacity: 0 }}
+          strokeWidth={1.2}
+          initial={{ r: 6, opacity: 0.5 }}
+          animate={{ r: 32, opacity: 0 }}
           transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: 'easeOut' }}
         />
       ))}
 
+      {/* Soft glow halo */}
       <circle
         cx={hub.x}
         cy={hub.y}
-        r={active ? 1.8 : 1.2}
+        r={active ? 20 : 14}
         fill={BLUE_GLOW}
         opacity={active ? 0.35 : 0.2}
         filter="url(#hub-glow)"
       />
 
+      {/* Core dot with hover scale */}
       <motion.circle
         cx={hub.x}
         cy={hub.y}
-        r={active ? 0.75 : 0.55}
         fill={ACCENT}
-        animate={{ r: active ? [0.75, 0.85, 0.75] : 0.55 }}
+        animate={{ r: active ? [8, 9.5, 8] : 6 }}
         transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
       />
-      <circle cx={hub.x} cy={hub.y} r={0.18} fill="white" opacity={0.9} />
+      {/* White center */}
+      <circle cx={hub.x} cy={hub.y} r={2.6} fill="white" opacity={0.95} />
     </g>
   );
 }
