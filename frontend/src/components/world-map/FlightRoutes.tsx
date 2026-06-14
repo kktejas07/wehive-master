@@ -9,26 +9,24 @@ export default function FlightRoutes({ from, to, active }: { from: Point; to: Po
 
   return (
     <g>
-      {/* Soft glow under the route */}
       <path
         d={d}
         fill="none"
         stroke={ACCENT}
-        strokeWidth={active ? 0.6 : 0.35}
+        strokeWidth={0.5}
         strokeLinecap="round"
-        strokeDasharray="1.2 0.8"
-        opacity={active ? 0.35 : 0.12}
+        strokeDasharray="1.4 1"
+        opacity={active ? 0.25 : 0.1}
         filter="url(#route-glow)"
       />
-      {/* Main dashed arc */}
       <path
         d={d}
         fill="none"
         stroke={ACCENT}
-        strokeWidth={active ? 0.25 : 0.15}
+        strokeWidth={active ? 0.22 : 0.14}
         strokeLinecap="round"
-        strokeDasharray="0.9 0.6"
-        opacity={active ? 0.75 : 0.35}
+        strokeDasharray="1 0.7"
+        opacity={active ? 0.85 : 0.45}
       />
     </g>
   );
