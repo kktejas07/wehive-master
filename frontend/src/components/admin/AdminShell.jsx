@@ -95,7 +95,7 @@ export default function AdminShell({ children }) {
           </div>
         </aside>
 
-        <main className="p-5 sm:p-8 lg:p-10 max-w-full overflow-y-auto">
+        <main className="p-5 sm:p-8 lg:p-10 max-w-full overflow-y-auto relative z-10">
           {/* Mobile tab pill bar */}
           <div className="lg:hidden flex overflow-x-auto gap-2 mb-5 -mx-5 px-5">
             {TABS.map((t) => {
