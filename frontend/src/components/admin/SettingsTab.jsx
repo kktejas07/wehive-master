@@ -344,7 +344,7 @@ export default function SettingsTab() {
                         />
                       </label>
                       {brandingAssets[field.key]?.url && (
-                        <img src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-10 rounded-lg object-cover border border-white/10" />
+                        <img src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-auto max-w-[120px] rounded-lg object-contain border border-white/10 bg-white/5" />
                       )}
                     </div>
                     {brandingAssets[field.key] && (
