@@ -1,49 +1,50 @@
 export interface Hub {
   id: string;
   name: string;
-  flag?: string;
+  flag: string;
   x: number;
   y: number;
-  visaTypes: string[];
 }
 
 export const HUBS: Hub[] = [
-  { id: 'usa',         name: 'United States',   x: 16,  y: 28,  visaTypes: ['Work Visa', 'Student Visa', 'Tourist Visa', 'Business Visa'] },
-  { id: 'canada',      name: 'Canada',          x: 14,  y: 16,  visaTypes: ['Student Visa', 'Tourist Visa', 'Work Permit'] },
-  { id: 'uk',          name: 'United Kingdom',  x: 46,  y: 18,  visaTypes: ['Student Visa', 'Work Visa', 'Tourist Visa'] },
-  { id: 'france',      name: 'France',          x: 47.5, y: 22,  visaTypes: ['Tourist Visa', 'Student Visa'] },
-  { id: 'germany',     name: 'Germany',         x: 50,  y: 20,  visaTypes: ['Student Visa', 'Work Visa', 'Tourist Visa'] },
-  { id: 'italy',       name: 'Italy',           x: 49,  y: 24,  visaTypes: ['Tourist Visa', 'Student Visa'] },
-  { id: 'spain',       name: 'Spain',           x: 46,  y: 26,  visaTypes: ['Tourist Visa', 'Student Visa'] },
-  { id: 'switzerland', name: 'Switzerland',     x: 49,  y: 22.5, visaTypes: ['Tourist Visa', 'Work Visa'] },
-  { id: 'uae',         name: 'UAE',             x: 62,  y: 36,  visaTypes: ['Tourist Visa', 'Work Visa', 'Business Visa'] },
-  { id: 'saudi',       name: 'Saudi Arabia',    x: 60,  y: 39,  visaTypes: ['Work Visa', 'Business Visa'] },
-  { id: 'india',       name: 'India',           x: 70,  y: 38,  visaTypes: ['Work Visa', 'Student Visa', 'Tourist Visa', 'Business Visa'] },
-  { id: 'singapore',   name: 'Singapore',       x: 77,  y: 47,  visaTypes: ['Tourist Visa', 'Work Visa', 'Student Visa'] },
-  { id: 'japan',       name: 'Japan',           x: 88,  y: 27,  visaTypes: ['Student Visa', 'Tourist Visa', 'Work Visa', 'Business Visa'] },
-  { id: 'south-korea', name: 'South Korea',     x: 86,  y: 26,  visaTypes: ['Tourist Visa', 'Student Visa', 'Business Visa'] },
-  { id: 'australia',   name: 'Australia',       x: 84,  y: 66,  visaTypes: ['Student Visa', 'Tourist Visa', 'Work Visa'] },
-  { id: 'new-zealand', name: 'New Zealand',     x: 93,  y: 76,  visaTypes: ['Student Visa', 'Tourist Visa', 'Work Visa'] },
+  { id: 'usa',         name: 'United States',  flag: 'us', x: 18,  y: 32  },
+  { id: 'canada',      name: 'Canada',         flag: 'ca', x: 16,  y: 19  },
+  { id: 'uk',          name: 'United Kingdom', flag: 'gb', x: 46,  y: 21  },
+  { id: 'france',      name: 'France',         flag: 'fr', x: 48,  y: 25  },
+  { id: 'germany',     name: 'Germany',        flag: 'de', x: 50,  y: 23  },
+  { id: 'spain',       name: 'Spain',          flag: 'es', x: 47,  y: 28  },
+  { id: 'italy',       name: 'Italy',          flag: 'it', x: 50,  y: 27  },
+  { id: 'uae',         name: 'UAE',            flag: 'ae', x: 63,  y: 40  },
+  { id: 'india',       name: 'India',          flag: 'in', x: 70,  y: 41  },
+  { id: 'singapore',   name: 'Singapore',      flag: 'sg', x: 78,  y: 52  },
+  { id: 'japan',       name: 'Japan',          flag: 'jp', x: 87,  y: 29  },
+  { id: 'south-korea', name: 'South Korea',    flag: 'kr', x: 85,  y: 27  },
+  { id: 'australia',   name: 'Australia',      flag: 'au', x: 84,  y: 70  },
+  { id: 'new-zealand', name: 'New Zealand',    flag: 'nz', x: 93,  y: 80  },
 ];
 
-export const CONNECTIONS: [string, string][] = [
+export const CONNECTIONS = [
   ['india', 'usa'],
   ['india', 'uk'],
   ['india', 'uae'],
-  ['india', 'australia'],
   ['india', 'singapore'],
+  ['india', 'australia'],
   ['india', 'japan'],
   ['usa', 'canada'],
   ['usa', 'japan'],
-  ['uk', 'france'],
   ['uk', 'germany'],
-  ['australia', 'new-zealand'],
-  ['uae', 'singapore'],
-  ['india', 'saudi'],
-  ['india', 'germany'],
+  ['uk', 'france'],
   ['uk', 'italy'],
+  ['uk', 'spain'],
+  ['australia', 'new-zealand'],
+  ['india', 'germany'],
+  ['uae', 'singapore'],
 ];
 
-export const NAVY = '#081C5A';
+export const NAVY = '#081A4E';
 export const ACCENT = '#E1212C';
 export const BLUE_GLOW = '#3B82F6';
+
+export function flagUrl(code) {
+  return `https://flagcdn.com/24x18/${code}.png`;
+}
