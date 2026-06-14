@@ -32,9 +32,9 @@ export default function AdminShell({ children }) {
   const user = admin;
 
   return (
-    <div className="min-h-screen bg-[#0b1020] text-slate-100" data-testid="admin-shell">
-      <div className="grid lg:grid-cols-[260px_1fr] min-h-screen">
-        <aside className="hidden lg:flex flex-col bg-[#0a0e1e] border-r border-white/5 p-5">
+    <div className="h-screen bg-[#0b1020] text-slate-100" data-testid="admin-shell">
+      <div className="grid lg:grid-cols-[260px_1fr] h-screen">
+        <aside className="hidden lg:flex flex-col bg-[#0a0e1e] border-r border-white/5 p-5 overflow-y-auto">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-200 hover:text-white">
             <img src={BRAND.logo} alt="We Hive" className="h-10 w-auto" />
             <span className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-bold">Admin</span>
@@ -95,7 +95,7 @@ export default function AdminShell({ children }) {
           </div>
         </aside>
 
-        <main className="p-5 sm:p-8 lg:p-10 max-w-full overflow-hidden">
+        <main className="p-5 sm:p-8 lg:p-10 max-w-full overflow-y-auto">
           {/* Mobile tab pill bar */}
           <div className="lg:hidden flex overflow-x-auto gap-2 mb-5 -mx-5 px-5">
             {TABS.map((t) => {
