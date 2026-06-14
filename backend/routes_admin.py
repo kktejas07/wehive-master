@@ -994,6 +994,7 @@ async def admin_sync_destinations_to_r2_stream(_=Depends(get_current_admin)):
                 yield f"data: {_json_stream.dumps({'event': 'progress', 'index': i + 1, 'total': len(manifest), 'filename': filename, 'status': 'failed', 'error': 'Image not found on any source', 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
 
         yield f"data: {_json_stream.dumps({'event': 'complete', 'total': len(manifest), 'uploaded': uploaded, 'skipped': skipped, 'failed': failed})}\n\n"
+        await _clear_r2_cache()
 
     return StreamingResponse(
         event_stream(),
@@ -1080,6 +1081,7 @@ async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
     skipped = sum(1 for r in results if r['status'] == 'exists')
     failed = sum(1 for r in results if r['status'] == 'failed')
 
+    await _clear_r2_cache()
     return {
         'total': len(manifest),
         'uploaded': uploaded,
@@ -1120,7 +1122,6 @@ async def admin_r2_status(
     refresh: bool = Query(False, description='Force a fresh check against R2'),
 ):
     """Check which destination images exist on R2. Uses cached status unless refresh=true."""
-    R2_STATUS_CACHE_ID = 'destinations_r2_status'
 
     if refresh:
         cfg = await _get_r2_settings()
@@ -1189,7 +1190,7 @@ async def admin_upload_destination(
 
     client.put_object(Bucket=bucket, Key=key, Body=content, ContentType=file.content_type or 'image/webp', ServerSideEncryption='AES256')
     url = f'{public_url}/{key}' if public_url else ''
-
+    await _clear_r2_cache()
     return {'filename': filename, 'country': country, 'url': url}
 
 
@@ -1265,6 +1266,7 @@ async def admin_regenerate_destination(
     with open(local_path, 'wb') as f:
         f.write(image_data)
 
+    await _clear_r2_cache()
     return {'filename': filename, 'country': country, 'url': url, 'size_kb': round(len(image_data) / 1024)}
 
 
@@ -1284,6 +1286,7 @@ async def admin_delete_r2_destination(
 
     key = f'destinations/{entry["filename"]}'
     client.delete_object(Bucket=bucket, Key=key)
+    await _clear_r2_cache()
     return {'filename': entry['filename'], 'country': country, 'deleted': True}
 
 
