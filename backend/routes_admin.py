@@ -852,8 +852,16 @@ async def admin_get_branding(_=Depends(get_current_admin)):
     return {'configured': True, 'assets': assets}
 
 
-# ---------- destinations (destination images) ----------
 MANIFEST_COLLECTION_ID = 'destinations_manifest'
+R2_STATUS_CACHE_ID = 'destinations_r2_status'
+
+
+async def _clear_r2_cache():
+    """Clear the cached R2 status after mutations."""
+    await settings_col.delete_one({'_id': R2_STATUS_CACHE_ID})
+
+
+# ---------- destinations (destination images) ----------
 
 
 def _find_manifest_file():
@@ -1107,21 +1115,39 @@ async def _get_r2_settings():
 
 
 @router.get('/destinations/r2-status')
-async def admin_r2_status(_=Depends(get_current_admin)):
-    """Check which destination images exist on R2."""
-    cfg = await _get_r2_settings()
-    client, bucket, _ = _r2_client_from_cfg(cfg)
-    manifest = await _load_manifest()
-    results = []
-    for entry in manifest:
-        filename = entry['filename']
-        key = f'destinations/{filename}'
-        try:
-            client.head_object(Bucket=bucket, Key=key)
-            results.append({'filename': filename, 'country': entry['country'], 'onR2': True})
-        except Exception:
-            results.append({'filename': filename, 'country': entry['country'], 'onR2': False})
-    return {'items': results, 'total': len(results), 'onR2': sum(1 for r in results if r['onR2'])}
+async def admin_r2_status(
+    _=Depends(get_current_admin),
+    refresh: bool = Query(False, description='Force a fresh check against R2'),
+):
+    """Check which destination images exist on R2. Uses cached status unless refresh=true."""
+    R2_STATUS_CACHE_ID = 'destinations_r2_status'
+
+    if refresh:
+        cfg = await _get_r2_settings()
+        client, bucket, _ = _r2_client_from_cfg(cfg)
+        manifest = await _load_manifest()
+        results = []
+        for entry in manifest:
+            filename = entry['filename']
+            key = f'destinations/{filename}'
+            try:
+                client.head_object(Bucket=bucket, Key=key)
+                results.append({'filename': filename, 'country': entry['country'], 'onR2': True})
+            except Exception:
+                results.append({'filename': filename, 'country': entry['country'], 'onR2': False})
+        await settings_col.update_one(
+            {'_id': R2_STATUS_CACHE_ID},
+            {'$set': {'items': results, 'updated_at': datetime.utcnow()}},
+            upsert=True,
+        )
+        return {'items': results, 'total': len(results), 'onR2': sum(1 for r in results if r['onR2']), 'cached': False}
+
+    doc = await settings_col.find_one({'_id': R2_STATUS_CACHE_ID})
+    if doc and doc.get('items'):
+        items = doc['items']
+        return {'items': items, 'total': len(items), 'onR2': sum(1 for r in items if r['onR2']), 'cached': True, 'updated_at': str(doc.get('updated_at', ''))}
+
+    return {'items': [], 'total': 0, 'onR2': 0, 'cached': True}
 
 
 @router.get('/destinations/signed-url')

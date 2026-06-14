@@ -137,6 +137,7 @@ export default function DestinationsTab() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
   const [r2PublicUrl, setR2PublicUrl] = useState('');
+  const [r2Cached, setR2Cached] = useState(false);
   const [page, setPage] = useState(0);
   const pageSize = 25;
 
@@ -158,6 +159,7 @@ export default function DestinationsTab() {
       }
       setItems(dests);
       setR2Status(statusMap);
+      setR2Cached(r2Res.value?.data?.cached || false);
       const r2Cfg = r2SettingsRes.value?.data?.config || {};
       setR2PublicUrl((r2Cfg.public_url || '').replace(/\/$/, ''));
     } catch (e) {
@@ -166,6 +168,24 @@ export default function DestinationsTab() {
       setLoading(false);
     }
   }, []);
+
+  const handleRefreshR2 = async () => {
+    setLoading(true);
+    try {
+      const client = adminClient();
+      const res = await client.get('/destinations/r2-status?refresh=true');
+      const statusMap = {};
+      for (const s of res.data.items || []) {
+        statusMap[s.filename] = s.onR2;
+      }
+      setR2Status(statusMap);
+      setR2Cached(false);
+    } catch (e) {
+      toast({ title: 'R2 status refresh failed', variant: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -287,14 +307,27 @@ export default function DestinationsTab() {
         title="Destination Images"
         subtitle={`Manage ${items.length || '...'} AI-generated country illustrations — upload, regenerate, or sync to Cloudflare R2 CDN`}
         right={
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 text-white font-bold text-[13px] transition"
-          >
-            {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-            {syncing ? 'Uploading...' : 'Upload All to R2'}
-          </button>
+          <div className="flex items-center gap-2">
+            {r2Cached && (
+              <button
+                onClick={handleRefreshR2}
+                disabled={loading}
+                className="inline-flex items-center gap-2 h-11 px-4 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white font-bold text-[12px] transition"
+                title="Force refresh R2 status cache"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Refresh
+              </button>
+            )}
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 text-white font-bold text-[13px] transition"
+            >
+              {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {syncing ? 'Uploading...' : 'Upload All to R2'}
+            </button>
+          </div>
         }
       />
 
