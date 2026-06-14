@@ -168,11 +168,11 @@ export default function WorldMap({ className = '', showConnections = true, anima
       <img
         src="/images/world-map.webp"
         alt="World map"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover brightness-[0.3] saturate-[0.6]"
       />
 
-      {/* Navy gradient overlay to blend the map into brand colours */}
-      <div className="absolute inset-0 bg-[#0A2C8A]/30 mix-blend-multiply" />
+      {/* Navy overlay to fully mask the underlying yellow palette */}
+      <div className="absolute inset-0 bg-[#0A2C8A]/70" />
 
       {mounted && (
         <>
