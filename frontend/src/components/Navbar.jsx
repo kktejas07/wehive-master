@@ -163,7 +163,7 @@ export default function Navbar({ variant = 'default' }) {
       )}>
         <Link to="/" className="flex items-center gap-2 group shrink-0 relative">
           <div className={cn(
-            'relative transition-[width,height] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-visible',
+            'relative transition-[width,height] duration-500 ease overflow-visible',
             scrolled ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-24 h-24 sm:w-28 sm:h-28'
           )}>
             {/* Full logo — visible when at top */}
