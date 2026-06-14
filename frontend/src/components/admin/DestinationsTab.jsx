@@ -148,7 +148,7 @@ export default function DestinationsTab() {
       const [destRes, r2Res, r2SettingsRes] = await Promise.allSettled([
         client.get('/destinations'),
         client.get('/destinations/r2-status'),
-        adminClient().get('/settings/r2'),
+        client.get('/settings/r2'),
       ]);
       const dests = destRes.value?.data?.items || [];
       const statusMap = {};
