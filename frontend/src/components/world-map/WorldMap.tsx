@@ -1,24 +1,21 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { HUBS, CONNECTIONS, NAVY, ACCENT } from './worldMapData';
+import { HUBS, CONNECTIONS, NAVY } from './worldMapData';
 import { arc } from './worldMapUtils';
-import FlightPath from './FlightPath';
-import MapNode from './MapNode';
-import type { Hub } from './worldMapData';
+import FlightRoutes from './FlightRoutes';
+import MapMarker from './MapMarker';
 
-function FlyingPlane({ from, to, delay }: { from: { x: number; y: number }; to: { x: number; y: number }; delay: number }) {
+function FlyingPlane({ from, to, delay, duration = 6 }: { from: { x: number; y: number }; to: { x: number; y: number }; delay: number; duration?: number }) {
   const { midX, midY } = useMemo(() => arc(from, to), [from.x, from.y, to.x, to.y]);
   return (
-    <motion.div
-      className="absolute w-2.5 h-2.5 z-10 pointer-events-none"
+    <motion.g
+      initial={{ offsetDistance: '0%' }}
+      animate={{ offsetDistance: '100%' }}
+      transition={{ duration, delay, repeat: Infinity, ease: 'linear' }}
       style={{ offsetPath: `path('M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}')` }}
-      animate={{ offsetDistance: ['0%', '100%'] }}
-      transition={{ duration: 5, delay, repeat: Infinity, ease: 'linear' }}
     >
-      <svg viewBox="0 0 24 24" className="w-full h-full text-[hsl(var(--accent))] drop-shadow-sm" fill="currentColor">
-        <path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-      </svg>
-    </motion.div>
+      <circle r="0.25" fill="#3B82F6" opacity="0.8" />
+    </motion.g>
   );
 }
 
@@ -29,127 +26,120 @@ interface WorldMapProps {
 }
 
 export default function WorldMap({ className = '', showConnections = true }: WorldMapProps) {
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
 
   useEffect(() => { setMounted(true); }, []);
 
-  const pos = (id: string) => {
-    const n = HUBS.find((h) => h.id === id);
-    return n ? { x: n.x, y: n.y } : { x: 0, y: 0 };
-  };
+  const pos = useCallback((id: string) => {
+    const h = HUBS.find((hub) => hub.id === id);
+    return h ? { x: h.x, y: h.y } : { x: 0, y: 0 };
+  }, []);
 
-  const flights = useMemo(() => {
-    if (!hoveredNode) return CONNECTIONS;
-    return CONNECTIONS.filter((c) => c[0] === hoveredNode || c[1] === hoveredNode);
-  }, [hoveredNode]);
+  const planes = useMemo(() => {
+    if (!showConnections) return [];
+    const subset = CONNECTIONS.filter((_, i) => i % 5 === 0);
+    return subset.slice(0, 3);
+  }, [showConnections]);
 
   return (
-    <div className={`relative w-full h-full rounded-2xl overflow-hidden ${className}`}>
-      {/* Dark navy background */}
-      <div className="absolute inset-0 bg-[#061440]" />
+    <div className={`relative w-full h-full rounded-2xl overflow-hidden bg-[${NAVY}] ${className}`}>
+      {/* Background */}
+      <div className="absolute inset-0 bg-[#081C5A]" />
 
-      {/* Continent outlines SVG */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 100 50"
-        preserveAspectRatio="xMidYMid meet"
-        style={{ opacity: 0.12 }}
-      >
-        {/* Simplified continent outlines */}
-        <g fill="none" stroke="#FFFFFF" strokeWidth="0.15">
-          {/* North America */}
-          <path d="M5,5 L10,3 L18,5 L22,8 L24,12 L20,18 L15,22 L8,22 L3,18 L2,12 Z" opacity="0.8" />
-          {/* South America */}
-          <path d="M18,28 L22,25 L25,28 L24,34 L22,40 L20,44 L18,42 L16,36 Z" opacity="0.7" />
-          {/* Europe */}
-          <path d="M46,10 L48,8 L52,9 L55,12 L54,16 L50,18 L47,16 L44,14 Z" opacity="0.8" />
-          {/* Africa */}
-          <path d="M47,20 L50,18 L55,20 L58,25 L56,32 L52,36 L48,35 L45,30 L45,25 Z" opacity="0.7" />
-          {/* Asia */}
-          <path d="M55,8 L62,5 L72,4 L82,6 L90,10 L92,15 L88,22 L78,24 L68,25 L60,22 L55,18 L55,12 Z" opacity="0.8" />
-          {/* Australia */}
-          <path d="M78,36 L82,34 L86,36 L88,40 L85,43 L80,42 Z" opacity="0.6" />
-          {/* Greenland */}
-          <path d="M26,8 L28,5 L32,6 L31,10 L28,11 Z" opacity="0.5" />
-          {/* SEA islands */}
-          <ellipse cx="78" cy="30" rx="1.5" ry="1" opacity="0.4" />
-          <ellipse cx="80" cy="32" rx="1" ry="0.7" opacity="0.4" />
-        </g>
+      {/* Radial gradient */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(8,28,90,0) 0%, #081C5A 100%)' }}
+      />
+
+      {/* Grid overlay */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="grid" width="5" height="5" patternUnits="userSpaceOnUse">
+            <circle cx="5" cy="5" r="0.08" fill="white" opacity="0.06" />
+          </pattern>
+        </defs>
+        <rect width="100" height="50" fill="url(#grid)" />
       </svg>
-
-      {/* Grid lines */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 100 50"
-        preserveAspectRatio="xMidYMid meet"
-        style={{ opacity: 0.04 }}
-      >
-        {Array.from({ length: 10 }, (_, i) => (
-          <line key={`h${i}`} x1="0" y1={i * 5} x2="100" y2={i * 5} stroke="white" strokeWidth="0.1" />
-        ))}
-        {Array.from({ length: 20 }, (_, i) => (
-          <line key={`v${i}`} x1={i * 5} y1="0" x2={i * 5} y2="50" stroke="white" strokeWidth="0.1" />
-        ))}
-      </svg>
-
-      {/* Gradient edges */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background: 'radial-gradient(ellipse at center, transparent 50%, #061440 100%)',
-      }} />
 
       {mounted && (
-        <>
-          {/* Flight paths */}
-          {flights.map(([fromId, toId], i) => {
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
+          {/* Continent outlines */}
+          <g fill="none" stroke="white" strokeWidth="0.15" opacity="0.10">
+            <path d="M 5.5,8 L 4,6 L 3.5,4.5 L 6,3 L 8.5,2.2 L 10.5,2.5 L 13,2.8 L 15,3.5 L 17,4.2 L 19,5.5 L 20.5,6.8 L 21.5,8.5 L 22,10.5 L 22.5,12.5 L 22.8,14.5 L 22.5,16 L 21.5,17.5 L 20,18.8 L 18,19.8 L 16,20.5 L 14.5,21 L 13,21.5 L 10.5,22 L 8.5,21.8 L 6.5,21 L 4.5,20 L 3,18.5 L 2,16.5 L 1.5,14 L 1.5,11.5 Z"/>
+            <path d="M 16.5,23.5 L 18,22.5 L 19,22 L 20.2,22.8 L 21,23.8 L 21.5,25 L 21.8,27 L 21.5,29 L 20.8,31 L 20,33 L 19.2,35 L 18.5,37.5 L 18,39.5 L 17.5,40.8 L 16.5,41 L 16,39.5 L 15.5,37 L 15,34 L 14.5,31 L 14,28 L 14,26 L 14.8,24 L 15.5,23.5 Z"/>
+            <path d="M 43.5,9 L 45.5,8 L 47,7 L 49,7.5 L 51,8 L 52.5,9 L 53.5,10 L 54.5,11.5 L 55,13.5 L 54.5,15.5 L 53.5,17 L 52,18 L 50,18.5 L 48,18.5 L 46,18 L 44.5,17 L 43.5,15.5 L 42.5,13.5 L 42,11.5 L 42.5,10 Z"/>
+            <path d="M 43.5,19.5 L 46,18.5 L 48,18.5 L 51,19 L 53,19.5 L 56,20 L 58,21 L 59.5,23 L 59.5,26 L 58.5,28.5 L 56.5,31 L 54,33 L 52,34.5 L 49,35.5 L 47,35 L 45,33.5 L 43.5,31 L 42.5,28 L 42,25 L 42,22 Z"/>
+            <path d="M 54,5 L 56,3.5 L 58.5,2.5 L 62,1.5 L 66,1 L 70.5,1 L 74.5,1.5 L 78,2.5 L 81,4 L 84,6 L 86.5,8 L 88.5,10 L 90,12.5 L 91.5,15 L 92.5,18 L 93,20.5 L 92,22 L 90.5,22 L 88.5,22 L 86,22 L 83.5,21.5 L 81,21 L 78.5,20.5 L 75.5,19.5 L 72,19 L 68.5,19 L 65,19.5 L 62,20 L 59,21 L 56.5,22 L 55,22.5 L 54,22 L 53,21 L 52.5,19 L 52.5,17 L 53,15 L 53.5,12.5 L 53.5,9 L 54,6.5 Z"/>
+            <path d="M 77,34 L 79.5,32.5 L 82,31.5 L 85,31.5 L 88,32.5 L 90,34 L 91,36.5 L 90,39 L 87,41 L 84,42 L 81.5,42.5 L 79,41.5 L 77.5,40 L 76.5,37 Z"/>
+            <path d="M 27,2.5 L 29,1.5 L 31.5,1.5 L 33,2.5 L 33.5,4 L 33,6 L 31,7 L 28.5,7 L 27,6 L 26,4.5 Z"/>
+            <path d="M 43.5,13 L 44.5,12 L 45.5,12 L 46.2,13 L 46.2,14.5 L 45.5,15.5 L 44.5,15.5 Z"/>
+            <path d="M 87,16 L 88,15 L 88.5,15 L 89.5,16 L 89.5,17.5 L 89,18.5 L 88,19 L 87,18 Z"/>
+            <path d="M 92.5,38 L 93.5,37.5 L 94,37.5 L 95,38.5 L 95,39.8 L 93.5,41.5 L 92.5,41 Z"/>
+            <path d="M 77,24 L 79,23 L 81,23 L 83,24.2 L 83.5,26 L 82,26.8 L 79.5,26.5 L 77.5,25.5 Z"/>
+            <path d="M 80,28.5 L 82,27.5 L 84.5,27.5 L 86,29 L 85.5,31 L 83,31 Z"/>
+            <path d="M 57,35.5 L 58,34.5 L 58.5,35 L 58.5,37.5 L 57.8,39 L 57,38 Z"/>
+          </g>
+
+          {/* Flight routes */}
+          {CONNECTIONS.map(([fromId, toId], i) => {
             const from = pos(fromId);
             const to = pos(toId);
-            const active = hoveredNode === fromId || hoveredNode === toId;
-            return <FlightPath key={i} from={from} to={to} active={active} />;
+            const active = hovered === fromId || hovered === toId;
+            return <FlightRoutes key={i} from={from} to={to} active={active} index={i} />;
           })}
-
-          {/* Animated planes */}
-          {showConnections &&
-            flights.map(([fromId, toId], i) => {
-              const from = pos(fromId);
-              const to = pos(toId);
-              return <FlyingPlane key={i} from={from} to={to} delay={i * 0.4} />;
-            })}
-
-          {/* Hub nodes */}
-          {HUBS.map((hub) => (
-            <MapNode
-              key={hub.id}
-              hub={hub}
-              active={hoveredNode === hub.id}
-              onHover={() => setHoveredNode(hub.id)}
-              onLeave={() => setHoveredNode(null)}
-            />
-          ))}
-        </>
+        </svg>
       )}
 
-      {/* Legend */}
-      <div className="absolute bottom-3 left-3 flex items-center gap-2 z-30">
-        <div className="flex items-center gap-1.5 bg-[#061440]/80 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-lg border border-white/10">
-          <svg viewBox="0 0 24 24" className="w-3 h-3 text-slate-400" fill="currentColor">
-            <path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-          </svg>
-          <span className="text-[10px] font-semibold text-slate-400">Routes</span>
+      {/* Map markers (outside SVG for tooltip positioning) */}
+      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 30 }}>
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
+          {mounted && HUBS.map((hub) => (
+            <MapMarker
+              key={hub.id}
+              hub={hub}
+              active={hovered === hub.id}
+              onHover={setHovered}
+            />
+          ))}
+        </svg>
+      </div>
+
+      {/* Animated planes */}
+      {mounted && (
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet" style={{ zIndex: 20 }}>
+          {planes.map(([fromId, toId], i) => (
+            <FlyingPlane key={i} from={pos(fromId)} to={pos(toId)} delay={i * 2} duration={6 + i} />
+          ))}
+        </svg>
+      )}
+
+      {/* Legend — bottom-left */}
+      <div className="absolute bottom-3 left-3 flex items-center gap-2 z-40">
+        <div className="flex items-center gap-1.5 bg-[#081C5A]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_6px_#3B82F6]" />
+          <span className="text-[10px] font-semibold text-slate-300">Active Visa Hub</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-[#061440]/80 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-lg border border-white/10">
-          <svg viewBox="0 0 24 24" className="w-3 h-3 text-[hsl(var(--accent))]" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-          <span className="text-[10px] font-semibold text-slate-400">Hubs</span>
+        <div className="flex items-center gap-1.5 bg-[#081C5A]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
+          <svg className="w-8 h-2" viewBox="0 0 32 8"><line x1="0" y1="4" x2="28" y2="4" stroke="#3B82F6" strokeWidth="0.5" strokeDasharray="2 1" opacity="0.5" /></svg>
+          <span className="text-[10px] font-semibold text-slate-300">Flight Route</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-[#081C5A]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_4px_#3B82F6]" />
+          <span className="text-[10px] font-semibold text-slate-300">Live Connection</span>
         </div>
       </div>
 
-      {/* Live indicator */}
-      <div className="absolute top-3 right-3 flex items-center gap-2 bg-[#061440]/80 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-lg border border-white/10 z-30">
-        <span className="h-2 w-2 rounded-full bg-[hsl(var(--accent))] animate-pulse" />
-        <span className="text-[10px] font-semibold text-slate-400">Live</span>
+      {/* Status — top-right */}
+      <div className="absolute top-3 right-3 flex items-center gap-3 z-40">
+        <div className="flex items-center gap-1.5 bg-[#081C5A]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_6px_#22C55E]" />
+          <span className="text-[10px] font-semibold text-slate-300">Live</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-[#081C5A]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
+          <span className="text-[10px] font-semibold text-slate-300">250+ Destinations</span>
+        </div>
       </div>
     </div>
   );

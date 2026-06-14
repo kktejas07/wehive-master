@@ -8,6 +8,7 @@ import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import Pagination from './Pagination';
+import BlobImage from './BlobImage';
 
 function PreviewModal({ item, onClose, onRefresh }) {
   const { toast } = useToast();
@@ -69,8 +70,9 @@ function PreviewModal({ item, onClose, onRefresh }) {
           <X className="w-4 h-4" />
         </button>
         <div className="aspect-[2/3] bg-black/50">
-          <img
-            src={item.onR2 ? `${process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in'}/api/admin/destinations/blob/${item.filename}` : `/images/destinations/${item.filename}`}
+          <BlobImage
+            filename={item.filename}
+            onR2={item.onR2}
             alt={item.country}
             className="w-full h-full object-cover"
           />
@@ -260,11 +262,6 @@ export default function DestinationsTab() {
 
   const r2Count = Object.values(r2Status).filter(Boolean).length;
   const localCount = items.length - r2Count;
-
-  const getImageUrl = (filename, onR2) => {
-    if (onR2) return `${process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in'}/api/admin/destinations/blob/${filename}`;
-    return `/images/destinations/${filename}`;
-  };
 
   const filtered = items
     .filter((item) => {
@@ -471,11 +468,11 @@ export default function DestinationsTab() {
                   onClick={() => setPreview({ ...item, onR2 })}
                 >
                   <div className="aspect-[2/3] bg-black/50 overflow-hidden relative">
-                    <img
-                      src={getImageUrl(item.filename, onR2)}
+                    <BlobImage
+                      filename={item.filename}
+                      onR2={onR2}
                       alt={item.country}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
                     />
                     <div className="absolute top-2 right-2">
                       {onR2 ? (
