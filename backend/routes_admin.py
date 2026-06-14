@@ -1123,32 +1123,32 @@ async def admin_r2_status(
 ):
     """Check which destination images exist on R2. Uses cached status unless refresh=true."""
 
-    if refresh:
-        cfg = await _get_r2_settings()
-        client, bucket, _ = _r2_client_from_cfg(cfg)
-        manifest = await _load_manifest()
-        results = []
-        for entry in manifest:
-            filename = entry['filename']
-            key = f'destinations/{filename}'
-            try:
-                client.head_object(Bucket=bucket, Key=key)
-                results.append({'filename': filename, 'country': entry['country'], 'onR2': True})
-            except Exception:
-                results.append({'filename': filename, 'country': entry['country'], 'onR2': False})
-        await settings_col.update_one(
-            {'_id': R2_STATUS_CACHE_ID},
-            {'$set': {'items': results, 'updated_at': datetime.utcnow()}},
-            upsert=True,
-        )
-        return {'items': results, 'total': len(results), 'onR2': sum(1 for r in results if r['onR2']), 'cached': False}
+    # Check cache first (unless refresh requested)
+    if not refresh:
+        doc = await settings_col.find_one({'_id': R2_STATUS_CACHE_ID})
+        if doc and doc.get('items'):
+            items = doc['items']
+            return {'items': items, 'total': len(items), 'onR2': sum(1 for r in items if r['onR2']), 'cached': True, 'updated_at': str(doc.get('updated_at', ''))}
 
-    doc = await settings_col.find_one({'_id': R2_STATUS_CACHE_ID})
-    if doc and doc.get('items'):
-        items = doc['items']
-        return {'items': items, 'total': len(items), 'onR2': sum(1 for r in items if r['onR2']), 'cached': True, 'updated_at': str(doc.get('updated_at', ''))}
-
-    return {'items': [], 'total': 0, 'onR2': 0, 'cached': True}
+    # Fresh check against R2
+    cfg = await _get_r2_settings()
+    client, bucket, _ = _r2_client_from_cfg(cfg)
+    manifest = await _load_manifest()
+    results = []
+    for entry in manifest:
+        filename = entry['filename']
+        key = f'destinations/{filename}'
+        try:
+            client.head_object(Bucket=bucket, Key=key)
+            results.append({'filename': filename, 'country': entry['country'], 'onR2': True})
+        except Exception:
+            results.append({'filename': filename, 'country': entry['country'], 'onR2': False})
+    await settings_col.update_one(
+        {'_id': R2_STATUS_CACHE_ID},
+        {'$set': {'items': results, 'updated_at': datetime.utcnow()}},
+        upsert=True,
+    )
+    return {'items': results, 'total': len(results), 'onR2': sum(1 for r in results if r['onR2']), 'cached': False}
 
 
 @router.get('/destinations/signed-url')

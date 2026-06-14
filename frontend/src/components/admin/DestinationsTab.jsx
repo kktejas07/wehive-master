@@ -509,7 +509,7 @@ export default function DestinationsTab() {
               <span>Status</span>
               <span>File</span>
             </div>
-            {filtered.map((item, idx) => {
+            {paginated.map((item, idx) => {
               const onR2 = r2Status[item.filename];
               return (
                 <div

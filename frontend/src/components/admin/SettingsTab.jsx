@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Loader2, Save, Eye, EyeOff, Info,
   CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud,
@@ -10,21 +11,41 @@ import { useToast } from '../../hooks/use-toast';
 
 function Tooltip({ text }) {
   const [show, setShow] = useState(false);
+  const triggerRef = useRef(null);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+
+  const updatePosition = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPos({ top: rect.top - 8, left: rect.left + rect.width / 2 });
+    }
+  };
+
+  useEffect(() => {
+    if (show) { updatePosition(); window.addEventListener('scroll', updatePosition, true); }
+    return () => window.removeEventListener('scroll', updatePosition, true);
+  }, [show]);
+
   return (
-    <span className="relative inline-flex ml-1.5">
+    <span className="inline-flex ml-1.5">
       <button
+        ref={triggerRef}
         type="button"
-        onMouseEnter={() => setShow(true)}
+        onMouseEnter={() => { updatePosition(); setShow(true); }}
         onMouseLeave={() => setShow(false)}
         className="text-slate-500 hover:text-slate-300 transition"
       >
         <Info className="w-3.5 h-3.5" />
       </button>
-      {show && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-lg bg-slate-800 border border-white/10 text-[11px] text-slate-300 whitespace-nowrap z-50 shadow-lg pointer-events-none">
+      {show && createPortal(
+        <div
+          className="fixed z-[99999] -translate-x-1/2 px-3 py-2 rounded-lg bg-slate-800 border border-white/10 text-[11px] text-slate-300 whitespace-nowrap shadow-lg pointer-events-none"
+          style={{ top: pos.top, left: pos.left, transform: 'translate(-50%, -100%)' }}
+        >
           {text}
           <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 border-r border-b border-white/10 rotate-45" />
-        </div>
+        </div>,
+        document.body
       )}
     </span>
   );
