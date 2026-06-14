@@ -9,7 +9,7 @@ import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import Pagination from './Pagination';
 
-function PreviewModal({ item, onClose, onRefresh, r2PublicUrl }) {
+function PreviewModal({ item, onClose, onRefresh }) {
   const { toast } = useToast();
   const [regenerating, setRegenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -70,7 +70,7 @@ function PreviewModal({ item, onClose, onRefresh, r2PublicUrl }) {
         </button>
         <div className="aspect-[2/3] bg-black/50">
           <img
-            src={item.onR2 && r2PublicUrl ? `${r2PublicUrl}/destinations/${item.filename}` : `/images/destinations/${item.filename}`}
+            src={item.onR2 ? `${process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in'}/api/admin/destinations/blob/${item.filename}` : `/images/destinations/${item.filename}`}
             alt={item.country}
             className="w-full h-full object-cover"
           />
@@ -136,7 +136,6 @@ export default function DestinationsTab() {
   const [sortBy, setSortBy] = useState('name-asc');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
-  const [r2PublicUrl, setR2PublicUrl] = useState('');
   const [r2Cached, setR2Cached] = useState(false);
   const [page, setPage] = useState(0);
   const pageSize = 25;
@@ -145,23 +144,20 @@ export default function DestinationsTab() {
     setLoading(true);
     try {
       const client = adminClient();
-      const [destRes, r2Res, r2SettingsRes] = await Promise.allSettled([
+      const [destRes, r2Res] = await Promise.all([
         client.get('/destinations'),
         client.get('/destinations/r2-status'),
-        client.get('/settings/r2'),
       ]);
-      const dests = destRes.value?.data?.items || [];
+      const dests = destRes.data?.items || [];
       const statusMap = {};
-      if (r2Res.value?.data?.items) {
-        for (const s of r2Res.value.data.items) {
+      if (r2Res.data?.items) {
+        for (const s of r2Res.data.items) {
           statusMap[s.filename] = s.onR2;
         }
       }
       setItems(dests);
       setR2Status(statusMap);
-      setR2Cached(r2Res.value?.data?.cached || false);
-      const r2Cfg = r2SettingsRes.value?.data?.config || {};
-      setR2PublicUrl((r2Cfg.public_url || '').replace(/\/$/, ''));
+      setR2Cached(r2Res.data?.cached || false);
     } catch (e) {
       toast({ title: 'Failed to load destinations', variant: 'error' });
     } finally {
@@ -266,7 +262,7 @@ export default function DestinationsTab() {
   const localCount = items.length - r2Count;
 
   const getImageUrl = (filename, onR2) => {
-    if (onR2 && r2PublicUrl) return `${r2PublicUrl}/destinations/${filename}`;
+    if (onR2) return `${process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in'}/api/admin/destinations/blob/${filename}`;
     return `/images/destinations/${filename}`;
   };
 
@@ -460,7 +456,7 @@ export default function DestinationsTab() {
       </div>
 
       {preview && (
-        <PreviewModal item={preview} onClose={() => setPreview(null)} onRefresh={fetchAll} r2PublicUrl={r2PublicUrl} />
+        <PreviewModal item={preview} onClose={() => setPreview(null)} onRefresh={fetchAll} />
       )}
 
       <Panel>

@@ -1169,6 +1169,37 @@ async def admin_destination_signed_url(filename: str = Query(...), _=Depends(get
     return {'filename': filename, 'url': url}
 
 
+@router.get('/destinations/blob/{filename:path}')
+async def admin_destination_blob(filename: str):
+    """Serve a destination image from R2 as a blob — hides the R2 public URL."""
+    from fastapi.responses import StreamingResponse
+
+    cfg = await _get_r2_settings()
+    client, bucket, _ = _r2_client_from_cfg(cfg)
+    key = f'destinations/{filename}'
+
+    try:
+        obj = client.get_object(Bucket=bucket, Key=key)
+    except Exception:
+        raise HTTPException(404, f'Image {filename} not found on R2')
+
+    content_type = obj.get('ContentType', 'image/webp')
+
+    async def stream():
+        body = obj['Body']
+        for chunk in iter(lambda: body.read(65536), b''):
+            yield chunk
+
+    return StreamingResponse(
+        stream(),
+        media_type=content_type,
+        headers={
+            'Cache-Control': 'public, max-age=86400',
+            'Content-Disposition': f'inline; filename="{filename}"',
+        },
+    )
+
+
 @router.post('/destinations/upload-image')
 async def admin_upload_destination(
     country: str = Query(..., description='Country name'),
