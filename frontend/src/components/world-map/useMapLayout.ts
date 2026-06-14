@@ -1,7 +1,7 @@
 import { useEffect, useState, type RefObject } from 'react';
 
-const VB_W = 100;
-const VB_H = 50;
+const VB_W = 1024;
+const VB_H = 576;
 
 export interface MapLayout {
   scale: number;
