@@ -1,22 +1,29 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { HUBS, CONNECTIONS } from './worldMapData';
+import { HUBS, CONNECTIONS, NAVY, ACCENT } from './worldMapData';
+import { CONTINENT_PATHS } from './worldMapPaths';
 import { arc } from './worldMapUtils';
 import FlightRoutes from './FlightRoutes';
 import MapMarker from './MapMarker';
+import CountryLabel from './CountryLabel';
 
-function Plane({ from, to, delay, dur = 7 }: { from: { x: number; y: number }; to: { x: number; y: number }; delay: number; dur?: number }) {
+function Plane({ from, to, delay, dur = 8 }: { from: { x: number; y: number }; to: { x: number; y: number }; delay: number; dur?: number }) {
   const { midX, midY } = useMemo(() => arc(from, to), [from.x, from.y, to.x, to.y]);
+  const pathD = `M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`;
+
   return (
     <motion.g
       initial={{ offsetDistance: '0%' }}
       animate={{ offsetDistance: '100%' }}
       transition={{ duration: dur, delay, repeat: Infinity, ease: 'linear' }}
-      style={{ offsetPath: `path('M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}')` }}
+      style={{ offsetPath: `path('${pathD}')` }}
     >
-      <g transform="rotate(-30)">
-        <path d="M0,-2 L4,0 L0,2 Z" fill="#3B82F6" opacity="0.9" />
-        <circle r="0.3" fill="white" opacity="0.8" />
+      {/* Comet tail */}
+      <ellipse cx={-1.2} cy={0} rx={1.8} ry={0.35} fill="white" opacity={0.25} />
+      {/* Airplane silhouette */}
+      <g transform="rotate(-35)">
+        <path d="M-0.5,-1.8 L3.5,0 L-0.5,1.8 L0,0 Z" fill="white" opacity={0.95} />
+        <path d="M0,-0.8 L2.2,0 L0,0.8 Z" fill={ACCENT} opacity={0.5} />
       </g>
     </motion.g>
   );
@@ -40,79 +47,117 @@ export default function WorldMap({ className = '', showConnections = true }: Wor
 
   const planes = useMemo(() => {
     if (!showConnections) return [];
-    return CONNECTIONS.filter((_, i) => i % 4 === 0).slice(0, 3);
+    return CONNECTIONS.filter((_, i) => i % 3 === 0).slice(0, 4);
   }, [showConnections]);
 
   return (
-    <div className={`relative w-full h-full rounded-3xl overflow-hidden ${className}`}>
-      {/* Deep navy background */}
-      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, #0A205A 0%, #061440 100%)' }} />
+    <div className={`relative w-full h-full rounded-3xl overflow-hidden ${className}`} style={{ background: NAVY }}>
+      {/* Centered 2:1 map canvas so SVG + HTML overlays align */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative h-full w-auto max-w-full aspect-[2/1]">
 
-      {/* Grid overlay */}
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <pattern id="g" width="5" height="5" patternUnits="userSpaceOnUse">
-            <circle cx="5" cy="5" r="0.06" fill="white" opacity="0.04" />
-          </pattern>
-        </defs>
-        <rect width="100" height="50" fill="url(#g)" />
-      </svg>
+          {/* Background gradient */}
+          <div
+            className="absolute inset-0 rounded-2xl"
+            style={{ background: `radial-gradient(ellipse 70% 60% at 50% 45%, #0A1F4A 0%, ${NAVY} 100%)` }}
+          />
 
-      {/* SVG world map background */}
-      <div className="absolute inset-0 [&_svg]:w-full [&_svg]:h-full" dangerouslySetInnerHTML={{
-        __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet" class="w-full h-full"><use href="/images/world-map-svg.svg#world-map" stroke="white" stroke-width="0.08" fill="none" opacity="0.15"/></svg>`
-      }} />
+          {/* Main SVG layer */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              {/* Square grid */}
+              <pattern id="wm-grid" width="4" height="4" patternUnits="userSpaceOnUse">
+                <path d="M 4 0 L 0 0 0 4" fill="none" stroke="white" strokeWidth="0.03" opacity="0.06" />
+              </pattern>
 
-      {/* Continent outlines overlay */}
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet" style={{ opacity: 0.12 }}>
-        <use href="/images/world-map-svg.svg#world-map" stroke="white" strokeWidth="0.12" fill="none" />
-      </svg>
+              {/* Dot fill for continents */}
+              <pattern id="wm-dots" width="0.42" height="0.42" patternUnits="userSpaceOnUse">
+                <circle cx="0.21" cy="0.21" r="0.09" fill={ACCENT} opacity="0.65" />
+              </pattern>
 
-      {/* Routes + Planes layer */}
-      {mounted && (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
-          {CONNECTIONS.map(([a, b], i) => (
-            <FlightRoutes key={i} from={pos(a)} to={pos(b)} active={hovered === a || hovered === b} index={i} />
-          ))}
-          {planes.map(([a, b], i) => (
-            <Plane key={i} from={pos(a)} to={pos(b)} delay={i * 2.5} dur={6 + i * 2} />
-          ))}
-        </svg>
-      )}
+              <filter id="hub-glow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="0.6" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
 
-      {/* Markers with portaled tooltips */}
-      <div className="absolute inset-0" style={{ zIndex: 30 }}>
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
+              <filter id="route-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="0.4" />
+              </filter>
+            </defs>
+
+            {/* Grid background */}
+            <rect width="100" height="50" fill="url(#wm-grid)" />
+
+            {/* Dotted continents */}
+            <g fill="url(#wm-dots)">
+              {CONTINENT_PATHS.map((d, i) => (
+                <path key={i} d={d} fillRule="evenodd" />
+              ))}
+            </g>
+
+            {/* Subtle continent edge glow */}
+            <g fill="none" stroke={ACCENT} strokeWidth="0.06" opacity="0.15">
+              {CONTINENT_PATHS.map((d, i) => (
+                <path key={i} d={d} />
+              ))}
+            </g>
+
+            {/* Flight routes + planes */}
+            {mounted && showConnections && (
+              <>
+                {CONNECTIONS.map(([a, b], i) => (
+                  <FlightRoutes key={i} from={pos(a)} to={pos(b)} active={hovered === a || hovered === b} />
+                ))}
+                {planes.map(([a, b], i) => (
+                  <Plane key={i} from={pos(a)} to={pos(b)} delay={i * 2} dur={7 + i * 1.5} />
+                ))}
+              </>
+            )}
+
+            {/* Hub markers */}
+            {mounted && HUBS.map((h) => (
+              <MapMarker key={h.id} hub={h} active={hovered === h.id} onHover={setHovered} />
+            ))}
+          </svg>
+
+          {/* Country label pills (HTML overlay) */}
           {mounted && HUBS.map((h) => (
-            <MapMarker key={h.id} hub={h} active={hovered === h.id} onHover={setHovered} />
+            <CountryLabel key={`label-${h.id}`} hub={h} />
           ))}
-        </svg>
-      </div>
 
-      {/* Legend — bottom-left */}
-      <div className="absolute bottom-3 left-3 flex items-center gap-2 z-40">
-        <div className="flex items-center gap-1.5 bg-[#061440]/85 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_6px_#3B82F6]" />
-          <span className="text-[10px] font-semibold text-slate-300">Active Visa Hub</span>
-        </div>
-        <div className="flex items-center gap-1.5 bg-[#061440]/85 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
-          <svg className="w-8 h-2" viewBox="0 0 24 4"><line x1="0" y1="2" x2="22" y2="2" stroke="#3B82F6" strokeWidth="0.5" strokeDasharray="2 1" opacity="0.5" /></svg>
-          <span className="text-[10px] font-semibold text-slate-300">Flight Route</span>
-        </div>
-        <div className="flex items-center gap-1.5 bg-[#061440]/85 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
-          <svg className="w-3 h-3" viewBox="0 0 12 12"><path d="M0,6 L4,4 L4,8 Z" fill="#3B82F6" opacity="0.8" /></svg>
-          <span className="text-[10px] font-semibold text-slate-300">Live Flight</span>
-        </div>
-      </div>
+          {/* Legend — bottom-left box */}
+          <div className="absolute bottom-3 left-3 z-40 rounded-xl bg-[#061440]/80 backdrop-blur-sm border border-white/10 px-4 py-2.5 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#00D4FF] shadow-[0_0_8px_#00D4FF]" />
+              <span className="text-[10px] font-medium text-slate-300">Active Visa Hub</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-6 h-1.5 shrink-0" viewBox="0 0 24 3">
+                <line x1="0" y1="1.5" x2="24" y2="1.5" stroke="#00D4FF" strokeWidth="1" strokeDasharray="3 2" opacity="0.6" />
+              </svg>
+              <span className="text-[10px] font-medium text-slate-300">Flight Route</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12">
+                <path d="M0,6 L5,3.5 L5,8.5 Z" fill="white" opacity="0.9" />
+              </svg>
+              <span className="text-[10px] font-medium text-slate-300">Live Flight</span>
+            </div>
+          </div>
 
-      {/* Status — top-right */}
-      <div className="absolute top-3 right-3 flex items-center gap-3 z-40">
-        <div className="flex items-center gap-1.5 bg-[#061440]/85 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_6px_#22C55E]" />
-          <span className="text-[10px] font-semibold text-slate-300">Live</span>
-        </div>
-        <div className="flex items-center gap-1.5 bg-[#061440]/85 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/8">
-          <span className="text-[10px] font-semibold text-slate-300 whitespace-nowrap">250+ Destinations</span>
+          {/* Status badges — top-right */}
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-40">
+            <div className="flex items-center gap-1.5 bg-[#061440]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/10">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34D399]" />
+              <span className="text-[10px] font-semibold text-slate-300">Live</span>
+            </div>
+            <div className="flex items-center bg-[#061440]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/10">
+              <span className="text-[10px] font-semibold text-slate-300 whitespace-nowrap">250+ Destinations</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
