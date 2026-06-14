@@ -26,7 +26,7 @@ export default function PromoCodesTab() {
   const [loading, setLoading] = useState(true);
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
-  const pageSize = 20;
+  const pageSize = 25;
   const [showForm, setShowForm] = useState(false);
   const [copied, setCopied] = useState(null);
   const [form, setForm] = useState({

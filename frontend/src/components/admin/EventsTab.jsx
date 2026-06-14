@@ -124,7 +124,7 @@ export default function EventsTab() {
   const [busy, setBusy] = useState(false);
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
-  const pageSize = 24;
+  const pageSize = 25;
 
   const load = useCallback(async () => {
     setItems(null);

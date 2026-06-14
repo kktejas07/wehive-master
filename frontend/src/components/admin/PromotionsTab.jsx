@@ -156,7 +156,7 @@ export default function PromotionsTab() {
   const [busy, setBusy] = useState(false);
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
-  const pageSize = 20;
+  const pageSize = 25;
 
   const headers = { Authorization: `Bearer ${token}` };
 

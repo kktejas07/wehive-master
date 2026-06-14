@@ -322,7 +322,7 @@ export default function CountriesTab() {
   const [q, setQ] = useState('');
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
-  const pageSize = 100;
+  const pageSize = 25;
 
   const load = useCallback(async () => {
     setItems(null);

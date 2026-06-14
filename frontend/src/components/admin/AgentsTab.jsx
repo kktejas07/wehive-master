@@ -189,7 +189,7 @@ export default function AgentsTab() {
   const [q, setQ] = useState('');
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
-  const pageSize = 20;
+  const pageSize = 25;
 
   const load = useCallback(() => {
     const params = new URLSearchParams();

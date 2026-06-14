@@ -31,7 +31,7 @@ export default function AgentApplications() {
   const [statusFilter, setStatusFilter] = useState('');
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
-  const pageSize = 15;
+  const pageSize = 25;
 
   const token = () => localStorage.getItem('agent_token');
 

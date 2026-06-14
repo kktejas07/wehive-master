@@ -24,7 +24,7 @@ export default function AgentStudents() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', country: '', course: '', education_level: '', notes: '' });
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
-  const pageSize = 20;
+  const pageSize = 25;
 
   const token = () => localStorage.getItem('agent_token');
 
