@@ -39,7 +39,7 @@ interface WorldMapProps {
 
 export default function WorldMap({ className = '', showConnections = true }: WorldMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const leaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const { toPixels } = useMapLayout(containerRef);
   const [mounted, setMounted] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
