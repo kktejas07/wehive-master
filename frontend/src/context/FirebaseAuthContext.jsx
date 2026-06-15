@@ -3,7 +3,7 @@ import { auth, sendPhoneOtp, verifyPhoneOtp, getRecaptchaVerifier } from '../lib
 import { firebaseAuth, getFirebaseIdToken } from '../lib/firebase-auth';
 import axios from 'axios';
 
-const API = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001/api'}`;
+const API = `${(process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001').replace(/\/api\/?$/i, '')}/api`;
 const FIREBASE_TOKEN_KEY = 'wehive_firebase_token';
 
 const FirebaseAuthCtx = createContext(null);
