@@ -14,9 +14,6 @@ RESEND_COOLDOWN = int(os.environ.get('OTP_RESEND_COOLDOWN_SECONDS', '60'))
 MAX_ATTEMPTS = 5
 MAX_RESENDS = 5
 
-_login_attempts: dict[str, int] = {}
-
-
 def generate_otp() -> str:
     return ''.join(secrets.choice(string.digits) for _ in range(OTP_LENGTH))
 
