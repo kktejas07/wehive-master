@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { inr, countryFlag, universityLogo } from '../lib/utils';
+import { inr, countryFlag } from '../lib/utils';
 import {
   GraduationCap, Clock, Briefcase, Globe2, Calendar, Award,
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
@@ -325,10 +325,10 @@ export default function StudentVisa() {
                         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-black/5">
             <img
-              src={universityLogo(uni.id, uni.short_name, uni.country)}
+              src={uni.website ? `https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128` : ''}
               alt={uni.short_name}
               className="w-8 h-8 object-contain"
-              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class='text-lg'>${uni.flag || '?'}</span>`; }}
+              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span style='font-size:20px'>${uni.flag || countryFlag(uni.country) || '?'}</span>`; }}
             />
           </div>
                           <div>
@@ -413,10 +413,10 @@ export default function StudentVisa() {
                   <div className="flex items-start gap-3">
                   <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-black/5">
                     <img
-                      src={universityLogo(uni.id, uni.short_name, uni.country)}
+                      src={uni.website ? `https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128` : ''}
                       alt={uni.short_name}
                       className="w-8 h-8 object-contain"
-                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class='text-lg'>${uni.flag || '?'}</span>`; }}
+                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span style='font-size:20px'>${uni.flag || countryFlag(uni.country) || '?'}</span>`; }}
                     />
                   </div>
                     <div className="min-w-0 flex-1">
