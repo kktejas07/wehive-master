@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { inr } from '../lib/utils';
+import { inr, countryFlag } from '../lib/utils';
 import {
   GraduationCap, Clock, Briefcase, Globe2, Calendar, Award,
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
@@ -122,7 +122,7 @@ function CountryCard({ c, onSelect, selected }) {
       }`}
     >
       <div className="relative z-10">
-        <div className="text-3xl mb-2">{c.flag || <Globe className="w-7 h-7 text-[hsl(var(--blue-700))]/40" />}</div>
+        <div className="text-3xl mb-2">{countryFlag(c.code) || <Globe className="w-7 h-7 text-[hsl(var(--blue-700))]/40" />}</div>
         <div className="font-bold text-[hsl(var(--blue-900))]">{c.name}</div>
         {meta.processing_weeks && (
           <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">
@@ -795,7 +795,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
                     to={`/visa/${c.id}`}
                     className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 rounded-full px-4 py-2 text-[13px] font-bold transition"
                   >
-                    {c.flag || <Globe className="w-4 h-4" />} {c.name}
+                    {countryFlag(c.code) || <Globe className="w-4 h-4" />} {c.name}
                   </Link>
                 ))}
                 <span className="inline-flex items-center bg-white/10 rounded-full px-4 py-2 text-[13px] font-bold">

@@ -37,3 +37,11 @@ export const STATUS_COLORS = {
 export function statusColor(s) {
   return STATUS_COLORS[s] || 'bg-slate-100 text-slate-700';
 }
+
+export function countryFlag(code) {
+  if (!code || typeof code !== 'string') return '';
+  const c = code.toUpperCase();
+  if (c.length !== 2) return '';
+  const OFFSET = 0x1F1E6 - 65;
+  return String.fromCodePoint(c.charCodeAt(0) + OFFSET, c.charCodeAt(1) + OFFSET);
+}
