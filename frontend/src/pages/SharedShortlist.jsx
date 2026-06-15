@@ -56,7 +56,7 @@ export default function SharedShortlist() {
               <motion.div key={uni.university_id || i}
                 initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
                 className="flex items-center gap-4 rounded-2xl bg-white/5 border border-white/8 px-5 py-4 hover:bg-white/8 transition">
-                <span className="text-3xl shrink-0">{uni.flag || '🎓'}</span>
+                {uni.flag ? <span className="text-3xl shrink-0">{uni.flag}</span> : <GraduationCap className="w-8 h-8 shrink-0 text-slate-400" />}
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-[15px] text-white truncate">{uni.university_name}</div>
                   <div className="text-[12px] text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">

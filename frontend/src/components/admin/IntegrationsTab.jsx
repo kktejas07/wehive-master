@@ -14,11 +14,11 @@ const CHANNELS = [
 ];
 
 const CATEGORY_ICONS = {
-  visa_apis: '🔐',
-  travel_booking: '✈️',
-  payments_forex: '💳',
-  travel_insurance: '🛡️',
-  appt_slots: '📅',
+  visa_apis: 'Visa APIs',
+  travel_booking: 'Travel',
+  payments_forex: 'Payments',
+  travel_insurance: 'Insurance',
+  appt_slots: 'Slots',
 };
 
 function StatusBadge({ status }) {
@@ -272,7 +272,7 @@ export default function IntegrationsTab() {
         {(categories || []).map(cat => (
           <Panel key={cat.id}>
             <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-white/5">
-              <span className="text-lg">{CATEGORY_ICONS[cat.id] || '🔌'}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{CATEGORY_ICONS[cat.id] || 'API'}</span>
               <div>
                 <div className="text-[13.5px] font-bold text-white">{cat.name}</div>
                 <div className="text-[11.5px] text-slate-400">{cat.description}</div>

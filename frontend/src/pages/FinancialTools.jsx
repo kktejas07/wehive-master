@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, Calculator, TrendingUp, CreditCard, ChevronRight } from 'lucide-react';
+import { DollarSign, Calculator, TrendingUp, CreditCard, ChevronRight, Globe, Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -67,16 +67,16 @@ function GICCalculator() {
 // ── Budget Planner ────────────────────────────────────────────────────────────
 
 const CITY_COSTS = [
-  { city: 'Toronto', country: 'Canada', flag: '🇨🇦', rent: 1600, food: 400, transport: 150, misc: 200 },
-  { city: 'Vancouver', country: 'Canada', flag: '🇨🇦', rent: 1800, food: 420, transport: 100, misc: 220 },
-  { city: 'London', country: 'UK', flag: '🇬🇧', rent: 1400, food: 350, transport: 160, misc: 180 },
-  { city: 'Manchester', country: 'UK', flag: '🇬🇧', rent: 900, food: 300, transport: 80, misc: 150 },
-  { city: 'Sydney', country: 'Australia', flag: '🇦🇺', rent: 1500, food: 400, transport: 180, misc: 200 },
-  { city: 'Melbourne', country: 'Australia', flag: '🇦🇺', rent: 1300, food: 380, transport: 160, misc: 180 },
-  { city: 'Berlin', country: 'Germany', flag: '🇩🇪', rent: 900, food: 300, transport: 100, misc: 150 },
-  { city: 'Munich', country: 'Germany', flag: '🇩🇪', rent: 1200, food: 320, transport: 100, misc: 160 },
-  { city: 'Dublin', country: 'Ireland', flag: '🇮🇪', rent: 1500, food: 380, transport: 130, misc: 200 },
-  { city: 'Amsterdam', country: 'Netherlands', flag: '🇳🇱', rent: 1300, food: 350, transport: 110, misc: 170 },
+  { city: 'Toronto', country: 'Canada', flag: '', rent: 1600, food: 400, transport: 150, misc: 200 },
+  { city: 'Vancouver', country: 'Canada', flag: '', rent: 1800, food: 420, transport: 100, misc: 220 },
+  { city: 'London', country: 'UK', flag: '', rent: 1400, food: 350, transport: 160, misc: 180 },
+  { city: 'Manchester', country: 'UK', flag: '', rent: 900, food: 300, transport: 80, misc: 150 },
+  { city: 'Sydney', country: 'Australia', flag: '', rent: 1500, food: 400, transport: 180, misc: 200 },
+  { city: 'Melbourne', country: 'Australia', flag: '', rent: 1300, food: 380, transport: 160, misc: 180 },
+  { city: 'Berlin', country: 'Germany', flag: '', rent: 900, food: 300, transport: 100, misc: 150 },
+  { city: 'Munich', country: 'Germany', flag: '', rent: 1200, food: 320, transport: 100, misc: 160 },
+  { city: 'Dublin', country: 'Ireland', flag: '', rent: 1500, food: 380, transport: 130, misc: 200 },
+  { city: 'Amsterdam', country: 'Netherlands', flag: '', rent: 1300, food: 350, transport: 110, misc: 170 },
 ];
 
 function BudgetPlanner() {
@@ -99,7 +99,7 @@ function BudgetPlanner() {
         {CITY_COSTS.map(c => (
           <button key={c.city} onClick={() => toggle(c.city)}
             className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-bold transition ${selected.includes(c.city) ? 'bg-[hsl(var(--accent))] text-white' : 'bg-white/5 text-slate-300 hover:bg-white/10'}`}>
-            {c.flag} {c.city}
+                  {c.flag || <Globe className="w-4 h-4 inline" />} {c.city}
           </button>
         ))}
       </div>
@@ -112,7 +112,7 @@ function BudgetPlanner() {
                 <th className="text-left text-slate-500 font-bold text-[10.5px] uppercase tracking-[0.12em] py-2 pr-4">Expense</th>
                 {comparison.map(c => (
                   <th key={c.city} className="text-right text-white font-bold py-2 px-3">
-                    {c.flag} {c.city}
+            {c.flag || <Globe className="w-4 h-4 inline" />} {c.city}
                   </th>
                 ))}
               </tr>
@@ -194,7 +194,7 @@ function LoanEligibility() {
             <p className="mt-2 text-[12.5px] text-slate-400 leading-relaxed">{l.notes}</p>
             {admission && (
               <div className="mt-2 text-[11.5px] font-bold text-emerald-400 flex items-center gap-1">
-                <span>✓</span> You may be eligible — contact the bank with your admission letter
+                <Check className="w-3.5 h-3.5" /> You may be eligible — contact the bank with your admission letter
               </div>
             )}
           </div>

@@ -19,8 +19,9 @@ import WorldMap from '../components/world-map/WorldMap';
 import LiveTickerMarquee from '../components/LiveTickerMarquee';
 import PromoCards from '../components/PromoCards';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
+import SchengenCarousel from '../components/SchengenCarousel';
 import { motion } from 'framer-motion';
-import { Globe, ArrowRight, Sparkles } from 'lucide-react';
+import { Globe, ArrowRight, Sparkles, Plane, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ContentCard, ContentCardGrid } from '../components/ui/ContentCard';
 
@@ -63,21 +64,21 @@ function GlobalReachSection() {
           className="mt-6 flex flex-wrap items-center justify-center gap-4"
         >
           <div className="flex items-center gap-2 bg-[hsl(var(--soft-bg))] rounded-full px-4 py-2">
-            <span className="text-2xl">🛫</span>
+            <Plane className="w-6 h-6 text-[hsl(var(--blue-700))]" />
             <div>
               <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">500+ Daily Bookings</div>
               <div className="text-[10px] text-[hsl(var(--blue-900))]/60">Across all routes</div>
             </div>
           </div>
           <div className="flex items-center gap-2 bg-[hsl(var(--soft-bg))] rounded-full px-4 py-2">
-            <span className="text-2xl">🌍</span>
+            <Globe className="w-6 h-6 text-[hsl(var(--blue-700))]" />
             <div>
               <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">250+ Countries</div>
               <div className="text-[10px] text-[hsl(var(--blue-900))]/60">Visa destinations</div>
             </div>
           </div>
           <div className="flex items-center gap-2 bg-[hsl(var(--soft-bg))] rounded-full px-4 py-2">
-            <span className="text-2xl">⚡</span>
+            <Zap className="w-6 h-6 text-[hsl(var(--blue-700))]" />
             <div>
               <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">Real-time Tracking</div>
               <div className="text-[10px] text-[hsl(var(--blue-900))]/60">Application status</div>
@@ -186,6 +187,7 @@ export default function Home() {
       <Navbar />
       <Hero filters={filters} onFilters={setFilters} />
       <LiveTickerMarquee />
+      <SchengenCarousel />
       <CountryGrid filters={filters} />
       <GlobalReachSection />
       <OnTimeGuarantee />

@@ -16,32 +16,32 @@ const CATEGORY_MAP = {
 
 const FALLBACK_COUNTRIES = {
   holiday: [
-    { name: 'Maldives', flag: '🇲🇻', price: '₹5,999' },
-    { name: 'Bali', flag: '🇮🇩', price: '₹3,999' },
-    { name: 'Dubai', flag: '🇦🇪', price: '₹4,999' },
-    { name: 'Seychelles', flag: '🇸🇨', price: '₹8,999' },
-    { name: 'Mauritius', flag: '🇲🇺', price: '₹7,499' },
+    { name: 'Maldives', price: '₹5,999' },
+    { name: 'Bali', price: '₹3,999' },
+    { name: 'Dubai', price: '₹4,999' },
+    { name: 'Seychelles', price: '₹8,999' },
+    { name: 'Mauritius', price: '₹7,499' },
   ],
   business: [
-    { name: 'USA', flag: '🇺🇸', price: '₹15,999' },
-    { name: 'UK', flag: '🇬🇧', price: '₹12,499' },
-    { name: 'UAE', flag: '🇦🇪', price: '₹6,999' },
-    { name: 'Singapore', flag: '🇸🇬', price: '₹4,999' },
-    { name: 'Germany', flag: '🇩🇪', price: '₹11,999' },
+    { name: 'USA', price: '₹15,999' },
+    { name: 'UK', price: '₹12,499' },
+    { name: 'UAE', price: '₹6,999' },
+    { name: 'Singapore', price: '₹4,999' },
+    { name: 'Germany', price: '₹11,999' },
   ],
   student: [
-    { name: 'USA', flag: '🇺🇸', price: '₹12,999' },
-    { name: 'Canada', flag: '🇨🇦', price: '₹10,999' },
-    { name: 'UK', flag: '🇬🇧', price: '₹11,499' },
-    { name: 'Australia', flag: '🇦🇺', price: '₹13,999' },
-    { name: 'Germany', flag: '🇩🇪', price: '₹7,999' },
+    { name: 'USA', price: '₹12,999' },
+    { name: 'Canada', price: '₹10,999' },
+    { name: 'UK', price: '₹11,499' },
+    { name: 'Australia', price: '₹13,999' },
+    { name: 'Germany', price: '₹7,999' },
   ],
   tourist: [
-    { name: 'Japan', flag: '🇯🇵', price: '₹6,999' },
-    { name: 'Thailand', flag: '🇹🇭', price: '₹4,999' },
-    { name: 'Singapore', flag: '🇸🇬', price: '₹4,999' },
-    { name: 'UAE', flag: '🇦🇪', price: '₹5,999' },
-    { name: 'Spain', flag: '🇪🇸', price: '₹9,999' },
+    { name: 'Japan', price: '₹6,999' },
+    { name: 'Thailand', price: '₹4,999' },
+    { name: 'Singapore', price: '₹4,999' },
+    { name: 'UAE', price: '₹5,999' },
+    { name: 'Spain', price: '₹9,999' },
   ],
 };
 
@@ -58,11 +58,11 @@ const FEATURED_OFFERS_FALLBACK = [
     badge: '40% OFF',
     badgeIcon: Percent,
     countries: [
-      { name: 'Greece', flag: '🇬🇷', price: '₹8,999' },
-      { name: 'Spain', flag: '🇪🇸', price: '₹9,499' },
-      { name: 'Italy', flag: '🇮🇹', price: '₹9,999' },
-      { name: 'Portugal', flag: '🇵🇹', price: '₹7,999' },
-      { name: 'Thailand', flag: '🇹🇭', price: '₹4,999' },
+      { name: 'Greece', price: '₹8,999' },
+      { name: 'Spain', price: '₹9,499' },
+      { name: 'Italy', price: '₹9,999' },
+      { name: 'Portugal', price: '₹7,999' },
+      { name: 'Thailand', price: '₹4,999' },
     ],
     validUntil: '2026-08-31',
     daysLeft: 82,
@@ -92,11 +92,11 @@ const FEATURED_OFFERS_FALLBACK = [
     badge: 'Priority',
     badgeIcon: Zap,
     countries: [
-      { name: 'USA', flag: '🇺🇸', price: '₹15,999' },
-      { name: 'UK', flag: '🇬🇧', price: '₹12,499' },
-      { name: 'UAE', flag: '🇦🇪', price: '₹6,999' },
-      { name: 'Singapore', flag: '🇸🇬', price: '₹4,999' },
-      { name: 'Germany', flag: '🇩🇪', price: '₹11,999' },
+      { name: 'USA', price: '₹15,999' },
+      { name: 'UK', price: '₹12,499' },
+      { name: 'UAE', price: '₹6,999' },
+      { name: 'Singapore', price: '₹4,999' },
+      { name: 'Germany', price: '₹11,999' },
     ],
     validUntil: 'Ongoing',
     daysLeft: null,
@@ -126,11 +126,11 @@ const FEATURED_OFFERS_FALLBACK = [
     badge: 'Scholarship',
     badgeIcon: Star,
     countries: [
-      { name: 'USA', flag: '🇺🇸', price: '₹12,999' },
-      { name: 'Canada', flag: '🇨🇦', price: '₹10,999' },
-      { name: 'UK', flag: '🇬🇧', price: '₹11,499' },
-      { name: 'Australia', flag: '🇦🇺', price: '₹13,999' },
-      { name: 'Germany', flag: '🇩🇪', price: '₹7,999' },
+      { name: 'USA', price: '₹12,999' },
+      { name: 'Canada', price: '₹10,999' },
+      { name: 'UK', price: '₹11,499' },
+      { name: 'Australia', price: '₹13,999' },
+      { name: 'Germany', price: '₹7,999' },
     ],
     validUntil: '2026-09-30',
     daysLeft: 112,
@@ -160,11 +160,11 @@ const FEATURED_OFFERS_FALLBACK = [
     badge: 'Popular',
     badgeIcon: Star,
     countries: [
-      { name: 'Maldives', flag: '🇲🇻', price: '₹5,999' },
-      { name: 'Bali', flag: '🇮🇩', price: '₹3,999' },
-      { name: 'Dubai', flag: '🇦🇪', price: '₹4,999' },
-      { name: 'Seychelles', flag: '🇸🇨', price: '₹8,999' },
-      { name: 'Mauritius', flag: '🇲🇺', price: '₹7,499' },
+      { name: 'Maldives', price: '₹5,999' },
+      { name: 'Bali', price: '₹3,999' },
+      { name: 'Dubai', price: '₹4,999' },
+      { name: 'Seychelles', price: '₹8,999' },
+      { name: 'Mauritius', price: '₹7,499' },
     ],
     validUntil: '2026-12-31',
     daysLeft: 204,
@@ -245,7 +245,7 @@ function CountryPreview({ countries, accent }) {
           <div className={`flex items-center gap-1.5 bg-white/80 rounded-full px-2.5 py-1.5 border border-black/5 ${hoveredIndex === i ? 'ring-2 ring-offset-1' : ''}`}
             style={{ ringColor: accent.includes('amber') ? '#F59E0B' : accent.includes('blue') ? '#3B82F6' : accent.includes('emerald') ? '#10B981' : '#EC4899' }}
           >
-            <span className="text-base">{country.flag}</span>
+            <span className="w-4 h-4 rounded-full bg-[hsl(var(--blue-700))]/20 flex items-center justify-center text-[8px] font-bold text-[hsl(var(--blue-900))]/60">{country.name[0]}</span>
             <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]">{country.name}</span>
           </div>
 
@@ -439,8 +439,8 @@ function OfferDetailPanel({ offer, onClose }) {
             <h3 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))]">{offer.title}</h3>
           </div>
         </div>
-        <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:bg-white transition-colors">
-          ✕
+        <button onClick={onClose} aria-label="Close offer details" className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:bg-white transition-colors">
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
 
@@ -484,7 +484,7 @@ function OfferDetailPanel({ offer, onClose }) {
         <div className="flex flex-wrap gap-3">
           {offer.countries.map((country) => (
             <div key={country.name} className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r ${offer.gradient} text-white`}>
-              <span className="text-lg">{country.flag}</span>
+              <div className="text-lg font-bold opacity-80">{country.name[0]}</div>
               <div>
                 <div className="text-[12px] font-bold">{country.name}</div>
                 <div className="text-[10px] opacity-80">From {country.price}</div>

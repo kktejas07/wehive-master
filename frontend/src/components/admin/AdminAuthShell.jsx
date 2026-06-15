@@ -89,7 +89,7 @@ export function PasswordStrength({ password }) {
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-slate-500">
         {checks.map((c) => (
           <span key={c.id} className={c.ok ? 'text-emerald-300' : ''}>
-            {c.ok ? '✓' : '·'} {c.label}
+            {c.ok ? 'OK' : '·'} {c.label}
           </span>
         ))}
       </div>

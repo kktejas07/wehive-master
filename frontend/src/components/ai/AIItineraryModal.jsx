@@ -227,7 +227,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                     <div className="flex flex-wrap gap-2">
                       {itinerary.highlights.map((h, i) => (
                         <span key={i} className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--accent))]/10 text-[11px] font-bold text-[hsl(var(--accent))] px-3 py-1">
-                          ✦ {h}
+                          <Sparkles className="w-3 h-3" /> {h}
                         </span>
                       ))}
                     </div>

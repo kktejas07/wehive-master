@@ -1,22 +1,32 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Bell, Check, CheckCheck, X, Loader2 } from 'lucide-react';
+import { Bell, Check, CheckCheck, X, Loader2, CreditCard, CheckCircle, FileText, Bot } from 'lucide-react';
 import { API, useAuth } from '../context/AuthContext';
 
 const ICONS = {
-  'application': '📋',
-  'payment': '💳',
-  'status': '📬',
-  'document': '📄',
-  'ai': '🤖',
-  'system': '🔔',
+  'application': 'file-text',
+  'payment': 'credit-card',
+  'status': 'check-circle',
+  'document': 'file-text',
+  'ai': 'bot',
+  'system': 'bell',
+};
+
+const ICON_MAP = {
+  'file-text': FileText,
+  'credit-card': CreditCard,
+  'check-circle': CheckCircle,
+  'bot': Bot,
+  'bell': Bell,
 };
 
 function NotifItem({ n, onMarkRead, onDelete }) {
+  const iconName = ICONS[n.type] || 'bell';
+  const IconComponent = ICON_MAP[iconName] || Bell;
   return (
     <div className={`flex items-start gap-3 p-4 border-b border-black/5 last:border-0 ${n.read ? 'opacity-60' : ''}`}>
-      <span className="text-xl shrink-0 mt-0.5">{ICONS[n.type] || '🔔'}</span>
+      <span className="shrink-0 mt-0.5"><IconComponent className="w-5 h-5 text-[hsl(var(--blue-900))]/60" /></span>
       <div className="flex-1 min-w-0">
         <div className="text-[13.5px] font-bold text-[hsl(var(--blue-900))]">{n.title}</div>
         {n.body && <div className="text-[12.5px] text-[hsl(var(--blue-900))]/55 mt-0.5 line-clamp-2">{n.body}</div>}

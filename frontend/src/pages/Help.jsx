@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Loader2, Send, Search, ChevronDown, Plus, Minus, MessageCircle } from 'lucide-react';
+import { Loader2, Send, Search, ChevronDown, Plus, Minus, MessageCircle, Rocket, FileText, CreditCard, ClipboardList, RefreshCw, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -8,12 +8,12 @@ import { API, useAuth } from '../context/AuthContext';
 import { FAQS } from '../data/mock';
 
 const CATEGORIES = [
-  { id: 'getting-started', label: 'Getting started', icon: '🚀' },
-  { id: 'documents', label: 'Documents & uploads', icon: '📄' },
-  { id: 'payments', label: 'Payments & pricing', icon: '💳' },
-  { id: 'application', label: 'Application status', icon: '📋' },
-  { id: 'refunds', label: 'Refunds & guarantees', icon: '🔄' },
-  { id: 'technical', label: 'Account & tech', icon: '🔐' },
+  { id: 'getting-started', label: 'Getting started', icon: Rocket },
+  { id: 'documents', label: 'Documents & uploads', icon: FileText },
+  { id: 'payments', label: 'Payments & pricing', icon: CreditCard },
+  { id: 'application', label: 'Application status', icon: ClipboardList },
+  { id: 'refunds', label: 'Refunds & guarantees', icon: RefreshCw },
+  { id: 'technical', label: 'Account & tech', icon: Lock },
 ];
 
 const CATEGORY_FAQS = {
@@ -196,7 +196,7 @@ export default function Help() {
                       : 'bg-white border border-black/10 text-[hsl(var(--blue-900))]/70 hover:border-[hsl(var(--blue-700))]/40'
                   }`}
                 >
-                  <span>{cat.icon}</span> {cat.label}
+                  <cat.icon className="w-4 h-4" /> {cat.label}
                 </button>
               ))}
             </div>

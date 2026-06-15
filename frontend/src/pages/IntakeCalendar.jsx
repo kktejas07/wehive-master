@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 const INTAKES = [
   {
     country: 'Canada',
-    flag: '🇨🇦',
+    flag: '',
     color: '#ef4444',
     intakes: [
       { name: 'Winter / January', months: 'Jan–Apr', apply_start: 'Sep', apply_end: 'Nov', popular: false },
@@ -18,7 +18,7 @@ const INTAKES = [
   },
   {
     country: 'United Kingdom',
-    flag: '🇬🇧',
+    flag: '',
     color: '#3b82f6',
     intakes: [
       { name: 'January', months: 'Jan–Jun', apply_start: 'Aug', apply_end: 'Nov', popular: false },
@@ -28,7 +28,7 @@ const INTAKES = [
   },
   {
     country: 'Australia',
-    flag: '🇦🇺',
+    flag: '',
     color: '#f59e0b',
     intakes: [
       { name: 'Semester 1 / February', months: 'Feb–Jun', apply_start: 'Sep', apply_end: 'Nov', popular: true },
@@ -38,7 +38,7 @@ const INTAKES = [
   },
   {
     country: 'Germany',
-    flag: '🇩🇪',
+    flag: '',
     color: '#f59e0b',
     intakes: [
       { name: 'Winter Semester / October', months: 'Oct–Mar', apply_start: 'Apr', apply_end: 'Jul', popular: true },
@@ -48,7 +48,7 @@ const INTAKES = [
   },
   {
     country: 'USA',
-    flag: '🇺🇸',
+    flag: '',
     color: '#6366f1',
     intakes: [
       { name: 'Spring / January', months: 'Jan–May', apply_start: 'Aug', apply_end: 'Nov', popular: false },
@@ -58,7 +58,7 @@ const INTAKES = [
   },
   {
     country: 'Ireland',
-    flag: '🇮🇪',
+    flag: '',
     color: '#22c55e',
     intakes: [
       { name: 'September / October', months: 'Sep–Jun', apply_start: 'Feb', apply_end: 'Jul', popular: true },
@@ -67,7 +67,7 @@ const INTAKES = [
   },
   {
     country: 'New Zealand',
-    flag: '🇳🇿',
+    flag: '',
     color: '#14b8a6',
     intakes: [
       { name: 'Semester 1 / February', months: 'Feb–Jun', apply_start: 'Oct', apply_end: 'Dec', popular: true },
@@ -77,7 +77,7 @@ const INTAKES = [
   },
   {
     country: 'France',
-    flag: '🇫🇷',
+    flag: '',
     color: '#ec4899',
     intakes: [
       { name: 'September / October', months: 'Sep–Jun', apply_start: 'Jan', apply_end: 'Jun', popular: true },
@@ -86,7 +86,7 @@ const INTAKES = [
   },
   {
     country: 'Netherlands',
-    flag: '🇳🇱',
+    flag: '',
     color: '#f97316',
     intakes: [
       { name: 'September', months: 'Sep–Aug', apply_start: 'Oct (prev yr)', apply_end: 'Apr', popular: true },
@@ -131,7 +131,7 @@ function CountryCard({ data }) {
       className="rounded-2xl bg-white/5 border border-white/8 overflow-hidden">
       <button onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/5 transition text-left">
-        <span className="text-3xl shrink-0">{data.flag}</span>
+        <span className="text-3xl shrink-0">{data.flag || <Globe className="w-7 h-7 text-slate-400" />}</span>
         <div className="flex-1">
           <div className="font-bold text-[16px] text-white">{data.country}</div>
           <div className="text-[12px] text-slate-400 mt-0.5">{data.intakes.length} intake{data.intakes.length > 1 ? 's' : ''} · {data.intakes.filter(i => i.popular).map(i => i.name).join(', ') || 'see details'}</div>
