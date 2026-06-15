@@ -323,12 +323,12 @@ export default function StudentVisa() {
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center overflow-hidden">
+          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-black/5">
             <img
-              src={universityLogo(uni.id, uni.short_name)}
+              src={universityLogo(uni.id, uni.short_name, uni.country)}
               alt={uni.short_name}
-              className="w-full h-full object-contain p-1"
-              onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`; }}
+              className="w-8 h-8 object-contain"
+              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class='text-lg'>${uni.flag || '?'}</span>`; }}
             />
           </div>
                           <div>
@@ -411,12 +411,12 @@ export default function StudentVisa() {
                   className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center overflow-hidden shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-black/5">
                     <img
-                      src={universityLogo(uni.id, uni.short_name)}
+                      src={universityLogo(uni.id, uni.short_name, uni.country)}
                       alt={uni.short_name}
-                      className="w-full h-full object-contain p-1"
-                      onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`; }}
+                      className="w-8 h-8 object-contain"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class='text-lg'>${uni.flag || '?'}</span>`; }}
                     />
                   </div>
                     <div className="min-w-0 flex-1">
@@ -467,35 +467,51 @@ export default function StudentVisa() {
               const totalItems = universities.filter(u => u.country === selected).length;
               const totalPages = Math.ceil(totalItems / UNI_PER_PAGE);
               if (totalPages <= 1) return null;
-              const pages = [];
-              for (let i = 1; i <= totalPages; i++) pages.push(i);
+              
+              const getPages = () => {
+                const pgs = [];
+                const maxShow = 5;
+                let start = Math.max(1, uniPage - 2);
+                let end = Math.min(totalPages, start + maxShow - 1);
+                if (end - start < maxShow - 1) start = Math.max(1, end - maxShow + 1);
+                
+                if (start > 1) { pgs.push(1); if (start > 2) pgs.push('...'); }
+                for (let i = start; i <= end; i++) pgs.push(i);
+                if (end < totalPages) { if (end < totalPages - 1) pgs.push('...'); pgs.push(totalPages); }
+                return pgs;
+              };
+
               return (
-                <div className="mt-6 flex items-center justify-center gap-2">
+                <div className="mt-6 flex items-center justify-center gap-1.5">
                   <Button
                     variant="outline"
                     disabled={uniPage === 1}
                     onClick={() => setUniPage(p => Math.max(1, p - 1))}
-                    className="rounded-full h-10 w-10 p-0"
+                    className="rounded-full h-9 px-3 text-[12px] font-bold"
                   >
-                    <ChevronRight className="w-4 h-4 rotate-180" />
+                    Prev
                   </Button>
-                  {pages.map(p => (
-                    <Button
-                      key={p}
-                      variant={p === uniPage ? 'default' : 'outline'}
-                      onClick={() => setUniPage(p)}
-                      className={`rounded-full h-10 w-10 p-0 text-[13px] font-bold ${p === uniPage ? 'bg-[hsl(var(--blue-700))] text-white' : ''}`}
-                    >
-                      {p}
-                    </Button>
-                  ))}
+                  {getPages().map((p, i) =>
+                    p === '...' ? (
+                      <span key={`dots-${i}`} className="w-9 text-center text-[13px] text-[hsl(var(--blue-900))]/40 font-bold">...</span>
+                    ) : (
+                      <Button
+                        key={p}
+                        variant={p === uniPage ? 'default' : 'outline'}
+                        onClick={() => setUniPage(p)}
+                        className={`rounded-full h-9 w-9 p-0 text-[13px] font-bold ${p === uniPage ? 'bg-[hsl(var(--blue-700))] text-white' : ''}`}
+                      >
+                        {p}
+                      </Button>
+                    )
+                  )}
                   <Button
                     variant="outline"
                     disabled={uniPage === totalPages}
                     onClick={() => setUniPage(p => Math.min(totalPages, p + 1))}
-                    className="rounded-full h-10 w-10 p-0"
+                    className="rounded-full h-9 px-3 text-[12px] font-bold"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    Next
                   </Button>
                 </div>
               );
