@@ -37,15 +37,14 @@ API_URL = "https://api.together.xyz/v1/images/generations"
 MODEL = "black-forest-labs/FLUX.1-schnell"
 
 STYLE_SUFFIX = (
-    "Premium travel destination artwork in modern flat-vector style blended with semi-realistic digital painting. "
-    "Golden hour warm sunlight, deep blue sky with soft white clouds, vibrant yet elegant color palette. "
-    "Clean composition with the main landmark centered, plenty of breathing room around the subject. "
-    "Highly detailed architecture and landscape elements. "
+    "Premium photorealistic travel photograph, professional DSLR quality. "
+    "Golden hour warm sunlight, crystal clear details, vibrant natural colors, perfect composition. "
+    "Ultra-detailed architecture and landscape elements, soft natural lighting. "
     "STRICT RULES: Absolutely NO text, NO letters, NO words, NO names, NO numbers, NO typography of any kind anywhere in the image. "
-    "NO flags, NO logos, NO watermarks, NO borders, NO frames, NO people crowds. "
+    "NO flags, NO logos, NO watermarks, NO borders, NO frames, NO people, NO crowds. "
     "The image must be completely free of any written language or characters. "
-    "Portrait vertical orientation suitable for a luxury travel card. "
-    "Award-winning travel illustration quality."
+    "Portrait vertical 2:3 orientation suitable for a luxury travel card. "
+    "National Geographic award-winning travel photography quality."
 )
 
 
