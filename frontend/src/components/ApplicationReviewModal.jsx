@@ -34,7 +34,7 @@ export default function ApplicationReviewModal({
   visaType,
   applicants,
 }) {
-  const { user, token, isAuthed, openAuth } = useAuth();
+  const { user, token, isAuthed } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -77,7 +77,7 @@ export default function ApplicationReviewModal({
   const handleConfirm = async () => {
     if (!isAuthed) {
       onClose?.();
-      openAuth('signup');
+      navigate('/signup');
       return;
     }
     if (!validate()) return;

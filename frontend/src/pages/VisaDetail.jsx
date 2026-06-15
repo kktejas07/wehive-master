@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, FileText, ChevronRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
@@ -30,7 +30,8 @@ import CategorySuggestions from '../components/visa/CategorySuggestions';
 
 export default function VisaDetail() {
   const { id } = useParams();
-  const { isAuthed, openAuth } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthed } = useAuth();
   const [country, setCountry] = useState(null);
   const [type, setType] = useState('Tourist');
   const [applicants, setApplicants] = useState(1);
@@ -69,7 +70,7 @@ export default function VisaDetail() {
 
   const onApply = () => {
     if (!isAuthed) {
-      openAuth('signup');
+      navigate('/signup');
       return;
     }
     setReviewOpen(true);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
@@ -167,7 +167,8 @@ function IntakeCard({ intake, index }) {
 }
 
 export default function StudentVisa() {
-  const { token, isAuthed, openAuth } = useAuth();
+  const navigate = useNavigate();
+  const { token, isAuthed } = useAuth();
   const { toast } = useToast();
   const [countries, setCountries] = useState([]);
   const [selected, setSelected] = useState('us');
@@ -217,7 +218,7 @@ export default function StudentVisa() {
             Apply for a student visa to the USA, UK, Germany, Italy, Spain and 7 more — with country-specific document review, slot priority, and an on-time guarantee.
           </p>
           <div className="flex flex-wrap gap-4 mt-8">
-            <Button onClick={() => isAuthed ? null : openAuth('signup')} className="btn-accent h-12 px-6">
+            <Button onClick={() => isAuthed ? null : navigate('/signup')} className="btn-accent h-12 px-6">
               Start my student visa <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button variant="outline" className="h-12 px-6 border-white/30 text-white hover:bg-white/10">
