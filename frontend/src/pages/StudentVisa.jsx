@@ -463,6 +463,7 @@ export default function StudentVisa() {
                 </Button>
               </div>
             )}
+            </>
           )}
 
           <div className="mt-8 flex items-center justify-center">
