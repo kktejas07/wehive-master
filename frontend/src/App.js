@@ -46,6 +46,7 @@ const IntakeCalendar = lazy(() => import('./pages/IntakeCalendar'));
 const SharedShortlist = lazy(() => import('./pages/SharedShortlist'));
 const FinancialTools = lazy(() => import('./pages/FinancialTools'));
 const AgentTraining = lazy(() => import('./pages/AgentTraining'));
+const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -96,6 +97,7 @@ function AnimatedRoutes() {
           <Route path="/shared/:token" element={<PageTransition><SharedShortlist /></PageTransition>} />
           <Route path="/financial-tools" element={<PageTransition><FinancialTools /></PageTransition>} />
           <Route path="/agent-training" element={<PageTransition><AgentTraining /></PageTransition>} />
+          <Route path="/emergency" element={<PageTransition><EmergencyCare /></PageTransition>} />
           <Route path="/visa-scheduling" element={<PageTransition><VisaScheduling /></PageTransition>} />
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
