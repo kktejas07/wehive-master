@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { inr, countryFlag } from '../lib/utils';
+import { inr, countryFlag, universityLogo } from '../lib/utils';
 import {
   GraduationCap, Clock, Briefcase, Globe2, Calendar, Award,
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
@@ -323,12 +323,12 @@ export default function StudentVisa() {
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-2xl overflow-hidden">
+          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center overflow-hidden">
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=random&color=fff&size=96&bold=true&format=png`}
+              src={universityLogo(uni.id, uni.short_name)}
               alt={uni.short_name}
-              className="w-full h-full object-cover"
-              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.textContent = uni.short_name?.[0] || '?'; }}
+              className="w-full h-full object-contain p-1"
+              onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`; }}
             />
           </div>
                           <div>
@@ -411,12 +411,12 @@ export default function StudentVisa() {
                   className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shrink-0 overflow-hidden">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center overflow-hidden shrink-0">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=random&color=fff&size=96&bold=true&format=png`}
+                      src={universityLogo(uni.id, uni.short_name)}
                       alt={uni.short_name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.textContent = uni.short_name?.[0] || '?'; }}
+                      className="w-full h-full object-contain p-1"
+                      onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`; }}
                     />
                   </div>
                     <div className="min-w-0 flex-1">
