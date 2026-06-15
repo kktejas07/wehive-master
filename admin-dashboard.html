@@ -899,6 +899,21 @@ function initMap() {
 // ─── DRAWER ───────────────────────────────────────────────────
 let currentDrawerApp = null;
 
+function handleAddNote() {
+  const input = document.getElementById('noteInput');
+  const text = input?.value?.trim();
+  if (!text) return;
+  DATA.notes.unshift({ initials: 'RA', text, time: 'just now' });
+  input.value = '';
+  const list = document.getElementById('noteList');
+  list.innerHTML = DATA.notes.map(n => `
+    <div class="note-item">
+      <div class="note-av">${n.initials}</div>
+      <div class="note-text">${n.text}<small>${n.time}</small></div>
+    </div>
+  `).join('');
+}
+
 function openDrawer(app) {
   currentDrawerApp = app;
   document.getElementById('drawerTitle').textContent = app.visa;
@@ -950,6 +965,8 @@ function openDrawer(app) {
       </div>
     `).join('')}</div>
   `;
+
+  document.getElementById('addNoteBtn')?.addEventListener('click', handleAddNote);
 
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('drawer').classList.add('open');

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Search, ArrowRight, Loader2 } from 'lucide-react';
+import { Search, ArrowRight, Loader2, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { API } from '../context/AuthContext';
@@ -120,7 +120,7 @@ export default function HeroSearchLive({ query, setQuery }) {
                   i === active ? 'bg-[hsl(var(--soft-bg))]' : ''
                 }`}
               >
-                <span className="text-xl leading-none">{c.flag || ''}</span>
+                <span className="text-xl leading-none">{c.flag || <Globe className="w-5 h-5 text-[hsl(var(--blue-900))]/40" />}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">
                     {c.name}

@@ -6,16 +6,16 @@ import { API } from '../context/AuthContext';
 import axios from 'axios';
 
 const SAMPLE_UNIVERSITIES = [
-  { _id: 's1', id: 'mit', name: 'Massachusetts Institute of Technology', short_name: 'MIT', country: 'us', rank: 1, tuition_usd: 55790 },
-  { _id: 's2', id: 'stanford', name: 'Stanford University', short_name: 'Stanford', country: 'us', rank: 3, tuition_usd: 56169 },
-  { _id: 's3', id: 'harvard', name: 'Harvard University', short_name: 'Harvard', country: 'us', rank: 2, tuition_usd: 55807 },
-  { _id: 's4', id: 'oxford', name: 'University of Oxford', short_name: 'Oxford', country: 'gb', rank: 2, tuition_usd: 35000 },
-  { _id: 's5', id: 'cambridge', name: 'University of Cambridge', short_name: 'Cambridge', country: 'gb', rank: 3, tuition_usd: 34000 },
-  { _id: 's6', id: 'imperial', name: 'Imperial College London', short_name: 'Imperial', country: 'gb', rank: 10, tuition_usd: 33000 },
-  { _id: 's7', id: 'tum', name: 'Technical University of Munich', short_name: 'TUM', country: 'de', rank: 50, tuition_usd: 0 },
-  { _id: 's8', id: 'lmu', name: 'LMU Munich', short_name: 'LMU Munich', country: 'de', rank: 45, tuition_usd: 0 },
-  { _id: 's9', id: 'polimi', name: 'Polytechnic University of Milan', short_name: 'Polimi', country: 'it', rank: 145, tuition_usd: 4000 },
-  { _id: 's10', id: 'unibo', name: 'University of Bologna', short_name: 'Unibo', country: 'it', rank: 120, tuition_usd: 4000 },
+  { _id: 's1', id: 'mit', name: 'Massachusetts Institute of Technology', short_name: 'MIT', country: 'us', rank: 1, tuition_usd: 55790, courses: ['stem', 'engineering'] },
+  { _id: 's2', id: 'stanford', name: 'Stanford University', short_name: 'Stanford', country: 'us', rank: 3, tuition_usd: 56169, courses: ['stem', 'engineering', 'business'] },
+  { _id: 's3', id: 'harvard', name: 'Harvard University', short_name: 'Harvard', country: 'us', rank: 2, tuition_usd: 55807, courses: ['business', 'medicine', 'law', 'arts', 'social'] },
+  { _id: 's4', id: 'oxford', name: 'University of Oxford', short_name: 'Oxford', country: 'gb', rank: 2, tuition_usd: 35000, courses: ['arts', 'law', 'social', 'medicine', 'business'] },
+  { _id: 's5', id: 'cambridge', name: 'University of Cambridge', short_name: 'Cambridge', country: 'gb', rank: 3, tuition_usd: 34000, courses: ['stem', 'engineering', 'law', 'arts'] },
+  { _id: 's6', id: 'imperial', name: 'Imperial College London', short_name: 'Imperial', country: 'gb', rank: 10, tuition_usd: 33000, courses: ['stem', 'engineering', 'medicine'] },
+  { _id: 's7', id: 'tum', name: 'Technical University of Munich', short_name: 'TUM', country: 'de', rank: 50, tuition_usd: 0, courses: ['stem', 'engineering'] },
+  { _id: 's8', id: 'lmu', name: 'LMU Munich', short_name: 'LMU Munich', country: 'de', rank: 45, tuition_usd: 0, courses: ['medicine', 'law', 'arts', 'social'] },
+  { _id: 's9', id: 'polimi', name: 'Polytechnic University of Milan', short_name: 'Polimi', country: 'it', rank: 145, tuition_usd: 4000, courses: ['stem', 'engineering', 'arts'] },
+  { _id: 's10', id: 'unibo', name: 'University of Bologna', short_name: 'Unibo', country: 'it', rank: 120, tuition_usd: 4000, courses: ['law', 'arts', 'social', 'medicine'] },
 ];
 
 const COURSES = [
@@ -132,6 +132,7 @@ export default function ProgramRecommender() {
     } catch {
       let unis = SAMPLE_UNIVERSITIES
         .filter(u => !form.countries.length || form.countries.includes(u.country))
+        .filter(u => !form.courses.length || form.courses.some(c => (u.courses || []).includes(c)))
         .filter(u => !form.budget || (u.tuition_usd || 0) <= form.budget)
         .map(u => ({
           ...u,

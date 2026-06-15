@@ -798,7 +798,7 @@ function ScholarshipCalculator({ onClose }) {
                     "p-4 rounded-xl border flex items-center gap-3",
                     eligible ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-200"
                   )}>
-                    <span className="text-2xl">{uni.flag || <GraduationCap className="w-6 h-6 text-white/70" />}</span>
+                    <span className="text-2xl">{uni.flag || <GraduationCap className="w-6 h-6 text-[hsl(var(--blue-700))]/70" />}</span>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{uni.short_name}</span>

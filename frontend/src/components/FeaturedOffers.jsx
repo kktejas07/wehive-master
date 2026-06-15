@@ -439,7 +439,7 @@ function OfferDetailPanel({ offer, onClose }) {
             <h3 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))]">{offer.title}</h3>
           </div>
         </div>
-        <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:bg-white transition-colors">
+        <button onClick={onClose} aria-label="Close offer details" className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:bg-white transition-colors">
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>

@@ -77,7 +77,7 @@ export default function SchengenCarousel() {
       {/* Header */}
       <div className="text-center px-4 mb-10 sm:mb-14">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-dashed border-gray-200 bg-white shadow-sm mb-6">
-          <span className="text-3xl">🇫🇷</span>
+          <span className="text-[11px] tracking-[0.22em] font-bold text-[hsl(var(--blue-700))]">FR</span>
         </div>
         <h2 className="text-[30px] sm:text-[44px] lg:text-[52px] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
           One visa to access 29 countries

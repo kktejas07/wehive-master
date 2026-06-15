@@ -20,9 +20,9 @@ const SAMPLE_ALUMNI = [
 
 const COUNTRY_LABELS = { us: 'United States', uk: 'United Kingdom', de: 'Germany', it: 'Italy', at: 'Austria' };
 
-const WHATSAPP_LINK = 'https://chat.whatsapp.com/F0R1TYMOr8dLwIbr5jLRau';
-const TELEGRAM_LINK = 'https://t.me/wehivecommunity';
-const PHONE_NUMBER = '+919000734326';
+const WHATSAPP_LINK = process.env.REACT_APP_COMMUNITY_WHATSAPP_LINK || 'https://chat.whatsapp.com/F0R1TYMOr8dLwIbr5jLRau';
+const TELEGRAM_LINK = process.env.REACT_APP_COMMUNITY_TELEGRAM_LINK || 'https://t.me/wehivecommunity';
+const PHONE_NUMBER = process.env.REACT_APP_COMMUNITY_PHONE_NUMBER || '+919000734326';
 
 export default function AlumniMentor({ compact = false }) {
   const [search, setSearch] = useState('');
