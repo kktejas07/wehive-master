@@ -11,7 +11,7 @@ import {
   Loader2, ChevronRight, Plus, Pencil, Trash2, X, Save,
   Star, TrendingUp, CheckCircle, XCircle, Clock, Award,
   GraduationCap, Globe2, BookOpen, Target, Briefcase,
-  ArrowRight, Check, AlertCircle, FileText, Upload, FolderOpen,
+  ArrowRight, Check, AlertCircle, FileText, Upload, FolderOpen, Globe,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
@@ -30,7 +30,7 @@ const TIER_CONFIG = {
   platinum: { color: '#a855f7', bg: 'bg-purple-50',    text: 'text-purple-600', label: 'Platinum Partner' },
 };
 
-const COUNTRY_FLAGS = { us: '🇺🇸', uk: '🇬🇧', ca: '🇨🇦', au: '🇦🇺', de: '🇩🇪', fr: '🇫🇷', nl: '🇳🇱', ie: '🇮🇪', sg: '🇸🇬', ch: '🇨🇭', nz: '🇳🇿', jp: '🇯🇵', kr: '🇰🇷' };
+const COUNTRY_FLAGS = { us: 'US', uk: 'UK', ca: 'CA', au: 'AU', de: 'DE', fr: 'FR', nl: 'NL', ie: 'IE', sg: 'SG', ch: 'CH', nz: 'NZ', jp: 'JP', kr: 'KR' };
 
 // ─── Tier badge ───────────────────────────────────────────────────────────────
 function TierBadge({ tier, size = 'sm' }) {
@@ -346,7 +346,7 @@ function StudentsTab({ token }) {
                 <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">{s.name}</div>
                 <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">{s.email || s.phone || '—'}</div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {(s.target_countries || []).map(c => <span key={c} className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5">{COUNTRY_FLAGS[c]} {c.toUpperCase()}</span>)}
+                  {(s.target_countries || []).map(c => <span key={c} className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5">{COUNTRY_FLAGS[c] || c.toUpperCase()}</span>)}
                   {s.intake && <span className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5">{s.intake}</span>}
                   {s.ielts_score && <span className="text-[11px] font-bold rounded-full bg-blue-50 text-blue-700 px-2 py-0.5">IELTS {s.ielts_score}</span>}
                   {s.budget_usd && <span className="text-[11px] font-bold rounded-full bg-green-50 text-green-700 px-2 py-0.5">Budget ${s.budget_usd.toLocaleString()}</span>}
@@ -600,7 +600,7 @@ function AnalyticsTab({ token }) {
             <div className="space-y-2.5">
               {top_countries.map(({ country, total, successful }) => (
                 <div key={country} className="flex items-center gap-3">
-                  <span className="text-xl shrink-0">{COUNTRY_FLAGS[country] || '🌍'}</span>
+                  <span className="text-xl shrink-0">{COUNTRY_FLAGS[country] || <Globe className="w-5 h-5 text-slate-400" />}</span>
                   <div className="flex-1">
                     <div className="text-[12px] font-bold text-[hsl(var(--blue-900))] capitalize">{country.toUpperCase()}</div>
                     <div className="text-[11px] text-[hsl(var(--blue-900))]/50">{successful}/{total} successful</div>

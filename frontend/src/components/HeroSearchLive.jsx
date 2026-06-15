@@ -120,7 +120,7 @@ export default function HeroSearchLive({ query, setQuery }) {
                   i === active ? 'bg-[hsl(var(--soft-bg))]' : ''
                 }`}
               >
-                <span className="text-xl leading-none">{c.flag || '🌐'}</span>
+                <span className="text-xl leading-none">{c.flag || ''}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">
                     {c.name}

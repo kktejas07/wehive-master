@@ -8,12 +8,12 @@ import {
 import { Link } from 'react-router-dom';
 
 const SAMPLE_LISTINGS = [
-  { id: 'h1', name: 'Student Housing International Dorm', type: 'Dormitory', city: 'Boston', country: 'us', monthly_rent: 1200, deposit: 1200, distance_km: 1.2, rating: 4.2, shared: true, furnished: true, bills_included: true, amenities: ['WiFi', 'Laundry', 'Kitchen', 'Study Room'], available_from: 'Aug 2025', image: '🏠' },
-  { id: 'h2', name: 'University Halls — City Campus', type: 'University Halls', city: 'London', country: 'uk', monthly_rent: 950, deposit: 950, distance_km: 0.5, rating: 4.5, shared: false, furnished: true, bills_included: true, amenities: ['WiFi', 'Gym', 'Common Room', 'Laundry'], available_from: 'Sep 2025', image: '🏢' },
-  { id: 'h3', name: 'Shared Apartment near Campus', type: 'Shared Apartment', city: 'Munich', country: 'de', monthly_rent: 650, deposit: 1300, distance_km: 0.8, rating: 4.0, shared: true, furnished: true, bills_included: false, amenities: ['WiFi', 'Kitchen', 'Balcony'], available_from: 'Oct 2025', image: '🏡' },
-  { id: 'h4', name: 'Studio Apartment — Private', type: 'Studio', city: 'Milan', country: 'it', monthly_rent: 800, deposit: 1600, distance_km: 1.5, rating: 4.3, shared: false, furnished: true, bills_included: true, amenities: ['WiFi', 'AC', 'Kitchenette', 'Laundry'], available_from: 'Sep 2025', image: '🔑' },
-  { id: 'h5', name: 'Student Residence — Premium', type: 'Residence', city: 'Vienna', country: 'at', monthly_rent: 550, deposit: 550, distance_km: 2.0, rating: 4.1, shared: false, furnished: true, bills_included: true, amenities: ['WiFi', 'Gym', 'Study Room', 'Cafeteria', 'Laundry'], available_from: 'Oct 2025', image: '🏰' },
-  { id: 'h6', name: 'Affordable Shared House', type: 'Shared House', city: 'Warsaw', country: 'pl', monthly_rent: 350, deposit: 700, distance_km: 3.0, rating: 3.8, shared: true, furnished: true, bills_included: false, amenities: ['WiFi', 'Kitchen', 'Garden'], available_from: 'Oct 2025', image: '🌳' },
+  { id: 'h1', name: 'Student Housing International Dorm', type: 'Dormitory', city: 'Boston', country: 'us', monthly_rent: 1200, deposit: 1200, distance_km: 1.2, rating: 4.2, shared: true, furnished: true, bills_included: true, amenities: ['WiFi', 'Laundry', 'Kitchen', 'Study Room'], available_from: 'Aug 2025' },
+  { id: 'h2', name: 'University Halls - City Campus', type: 'University Halls', city: 'London', country: 'uk', monthly_rent: 950, deposit: 950, distance_km: 0.5, rating: 4.5, shared: false, furnished: true, bills_included: true, amenities: ['WiFi', 'Gym', 'Common Room', 'Laundry'], available_from: 'Sep 2025' },
+  { id: 'h3', name: 'Shared Apartment near Campus', type: 'Shared Apartment', city: 'Munich', country: 'de', monthly_rent: 650, deposit: 1300, distance_km: 0.8, rating: 4.0, shared: true, furnished: true, bills_included: false, amenities: ['WiFi', 'Kitchen', 'Balcony'], available_from: 'Oct 2025' },
+  { id: 'h4', name: 'Studio Apartment - Private', type: 'Studio', city: 'Milan', country: 'it', monthly_rent: 800, deposit: 1600, distance_km: 1.5, rating: 4.3, shared: false, furnished: true, bills_included: true, amenities: ['WiFi', 'AC', 'Kitchenette', 'Laundry'], available_from: 'Sep 2025' },
+  { id: 'h5', name: 'Student Residence - Premium', type: 'Residence', city: 'Vienna', country: 'at', monthly_rent: 550, deposit: 550, distance_km: 2.0, rating: 4.1, shared: false, furnished: true, bills_included: true, amenities: ['WiFi', 'Gym', 'Study Room', 'Cafeteria', 'Laundry'], available_from: 'Oct 2025' },
+  { id: 'h6', name: 'Affordable Shared House', type: 'Shared House', city: 'Warsaw', country: 'pl', monthly_rent: 350, deposit: 700, distance_km: 3.0, rating: 3.8, shared: true, furnished: true, bills_included: false, amenities: ['WiFi', 'Kitchen', 'Garden'], available_from: 'Oct 2025' },
 ];
 
 export default function StudentHousing({ country, compact = false }) {
@@ -127,7 +127,7 @@ export default function StudentHousing({ country, compact = false }) {
               className="rounded-2xl border border-black/5 bg-white hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all overflow-hidden"
             >
               <div className="bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] p-5 text-center">
-                <div className="text-5xl">{l.image}</div>
+                <div className="text-white/80 text-2xl font-bold">{l.type?.charAt(0) || 'H'}</div>
                 <div className="mt-2 text-white font-bold text-[13px]">{l.type}</div>
               </div>
               <div className="p-5">

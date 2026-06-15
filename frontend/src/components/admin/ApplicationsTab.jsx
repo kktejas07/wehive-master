@@ -97,7 +97,7 @@ export default function ApplicationsTab() {
               <tr key={a.id} data-testid={`admin-app-row-${a.id}`} className="border-t border-white/5 hover:bg-white/5">
                 <td className="px-5 py-3">
                   <div className="font-bold text-white inline-flex items-center gap-1.5">
-                    <span>{a.country?.flag || '🌐'}</span>
+                    <span>{a.country?.flag || ''}</span>
                     {a.country?.name || a.country_id?.toUpperCase()} · {a.visa_type}
                   </div>
                   <div className="text-[11px] text-slate-500 font-mono">#{a.id.slice(0, 8).toUpperCase()}</div>

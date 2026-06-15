@@ -202,7 +202,7 @@ function CountryRow({ c, onSaved }) {
       <tr data-testid={`admin-country-row-${c.id}`} className="border-t border-white/5 hover:bg-white/5">
         <td className="px-5 py-3">
           <div className="font-bold text-white inline-flex items-center gap-1.5">
-            <span>{c.flag || '🌐'}</span> {c.name}
+            <span>{c.flag || ''}</span> {c.name}
           </div>
           <div className="text-[11px] text-slate-500 font-mono">{c.iso2} · {c.id}</div>
         </td>

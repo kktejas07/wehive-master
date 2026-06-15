@@ -6,20 +6,47 @@ import { API } from '../context/AuthContext';
 import axios from 'axios';
 
 const SAMPLE_UNIVERSITIES = [
-  { _id: 's1', id: 'mit', name: 'Massachusetts Institute of Technology', short_name: 'MIT', country: 'USA', flag: '🇺🇸', rank: 1, tuition_usd: 55790 },
-  { _id: 's2', id: 'stanford', name: 'Stanford University', short_name: 'Stanford', country: 'USA', flag: '🇺🇸', rank: 3, tuition_usd: 56169 },
-  { _id: 's3', id: 'harvard', name: 'Harvard University', short_name: 'Harvard', country: 'USA', flag: '🇺🇸', rank: 2, tuition_usd: 55807 },
-  { _id: 's4', id: 'oxford', name: 'University of Oxford', short_name: 'Oxford', country: 'United Kingdom', flag: '🇬🇧', rank: 2, tuition_usd: 35000 },
-  { _id: 's5', id: 'cambridge', name: 'University of Cambridge', short_name: 'Cambridge', country: 'United Kingdom', flag: '🇬🇧', rank: 3, tuition_usd: 34000 },
-  { _id: 's6', id: 'imperial', name: 'Imperial College London', short_name: 'Imperial', country: 'United Kingdom', flag: '🇬🇧', rank: 10, tuition_usd: 33000 },
-  { _id: 's7', id: 'tum', name: 'Technical University of Munich', short_name: 'TUM', country: 'Germany', flag: '🇩🇪', rank: 50, tuition_usd: 0 },
-  { _id: 's8', id: 'lmu', name: 'LMU Munich', short_name: 'LMU Munich', country: 'Germany', flag: '🇩🇪', rank: 45, tuition_usd: 0 },
-  { _id: 's9', id: 'polimi', name: 'Polytechnic University of Milan', short_name: 'Polimi', country: 'Italy', flag: '🇮🇹', rank: 145, tuition_usd: 4000 },
-  { _id: 's10', id: 'unibo', name: 'University of Bologna', short_name: 'Unibo', country: 'Italy', flag: '🇮🇹', rank: 120, tuition_usd: 4000 },
+  { _id: 's1', id: 'mit', name: 'Massachusetts Institute of Technology', short_name: 'MIT', country: 'us', rank: 1, tuition_usd: 55790 },
+  { _id: 's2', id: 'stanford', name: 'Stanford University', short_name: 'Stanford', country: 'us', rank: 3, tuition_usd: 56169 },
+  { _id: 's3', id: 'harvard', name: 'Harvard University', short_name: 'Harvard', country: 'us', rank: 2, tuition_usd: 55807 },
+  { _id: 's4', id: 'oxford', name: 'University of Oxford', short_name: 'Oxford', country: 'gb', rank: 2, tuition_usd: 35000 },
+  { _id: 's5', id: 'cambridge', name: 'University of Cambridge', short_name: 'Cambridge', country: 'gb', rank: 3, tuition_usd: 34000 },
+  { _id: 's6', id: 'imperial', name: 'Imperial College London', short_name: 'Imperial', country: 'gb', rank: 10, tuition_usd: 33000 },
+  { _id: 's7', id: 'tum', name: 'Technical University of Munich', short_name: 'TUM', country: 'de', rank: 50, tuition_usd: 0 },
+  { _id: 's8', id: 'lmu', name: 'LMU Munich', short_name: 'LMU Munich', country: 'de', rank: 45, tuition_usd: 0 },
+  { _id: 's9', id: 'polimi', name: 'Polytechnic University of Milan', short_name: 'Polimi', country: 'it', rank: 145, tuition_usd: 4000 },
+  { _id: 's10', id: 'unibo', name: 'University of Bologna', short_name: 'Unibo', country: 'it', rank: 120, tuition_usd: 4000 },
 ];
 
-const COURSES = ['Computer Science', 'Business Administration', 'Engineering', 'Data Science', 'Medicine', 'Law', 'Architecture', 'Nursing', 'Finance', 'Design', 'Psychology', 'Education'];
-const COUNTRIES = ['Canada', 'United Kingdom', 'Australia', 'Germany', 'USA', 'Ireland', 'Netherlands', 'New Zealand', 'France', 'Singapore'];
+const COURSES = [
+  { label: 'Engineering & STEM', value: 'stem' },
+  { label: 'Business & Management', value: 'business' },
+  { label: 'Medicine & Health', value: 'medicine' },
+  { label: 'Computer Science & IT', value: 'engineering' },
+  { label: 'Law & Legal Studies', value: 'law' },
+  { label: 'Arts & Humanities', value: 'arts' },
+  { label: 'Social Sciences', value: 'social' },
+];
+const COUNTRIES = [
+  { label: 'USA', value: 'us' },
+  { label: 'United Kingdom', value: 'gb' },
+  { label: 'Canada', value: 'ca' },
+  { label: 'Australia', value: 'au' },
+  { label: 'Germany', value: 'de' },
+  { label: 'France', value: 'fr' },
+  { label: 'Netherlands', value: 'nl' },
+  { label: 'Ireland', value: 'ie' },
+  { label: 'Singapore', value: 'sg' },
+  { label: 'New Zealand', value: 'nz' },
+  { label: 'Italy', value: 'it' },
+  { label: 'Spain', value: 'es' },
+  { label: 'Switzerland', value: 'ch' },
+  { label: 'Sweden', value: 'se' },
+  { label: 'Japan', value: 'jp' },
+  { label: 'South Korea', value: 'kr' },
+  { label: 'China', value: 'cn' },
+  { label: 'India', value: 'in' },
+];
 const BUDGET_OPTIONS = [
   { label: 'Under $15K/yr', value: 15000 },
   { label: '$15K–$30K/yr', value: 30000 },
@@ -47,7 +74,6 @@ function UniCard({ uni, rank }) {
       <div className="flex-1 min-w-0">
         <div className="font-bold text-[14.5px] text-[hsl(var(--blue-900))] truncate">{uni.name}</div>
         <div className="text-[12px] text-[hsl(var(--blue-900))]/55 flex items-center gap-2 flex-wrap mt-0.5">
-          <span>{uni.flag || uni.country}</span>
           <span>{uni.country}</span>
           {uni.rank && <span>World #{uni.rank}</span>}
           {uni.tuition_usd && <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" />${uni.tuition_usd.toLocaleString()}/yr</span>}
@@ -89,10 +115,12 @@ export default function ProgramRecommender() {
       const params = new URLSearchParams();
       if (form.countries.length) params.set('country', form.countries[0]);
       if (form.courses.length) params.set('course', form.courses[0]);
-      params.set('limit', '20');
+      params.set('limit', '200');
       const res = await axios.get(`${API}/universities?${params}`);
       let unis = res.data || [];
       unis = unis
+        .filter(u => !form.countries.length || form.countries.includes(u.country))
+        .filter(u => !form.courses.length || (u.courses && form.courses.some(c => u.courses.includes(c))))
         .filter(u => !form.budget || (u.tuition_usd || 0) <= form.budget)
         .map(u => ({
           ...u,
@@ -103,7 +131,7 @@ export default function ProgramRecommender() {
       setResults(unis);
     } catch {
       let unis = SAMPLE_UNIVERSITIES
-        .filter(u => !form.countries.length || form.countries.some(c => u.country.includes(c) || c.includes(u.country)))
+        .filter(u => !form.countries.length || form.countries.includes(u.country))
         .filter(u => !form.budget || (u.tuition_usd || 0) <= form.budget)
         .map(u => ({
           ...u,
@@ -138,8 +166,8 @@ export default function ProgramRecommender() {
           <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Course / Field (pick up to 3)</div>
           <div className="flex flex-wrap gap-2">
             {COURSES.map(c => (
-              <ToggleChip key={c} label={c} selected={form.courses.includes(c)}
-                onClick={() => form.courses.length < 3 || form.courses.includes(c) ? toggle('courses', c) : null} />
+              <ToggleChip key={c.value} label={c.label} selected={form.courses.includes(c.value)}
+                onClick={() => form.courses.length < 3 || form.courses.includes(c.value) ? toggle('courses', c.value) : null} />
             ))}
           </div>
         </div>
@@ -148,8 +176,8 @@ export default function ProgramRecommender() {
           <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Countries (pick up to 3)</div>
           <div className="flex flex-wrap gap-2">
             {COUNTRIES.map(c => (
-              <ToggleChip key={c} label={c} selected={form.countries.includes(c)}
-                onClick={() => form.countries.length < 3 || form.countries.includes(c) ? toggle('countries', c) : null} />
+              <ToggleChip key={c.value} label={c.label} selected={form.countries.includes(c.value)}
+                onClick={() => form.countries.length < 3 || form.countries.includes(c.value) ? toggle('countries', c.value) : null} />
             ))}
           </div>
         </div>

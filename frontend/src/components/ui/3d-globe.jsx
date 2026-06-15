@@ -22,16 +22,16 @@ interface Globe3DProps {
 }
 
 const VISA_LOCATIONS = [
-  { lat: 28.6139, lng: 77.209, label: 'India', flag: '🇮🇳', visaType: 'All Destinations' },
-  { lat: 40.7128, lng: -74.006, label: 'USA', flag: '🇺🇸', visaType: 'Tourist/Business' },
-  { lat: 51.5074, lng: -0.1278, label: 'UK', flag: '🇬🇧', visaType: 'Tourist/Student' },
-  { lat: 35.6762, lng: 139.6503, label: 'Japan', flag: '🇯🇵', visaType: 'Tourist/Business' },
-  { lat: -33.8688, lng: 151.2093, label: 'Australia', flag: '🇦🇺', visaType: 'Work/Holiday' },
-  { lat: 48.8566, lng: 2.3522, label: 'France', flag: '🇫🇷', visaType: 'Schengen' },
-  { lat: 25.2048, lng: 55.2708, label: 'UAE', flag: '🇦🇪', visaType: 'Transit/Tourist' },
-  { lat: 1.3521, lng: 103.8198, label: 'Singapore', flag: '🇸🇬', visaType: 'Business/Tourist' },
-  { lat: 37.5665, lng: 126.978, label: 'South Korea', flag: '🇰🇷', visaType: 'Tourist/K-ETA' },
-  { lat: 52.52, lng: 13.405, label: 'Germany', flag: '🇩🇪', visaType: 'Schengen' },
+  { lat: 28.6139, lng: 77.209, label: 'India', flag: '', visaType: 'All Destinations' },
+  { lat: 40.7128, lng: -74.006, label: 'USA', flag: '', visaType: 'Tourist/Business' },
+  { lat: 51.5074, lng: -0.1278, label: 'UK', flag: '', visaType: 'Tourist/Student' },
+  { lat: 35.6762, lng: 139.6503, label: 'Japan', flag: '', visaType: 'Tourist/Business' },
+  { lat: -33.8688, lng: 151.2093, label: 'Australia', flag: '', visaType: 'Work/Holiday' },
+  { lat: 48.8566, lng: 2.3522, label: 'France', flag: '', visaType: 'Schengen' },
+  { lat: 25.2048, lng: 55.2708, label: 'UAE', flag: '', visaType: 'Transit/Tourist' },
+  { lat: 1.3521, lng: 103.8198, label: 'Singapore', flag: '', visaType: 'Business/Tourist' },
+  { lat: 37.5665, lng: 126.978, label: 'South Korea', flag: '', visaType: 'Tourist/K-ETA' },
+  { lat: 52.52, lng: 13.405, label: 'Germany', flag: '', visaType: 'Schengen' },
 ];
 
 function latLngToPosition(lat, lng, radius) {
@@ -69,11 +69,7 @@ function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
         animate={isHovered ? { scale: 1.2 } : { scale: 1 }}
       >
         <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-all duration-300 ${isHovered ? 'bg-[hsl(var(--accent))]' : 'bg-[hsl(var(--blue-700))]'}`}>
-          {marker.flag ? (
-            <span className="text-lg">{marker.flag}</span>
-          ) : (
-            <MapPin className="w-4 h-4 text-white" />
-          )}
+          <MapPin className="w-4 h-4 text-white" />
         </div>
         {isHovered && (
           <motion.div

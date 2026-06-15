@@ -18,16 +18,16 @@ import {
 import axios from 'axios';
 
 const STUDENT_COUNTRIES = [
-  { id: 'us', name: 'United States', flag: '🇺🇸', code: 'US' },
-  { id: 'uk', name: 'United Kingdom', flag: '🇬🇧', code: 'GB' },
-  { id: 'de', name: 'Germany', flag: '🇩🇪', code: 'DE' },
-  { id: 'it', name: 'Italy', flag: '🇮🇹', code: 'IT' },
-  { id: 'es', name: 'Spain', flag: '🇪🇸', code: 'ES' },
-  { id: 'pl', name: 'Poland', flag: '🇵🇱', code: 'PL' },
-  { id: 'at', name: 'Austria', flag: '🇦🇹', code: 'AT' },
-  { id: 'pt', name: 'Portugal', flag: '🇵🇹', code: 'PT' },
-  { id: 'gr', name: 'Greece', flag: '🇬🇷', code: 'GR' },
-  { id: 'hr', name: 'Croatia', flag: '🇭🇷', code: 'HR' },
+  { id: 'us', name: 'United States', flag: '', code: 'US' },
+  { id: 'uk', name: 'United Kingdom', flag: '', code: 'GB' },
+  { id: 'de', name: 'Germany', flag: '', code: 'DE' },
+  { id: 'it', name: 'Italy', flag: '', code: 'IT' },
+  { id: 'es', name: 'Spain', flag: '', code: 'ES' },
+  { id: 'pl', name: 'Poland', flag: '', code: 'PL' },
+  { id: 'at', name: 'Austria', flag: '', code: 'AT' },
+  { id: 'pt', name: 'Portugal', flag: '', code: 'PT' },
+  { id: 'gr', name: 'Greece', flag: '', code: 'GR' },
+  { id: 'hr', name: 'Croatia', flag: '', code: 'HR' },
 ];
 
 const INTAKE_TIMES = [
@@ -94,16 +94,16 @@ const SCORE_REQUIREMENTS = [
 ];
 
 const ANNUAL_BUDGETS = [
-  { country: 'us', name: 'United States', flag: '🇺🇸', tuition_min: 20000, tuition_max: 60000, living_min: 12000, living_max: 24000, currency: 'USD' },
-  { country: 'uk', name: 'United Kingdom', flag: '🇬🇧', tuition_min: 15000, tuition_max: 38000, living_min: 12000, living_max: 18000, currency: 'GBP' },
-  { country: 'de', name: 'Germany', flag: '🇩🇪', tuition_min: 0, tuition_max: 3000, living_min: 11000, living_max: 14000, currency: 'EUR' },
-  { country: 'it', name: 'Italy', flag: '🇮🇹', tuition_min: 2000, tuition_max: 20000, living_min: 10000, living_max: 15000, currency: 'EUR' },
-  { country: 'es', name: 'Spain', flag: '🇪🇸', tuition_min: 2000, tuition_max: 18000, living_min: 9000, living_max: 14000, currency: 'EUR' },
-  { country: 'pl', name: 'Poland', flag: '🇵🇱', tuition_min: 2000, tuition_max: 8000, living_min: 6000, living_max: 10000, currency: 'EUR' },
-  { country: 'at', name: 'Austria', flag: '🇦🇹', tuition_min: 0, tuition_max: 2000, living_min: 11000, living_max: 14000, currency: 'EUR' },
-  { country: 'pt', name: 'Portugal', flag: '🇵🇹', tuition_min: 3000, tuition_max: 12000, living_min: 8000, living_max: 12000, currency: 'EUR' },
-  { country: 'gr', name: 'Greece', flag: '🇬🇷', tuition_min: 2000, tuition_max: 8000, living_min: 7000, living_max: 11000, currency: 'EUR' },
-  { country: 'hr', name: 'Croatia', flag: '🇭🇷', tuition_min: 2000, tuition_max: 6000, living_min: 7000, living_max: 10000, currency: 'EUR' },
+  { country: 'us', name: 'United States', flag: '', tuition_min: 20000, tuition_max: 60000, living_min: 12000, living_max: 24000, currency: 'USD' },
+  { country: 'uk', name: 'United Kingdom', flag: '', tuition_min: 15000, tuition_max: 38000, living_min: 12000, living_max: 18000, currency: 'GBP' },
+  { country: 'de', name: 'Germany', flag: '', tuition_min: 0, tuition_max: 3000, living_min: 11000, living_max: 14000, currency: 'EUR' },
+  { country: 'it', name: 'Italy', flag: '', tuition_min: 2000, tuition_max: 20000, living_min: 10000, living_max: 15000, currency: 'EUR' },
+  { country: 'es', name: 'Spain', flag: '', tuition_min: 2000, tuition_max: 18000, living_min: 9000, living_max: 14000, currency: 'EUR' },
+  { country: 'pl', name: 'Poland', flag: '', tuition_min: 2000, tuition_max: 8000, living_min: 6000, living_max: 10000, currency: 'EUR' },
+  { country: 'at', name: 'Austria', flag: '', tuition_min: 0, tuition_max: 2000, living_min: 11000, living_max: 14000, currency: 'EUR' },
+  { country: 'pt', name: 'Portugal', flag: '', tuition_min: 3000, tuition_max: 12000, living_min: 8000, living_max: 12000, currency: 'EUR' },
+  { country: 'gr', name: 'Greece', flag: '', tuition_min: 2000, tuition_max: 8000, living_min: 7000, living_max: 11000, currency: 'EUR' },
+  { country: 'hr', name: 'Croatia', flag: '', tuition_min: 2000, tuition_max: 6000, living_min: 7000, living_max: 10000, currency: 'EUR' },
 ];
 
 function getDisplayCourses(popularCourses = []) {
@@ -122,7 +122,7 @@ function CountryCard({ c, onSelect, selected }) {
       }`}
     >
       <div className="relative z-10">
-        <div className="text-3xl mb-2">{c.flag}</div>
+        <div className="text-3xl mb-2">{c.flag || <Globe className="w-7 h-7 text-[hsl(var(--blue-700))]/40" />}</div>
         <div className="font-bold text-[hsl(var(--blue-900))]">{c.name}</div>
         {meta.processing_weeks && (
           <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">
@@ -318,9 +318,9 @@ export default function StudentVisa() {
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-white text-xl">
-                            {uni.flag}
-                          </div>
+          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-white text-xl font-bold">
+            {uni.flag || uni.short_name?.[0] || '?'}
+          </div>
                           <div>
                             <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
                             <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.name}</div>
@@ -400,8 +400,8 @@ export default function StudentVisa() {
                   className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-xl shrink-0">
-                      {uni.flag}
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-xl font-bold shrink-0">
+                      {uni.flag || uni.short_name?.[0] || '?'}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
@@ -490,7 +490,7 @@ export default function StudentVisa() {
                     <tr key={b.country} className="border-b border-black/5 hover:bg-[hsl(var(--blue-50))] transition">
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">{b.flag}</span>
+                          <span className="text-xl">{b.flag || <Globe className="w-5 h-5 text-[hsl(var(--blue-900))]/40" />}</span>
                           <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{b.name}</span>
                         </div>
                       </td>
@@ -795,7 +795,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
                     to={`/visa/${c.id}`}
                     className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 rounded-full px-4 py-2 text-[13px] font-bold transition"
                   >
-                    {c.flag} {c.name}
+                    {c.flag || <Globe className="w-4 h-4" />} {c.name}
                   </Link>
                 ))}
                 <span className="inline-flex items-center bg-white/10 rounded-full px-4 py-2 text-[13px] font-bold">

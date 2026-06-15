@@ -64,16 +64,16 @@ function safeScholarships(uni) {
 
 
 const STUDENT_COUNTRIES = [
-  { id: 'us', name: 'United States', flag: '🇺🇸' },
-  { id: 'uk', name: 'United Kingdom', flag: '🇬🇧' },
-  { id: 'de', name: 'Germany', flag: '🇩🇪' },
-  { id: 'it', name: 'Italy', flag: '🇮🇹' },
-  { id: 'es', name: 'Spain', flag: '🇪🇸' },
-  { id: 'pl', name: 'Poland', flag: '🇵🇱' },
-  { id: 'at', name: 'Austria', flag: '🇦🇹' },
-  { id: 'pt', name: 'Portugal', flag: '🇵🇹' },
-  { id: 'gr', name: 'Greece', flag: '🇬🇷' },
-  { id: 'hr', name: 'Croatia', flag: '🇭🇷' },
+  { id: 'us', name: 'United States', flag: '' },
+  { id: 'uk', name: 'United Kingdom', flag: '' },
+  { id: 'de', name: 'Germany', flag: '' },
+  { id: 'it', name: 'Italy', flag: '' },
+  { id: 'es', name: 'Spain', flag: '' },
+  { id: 'pl', name: 'Poland', flag: '' },
+  { id: 'at', name: 'Austria', flag: '' },
+  { id: 'pt', name: 'Portugal', flag: '' },
+  { id: 'gr', name: 'Greece', flag: '' },
+  { id: 'hr', name: 'Croatia', flag: '' },
 ];
 
 function UniversityCard({ uni, onCompare, isComparing, isSaved, onSave, isSelected, onToggleSelect }) {
@@ -110,7 +110,7 @@ function UniversityCard({ uni, onCompare, isComparing, isSaved, onSave, isSelect
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg shadow-[hsl(var(--blue-700))]/20 shrink-0">
-              {uni.flag}
+              {uni.flag || <GraduationCap className="w-6 h-6 text-white" />}
             </div>
             <div className="min-w-0">
               <h3 className="font-bold text-[hsl(var(--blue-900))] truncate">{uni.short_name}</h3>
@@ -241,10 +241,10 @@ function UniversityListItem({ uni, onCompare, isComparing, isSaved, onSave, isSe
         <Bookmark className={cn("w-4 h-4", isSaved && "fill-current")} />
       </button>
       <div className="flex items-stretch h-full">
-        <div className="w-24 sm:w-32 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex flex-col items-center justify-center p-4 text-white shrink-0">
-          <div className="text-3xl mb-1">{uni.flag}</div>
-          <div className="text-[10px] font-bold text-white/70">#{uni.rank}</div>
-        </div>
+            <div className="w-24 sm:w-32 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex flex-col items-center justify-center p-4 text-white shrink-0">
+              <div className="text-3xl mb-1">{uni.flag || <GraduationCap className="w-7 h-7 text-white/70" />}</div>
+              <div className="text-[10px] font-bold text-white/70">#{uni.rank}</div>
+            </div>
 
         <div className="flex-1 p-4 sm:p-6 flex flex-col">
           <div className="flex items-start justify-between mb-3">
@@ -344,7 +344,7 @@ function CompareTable({ universities }) {
                   <div className="flex flex-col items-center gap-3">
                     <div className="relative">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg shadow-[hsl(var(--blue-700))]/30">
-                        {uni.flag}
+                        {uni.flag || <GraduationCap className="w-6 h-6 text-white" />}
                       </div>
                       <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[hsl(var(--accent))] text-white text-[10px] font-bold flex items-center justify-center shadow">
                         #{uni.rank}
@@ -479,7 +479,7 @@ function CompareCards({ universities }) {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shadow-lg">
-                  {uni.flag}
+                  {uni.flag || <GraduationCap className="w-6 h-6 text-white" />}
                 </div>
                 <div>
                   <h3 className="font-bold text-[hsl(var(--blue-900))] text-[18px]">{uni.short_name}</h3>
@@ -631,7 +631,7 @@ function CompareList({ universities }) {
         )}>
           <div className="flex items-stretch">
             <div className="w-24 sm:w-32 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex flex-col items-center justify-center p-4 text-white">
-              <div className="text-3xl mb-1">{uni.flag}</div>
+              <div className="text-3xl mb-1">{uni.flag || <GraduationCap className="w-7 h-7 text-white/70" />}</div>
               <div className="text-[10px] font-bold text-white/70">#{uni.rank}</div>
             </div>
 
@@ -714,21 +714,21 @@ function ScholarshipCalculator({ onClose }) {
   const calculate = () => {
     const matched = [];
     const UNIVERSITIES_DATA = [
-      { id: 'mit', short_name: 'MIT', country: 'US', flag: '🇺🇸', rank: 1, tuition_usd: 55790, scholarships: true, ielts_min: 7.0, gre_required: true, gmat_required: false },
-      { id: 'stanford', short_name: 'Stanford', country: 'US', flag: '🇺🇸', rank: 3, tuition_usd: 56169, scholarships: true, ielts_min: 7.0, gre_required: true, gmat_required: false },
-      { id: 'harvard', short_name: 'Harvard', country: 'US', flag: '🇺🇸', rank: 2, tuition_usd: 55807, scholarships: true, ielts_min: 7.5, gre_required: false, gmat_required: true },
-      { id: 'oxford', short_name: 'Oxford', country: 'UK', flag: '🇬🇧', rank: 2, tuition_usd: 35000, scholarships: true, ielts_min: 7.0, gre_required: false, gmat_required: false },
-      { id: 'cambridge', short_name: 'Cambridge', country: 'UK', flag: '🇬🇧', rank: 3, tuition_usd: 34000, scholarships: true, ielts_min: 7.0, gre_required: false, gmat_required: false },
-      { id: 'imperial', short_name: 'Imperial', country: 'UK', flag: '🇬🇧', rank: 10, tuition_usd: 33000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'tum', short_name: 'TUM', country: 'DE', flag: '🇩🇪', rank: 50, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'lmu', short_name: 'LMU Munich', country: 'DE', flag: '🇩🇪', rank: 45, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'polimi', short_name: 'Polimi', country: 'IT', flag: '🇮🇹', rank: 145, tuition_usd: 4000, scholarships: true, ielts_min: 6.0, gre_required: false, gmat_required: false },
-      { id: 'unibo', short_name: 'Unibo', country: 'IT', flag: '🇮🇹', rank: 120, tuition_usd: 4000, scholarships: true, ielts_min: 6.0, gre_required: false, gmat_required: false },
-      { id: 'tuwien', short_name: 'TU Vienna', country: 'AT', flag: '🇦🇹', rank: 180, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'uniwien', short_name: 'Uni Wien', country: 'AT', flag: '🇦🇹', rank: 150, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'unide', short_name: 'UW', country: 'PL', flag: '🇵🇱', rank: 260, tuition_usd: 5000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'jagiellonian', short_name: 'JU', country: 'PL', flag: '🇵🇱', rank: 240, tuition_usd: 4500, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'nova', short_name: 'NOVA', country: 'PT', flag: '🇵🇹', rank: 300, tuition_usd: 6000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: true },
+      { id: 'mit', short_name: 'MIT', country: 'US', flag: '', rank: 1, tuition_usd: 55790, scholarships: true, ielts_min: 7.0, gre_required: true, gmat_required: false },
+      { id: 'stanford', short_name: 'Stanford', country: 'US', flag: '', rank: 3, tuition_usd: 56169, scholarships: true, ielts_min: 7.0, gre_required: true, gmat_required: false },
+      { id: 'harvard', short_name: 'Harvard', country: 'US', flag: '', rank: 2, tuition_usd: 55807, scholarships: true, ielts_min: 7.5, gre_required: false, gmat_required: true },
+      { id: 'oxford', short_name: 'Oxford', country: 'UK', flag: '', rank: 2, tuition_usd: 35000, scholarships: true, ielts_min: 7.0, gre_required: false, gmat_required: false },
+      { id: 'cambridge', short_name: 'Cambridge', country: 'UK', flag: '', rank: 3, tuition_usd: 34000, scholarships: true, ielts_min: 7.0, gre_required: false, gmat_required: false },
+      { id: 'imperial', short_name: 'Imperial', country: 'UK', flag: '', rank: 10, tuition_usd: 33000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'tum', short_name: 'TUM', country: 'DE', flag: '', rank: 50, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'lmu', short_name: 'LMU Munich', country: 'DE', flag: '', rank: 45, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'polimi', short_name: 'Polimi', country: 'IT', flag: '', rank: 145, tuition_usd: 4000, scholarships: true, ielts_min: 6.0, gre_required: false, gmat_required: false },
+      { id: 'unibo', short_name: 'Unibo', country: 'IT', flag: '', rank: 120, tuition_usd: 4000, scholarships: true, ielts_min: 6.0, gre_required: false, gmat_required: false },
+      { id: 'tuwien', short_name: 'TU Vienna', country: 'AT', flag: '', rank: 180, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'uniwien', short_name: 'Uni Wien', country: 'AT', flag: '', rank: 150, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'unide', short_name: 'UW', country: 'PL', flag: '', rank: 260, tuition_usd: 5000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'jagiellonian', short_name: 'JU', country: 'PL', flag: '', rank: 240, tuition_usd: 4500, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
+      { id: 'nova', short_name: 'NOVA', country: 'PT', flag: '', rank: 300, tuition_usd: 6000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: true },
     ];
     for (const uni of UNIVERSITIES_DATA) {
       let score = 0;
@@ -798,7 +798,7 @@ function ScholarshipCalculator({ onClose }) {
                     "p-4 rounded-xl border flex items-center gap-3",
                     eligible ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-200"
                   )}>
-                    <span className="text-2xl">{uni.flag}</span>
+                    <span className="text-2xl">{uni.flag || <GraduationCap className="w-6 h-6 text-white/70" />}</span>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{uni.short_name}</span>
@@ -1080,7 +1080,7 @@ export default function UniversityComparison() {
                             : "bg-white text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))] border border-black/5"
                         )}
                       >
-                        <span>{c.flag}</span> {c.name}
+                        <span>{c.flag || <Globe2 className="w-4 h-4" />}</span> {c.name}
                       </button>
                     ))}
                   </div>
@@ -1145,7 +1145,7 @@ export default function UniversityComparison() {
                 <div className="flex gap-2">
                   {compareList.map((uni) => (
                     <div key={uni.id} className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5">
-                      <span>{uni.flag}</span>
+                      <span>{uni.flag || <GraduationCap className="w-4 h-4 inline" />}</span>
                       <span className="text-[13px] font-bold">{uni.short_name}</span>
                       <button onClick={() => handleCompare(uni)} className="hover:bg-white/10 rounded-full p-0.5">
                         <X className="w-3 h-3" />

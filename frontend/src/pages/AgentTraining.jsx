@@ -8,7 +8,7 @@ const GUIDES = [
   {
     id: 'ca',
     country: 'Canada',
-    flag: '🇨🇦',
+    flag: '',
     color: '#ef4444',
     topics: [
       { title: 'Student Visa (Study Permit) Overview', type: 'guide', content: 'A study permit is required for any course longer than 6 months. Apply online or at the port of entry. Processing times average 8–12 weeks.' },
@@ -21,7 +21,7 @@ const GUIDES = [
   {
     id: 'uk',
     country: 'United Kingdom',
-    flag: '🇬🇧',
+    flag: '',
     color: '#3b82f6',
     topics: [
       { title: 'Student Visa (formerly Tier 4)', type: 'guide', content: 'Apply up to 6 months before your course starts. You need a Confirmation of Acceptance for Studies (CAS) from your university. Biometrics required at a visa centre.' },
@@ -33,7 +33,7 @@ const GUIDES = [
   {
     id: 'au',
     country: 'Australia',
-    flag: '🇦🇺',
+    flag: '',
     color: '#f59e0b',
     topics: [
       { title: 'Student Visa (Subclass 500)', type: 'guide', content: 'Apply online via ImmiAccount. Usually granted for the full duration of your course. Must maintain satisfactory progress and attendance.' },
@@ -45,7 +45,7 @@ const GUIDES = [
   {
     id: 'de',
     country: 'Germany',
-    flag: '🇩🇪',
+    flag: '',
     color: '#6366f1',
     topics: [
       { title: 'Student Visa Process', type: 'guide', content: 'Apply at the German embassy in your home country. After arrival, apply for a residence permit at the Ausländerbehörde within 90 days.' },
@@ -57,7 +57,7 @@ const GUIDES = [
   {
     id: 'ie',
     country: 'Ireland',
-    flag: '🇮🇪',
+    flag: '',
     color: '#22c55e',
     topics: [
       { title: 'Study Visa (D Visa)', type: 'guide', content: 'Required for courses over 90 days. Apply online at AVATS. IRP registration required within 90 days of arrival.' },
@@ -68,7 +68,7 @@ const GUIDES = [
   {
     id: 'compliance',
     country: 'Compliance & Ethics',
-    flag: '⚖️',
+    flag: '',
     color: '#8b5cf6',
     topics: [
       { title: 'Agent Code of Conduct', type: 'checklist', items: ['Never misrepresent university programs or costs', 'Disclose all fees charged to students', 'Keep copies of all application documents', 'Never forge or alter documents', 'Report concerns to the institution'] },
@@ -132,7 +132,7 @@ function CountrySection({ guide }) {
     <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       className="rounded-2xl bg-white/5 border border-white/8 overflow-hidden">
       <button onClick={() => setOpen(v => !v)} className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/5 transition text-left">
-        <span className="text-3xl">{guide.flag}</span>
+        <span className="text-3xl">{guide.flag || <Shield className="w-7 h-7 text-slate-400" />}</span>
         <div className="flex-1">
           <div className="font-bold text-[16px] text-white">{guide.country}</div>
           <div className="text-[12px] text-slate-400">{guide.topics.length} topics</div>

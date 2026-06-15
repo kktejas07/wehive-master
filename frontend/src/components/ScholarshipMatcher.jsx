@@ -8,21 +8,21 @@ import {
 import { Link } from 'react-router-dom';
 
 const SAMPLE_UNIVERSITIES = [
-  { id: 'mit', short_name: 'MIT', name: 'Massachusetts Institute of Technology', country: 'US', flag: '🇺🇸', rank: 1, tuition_usd: 55790, living_cost_usd: 18000, scholarships: true, ielts_min: 7.0, gre_required: true },
-  { id: 'stanford', short_name: 'Stanford', name: 'Stanford University', country: 'US', flag: '🇺🇸', rank: 3, tuition_usd: 56169, living_cost_usd: 22000, scholarships: true, ielts_min: 7.0, gre_required: true },
-  { id: 'harvard', short_name: 'Harvard', name: 'Harvard University', country: 'US', flag: '🇺🇸', rank: 2, tuition_usd: 55807, living_cost_usd: 20000, scholarships: true, ielts_min: 7.5, gre_required: false },
-  { id: 'oxford', short_name: 'Oxford', name: 'University of Oxford', country: 'UK', flag: '🇬🇧', rank: 2, tuition_usd: 35000, living_cost_usd: 15000, scholarships: true, ielts_min: 7.0, gre_required: false },
-  { id: 'cambridge', short_name: 'Cambridge', name: 'University of Cambridge', country: 'UK', flag: '🇬🇧', rank: 3, tuition_usd: 34000, living_cost_usd: 14000, scholarships: true, ielts_min: 7.0, gre_required: false },
-  { id: 'imperial', short_name: 'Imperial', name: 'Imperial College London', country: 'UK', flag: '🇬🇧', rank: 10, tuition_usd: 33000, living_cost_usd: 15000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'tum', short_name: 'TUM', name: 'Technical University of Munich', country: 'DE', flag: '🇩🇪', rank: 50, tuition_usd: 0, living_cost_usd: 12000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'lmu', short_name: 'LMU Munich', name: 'Ludwig Maximilian University of Munich', country: 'DE', flag: '🇩🇪', rank: 45, tuition_usd: 0, living_cost_usd: 12000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'polimi', short_name: 'Polimi', name: 'Polytechnic University of Milan', country: 'IT', flag: '🇮🇹', rank: 145, tuition_usd: 4000, living_cost_usd: 10000, scholarships: true, ielts_min: 6.0, gre_required: false },
-  { id: 'unibo', short_name: 'Unibo', name: 'University of Bologna', country: 'IT', flag: '🇮🇹', rank: 120, tuition_usd: 4000, living_cost_usd: 9000, scholarships: true, ielts_min: 6.0, gre_required: false },
-  { id: 'tuwien', short_name: 'TU Vienna', name: 'TU Wien', country: 'AT', flag: '🇦🇹', rank: 180, tuition_usd: 0, living_cost_usd: 11000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'uniwien', short_name: 'Uni Wien', name: 'University of Vienna', country: 'AT', flag: '🇦🇹', rank: 150, tuition_usd: 0, living_cost_usd: 11000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'uw', short_name: 'UW', name: 'University of Warsaw', country: 'PL', flag: '🇵🇱', rank: 260, tuition_usd: 5000, living_cost_usd: 8000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'jagiellonian', short_name: 'JU', name: 'Jagiellonian University', country: 'PL', flag: '🇵🇱', rank: 240, tuition_usd: 4500, living_cost_usd: 7500, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'nova', short_name: 'NOVA', name: 'NOVA University Lisbon', country: 'PT', flag: '🇵🇹', rank: 300, tuition_usd: 6000, living_cost_usd: 9000, scholarships: true, ielts_min: 6.5, gre_required: false },
+  { id: 'mit', short_name: 'MIT', name: 'Massachusetts Institute of Technology', country: 'US', rank: 1, tuition_usd: 55790, living_cost_usd: 18000, scholarships: true, ielts_min: 7.0, gre_required: true },
+  { id: 'stanford', short_name: 'Stanford', name: 'Stanford University', country: 'US', rank: 3, tuition_usd: 56169, living_cost_usd: 22000, scholarships: true, ielts_min: 7.0, gre_required: true },
+  { id: 'harvard', short_name: 'Harvard', name: 'Harvard University', country: 'US', rank: 2, tuition_usd: 55807, living_cost_usd: 20000, scholarships: true, ielts_min: 7.5, gre_required: false },
+  { id: 'oxford', short_name: 'Oxford', name: 'University of Oxford', country: 'UK', rank: 2, tuition_usd: 35000, living_cost_usd: 15000, scholarships: true, ielts_min: 7.0, gre_required: false },
+  { id: 'cambridge', short_name: 'Cambridge', name: 'University of Cambridge', country: 'UK', rank: 3, tuition_usd: 34000, living_cost_usd: 14000, scholarships: true, ielts_min: 7.0, gre_required: false },
+  { id: 'imperial', short_name: 'Imperial', name: 'Imperial College London', country: 'UK', rank: 10, tuition_usd: 33000, living_cost_usd: 15000, scholarships: true, ielts_min: 6.5, gre_required: false },
+  { id: 'tum', short_name: 'TUM', name: 'Technical University of Munich', country: 'DE', rank: 50, tuition_usd: 0, living_cost_usd: 12000, scholarships: true, ielts_min: 6.5, gre_required: false },
+  { id: 'lmu', short_name: 'LMU Munich', name: 'Ludwig Maximilian University of Munich', country: 'DE', rank: 45, tuition_usd: 0, living_cost_usd: 12000, scholarships: true, ielts_min: 6.5, gre_required: false },
+  { id: 'polimi', short_name: 'Polimi', name: 'Polytechnic University of Milan', country: 'IT', rank: 145, tuition_usd: 4000, living_cost_usd: 10000, scholarships: true, ielts_min: 6.0, gre_required: false },
+  { id: 'unibo', short_name: 'Unibo', name: 'University of Bologna', country: 'IT', rank: 120, tuition_usd: 4000, living_cost_usd: 9000, scholarships: true, ielts_min: 6.0, gre_required: false },
+  { id: 'tuwien', short_name: 'TU Vienna', name: 'TU Wien', country: 'AT', rank: 180, tuition_usd: 0, living_cost_usd: 11000, scholarships: true, ielts_min: 6.5, gre_required: false },
+  { id: 'uniwien', short_name: 'Uni Wien', name: 'University of Vienna', country: 'AT', rank: 150, tuition_usd: 0, living_cost_usd: 11000, scholarships: true, ielts_min: 6.5, gre_required: false },
+  { id: 'uw', short_name: 'UW', name: 'University of Warsaw', country: 'PL', rank: 260, tuition_usd: 5000, living_cost_usd: 8000, scholarships: true, ielts_min: 6.5, gre_required: false },
+  { id: 'jagiellonian', short_name: 'JU', name: 'Jagiellonian University', country: 'PL', rank: 240, tuition_usd: 4500, living_cost_usd: 7500, scholarships: true, ielts_min: 6.5, gre_required: false },
+  { id: 'nova', short_name: 'NOVA', name: 'NOVA University Lisbon', country: 'PT', rank: 300, tuition_usd: 6000, living_cost_usd: 9000, scholarships: true, ielts_min: 6.5, gre_required: false },
 ];
 
 const SCHOLARSHIP_TYPES = [
@@ -215,8 +215,8 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                 <div key={uni.id} className="rounded-2xl border border-black/5 p-4 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition-all">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shrink-0">
-                        {uni.flag}
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-sm font-bold text-white shrink-0">
+                        {uni.short_name?.slice(0, 2)}
                       </div>
                       <div className="min-w-0">
                         <Link to={`/university/${uni.id}`} className="font-bold text-[14px] text-[hsl(var(--blue-900))] hover:underline block truncate">

@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import {
   Mic, MicOff, ChevronRight, Loader2, Clock, CheckCircle2,
   XCircle, AlertCircle, RefreshCw, Award, Shield, ChevronLeft,
-  BarChart3, Star, FileText, MessageSquare, Sparkles,
+  BarChart3, Star, FileText, MessageSquare, Sparkles, Flag,
 } from 'lucide-react';
 
 const INTERVIEW_QUESTIONS = {
@@ -65,11 +65,11 @@ const INTERVIEW_QUESTIONS = {
 };
 
 const COUNTRY_LIST = [
-  { id: 'us', label: 'US F-1', flag: '🇺🇸', color: 'bg-blue-500' },
-  { id: 'uk', label: 'UK Tier 4', flag: '🇬🇧', color: 'bg-red-500' },
-  { id: 'schengen', label: 'Schengen', flag: '🇪🇺', color: 'bg-amber-500' },
-  { id: 'canada', label: 'Canada', flag: '🇨🇦', color: 'bg-red-600' },
-  { id: 'australia', label: 'Australia', flag: '🇦🇺', color: 'bg-emerald-500' },
+  { id: 'us', label: 'US F-1', flag: '', color: 'bg-blue-500' },
+  { id: 'uk', label: 'UK Tier 4', flag: '', color: 'bg-red-500' },
+  { id: 'schengen', label: 'Schengen', flag: '', color: 'bg-amber-500' },
+  { id: 'canada', label: 'Canada', flag: '', color: 'bg-red-600' },
+  { id: 'australia', label: 'Australia', flag: '', color: 'bg-emerald-500' },
 ];
 
 const SCORE_CRITERIA = [
@@ -193,7 +193,7 @@ export default function VisaInterview() {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-3xl">{c.flag}</span>
+                        <span className="text-3xl">{c.flag || <Flag className="w-7 h-7 text-[hsl(var(--blue-700))]" />}</span>
                         <div>
                           <div className="font-bold text-[hsl(var(--blue-900))]">{c.label}</div>
                           <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{INTERVIEW_QUESTIONS[c.id]?.questions.length} questions</div>
@@ -244,7 +244,7 @@ export default function VisaInterview() {
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8 mb-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">{COUNTRY_LIST.find(c => c.id === country)?.flag}</span>
+                  <span className="text-3xl">{COUNTRY_LIST.find(c => c.id === country)?.flag || <Flag className="w-7 h-7 text-[hsl(var(--blue-700))]" />}</span>
                   <div>
                     <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))]">{INTERVIEW_QUESTIONS[country]?.name}</div>
                     <div className="text-[13px] text-[hsl(var(--blue-900))]/60">Consular Officer</div>

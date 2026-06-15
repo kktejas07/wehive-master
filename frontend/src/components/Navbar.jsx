@@ -42,7 +42,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
               )
             }
           >
-            {t(item.label, item.label)}
+            {t('nav.' + item.id, item.label)}
           </NavLink>
         ))}
       </nav>
@@ -61,7 +61,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
               : 'hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]'
           )}
         >
-          {t(item.label, item.label)}
+          {t('nav.' + item.id, item.label)}
         </Link>
       ))}
     </div>

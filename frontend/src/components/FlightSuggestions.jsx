@@ -14,8 +14,8 @@ import { inr } from '../lib/utils';
 
 const FALLBACK = {
   ae: [
-    { id: 'ae-c', kind: 'cheapest', airline: 'IndiGo',  code: '6E', logo: '🇮🇳', from: 'BLR', to: 'DXB', stops: 0, duration_h: 4.0, price_inr: 19500 },
-    { id: 'ae-p', kind: 'popular',  airline: 'Emirates', code: 'EK', logo: '🇦🇪', from: 'BLR', to: 'DXB', stops: 0, duration_h: 4.1, price_inr: 28500 },
+    { id: 'ae-c', kind: 'cheapest', airline: 'IndiGo',  code: '6E', logo: '', from: 'BLR', to: 'DXB', stops: 0, duration_h: 4.0, price_inr: 19500 },
+    { id: 'ae-p', kind: 'popular',  airline: 'Emirates', code: 'EK', logo: '', from: 'BLR', to: 'DXB', stops: 0, duration_h: 4.1, price_inr: 28500 },
   ],
 };
 
@@ -48,7 +48,7 @@ function FlightCard({ flight, index }) {
         <Icon className="w-3 h-3" /> {meta.label}
       </div>
       <div className="mt-3 flex items-center gap-3">
-        <span className="text-2xl leading-none">{flight.logo || '✈️'}</span>
+        {flight.logo ? <span className="text-2xl leading-none">{flight.logo}</span> : <Plane className="w-6 h-6 text-[hsl(var(--blue-900))]/40" />}
         <div className="min-w-0">
           <div className="text-[15px] font-bold text-[hsl(var(--blue-900))] truncate">
             {flight.airline}

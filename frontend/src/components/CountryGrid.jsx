@@ -483,12 +483,12 @@ function EmptyResults() {
 
 function EventsBoard() {
   const events = [
-    { id: 'e1', city: 'Tokyo', country: 'Japan', flag: '🇯🇵', title: 'Cherry Blossom Festival', date: 'Mar – Apr', img: 'https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?w=800&q=80' },
-    { id: 'e2', city: 'Munich', country: 'Germany', flag: '🇩🇪', title: 'Oktoberfest', date: 'Sep 20 – Oct 5', img: 'https://images.unsplash.com/photo-1557067175-db3159d938ac?w=800&q=80' },
-    { id: 'e3', city: 'Rio', country: 'Brazil', flag: '🇧🇷', title: 'Carnival', date: 'Feb 14 – 20', img: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&q=80' },
-    { id: 'e4', city: 'Dubai', country: 'UAE', flag: '🇦🇪', title: 'Shopping Festival', date: 'Dec – Jan', img: 'https://images.unsplash.com/photo-1677632227671-cc52e6f7f130?w=800&q=80' },
-    { id: 'e5', city: 'Edinburgh', country: 'UK', flag: '🇬🇧', title: 'Fringe Festival', date: 'Aug 1 – 25', img: 'https://images.unsplash.com/photo-1665573456818-67a4c48110c0?w=800&q=80' },
-    { id: 'e6', city: 'Paris', country: 'France', flag: '🇫🇷', title: 'Bastille Day', date: 'Jul 14', img: 'https://images.unsplash.com/photo-1570097703229-b195d6dd291f?w=800&q=80' },
+    { id: 'e1', city: 'Tokyo', country: 'Japan', title: 'Cherry Blossom Festival', date: 'Mar - Apr', img: 'https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?w=800&q=80' },
+    { id: 'e2', city: 'Munich', country: 'Germany', title: 'Oktoberfest', date: 'Sep 20 - Oct 5', img: 'https://images.unsplash.com/photo-1557067175-db3159d938ac?w=800&q=80' },
+    { id: 'e3', city: 'Rio', country: 'Brazil', title: 'Carnival', date: 'Feb 14 - 20', img: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&q=80' },
+    { id: 'e4', city: 'Dubai', country: 'UAE', title: 'Shopping Festival', date: 'Dec - Jan', img: 'https://images.unsplash.com/photo-1677632227671-cc52e6f7f130?w=800&q=80' },
+    { id: 'e5', city: 'Edinburgh', country: 'UK', title: 'Fringe Festival', date: 'Aug 1 - 25', img: 'https://images.unsplash.com/photo-1665573456818-67a4c48110c0?w=800&q=80' },
+    { id: 'e6', city: 'Paris', country: 'France', title: 'Bastille Day', date: 'Jul 14', img: 'https://images.unsplash.com/photo-1570097703229-b195d6dd291f?w=800&q=80' },
   ];
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -498,7 +498,7 @@ function EventsBoard() {
             <img src={e.img} alt={e.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
             <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-[hsl(var(--blue-900))]">
-              <span>{e.flag}</span> {e.city}
+              <span>{e.country.slice(0,2).toUpperCase()}</span> {e.city}
             </div>
           </div>
           <div className="p-5">

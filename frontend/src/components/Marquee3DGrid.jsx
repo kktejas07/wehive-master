@@ -4,18 +4,18 @@ import { Globe, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const COUNTRIES_3D = [
-  { id: 'us', name: 'USA', flag: '🇺🇸', visa: 'Tourist/Business', processing: '3-5 days', color: '#3B82F6' },
-  { id: 'uk', name: 'United Kingdom', flag: '🇬🇧', visa: 'Tourist/Student', processing: '5-10 days', color: '#8B5CF6' },
-  { id: 'canada', name: 'Canada', flag: '🇨🇦', visa: 'Tourist/Student', processing: '7-14 days', color: '#EF4444' },
-  { id: 'australia', name: 'Australia', flag: '🇦🇺', visa: 'Tourist/Work', processing: '5-7 days', color: '#10B981' },
-  { id: 'japan', name: 'Japan', flag: '🇯🇵', visa: 'Tourist/Business', processing: '4-6 days', color: '#F59E0B' },
-  { id: 'germany', name: 'Germany', flag: '🇩🇪', visa: 'Schengen', processing: '5-8 days', color: '#6366F1' },
-  { id: 'france', name: 'France', flag: '🇫🇷', visa: 'Schengen', processing: '5-8 days', color: '#EC4899' },
-  { id: 'uae', name: 'UAE', flag: '🇦🇪', visa: 'Tourist/Transit', processing: '2-4 days', color: '#14B8A6' },
-  { id: 'singapore', name: 'Singapore', flag: '🇸🇬', visa: 'Tourist/Business', processing: '1-3 days', color: '#F97316' },
-  { id: 'newzealand', name: 'New Zealand', flag: '🇳🇿', visa: 'Tourist/Student', processing: '7-12 days', color: '#06B6D4' },
-  { id: 'switzerland', name: 'Switzerland', flag: '🇨🇭', visa: 'Schengen', processing: '5-7 days', color: '#84CC16' },
-  { id: 'italy', name: 'Italy', flag: '🇮🇹', visa: 'Schengen', processing: '5-10 days', color: '#22C55E' },
+  { id: 'us', name: 'USA', visa: 'Tourist/Business', processing: '3-5 days', color: '#3B82F6' },
+  { id: 'uk', name: 'United Kingdom', visa: 'Tourist/Student', processing: '5-10 days', color: '#8B5CF6' },
+  { id: 'canada', name: 'Canada', visa: 'Tourist/Student', processing: '7-14 days', color: '#EF4444' },
+  { id: 'australia', name: 'Australia', visa: 'Tourist/Work', processing: '5-7 days', color: '#10B981' },
+  { id: 'japan', name: 'Japan', visa: 'Tourist/Business', processing: '4-6 days', color: '#F59E0B' },
+  { id: 'germany', name: 'Germany', visa: 'Schengen', processing: '5-8 days', color: '#6366F1' },
+  { id: 'france', name: 'France', visa: 'Schengen', processing: '5-8 days', color: '#EC4899' },
+  { id: 'uae', name: 'UAE', visa: 'Tourist/Transit', processing: '2-4 days', color: '#14B8A6' },
+  { id: 'singapore', name: 'Singapore', visa: 'Tourist/Business', processing: '1-3 days', color: '#F97316' },
+  { id: 'newzealand', name: 'New Zealand', visa: 'Tourist/Student', processing: '7-12 days', color: '#06B6D4' },
+  { id: 'switzerland', name: 'Switzerland', visa: 'Schengen', processing: '5-7 days', color: '#84CC16' },
+  { id: 'italy', name: 'Italy', visa: 'Schengen', processing: '5-10 days', color: '#22C55E' },
 ];
 
 function CountryCard3D({ country, index }) {
@@ -48,8 +48,8 @@ function CountryCard3D({ country, index }) {
               backgroundImage: `radial-gradient(circle at 30% 50%, ${country.color}40 0%, transparent 50%)`,
             }}
           />
-          <span className="text-6xl transform group-hover:scale-110 transition-transform duration-300">
-            {country.flag}
+          <span className="text-6xl transform group-hover:scale-110 transition-transform duration-300 opacity-20 font-bold">
+            {country.name[0]}
           </span>
           <div className="absolute top-3 right-3">
             <div

@@ -153,7 +153,7 @@ export default function OverviewTab() {
               {top_countries.map((c, idx) => (
                 <li key={c.id} className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5">
                   <span className="text-[11px] font-bold text-slate-500 w-4">{idx + 1}</span>
-                  <span className="text-lg leading-none">{c.flag || '🌐'}</span>
+                  <span className="text-lg leading-none">{c.flag || ''}</span>
                   <span className="flex-1 text-[13.5px] font-bold text-white truncate">{c.name}</span>
                   <span className="text-[12px] font-bold text-[hsl(var(--accent))] inline-flex items-center gap-0.5">
                     {c.count} <ArrowUpRight className="w-3 h-3" />

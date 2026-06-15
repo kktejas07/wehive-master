@@ -15,12 +15,13 @@ import {
   CheckCircle2,
   FileText,
   Sparkles,
+  Globe,
 } from 'lucide-react';
 
 const POPULAR_VISAS = [
   {
     country: 'USA',
-    flag: '🇺🇸',
+    flag: '',
     visaType: 'B1/B2 Tourist',
     processing: '3-5 days',
     price: '₹15,999',
@@ -31,7 +32,7 @@ const POPULAR_VISAS = [
   },
   {
     country: 'UK',
-    flag: '🇬🇧',
+    flag: '',
     visaType: 'Standard Visitor',
     processing: '5-10 days',
     price: '₹12,499',
@@ -42,7 +43,7 @@ const POPULAR_VISAS = [
   },
   {
     country: 'Australia',
-    flag: '🇦🇺',
+    flag: '',
     visaType: 'Subclass 600',
     processing: '5-7 days',
     price: '₹18,999',
@@ -53,7 +54,7 @@ const POPULAR_VISAS = [
   },
   {
     country: 'Japan',
-    flag: '🇯🇵',
+    flag: '',
     visaType: 'Tourist Visa',
     processing: '4-6 days',
     price: '₹8,999',
@@ -64,7 +65,7 @@ const POPULAR_VISAS = [
   },
   {
     country: 'Canada',
-    flag: '🇨🇦',
+    flag: '',
     visaType: 'Visitor Visa',
     processing: '7-14 days',
     price: '₹14,999',
@@ -75,7 +76,7 @@ const POPULAR_VISAS = [
   },
   {
     country: 'UAE',
-    flag: '🇦🇪',
+    flag: '',
     visaType: 'Tourist/Transit',
     processing: '2-4 days',
     price: '₹6,999',
@@ -86,7 +87,7 @@ const POPULAR_VISAS = [
   },
   {
     country: 'Germany',
-    flag: '🇩🇪',
+    flag: '',
     visaType: 'Schengen Visa',
     processing: '5-8 days',
     price: '₹11,999',
@@ -97,7 +98,7 @@ const POPULAR_VISAS = [
   },
   {
     country: 'Singapore',
-    flag: '🇸🇬',
+    flag: '',
     visaType: 'Tourist Visa',
     processing: '1-3 days',
     price: '₹4,999',
@@ -128,7 +129,7 @@ function VisaCard({ visa, index, onClick }) {
       )}
       <div className={`h-20 bg-gradient-to-br ${visa.gradient} flex items-center justify-center relative overflow-hidden`}>
         <div className="absolute inset-0 bg-black/10" />
-        <span className="text-5xl">{visa.flag}</span>
+        {visa.flag ? <span className="text-5xl">{visa.flag}</span> : <Globe className="w-10 h-10 text-white/60" />}
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between">
