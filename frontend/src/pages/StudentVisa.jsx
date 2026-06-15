@@ -110,6 +110,13 @@ function getDisplayCourses(popularCourses = []) {
   return popularCourses.map(c => COURSE_ID_TO_NAME[c] || c);
 }
 
+function getInitials(name) {
+  if (!name) return '?';
+  const words = name.split(/\s+/).filter(w => w.length > 0);
+  if (words.length === 1) return name.slice(0, 2).toUpperCase();
+  return words.slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
 function CountryCard({ c, onSelect, selected }) {
   const meta = c.student_meta || {};
   return (
@@ -323,13 +330,17 @@ export default function StudentVisa() {
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-black/5">
-            <img
-              src={uni.website ? `https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128` : ''}
-              alt={uni.short_name}
-              className="w-8 h-8 object-contain"
-              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span style='font-size:20px'>${uni.flag || countryFlag(uni.country) || '?'}</span>`; }}
-            />
+          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center overflow-hidden">
+            {uni.website ? (
+              <img
+                src={`https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128`}
+                alt={uni.short_name}
+                className="w-8 h-8 object-contain"
+                onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = getInitials(uni.short_name); }}
+              />
+            ) : (
+              getInitials(uni.short_name)
+            )}
           </div>
                           <div>
                             <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
@@ -411,13 +422,17 @@ export default function StudentVisa() {
                   className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-black/5">
-                    <img
-                      src={uni.website ? `https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128` : ''}
-                      alt={uni.short_name}
-                      className="w-8 h-8 object-contain"
-                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span style='font-size:20px'>${uni.flag || countryFlag(uni.country) || '?'}</span>`; }}
-                    />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center overflow-hidden shrink-0">
+                    {uni.website ? (
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128`}
+                        alt={uni.short_name}
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = getInitials(uni.short_name); }}
+                      />
+                    ) : (
+                      getInitials(uni.short_name)
+                    )}
                   </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
