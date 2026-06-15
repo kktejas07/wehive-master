@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { inr, countryFlag } from '../lib/utils';
+import { inr, countryFlag, universityLogo } from '../lib/utils';
 import {
   GraduationCap, Clock, Briefcase, Globe2, Calendar, Award,
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
@@ -323,8 +323,13 @@ export default function StudentVisa() {
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-xl">
-            {uni.flag || countryFlag(uni.country) || uni.short_name?.[0] || '?'}
+          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-black/5">
+            <img
+              src={universityLogo(uni.id, uni.short_name, uni.country)}
+              alt={uni.short_name}
+              className="w-8 h-8 object-contain"
+              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class='text-lg'>${uni.flag || '?'}</span>`; }}
+            />
           </div>
                           <div>
                             <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
@@ -406,8 +411,13 @@ export default function StudentVisa() {
                   className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-xl shrink-0">
-                    {uni.flag || countryFlag(uni.country) || uni.short_name?.[0] || '?'}
+                  <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 border border-black/5">
+                    <img
+                      src={universityLogo(uni.id, uni.short_name, uni.country)}
+                      alt={uni.short_name}
+                      className="w-8 h-8 object-contain"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class='text-lg'>${uni.flag || '?'}</span>`; }}
+                    />
                   </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
