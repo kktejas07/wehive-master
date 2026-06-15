@@ -1,37 +1,38 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { landmarkFor } from '../lib/landmarks';
 
 const SCHENGEN_COUNTRIES = [
-  { id: 'at', name: 'AUSTRIA', img: 'https://images.unsplash.com/photo-1580137197581-df2bb346a786?w=400&q=80' },
-  { id: 'be', name: 'BELGIUM', img: 'https://images.unsplash.com/photo-1559561853-08451507a579?w=400&q=80' },
-  { id: 'bg', name: 'BULGARIA', img: 'https://images.unsplash.com/photo-1590477331040-6eaa1f4e1697?w=400&q=80' },
-  { id: 'hr', name: 'CROATIA', img: 'https://images.unsplash.com/photo-1555990793-4cfbe6d2e7b4?w=400&q=80' },
-  { id: 'cz', name: 'CZECH REP.', img: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=400&q=80' },
-  { id: 'dk', name: 'DENMARK', img: 'https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?w=400&q=80' },
-  { id: 'ee', name: 'ESTONIA', img: 'https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=400&q=80' },
-  { id: 'fi', name: 'FINLAND', img: 'https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=400&q=80' },
-  { id: 'fr', name: 'FRANCE', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80' },
-  { id: 'de', name: 'GERMANY', img: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400&q=80' },
-  { id: 'gr', name: 'GREECE', img: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&q=80' },
-  { id: 'hu', name: 'HUNGARY', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
-  { id: 'is', name: 'ICELAND', img: 'https://images.unsplash.com/photo-1529963183134-61a90db47eaf?w=400&q=80' },
-  { id: 'it', name: 'ITALY', img: 'https://images.unsplash.com/photo-1525874684015-58379d421a52?w=400&q=80' },
-  { id: 'lv', name: 'LATVIA', img: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400&q=80' },
-  { id: 'li', name: 'LIECHTENSTEIN', img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80' },
-  { id: 'lt', name: 'LITHUANIA', img: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&q=80' },
-  { id: 'lu', name: 'LUXEMBOURG', img: 'https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?w=400&q=80' },
-  { id: 'mt', name: 'MALTA', img: 'https://images.unsplash.com/photo-1548862944-b6ece99de0a7?w=400&q=80' },
-  { id: 'nl', name: 'NETHERLANDS', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5702?w=400&q=80' },
-  { id: 'no', name: 'NORWAY', img: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&q=80' },
-  { id: 'pl', name: 'POLAND', img: 'https://images.unsplash.com/photo-1562883676-8c7feb83f09b?w=400&q=80' },
-  { id: 'pt', name: 'PORTUGAL', img: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=400&q=80' },
-  { id: 'ro', name: 'ROMANIA', img: 'https://images.unsplash.com/photo-1594131431372-eb0db4c15af2?w=400&q=80' },
-  { id: 'sk', name: 'SLOVAKIA', img: 'https://images.unsplash.com/photo-1576803226498-59a96f8a0b71?w=400&q=80' },
-  { id: 'si', name: 'SLOVENIA', img: 'https://images.unsplash.com/photo-1566127992631-137a642a90f4?w=400&q=80' },
-  { id: 'es', name: 'SPAIN', img: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=400&q=80' },
-  { id: 'se', name: 'SWEDEN', img: 'https://images.unsplash.com/photo-1508189860359-777d945909ef?w=400&q=80' },
-  { id: 'ch', name: 'SWITZERLAND', img: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=400&q=80' },
+  { id: 'at', name: 'AUSTRIA' },
+  { id: 'be', name: 'BELGIUM' },
+  { id: 'bg', name: 'BULGARIA' },
+  { id: 'hr', name: 'CROATIA' },
+  { id: 'cz', name: 'CZECH REP.' },
+  { id: 'dk', name: 'DENMARK' },
+  { id: 'ee', name: 'ESTONIA' },
+  { id: 'fi', name: 'FINLAND' },
+  { id: 'fr', name: 'FRANCE' },
+  { id: 'de', name: 'GERMANY' },
+  { id: 'gr', name: 'GREECE' },
+  { id: 'hu', name: 'HUNGARY' },
+  { id: 'is', name: 'ICELAND' },
+  { id: 'it', name: 'ITALY' },
+  { id: 'lv', name: 'LATVIA' },
+  { id: 'li', name: 'LIECHTENSTEIN' },
+  { id: 'lt', name: 'LITHUANIA' },
+  { id: 'lu', name: 'LUXEMBOURG' },
+  { id: 'mt', name: 'MALTA' },
+  { id: 'nl', name: 'NETHERLANDS' },
+  { id: 'no', name: 'NORWAY' },
+  { id: 'pl', name: 'POLAND' },
+  { id: 'pt', name: 'PORTUGAL' },
+  { id: 'ro', name: 'ROMANIA' },
+  { id: 'sk', name: 'SLOVAKIA' },
+  { id: 'si', name: 'SLOVENIA' },
+  { id: 'es', name: 'SPAIN' },
+  { id: 'se', name: 'SWEDEN' },
+  { id: 'ch', name: 'SWITZERLAND' },
 ];
 
 const N = SCHENGEN_COUNTRIES.length;
@@ -118,7 +119,7 @@ export default function SchengenCarousel() {
                   style={{ width: 210, height: 315 }}
                 >
                   <img
-                    src={country.img}
+                    src={landmarkFor(country) || ''}
                     alt={country.name}
                     className="absolute inset-0 w-full h-full object-cover"
                     loading="lazy"

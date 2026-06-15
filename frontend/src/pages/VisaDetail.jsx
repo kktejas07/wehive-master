@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { COUNTRIES } from '../data/mock';
-import FeeBreakdown from '../components/FeeBreakdown';
+import VisaPricingCard from '../components/visa/VisaPricingCard';
 import FlightSuggestions from '../components/FlightSuggestions';
 import ApplicationReviewModal from '../components/ApplicationReviewModal';
 import VisaBreadcrumb from '../components/visa/VisaBreadcrumb';
@@ -22,6 +22,11 @@ import AppointmentMonitor from '../components/visa/AppointmentMonitor';
 import GuidedFormSection from '../components/visa/GuidedFormSection';
 import InterviewPrep from '../components/visa/InterviewPrep';
 import EligibilityChecker from '../components/visa/EligibilityChecker';
+import TrustFeatures from '../components/visa/TrustFeatures';
+import OnTimeGuarantee from '../components/OnTimeGuarantee';
+import HowItWorks from '../components/HowItWorks';
+import ETATracker from '../components/visa/ETATracker';
+import CategorySuggestions from '../components/visa/CategorySuggestions';
 
 export default function VisaDetail() {
   const { id } = useParams();
@@ -111,10 +116,11 @@ export default function VisaDetail() {
           </div>
           <aside className="lg:col-span-5 space-y-6">
             {cat && (
-              <FeeBreakdown
+              <VisaPricingCard
                 category={cat}
                 country={country}
                 visaType={type}
+                onApply={onApply}
                 onApplicantsChange={setApplicants}
               />
             )}
@@ -123,6 +129,10 @@ export default function VisaDetail() {
         </div>
       </section>
 
+      <ETATracker country={country} />
+      <TrustFeatures countryName={country.name} />
+      <OnTimeGuarantee />
+      <HowItWorks />
       <VisaFaqSection countryName={country.name} />
       <VisaComparison countryName={country.name} />
       <AppointmentMonitor countryName={country.name} />
@@ -130,6 +140,7 @@ export default function VisaDetail() {
       <InterviewPrep countryName={country.name} />
       <EligibilityChecker countryName={country.name} />
       <FlightSuggestions country={country} />
+      <CategorySuggestions currentId={country.id} />
       <OtherCountries list={others} />
       <Footer />
 
