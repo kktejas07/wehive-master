@@ -113,8 +113,8 @@ export default function ProgramRecommender() {
     setSearched(true);
     try {
       const params = new URLSearchParams();
-      if (form.countries.length) params.set('country', form.countries[0]);
-      if (form.courses.length) params.set('course', form.courses[0]);
+      if (form.countries.length) params.set('country', form.countries.join(','));
+      if (form.courses.length) params.set('course', form.courses.join(','));
       params.set('limit', '200');
       const res = await axios.get(`${API}/universities?${params}`);
       let unis = res.data || [];
