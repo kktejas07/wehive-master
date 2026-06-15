@@ -336,10 +336,14 @@ export default function StudentVisa() {
                 src={`https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128`}
                 alt={uni.short_name}
                 className="w-8 h-8 object-contain"
-                onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = getInitials(uni.short_name); }}
+                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`; }}
               />
             ) : (
-              getInitials(uni.short_name)
+              <img
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`}
+                alt={uni.short_name}
+                className="w-full h-full object-cover"
+              />
             )}
           </div>
                           <div>
@@ -428,10 +432,14 @@ export default function StudentVisa() {
                         src={`https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128`}
                         alt={uni.short_name}
                         className="w-8 h-8 object-contain"
-                        onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = getInitials(uni.short_name); }}
+                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`; }}
                       />
                     ) : (
-                      getInitials(uni.short_name)
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`}
+                        alt={uni.short_name}
+                        className="w-full h-full object-cover"
+                      />
                     )}
                   </div>
                     <div className="min-w-0 flex-1">
