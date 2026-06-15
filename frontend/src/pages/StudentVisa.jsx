@@ -323,8 +323,8 @@ export default function StudentVisa() {
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-2xl">
-            {countryFlag(uni.country) || uni.short_name?.[0] || '?'}
+          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-white text-sm font-bold">
+            {uni.short_name ? uni.short_name.split(' ').map(w => w[0]).join('').slice(0, 3).toUpperCase() : '?'}
           </div>
                           <div>
                             <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
@@ -406,8 +406,8 @@ export default function StudentVisa() {
                   className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shrink-0">
-                    {countryFlag(uni.country) || uni.short_name?.[0] || '?'}
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white text-sm font-bold shrink-0">
+                    {uni.short_name ? uni.short_name.split(' ').map(w => w[0]).join('').slice(0, 3).toUpperCase() : '?'}
                   </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
