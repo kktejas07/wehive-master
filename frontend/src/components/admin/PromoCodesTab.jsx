@@ -20,7 +20,7 @@ const SEASONS = [
 const VISA_TYPES = ['Tourist', 'Business', 'Student', 'Work', 'Transit', 'Medical'];
 
 export default function PromoCodesTab() {
-  const { getToken } = useAdminAuth();
+  const { token: adminToken } = useAdminAuth();
   const { toast } = useToast();
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,8 +37,7 @@ export default function PromoCodesTab() {
 
   const load = async () => {
     try {
-      const token = getToken();
-      const r = await axios.get(`${API}/promotions`, { headers: { Authorization: `Bearer ${token}` }, params: { limit: pageSize, skip } });
+      const r = await axios.get(`${API}/promotions`, { headers: { Authorization: `Bearer ${adminToken}` }, params: { limit: pageSize, skip } });
       setPromos(r.data.items || []);
       setTotal(r.data.total || (r.data.items || []).length);
     } catch {} finally { setLoading(false); }
@@ -47,11 +46,10 @@ export default function PromoCodesTab() {
   useEffect(() => { load(); }, [skip]);
 
   const handleCreate = async () => {
-    const token = getToken();
     try {
       await axios.post(`${API}/promotions/create`, {
         ...form, expires_at: new Date(form.expires_at).toISOString(),
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      }, { headers: { Authorization: `Bearer ${adminToken}` } });
       toast({ title: 'Promo code created' });
       setShowForm(false);
       setForm({ code: '', description: '', discount_percent: 10, discount_fixed: 0, max_uses: 100, expires_at: '', season: 'all', min_cart_value: 0, applicable_visa_types: ['Tourist', 'Business', 'Student', 'Work'] });
@@ -62,14 +60,12 @@ export default function PromoCodesTab() {
   };
 
   const handleToggle = async (code) => {
-    const token = getToken();
-    await axios.put(`${API}/promotions/${code}/toggle`, {}, { headers: { Authorization: `Bearer ${token}` } });
+    await axios.put(`${API}/promotions/${code}/toggle`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
     load();
   };
 
   const handleDelete = async (code) => {
-    const token = getToken();
-    await axios.delete(`${API}/promotions/${code}`, { headers: { Authorization: `Bearer ${token}` } });
+    await axios.delete(`${API}/promotions/${code}`, { headers: { Authorization: `Bearer ${adminToken}` } });
     toast({ title: 'Promo code deleted' });
     load();
   };

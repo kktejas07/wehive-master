@@ -14,11 +14,12 @@ from auth_utils import get_current_user
 from config import CONSULTANT_NAME, CONSULTANT_AUTO_REPLY
 from db import db, applications
 from serializers import serialize_doc
+_serialize = serialize_doc
 import storage as r2
 
 router = APIRouter(prefix='/users/me/applications', tags=['applications'])
 
-UPLOAD_ROOT = Path('/app/backend/uploads')
+UPLOAD_ROOT = Path(os.environ.get('UPLOAD_DIR', Path(__file__).parent / 'uploads'))
 UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10MB
 ALLOWED_MIME = {

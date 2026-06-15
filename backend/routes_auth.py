@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
 import json
@@ -127,10 +128,20 @@ async def send_otp(req: SendOtpRequest):
     delivered = False
     channel_used = kind
 
-    if kind != 'email':
-        raise HTTPException(status_code=400, detail='Only email OTP is supported')
-    from email_otp_service import send_otp_email
-    delivered = await send_otp_email(identifier, otp_code, req.purpose)
+    channel_mode = os.environ.get('OTP_CHANNEL', 'mock')
+    dev_code = None
+    if channel_mode == 'mock':
+        delivered = True
+        channel_used = 'mock'
+        dev_code = os.environ.get('MOCK_OTP_CODE', '123456')
+        # Re-store with the mock code so verify-otp works
+        from otp_service import store_otp as store_mock
+        await store_mock(identifier, channel_used, dev_code, purpose=req.purpose)
+    elif kind == 'email':
+        from email_otp_service import send_otp_email
+        delivered = await send_otp_email(identifier, otp_code, req.purpose)
+    else:
+        raise HTTPException(status_code=400, detail=f'Unsupported OTP channel: {kind}')
 
     if not delivered:
         raise HTTPException(status_code=400, detail=f'Failed to deliver OTP via {channel_used}. Check provider configuration.')
@@ -139,7 +150,7 @@ async def send_otp(req: SendOtpRequest):
         sent=True,
         channel=channel_used,
         masked=mask(identifier),
-        dev_code=None,
+        dev_code=dev_code,
         ttl_seconds=OTP_TTL_MIN * 60,
     )
 

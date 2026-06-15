@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, GraduationCap, DollarSign, Globe, Star, ArrowRight } from 'lucide-react';
+import { Sparkles, Loader2, GraduationCap, DollarSign, Globe, Star, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useToast } from '../hooks/use-toast';
 import { API } from '../context/AuthContext';
 import axios from 'axios';
 
@@ -94,6 +95,7 @@ function UniCard({ uni, rank }) {
 }
 
 export default function ProgramRecommender() {
+  const { toast } = useToast();
   const [form, setForm] = useState({
     courses: [],
     countries: [],
@@ -129,7 +131,9 @@ export default function ProgramRecommender() {
         .sort((a, b) => b.match_score - a.match_score)
         .slice(0, 8);
       setResults(unis);
-    } catch {
+    } catch (err) {
+      console.error('University API unavailable, using fallback:', err);
+      toast({ title: 'API unavailable', description: 'Showing sample universities. Check that the backend is running.', variant: 'destructive' });
       let unis = SAMPLE_UNIVERSITIES
         .filter(u => !form.countries.length || form.countries.includes(u.country))
         .filter(u => !form.courses.length || form.courses.some(c => (u.courses || []).includes(c)))

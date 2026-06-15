@@ -515,50 +515,68 @@ async def fetch_hipolabs(country_name: str, timeout: float = 15.0) -> list[dict]
 
 
 async def seed() -> dict:
-    # --- 1. Upsert static data -----------------------------------------------
+    # --- 1. Upsert static data (dedup by name+country) ------------------------
     static_count = 0
+    seen_names: set[tuple[str, str]] = set()
     for u in _STATIC:
+        name_key = ((u.get('name') or '').strip().lower(), (u.get('country') or '').strip().lower())
+        if name_key in seen_names:
+            continue
+        seen_names.add(name_key)
         doc = {**u, '_source': 'static'}
         await universities_col.update_one({'id': doc['id']}, {'$set': doc}, upsert=True)
         static_count += 1
 
     # --- 2. Pull new countries from HiPolabs ---------------------------------
+    # Normalize static country codes (e.g. 'uk') to ISO alpha-2 (e.g. 'gb')
+    COUNTRY_CODE_MAP = {'uk': 'gb'}
     api_count = 0
     for country_code, country_name, flag, default_tuition, top_list in EXTRA_COUNTRIES:
         cc_lower = country_code.lower()
-        # Skip if already seeded (static data covers this country)
-        existing = await universities_col.count_documents({'country': cc_lower})
+        # Also look up any aliased country codes from static data
+        cc_aliases = [k for k, v in COUNTRY_CODE_MAP.items() if v == cc_lower]
+        cc_query = {'$in': [cc_lower] + cc_aliases}
+        existing = await universities_col.count_documents({'country': cc_query})
         if existing >= len(top_list):
-            # Country already has at least as many docs as top_list — skip API call
-            # but still ensure top-ranked ones are present
-            pass
-
-        try:
-            raw_list = await fetch_hipolabs(country_name)
-        except Exception:
             raw_list = []
+        else:
+            try:
+                raw_list = await fetch_hipolabs(country_name)
+            except Exception:
+                raw_list = []
 
         top_names = {t['name'].lower(): t for t in top_list}
 
+        # Pre-fetch existing names in this country (including aliased codes) for dedup
+        existing_names = set()
+        async for u in universities_col.find({'country': cc_query}, {'name': 1}):
+            existing_names.add((u.get('name') or '').strip().lower())
+
         for raw in raw_list:
             name_lower = raw['name'].lower()
+            if name_lower in existing_names:
+                api_count += 1
+                continue
             top_override = top_names.get(name_lower)
             doc = _enrich_hipolabs(raw, cc_lower, country_name, flag, default_tuition, top_override)
             await universities_col.update_one({'id': doc['id']}, {'$set': doc}, upsert=True)
             api_count += 1
+            existing_names.add(name_lower)
 
         # Ensure top-ranked entries exist even if HiPolabs didn't return them
         for top in top_list:
+            top_name = top['name'].strip().lower()
+            if top_name in existing_names:
+                continue
             doc_id = _slug(top['name'], cc_lower)
-            existing_top = await universities_col.find_one({'id': doc_id})
-            if not existing_top:
-                enriched = _enrich_hipolabs(
-                    {'name': top['name'], 'state-province': None, 'web_pages': []},
-                    cc_lower, country_name, flag, default_tuition, top,
-                )
-                enriched['short_name'] = top.get('short_name', enriched['short_name'])
-                await universities_col.update_one({'id': doc_id}, {'$set': enriched}, upsert=True)
-                api_count += 1
+            enriched = _enrich_hipolabs(
+                {'name': top['name'], 'state-province': None, 'web_pages': []},
+                cc_lower, country_name, flag, default_tuition, top,
+            )
+            enriched['short_name'] = top.get('short_name', enriched['short_name'])
+            await universities_col.update_one({'id': doc_id}, {'$set': enriched}, upsert=True)
+            api_count += 1
+            existing_names.add(top_name)
 
     total = await universities_col.count_documents({})
     return {'static': static_count, 'api': api_count, 'total': total}

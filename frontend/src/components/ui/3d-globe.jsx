@@ -221,7 +221,7 @@ export function Globe3DDemo() {
       autoRotateSpeed={0.3}
       onMarkerClick={(marker) => setSelectedMarker(marker)}
       onMarkerHover={(marker) => {
-        if (marker) console.log('Hovering:', marker.label);
+        if (marker) {/* hover handler placeholder */}
       }}
     />
   );

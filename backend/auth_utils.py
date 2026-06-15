@@ -9,6 +9,13 @@ from fastapi import HTTPException, Header, status
 
 JWT_SECRET = os.environ.get('JWT_SECRET', 'change_me')
 JWT_ALG = os.environ.get('JWT_ALG', 'HS256')
+
+if JWT_SECRET == 'change_me':
+    import logging
+    logging.getLogger('wehive').warning(
+        'JWT_SECRET is set to the default value "change_me". '
+        'Set a strong random secret in production.'
+    )
 JWT_EXPIRES_HOURS = int(os.environ.get('JWT_EXPIRES_HOURS', '720'))
 OTP_LENGTH = int(os.environ.get('OTP_LENGTH', '6'))
 OTP_TTL_MIN = int(os.environ.get('OTP_TTL_MINUTES', '10'))

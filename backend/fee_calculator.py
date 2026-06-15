@@ -10,6 +10,7 @@ DEFAULT_BASE_FEE_BY_TYPE = {
 }
 DEFAULT_SURCHARGE_INR = 350
 DEFAULT_GST_RATE = 0.18
+FLAT_APPLICATION_FEE_INR = 20000
 
 
 def base_fee_for(visa_type: str, fallback: int = 3500) -> int:
