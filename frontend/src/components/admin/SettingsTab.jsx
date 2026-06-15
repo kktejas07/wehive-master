@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Loader2, Save, Eye, EyeOff, Info,
-  CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud, Key, ShieldCheck,
+  CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud, ShieldCheck,
   Palette, Upload as UploadIcon,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
@@ -121,7 +121,7 @@ function ToggleField({ label, tooltip, value, onChange }) {
   );
 }
 
-const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'google_oauth', 'general', 'notifications', 'r2', 'branding'];
+const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding'];
 
 const SECTION_META = {
   firebase: { label: 'Firebase', icon: Globe, title: 'Firebase Authentication' },
@@ -129,7 +129,6 @@ const SECTION_META = {
   smtp: { label: 'SMTP Email', icon: Mail, title: 'SMTP Email' },
   twilio: { label: 'Twilio', icon: Smartphone, title: 'Twilio SMS / WhatsApp' },
   auth_methods: { label: 'Auth Methods', icon: ShieldCheck, title: 'Authentication Methods' },
-  google_oauth: { label: 'Google OAuth', icon: Key, title: 'Google OAuth Client' },
   notifications: { label: 'Notifications', icon: Bell, title: 'Notifications (Telegram / Discord / WhatsApp)' },
   general: { label: 'General', icon: MessageSquare, title: 'General' },
   r2: { label: 'R2 Storage', icon: Cloud, title: 'Cloudflare R2 Image Storage' },
@@ -164,11 +163,6 @@ const FIELDS = {
     { type: 'secret', key: 'auth_token', label: 'Auth Token', tooltip: 'Twilio Auth Token — keep this confidential' },
     { type: 'text', key: 'sms_from', label: 'SMS From Number', tooltip: 'Twilio phone number for SMS e.g. +1234567890' },
     { type: 'text', key: 'whatsapp_from', label: 'WhatsApp From Number', tooltip: 'Twilio WhatsApp sender e.g. whatsapp:+14155238886' },
-  ],
-  google_oauth: [
-    { type: 'secret', key: 'client_id', label: 'Client ID', tooltip: 'Google OAuth 2.0 Client ID from Google Cloud Console → APIs & Services → Credentials' },
-    { type: 'secret', key: 'client_secret', label: 'Client Secret', tooltip: 'Google OAuth 2.0 Client Secret — keep confidential' },
-    { type: 'text', key: 'redirect_uri', label: 'Redirect URI', tooltip: 'OAuth redirect URI e.g. https://wehive.co.in/oauth/google/callback' },
   ],
   auth_methods: [
     { type: 'toggle', key: 'google_enabled', label: 'Google Sign-In', tooltip: 'Enable Google one-click sign-in via Firebase Auth (must be enabled in Firebase Console first)' },
