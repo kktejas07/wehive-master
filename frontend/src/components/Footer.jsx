@@ -34,7 +34,7 @@ function FooterBrand() {
         <img
           src={BRAND.logoWhite}
           alt={BRAND.name}
-          className="h-12 w-auto select-none brightness-0 invert"
+          className="h-16 sm:h-20 w-auto select-none brightness-0 invert"
           draggable={false}
         />
       </div>

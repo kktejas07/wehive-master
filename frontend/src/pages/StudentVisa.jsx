@@ -176,7 +176,8 @@ export default function StudentVisa() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [universities, setUniversities] = useState([]);
   const [showCourseSelector, setShowCourseSelector] = useState(false);
-  const [uniPage, setUniPage] = useState(6);
+  const [uniPage, setUniPage] = useState(1);
+  const UNI_PER_PAGE = 6;
 
   useEffect(() => {
     axios.get(`${API}/countries`, { params: { limit: 100 } })
@@ -198,7 +199,7 @@ export default function StudentVisa() {
       .catch(() => setUniversities([]));
   }, []);
 
-  useEffect(() => { setUniPage(6); }, [selected]);
+  useEffect(() => { setUniPage(1); }, [selected]);
 
   const selectedCountry = countries.find(c => c.id === selected) || countries[0];
   const studentMeta = selectedCountry?.student_meta || {};
@@ -322,8 +323,13 @@ export default function StudentVisa() {
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-2xl">
-            {countryFlag(uni.country) || uni.short_name?.[0] || '?'}
+          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-2xl overflow-hidden">
+            <img
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=random&color=fff&size=96&bold=true&format=png`}
+              alt={uni.short_name}
+              className="w-full h-full object-cover"
+              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.textContent = uni.short_name?.[0] || '?'; }}
+            />
           </div>
                           <div>
                             <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
@@ -399,14 +405,19 @@ export default function StudentVisa() {
           ) : (
             <>
               <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {universities.filter(u => u.country === selected).slice(0, uniPage).map((uni) => (
+                {universities.filter(u => u.country === selected).slice((uniPage - 1) * UNI_PER_PAGE, uniPage * UNI_PER_PAGE).map((uni) => (
                 <div
                   key={uni.id}
                   className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shrink-0">
-                    {countryFlag(uni.country) || uni.short_name?.[0] || '?'}
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shrink-0 overflow-hidden">
+                    <img
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=random&color=fff&size=96&bold=true&format=png`}
+                      alt={uni.short_name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.textContent = uni.short_name?.[0] || '?'; }}
+                    />
                   </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
@@ -452,28 +463,45 @@ export default function StudentVisa() {
                 </div>
               ))}
             </div>
-            {universities.filter(u => u.country === selected).length > uniPage && (
-              <div className="mt-6 flex items-center justify-center">
-                <Button
-                  variant="outline"
-                  onClick={() => setUniPage(p => p + 6)}
-                  className="rounded-full h-11 px-8"
-                >
-                  Show more universities <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            )}
+            {(() => {
+              const totalItems = universities.filter(u => u.country === selected).length;
+              const totalPages = Math.ceil(totalItems / UNI_PER_PAGE);
+              if (totalPages <= 1) return null;
+              const pages = [];
+              for (let i = 1; i <= totalPages; i++) pages.push(i);
+              return (
+                <div className="mt-6 flex items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={uniPage === 1}
+                    onClick={() => setUniPage(p => Math.max(1, p - 1))}
+                    className="rounded-full h-10 w-10 p-0"
+                  >
+                    <ChevronRight className="w-4 h-4 rotate-180" />
+                  </Button>
+                  {pages.map(p => (
+                    <Button
+                      key={p}
+                      variant={p === uniPage ? 'default' : 'outline'}
+                      onClick={() => setUniPage(p)}
+                      className={`rounded-full h-10 w-10 p-0 text-[13px] font-bold ${p === uniPage ? 'bg-[hsl(var(--blue-700))] text-white' : ''}`}
+                    >
+                      {p}
+                    </Button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    disabled={uniPage === totalPages}
+                    onClick={() => setUniPage(p => Math.min(totalPages, p + 1))}
+                    className="rounded-full h-10 w-10 p-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              );
+            })()}
             </>
           )}
-
-          <div className="mt-8 flex items-center justify-center">
-            <Link
-              to={`/universities?country=${selected}`}
-              className="inline-flex items-center gap-2 rounded-full bg-white border border-black/10 text-[hsl(var(--blue-700))] h-12 px-8 font-bold hover:border-[hsl(var(--blue-700))]/30 transition-all"
-            >
-              View all universities in {selectedCountry?.name} <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
         </div>
       </section>
 
