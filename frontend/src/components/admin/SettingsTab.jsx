@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Loader2, Save, Eye, EyeOff, Info,
-  CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud,
+  CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud, Key, ShieldCheck,
   Palette, Upload as UploadIcon,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
@@ -97,13 +97,39 @@ function Field({ label, tooltip, value, onChange, placeholder }) {
   );
 }
 
-const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'general', 'notifications', 'r2', 'branding'];
+function ToggleField({ label, tooltip, value, onChange }) {
+  return (
+    <label className="block">
+      <span className="flex items-center text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400 mb-1.5">
+        {label}
+        {tooltip && <Tooltip text={tooltip} />}
+      </span>
+      <button
+        type="button"
+        onClick={() => onChange(!value)}
+        className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
+          value ? 'bg-emerald-500' : 'bg-white/15'
+        }`}
+      >
+        <span
+          className={`inline-block h-5 w-5 rounded-full bg-white shadow transition ${
+            value ? 'translate-x-6' : 'translate-x-1'
+          }`}
+        />
+      </button>
+    </label>
+  );
+}
+
+const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'google_oauth', 'general', 'notifications', 'r2', 'branding'];
 
 const SECTION_META = {
   firebase: { label: 'Firebase', icon: Globe, title: 'Firebase Authentication' },
   razorpay: { label: 'Razorpay', icon: CreditCard, title: 'Razorpay Payments' },
   smtp: { label: 'SMTP Email', icon: Mail, title: 'SMTP Email' },
   twilio: { label: 'Twilio', icon: Smartphone, title: 'Twilio SMS / WhatsApp' },
+  auth_methods: { label: 'Auth Methods', icon: ShieldCheck, title: 'Authentication Methods' },
+  google_oauth: { label: 'Google OAuth', icon: Key, title: 'Google OAuth Client' },
   notifications: { label: 'Notifications', icon: Bell, title: 'Notifications (Telegram / Discord / WhatsApp)' },
   general: { label: 'General', icon: MessageSquare, title: 'General' },
   r2: { label: 'R2 Storage', icon: Cloud, title: 'Cloudflare R2 Image Storage' },
@@ -118,6 +144,7 @@ const FIELDS = {
     { type: 'text', key: 'storageBucket', label: 'Storage Bucket', tooltip: 'Your-project-id.appspot.com or .firebasestorage.app' },
     { type: 'secret', key: 'messagingSenderId', label: 'Messaging Sender ID', tooltip: 'Found in Firebase Cloud Messaging settings' },
     { type: 'secret', key: 'appId', label: 'App ID', tooltip: 'Web app identifier — 1:xxxx:web:yyyy' },
+    { type: 'secret', key: 'service_account_key', label: 'Service Account Key (JSON)', tooltip: 'Download from Firebase Console → Project Settings → Service Accounts → Generate new private key. Paste the entire JSON content. Required for Google/Email auth to work on backend.' },
   ],
   razorpay: [
     { type: 'secret', key: 'key_id', label: 'Key ID', tooltip: 'Razorpay API Key ID (rzp_live_... or rzp_test_...)' },
@@ -137,6 +164,16 @@ const FIELDS = {
     { type: 'secret', key: 'auth_token', label: 'Auth Token', tooltip: 'Twilio Auth Token — keep this confidential' },
     { type: 'text', key: 'sms_from', label: 'SMS From Number', tooltip: 'Twilio phone number for SMS e.g. +1234567890' },
     { type: 'text', key: 'whatsapp_from', label: 'WhatsApp From Number', tooltip: 'Twilio WhatsApp sender e.g. whatsapp:+14155238886' },
+  ],
+  google_oauth: [
+    { type: 'secret', key: 'client_id', label: 'Client ID', tooltip: 'Google OAuth 2.0 Client ID from Google Cloud Console → APIs & Services → Credentials' },
+    { type: 'secret', key: 'client_secret', label: 'Client Secret', tooltip: 'Google OAuth 2.0 Client Secret — keep confidential' },
+    { type: 'text', key: 'redirect_uri', label: 'Redirect URI', tooltip: 'OAuth redirect URI e.g. https://wehive.co.in/oauth/google/callback' },
+  ],
+  auth_methods: [
+    { type: 'toggle', key: 'google_enabled', label: 'Google Sign-In', tooltip: 'Enable Google one-click sign-in via Firebase Auth (must be enabled in Firebase Console first)' },
+    { type: 'toggle', key: 'email_password_enabled', label: 'Email / Password', tooltip: 'Enable email + password sign-in via Firebase Auth (must be enabled in Firebase Console first)' },
+    { type: 'toggle', key: 'otp_enabled', label: 'OTP (Email)', tooltip: 'Enable OTP-based login via email (uses configured SMTP provider)' },
   ],
   notifications: [
     { type: 'secret', key: 'telegram_bot_token', label: 'Telegram Bot Token', tooltip: 'From BotFather — used to send admin notifications via Telegram' },
@@ -319,6 +356,13 @@ export default function SettingsTab() {
                     label={field.label}
                     tooltip={field.tooltip}
                     value={values[field.key] || ''}
+                    onChange={(v) => setField(field.key, v)}
+                  />
+                ) : field.type === 'toggle' ? (
+                  <ToggleField
+                    label={field.label}
+                    tooltip={field.tooltip}
+                    value={values[field.key] ?? true}
                     onChange={(v) => setField(field.key, v)}
                   />
                 ) : field.type === 'file' ? (

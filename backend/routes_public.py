@@ -76,6 +76,18 @@ async def public_events(
     return {'items': items, 'total': len(items)}
 
 
+@router.get('/auth-config')
+async def public_auth_config():
+    """Public auth methods config — which login methods are enabled."""
+    doc = await settings_col.find_one({'_id': 'auth_methods'}) or {}
+    cfg = doc.get('config', {})
+    return {
+        'google_enabled': cfg.get('google_enabled', True),
+        'email_password_enabled': cfg.get('email_password_enabled', True),
+        'otp_enabled': cfg.get('otp_enabled', True),
+    }
+
+
 @router.get('/firebase-config')
 async def public_firebase_config():
     """Public Firebase web config for the frontend — stored in DB via admin settings."""

@@ -8,22 +8,26 @@ logger = logging.getLogger('wehive.firebase')
 _firebase_app = None
 
 
-def get_firebase_app():
-    global _firebase_app
-    if _firebase_app is not None:
-        return _firebase_app
-
-    import firebase_admin
-    from firebase_admin import credentials
-
+async def _get_firebase_creds():
     project_id = os.environ.get('FIREBASE_PROJECT_ID', '')
     creds_json = os.environ.get('FIREBASE_CREDENTIALS', '')
 
-    if not project_id:
-        raise HTTPException(status_code=503, detail='Firebase not configured (FIREBASE_PROJECT_ID missing)')
+    if not project_id or not creds_json:
+        from db import db
+        doc = await db['settings'].find_one({'_id': 'firebase'}) or {}
+        cfg = doc.get('config', {})
+        if not project_id:
+            project_id = cfg.get('projectId', '')
+        if not creds_json:
+            creds_json = cfg.get('service_account_key', '')
 
-    if not creds_json:
-        raise HTTPException(status_code=503, detail='Firebase credentials not configured (FIREBASE_CREDENTIALS missing)')
+    return project_id, creds_json
+
+
+def init_firebase_admin(project_id: str, creds_json: str):
+    global _firebase_app
+    import firebase_admin
+    from firebase_admin import credentials
 
     try:
         cred_dict = json.loads(creds_json)
@@ -34,6 +38,13 @@ def get_firebase_app():
     except Exception as e:
         logger.exception('Failed to initialize Firebase Admin SDK')
         raise HTTPException(status_code=503, detail=f'Firebase init failed: {str(e)}')
+
+
+def get_firebase_app():
+    global _firebase_app
+    if _firebase_app is not None:
+        return _firebase_app
+    raise HTTPException(status_code=503, detail='Firebase not initialized — call init_firebase_admin first')
 
 
 async def verify_firebase_token(id_token: str) -> dict:

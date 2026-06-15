@@ -54,8 +54,9 @@ export function FirebaseAuthProvider({ children }) {
   const signupWithEmail = useCallback(async (email, password, name) => {
     const user = await firebaseAuth.emailSignup(email, password, name);
     setVerificationSent(true);
+    await syncWithBackend(user);
     return user;
-  }, []);
+  }, [syncWithBackend]);
 
   const loginWithEmail = useCallback(async (email, password) => {
     const user = await firebaseAuth.emailLogin(email, password);
@@ -63,8 +64,9 @@ export function FirebaseAuthProvider({ children }) {
       await firebaseAuth.sendVerification(user);
       setVerificationSent(true);
     }
+    await syncWithBackend(user);
     return user;
-  }, []);
+  }, [syncWithBackend]);
 
   const resendVerification = useCallback(async () => {
     if (firebaseUser) {

@@ -17,7 +17,7 @@ from db import db, users
 from constants import REFERRAL_REWARD_INR
 import uuid
 
-from config import ADMIN_EMAILS, OTP_TTL_MIN, FIREBASE_PROJECT_ID, FIREBASE_CREDENTIALS
+from config import ADMIN_EMAILS, OTP_TTL_MIN
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -179,19 +179,18 @@ async def me(user=Depends(get_current_user)):
 
 @router.post('/firebase-sync', response_model=AuthTokens)
 async def firebase_sync(req: FirebaseSyncRequest):
-    if not FIREBASE_PROJECT_ID:
-        raise HTTPException(status_code=503, detail='Firebase not configured')
-
+    from firebase_utils import _get_firebase_creds, init_firebase_admin, get_firebase_app
     import firebase_admin
-    from firebase_admin import credentials, auth
+    from firebase_admin import auth
+
+    project_id, creds_json = await _get_firebase_creds()
+    if not project_id:
+        raise HTTPException(status_code=503, detail='Firebase not configured. Set Firebase settings in Admin → Settings → Firebase.')
+    if not creds_json:
+        raise HTTPException(status_code=503, detail='Firebase Service Account Key not configured. Add it in Admin → Settings → Firebase.')
 
     if not firebase_admin._apps:
-        if FIREBASE_CREDENTIALS:
-            cred_dict = json.loads(FIREBASE_CREDENTIALS)
-            cred = credentials.Certificate(cred_dict)
-            firebase_admin.initialize_app(cred, {'projectId': FIREBASE_PROJECT_ID})
-        else:
-            raise HTTPException(status_code=503, detail='Firebase credentials not configured')
+        init_firebase_admin(project_id, creds_json)
 
     try:
         decoded = auth.verify_id_token(req.id_token)
@@ -238,7 +237,13 @@ async def firebase_sync(req: FirebaseSyncRequest):
 
 @router.post('/firebase-phone-sync', response_model=AuthTokens)
 async def firebase_phone_sync(req: FirebasePhoneSyncRequest):
-    from firebase_utils import verify_firebase_token
+    from firebase_utils import _get_firebase_creds, init_firebase_admin, verify_firebase_token
+    import firebase_admin
+
+    if not firebase_admin._apps:
+        project_id, creds_json = await _get_firebase_creds()
+        if project_id and creds_json:
+            init_firebase_admin(project_id, creds_json)
 
     decoded = await verify_firebase_token(req.id_token)
 

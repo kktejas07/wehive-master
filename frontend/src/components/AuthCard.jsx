@@ -1,20 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare } from 'lucide-react';
+import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useToast } from '../hooks/use-toast';
 
-function TabsInline({ value, onChange }) {
+function TabsInline({ value, onChange, tabs }) {
   return (
     <div className="inline-flex p-1 rounded-full bg-[hsl(var(--soft-bg))] border border-black/5">
-      {[
-        { id: 'google', label: 'Google', Icon: Chrome },
-        { id: 'emailpwd', label: 'Email', Icon: Mail },
-        { id: 'otp', label: 'OTP', Icon: MessageSquare },
-      ].map((opt) => {
+      {tabs.filter(t => t.enabled !== false).map((opt) => {
         const Icon = opt.Icon;
         const active = value === opt.id;
         return (
@@ -105,9 +102,35 @@ export default function AuthCard({ mode, referralCode }) {
   const [countdown, setCountdown] = useState(0);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailPwdLoading, setEmailPwdLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const timerRef = useRef(null);
 
   const isSignup = mode === 'signup';
+
+  const ALL_TABS = [
+    { id: 'google', label: 'Google', Icon: Chrome, configKey: 'google_enabled' },
+    { id: 'emailpwd', label: 'Email', Icon: Mail, configKey: 'email_password_enabled' },
+    { id: 'otp', label: 'OTP', Icon: MessageSquare, configKey: 'otp_enabled' },
+  ];
+  const [authConfig, setAuthConfig] = useState(null);
+  const allowedTabs = ALL_TABS.map((t) => ({
+    ...t,
+    enabled: authConfig ? authConfig[t.configKey] !== false : true,
+  }));
+
+  useEffect(() => {
+    const api = process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in';
+    axios.get(`${api}/api/public/auth-config`).then((r) => {
+      setAuthConfig(r.data);
+      const firstEnabled = ALL_TABS.find((t) => {
+        if (t.configKey === 'google_enabled') return r.data.google_enabled !== false;
+        if (t.configKey === 'email_password_enabled') return r.data.email_password_enabled !== false;
+        if (t.configKey === 'otp_enabled') return r.data.otp_enabled !== false;
+        return true;
+      });
+      if (firstEnabled) setTab(firstEnabled.id);
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (isAuthed) navigate('/account', { replace: true });
@@ -296,7 +319,7 @@ export default function AuthCard({ mode, referralCode }) {
       {step === 'input' ? (
         <div className="mt-6 space-y-5">
           <div className="flex justify-center">
-            <TabsInline value={tab} onChange={setTab} />
+            <TabsInline value={tab} onChange={setTab} tabs={allowedTabs} />
           </div>
 
           {tab === 'google' ? (
@@ -329,8 +352,14 @@ export default function AuthCard({ mode, referralCode }) {
               </div>
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
-                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
+                <div className="relative">
+                  <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
+                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
+                  <button type="button" onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-700))] transition">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
               <Button type="submit" disabled={emailPwdLoading}
                 className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
