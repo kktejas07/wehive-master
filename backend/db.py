@@ -57,6 +57,7 @@ async def ensure_indexes():
     await profile_change_requests.create_index([('status', 1), ('created_at', -1)])
     await universities_col.create_index([('country', 1), ('rank', 1)])
     await universities_col.create_index([('name', 'text'), ('short_name', 'text')])
+    await universities_col.create_index([('courses', 1)])
     await promotions_col.create_index([('active', 1), ('position', 1)])
     await promotions_col.create_index([('expires_at', 1)], sparse=True)
     await agents_col.create_index('user_id', unique=True, sparse=True)

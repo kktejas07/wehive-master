@@ -20,9 +20,9 @@ async def list_universities(
 ) -> List[dict]:
     flt: dict = {}
     if country:
-        flt['country'] = country.lower()
+        flt['country'] = {'$in': [c.strip() for c in country.lower().split(',') if c.strip()]}
     if course:
-        flt['courses'] = course.lower()
+        flt['courses'] = {'$in': [c.strip() for c in course.lower().split(',') if c.strip()]}
     if q:
         flt['$text'] = {'$search': q}
 
@@ -50,9 +50,9 @@ async def count_universities(
 ) -> dict:
     flt: dict = {}
     if country:
-        flt['country'] = country.lower()
+        flt['country'] = {'$in': [c.strip() for c in country.lower().split(',') if c.strip()]}
     if course:
-        flt['courses'] = course.lower()
+        flt['courses'] = {'$in': [c.strip() for c in course.lower().split(',') if c.strip()]}
     total = await universities_col.count_documents(flt)
     return {'total': total}
 
