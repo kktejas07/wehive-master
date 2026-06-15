@@ -18,8 +18,6 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(!!token);
-  const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
 
   const fetchMe = useCallback(async (t) => {
     try {
@@ -79,12 +77,6 @@ export function AuthProvider({ children }) {
     if (token) await fetchMe(token);
   }, [token, fetchMe]);
 
-  const openAuth = useCallback((mode = 'login') => {
-    setAuthMode(mode);
-    setAuthOpen(true);
-  }, []);
-  const closeAuth = useCallback(() => setAuthOpen(false), []);
-
   const value = {
     user,
     token,
@@ -95,11 +87,6 @@ export function AuthProvider({ children }) {
     verifyOtp,
     logout,
     refreshUser,
-    authOpen,
-    authMode,
-    openAuth,
-    closeAuth,
-    setAuthMode,
   };
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;

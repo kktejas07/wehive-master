@@ -8,7 +8,6 @@ import { FirebaseAuthProvider } from './context/FirebaseAuthContext';
 import { I18nProvider } from './context/I18nContext';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import AuthModal from './components/AuthModal';
 import ChatbotWidget from './components/ChatbotWidget';
 import PageTransition from './components/PageTransition';
 import RouteFallback from './components/RouteFallback';
@@ -122,7 +121,6 @@ function App() {
                 <ErrorBoundary>
                   <AnimatedRoutes />
                 </ErrorBoundary>
-                <AuthModal />
                 <ChatbotWidget />
                 <Toaster />
               </FirebaseAuthProvider>

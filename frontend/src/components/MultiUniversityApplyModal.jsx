@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, Loader2, Info, ArrowRight, GraduationCap, UserPlus, LogIn } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth, API } from '../context/AuthContext';
@@ -14,7 +15,8 @@ function computeFee(count) {
 }
 
 export default function MultiUniversityApplyModal({ universities, onClose }) {
-  const { isAuthed, openAuth, token } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthed, token } = useAuth();
   const [step, setStep] = useState('review');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
@@ -27,7 +29,7 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
   const fees = computeFee(universities.length);
 
   const handleSubmit = async () => {
-    if (!isAuthed) { openAuth('signup'); return; }
+    if (!isAuthed) { navigate('/signup'); return; }
     setSubmitting(true);
     setError('');
     try {
@@ -130,7 +132,7 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
                 Cancel
               </Button>
               {!isAuthed ? (
-                <Button onClick={() => openAuth('signup')} className="flex-1 rounded-xl h-12 btn-primary text-white font-bold flex items-center gap-2">
+                <Button onClick={() => navigate('/signup')} className="flex-1 rounded-xl h-12 btn-primary text-white font-bold flex items-center gap-2">
                   <UserPlus className="w-4 h-4" /> Sign up to apply
                 </Button>
               ) : (

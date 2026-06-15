@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -53,7 +53,8 @@ function ItineraryStep({ step }) {
 
 export default function HolidayPlanner() {
   const { id } = useParams();
-  const { token, isAuthed, openAuth } = useAuth();
+  const navigate = useNavigate();
+  const { token, isAuthed } = useAuth();
   const { toast } = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -78,7 +79,7 @@ export default function HolidayPlanner() {
 
   const onSave = async () => {
     if (!isAuthed) {
-      openAuth('login');
+      navigate('/login');
       return;
     }
     setSaving(true);

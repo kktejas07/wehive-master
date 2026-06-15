@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, User as UserIcon, LogOut, FileText, Compass, Settings, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 import { avatarUrl } from '../lib/avatars';
 
 export default function UserMenu() {
-  const { user, logout, openAuth } = useAuth();
+  const { user, logout } = useAuth();
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -23,13 +24,13 @@ export default function UserMenu() {
     return (
       <>
         <button
-          onClick={() => openAuth('login')}
+          onClick={() => navigate('/login')}
           className="hidden sm:inline-flex items-center px-3 py-2 rounded-full text-[13px] font-bold text-[hsl(var(--blue-900))]/80 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))] transition"
         >
           {t('cta.signIn')}
         </button>
         <button
-          onClick={() => openAuth('signup')}
+          onClick={() => navigate('/signup')}
           className="hidden md:inline-flex items-center rounded-full btn-primary text-white px-4 py-2 text-[13px] font-bold"
         >
           {t('cta.signUp')}

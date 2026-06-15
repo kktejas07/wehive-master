@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
@@ -822,7 +822,8 @@ function ScholarshipCalculator({ onClose }) {
 }
 
 export default function UniversityComparison() {
-  const { isAuthed, openAuth } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthed } = useAuth();
   const [universities, setUniversities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -887,7 +888,7 @@ export default function UniversityComparison() {
   };
 
   const createShareLink = async () => {
-    if (!isAuthed) { openAuth('login'); return; }
+    if (!isAuthed) { navigate('/login'); return; }
     if (shortlist.length < 2) return;
     try {
       const r = await axios.post(`${API}/users/me/shortlist/share`, {}, { headers: { Authorization: `Bearer ${token}` } });
@@ -1461,7 +1462,7 @@ export default function UniversityComparison() {
                 </div>
               </div>
               <Button
-                onClick={() => isAuthed ? null : openAuth('signup')}
+                onClick={() => isAuthed ? null : navigate('/signup')}
                 className="mt-6 w-full btn-accent h-12 font-bold"
               >
                 Start your journey <ArrowRight className="w-4 h-4 ml-2" />

@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { Menu, X, Phone, MessageCircle, Send } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -87,8 +87,9 @@ function PhoneBlock() {
 }
 
 function MobileMenu({ open, light = false }) {
-  const { isAuthed, openAuth } = useAuth();
+  const { isAuthed } = useAuth();
   const { t } = useI18n();
+  const navigate = useNavigate();
   if (!open) return null;
   return (
     <div className={cn(
@@ -109,13 +110,13 @@ function MobileMenu({ open, light = false }) {
             <Button
               variant="outline"
               className="rounded-full h-11"
-              onClick={() => openAuth('login')}
+              onClick={() => navigate('/login')}
             >
               {t('cta.signIn')}
             </Button>
             <Button
               className="rounded-full btn-primary text-white h-11"
-              onClick={() => openAuth('signup')}
+              onClick={() => navigate('/signup')}
             >
               {t('cta.signUp')}
             </Button>
