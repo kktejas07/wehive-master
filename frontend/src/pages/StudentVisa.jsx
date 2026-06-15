@@ -94,16 +94,16 @@ const SCORE_REQUIREMENTS = [
 ];
 
 const ANNUAL_BUDGETS = [
-  { country: 'us', name: 'United States', flag: '', tuition_min: 20000, tuition_max: 60000, living_min: 12000, living_max: 24000, currency: 'USD' },
-  { country: 'uk', name: 'United Kingdom', flag: '', tuition_min: 15000, tuition_max: 38000, living_min: 12000, living_max: 18000, currency: 'GBP' },
-  { country: 'de', name: 'Germany', flag: '', tuition_min: 0, tuition_max: 3000, living_min: 11000, living_max: 14000, currency: 'EUR' },
-  { country: 'it', name: 'Italy', flag: '', tuition_min: 2000, tuition_max: 20000, living_min: 10000, living_max: 15000, currency: 'EUR' },
-  { country: 'es', name: 'Spain', flag: '', tuition_min: 2000, tuition_max: 18000, living_min: 9000, living_max: 14000, currency: 'EUR' },
-  { country: 'pl', name: 'Poland', flag: '', tuition_min: 2000, tuition_max: 8000, living_min: 6000, living_max: 10000, currency: 'EUR' },
-  { country: 'at', name: 'Austria', flag: '', tuition_min: 0, tuition_max: 2000, living_min: 11000, living_max: 14000, currency: 'EUR' },
-  { country: 'pt', name: 'Portugal', flag: '', tuition_min: 3000, tuition_max: 12000, living_min: 8000, living_max: 12000, currency: 'EUR' },
-  { country: 'gr', name: 'Greece', flag: '', tuition_min: 2000, tuition_max: 8000, living_min: 7000, living_max: 11000, currency: 'EUR' },
-  { country: 'hr', name: 'Croatia', flag: '', tuition_min: 2000, tuition_max: 6000, living_min: 7000, living_max: 10000, currency: 'EUR' },
+  { country: 'us', name: 'United States', code: 'US', tuition_min: 20000, tuition_max: 60000, living_min: 12000, living_max: 24000, currency: 'USD' },
+  { country: 'uk', name: 'United Kingdom', code: 'GB', tuition_min: 15000, tuition_max: 38000, living_min: 12000, living_max: 18000, currency: 'GBP' },
+  { country: 'de', name: 'Germany', code: 'DE', tuition_min: 0, tuition_max: 3000, living_min: 11000, living_max: 14000, currency: 'EUR' },
+  { country: 'it', name: 'Italy', code: 'IT', tuition_min: 2000, tuition_max: 20000, living_min: 10000, living_max: 15000, currency: 'EUR' },
+  { country: 'es', name: 'Spain', code: 'ES', tuition_min: 2000, tuition_max: 18000, living_min: 9000, living_max: 14000, currency: 'EUR' },
+  { country: 'pl', name: 'Poland', code: 'PL', tuition_min: 2000, tuition_max: 8000, living_min: 6000, living_max: 10000, currency: 'EUR' },
+  { country: 'at', name: 'Austria', code: 'AT', tuition_min: 0, tuition_max: 2000, living_min: 11000, living_max: 14000, currency: 'EUR' },
+  { country: 'pt', name: 'Portugal', code: 'PT', tuition_min: 3000, tuition_max: 12000, living_min: 8000, living_max: 12000, currency: 'EUR' },
+  { country: 'gr', name: 'Greece', code: 'GR', tuition_min: 2000, tuition_max: 8000, living_min: 7000, living_max: 11000, currency: 'EUR' },
+  { country: 'hr', name: 'Croatia', code: 'HR', tuition_min: 2000, tuition_max: 6000, living_min: 7000, living_max: 10000, currency: 'EUR' },
 ];
 
 function getDisplayCourses(popularCourses = []) {
@@ -176,19 +176,20 @@ export default function StudentVisa() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [universities, setUniversities] = useState([]);
   const [showCourseSelector, setShowCourseSelector] = useState(false);
+  const [uniPage, setUniPage] = useState(6);
 
   useEffect(() => {
     axios.get(`${API}/countries`, { params: { limit: 100 } })
       .then(r => {
         const studentCountries = STUDENT_COUNTRIES.map(sc => {
           const found = (r.data || []).find(c => c.id === sc.id);
-          return found ? { ...found, flag: sc.flag } : { id: sc.id, name: sc.name, flag: sc.flag, student_meta: null };
+          return found ? { ...found, code: sc.code, student_meta: found.student_meta || null } : { id: sc.id, name: sc.name, code: sc.code, student_meta: null };
         });
         setCountries(studentCountries);
         setLoading(false);
       })
       .catch(() => {
-        setCountries(STUDENT_COUNTRIES.map(sc => ({ id: sc.id, name: sc.name, flag: sc.flag, student_meta: null })));
+        setCountries(STUDENT_COUNTRIES.map(sc => ({ id: sc.id, name: sc.name, code: sc.code, student_meta: null })));
         setLoading(false);
       });
 
@@ -196,6 +197,8 @@ export default function StudentVisa() {
       .then(r => setUniversities(r.data || []))
       .catch(() => setUniversities([]));
   }, []);
+
+  useEffect(() => { setUniPage(6); }, [selected]);
 
   const selectedCountry = countries.find(c => c.id === selected) || countries[0];
   const studentMeta = selectedCountry?.student_meta || {};
@@ -319,8 +322,8 @@ export default function StudentVisa() {
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-white text-xl font-bold">
-            {uni.flag || uni.short_name?.[0] || '?'}
+          <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-2xl">
+            {countryFlag(uni.country) || uni.short_name?.[0] || '?'}
           </div>
                           <div>
                             <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
@@ -394,16 +397,17 @@ export default function StudentVisa() {
               </p>
             </div>
           ) : (
-            <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {universities.filter(u => u.country === selected).map((uni) => (
+            <>
+              <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {universities.filter(u => u.country === selected).slice(0, uniPage).map((uni) => (
                 <div
                   key={uni.id}
                   className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-xl font-bold shrink-0">
-                      {uni.flag || uni.short_name?.[0] || '?'}
-                    </div>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-2xl shrink-0">
+                    {countryFlag(uni.country) || uni.short_name?.[0] || '?'}
+                  </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
                       <div className="text-[12px] text-[hsl(var(--blue-900))]/60 truncate">{uni.name}</div>
@@ -448,6 +452,17 @@ export default function StudentVisa() {
                 </div>
               ))}
             </div>
+            {universities.filter(u => u.country === selected).length > uniPage && (
+              <div className="mt-6 flex items-center justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setUniPage(p => p + 6)}
+                  className="rounded-full h-11 px-8"
+                >
+                  Show more universities <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            )}
           )}
 
           <div className="mt-8 flex items-center justify-center">
@@ -491,7 +506,7 @@ export default function StudentVisa() {
                     <tr key={b.country} className="border-b border-black/5 hover:bg-[hsl(var(--blue-50))] transition">
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">{b.flag || <Globe className="w-5 h-5 text-[hsl(var(--blue-900))]/40" />}</span>
+                          <span className="text-xl">{countryFlag(b.code) || <Globe className="w-5 h-5 text-[hsl(var(--blue-900))]/40" />}</span>
                           <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{b.name}</span>
                         </div>
                       </td>
@@ -649,44 +664,44 @@ export default function StudentVisa() {
                 background: 'linear-gradient(135deg, hsl(var(--blue-900)) 0%, hsl(var(--blue-700)) 50%, hsl(var(--blue-500)) 100%)',
               }}>
                 <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-[hsl(var(--accent))]/20 to-transparent rounded-tl-full" />
-                <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/70">
+                <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/90">
                   Why apply with We Hive
                 </div>
                 <div className="mt-4 space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                      <Zap className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                      <Zap className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14px]">On-time, or it's on us</div>
-                      <div className="text-[12px] text-white/60 mt-0.5">We commit to your intake date. If we miss, we refund.</div>
+                      <div className="font-bold text-[14px] text-white">On-time, or it's on us</div>
+                      <div className="text-[12px] text-white/70 mt-0.5">We commit to your intake date. If we miss, we refund.</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                      <Check className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                      <Check className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14px]">Documents reviewed by humans</div>
-                      <div className="text-[12px] text-white/60 mt-0.5">Every SOP and financial document checked before submission.</div>
+                      <div className="font-bold text-[14px] text-white">Documents reviewed by humans</div>
+                      <div className="text-[12px] text-white/70 mt-0.5">Every SOP and financial document checked before submission.</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                      <Users className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14px]">Slots before they vanish</div>
-                      <div className="text-[12px] text-white/60 mt-0.5">We grab VFS appointments the moment they open.</div>
+                      <div className="font-bold text-[14px] text-white">Slots before they vanish</div>
+                      <div className="text-[12px] text-white/70 mt-0.5">We grab VFS appointments the moment they open.</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                      <Globe className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                      <Globe className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14px]">Real humans on call</div>
-                      <div className="text-[12px] text-white/60 mt-0.5">WhatsApp, email, or call. Including weekends.</div>
+                      <div className="font-bold text-[14px] text-white">Real humans on call</div>
+                      <div className="text-[12px] text-white/70 mt-0.5">WhatsApp, email, or call. Including weekends.</div>
                     </div>
                   </div>
                 </div>
