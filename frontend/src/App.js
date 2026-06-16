@@ -44,6 +44,7 @@ const AgentPortal = lazy(() => import('./pages/AgentPortal'));
 const StudentResources = lazy(() => import('./pages/StudentResources'));
 const IntakeCalendar = lazy(() => import('./pages/IntakeCalendar'));
 const SharedShortlist = lazy(() => import('./pages/SharedShortlist'));
+const EmailVerification = lazy(() => import('./pages/EmailVerification'));
 const FinancialTools = lazy(() => import('./pages/FinancialTools'));
 const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
