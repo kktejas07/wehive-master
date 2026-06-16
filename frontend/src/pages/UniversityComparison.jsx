@@ -49,7 +49,7 @@ function getDisplayCourses(popularCourses = []) {
 }
 
 function safeEmploymentRate(uni) {
-  return uni?.就业率 || uni?.employment_rate || 'N/A';
+  return uni?.employment_rate || 'N/A';
 }
 
 function safeAvgSalary(uni) {
@@ -325,7 +325,7 @@ function CompareTable({ universities }) {
     { key: 'gre_required', label: 'GRE Required', format: (v) => v ? 'Yes' : 'No', icon: Check, color: v => v ? 'emerald' : 'gray' },
     { key: 'gmat_required', label: 'GMAT Required', format: (v) => v ? 'Yes' : 'No', icon: Check, color: v => v ? 'emerald' : 'gray' },
     { key: 'scholarships', label: 'Scholarships', format: (v) => v ? 'Yes' : 'No', icon: Crown, color: v => v ? 'amber' : 'gray' },
-    { key: '就业率', label: 'Employment', format: (v) => v || 'N/A', icon: TrendingUp, color: 'emerald' },
+    { key: 'employment_rate', label: 'Employment', format: (v) => v || 'N/A', icon: TrendingUp, color: 'emerald' },
     { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => v ? `$${Number(v).toLocaleString()}` : 'N/A', icon: TrendingUp, color: 'emerald' },
   ];
 
@@ -445,7 +445,7 @@ function CompareCards({ universities }) {
     if (key === 'tuition_usd') {
       return Math.min(...values);
     }
-    if (key === '就业率' || key === 'employment_rate' || key === 'avg_salary_usd' || key === 'ielts_min') {
+    if (key === 'employment_rate' || key === 'avg_salary_usd' || key === 'ielts_min') {
       return Math.max(...values);
     }
     return null;
@@ -461,7 +461,7 @@ function CompareCards({ universities }) {
     { key: 'rank', label: 'World Rank', format: (v) => `#${v}`, higher: false },
     { key: 'tuition_usd', label: 'Tuition', format: (v) => v === 0 ? 'Free' : `$${v?.toLocaleString()}`, higher: false },
     { key: 'ielts_min', label: 'IELTS', format: (v) => `${v}`, higher: true },
-    { key: '就业率', label: 'Employment', format: (v) => v || 'N/A', higher: true },
+    { key: 'employment_rate', label: 'Employment', format: (v) => v || 'N/A', higher: true },
     { key: 'avg_salary_usd', label: 'Avg Salary', format: (v) => v ? `$${Number(v).toLocaleString()}` : 'N/A', higher: true },
     { key: 'intl_students', label: 'Intl Students', format: (v) => v?.toLocaleString(), higher: true },
   ];
@@ -545,7 +545,7 @@ function CompareBars({ universities }) {
     { key: 'tuition_usd', label: 'Tuition Fee', higher: false, max: 60000 },
     { key: 'living_cost_usd', label: 'Living Cost', higher: false, max: 25000 },
     { key: 'ielts_min', label: 'IELTS Score', higher: true, max: 9 },
-    { key: '就业率', label: 'Employment Rate', higher: true, max: 100, suffix: '%' },
+    { key: 'employment_rate', label: 'Employment Rate', higher: true, max: 100, suffix: '%' },
     { key: 'avg_salary_usd', label: 'Avg Salary', higher: true, max: 200000 },
   ];
 
@@ -703,7 +703,7 @@ function FilterSection({ title, children }) {
   );
 }
 
-function ScholarshipCalculator({ onClose }) {
+function ScholarshipCalculator({ onClose, universities }) {
   const [ielts, setIelts] = useState(7.0);
   const [gre, setGre] = useState(320);
   const [gmat, setGmat] = useState(650);
@@ -712,39 +712,22 @@ function ScholarshipCalculator({ onClose }) {
   const [results, setResults] = useState(null);
 
   const calculate = () => {
-    const matched = [];
-    const UNIVERSITIES_DATA = [
-      { id: 'mit', short_name: 'MIT', country: 'US', flag: '', rank: 1, tuition_usd: 55790, scholarships: true, ielts_min: 7.0, gre_required: true, gmat_required: false },
-      { id: 'stanford', short_name: 'Stanford', country: 'US', flag: '', rank: 3, tuition_usd: 56169, scholarships: true, ielts_min: 7.0, gre_required: true, gmat_required: false },
-      { id: 'harvard', short_name: 'Harvard', country: 'US', flag: '', rank: 2, tuition_usd: 55807, scholarships: true, ielts_min: 7.5, gre_required: false, gmat_required: true },
-      { id: 'oxford', short_name: 'Oxford', country: 'UK', flag: '', rank: 2, tuition_usd: 35000, scholarships: true, ielts_min: 7.0, gre_required: false, gmat_required: false },
-      { id: 'cambridge', short_name: 'Cambridge', country: 'UK', flag: '', rank: 3, tuition_usd: 34000, scholarships: true, ielts_min: 7.0, gre_required: false, gmat_required: false },
-      { id: 'imperial', short_name: 'Imperial', country: 'UK', flag: '', rank: 10, tuition_usd: 33000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'tum', short_name: 'TUM', country: 'DE', flag: '', rank: 50, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'lmu', short_name: 'LMU Munich', country: 'DE', flag: '', rank: 45, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'polimi', short_name: 'Polimi', country: 'IT', flag: '', rank: 145, tuition_usd: 4000, scholarships: true, ielts_min: 6.0, gre_required: false, gmat_required: false },
-      { id: 'unibo', short_name: 'Unibo', country: 'IT', flag: '', rank: 120, tuition_usd: 4000, scholarships: true, ielts_min: 6.0, gre_required: false, gmat_required: false },
-      { id: 'tuwien', short_name: 'TU Vienna', country: 'AT', flag: '', rank: 180, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'uniwien', short_name: 'Uni Wien', country: 'AT', flag: '', rank: 150, tuition_usd: 0, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'unide', short_name: 'UW', country: 'PL', flag: '', rank: 260, tuition_usd: 5000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'jagiellonian', short_name: 'JU', country: 'PL', flag: '', rank: 240, tuition_usd: 4500, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: false },
-      { id: 'nova', short_name: 'NOVA', country: 'PT', flag: '', rank: 300, tuition_usd: 6000, scholarships: true, ielts_min: 6.5, gre_required: false, gmat_required: true },
-    ];
-    for (const uni of UNIVERSITIES_DATA) {
-      let score = 0;
-      let reasons = [];
+    const pool = (universities || []).filter(u => u.scholarships && u.tuition_usd != null).slice(0, 200);
+    if (pool.length === 0) { setResults([]); return; }
+    const matched = pool.map(uni => {
+      let score = 0; let reasons = [];
       if (uni.scholarships) { score += 30; reasons.push('Has scholarships'); }
-      if (ielts >= uni.ielts_min) { score += 25; reasons.push(`IELTS ${ielts} meets ${uni.ielts_min}+`); }
-      else { score -= 20; reasons.push(`IELTS too low (need ${uni.ielts_min})`); }
+      if (uni.ielts_min && ielts >= uni.ielts_min) { score += 25; reasons.push(`IELTS ${ielts} meets ${uni.ielts_min}+`); }
+      else if (uni.ielts_min) { score -= 20; reasons.push(`IELTS too low (need ${uni.ielts_min})`); }
       if (!uni.gre_required && !uni.gmat_required) { score += 15; reasons.push('No GRE/GMAT required'); }
       else if (uni.gre_required && gre >= 320) { score += 15; reasons.push(`GRE ${gre} qualifies`); }
       else if (uni.gmat_required && gmat >= 650) { score += 15; reasons.push(`GMAT ${gmat} qualifies`); }
-      if (uni.tuition_usd <= budget) { score += 20; reasons.push(`Within budget ($${uni.tuition_usd?.toLocaleString()})`); }
+      if (uni.tuition_usd <= budget) { score += 20; reasons.push(`Within budget ($${(uni.tuition_usd || 0).toLocaleString()})`); }
       if (gpa >= 85) { score += 10; reasons.push('Strong academics'); }
-      matched.push({ ...uni, matchScore: score, reasons });
-    }
+      return { ...uni, matchScore: Math.min(100, score), reasons };
+    });
     matched.sort((a, b) => b.matchScore - a.matchScore);
-    setResults(matched.slice(0, 10));
+    setResults(matched.slice(0, 12));
   };
 
   return (
@@ -759,60 +742,53 @@ function ScholarshipCalculator({ onClose }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">IELTS Score</label>
-              <input type="range" min="5" max="9" step="0.5" value={ielts} onChange={(e) => setIelts(parseFloat(e.target.value))} className="w-full mt-1" />
+              <input type="range" min="5" max="9" step="0.5" value={ielts} onChange={e => setIelts(parseFloat(e.target.value))} className="w-full mt-1" />
               <div className="text-center text-[15px] font-bold text-[hsl(var(--blue-700))]">{ielts}</div>
             </div>
             <div>
-              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">GRE Score (out of 340)</label>
-              <input type="range" min="260" max="340" step="1" value={gre} onChange={(e) => setGre(parseInt(e.target.value))} className="w-full mt-1" />
+              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">GRE Score</label>
+              <input type="range" min="260" max="340" step="1" value={gre} onChange={e => setGre(parseInt(e.target.value))} className="w-full mt-1" />
               <div className="text-center text-[15px] font-bold text-[hsl(var(--blue-700))]">{gre}</div>
             </div>
             <div>
-              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">GMAT Score (out of 800)</label>
-              <input type="range" min="500" max="800" step="10" value={gmat} onChange={(e) => setGmat(parseInt(e.target.value))} className="w-full mt-1" />
+              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">GMAT Score</label>
+              <input type="range" min="500" max="800" step="10" value={gmat} onChange={e => setGmat(parseInt(e.target.value))} className="w-full mt-1" />
               <div className="text-center text-[15px] font-bold text-[hsl(var(--blue-700))]">{gmat}</div>
             </div>
             <div>
-              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Academic % (or GPA)</label>
-              <input type="range" min="50" max="100" step="1" value={gpa} onChange={(e) => setGpa(parseInt(e.target.value))} className="w-full mt-1" />
+              <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Academics</label>
+              <input type="range" min="50" max="100" step="1" value={gpa} onChange={e => setGpa(parseInt(e.target.value))} className="w-full mt-1" />
               <div className="text-center text-[15px] font-bold text-[hsl(var(--blue-700))]">{gpa}%</div>
             </div>
           </div>
           <div>
-            <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Budget (USD/year)</label>
+            <label className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Budget (USD/yr)</label>
             <div className="flex items-center gap-3 mt-1">
-              <input type="range" min="0" max="60000" step="1000" value={budget} onChange={(e) => setBudget(parseInt(e.target.value))} className="flex-1" />
+              <input type="range" min="0" max="60000" step="1000" value={budget} onChange={e => setBudget(parseInt(e.target.value))} className="flex-1" />
               <span className="text-[15px] font-bold text-[hsl(var(--blue-700))] w-28 text-right">${budget.toLocaleString()}</span>
             </div>
           </div>
           <Button onClick={calculate} className="w-full rounded-xl btn-accent text-white font-bold h-11">
-            <Sparkles className="w-4 h-4 mr-2" /> Find My Matching Universities
+            <Sparkles className="w-4 h-4 mr-2" /> Find Matching Universities
           </Button>
-          {results && (
+          {results !== null && (
             <div className="space-y-3">
-              <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]/60 uppercase tracking-wider">Matching Universities</div>
-              {results.map((uni) => {
-                const eligible = uni.matchScore >= 50;
-                return (
-                  <div key={uni.id} className={cn(
-                    "p-4 rounded-xl border flex items-center gap-3",
-                    eligible ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-200"
-                  )}>
-                    <span className="text-2xl">{uni.flag || <GraduationCap className="w-6 h-6 text-[hsl(var(--blue-700))]/70" />}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{uni.short_name}</span>
-                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">{uni.matchScore}/100</span>
-                        {eligible ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold">Eligible</span> : <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-bold">Partial</span>}
-                      </div>
-                      <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">{uni.reasons.slice(0, 3).join(' · ')}</div>
+              <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]/60 uppercase tracking-wider">{results.length} Matches</div>
+              {results.length === 0 && <p className="text-[13px] text-[hsl(var(--blue-900))]/50 text-center py-4">No matching universities found. Try adjusting criteria.</p>}
+              {results.map((uni) => (
+                <div key={uni.id} className={cn("p-4 rounded-xl border flex items-center gap-3", uni.matchScore >= 50 ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-200")}>
+                  <span className="text-2xl">{uni.flag || <GraduationCap className="w-6 h-6 text-[hsl(var(--blue-700))]/70" />}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{uni.short_name || uni.name}</span>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">{uni.matchScore}/100</span>
+                      {uni.matchScore >= 50 ? <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold">Eligible</span> : <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-bold">Partial</span>}
                     </div>
-                    <div className="text-right text-[13px] font-bold text-[hsl(var(--blue-900))]">
-                      {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
-                    </div>
+                    <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">{uni.reasons.slice(0, 3).join(' · ')}</div>
                   </div>
-                );
-              })}
+                  <div className="text-right text-[13px] font-bold text-[hsl(var(--blue-900))]">{uni.tuition_usd === 0 ? 'Free' : `$${(uni.tuition_usd || 0).toLocaleString()}`}</div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -1473,7 +1449,7 @@ export default function UniversityComparison() {
       </section>
 
       <Footer />
-      {showCalculator && <ScholarshipCalculator onClose={() => setShowCalculator(false)} />}
+      {showCalculator && <ScholarshipCalculator onClose={() => setShowCalculator(false)} universities={universities} />}
       {showApplyModal && (
         <MultiUniversityApplyModal
           universities={selectedForApply}

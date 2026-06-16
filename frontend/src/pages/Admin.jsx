@@ -9,6 +9,8 @@ import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import IntegrationsTab from '../components/admin/IntegrationsTab';
 import ExportsTab from '../components/admin/ExportsTab';
+import UniversitiesTab from '../components/admin/UniversitiesTab';
+import ProgramsTab from '../components/admin/ProgramsTab';
 import PricingTab from '../components/admin/PricingTab';
 import EventsTab from '../components/admin/EventsTab';
 import SettingsTab from '../components/admin/SettingsTab';
@@ -70,6 +72,8 @@ function AdminRoutes() {
                 <Route path="staff" element={<StaffTab />} />
                 <Route path="integrations" element={<IntegrationsTab />} />
                 <Route path="exports" element={<ExportsTab />} />
+                <Route path="universities" element={<UniversitiesTab />} />
+                <Route path="programs" element={<ProgramsTab />} />
                 <Route path="settings" element={<SettingsTab />} />
                 <Route path="destinations" element={<DestinationsTab />} />
                 <Route path="*" element={<OverviewTab />} />

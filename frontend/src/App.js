@@ -33,6 +33,7 @@ const Contact = lazy(() => import('./pages/Contact'));
 const StudentVisa = lazy(() => import('./pages/StudentVisa'));
 const VisaInterview = lazy(() => import('./pages/VisaInterview'));
 const UniversityDetail = lazy(() => import('./pages/UniversityDetail'));
+const ProgramList = lazy(() => import('./pages/ProgramList'));
 const MapView = lazy(() => import('./pages/MapView'));
 const AgentLogin = lazy(() => import('./pages/AgentLogin'));
 const AgentDashboard = lazy(() => import('./pages/AgentDashboard'));
@@ -46,7 +47,7 @@ const SharedShortlist = lazy(() => import('./pages/SharedShortlist'));
 const FinancialTools = lazy(() => import('./pages/FinancialTools'));
 const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
-const EmailVerification = lazy(() => import('./pages/EmailVerification'));
+const VisaChecker = lazy(() => import('./pages/VisaChecker'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -92,6 +93,7 @@ function AnimatedRoutes() {
           <Route path="/visa-interview" element={<PageTransition><VisaInterview /></PageTransition>} />
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
+          <Route path="/programs/:universityId" element={<PageTransition><ProgramList /></PageTransition>} />
           <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
           <Route path="/resources" element={<PageTransition><StudentResources /></PageTransition>} />
           <Route path="/intake-calendar" element={<PageTransition><IntakeCalendar /></PageTransition>} />
@@ -100,6 +102,7 @@ function AnimatedRoutes() {
           <Route path="/agent-training" element={<PageTransition><AgentTraining /></PageTransition>} />
           <Route path="/emergency" element={<PageTransition><EmergencyCare /></PageTransition>} />
           <Route path="/visa-scheduling" element={<PageTransition><VisaScheduling /></PageTransition>} />
+          <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
