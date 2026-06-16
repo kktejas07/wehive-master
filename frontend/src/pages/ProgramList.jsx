@@ -4,7 +4,6 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API } from '../context/AuthContext';
-import { Loader2, Clock, DollarSign, GraduationCap, BookOpen, Globe, ArrowLeft, ExternalLink } from 'lucide-react';
 import { Loader2, Clock, DollarSign, GraduationCap, BookOpen, Globe, ArrowLeft, ExternalLink, ChevronRight } from 'lucide-react';
 
 const DEGREE_COLORS = {

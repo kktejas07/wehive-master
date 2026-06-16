@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Building2, Globe, Upload, RefreshCw, Loader2, Database, FileSpreadsheet, CheckCircle2, Search, Edit3, X, Save, ChevronDown, ChevronUp, Plus, Sparkles } from 'lucide-react';
 import { Building2, Globe, Upload, RefreshCw, Loader2, Database, FileSpreadsheet, CheckCircle2, Search, Edit3, Trash2, X, Save, ChevronDown, ChevronUp, ExternalLink, Plus, Sparkles } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, apiClient } from '../../lib/admin';

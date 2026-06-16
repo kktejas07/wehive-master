@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Star, MessageCircle, ThumbsUp, Loader2, User, Clock } from 'lucide-react';
 import { Star, MessageCircle, ThumbsUp, Loader2, User, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../context/AuthContext';

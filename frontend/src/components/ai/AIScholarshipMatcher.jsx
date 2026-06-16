@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Loader2, ArrowRight, DollarSign, Globe, BookOpen, Target, X, Award } from 'lucide-react';
 import { Sparkles, Loader2, ArrowRight, GraduationCap, DollarSign, Globe, BookOpen, Target, X, Award } from 'lucide-react';
 import { useAuth, API } from '../../context/AuthContext';
 import { useToast } from '../../hooks/use-toast';
