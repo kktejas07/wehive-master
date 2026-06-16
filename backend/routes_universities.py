@@ -15,10 +15,13 @@ async def list_universities(
     q: Optional[str] = Query(None),
     country: Optional[str] = Query(None),
     course: Optional[str] = Query(None),
+    scholarships: Optional[bool] = Query(None),
     limit: int = Query(50, ge=1, le=15000),
     skip: int = Query(0, ge=0),
 ) -> List[dict]:
     flt: dict = {}
+    if scholarships is not None:
+        flt['scholarships'] = scholarships
     if country:
         flt['country'] = {'$in': [c.strip() for c in country.lower().split(',') if c.strip()]}
     if course:

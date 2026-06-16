@@ -630,10 +630,10 @@ export const FOOTER_COLS = [
   ]},
   { id: 'resources', title: 'Resources', links: [
     { id: 'l-help', label: 'Help center', to: '/help' },
-    { id: 'l-guide', label: 'Visa guides', to: '/' },
-    { id: 'l-embassy', label: 'Embassy directory', to: '/' },
+    { id: 'l-intake', label: 'Intake Calendar', to: '/intake-calendar' },
+    { id: 'l-financial', label: 'Financial Tools', to: '/financial-tools' },
+    { id: 'l-universities', label: 'University Search', to: '/universities' },
     { id: 'l-refund', label: 'Refund policy', to: '/' },
-    { id: 'l-status', label: 'Status', to: '/' },
   ]},
   { id: 'legal', title: 'Legal', links: [
     { id: 'l-terms', label: 'Terms', to: '/' },
