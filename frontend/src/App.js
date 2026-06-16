@@ -46,6 +46,7 @@ const SharedShortlist = lazy(() => import('./pages/SharedShortlist'));
 const FinancialTools = lazy(() => import('./pages/FinancialTools'));
 const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
+const EmailVerification = lazy(() => import('./pages/EmailVerification'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -81,6 +82,7 @@ function AnimatedRoutes() {
           <Route path="/pricing" element={<PageTransition><Pricing /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+          <Route path="/__/auth/action" element={<EmailVerification />} />
           <Route path="/account" element={<PageTransition><Account /></PageTransition>} />
           <Route path="/account/applications/:id" element={<PageTransition><ApplicationDetail /></PageTransition>} />
           <Route path="/track/:id" element={<PageTransition><TrackStatus /></PageTransition>} />
