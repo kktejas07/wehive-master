@@ -83,8 +83,8 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
     setLoading(true);
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
-      setAllUniversities(JSON.parse(cached));
-      setLoading(false);
+      try { setAllUniversities(JSON.parse(cached)); setLoading(false); }
+      catch { localStorage.removeItem(CACHE_KEY); }
     }
     axios.get(`${API}/universities?scholarships=true&limit=15000`)
       .then(res => {

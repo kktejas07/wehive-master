@@ -35,17 +35,20 @@ async def list_universities(
     if q and not results:
         ql = q.lower()
         flt2 = {k: v for k, v in flt.items() if k != '$text'}
-        cursor2 = universities_col.find(flt2, {'_id': 0}).sort(sort_field, sort_dir)
+        cursor2 = universities_col.find(flt2, {'_id': 0}).sort(sort_field, sort_dir).limit(skip + limit)
         results = [normalize_university(dict(d)) async for d in cursor2 if ql in (d.get('name') or '').lower() or ql in (d.get('short_name') or '').lower()]
-        results = results[skip: skip + limit]
+        results = results[:limit]
     return results
 
 @router.get('/count')
 async def count_universities(country: Optional[str] = Query(None), course: Optional[str] = Query(None),
-    scholarships: Optional[bool] = Query(None), tuition_min: Optional[int] = Query(None),
+    scholarships: Optional[bool] = Query(None), gre_required: Optional[bool] = Query(None),
+    gmat_required: Optional[bool] = Query(None), tuition_min: Optional[int] = Query(None),
     tuition_max: Optional[int] = Query(None), ielts_min: Optional[float] = Query(None)) -> dict:
     flt: dict = {}
     if scholarships is not None: flt['$or'] = [{'scholarships': scholarships}, {' scholarships': scholarships}]
+    if gre_required is not None: flt['gre_required'] = gre_required
+    if gmat_required is not None: flt['gmat_required'] = gmat_required
     if country: flt['country'] = {'$in': [c.strip() for c in country.lower().split(',') if c.strip()]}
     if course: flt['courses'] = {'$in': [c.strip() for c in course.lower().split(',') if c.strip()]}
     if tuition_min is not None or tuition_max is not None:
@@ -69,9 +72,6 @@ async def list_countries():
 @router.get('/stats')
 async def university_stats():
     return {'total': await universities_col.count_documents({}), 'countries': len(await universities_col.distinct('country'))}
-
-@router.get('/countries/list')
-async def list_countries():
     pipeline = [
         {'$group': {'_id': '$country', 'country_name': {'$first': '$country_name'}, 'flag': {'$first': '$flag'}}},
         {'$sort': {'country_name': 1}},

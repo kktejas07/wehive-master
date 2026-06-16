@@ -43,12 +43,11 @@ async def recommend(profile: RecommenderProfile):
         {"id": u["id"], "name": u.get("name"), "country": u.get("country_name"),
          "rank": u.get("rank"), "tuition_usd": u.get("tuition_usd"), "scholarships": u.get("scholarships")}
         for u in top]}
-    prompt = f"""Recommend 5-8 best universities for this student. Return ONLY a JSON array with each having "id", "fit_score"(0-100), "reason"(1-2 sentences), "strengths"(array).
-
-Student: {json.dumps(ctx["profile"])}
+    system_prompt = """Recommend 5-8 best universities for this student. Return ONLY a JSON array with each having "id", "fit_score"(0-100), "reason"(1-2 sentences), "strengths"(array)."""
+    user_prompt = f"""Student: {json.dumps(ctx["profile"])}
 Universities: {json.dumps(ctx["universities"])}"""
     try:
-        text = re.search(r"\[\s*\{.*\}\s*\]", (await marketplace.chat(prompt)).strip(), re.DOTALL)
+        text = re.search(r"\[\s*\{.*\}\s*\]", (await marketplace.chat("anonymous", system_prompt, user_prompt)).strip(), re.DOTALL)
         recs = json.loads(text.group()) if text else []
         if not isinstance(recs, list): recs = []
     except: recs = []
@@ -68,11 +67,10 @@ async def ask(uid: str, body: QuestionBody):
     if not doc: raise HTTPException(404)
     doc = normalize_university(dict(doc))
     p = {k: v for k, v in doc.items() if v is not None}
-    prompt = f"""Answer the student's question about this university using only the data below. Be concise.
-
-University: {json.dumps(p, indent=2)}
+    system_prompt = """Answer the student's question about this university using only the data below. Be concise."""
+    user_prompt = f"""University: {json.dumps(p, indent=2)}
 Question: {body.question}"""
-    try: answer = await marketplace.chat(prompt)
+    try: answer = await marketplace.chat("anonymous", system_prompt, user_prompt)
     except Exception as e: answer = f"Sorry, couldn't answer. ({e})"
     return {"university_id": uid, "university_name": doc.get("name"), "answer": answer}
 
@@ -94,11 +92,11 @@ async def scholarship_match(profile: ScholarshipProfile):
     top = candidates[:30]
     ctx = {"profile": profile.model_dump(), "universities": [
         {"id": u["id"], "name": u.get("name"), "tuition_usd": u.get("tuition_usd")} for u in top]}
-    prompt = f"""Find best scholarship matches. Return JSON array with "id", "match_score"(0-100), "reason", "scholarship_tips".
-Student: {json.dumps(ctx["profile"])}
+    system_prompt = """Find best scholarship matches. Return JSON array with "id", "match_score"(0-100), "reason", "scholarship_tips"."""
+    user_prompt = f"""Student: {json.dumps(ctx["profile"])}
 Universities: {json.dumps(ctx["universities"])}"""
     try:
-        text = re.search(r"\[\s*\{.*\}\s*\]", (await marketplace.chat(prompt)).strip(), re.DOTALL)
+        text = re.search(r"\[\s*\{.*\}\s*\]", (await marketplace.chat("anonymous", system_prompt, user_prompt)).strip(), re.DOTALL)
         matches = json.loads(text.group()) if text else []
     except: matches = []
     mm = {m["id"]: m for m in matches}
@@ -118,11 +116,11 @@ async def acceptance_prob(uid: str, body: AcceptanceQuery):
     if not doc: raise HTTPException(404)
     uni = {"name": doc.get("name"), "rank": doc.get("rank"), "acceptance_rate": doc.get("acceptance_rate"),
            "ielts_min": doc.get("ielts_min"), "gre_required": doc.get("gre_required")}
-    prompt = f"""Estimate acceptance probability. Return ONLY JSON: {{"probability":int 0-100, "tier":"reach|target|safety", "factors":[], "recommendations":"", "confidence":"low|medium|high"}}
-University: {json.dumps(uni)}
+    system_prompt = """Estimate acceptance probability. Return ONLY JSON: {"probability":int 0-100, "tier":"reach|target|safety", "factors":[], "recommendations":"", "confidence":"low|medium|high"}"""
+    user_prompt = f"""University: {json.dumps(uni)}
 Student: {json.dumps(body.model_dump(exclude_none=True))}"""
     try:
-        text = (await marketplace.chat(prompt)).strip()
+        text = (await marketplace.chat("anonymous", system_prompt, user_prompt)).strip()
         m = re.search(r"\{.*\}", text, re.DOTALL)
         result = json.loads(m.group()) if m else {}
     except: result = {"probability": 50, "tier": "target", "factors": [], "recommendations": "", "confidence": "low"}
@@ -138,10 +136,10 @@ async def ai_enrich_missing_data(admin=Depends(get_current_admin_flex)):
     if not bare: return {"enriched": 0, "note": "No thin data found."}
     target = bare[:30]
     batch = [{"id": u.get("id"), "name": u.get("name"), "country_name": u.get("country_name")} for u in target]
-    prompt = f"""Generate realistic data for each university. Return JSON array with "id", "description"(2-3 sentences), "popular_courses"(3-5), "facilities"(4-6), "living_cost_usd".
-{json.dumps(batch)}"""
+    system_prompt = """Generate realistic data for each university. Return JSON array with "id", "description"(2-3 sentences), "popular_courses"(3-5), "facilities"(4-6), "living_cost_usd"."""
+    user_prompt = json.dumps(batch)
     try:
-        text = re.search(r"\[\s*\{.*\}\s*\]", (await marketplace.chat(prompt)).strip(), re.DOTALL)
+        text = re.search(r"\[\s*\{.*\}\s*\]", (await marketplace.chat(str(admin.get("_id", "admin")), system_prompt, user_prompt)).strip(), re.DOTALL)
         enrichments = json.loads(text.group()) if text else []
     except: enrichments = []
     enriched = 0

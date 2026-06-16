@@ -137,7 +137,7 @@ export default function UniversitiesTab() {
         const v = editDraft[f.key];
         const orig = items.find(i => i.id === editing)?.[f.key];
         if (JSON.stringify(v) !== JSON.stringify(orig)) {
-          patch[f.key] = f.type === 'number' ? (v === '' || v === null ? undefined : Number(v)) : v;
+          patch[f.key] = f.type === 'number' ? (v === '' || v === null ? null : Number(v)) : v;
         }
       });
       if (Object.keys(patch).length === 0) { toast({ title: 'No changes' }); setSaving(false); return; }
@@ -496,7 +496,7 @@ export default function UniversitiesTab(){
     setSaving(true);
     try{
       const patch={};
-      FIELDS.filter(f=>f.editable).forEach(f=>{const v=editDraft[f.key];const orig=items.find(i=>i.id===editing)?.[f.key];if(JSON.stringify(v)!==JSON.stringify(orig))patch[f.key]=f.type==='number'?(v===''||v===null?undefined:Number(v)):v});
+      FIELDS.filter(f=>f.editable).forEach(f=>{const v=editDraft[f.key];const orig=items.find(i=>i.id===editing)?.[f.key];if(JSON.stringify(v)!==JSON.stringify(orig))patch[f.key]=f.type==='number'?(v===''||v===null?null:Number(v)):v});
       if(Object.keys(patch).length===0){toast({title:'No changes'});setSaving(false);return}
       await adminClient(token).patch(`/universities/${editing}`,patch);
       toast({title:'Updated'});closeEditor();loadList();loadStats();

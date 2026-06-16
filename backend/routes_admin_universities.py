@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import json as _json
+import logging
 import os
 from datetime import datetime
 from typing import Any, Optional
+
+logger = logging.getLogger("wehive.admin_universities")
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from pydantic import BaseModel
@@ -62,6 +65,8 @@ async def enrich_csv(file: UploadFile = File(...), threshold: int = Form(88),
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(400, "Must be a CSV file")
     overrides = _json.loads(column_overrides) if column_overrides else {}
+    if not isinstance(overrides, dict):
+        raise HTTPException(400, "column_overrides must be a JSON object, e.g. {\"rank\": \"My Rank\"}")
     result = await enrich_from_csv_bytes(await file.read(), file.filename, threshold=threshold,
         insert_missing=insert_missing, dry_run=dry_run, column_overrides=overrides)
     if "error" in result: raise HTTPException(400, result["error"])
@@ -88,8 +93,9 @@ async def re_seed(admin=Depends(_admin)):
         await audit_record(admin, "re_seed", "universities", "static",
             extra={"static": result.get("static", 0), "api": result.get("api", 0), "total": result.get("total", 0)})
         return {"ok": True, "result": result}
-    except Exception as e:
-        raise HTTPException(500, f"Re-seed failed: {e}")
+    except Exception:
+        logger.exception("Re-seed failed")
+        raise HTTPException(500, "Re-seed failed")
 
 
 @router.get("")

@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from auth_utils import get_current_user
-from db import db
+from db import db, universities_col
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -29,6 +29,9 @@ class ReviewCreate(BaseModel):
 
 @router.post("")
 async def create_review(body: ReviewCreate, user=Depends(get_current_user)):
+    uni = await universities_col.find_one({"id": body.university_id}, {"_id": 1})
+    if not uni:
+        raise HTTPException(404, f"University not found: {body.university_id}")
     doc = {
         "id": str(uuid.uuid4()),
         "university_id": body.university_id,

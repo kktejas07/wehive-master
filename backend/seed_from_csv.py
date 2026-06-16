@@ -133,22 +133,24 @@ async def main(args: argparse.Namespace) -> None:
         return
 
     mongo = AsyncIOMotorClient(MONGODB_URI)
-    coll = mongo[MONGODB_DB][COLLECTION_NAME]
-    await coll.create_index("id", unique=True)
+    try:
+        coll = mongo[MONGODB_DB][COLLECTION_NAME]
+        await coll.create_index("id", unique=True)
 
-    ops = [UpdateOne({"id": d["id"]}, {"$set": d}, upsert=True) for d in docs]
-    added = modified = 0
-    for i in range(0, len(ops), 500):
-        res = await coll.bulk_write(ops[i : i + 500], ordered=False)
-        added += res.upserted_count
-        modified += res.modified_count
+        ops = [UpdateOne({"id": d["id"]}, {"$set": d}, upsert=True) for d in docs]
+        added = modified = 0
+        for i in range(0, len(ops), 500):
+            res = await coll.bulk_write(ops[i : i + 500], ordered=False)
+            added += res.upserted_count
+            modified += res.modified_count
 
-    total = await coll.count_documents({})
-    print("Done.")
-    print(f"  Inserted : {added}")
-    print(f"  Updated  : {modified}")
-    print(f"  Total    : {total}")
-    mongo.close()
+        total = await coll.count_documents({})
+        print("Done.")
+        print(f"  Inserted : {added}")
+        print(f"  Updated  : {modified}")
+        print(f"  Total    : {total}")
+    finally:
+        mongo.close()
 
 
 def parse_args() -> argparse.Namespace:

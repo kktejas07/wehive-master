@@ -1,13 +1,8 @@
-"""University seeder — populates the universities_v2 MongoDB collection.
-
-Strategy:
-  1. Start with the rich hardcoded set from data.py (1 000+ universities).
-  2. Pull additional universities from the HiPolabs open API for extended
-     study destinations not already covered.
-  3. Deduplicate by (name, country).
-  4. Upsert each document so the operation is idempotent.
-"""
+"""University seeder — populates the universities_v2 MongoDB collection."""
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger('wehive.seed_universities')
 
 import asyncio
 import re
@@ -544,7 +539,8 @@ async def seed() -> dict:
         else:
             try:
                 raw_list = await fetch_hipolabs(country_name)
-            except Exception:
+            except Exception as exc:
+                logger.warning("HiPolabs fetch failed for %s: %s", country_name, exc)
                 raw_list = []
 
         top_names = {t['name'].lower(): t for t in top_list}
@@ -583,7 +579,8 @@ async def seed() -> dict:
     # --- 3. Pull all remaining countries from HiPolabs -----------------------
     try:
         all_raw = await fetch_hipolabs('')  # empty = all countries
-    except Exception:
+    except Exception as exc:
+        logger.warning("HiPolabs fetch failed for remaining countries: %s", exc)
         all_raw = []
     remaining_by_country: dict[str, list[dict]] = {}
     for u in all_raw:

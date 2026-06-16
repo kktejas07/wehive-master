@@ -22,6 +22,10 @@ export default function ProgramList() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
+    setLoading(true);
+    setUni(null);
+    setPrograms([]);
+    setFilter('all');
     Promise.all([
       axios.get(`${API}/universities/${universityId}`).catch(() => null),
       axios.get(`${API}/programs/${universityId}`).catch(() => ({ data: [] })),

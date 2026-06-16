@@ -290,96 +290,98 @@ async def main(args: argparse.Namespace) -> None:
     print("-" * 70)
 
     mongo = AsyncIOMotorClient(MONGODB_URI)
-    coll = mongo[MONGODB_DB][COLLECTION_NAME]
-    await coll.create_index("id", unique=True)
+    try:
+        coll = mongo[MONGODB_DB][COLLECTION_NAME]
+        await coll.create_index("id", unique=True)
 
-    docs = await coll.find(
-        {}, {"id": 1, "name": 1, "country": 1, "country_name": 1}
-    ).to_list(length=None)
-    print(f"Loaded {len(docs)} existing universities from {COLLECTION_NAME}.")
-    by_country, all_names, all_docs = build_index(docs)
+        docs = await coll.find(
+            {}, {"id": 1, "name": 1, "country": 1, "country_name": 1}
+        ).to_list(length=None)
+        print(f"Loaded {len(docs)} existing universities from {COLLECTION_NAME}.")
+        by_country, all_names, all_docs = build_index(docs)
 
-    ops: list[UpdateOne] = []
-    report_rows: list[dict] = []
-    n_updated = n_inserted = n_low = n_nomatch = 0
+        ops: list[UpdateOne] = []
+        report_rows: list[dict] = []
+        n_updated = n_inserted = n_low = n_nomatch = 0
 
-    for _, row in df.iterrows():
-        csv_name = str(row[colmap["name"]]).strip()
-        if not csv_name:
-            continue
-        csv_country = str(row[colmap["country_name"]]).strip() if "country_name" in colmap else ""
-        ck = country_key(csv_country)
+        for _, row in df.iterrows():
+            csv_name = str(row[colmap["name"]]).strip()
+            if not csv_name:
+                continue
+            csv_country = str(row[colmap["country_name"]]).strip() if "country_name" in colmap else ""
+            ck = country_key(csv_country)
 
-        doc, score, scope = match_one(csv_name, ck, by_country, all_names, all_docs, args.threshold)
+            doc, score, scope = match_one(csv_name, ck, by_country, all_names, all_docs, args.threshold)
 
-        # Build the enrichment payload from whatever fields exist in the CSV.
-        payload: dict[str, Any] = {}
-        for f in enrich_fields:
-            val = COERCE[f](row[colmap[f]])
-            if val is not None:
-                payload[f] = val
+            # Build the enrichment payload from whatever fields exist in the CSV.
+            payload: dict[str, Any] = {}
+            for f in enrich_fields:
+                val = COERCE[f](row[colmap[f]])
+                if val is not None:
+                    payload[f] = val
 
-        if doc:
-            action = "update"
-            n_updated += 1
-            if not args.dry_run and payload:
-                ops.append(UpdateOne({"id": doc["id"]}, {"$set": payload}))
-        elif args.insert_missing and score < args.threshold:
-            action = "insert"
-            n_inserted += 1
-            if not args.dry_run:
-                a2 = alpha2_for(csv_country)
-                slug = slugify(csv_name, csv_country)
-                new_doc = {
-                    **INSERT_DEFAULTS,
-                    "id": slug, "name": csv_name,
-                    "country": a2, "country_name": csv_country,
-                    "flag": flag_from_alpha2(a2) if a2 else "🏳️",
-                    "location": csv_country,
-                    "description": f"{csv_name} is a university located in {csv_country}.",
-                    "rank": 9999,
-                }
-                new_doc.update(payload)
-                ops.append(UpdateOne({"id": slug}, {"$setOnInsert": new_doc}, upsert=True))
-        else:
-            action = "skip_low_score" if score > 0 else "skip_no_match"
-            if score > 0:
-                n_low += 1
+            if doc:
+                action = "update"
+                n_updated += 1
+                if not args.dry_run and payload:
+                    ops.append(UpdateOne({"id": doc["id"]}, {"$set": payload}))
+            elif args.insert_missing and score < args.threshold:
+                action = "insert"
+                n_inserted += 1
+                if not args.dry_run:
+                    a2 = alpha2_for(csv_country)
+                    slug = slugify(csv_name, csv_country)
+                    new_doc = {
+                        **INSERT_DEFAULTS,
+                        "id": slug, "name": csv_name,
+                        "country": a2, "country_name": csv_country,
+                        "flag": flag_from_alpha2(a2) if a2 else "🏳️",
+                        "location": csv_country,
+                        "description": f"{csv_name} is a university located in {csv_country}.",
+                        "rank": 9999,
+                    }
+                    new_doc.update(payload)
+                    ops.append(UpdateOne({"id": slug}, {"$setOnInsert": new_doc}, upsert=True))
             else:
-                n_nomatch += 1
+                action = "skip_low_score" if score > 0 else "skip_no_match"
+                if score > 0:
+                    n_low += 1
+                else:
+                    n_nomatch += 1
 
-        report_rows.append({
-            "csv_name": csv_name,
-            "csv_country": csv_country,
-            "matched_name": doc["name"] if doc else "",
-            "matched_id": doc["id"] if doc else "",
-            "score": round(score, 1),
-            "scope": scope,
-            "action": action,
-            "fields": ",".join(payload.keys()),
-        })
+            report_rows.append({
+                "csv_name": csv_name,
+                "csv_country": csv_country,
+                "matched_name": doc["name"] if doc else "",
+                "matched_id": doc["id"] if doc else "",
+                "score": round(score, 1),
+                "scope": scope,
+                "action": action,
+                "fields": ",".join(payload.keys()),
+            })
 
-    # Always write the audit report.
-    report_df = pd.DataFrame(report_rows)
-    report_df.to_csv(args.report, index=False)
-    print(f"Wrote match report -> {args.report}")
+        # Always write the audit report.
+        report_df = pd.DataFrame(report_rows)
+        report_df.to_csv(args.report, index=False)
+        print(f"Wrote match report -> {args.report}")
 
-    # Apply.
-    if not args.dry_run and ops:
-        BATCH = 500
-        for i in range(0, len(ops), BATCH):
-            await coll.bulk_write(ops[i:i + BATCH], ordered=False)
+        # Apply.
+        if not args.dry_run and ops:
+            BATCH = 500
+            for i in range(0, len(ops), BATCH):
+                await coll.bulk_write(ops[i:i + BATCH], ordered=False)
 
-    total = await coll.count_documents({})
-    print("-" * 70)
-    print("DRY RUN - nothing written." if args.dry_run else "Done.")
-    print(f"  Matched & updated     : {n_updated}")
-    if args.insert_missing:
-        print(f"  Inserted (missing)    : {n_inserted}")
-    print(f"  Skipped (low score)   : {n_low}    <- review these in the report")
-    print(f"  Skipped (no match)    : {n_nomatch}")
-    print(f"  Total in collection   : {total}")
-    mongo.close()
+        total = await coll.count_documents({})
+        print("-" * 70)
+        print("DRY RUN - nothing written." if args.dry_run else "Done.")
+        print(f"  Matched & updated     : {n_updated}")
+        if args.insert_missing:
+            print(f"  Inserted (missing)    : {n_inserted}")
+        print(f"  Skipped (low score)   : {n_low}    <- review these in the report")
+        print(f"  Skipped (no match)    : {n_nomatch}")
+        print(f"  Total in collection   : {total}")
+    finally:
+        mongo.close()
 
 
 def parse_args() -> argparse.Namespace:

@@ -19,7 +19,7 @@ SUPPORTED_LOCALES = {"en", "es", "fr", "de", "it", "pt", "zh", "ja", "ko", "ar",
 
 class TranslationSet(BaseModel):
     locale: str
-    fields: dict
+    fields: dict[str, str]
 
 
 @router.get("/universities/{university_id}")

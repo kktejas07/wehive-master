@@ -259,74 +259,76 @@ async def main(args: argparse.Namespace) -> None:
     print(f"Fetched {len(raw_rows)} US institutions.")
 
     mongo = AsyncIOMotorClient(MONGODB_URI)
-    coll = mongo[MONGODB_DB][COLLECTION_NAME]
-    await coll.create_index("id", unique=True)
-    docs = await coll.find(
-        {}, {"id": 1, "name": 1, "country": 1, "country_name": 1}
-    ).to_list(length=None)
-    by_country = build_index(docs)
-    print(f"Loaded {len(docs)} existing universities "
-          f"({len(by_country.get('united states', []))} US).")
+    try:
+        coll = mongo[MONGODB_DB][COLLECTION_NAME]
+        await coll.create_index("id", unique=True)
+        docs = await coll.find(
+            {}, {"id": 1, "name": 1, "country": 1, "country_name": 1}
+        ).to_list(length=None)
+        by_country = build_index(docs)
+        print(f"Loaded {len(docs)} existing universities "
+              f"({len(by_country.get('united states', []))} US).")
 
-    ops: list[UpdateOne] = []
-    report_rows: list[dict] = []
-    n_updated = n_inserted = n_low = n_skip = 0
+        ops: list[UpdateOne] = []
+        report_rows: list[dict] = []
+        n_updated = n_inserted = n_low = n_skip = 0
 
-    for raw in raw_rows:
-        name, payload = map_row(raw)
-        if not name or not payload:
-            n_skip += 1
-            continue
+        for raw in raw_rows:
+            name, payload = map_row(raw)
+            if not name or not payload:
+                n_skip += 1
+                continue
 
-        doc, score = match_one(name, by_country, args.threshold)
-        if doc:
-            n_updated += 1
-            action = "update"
-            if not args.dry_run:
-                ops.append(UpdateOne({"id": doc["id"]}, {"$set": payload}))
-        elif args.insert_missing:
-            n_inserted += 1
-            action = "insert"
-            if not args.dry_run:
-                slug = slugify(name, "united states")
-                new_doc = {
-                    **INSERT_DEFAULTS, "id": slug, "name": name,
-                    "country": "us", "country_name": "United States",
-                    "location": (raw.get("school.city") or "") + ", " + (raw.get("school.state") or ""),
-                    "description": f"{name} is a university located in the United States.",
-                    **payload,
-                }
-                ops.append(UpdateOne({"id": slug}, {"$setOnInsert": new_doc}, upsert=True))
-        else:
-            action = "skip_low_score"
-            n_low += 1
+            doc, score = match_one(name, by_country, args.threshold)
+            if doc:
+                n_updated += 1
+                action = "update"
+                if not args.dry_run:
+                    ops.append(UpdateOne({"id": doc["id"]}, {"$set": payload}))
+            elif args.insert_missing:
+                n_inserted += 1
+                action = "insert"
+                if not args.dry_run:
+                    slug = slugify(name, "united states")
+                    new_doc = {
+                        **INSERT_DEFAULTS, "id": slug, "name": name,
+                        "country": "us", "country_name": "United States",
+                        "location": (raw.get("school.city") or "") + ", " + (raw.get("school.state") or ""),
+                        "description": f"{name} is a university located in the United States.",
+                        **payload,
+                    }
+                    ops.append(UpdateOne({"id": slug}, {"$setOnInsert": new_doc}, upsert=True))
+            else:
+                action = "skip_low_score"
+                n_low += 1
 
-        report_rows.append({
-            "scorecard_name": name,
-            "matched_name": doc["name"] if doc else "",
-            "matched_id": doc["id"] if doc else "",
-            "score": round(score, 1),
-            "action": action,
-            "fields": ",".join(payload.keys()),
-        })
+            report_rows.append({
+                "scorecard_name": name,
+                "matched_name": doc["name"] if doc else "",
+                "matched_id": doc["id"] if doc else "",
+                "score": round(score, 1),
+                "action": action,
+                "fields": ",".join(payload.keys()),
+            })
 
-    pd.DataFrame(report_rows).to_csv(args.report, index=False)
-    print(f"Wrote match report -> {args.report}")
+        pd.DataFrame(report_rows).to_csv(args.report, index=False)
+        print(f"Wrote match report -> {args.report}")
 
-    if not args.dry_run and ops:
-        for i in range(0, len(ops), 500):
-            await coll.bulk_write(ops[i:i + 500], ordered=False)
+        if not args.dry_run and ops:
+            for i in range(0, len(ops), 500):
+                await coll.bulk_write(ops[i:i + 500], ordered=False)
 
-    total = await coll.count_documents({})
-    print("-" * 70)
-    print("DRY RUN - nothing written." if args.dry_run else "Done.")
-    print(f"  Matched & updated   : {n_updated}")
-    if args.insert_missing:
-        print(f"  Inserted (missing)  : {n_inserted}")
-    print(f"  Unmatched (skipped) : {n_low}   <- review in the report")
-    print(f"  No usable data      : {n_skip}")
-    print(f"  Total in collection : {total}")
-    mongo.close()
+        total = await coll.count_documents({})
+        print("-" * 70)
+        print("DRY RUN - nothing written." if args.dry_run else "Done.")
+        print(f"  Matched & updated   : {n_updated}")
+        if args.insert_missing:
+            print(f"  Inserted (missing)  : {n_inserted}")
+        print(f"  Unmatched (skipped) : {n_low}   <- review in the report")
+        print(f"  No usable data      : {n_skip}")
+        print(f"  Total in collection : {total}")
+    finally:
+        mongo.close()
 
 
 def parse_args() -> argparse.Namespace:

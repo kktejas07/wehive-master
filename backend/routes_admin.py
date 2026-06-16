@@ -1497,7 +1497,7 @@ async def export_universities_csv(_=Depends(get_current_admin)):
             u.get('acceptance_rate') or '',
             u.get('employment_rate') or '',
             str(u.get('avg_salary_usd') or ''),
-            (u.get('description') or '').replace('"', '""'),
+            (u.get('description') or ''),
             u.get('location') or '',
             u.get('website') or '',
             ';'.join(u.get('accreditation') or []),

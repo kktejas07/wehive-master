@@ -101,6 +101,10 @@ COLUMN_CANDIDATES: dict[str, list[str]] = {
     "acceptance_rate": ["acceptance_rate", "acceptance rate"],
 }
 
+def _eint(v): m = re.search(r"\d+", str(v).replace(",", "")); return int(m.group()) if m else None
+def _efloat(v): s = re.sub(r"[^\d.]", "", str(v)); return float(s) if s else None
+def _elist(v): p = [x.strip() for x in re.split(r"[;|,]", str(v)) if x.strip()]; return p or None
+
 _ENRICH_COERCE = {
     "rank": lambda v: _eint(v), "qs_rank": lambda v: _eint(v), "times_rank": lambda v: _eint(v),
     "type": _to_str, "students": lambda v: _eint(v), "intl_students": lambda v: _eint(v),
@@ -112,9 +116,6 @@ _ENRICH_COERCE = {
     "courses": _elist, "popular_courses": _elist, "intakes": _elist,
     "accreditation": _elist, "facilities": _elist,
 }
-def _eint(v): m = re.search(r"\d+", str(v).replace(",", "")); return int(m.group()) if m else None
-def _efloat(v): s = re.sub(r"[^\d.]", "", str(v)); return float(s) if s else None
-def _elist(v): p = [x.strip() for x in re.split(r"[;|,]", str(v)) if x.strip()]; return p or None
 
 COUNTRY_ALIASES = {"usa": "united states", "us": "united states", "uk": "united kingdom",
     "uae": "united arab emirates", "south korea": "korea, republic of"}

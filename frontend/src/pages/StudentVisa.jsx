@@ -213,8 +213,8 @@ export default function StudentVisa() {
 =======
 >>>>>>> Stashed changes
     if (searchQuery && !u.name?.toLowerCase().includes(searchQuery.toLowerCase()) && !u.short_name?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    if (tuitionMax && (u.tuition_usd || 0) > Number(tuitionMax)) return false;
-    if (ieltsFilter && (u.ielts_min || 0) > Number(ieltsFilter)) return false;
+    if (tuitionMax && (u.tuition_usd == null || u.tuition_usd > Number(tuitionMax))) return false;
+    if (ieltsFilter && (u.ielts_min == null || u.ielts_min > Number(ieltsFilter))) return false;
     if (scholarshipsOnly && !u.scholarships) return false;
     return true;
   }).sort((a, b) => {
@@ -243,6 +243,8 @@ export default function StudentVisa() {
   }, []);
 
   useEffect(() => { setUniPage(1); fetchUniversities(selected); }, [selected]);
+
+  useEffect(() => { setUniPage(1); }, [searchQuery, tuitionMax, ieltsFilter, scholarshipsOnly, sortField]);
 
   const fetchUniversities = (countryCode) => {
     axios.get(`${API}/universities`, { params: { country: countryCode, limit: 200 } })

@@ -36,8 +36,10 @@ export default function AIAcceptanceProbability({ universityId, universityName }
     setBusy(true); setResult(null);
     try {
       const body = {};
-      if (gpa) body.gpa = Number(gpa);
-      if (ielts) body.ielts = Number(ielts);
+      const gpaNum = Number(gpa);
+      if (gpa && Number.isFinite(gpaNum)) body.gpa = gpaNum;
+      const ieltsNum = Number(ielts);
+      if (ielts && Number.isFinite(ieltsNum)) body.ielts = ieltsNum;
       if (testScores.trim()) body.test_scores = testScores.trim();
       if (background.trim()) body.background = background.trim();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -140,7 +142,7 @@ export default function AIAcceptanceProbability({universityId,universityName}){
     if(!gpa&&!ielts&&!testScores){toast({title:'Enter at least one field'});return}
     setBusy(true); setResult(null);
     try{
-      const body={}; if(gpa)body.gpa=Number(gpa); if(ielts)body.ielts=Number(ielts); if(testScores.trim())body.test_scores=testScores.trim(); if(background.trim())body.background=background.trim();
+      const body={}; const _g=Number(gpa);if(gpa&&Number.isFinite(_g))body.gpa=_g;const _i=Number(ielts);if(ielts&&Number.isFinite(_i))body.ielts=_i; if(testScores.trim())body.test_scores=testScores.trim(); if(background.trim())body.background=background.trim();
       const {data}=await axios.post(`${API}/ai/universities/${universityId}/acceptance-probability`,body,{headers:token?{Authorization:`Bearer ${token}`}:{}});
       setResult(data);
     }catch(e){toast({title:'Failed'})}

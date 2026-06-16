@@ -159,7 +159,7 @@ export default function AIUniversityRecommender({ open, onClose }) {
                         </div>
                         <p className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-0.5">{uni.country} · Rank #{uni.rank} · ${uni.tuition_usd?.toLocaleString()}/yr</p>
                       </div>
-                      {uni.fit_score && (
+                      {uni.fit_score != null && (
                         <div className="shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white font-extrabold text-[18px]">
                           {uni.fit_score}
                         </div>

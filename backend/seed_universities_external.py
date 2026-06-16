@@ -60,7 +60,7 @@ COLLECTION_NAME = "universities_v2"
 
 # Base URL of the external source. Swap this for whatever API you confirm.
 # Default points at the HiPolabs-style shape (name/country/alpha_two_code/web_pages).
-API_BASE = os.environ.get("UNIVERSITY_API_BASE", "http://universities.hipolabs.com").rstrip("/")
+API_BASE = os.environ.get("UNIVERSITY_API_BASE", "https://universities.hipolabs.com").rstrip("/")
 SEARCH_PATH = "/search"
 
 # Network tuning
@@ -247,44 +247,44 @@ async def main(countries: list[str] | None) -> None:
     print("-" * 60)
 
     mongo = AsyncIOMotorClient(MONGODB_URI)
-    coll = mongo[MONGODB_DB][COLLECTION_NAME]
-    # Ensure the dedup key is indexed (idempotent).
-    await coll.create_index("id", unique=True)
+    try:
+        coll = mongo[MONGODB_DB][COLLECTION_NAME]
+        # Ensure the dedup key is indexed (idempotent).
+        await coll.create_index("id", unique=True)
 
-    async with httpx.AsyncClient(timeout=HTTP_TIMEOUT, follow_redirects=True) as client:
-        try:
-            raw_records = await fetch_universities(client, countries)
-        except httpx.HTTPError as exc:
-            print(f"ERROR: failed to fetch from {API_BASE}: {exc}", file=sys.stderr)
-            mongo.close()
-            sys.exit(1)
+        async with httpx.AsyncClient(timeout=HTTP_TIMEOUT, follow_redirects=True) as client:
+            try:
+                raw_records = await fetch_universities(client, countries)
+            except httpx.HTTPError as exc:
+                print(f"ERROR: failed to fetch from {API_BASE}: {exc}", file=sys.stderr)
+                sys.exit(1)
 
-    print(f"Fetched {len(raw_records)} raw records from the API.")
+        print(f"Fetched {len(raw_records)} raw records from the API.")
 
-    ops, skipped = build_ops(raw_records)
-    if skipped:
-        print(f"Skipped {skipped} records missing name/country.")
+        ops, skipped = build_ops(raw_records)
+        if skipped:
+            print(f"Skipped {skipped} records missing name/country.")
 
-    added = 0
-    modified = 0
-    for i in range(0, len(ops), BATCH_SIZE):
-        batch = ops[i : i + BATCH_SIZE]
-        if not batch:
-            continue
-        result = await coll.bulk_write(batch, ordered=False)
-        added += result.upserted_count
-        modified += result.modified_count
+        added = 0
+        modified = 0
+        for i in range(0, len(ops), BATCH_SIZE):
+            batch = ops[i : i + BATCH_SIZE]
+            if not batch:
+                continue
+            result = await coll.bulk_write(batch, ordered=False)
+            added += result.upserted_count
+            modified += result.modified_count
 
-    total = await coll.count_documents({})
+        total = await coll.count_documents({})
 
-    print("-" * 60)
-    print("Done.")
-    print(f"  Newly added (inserted) : {added}")
-    print(f"  Existing updated       : {modified}")
-    print(f"  Unique processed       : {len(ops)}")
-    print(f"  Total in collection    : {total}")
-
-    mongo.close()
+        print("-" * 60)
+        print("Done.")
+        print(f"  Newly added (inserted) : {added}")
+        print(f"  Existing updated       : {modified}")
+        print(f"  Unique processed       : {len(ops)}")
+        print(f"  Total in collection    : {total}")
+    finally:
+        mongo.close()
 
 
 def parse_args() -> argparse.Namespace:
