@@ -91,7 +91,7 @@ export default function EmailVerification() {
 
   return (
     <div className="bg-white min-h-screen">
-      <main className="min-h-screen flex items-center justify-center bg-[hsl(var(--soft-bg))] px-5">
+      <main className="min-h-screen flex items-center justify-center bg-[hsl(var(--soft-bg))] px-5 pt-20">
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
