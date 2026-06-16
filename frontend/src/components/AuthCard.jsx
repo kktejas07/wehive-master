@@ -192,7 +192,18 @@ export default function AuthCard({ mode, referralCode }) {
         }
       }
     } catch (e) {
-      toast({ title: 'Auth failed', description: e.message });
+      const code = e.code;
+      const messages = {
+        'auth/email-already-in-use': 'An account with this email already exists. Please sign in instead.',
+        'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
+        'auth/invalid-email': 'Please enter a valid email address.',
+        'auth/user-not-found': 'No account found with this email. Please sign up first.',
+        'auth/wrong-password': 'Incorrect password. Please try again.',
+        'auth/too-many-requests': 'Too many attempts. Please try again later.',
+        'auth/invalid-credential': 'Invalid email or password. Please try again.',
+        'auth/network-request-failed': 'Network error. Please check your connection.',
+      };
+      toast({ title: messages[code] || 'Auth failed', description: messages[code] ? '' : e.message });
     } finally {
       setEmailPwdLoading(false);
     }
