@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot, ClipboardList, Clock, CheckCircle, XCircle, Send, Briefcase } from 'lucide-react';
+import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot, ClipboardList, Clock, CheckCircle, XCircle, Send, Briefcase, GraduationCap } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
 import { statusColor } from '../lib/utils';
 import ScansTab from '../components/account/ScansTab';
@@ -17,10 +17,12 @@ import AIRiskAnalysisModal from '../components/ai/AIRiskAnalysisModal';
 import OpenMarketAI from '../components/OpenMarketAI';
 import PremiumGate from '../components/PremiumGate';
 import AIMarketplaceSettings from '../components/ai/AIMarketplaceSettings';
+import UniversityAppsTab from '../components/account/UniversityAppsTab';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },
   { id: 'applications', label: 'Applications', Icon: FileText },
+  { id: 'university-apps', label: 'University Apps', Icon: GraduationCap },
   { id: 'referrals', label: 'Referrals', Icon: Users },
   { id: 'aitools', label: 'AI Tools', Icon: Sparkles },
   { id: 'scans', label: 'My scans', Icon: ScanLine },
@@ -953,6 +955,7 @@ export default function Account() {
             <div className="rounded-3xl bg-white border border-black/5 p-8 min-h-[420px]">
               {tab === 'profile' && <ProfileTab user={user} token={token} onUpdated={refreshUser} />}
               {tab === 'applications' && <ApplicationsTab token={token} />}
+              {tab === 'university-apps' && <UniversityAppsTab token={token} />}
               {tab === 'referrals' && <ReferralsTab token={token} />}
               {tab === 'aitools' && <AIToolsTab token={token} isPremium={user?.is_premium} />}
               {tab === 'scans' && <ScansTab user={user} token={token} />}

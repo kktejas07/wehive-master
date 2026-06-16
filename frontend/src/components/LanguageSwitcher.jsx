@@ -1,61 +1,73 @@
-import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Globe } from 'lucide-react';
-import { useI18n } from '../context/I18nContext';
+import { useState, useEffect } from 'react';
+import { Globe, ChevronDown, Check, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { API } from '../context/AuthContext';
 
-export default function LanguageSwitcher() {
-  const { lang, setLang, languages } = useI18n();
+const LANGS = [
+  { code: 'en', label: 'English', native: 'English' },
+  { code: 'es', label: 'Spanish', native: 'Español' },
+  { code: 'fr', label: 'French', native: 'Français' },
+  { code: 'de', label: 'German', native: 'Deutsch' },
+  { code: 'it', label: 'Italian', native: 'Italiano' },
+  { code: 'pt', label: 'Portuguese', native: 'Português' },
+  { code: 'zh', label: 'Chinese', native: '中文' },
+  { code: 'ja', label: 'Japanese', native: '日本語' },
+  { code: 'ko', label: 'Korean', native: '한국어' },
+  { code: 'hi', label: 'Hindi', native: 'हिंदी' },
+  { code: 'ar', label: 'Arabic', native: 'العربية' },
+  { code: 'ru', label: 'Russian', native: 'Русский' },
+  { code: 'tr', label: 'Turkish', native: 'Türkçe' },
+];
+
+export default function LanguageSwitcher({ universityId, fields, onTranslated }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const [locale, setLocale] = useState(localStorage.getItem('uni_locale') || '');
+  const [translations, setTranslations] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const h = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, []);
+    if (!locale || !universityId) {
+      onTranslated?.(null);
+      return;
+    }
+    setLoading(true);
+    axios.get(`${API}/i18n/universities/${universityId}`, { params: { locale } })
+      .then(r => {
+        const t = r.data?.fields || {};
+        setTranslations(t);
+        onTranslated?.(t);
+      })
+      .catch(() => { setTranslations({}); onTranslated?.(null); })
+      .finally(() => setLoading(false));
+  }, [locale, universityId]);
 
-  const cur = languages.find((l) => l.code === lang) || languages[0];
+  const current = LANGS.find(l => l.code === locale);
 
   return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        data-testid="language-switcher-button"
-        className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-[12.5px] font-bold text-[hsl(var(--blue-900))]/70 hover:text-[hsl(var(--blue-700))] rounded-full hover:bg-[hsl(var(--blue-50))] transition-colors"
-        aria-label="Change language"
-      >
+    <div className="relative">
+      <button onClick={() => setOpen(!open)}
+        className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 text-[12px] font-bold transition">
         <Globe className="w-3.5 h-3.5" />
-        <span className="uppercase">{cur.code}</span>
+        {current ? current.native : 'English'}
         <ChevronDown className="w-3 h-3" />
       </button>
+
       {open && (
-        <div className="absolute right-0 mt-2 w-52 rounded-2xl backdrop-blur-xl bg-white/85 border border-white/40 shadow-[0_20px_50px_-25px_rgba(10,44,138,0.4)] p-1 z-50">
-          {languages.map((l) => {
-            const active = l.code === lang;
-            return (
-              <button
-                key={l.code}
-                data-testid={`language-option-${l.code}`}
-                onClick={() => {
-                  setLang(l.code);
-                  setOpen(false);
-                }}
-                className={`w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-[14px] transition ${
-                  active
-                    ? 'bg-[hsl(var(--blue-700))] text-white font-bold'
-                    : 'text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))]'
-                }`}
-              >
-                <span>{l.native}</span>
-                <span className={`text-[11px] uppercase tracking-wide ${active ? 'text-white/70' : 'text-[hsl(var(--blue-900))]/45'}`}>
-                  {l.code}
-                </span>
-              </button>
-            );
-          })}
+        <div className="absolute right-0 top-full mt-1 z-50 w-44 rounded-xl bg-white border border-black/10 shadow-2xl max-h-64 overflow-y-auto" onMouseLeave={() => setOpen(false)}>
+          {LANGS.map(l => (
+            <button key={l.code} onClick={() => { setLocale(l.code); localStorage.setItem('uni_locale', l.code); setOpen(false); }}
+              className={`w-full flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-bold text-left transition hover:bg-[hsl(var(--blue-50))] ${
+                locale === l.code ? 'text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]' : 'text-[hsl(var(--blue-900))]'
+              }`}>
+              <span className="w-5 text-center text-[14px]">{locale === l.code ? <Check className="w-4 h-4 mx-auto" /> : ''}</span>
+              <span>{l.native}</span>
+              <span className="ml-auto text-[10px] text-slate-400">{l.code.toUpperCase()}</span>
+            </button>
+          ))}
         </div>
       )}
+
+      {loading && <Loader2 className="w-3 h-3 animate-spin text-white/60 ml-1 inline" />}
     </div>
   );
 }

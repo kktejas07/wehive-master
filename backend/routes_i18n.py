@@ -7,7 +7,10 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+<<<<<<< Updated upstream
 from auth_utils import get_current_user
+=======
+>>>>>>> Stashed changes
 from admin_auth import get_current_admin_flex
 from db import db
 
@@ -20,7 +23,11 @@ SUPPORTED_LOCALES = {"en", "es", "fr", "de", "it", "pt", "zh", "ja", "ko", "ar",
 
 class TranslationSet(BaseModel):
     locale: str
+<<<<<<< Updated upstream
     fields: dict  # field_name -> translated string
+=======
+    fields: dict
+>>>>>>> Stashed changes
 
 
 @router.get("/universities/{university_id}")
@@ -28,7 +35,10 @@ async def get_university_translations(
     university_id: str,
     locale: Optional[str] = Query(None),
 ):
+<<<<<<< Updated upstream
     """Get translations for a university. If locale provided, return only that locale's translations."""
+=======
+>>>>>>> Stashed changes
     if locale:
         if locale not in SUPPORTED_LOCALES:
             raise HTTPException(400, f"Unsupported locale. Supported: {', '.join(sorted(SUPPORTED_LOCALES))}")
@@ -38,7 +48,10 @@ async def get_university_translations(
         translations = doc.get("translations", {})
         return {"university_id": university_id, "locale": locale, "fields": translations.get(locale, {})}
 
+<<<<<<< Updated upstream
     # Return all available translations
+=======
+>>>>>>> Stashed changes
     doc = await translations_col.find_one(
         {"entity_type": "university", "entity_id": university_id},
         {"_id": 0, "translations": 1},
@@ -52,7 +65,10 @@ async def set_university_translations(
     body: TranslationSet,
     admin=Depends(get_current_admin_flex),
 ):
+<<<<<<< Updated upstream
     """Set translations for a specific locale for a university."""
+=======
+>>>>>>> Stashed changes
     locale = body.locale.lower()
     if locale not in SUPPORTED_LOCALES:
         raise HTTPException(400, f"Unsupported locale. Supported: {', '.join(sorted(SUPPORTED_LOCALES))}")

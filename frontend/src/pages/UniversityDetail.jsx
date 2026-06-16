@@ -78,7 +78,7 @@ function IntakeCalendar({ intakes, country_name }) {
   );
 }
 
-function ProgramCard({ uni }) {
+function ProgramDetailsCard({ uni }) {
   return (
     <div className="rounded-2xl bg-white border border-black/5 p-6">
       <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-4">Program Details</h3>
@@ -134,6 +134,12 @@ export default function UniversityDetail() {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
+  const [translated, setTranslated] = useState(null);
+
+  const t = (field, fallback) => {
+    if (translated && translated[field]) return translated[field];
+    return uni?.[field] ?? fallback ?? '';
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -187,25 +193,35 @@ export default function UniversityDetail() {
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+<<<<<<< Updated upstream
             <div className="flex items-start gap-5">
+=======
+            <div className="flex items-start gap-5 relative">
+>>>>>>> Stashed changes
               <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
                 {uni.image_url ? (
                   <img src={uni.image_url} alt={uni.short_name} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = uni.flag; }} />
                 ) : (
                   <span className="text-4xl">{uni.flag}</span>
                 )}
+<<<<<<< Updated upstream
+=======
+              </div>
+              <div className="absolute top-0 right-0">
+                <LanguageSwitcher universityId={id} fields={uni} onTranslated={setTranslated} />
+>>>>>>> Stashed changes
               </div>
               <div>
                 <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] bg-white/10 rounded-full px-3 py-1">
                   <GraduationCap className="w-3.5 h-3.5" /> {uni.type}
                 </div>
                 <h1 className="mt-3 font-display font-extrabold text-[36px] sm:text-[48px] leading-[1.0] tracking-[-0.035em]">
-                  {uni.short_name}
+                  {t('short_name') || uni.short_name}
                 </h1>
-                <p className="mt-2 text-[17px] text-white/70 max-w-xl">{uni.name}</p>
+                <p className="mt-2 text-[17px] text-white/70 max-w-xl">{t('name') || uni.name}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-[14px] text-white/60">
                   <span className="inline-flex items-center gap-1">
-                    <MapPin className="w-4 h-4" /> {uni.location}
+                    <MapPin className="w-4 h-4" /> {t('location') || uni.location}
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <Globe2 className="w-4 h-4" /> {uni.country_name}
@@ -268,7 +284,7 @@ export default function UniversityDetail() {
             <div className="rounded-2xl bg-white border border-black/5 p-6">
               <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-3">About</h2>
               <p className="text-[15px] text-[hsl(var(--blue-900))]/70 leading-relaxed">
-                {uni.description || `${uni.short_name} is a prestigious institution located in ${uni.location}, ${uni.country_name}. Established in ${uni.established}, it is known for its academic excellence and research contributions.`}
+                {t('description') || `${uni.short_name} is a prestigious institution located in ${uni.location}, ${uni.country_name}. Established in ${uni.established}, it is known for its academic excellence and research contributions.`}
               </p>
               <div className="mt-4 flex flex-wrap gap-4 text-[13px] text-[hsl(var(--blue-900))]/60">
                 <span>Founded: <strong>{uni.established}</strong></span>
@@ -279,6 +295,10 @@ export default function UniversityDetail() {
               </div>
             </div>
 
+<<<<<<< Updated upstream
+=======
+            <ProgramDetailsCard uni={uni} />
+>>>>>>> Stashed changes
             <ProgramCard universityId={id} />
 
             <div>

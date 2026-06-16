@@ -22,9 +22,15 @@ import axios from 'axios';
 const STUDENT_COUNTRIES = [
   { id: 'us', name: 'United States', flag: '', code: 'US' },
   { id: 'uk', name: 'United Kingdom', flag: '', code: 'GB' },
+  { id: 'ca', name: 'Canada', flag: '', code: 'CA' },
+  { id: 'au', name: 'Australia', flag: '', code: 'AU' },
   { id: 'de', name: 'Germany', flag: '', code: 'DE' },
+  { id: 'fr', name: 'France', flag: '', code: 'FR' },
   { id: 'it', name: 'Italy', flag: '', code: 'IT' },
   { id: 'es', name: 'Spain', flag: '', code: 'ES' },
+  { id: 'jp', name: 'Japan', flag: '', code: 'JP' },
+  { id: 'sg', name: 'Singapore', flag: '', code: 'SG' },
+  { id: 'ch', name: 'Switzerland', flag: '', code: 'CH' },
   { id: 'pl', name: 'Poland', flag: '', code: 'PL' },
   { id: 'at', name: 'Austria', flag: '', code: 'AT' },
   { id: 'pt', name: 'Portugal', flag: '', code: 'PT' },
@@ -98,9 +104,15 @@ const SCORE_REQUIREMENTS = [
 const ANNUAL_BUDGETS = [
   { country: 'us', name: 'United States', code: 'US', tuition_min: 20000, tuition_max: 60000, living_min: 12000, living_max: 24000, currency: 'USD' },
   { country: 'uk', name: 'United Kingdom', code: 'GB', tuition_min: 15000, tuition_max: 38000, living_min: 12000, living_max: 18000, currency: 'GBP' },
+  { country: 'ca', name: 'Canada', code: 'CA', tuition_min: 18000, tuition_max: 45000, living_min: 12000, living_max: 20000, currency: 'CAD' },
+  { country: 'au', name: 'Australia', code: 'AU', tuition_min: 20000, tuition_max: 45000, living_min: 15000, living_max: 25000, currency: 'AUD' },
   { country: 'de', name: 'Germany', code: 'DE', tuition_min: 0, tuition_max: 3000, living_min: 11000, living_max: 14000, currency: 'EUR' },
+  { country: 'fr', name: 'France', code: 'FR', tuition_min: 3000, tuition_max: 20000, living_min: 10000, living_max: 15000, currency: 'EUR' },
   { country: 'it', name: 'Italy', code: 'IT', tuition_min: 2000, tuition_max: 20000, living_min: 10000, living_max: 15000, currency: 'EUR' },
   { country: 'es', name: 'Spain', code: 'ES', tuition_min: 2000, tuition_max: 18000, living_min: 9000, living_max: 14000, currency: 'EUR' },
+  { country: 'jp', name: 'Japan', code: 'JP', tuition_min: 5000, tuition_max: 15000, living_min: 10000, living_max: 18000, currency: 'JPY' },
+  { country: 'sg', name: 'Singapore', code: 'SG', tuition_min: 20000, tuition_max: 40000, living_min: 12000, living_max: 20000, currency: 'SGD' },
+  { country: 'ch', name: 'Switzerland', code: 'CH', tuition_min: 1500, tuition_max: 4000, living_min: 18000, living_max: 25000, currency: 'CHF' },
   { country: 'pl', name: 'Poland', code: 'PL', tuition_min: 2000, tuition_max: 8000, living_min: 6000, living_max: 10000, currency: 'EUR' },
   { country: 'at', name: 'Austria', code: 'AT', tuition_min: 0, tuition_max: 2000, living_min: 11000, living_max: 14000, currency: 'EUR' },
   { country: 'pt', name: 'Portugal', code: 'PT', tuition_min: 3000, tuition_max: 12000, living_min: 8000, living_max: 12000, currency: 'EUR' },
@@ -196,7 +208,10 @@ export default function StudentVisa() {
   const UNI_PER_PAGE = 6;
 
   const filtered = universities.filter(u => {
+<<<<<<< Updated upstream
     if (u.country !== selected) return false;
+=======
+>>>>>>> Stashed changes
     if (searchQuery && !u.name?.toLowerCase().includes(searchQuery.toLowerCase()) && !u.short_name?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (tuitionMax && (u.tuition_usd || 0) > Number(tuitionMax)) return false;
     if (ieltsFilter && (u.ielts_min || 0) > Number(ieltsFilter)) return false;
@@ -224,12 +239,16 @@ export default function StudentVisa() {
         setLoading(false);
       });
 
-    axios.get(`${API}/universities`, { params: { limit: 15000 } })
-      .then(r => setUniversities(r.data || []))
-      .catch(() => setUniversities([]));
+    fetchUniversities('us');
   }, []);
 
-  useEffect(() => { setUniPage(1); }, [selected]);
+  useEffect(() => { setUniPage(1); fetchUniversities(selected); }, [selected]);
+
+  const fetchUniversities = (countryCode) => {
+    axios.get(`${API}/universities`, { params: { country: countryCode, limit: 200 } })
+      .then(r => setUniversities(r.data || []))
+      .catch(() => setUniversities([]));
+  };
 
   const selectedCountry = countries.find(c => c.id === selected) || countries[0];
   const studentMeta = selectedCountry?.student_meta || {};
@@ -255,11 +274,15 @@ export default function StudentVisa() {
             <Button onClick={() => { if (isAuthed) { document.getElementById('universities-section')?.scrollIntoView({ behavior: 'smooth' }); } else { openAuth('signup'); } }} className="btn-accent h-12 px-6">
               Start my student visa <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
+<<<<<<< Updated upstream
             <Button
               onClick={() => setShowAIRecommender(true)}
               variant="outline"
               className="h-12 px-6 border-purple-400/50 text-purple-300 hover:bg-purple-500/20 hover:text-purple-200 hover:border-purple-400"
             >
+=======
+            <Button onClick={() => setShowAIRecommender(true)} variant="outline" className="h-12 px-6 border-purple-400/50 text-purple-300 hover:bg-purple-500/20 hover:text-purple-200 hover:border-purple-400">
+>>>>>>> Stashed changes
               <Sparkles className="w-4 h-4 mr-1.5" /> AI recommend
             </Button>
             <Button variant="outline" className="h-12 px-6 border-white/30 text-white hover:bg-white/10">
@@ -959,6 +982,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               { icon: Home, label: 'Cost of Living Calculator', desc: 'Compare tuition, rent, food, and transport costs', href: '/student-visa', color: 'bg-emerald-500' },
               { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate university-specific application documents', href: '/student-visa', color: 'bg-purple-500' },
             ].map(tool => {
+<<<<<<< Updated upstream
               if (tool.action === 'scholarship') {
                 return (
                   <button key={tool.label} onClick={() => setShowScholarshipMatcher(true)}
@@ -1003,6 +1027,30 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
                   <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">
                     Open <ChevronRight className="w-3 h-3" />
                   </div>
+=======
+              if (tool.action === 'scholarship') return (
+                <button key={tool.label} onClick={() => setShowScholarshipMatcher(true)} className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group text-left w-full">
+                  <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}><tool.icon className="w-6 h-6" /></div>
+                  <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
+                  <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">Open <ChevronRight className="w-3 h-3" /></div>
+                </button>
+              );
+              if (tool.action === 'recommender') return (
+                <button key={tool.label} onClick={() => setShowAIRecommender(true)} className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group text-left w-full">
+                  <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}><tool.icon className="w-6 h-6" /></div>
+                  <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
+                  <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">Open <ChevronRight className="w-3 h-3" /></div>
+                </button>
+              );
+              return (
+                <Link key={tool.label} to={tool.href} className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group">
+                  <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}><tool.icon className="w-6 h-6" /></div>
+                  <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
+                  <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">Open <ChevronRight className="w-3 h-3" /></div>
+>>>>>>> Stashed changes
                 </Link>
               );
             })}
