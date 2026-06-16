@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Loader2, Check, X, ShieldCheck, Sparkles } from 'lucide-react';
+import { Loader2, Check, X, ShieldCheck, Sparkles, Mail, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyActionCode } from 'firebase/auth';
 import { initFirebase } from '../lib/firebase';
@@ -50,6 +50,8 @@ export default function EmailVerification() {
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
   const [countdown, setCountdown] = useState(3);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const oobCode = searchParams.get('oobCode');
   const mode = searchParams.get('mode');
@@ -215,18 +217,24 @@ export default function EmailVerification() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-8 text-center"
               >
-                <div className="w-20 h-20 rounded-2xl bg-red-500 flex items-center justify-center mx-auto shadow-lg shadow-red-500/20">
-                  <X className="w-9 h-9 text-white" />
+                <div className="w-20 h-20 rounded-2xl bg-amber-500 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20">
+                  <RefreshCw className="w-9 h-9 text-white" />
                 </div>
                 <h2 className="mt-6 font-display font-extrabold text-[22px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
-                  Verification failed
+                  Link expired or used
                 </h2>
                 <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/60">
-                  {message || 'Something went wrong.'}
+                  {message || 'This verification link has expired or was already used.'}
+                </p>
+                <p className="mt-4 text-[13px] text-[hsl(var(--blue-900))]/45">
+                  Sign in with your email and password to receive a new verification link automatically.
                 </p>
                 <div className="mt-6 flex flex-col gap-3">
                   <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-full btn-primary text-white h-12 px-8 font-bold">
-                    Back to sign in
+                    <Mail className="w-4 h-4" /> Sign in to get new link
+                  </Link>
+                  <Link to="/signup" className="text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline">
+                    Don't have an account? Sign up
                   </Link>
                 </div>
               </motion.div>
