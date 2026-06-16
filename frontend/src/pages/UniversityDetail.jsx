@@ -183,11 +183,6 @@ export default function UniversityDetail() {
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-<<<<<<< Updated upstream
-            <div className="flex items-start gap-5">
-              <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center text-4xl">
-                {uni.flag}
-=======
             <div className="flex items-start gap-5 relative">
               <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
                 {uni.image_url ? (
@@ -199,8 +194,7 @@ export default function UniversityDetail() {
               <div className="absolute top-0 right-0">
                 <LanguageSwitcher universityId={id} fields={uni} onTranslated={setTranslated} />
               </div>
->>>>>>> Stashed changes
-              </div>
+            </div>
               <div>
                 <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] bg-white/10 rounded-full px-3 py-1">
                   <GraduationCap className="w-3.5 h-3.5" /> {uni.type}
@@ -218,7 +212,6 @@ export default function UniversityDetail() {
                   </span>
                 </div>
               </div>
-            </div>
 
             <div className="flex flex-wrap items-center gap-3 shrink-0">
               <Button
@@ -284,12 +277,8 @@ export default function UniversityDetail() {
               </div>
             </div>
 
-<<<<<<< Updated upstream
-            <ProgramCard uni={uni} />
-=======
             <ProgramDetailsCard uni={uni} />
             <ProgramCard universityId={id} />
->>>>>>> Stashed changes
 
             <div>
               <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-4">Campus Facilities</h2>
