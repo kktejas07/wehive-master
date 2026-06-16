@@ -1,10 +1,7 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, Calendar, ShieldAlert, ListChecks, MessageSquare, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { FileText, Calendar, ShieldAlert, ListChecks, MessageSquare, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
-import { useAuth } from '../../context/AuthContext';
-import { API } from '../../context/AuthContext';
 import Reveal from '../Reveal';
 import TextFlipAnimation from '../ui/TextFlipAnimation';
 import { GlowingEffect } from '../ui/glowing-effect';
@@ -62,8 +59,7 @@ const AI_TOOLS = [
   },
 ];
 
-function AIToolCard({ tool, index, isAuthed }) {
-  const [launching, setLaunching] = useState(false);
+function AIToolCard({ tool, index }) {
   const Icon = tool.Icon;
   return (
     <motion.div
@@ -71,7 +67,7 @@ function AIToolCard({ tool, index, isAuthed }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative rounded-2xl border border-black/8 bg-white p-5 sm:p-6 hover:border-[hsl(var(--accent))] hover:shadow-[0_12px_40px_-12px_rgba(10,44,138,0.18)] transition-all"
+      className="group relative rounded-2xl border border-black/8 bg-white p-5 sm:p-6 transition-all"
     >
       <GlowingEffect
         blur={30}
@@ -101,35 +97,9 @@ function AIToolCard({ tool, index, isAuthed }) {
       <p className="mt-2 text-[13px] text-[hsl(var(--blue-900))]/60 leading-relaxed">
         {tool.desc}
       </p>
-      <div className="mt-5">
-        {tool.id === 'chatbot' ? (
-          <button
-            onClick={() => {
-              const ev = new CustomEvent('open-chatbot');
-              window.dispatchEvent(ev);
-            }}
-            className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold text-[hsl(var(--accent))] hover:gap-2.5 transition-all"
-          >
-            {tool.cta} <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        ) : (
-          <Link
-            to={tool.href}
-            className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold text-[hsl(var(--accent))] hover:gap-2.5 transition-all"
-          >
-            {launching ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Launching…
-              </>
-            ) : (
-              <>
-                {tool.cta} <ArrowRight className="w-3.5 h-3.5" />
-              </>
-            )}
-          </Link>
-        )}
+      <div className="mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--blue-900))]/40">
+        {tool.cta} <ArrowRight className="w-3.5 h-3.5" />
       </div>
-      
     </motion.div>
   );
 }
