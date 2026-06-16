@@ -9,13 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from admin_auth import get_current_admin_flex
-<<<<<<< Updated upstream
-from auth_utils import get_current_user
 from db import db
-from routes_admin_universities import _admin as admin_dep
-=======
-from db import db
->>>>>>> Stashed changes
 
 router = APIRouter(prefix="/programs", tags=["programs"])
 admin_router = APIRouter(prefix="/admin/programs", tags=["admin-programs"])
@@ -23,12 +17,6 @@ admin_router = APIRouter(prefix="/admin/programs", tags=["admin-programs"])
 programs_col = db["programs"]
 
 
-<<<<<<< Updated upstream
-class ProgramCreate(BaseModel):
-    university_id: str
-    name: str
-    degree_type: str = "bachelor"  # bachelor, master, phd, diploma
-=======
 async def _admin(user=Depends(get_current_admin_flex)):
     return user
 
@@ -37,7 +25,6 @@ class ProgramCreate(BaseModel):
     university_id: str
     name: str
     degree_type: str = "bachelor"
->>>>>>> Stashed changes
     duration_years: float = 4.0
     tuition_usd: int = 0
     application_fee_usd: int = 0
@@ -51,13 +38,10 @@ class ProgramCreate(BaseModel):
     language: str = "English"
     campus: str = ""
     url: str = ""
-<<<<<<< Updated upstream
-=======
     total_enrolled: int = 0
     intl_enrolled: int = 0
     avg_class_size: int = 0
     acceptance_rate_program: str = ""
->>>>>>> Stashed changes
 
 
 class ProgramUpdate(BaseModel):
@@ -76,19 +60,12 @@ class ProgramUpdate(BaseModel):
     language: Optional[str] = None
     campus: Optional[str] = None
     url: Optional[str] = None
-<<<<<<< Updated upstream
-
-
-# ── Public endpoints ──
-
-=======
     total_enrolled: Optional[int] = None
     intl_enrolled: Optional[int] = None
     avg_class_size: Optional[int] = None
     acceptance_rate_program: Optional[str] = None
 
 
->>>>>>> Stashed changes
 @router.get("/{university_id}")
 async def list_programs(university_id: str):
     cursor = programs_col.find({"university_id": university_id}, {"_id": 0}).sort("tuition_usd", 1)
@@ -103,21 +80,12 @@ async def get_program(university_id: str, program_id: str):
     return doc
 
 
-<<<<<<< Updated upstream
-# ── Admin endpoints ──
-
-=======
->>>>>>> Stashed changes
 @admin_router.get("")
 async def admin_list_programs(
     university_id: Optional[str] = Query(None),
     limit: int = Query(100, ge=1, le=500),
     skip: int = Query(0, ge=0),
-<<<<<<< Updated upstream
-    _=Depends(admin_dep),
-=======
     _=Depends(_admin),
->>>>>>> Stashed changes
 ):
     flt = {}
     if university_id:
@@ -128,11 +96,7 @@ async def admin_list_programs(
 
 
 @admin_router.post("")
-<<<<<<< Updated upstream
-async def admin_create_program(body: ProgramCreate, admin=Depends(admin_dep)):
-=======
 async def admin_create_program(body: ProgramCreate, admin=Depends(_admin)):
->>>>>>> Stashed changes
     from audit import record as audit_record
     doc = body.model_dump()
     doc["id"] = f"{body.university_id}-{uuid.uuid4().hex[:8]}"
@@ -145,11 +109,7 @@ async def admin_create_program(body: ProgramCreate, admin=Depends(_admin)):
 
 
 @admin_router.patch("/{program_id}")
-<<<<<<< Updated upstream
-async def admin_update_program(program_id: str, body: ProgramUpdate, admin=Depends(admin_dep)):
-=======
 async def admin_update_program(program_id: str, body: ProgramUpdate, admin=Depends(_admin)):
->>>>>>> Stashed changes
     from audit import record as audit_record
     existing = await programs_col.find_one({"id": program_id})
     if not existing:
@@ -166,11 +126,7 @@ async def admin_update_program(program_id: str, body: ProgramUpdate, admin=Depen
 
 
 @admin_router.delete("/{program_id}")
-<<<<<<< Updated upstream
-async def admin_delete_program(program_id: str, admin=Depends(admin_dep)):
-=======
 async def admin_delete_program(program_id: str, admin=Depends(_admin)):
->>>>>>> Stashed changes
     from audit import record as audit_record
     existing = await programs_col.find_one({"id": program_id})
     if not existing:

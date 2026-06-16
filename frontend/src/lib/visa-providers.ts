@@ -63,34 +63,31 @@ function mapDocTypeToOutcome(docTypes: string[] = []): VisaOutcome {
   return "UNKNOWN";
 }
 
-const ALPHA2_TO_ALPHA3: Record<string, string> = {
-  IN: "IND", AE: "ARE", US: "USA", GB: "GBR", SG: "SGP", TH: "THA",
-  MY: "MYS", ID: "IDN", VN: "VNM", LK: "LKA", NP: "NPL", QA: "QAT",
-  SA: "SAU", OM: "OMN", BH: "BHR", KW: "KWT", AU: "AUS", NZ: "NZL",
-  CA: "CAN", FR: "FRA", DE: "DEU", IT: "ITA", ES: "ESP", NL: "NLD",
-  CH: "CHE", JP: "JPN", KR: "KOR", CN: "CHN", HK: "HKG", TR: "TUR",
-  EG: "EGY", ZA: "ZAF", KE: "KEN", MV: "MDV", MU: "MUS", SC: "SYC",
-  PT: "PRT", GR: "GRC", AT: "AUT", BE: "BEL", IE: "IRL", SE: "SWE",
-  NO: "NOR", DK: "DNK", FI: "FIN", PL: "POL", CZ: "CZE", AZ: "AZE",
-};
-
-const ALPHA3_TO_ALPHA2: Record<string, string> = Object.fromEntries(
-  Object.entries(ALPHA2_TO_ALPHA3).map(([a2, a3]) => [a3, a2])
-);
+import i18nIsoCountries from "i18n-iso-countries";
 
 export function toAlpha3(alpha2: string): string | null {
-  return ALPHA2_TO_ALPHA3[alpha2.toUpperCase()] ?? null;
+  const code = alpha2.toUpperCase();
+  try {
+    return i18nIsoCountries.alpha2ToAlpha3(code) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export function toAlpha2(alpha3: string): string | null {
-  return ALPHA3_TO_ALPHA2[alpha3.toUpperCase()] ?? null;
+  const code = alpha3.toUpperCase();
+  try {
+    return i18nIsoCountries.alpha3ToAlpha2(code) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export function requireAlpha3(alpha2: string): string {
   const a3 = toAlpha3(alpha2);
   if (!a3)
     throw new Error(
-      `No Alpha-3 mapping for "${alpha2}" — extend ALPHA2_TO_ALPHA3 or use i18n-iso-countries`
+      `No Alpha-3 mapping for "${alpha2}" — i18n-iso-countries returned null`
     );
   return a3;
 }

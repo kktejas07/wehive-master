@@ -200,7 +200,7 @@ export default function UniversityDetail() {
 >>>>>>> Stashed changes
               <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
                 {uni.image_url ? (
-                  <img src={uni.image_url} alt={uni.short_name} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = uni.flag; }} />
+                  <img src={uni.image_url} alt={uni.short_name} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; e.target.parentElement.textContent = uni.flag; }} />
                 ) : (
                   <span className="text-4xl">{uni.flag}</span>
                 )}

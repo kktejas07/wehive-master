@@ -102,7 +102,10 @@ export default function ProgramRecommender() {
 
   useEffect(() => {
     const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) setAllUniversities(JSON.parse(cached));
+    if (cached) {
+      try { setAllUniversities(JSON.parse(cached)); }
+      catch { localStorage.removeItem(CACHE_KEY); }
+    }
     axios.get(`${API}/universities?limit=15000`)
       .then(res => {
         const data = res.data || [];

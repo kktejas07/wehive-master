@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search, IdCard, Globe, Calendar, ArrowRight,
-  CheckCircle2, XCircle, AlertTriangle, Info, Clock, Loader2,
+  CheckCircle2, XCircle, AlertCircle, AlertTriangle, Info, Clock, Loader2,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -43,9 +43,15 @@ function OutcomeBadge({ outcome }) {
   );
 }
 
-function ResultDisplay({ result }) {
+function ResultDisplay({ result, isFallback }) {
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+      {isFallback && (
+        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2 text-[13px] text-amber-800">
+          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          Live provider unavailable — showing estimated requirements. Verify with the official embassy before applying.
+        </div>
+      )}
       <div className="flex items-center gap-3 flex-wrap">
         <OutcomeBadge outcome={result.outcome} />
         <ProviderBadge provider={result.provider} />
@@ -147,6 +153,7 @@ export default function VisaChecker() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isFallback, setIsFallback] = useState(false);
 
   const nat = COUNTRIES.find(c => c.id === nationality);
   const dest = COUNTRIES.find(c => c.id === destination);
@@ -159,14 +166,18 @@ export default function VisaChecker() {
 
     try {
       const { makeSherpaProvider } = await import('../lib/visa-providers');
-      const provider = makeSherpaProvider('');
+      const apiKey = process.env.REACT_APP_SHERPA_API_KEY || '';
+      const provider = makeSherpaProvider(apiKey);
       const res = await provider.getRequirements({
         nationality: nationality.toUpperCase(),
         destination: destination.toUpperCase(),
         travelDate: travelDate || undefined,
       });
       setResult(res);
+      setIsFallback(false);
     } catch (err) {
+      setError('Visa provider unavailable. Showing estimated requirements.');
+      setIsFallback(true);
       const { adaptSherpaTrips } = await import('../lib/visa-providers');
       const sample = adaptSherpaTrips({
         included: [{
@@ -243,7 +254,13 @@ export default function VisaChecker() {
           </div>
         </div>
 
-        {result && <ResultDisplay result={result} />}
+        {error && (
+          <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2 text-[13px] text-amber-800">
+            <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            {error}
+          </div>
+        )}
+        {result && <ResultDisplay result={result} isFallback={isFallback} />}
       </div>
       <Footer />
     </div>

@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from typing import List, Optional
 
+from pydantic import BaseModel
+
 from models import UniversityApplicationCreate, PrimaryApplicant
 from auth_utils import get_current_user
 from db import db, applications, universities_col
@@ -216,7 +218,6 @@ async def update_university_status(
 @router.get('/visa-from-university')
 async def list_visa_from_university_apps(user=Depends(get_current_user)):
     cur = applications.find(
-        {'user_id': user['_id'], 'type': 'student_visa'},
-        {'_id': 0}
+        {'user_id': user['_id'], 'type': 'student_visa'}
     ).sort('created_at', -1)
-    return [doc async for doc in cur]
+    return [serialize_doc(doc) async for doc in cur]
