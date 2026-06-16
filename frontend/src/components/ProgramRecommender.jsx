@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader2, GraduationCap, DollarSign, Globe, Star, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { API } from '../context/AuthContext';
 import axios from 'axios';
+
+const CACHE_KEY = 'wehive_all_universities_cache';
 
 const SAMPLE_UNIVERSITIES = [
   { _id: 's1', id: 'mit', name: 'Massachusetts Institute of Technology', short_name: 'MIT', country: 'us', rank: 1, tuition_usd: 55790, courses: ['stem', 'engineering'] },
@@ -96,6 +98,23 @@ function UniCard({ uni, rank }) {
 
 export default function ProgramRecommender() {
   const { toast } = useToast();
+  const [allUniversities, setAllUniversities] = useState([]);
+
+  useEffect(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try { setAllUniversities(JSON.parse(cached)); }
+      catch { localStorage.removeItem(CACHE_KEY); }
+    }
+    axios.get(`${API}/universities?limit=15000`)
+      .then(res => {
+        const data = res.data || [];
+        setAllUniversities(data);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      })
+      .catch(() => {});
+  }, []);
+
   const [form, setForm] = useState({
     courses: [],
     countries: [],
@@ -106,6 +125,8 @@ export default function ProgramRecommender() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 8;
 
   const toggle = (field, val) =>
     setForm(f => ({ ...f, [field]: f[field].includes(val) ? f[field].filter(v => v !== val) : [...f[field], val] }));
@@ -113,11 +134,12 @@ export default function ProgramRecommender() {
   const search = async () => {
     setLoading(true);
     setSearched(true);
+    setPage(0);
     try {
       const params = new URLSearchParams();
       if (form.countries.length) params.set('country', form.countries.join(','));
       if (form.courses.length) params.set('course', form.courses.join(','));
-      params.set('limit', '200');
+      params.set('limit', '15000');
       const res = await axios.get(`${API}/universities?${params}`);
       let unis = res.data || [];
       unis = unis
@@ -128,22 +150,22 @@ export default function ProgramRecommender() {
           ...u,
           match_score: Math.max(60, Math.min(99, 99 - (u.rank || 300) / 10 + Math.random() * 15 | 0)),
         }))
-        .sort((a, b) => b.match_score - a.match_score)
-        .slice(0, 8);
+        .sort((a, b) => b.match_score - a.match_score);
       setResults(unis);
     } catch (err) {
-      console.error('University API unavailable, using fallback:', err);
-      toast({ title: 'API unavailable', description: 'Showing sample universities. Check that the backend is running.', variant: 'destructive' });
-      let unis = SAMPLE_UNIVERSITIES
+      console.error('University API unavailable, using cached data:', err);
+      let unis = (allUniversities.length ? allUniversities : SAMPLE_UNIVERSITIES)
         .filter(u => !form.countries.length || form.countries.includes(u.country))
-        .filter(u => !form.courses.length || form.courses.some(c => (u.courses || []).includes(c)))
+        .filter(u => !form.courses.length || (u.courses && form.courses.some(c => u.courses.includes(c))))
         .filter(u => !form.budget || (u.tuition_usd || 0) <= form.budget)
         .map(u => ({
           ...u,
           match_score: Math.max(60, Math.min(99, 99 - (u.rank || 300) / 10 + Math.random() * 15 | 0)),
         }))
-        .sort((a, b) => b.match_score - a.match_score)
-        .slice(0, 8);
+        .sort((a, b) => b.match_score - a.match_score);
+      if (!allUniversities.length) {
+        toast({ title: 'API unavailable', description: 'Showing sample universities. Check that the backend is running.', variant: 'destructive' });
+      }
       setResults(unis);
     } finally {
       setLoading(false);
@@ -221,8 +243,16 @@ export default function ProgramRecommender() {
               {results?.length ? `${results.length} matches found` : 'No matches — try adjusting filters'}
             </div>
             <div className="space-y-2">
-              {results?.map((uni, i) => <UniCard key={uni._id || uni.id || i} uni={uni} rank={i} />)}
+              {results?.slice(0, (page + 1) * PAGE_SIZE).map((uni, i) => (
+                <UniCard key={uni._id || uni.id || i} uni={uni} rank={i} />
+              ))}
             </div>
+            {results && (page + 1) * PAGE_SIZE < results.length && (
+              <button onClick={() => setPage(p => p + 1)}
+                className="mt-4 w-full rounded-xl border border-black/5 py-3 text-[13px] font-bold text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:border-black/10 transition">
+                Show more ({results.length - (page + 1) * PAGE_SIZE} remaining)
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

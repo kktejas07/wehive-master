@@ -14,6 +14,7 @@ const DEGREE_COLORS = {
 export default function ProgramCard({ universityId, limit = 6 }) {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     setLoading(true);
     axios.get(`${API}/programs/${universityId}`)
@@ -50,6 +51,9 @@ export default function ProgramCard({ universityId, limit = 6 }) {
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${DEGREE_COLORS[p.degree_type] || 'bg-slate-100 text-slate-600'}`}>
                     {p.degree_type?.charAt(0).toUpperCase() + p.degree_type?.slice(1) || 'N/A'}
                   </span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${DEGREE_COLORS[p.degree_type] || 'bg-slate-100 text-slate-600'}`}>
+                    {p.degree_type?.charAt(0).toUpperCase() + p.degree_type?.slice(1) || 'N/A'}
+                  </span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[hsl(var(--blue-900))]/60">
                   <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {p.duration_years} yrs</span>
@@ -67,6 +71,7 @@ export default function ProgramCard({ universityId, limit = 6 }) {
                 Program page <ExternalLink className="w-3 h-3" />
               </a>
             )}
+
           </div>
         ))}
       </div>

@@ -35,6 +35,11 @@ from routes_agents import router as agents_router  # noqa: E402
 from routes_visa_scheduling import router as visa_scheduling_router  # noqa: E402
 from routes_shortlist import router as shortlist_router  # noqa: E402
 from routes_university_apps import router as university_apps_router  # noqa: E402
+from routes_admin_universities import router as admin_universities_router  # noqa: E402
+from routes_ai_universities import router as ai_universities_router  # noqa: E402
+from routes_programs import router as programs_router, admin_router as admin_programs_router  # noqa: E402
+from routes_reviews import router as reviews_router  # noqa: E402
+from routes_i18n import router as i18n_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -84,6 +89,12 @@ api_router.include_router(agents_router)
 api_router.include_router(visa_scheduling_router)
 api_router.include_router(shortlist_router)
 api_router.include_router(university_apps_router)
+api_router.include_router(admin_universities_router)
+api_router.include_router(ai_universities_router)
+api_router.include_router(programs_router)
+api_router.include_router(admin_programs_router)
+api_router.include_router(reviews_router)
+api_router.include_router(i18n_router)
 
 app.include_router(api_router)
 

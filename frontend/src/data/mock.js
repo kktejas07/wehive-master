@@ -633,6 +633,7 @@ export const FOOTER_COLS = [
     { id: 'l-intake', label: 'Intake Calendar', to: '/intake-calendar' },
     { id: 'l-financial', label: 'Financial Tools — GIC, Budgets, Loans', to: '/financial-tools' },
     { id: 'l-universities', label: 'University Search — Browse & Compare', to: '/universities' },
+    { id: 'l-visa-checker', label: 'Visa Checker — Do I Need a Visa?', to: '/visa-checker' },
     { id: 'l-refund', label: 'Refund policy', to: '/' },
   ]},
   { id: 'legal', title: 'Legal', links: [

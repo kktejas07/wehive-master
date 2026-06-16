@@ -140,8 +140,12 @@ class Lead(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class UniversitySelection(BaseModel):
+    university_id: str
+    program_id: Optional[str] = None
+
 class UniversityApplicationCreate(BaseModel):
-    university_ids: List[str]
+    universities: List[UniversitySelection]
     country_id: str
     visa_type: str = 'Student'
     travel_date: Optional[str] = None
