@@ -193,10 +193,7 @@ export default function UniversityDetail() {
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div className="flex items-start gap-5">
-              <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center text-4xl">
-                {uni.flag}
-
+            <div className="flex items-start gap-5 relative">
               <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
                 {uni.image_url ? (
                   <img src={uni.image_url} alt={uni.short_name} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; e.target.parentElement.textContent = uni.flag; }} />
@@ -207,7 +204,7 @@ export default function UniversityDetail() {
               <div className="absolute top-0 right-0">
                 <LanguageSwitcher universityId={id} fields={uni} onTranslated={setTranslated} />
               </div>
-              </div>
+            </div>
               <div>
                 <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] bg-white/10 rounded-full px-3 py-1">
                   <GraduationCap className="w-3.5 h-3.5" /> {uni.type}
@@ -225,7 +222,6 @@ export default function UniversityDetail() {
                   </span>
                 </div>
               </div>
-            </div>
 
             <div className="flex flex-wrap items-center gap-3 shrink-0">
               <Button
@@ -291,8 +287,6 @@ export default function UniversityDetail() {
                 )}
               </div>
             </div>
-
-            <ProgramCard uni={uni} />
 
             <ProgramDetailsCard uni={uni} />
 

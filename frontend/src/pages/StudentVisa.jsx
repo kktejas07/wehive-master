@@ -207,7 +207,7 @@ export default function StudentVisa() {
   const [sortField, setSortField] = useState('rank');
   const UNI_PER_PAGE = 6;
 
-    if (u.country !== selected) return false;
+  const filtered = universities.filter(u => {
     if (searchQuery && !u.name?.toLowerCase().includes(searchQuery.toLowerCase()) && !u.short_name?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (tuitionMax && (u.tuition_usd == null || u.tuition_usd > Number(tuitionMax))) return false;
     if (ieltsFilter && (u.ielts_min == null || u.ielts_min > Number(ieltsFilter))) return false;
@@ -219,6 +219,7 @@ export default function StudentVisa() {
     if (sortField === 'name') return (a.name || '').localeCompare(b.name || '');
     return 0;
   });
+
   useEffect(() => {
     axios.get(`${API}/countries`, { params: { limit: 100 } })
       .then(r => {
@@ -279,8 +280,6 @@ export default function StudentVisa() {
 
               <Sparkles className="w-4 h-4 mr-1.5" /> AI recommend
             </Button>
-
-            <Button onClick={() => setShowAIRecommender(true)} variant="outline" className="h-12 px-6 border-purple-400/50 text-purple-300 hover:bg-purple-500/20 hover:text-purple-200 hover:border-purple-400">
             <Button variant="outline" className="h-12 px-6 border-white/30 text-white hover:bg-white/10">
               Book free consultation
             </Button>
@@ -977,22 +976,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               { icon: Sparkles, label: 'AI University Recommender', desc: 'Get personalized AI university recommendations', color: 'bg-purple-500', action: 'recommender' },
               { icon: Home, label: 'Cost of Living Calculator', desc: 'Compare tuition, rent, food, and transport costs', href: '/student-visa', color: 'bg-emerald-500' },
               { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate university-specific application documents', href: '/student-visa', color: 'bg-purple-500' },
-            ].map(tool => (
-              <Link
-                key={tool.label}
-                to={tool.href}
-                className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group"
-              >
-                <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
-                  <tool.icon className="w-6 h-6" />
-                </div>
-                <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
-                <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
-                <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">
-                  Open <ChevronRight className="w-3 h-3" />
-                </div>
-              </Link>
-            ))}
+            ].map(tool => {
               if (tool.action === 'scholarship') {
                 return (
                   <button key={tool.label} onClick={() => setShowScholarshipMatcher(true)}
@@ -1040,34 +1024,6 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
                 </Link>
               );
             })}
-
-              if (tool.action === 'scholarship') return (
-                <button key={tool.label} onClick={() => setShowScholarshipMatcher(true)} className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group text-left w-full">
-                  <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}><tool.icon className="w-6 h-6" /></div>
-                  <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
-                  <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
-                  <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">Open <ChevronRight className="w-3 h-3" /></div>
-                </button>
-              );
-              if (tool.action === 'recommender') return (
-                <button key={tool.label} onClick={() => setShowAIRecommender(true)} className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group text-left w-full">
-                  <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}><tool.icon className="w-6 h-6" /></div>
-                  <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
-                  <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
-                  <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">Open <ChevronRight className="w-3 h-3" /></div>
-                </button>
-              );
-              return (
-                <Link key={tool.label} to={tool.href} className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group">
-                  <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}><tool.icon className="w-6 h-6" /></div>
-                  <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
-                  <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
-                  <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">Open <ChevronRight className="w-3 h-3" /></div>
-
-                </Link>
-              );
-            })}
-
           </div>
         </div>
       </section>
