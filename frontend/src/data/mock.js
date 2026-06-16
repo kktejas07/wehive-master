@@ -631,8 +631,9 @@ export const FOOTER_COLS = [
   { id: 'resources', title: 'Resources', links: [
     { id: 'l-help', label: 'Help center', to: '/help' },
     { id: 'l-intake', label: 'Intake Calendar', to: '/intake-calendar' },
-    { id: 'l-financial', label: 'Financial Tools', to: '/financial-tools' },
-    { id: 'l-universities', label: 'University Search', to: '/universities' },
+    { id: 'l-when-apply', label: 'When to Apply by Country', to: '/intake-calendar' },
+    { id: 'l-financial', label: 'Financial Tools — GIC, Budgets, Loans', to: '/financial-tools' },
+    { id: 'l-universities', label: 'University Search — Browse & Compare', to: '/universities' },
     { id: 'l-refund', label: 'Refund policy', to: '/' },
   ]},
   { id: 'legal', title: 'Legal', links: [
