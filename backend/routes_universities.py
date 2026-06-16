@@ -21,7 +21,7 @@ async def list_universities(
 ) -> List[dict]:
     flt: dict = {}
     if scholarships is not None:
-        flt['scholarships'] = scholarships
+        flt['$or'] = [{'scholarships': scholarships}, {' scholarships': scholarships}]
     if country:
         flt['country'] = {'$in': [c.strip() for c in country.lower().split(',') if c.strip()]}
     if course:
@@ -38,7 +38,7 @@ async def list_universities(
         flt2 = {k: v for k, v in flt.items() if k != '$text'}
         cursor2 = universities_col.find(flt2, {'_id': 0}).sort('rank', 1)
         results = [
-            doc async for doc in cursor2
+            _serialize(dict(doc)) async for doc in cursor2
             if ql in (doc.get('name') or '').lower() or ql in (doc.get('short_name') or '').lower()
         ]
         results = results[skip: skip + limit]

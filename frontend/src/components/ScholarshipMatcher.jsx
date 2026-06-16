@@ -68,8 +68,10 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
   const [showForm, setShowForm] = useState(false);
   const [allUniversities, setAllUniversities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
+    if (compact) return;
     if (universities && universities.length > 0) {
       setAllUniversities(universities);
       setLoading(false);
@@ -78,11 +80,11 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
     let cancelled = false;
     setLoading(true);
     axios.get(`${API}/universities?scholarships=true&limit=5000`)
-      .then(res => { if (!cancelled) setAllUniversities(res.data || []); })
-      .catch(() => { if (!cancelled) setAllUniversities([]); })
+      .then(res => { if (!cancelled) { setAllUniversities(res.data || []); setFetchError(false); } })
+      .catch(() => { if (!cancelled) setFetchError(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [universities]);
+  }, [compact, universities]);
 
   const filtered = useMemo(() => {
     return allUniversities
@@ -196,7 +198,7 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
           <div className="mt-4 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200 p-4">
             <div className="flex items-center gap-2 text-[12px] font-bold text-amber-800">
               <Calculator className="w-4 h-4" />
-              {loading ? 'Loading universities...' : `${filtered.length} universities match your profile`}
+              {loading ? 'Loading universities...' : fetchError ? 'Failed to load data' : `${filtered.length} universities match your profile`}
             </div>
           </div>
         </div>
@@ -207,6 +209,13 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
               <Loader2 className="w-10 h-10 text-[hsl(var(--blue-900))]/30 mx-auto animate-spin" />
               <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60">
                 Loading universities...
+              </p>
+            </div>
+          ) : fetchError ? (
+            <div className="rounded-2xl border-2 border-dashed border-red-200 p-8 text-center">
+              <XCircle className="w-10 h-10 text-red-300 mx-auto" />
+              <p className="mt-3 text-[14px] text-red-600 font-medium">
+                Unable to load university data. Please try again later.
               </p>
             </div>
           ) : filtered.length === 0 ? (

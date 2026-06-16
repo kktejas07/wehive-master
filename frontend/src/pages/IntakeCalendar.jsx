@@ -125,11 +125,15 @@ function MonthBar({ applyStart, applyEnd, months, color }) {
 
 function CountryCard({ data }) {
   const [open, setOpen] = useState(false);
+  const panelId = `intake-panel-${data.country.replace(/\s+/g, '-').toLowerCase()}`;
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       className="rounded-2xl bg-white border border-black/5 overflow-hidden">
-      <button onClick={() => setOpen(v => !v)}
+      <button
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+        aria-controls={panelId}
         className="w-full flex items-center gap-4 px-5 py-4 hover:bg-black/[0.02] transition text-left">
         <span className="text-3xl shrink-0">{data.flag || <Globe className="w-7 h-7 text-[hsl(var(--blue-900))]/40" />}</span>
         <div className="flex-1">
@@ -145,7 +149,7 @@ function CountryCard({ data }) {
       </button>
 
       {open && (
-        <div className="border-t border-black/5 px-5 py-4 space-y-4">
+        <div id={panelId} className="border-t border-black/5 px-5 py-4 space-y-4">
           {data.intakes.map((intake, i) => (
             <div key={i} className="rounded-xl bg-[hsl(var(--soft-bg))] p-4">
               <div className="flex items-center gap-2 flex-wrap">
