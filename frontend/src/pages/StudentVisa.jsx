@@ -175,7 +175,7 @@ function IntakeCard({ intake, index }) {
 
 export default function StudentVisa() {
   const navigate = useNavigate();
-  const { token, isAuthed } = useAuth();
+  const { token, isAuthed, openAuth } = useAuth();
   const { toast } = useToast();
   const [countries, setCountries] = useState([]);
   const [selected, setSelected] = useState('us');
@@ -229,7 +229,7 @@ export default function StudentVisa() {
             Apply for a student visa to the USA, UK, Germany, Italy, Spain and 7 more — with country-specific document review, slot priority, and an on-time guarantee.
           </p>
           <div className="flex flex-wrap gap-4 mt-8">
-            <Button onClick={() => isAuthed ? null : navigate('/signup')} className="btn-accent h-12 px-6">
+            <Button onClick={() => { if (isAuthed) { document.getElementById('universities-section')?.scrollIntoView({ behavior: 'smooth' }); } else { openAuth('signup'); } }} className="btn-accent h-12 px-6">
               Start my student visa <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button variant="outline" className="h-12 px-6 border-white/30 text-white hover:bg-white/10">
@@ -398,7 +398,7 @@ export default function StudentVisa() {
         </div>
       </section>
 
-      <section className="py-16 bg-[hsl(var(--soft-bg))] border-y border-black/5">
+      <section id="universities-section" className="py-16 bg-[hsl(var(--soft-bg))] border-y border-black/5">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <GraduationCap className="w-3.5 h-3.5" /> Schools & Programs

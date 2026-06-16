@@ -136,7 +136,7 @@ async def send_otp(req: SendOtpRequest):
         dev_code = os.environ.get('MOCK_OTP_CODE', '123456')
         # Re-store with the mock code so verify-otp works
         from otp_service import store_otp as store_mock
-        await store_mock(identifier, channel_used, dev_code, purpose=req.purpose)
+        await store_mock(identifier, kind, dev_code, purpose=req.purpose)
     elif kind == 'email':
         from email_otp_service import send_otp_email
         delivered = await send_otp_email(identifier, otp_code, req.purpose)

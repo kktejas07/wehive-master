@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { API } from '../context/AuthContext';
+import MultiUniversityApplyModal from '../components/MultiUniversityApplyModal';
 import {
   Globe2, BookOpen, Users, Star, Clock, DollarSign, MapPin,
   ChevronRight, Loader2, GraduationCap, Award, TrendingUp,
@@ -128,6 +129,7 @@ export default function UniversityDetail() {
   const [uni, setUni] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -227,12 +229,12 @@ export default function UniversityDetail() {
                 <Bookmark className={`w-4 h-4 mr-1.5 ${saved ? 'fill-current' : ''}`} />
                 {saved ? 'Saved' : 'Save'}
               </Button>
-              <Link
-                to={`/student-visa?university=${uni.id}`}
+              <button
+                onClick={() => setShowApplyModal(true)}
                 className="inline-flex items-center gap-2 rounded-full btn-accent text-white h-12 px-6 font-bold"
               >
                 Apply now <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -290,12 +292,12 @@ export default function UniversityDetail() {
                 We handle your student visa application from document review to submission.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  to={`/student-visa?university=${uni.id}`}
+                <button
+                  onClick={() => setShowApplyModal(true)}
                   className="inline-flex items-center gap-2 rounded-full btn-accent text-white h-12 px-6 font-bold"
                 >
                   Apply now <ArrowRight className="w-4 h-4" />
-                </Link>
+                </button>
                 <Link
                   to={`/universities?country=${uni.country}`}
                   className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white h-12 px-6 font-bold transition"
@@ -348,6 +350,9 @@ export default function UniversityDetail() {
         </div>
       </section>
 
+      {showApplyModal && uni && (
+        <MultiUniversityApplyModal universities={[uni]} onClose={() => setShowApplyModal(false)} />
+      )}
       <Footer />
     </div>
   );
