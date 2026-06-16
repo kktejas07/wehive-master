@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Award, DollarSign, Star, CheckCircle2, XCircle,
@@ -6,24 +6,8 @@ import {
   BookOpen, TrendingUp, Calculator,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const SAMPLE_UNIVERSITIES = [
-  { id: 'mit', short_name: 'MIT', name: 'Massachusetts Institute of Technology', country: 'US', rank: 1, tuition_usd: 55790, living_cost_usd: 18000, scholarships: true, ielts_min: 7.0, gre_required: true },
-  { id: 'stanford', short_name: 'Stanford', name: 'Stanford University', country: 'US', rank: 3, tuition_usd: 56169, living_cost_usd: 22000, scholarships: true, ielts_min: 7.0, gre_required: true },
-  { id: 'harvard', short_name: 'Harvard', name: 'Harvard University', country: 'US', rank: 2, tuition_usd: 55807, living_cost_usd: 20000, scholarships: true, ielts_min: 7.5, gre_required: false },
-  { id: 'oxford', short_name: 'Oxford', name: 'University of Oxford', country: 'UK', rank: 2, tuition_usd: 35000, living_cost_usd: 15000, scholarships: true, ielts_min: 7.0, gre_required: false },
-  { id: 'cambridge', short_name: 'Cambridge', name: 'University of Cambridge', country: 'UK', rank: 3, tuition_usd: 34000, living_cost_usd: 14000, scholarships: true, ielts_min: 7.0, gre_required: false },
-  { id: 'imperial', short_name: 'Imperial', name: 'Imperial College London', country: 'UK', rank: 10, tuition_usd: 33000, living_cost_usd: 15000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'tum', short_name: 'TUM', name: 'Technical University of Munich', country: 'DE', rank: 50, tuition_usd: 0, living_cost_usd: 12000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'lmu', short_name: 'LMU Munich', name: 'Ludwig Maximilian University of Munich', country: 'DE', rank: 45, tuition_usd: 0, living_cost_usd: 12000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'polimi', short_name: 'Polimi', name: 'Polytechnic University of Milan', country: 'IT', rank: 145, tuition_usd: 4000, living_cost_usd: 10000, scholarships: true, ielts_min: 6.0, gre_required: false },
-  { id: 'unibo', short_name: 'Unibo', name: 'University of Bologna', country: 'IT', rank: 120, tuition_usd: 4000, living_cost_usd: 9000, scholarships: true, ielts_min: 6.0, gre_required: false },
-  { id: 'tuwien', short_name: 'TU Vienna', name: 'TU Wien', country: 'AT', rank: 180, tuition_usd: 0, living_cost_usd: 11000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'uniwien', short_name: 'Uni Wien', name: 'University of Vienna', country: 'AT', rank: 150, tuition_usd: 0, living_cost_usd: 11000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'uw', short_name: 'UW', name: 'University of Warsaw', country: 'PL', rank: 260, tuition_usd: 5000, living_cost_usd: 8000, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'jagiellonian', short_name: 'JU', name: 'Jagiellonian University', country: 'PL', rank: 240, tuition_usd: 4500, living_cost_usd: 7500, scholarships: true, ielts_min: 6.5, gre_required: false },
-  { id: 'nova', short_name: 'NOVA', name: 'NOVA University Lisbon', country: 'PT', rank: 300, tuition_usd: 6000, living_cost_usd: 9000, scholarships: true, ielts_min: 6.5, gre_required: false },
-];
+import axios from 'axios';
+import { API } from '../context/AuthContext';
 
 const SCHOLARSHIP_TYPES = [
   {
@@ -71,7 +55,6 @@ function calculateEligibility(uni, profile) {
 }
 
 export default function ScholarshipMatcher({ universities, compact = false }) {
-  const data = universities && universities.length > 0 ? universities : SAMPLE_UNIVERSITIES;
   const [profile, setProfile] = useState({
     gpa: 3.0,
     ielts: 6.5,
@@ -83,14 +66,33 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
     budget: 30000,
   });
   const [showForm, setShowForm] = useState(false);
+  const [allUniversities, setAllUniversities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
+
+  useEffect(() => {
+    if (compact) return;
+    if (universities && universities.length > 0) {
+      setAllUniversities(universities);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    axios.get(`${API}/universities?scholarships=true&limit=5000`)
+      .then(res => { if (!cancelled) { setAllUniversities(res.data || []); setFetchError(false); } })
+      .catch(() => { if (!cancelled) setFetchError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [compact, universities]);
 
   const filtered = useMemo(() => {
-    return data
+    return allUniversities
       .filter(u => u.scholarships)
       .map(u => ({ ...u, eligibility: calculateEligibility(u, profile) }))
       .filter(u => u.eligibility !== null && u.eligibility.eligible)
       .sort((a, b) => (b.eligibility?.score || 0) - (a.eligibility?.score || 0));
-  }, [data, profile]);
+  }, [allUniversities, profile]);
 
   if (compact) {
     return (
@@ -196,13 +198,27 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
           <div className="mt-4 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200 p-4">
             <div className="flex items-center gap-2 text-[12px] font-bold text-amber-800">
               <Calculator className="w-4 h-4" />
-              {filtered.length} universities match your profile
+              {loading ? 'Loading universities...' : fetchError ? 'Failed to load data' : `${filtered.length} universities match your profile`}
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-3">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="rounded-2xl border-2 border-dashed border-black/10 p-8 text-center">
+              <Loader2 className="w-10 h-10 text-[hsl(var(--blue-900))]/30 mx-auto animate-spin" />
+              <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60">
+                Loading universities...
+              </p>
+            </div>
+          ) : fetchError ? (
+            <div className="rounded-2xl border-2 border-dashed border-red-200 p-8 text-center">
+              <XCircle className="w-10 h-10 text-red-300 mx-auto" />
+              <p className="mt-3 text-[14px] text-red-600 font-medium">
+                Unable to load university data. Please try again later.
+              </p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-black/10 p-8 text-center">
               <Award className="w-10 h-10 text-[hsl(var(--blue-900))]/30 mx-auto" />
               <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60">
