@@ -309,10 +309,23 @@ async def admin_delete_user(user_id: str, admin=Depends(get_current_admin)):
     u = await users.find_one({'_id': user_id})
     if not u:
         raise HTTPException(404, 'User not found')
+    firebase_uid = u.get('firebase_uid')
     await users.delete_one({'_id': user_id})
     await applications.delete_many({'user_id': user_id})
     await holiday_plans.delete_many({'user_id': user_id})
     await audit_record(admin, 'delete', 'user', user_id, extra={'email': u.get('email'), 'name': u.get('name')})
+    if firebase_uid:
+        try:
+            from firebase_utils import _get_firebase_creds, init_firebase_admin
+            import firebase_admin
+            if not firebase_admin._apps:
+                pid, creds = await _get_firebase_creds()
+                if pid and creds:
+                    init_firebase_admin(pid, creds)
+            from firebase_admin import auth
+            auth.delete_user(firebase_uid)
+        except Exception:
+            pass
     return {'ok': True}
 
 
