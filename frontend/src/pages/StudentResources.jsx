@@ -1,6 +1,6 @@
 import { useState, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, Award, Users, Home, PenTool, DollarSign, ChevronRight, Calendar, Banknote } from 'lucide-react';
+import { BookOpen, Award, Users, Home, PenTool, DollarSign, ChevronRight, Calendar, Banknote, IdCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -137,15 +137,16 @@ export default function StudentResources() {
                   { to: '/intake-calendar', Icon: Calendar, label: 'Intake Calendar', desc: 'When to apply by country' },
                   { to: '/financial-tools', Icon: Banknote, label: 'Financial Tools', desc: 'GIC, budgets, loans' },
                   { to: '/universities', Icon: BookOpen, label: 'University Search', desc: 'Browse & compare universities' },
+                  { to: '/visa-checker', Icon: IdCard, label: 'Visa Checker', desc: 'Check visa requirements by nationality' },
                 ].map(({ to, Icon, label, desc }) => (
                   <Link key={to} to={to}
-                    className="flex items-center gap-3 rounded-xl border border-black/5 bg-white px-4 py-3 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition">
-                    <Icon className="w-4 h-4 text-[hsl(var(--blue-900))]/40" />
-                    <div>
+                    className="flex items-center gap-3 rounded-xl border border-black/5 bg-white px-4 py-3 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition min-w-0">
+                    <Icon className="w-5 h-5 shrink-0 text-[hsl(var(--blue-900))]/40" />
+                    <div className="flex-1 min-w-0">
                       <div className="font-bold text-[13px] text-[hsl(var(--blue-900))]">{label}</div>
-                      <div className="text-[11.5px] text-[hsl(var(--blue-900))]/50">{desc}</div>
+                      <div className="text-[11.5px] text-[hsl(var(--blue-900))]/50 truncate">{desc}</div>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-[hsl(var(--blue-900))]/30 ml-2" />
+                    <ChevronRight className="w-4 h-4 shrink-0 text-[hsl(var(--blue-900))]/30" />
                   </Link>
                 ))}
               </div>

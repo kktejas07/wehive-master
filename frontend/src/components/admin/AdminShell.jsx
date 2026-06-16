@@ -6,7 +6,7 @@ import { adminClient } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
-  Key, User,
+  Key, User, Building2, BookOpen,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 
@@ -23,6 +23,8 @@ const TABS = [
   { id: 'agents',       to: '/admin/agents',        label: 'Agents',       Icon: Briefcase,       testid: 'admin-nav-agents' },
   { id: 'staff',        to: '/admin/staff',         label: 'Staff',        Icon: UserCog,         testid: 'admin-nav-staff' },
   { id: 'integrations', to: '/admin/integrations',  label: 'Integrations', Icon: Plug,            testid: 'admin-nav-integrations' },
+  { id: 'universities', to: '/admin/universities',  label: 'Universities', Icon: Building2,       testid: 'admin-nav-universities' },
+  { id: 'programs',     to: '/admin/programs',      label: 'Programs',     Icon: BookOpen,        testid: 'admin-nav-programs' },
   { id: 'exports',      to: '/admin/exports',       label: 'Exports',      Icon: Download,        testid: 'admin-nav-exports' },
   { id: 'destinations', to: '/admin/destinations',  label: 'Destinations', Icon: ImageIcon,       testid: 'admin-nav-destinations' },
   { id: 'settings',     to: '/admin/settings',      label: 'Settings',     Icon: Settings,        testid: 'admin-nav-settings' },

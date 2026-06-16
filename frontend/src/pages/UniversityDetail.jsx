@@ -6,6 +6,10 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { API } from '../context/AuthContext';
 import MultiUniversityApplyModal from '../components/MultiUniversityApplyModal';
+import AIUniversityQA from '../components/ai/AIUniversityQA';
+import AIAcceptanceProbability from '../components/ai/AIAcceptanceProbability';
+import ProgramCard from '../components/ProgramCard';
+import ReviewsCard from '../components/ReviewsCard';
 import {
   Globe2, BookOpen, Users, Star, Clock, DollarSign, MapPin,
   ChevronRight, Loader2, GraduationCap, Award, TrendingUp,
@@ -184,8 +188,12 @@ export default function UniversityDetail() {
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="flex items-start gap-5">
-              <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center text-4xl">
-                {uni.flag}
+              <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                {uni.image_url ? (
+                  <img src={uni.image_url} alt={uni.short_name} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = uni.flag; }} />
+                ) : (
+                  <span className="text-4xl">{uni.flag}</span>
+                )}
               </div>
               <div>
                 <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] bg-white/10 rounded-full px-3 py-1">
@@ -245,6 +253,7 @@ export default function UniversityDetail() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <StatCard icon={Award} label="World Rank" value={`#${uni.rank}`} color="bg-amber-500" />
             <StatCard icon={Star} label="QS Rank" value={`#${uni.qs_rank || '—'}`} color="bg-blue-500" />
+            <StatCard icon={Award} label="THE Rank" value={`#${uni.times_rank || '—'}`} color="bg-indigo-500" />
             <StatCard icon={Users} label="Students" value={(uni.students || 0).toLocaleString()} color="bg-emerald-500" />
             <StatCard icon={Globe2} label="Intl. Students" value={(uni.intl_students || 0).toLocaleString()} color="bg-violet-500" />
             <StatCard icon={DollarSign} label="Tuition/yr" value={uni.tuition_usd === 0 ? 'Free' : `$${(uni.tuition_usd || 0).toLocaleString()}`} color="bg-rose-500" />
@@ -270,7 +279,7 @@ export default function UniversityDetail() {
               </div>
             </div>
 
-            <ProgramCard uni={uni} />
+            <ProgramCard universityId={id} />
 
             <div>
               <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-4">Campus Facilities</h2>
@@ -280,6 +289,8 @@ export default function UniversityDetail() {
                 ))}
               </div>
             </div>
+
+            <ReviewsCard universityId={id} />
 
             <div className="rounded-2xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-8">
               <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
@@ -316,11 +327,11 @@ export default function UniversityDetail() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between py-2 border-b border-black/5">
                   <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Acceptance Rate</span>
-                  <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni['录取率'] || '—'}</span>
+                  <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni.acceptance_rate || '—'}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-black/5">
                   <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Employment Rate</span>
-                  <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni['就业率'] || '—'}</span>
+                  <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni.employment_rate || '—'}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-black/5">
                   <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Est. Living Cost/yr</span>
@@ -334,6 +345,20 @@ export default function UniversityDetail() {
                 </div>
               </div>
             </div>
+
+            {uni.website && (
+              <a href={uni.website.startsWith('http') ? uni.website : `https://${uni.website}`} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 transition-all group">
+                <ExternalLink className="w-5 h-5 text-[hsl(var(--blue-700))]" />
+                <div>
+                  <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))]">Visit official website</div>
+                  <div className="text-[11px] text-[hsl(var(--blue-900))]/50 truncate max-w-[200px]">{uni.website}</div>
+                </div>
+              </a>
+            )}
+
+            <AIUniversityQA universityId={id} universityName={uni.short_name} />
+            <AIAcceptanceProbability universityId={id} universityName={uni.short_name} />
 
             <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--accent))]/10 to-[hsl(var(--accent))]/5 border border-[hsl(var(--accent))]/20 p-6">
               <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-2">Study Abroad with WeHive</h3>
