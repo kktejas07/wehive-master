@@ -10,7 +10,7 @@ export default function Signup() {
   return (
     <div className="bg-white">
       <Navbar />
-      <main className="min-h-[calc(100vh-72px)] flex items-center justify-center py-10 bg-[hsl(var(--soft-bg))]">
+      <main className="min-h-screen flex items-center justify-center py-10 pt-24 bg-[hsl(var(--soft-bg))]">
         <div className="max-w-md mx-auto px-5 w-full">
           <AuthCard mode="signup" referralCode={ref} />
         </div>
