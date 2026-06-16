@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star, MessageCircle, ThumbsUp, Loader2, User, Clock } from 'lucide-react';
+import { Star, MessageCircle, ThumbsUp, Loader2, User, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +15,7 @@ export default function ReviewsCard({ universityId }) {
   const [showAll, setShowAll] = useState(false);
   const [form, setForm] = useState({ rating: 5, title: '', review_text: '', pros: '', cons: '', program_name: '' });
   const [submitting, setSubmitting] = useState(false);
+
   const fetchReviews = () => {
     setLoading(true);
     axios.get(`${API}/reviews/${universityId}`)

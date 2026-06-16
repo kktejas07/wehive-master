@@ -9,6 +9,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
 
+const CACHE_KEY = 'wehive_universities_cache';
+
 const SCHOLARSHIP_TYPES = [
   {
     id: 'merit',
@@ -79,12 +81,29 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
     }
     let cancelled = false;
     setLoading(true);
-    axios.get(`${API}/universities?scholarships=true&limit=5000`)
-      .then(res => { if (!cancelled) { setAllUniversities(res.data || []); setFetchError(false); } })
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try { setAllUniversities(JSON.parse(cached)); setLoading(false); }
+      catch { localStorage.removeItem(CACHE_KEY); }
+    }
+    axios.get(`${API}/universities?scholarships=true&limit=15000`)
+      .then(res => {
+        if (!cancelled) {
+          const data = res.data || [];
+          setAllUniversities(data);
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          setFetchError(false);
+        }
+      })
       .catch(() => { if (!cancelled) setFetchError(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [compact, universities]);
+
+  const stats = useMemo(() => {
+    const countries = new Set(allUniversities.map(u => u.country).filter(Boolean));
+    return { total: allUniversities.length, countries: countries.size };
+  }, [allUniversities]);
 
   const filtered = useMemo(() => {
     return allUniversities
@@ -198,7 +217,7 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
           <div className="mt-4 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200 p-4">
             <div className="flex items-center gap-2 text-[12px] font-bold text-amber-800">
               <Calculator className="w-4 h-4" />
-              {loading ? 'Loading universities...' : fetchError ? 'Failed to load data' : `${filtered.length} universities match your profile`}
+              {loading ? 'Loading universities...' : fetchError === true ? `Showing cached data (${stats.total} universities, ${stats.countries} countries)` : `${filtered.length} of ${stats.total} universities match your profile · ${stats.countries} countries`}
             </div>
           </div>
         </div>
@@ -211,7 +230,7 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                 Loading universities...
               </p>
             </div>
-          ) : fetchError ? (
+          ) : fetchError && allUniversities.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-red-200 p-8 text-center">
               <XCircle className="w-10 h-10 text-red-300 mx-auto" />
               <p className="mt-3 text-[14px] text-red-600 font-medium">
@@ -256,7 +275,27 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                       </span>
                     ))}
                   </div>
-                  <div className="mt-3 flex items-center justify-between">
+                  {Array.isArray(uni.scholarships) && uni.scholarships.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {uni.scholarships.slice(0, 2).map((s, i) => (
+                        <div key={i} className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--blue-900))]/70">
+                          <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          <span className="truncate">{s.name || 'Scholarship'}</span>
+                          {s.amount && <span className="font-bold text-emerald-600 shrink-0">${s.amount.toLocaleString()}</span>}
+                        </div>
+                      ))}
+                      {uni.scholarships.length > 2 && (
+                        <div className="text-[11px] text-[hsl(var(--blue-900))]/40 pl-5">+{uni.scholarships.length - 2} more</div>
+                      )}
+                    </div>
+                  )}
+                  {!Array.isArray(uni.scholarships) && uni.scholarships === true && (
+                    <div className="mt-2 flex items-center gap-1.5 text-[12px] text-amber-700">
+                      <Award className="w-3.5 h-3.5 shrink-0" />
+                      Scholarships available
+                    </div>
+                  )}
+                  <div className="mt-2 flex items-center justify-between">
                     <span className="text-[12px] text-[hsl(var(--blue-900))]/55">
                       Tuition: {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
                       {uni.living_cost_usd ? ` · Living: $${uni.living_cost_usd?.toLocaleString()}` : ''}

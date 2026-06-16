@@ -1,13 +1,8 @@
-"""University seeder — populates the universities_v2 MongoDB collection.
-
-Strategy:
-  1. Start with the rich hardcoded set from data.py (1 000+ universities).
-  2. Pull additional universities from the HiPolabs open API for extended
-     study destinations not already covered.
-  3. Deduplicate by (name, country).
-  4. Upsert each document so the operation is idempotent.
-"""
+"""University seeder — populates the universities_v2 MongoDB collection."""
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger('wehive.seed_universities')
 
 import asyncio
 import re
@@ -25,7 +20,7 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).parent
 load_dotenv(ROOT / '.env')
 
-from db import universities_col  # noqa: E402
+from db import countries_col, universities_col  # noqa: E402
 from data import UNIVERSITIES as _STATIC  # noqa: E402
 
 # ---------------------------------------------------------------------------
@@ -531,7 +526,9 @@ async def seed() -> dict:
     # Normalize static country codes (e.g. 'uk') to ISO alpha-2 (e.g. 'gb')
     COUNTRY_CODE_MAP = {'uk': 'gb'}
     api_count = 0
+    extra_codes = set()
     for country_code, country_name, flag, default_tuition, top_list in EXTRA_COUNTRIES:
+        extra_codes.add(country_code.lower())
         cc_lower = country_code.lower()
         # Also look up any aliased country codes from static data
         cc_aliases = [k for k, v in COUNTRY_CODE_MAP.items() if v == cc_lower]
@@ -542,7 +539,8 @@ async def seed() -> dict:
         else:
             try:
                 raw_list = await fetch_hipolabs(country_name)
-            except Exception:
+            except Exception as exc:
+                logger.warning("HiPolabs fetch failed for %s: %s", country_name, exc)
                 raw_list = []
 
         top_names = {t['name'].lower(): t for t in top_list}
@@ -577,6 +575,35 @@ async def seed() -> dict:
             await universities_col.update_one({'id': doc_id}, {'$set': enriched}, upsert=True)
             api_count += 1
             existing_names.add(top_name)
+
+    # --- 3. Pull all remaining countries from HiPolabs -----------------------
+    try:
+        all_raw = await fetch_hipolabs('')  # empty = all countries
+    except Exception as exc:
+        logger.warning("HiPolabs fetch failed for remaining countries: %s", exc)
+        all_raw = []
+    remaining_by_country: dict[str, list[dict]] = {}
+    for u in all_raw:
+        cc = (u.get('alpha_two_code') or '').lower()
+        if cc and cc not in extra_codes:
+            remaining_by_country.setdefault(cc, []).append(u)
+
+    for cc, unis in remaining_by_country.items():
+        unis.sort(key=lambda x: x.get('name', ''))
+        existing_names = set()
+        async for u in universities_col.find({'country': cc}, {'name': 1}):
+            existing_names.add((u.get('name') or '').strip().lower())
+        for raw in unis:
+            name_lower = raw['name'].lower()
+            if name_lower in existing_names:
+                continue
+            doc = _enrich_hipolabs(
+                raw, cc, raw.get('country', cc.upper()),
+                '\U0001F30D', 12000,  # globe emoji, default tuition
+            )
+            await universities_col.update_one({'id': doc['id']}, {'$set': doc}, upsert=True)
+            api_count += 1
+            existing_names.add(name_lower)
 
     total = await universities_col.count_documents({})
     return {'static': static_count, 'api': api_count, 'total': total}

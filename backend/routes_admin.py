@@ -27,7 +27,7 @@ from admin_auth import get_current_admin_flex
 from config import ADMIN_EMAILS
 from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS
 from audit import record as audit_record, recent as audit_recent
-from db import db, users, applications, holiday_plans, leads, otps
+from db import db, users, applications, holiday_plans, leads, otps, universities_col
 from serializers import public_user, serialize_event
 from pricing import load_pricing, invalidate_pricing_cache
 from seed_universities import seed as seed_universities
@@ -1456,6 +1456,54 @@ async def export_countries_csv(_=Depends(get_current_admin)):
             '|'.join(c.get('visa_types') or []),
         ])
     return _csv_response(rows, 'wehive-countries.csv')
+
+
+@router.get('/export/universities.csv')
+async def export_universities_csv(_=Depends(get_current_admin)):
+    rows = [[
+        'id', 'name', 'short_name', 'country', 'country_name', 'flag',
+        'rank', 'qs_rank', 'times_rank', 'type', 'established', 'students',
+        'intl_students', 'tuition_usd', 'living_cost_usd', 'scholarships',
+        'courses', 'popular_courses', 'intakes', 'gre_required', 'gmat_required',
+        'ielts_min', 'toefl_min', 'acceptance_rate', 'employment_rate',
+        'avg_salary_usd', 'description', 'location', 'website',
+        'accreditation', 'facilities',
+    ]]
+    async for u in universities_col.find({}, {'_id': 0}).sort('name', 1):
+        rows.append([
+            u.get('id') or '',
+            u.get('name') or '',
+            u.get('short_name') or '',
+            u.get('country') or '',
+            u.get('country_name') or '',
+            u.get('flag') or '',
+            str(u.get('rank') or ''),
+            str(u.get('qs_rank') or ''),
+            str(u.get('times_rank') or ''),
+            u.get('type') or '',
+            str(u.get('established') or ''),
+            str(u.get('students') or ''),
+            str(u.get('intl_students') or ''),
+            str(u.get('tuition_usd') or ''),
+            str(u.get('living_cost_usd') or ''),
+            'yes' if u.get('scholarships') else 'no',
+            ';'.join(u.get('courses') or []),
+            ';'.join(u.get('popular_courses') or []),
+            ';'.join(u.get('intakes') or []),
+            'yes' if u.get('gre_required') else 'no',
+            'yes' if u.get('gmat_required') else 'no',
+            str(u.get('ielts_min') or ''),
+            str(u.get('toefl_min') or ''),
+            u.get('acceptance_rate') or '',
+            u.get('employment_rate') or '',
+            str(u.get('avg_salary_usd') or ''),
+            (u.get('description') or ''),
+            u.get('location') or '',
+            u.get('website') or '',
+            ';'.join(u.get('accreditation') or []),
+            ';'.join(u.get('facilities') or []),
+        ])
+    return _csv_response(rows, 'wehive-universities.csv')
 
 
 @router.get('/export/revenue.csv')

@@ -1,4 +1,5 @@
 import { Sparkles, Loader2, Target, TrendingUp, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
+import { Sparkles, Loader2, Target, TrendingUp, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
 import { useAuth, API } from '../../context/AuthContext';
 import { useToast } from '../../hooks/use-toast';
 import axios from 'axios';

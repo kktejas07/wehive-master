@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API } from '../context/AuthContext';
 import { Loader2, Clock, DollarSign, GraduationCap, BookOpen, Globe, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Loader2, Clock, DollarSign, GraduationCap, BookOpen, Globe, ArrowLeft, ExternalLink, ChevronRight } from 'lucide-react';
 
 const DEGREE_COLORS = {
   bachelor: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' },

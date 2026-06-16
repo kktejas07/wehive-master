@@ -6,6 +6,10 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { API } from '../context/AuthContext';
 import MultiUniversityApplyModal from '../components/MultiUniversityApplyModal';
+import AIUniversityQA from '../components/ai/AIUniversityQA';
+import AIAcceptanceProbability from '../components/ai/AIAcceptanceProbability';
+import ProgramCard from '../components/ProgramCard';
+import ReviewsCard from '../components/ReviewsCard';
 import {
   Globe2, BookOpen, Users, Star, Clock, DollarSign, MapPin,
   ChevronRight, Loader2, GraduationCap, Award, TrendingUp,
@@ -74,7 +78,7 @@ function IntakeCalendar({ intakes, country_name }) {
   );
 }
 
-function ProgramCard({ uni }) {
+function ProgramDetailsCard({ uni }) {
   return (
     <div className="rounded-2xl bg-white border border-black/5 p-6">
       <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-4">Program Details</h3>
@@ -130,6 +134,12 @@ export default function UniversityDetail() {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
+  const [translated, setTranslated] = useState(null);
+
+  const t = (field, fallback) => {
+    if (translated && translated[field]) return translated[field];
+    return uni?.[field] ?? fallback ?? '';
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -200,12 +210,12 @@ export default function UniversityDetail() {
                   <GraduationCap className="w-3.5 h-3.5" /> {uni.type}
                 </div>
                 <h1 className="mt-3 font-display font-extrabold text-[36px] sm:text-[48px] leading-[1.0] tracking-[-0.035em]">
-                  {uni.short_name}
+                  {t('short_name') || uni.short_name}
                 </h1>
-                <p className="mt-2 text-[17px] text-white/70 max-w-xl">{uni.name}</p>
+                <p className="mt-2 text-[17px] text-white/70 max-w-xl">{t('name') || uni.name}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-[14px] text-white/60">
                   <span className="inline-flex items-center gap-1">
-                    <MapPin className="w-4 h-4" /> {uni.location}
+                    <MapPin className="w-4 h-4" /> {t('location') || uni.location}
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <Globe2 className="w-4 h-4" /> {uni.country_name}
@@ -252,6 +262,7 @@ export default function UniversityDetail() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <StatCard icon={Award} label="World Rank" value={`#${uni.rank}`} color="bg-amber-500" />
             <StatCard icon={Star} label="QS Rank" value={`#${uni.qs_rank || '—'}`} color="bg-blue-500" />
+            <StatCard icon={Award} label="THE Rank" value={`#${uni.times_rank || '—'}`} color="bg-indigo-500" />
             <StatCard icon={Users} label="Students" value={(uni.students || 0).toLocaleString()} color="bg-emerald-500" />
             <StatCard icon={Globe2} label="Intl. Students" value={(uni.intl_students || 0).toLocaleString()} color="bg-violet-500" />
             <StatCard icon={DollarSign} label="Tuition/yr" value={uni.tuition_usd === 0 ? 'Free' : `$${(uni.tuition_usd || 0).toLocaleString()}`} color="bg-rose-500" />
@@ -266,7 +277,7 @@ export default function UniversityDetail() {
             <div className="rounded-2xl bg-white border border-black/5 p-6">
               <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-3">About</h2>
               <p className="text-[15px] text-[hsl(var(--blue-900))]/70 leading-relaxed">
-                {uni.description || `${uni.short_name} is a prestigious institution located in ${uni.location}, ${uni.country_name}. Established in ${uni.established}, it is known for its academic excellence and research contributions.`}
+                {t('description') || `${uni.short_name} is a prestigious institution located in ${uni.location}, ${uni.country_name}. Established in ${uni.established}, it is known for its academic excellence and research contributions.`}
               </p>
               <div className="mt-4 flex flex-wrap gap-4 text-[13px] text-[hsl(var(--blue-900))]/60">
                 <span>Founded: <strong>{uni.established}</strong></span>
@@ -278,6 +289,7 @@ export default function UniversityDetail() {
             </div>
 
             <ProgramDetailsCard uni={uni} />
+
             <ProgramCard universityId={id} />
 
             <div>
@@ -288,6 +300,8 @@ export default function UniversityDetail() {
                 ))}
               </div>
             </div>
+
+            <ReviewsCard universityId={id} />
 
             <div className="rounded-2xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-8">
               <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
@@ -324,11 +338,11 @@ export default function UniversityDetail() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between py-2 border-b border-black/5">
                   <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Acceptance Rate</span>
-                  <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni['录取率'] || '—'}</span>
+                  <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni.acceptance_rate || '—'}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-black/5">
                   <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Employment Rate</span>
-                  <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni['就业率'] || '—'}</span>
+                  <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni.employment_rate || '—'}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-black/5">
                   <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Est. Living Cost/yr</span>
@@ -342,6 +356,20 @@ export default function UniversityDetail() {
                 </div>
               </div>
             </div>
+
+            {uni.website && (
+              <a href={uni.website.startsWith('http') ? uni.website : `https://${uni.website}`} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 transition-all group">
+                <ExternalLink className="w-5 h-5 text-[hsl(var(--blue-700))]" />
+                <div>
+                  <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))]">Visit official website</div>
+                  <div className="text-[11px] text-[hsl(var(--blue-900))]/50 truncate max-w-[200px]">{uni.website}</div>
+                </div>
+              </a>
+            )}
+
+            <AIUniversityQA universityId={id} universityName={uni.short_name} />
+            <AIAcceptanceProbability universityId={id} universityName={uni.short_name} />
 
             <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--accent))]/10 to-[hsl(var(--accent))]/5 border border-[hsl(var(--accent))]/20 p-6">
               <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-2">Study Abroad with WeHive</h3>
