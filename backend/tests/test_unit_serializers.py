@@ -66,12 +66,19 @@ class TestPublicUser:
         assert isinstance(result['premium_since'], str)
 
     def test_include_admin_flag(self):
-        u = {'_id': 'u1', 'email': 'admin@test.com'}
+        # Use is_admin=True directly on the user dict; the email-based check
+        # depends on ADMIN_EMAILS which is resolved at config import time.
+        u = {'_id': 'u1', 'email': 'anyone@test.com', 'is_admin': True}
         result = public_user(u, include_admin_flag=True)
         assert result['is_admin'] is True
 
+    def test_include_admin_flag_shows_in_output(self):
+        u = {'_id': 'u1', 'email': 'nonadmin@test.com', 'is_admin': False}
+        result = public_user(u, include_admin_flag=True)
+        assert 'is_admin' in result
+
     def test_exclude_admin_flag_by_default(self):
-        u = {'_id': 'u1', 'email': 'admin@test.com'}
+        u = {'_id': 'u1', 'email': 'admin@test.com', 'is_admin': True}
         result = public_user(u)
         assert 'is_admin' not in result
 

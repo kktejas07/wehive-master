@@ -2,10 +2,10 @@
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, Body, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Query, Body, UploadFile, File, Form, Header
 import os
 from pydantic import BaseModel
-from auth_utils import get_current_user_optional, create_access_token, verify_password, hash_password
+from auth_utils import decode_jwt, create_access_token, verify_password, hash_password
 from admin_auth import get_current_admin_flex
 from db import db
 from config import SECRET_KEY, ACCESS_TOKEN_EXPIRE
@@ -32,8 +32,15 @@ class AgentVerifyOTPRequest(BaseModel):
     otp: str
 
 
-async def get_current_agent(token: str = Depends(get_current_user_optional)):
-    agent = await db.agents.find_one({'email': token.get('sub')})
+async def get_current_agent(authorization: Optional[str] = Header(default=None)):
+    if not authorization or not authorization.lower().startswith('bearer '):
+        raise HTTPException(401, 'Invalid agent credentials')
+    token = authorization.split(' ', 1)[1].strip()
+    payload = decode_jwt(token)
+    email = payload.get('sub')
+    if not email:
+        raise HTTPException(401, 'Invalid agent credentials')
+    agent = await db.agents.find_one({'email': email})
     if not agent:
         raise HTTPException(401, 'Invalid agent credentials')
     return agent

@@ -1,16 +1,20 @@
 """Application document, timeline, messaging + PDF receipt routes."""
 import os
 import io
+import re
 import uuid
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from fastapi.responses import StreamingResponse, FileResponse, RedirectResponse
 from pydantic import BaseModel
 
 from auth_utils import get_current_user
+from rate_limit import RateLimit
+
+_upload_limiter = RateLimit(max_calls=20, window_seconds=60)
 from config import CONSULTANT_NAME, CONSULTANT_AUTO_REPLY
 from db import db, applications
 from serializers import serialize_doc
@@ -24,8 +28,41 @@ UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10MB
 ALLOWED_MIME = {
     'application/pdf', 'image/jpeg', 'image/png', 'image/webp',
-    'image/heic', 'image/heif', 'application/octet-stream',
+    'image/heic', 'image/heif',
 }
+
+# Magic-byte signatures for allowed file types.
+# Client-supplied Content-Type can be spoofed; verify actual bytes.
+_MAGIC: list[tuple[bytes, str]] = [
+    (b'%PDF', 'application/pdf'),
+    (b'\xff\xd8\xff', 'image/jpeg'),
+    (b'\x89PNG\r\n\x1a\n', 'image/png'),
+    (b'RIFF', 'image/webp'),   # RIFF....WEBP
+]
+
+
+def _detect_mime(data: bytes) -> Optional[str]:
+    """Return detected MIME type from leading bytes, or None if unrecognised."""
+    if data[:4] == b'RIFF' and data[8:12] == b'WEBP':
+        return 'image/webp'
+    for magic, mime in _MAGIC:
+        if magic != b'RIFF' and data[:len(magic)] == magic:
+            return mime
+    # HEIC/HEIF: ftyp box at offset 4
+    if len(data) >= 12 and data[4:8] == b'ftyp':
+        brand = data[8:12]
+        if brand in (b'heic', b'heix', b'mif1', b'msf1', b'hevc', b'hevx'):
+            return 'image/heic'
+    return None
+
+
+# Filename sanitizer: keep only safe characters, strip path components.
+_UNSAFE_RE = re.compile(r'[^\w.\-]')
+
+def _safe_filename(name: str) -> str:
+    base = Path(name).name  # strip any directory component
+    safe = _UNSAFE_RE.sub('_', base)[:120]
+    return safe or 'document'
 
 
 async def _get_app_for_user(application_id: str, user_id: str):
@@ -106,21 +143,29 @@ async def list_documents(application_id: str, user=Depends(get_current_user)):
 @router.post('/{application_id}/documents')
 async def upload_document(
     application_id: str,
+    request: Request,
     doc_type: str = Form(...),
     file: UploadFile = File(...),
     user=Depends(get_current_user),
+    _=Depends(_upload_limiter),
 ):
     app = await _get_app_for_user(application_id, user["_id"])  # noqa: F841 (used for auth)
     # Read file with size cap
     content = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, f'File exceeds {MAX_UPLOAD_BYTES // (1024 * 1024)}MB limit')
-    if file.content_type and file.content_type not in ALLOWED_MIME:
-        raise HTTPException(415, f'Unsupported file type: {file.content_type}')
+
+    # Validate by actual file content, not client-supplied Content-Type header.
+    detected = _detect_mime(content)
+    if detected is None or detected not in ALLOWED_MIME:
+        raise HTTPException(
+            415,
+            'Unsupported file type. Only PDF, JPEG, PNG, and WEBP are allowed.',
+        )
 
     doc_id = str(uuid.uuid4())
-    safe_name = (file.filename or 'document').replace('/', '_').replace('\\', '_')
-    mime = file.content_type or 'application/octet-stream'
+    safe_name = _safe_filename(file.filename or 'document')
+    mime = detected
 
     now = datetime.utcnow()
     doc = {
@@ -142,7 +187,10 @@ async def upload_document(
     else:
         user_dir = UPLOAD_ROOT / user['_id'] / application_id
         user_dir.mkdir(parents=True, exist_ok=True)
-        saved_path = user_dir / f'{doc_id}__{safe_name}'
+        saved_path = (user_dir / f'{doc_id}__{safe_name}').resolve()
+        # Guard against path traversal escaping the upload root.
+        if not saved_path.is_relative_to(UPLOAD_ROOT.resolve()):
+            raise HTTPException(400, 'Invalid filename')
         with open(saved_path, 'wb') as f:
             f.write(content)
         doc['storage'] = 'local'

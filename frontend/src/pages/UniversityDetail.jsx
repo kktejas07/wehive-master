@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -10,12 +10,13 @@ import AIUniversityQA from '../components/ai/AIUniversityQA';
 import AIAcceptanceProbability from '../components/ai/AIAcceptanceProbability';
 import ProgramCard from '../components/ProgramCard';
 import ReviewsCard from '../components/ReviewsCard';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import {
-  Globe2, BookOpen, Users, Star, Clock, DollarSign, MapPin,
+  Globe2, Users, Star, DollarSign, MapPin,
   ChevronRight, Loader2, GraduationCap, Award, TrendingUp,
-  Calendar, Check, X, ExternalLink, Bookmark, Heart,
+  Calendar, Check, X, ExternalLink, Bookmark,
   Building2, Library, FlaskConical, Dribbble, Stethoscope,
-  Shield, FileText, ArrowRight, Sparkles,
+  ArrowRight, Sparkles,
 } from 'lucide-react';
 
 const FACILITY_ICONS = {
@@ -130,6 +131,7 @@ function FacilityCard({ name }) {
 
 export default function UniversityDetail() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const [uni, setUni] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -147,6 +149,12 @@ export default function UniversityDetail() {
       .then(r => { setUni(r.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (searchParams.get('apply') === 'true') {
+      setShowApplyModal(true);
+    }
+  }, [searchParams]);
 
   if (loading) {
     return (
@@ -192,8 +200,8 @@ export default function UniversityDetail() {
             <span className="text-white font-bold">{uni.name}</span>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div className="flex items-start gap-5 relative">
+          <div className="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div className="flex items-start gap-5">
               <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
                 {uni.image_url ? (
                   <img src={uni.image_url} alt={uni.short_name} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; e.target.parentElement.textContent = uni.flag; }} />
@@ -201,9 +209,9 @@ export default function UniversityDetail() {
                   <span className="text-4xl">{uni.flag}</span>
                 )}
               </div>
-              <div className="absolute top-0 right-0">
-                <LanguageSwitcher universityId={id} fields={uni} onTranslated={setTranslated} />
-              </div>
+            </div>
+            <div className="absolute top-0 right-0">
+              <LanguageSwitcher universityId={id} fields={uni} onTranslated={setTranslated} />
             </div>
               <div>
                 <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] bg-white/10 rounded-full px-3 py-1">

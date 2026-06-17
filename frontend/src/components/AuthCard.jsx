@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
@@ -89,6 +89,10 @@ export default function AuthCard({ mode, referralCode }) {
   const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent, phoneOtp, verifyPhoneOtpCode } = useFirebaseAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const rawNext = searchParams.get('next');
+  const isValidRedirect = (url) => url && url.startsWith('/') && !url.startsWith('//');
+  const nextUrl = isValidRedirect(rawNext) ? rawNext : '/account';
   const [tab, setTab] = useState('google');
   const [identifier, setIdentifier] = useState('');
   const [name, setName] = useState('');
@@ -133,8 +137,8 @@ export default function AuthCard({ mode, referralCode }) {
   }, []);
 
   useEffect(() => {
-    if (isAuthed) navigate('/account', { replace: true });
-  }, [isAuthed, navigate]);
+    if (isAuthed) navigate(nextUrl, { replace: true });
+  }, [isAuthed, navigate, nextUrl]);
 
   useEffect(() => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
@@ -157,7 +161,7 @@ export default function AuthCard({ mode, referralCode }) {
     try {
       await loginWithGoogle();
       toast({ title: 'Welcome to We Hive', description: 'Signed in with Google.' });
-      navigate('/account', { replace: true });
+      navigate(nextUrl, { replace: true });
     } catch (e) {
       if (e.code !== 'auth/popup-closed-by-user') {
         toast({ title: 'Google sign-in failed', description: e.message });
@@ -188,7 +192,7 @@ export default function AuthCard({ mode, referralCode }) {
           toast({ title: 'Verify your email', description: 'Please verify your email address.' });
         } else {
           toast({ title: 'Welcome to We Hive', description: 'Signed in with email.' });
-          navigate('/account', { replace: true });
+          navigate(nextUrl, { replace: true });
         }
       }
     } catch (e) {
@@ -256,7 +260,7 @@ export default function AuthCard({ mode, referralCode }) {
         });
       }
       toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
-      navigate('/account', { replace: true });
+      navigate(nextUrl, { replace: true });
     } catch (e) {
       const msg = e?.response?.data?.detail || e?.message || 'Invalid code. Try again.';
       toast({ title: 'Verification failed', description: msg });

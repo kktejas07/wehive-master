@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from pymongo.errors import DuplicateKeyError
+from pydantic import BaseModel
 
 from models import UpdateProfileRequest, ApplicationCreate, Application, SavedPlanCreate, SavedPlan, PublicUser
 from auth_utils import get_current_user
+from admin_auth import hash_password, verify_password
 from constants import AppStatus
 from db import users, applications, holiday_plans, db
 from serializers import serialize_doc
@@ -122,3 +124,55 @@ async def downgrade_from_premium(user=Depends(get_current_user)):
         {'$set': {'is_premium': False, 'updated_at': now}, '$unset': {'premium_since': ''}},
     )
     return {'ok': True, 'is_premium': False}
+
+
+# ---------- Password management ----------
+
+class SetPasswordRequest(BaseModel):
+    new_password: str
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+def _validate_password_strength(pw: str):
+    if len(pw) < 8:
+        raise HTTPException(400, 'Password must be at least 8 characters.')
+    if not any(c.isdigit() for c in pw):
+        raise HTTPException(400, 'Password must contain at least one digit.')
+    if not any(c.isupper() for c in pw):
+        raise HTTPException(400, 'Password must contain at least one uppercase letter.')
+
+
+@router.post('/me/set-password')
+async def set_password(req: SetPasswordRequest, user=Depends(get_current_user)):
+    """Set a password for users who signed up via OTP/OAuth and don't have one yet."""
+    if user.get('password_hash'):
+        raise HTTPException(409, 'Password already set. Use change-password instead.')
+    _validate_password_strength(req.new_password)
+    hashed = hash_password(req.new_password)
+    await users.update_one(
+        {'_id': user['_id']},
+        {'$set': {'password_hash': hashed, 'updated_at': datetime.utcnow()}},
+    )
+    return {'ok': True}
+
+
+@router.post('/me/change-password')
+async def change_password(req: ChangePasswordRequest, user=Depends(get_current_user)):
+    """Change password — requires current password for verification."""
+    if not user.get('password_hash'):
+        raise HTTPException(400, 'No password set. Use set-password first.')
+    if not verify_password(req.current_password, user['password_hash']):
+        raise HTTPException(401, 'Current password is incorrect.')
+    _validate_password_strength(req.new_password)
+    if req.current_password == req.new_password:
+        raise HTTPException(400, 'New password must be different from the current password.')
+    hashed = hash_password(req.new_password)
+    await users.update_one(
+        {'_id': user['_id']},
+        {'$set': {'password_hash': hashed, 'updated_at': datetime.utcnow()}},
+    )
+    return {'ok': True}

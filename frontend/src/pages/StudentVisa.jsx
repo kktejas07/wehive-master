@@ -12,10 +12,10 @@ import AIScholarshipMatcher from '../components/ai/AIScholarshipMatcher';
 import {
   GraduationCap, Clock, Briefcase, Globe2, Calendar, Award,
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
-  Globe, MapPin, Visa, FileText, Shield, Zap, Search, Filter,
-  Atom, Cog, Heart, Scale, Palette, BookMarked, MessageCircle,
-  Sparkles, Target, Calculator, Home, DollarSign, TrendingUp,
-  BarChart3, Info, ExternalLink, Bot,
+  Globe, FileText, Shield, Zap, Search, TrendingUp,
+  Atom, Cog, Heart, Scale, Palette, BookMarked,
+  Sparkles, Calculator, Home, DollarSign,
+  BarChart3, Info,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -547,7 +547,7 @@ export default function StudentVisa() {
                       View details
                     </Link>
                     <Link
-                      to={`/student-visa?university=${uni.id}`}
+                      to={`/university/${uni.id}?apply=true`}
                       className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl btn-primary text-white h-9 text-[12px] font-bold"
                     >
                       Apply <ArrowRight className="w-3.5 h-3.5" />

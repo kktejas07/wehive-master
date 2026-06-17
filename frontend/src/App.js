@@ -10,6 +10,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import ChatbotWidget from './components/ChatbotWidget';
 import PageTransition from './components/PageTransition';
+import PrivateRoute from './components/PrivateRoute';
 import RouteFallback from './components/RouteFallback';
 import { Toaster } from './components/ui/toaster';
 import { setPricing } from './components/FeeBreakdown';
@@ -85,8 +86,8 @@ function AnimatedRoutes() {
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
           <Route path="/__/auth/action" element={<EmailVerification />} />
-          <Route path="/account" element={<PageTransition><Account /></PageTransition>} />
-          <Route path="/account/applications/:id" element={<PageTransition><ApplicationDetail /></PageTransition>} />
+          <Route path="/account" element={<PrivateRoute><PageTransition><Account /></PageTransition></PrivateRoute>} />
+          <Route path="/account/applications/:id" element={<PrivateRoute><PageTransition><ApplicationDetail /></PageTransition></PrivateRoute>} />
           <Route path="/track/:id" element={<PageTransition><TrackStatus /></PageTransition>} />
           <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />

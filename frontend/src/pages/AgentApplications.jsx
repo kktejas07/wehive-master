@@ -31,6 +31,7 @@ export default function AgentApplications() {
   const [statusFilter, setStatusFilter] = useState('');
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   const pageSize = 25;
 
   const token = () => localStorage.getItem('agent_token');
@@ -42,9 +43,9 @@ export default function AgentApplications() {
       headers: { Authorization: `Bearer ${token()}` },
       params: { status: statusFilter || undefined, search: search || undefined, limit: pageSize, skip },
     }).then(r => { setApps(r.data.items || []); setTotal(r.data.total || 0); }).catch(() => navigate('/agent/login')).finally(() => setLoading(false));
-  }, [statusFilter, skip]);
+  }, [statusFilter, skip, search, refreshKey]);
 
-  const handleSearch = () => { setSkip(0); };
+  const handleSearch = () => { setSkip(0); setRefreshKey(k => k + 1); };
 
   const handleLogout = () => { localStorage.removeItem('agent_token'); navigate('/agent/login'); };
 
@@ -81,7 +82,7 @@ export default function AgentApplications() {
         <div className="flex gap-3 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/40" />
-            <input value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { setSkip(0); setLoading(true); } }} placeholder="Search applications..." className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none pl-10 pr-4 text-[14px]" />
+            <input value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { handleSearch(); } }} placeholder="Search applications..." className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none pl-10 pr-4 text-[14px]" />
           </div>
           <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setSkip(0); }} className="h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] bg-white">
             <option value="">All Status</option>

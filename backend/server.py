@@ -54,7 +54,6 @@ async def root():
     return {
         'service': 'We Hive API',
         'status': 'ok',
-        'otp_channel': os.environ.get('OTP_CHANNEL', 'mock'),
     }
 
 
