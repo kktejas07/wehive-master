@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from datetime import datetime
 import json
 from pydantic import BaseModel, Field
@@ -15,11 +15,16 @@ from auth_utils import (
 from admin_auth import verify_password
 from db import db, users
 from constants import REFERRAL_REWARD_INR
+from rate_limit import RateLimit
 import uuid
 
 from config import ADMIN_EMAILS, OTP_TTL_MIN
 
 router = APIRouter(prefix='/auth', tags=['auth'])
+
+# 5 OTP requests per IP per 10 minutes; 10 login attempts per IP per minute.
+_otp_limiter = RateLimit(max_calls=5, window_seconds=600)
+_login_limiter = RateLimit(max_calls=10, window_seconds=60)
 
 
 class LoginRequest(BaseModel):
@@ -28,7 +33,7 @@ class LoginRequest(BaseModel):
 
 
 @router.post('/login', response_model=AuthTokens)
-async def user_login(req: LoginRequest):
+async def user_login(req: LoginRequest, request: Request, _=Depends(_login_limiter)):
     email = req.email.lower().strip()
     user = await users.find_one({'email': email})
     if not user or not user.get('password_hash'):
@@ -111,7 +116,7 @@ async def _find_or_create_user(identifier: str, kind: str, name: str = '', refer
 
 
 @router.post('/send-otp', response_model=SendOtpResponse)
-async def send_otp(req: SendOtpRequest):
+async def send_otp(req: SendOtpRequest, request: Request, _=Depends(_otp_limiter)):
     from otp_service import generate_otp, store_otp, check_rate_limit, increment_resend
 
     kind = req.channel or classify_identifier(req.identifier)

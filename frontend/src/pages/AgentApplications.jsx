@@ -42,7 +42,7 @@ export default function AgentApplications() {
       headers: { Authorization: `Bearer ${token()}` },
       params: { status: statusFilter || undefined, search: search || undefined, limit: pageSize, skip },
     }).then(r => { setApps(r.data.items || []); setTotal(r.data.total || 0); }).catch(() => navigate('/agent/login')).finally(() => setLoading(false));
-  }, [statusFilter, skip]);
+  }, [statusFilter, skip, search]);
 
   const handleSearch = () => { setSkip(0); };
 

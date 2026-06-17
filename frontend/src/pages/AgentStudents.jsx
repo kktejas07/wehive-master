@@ -30,10 +30,6 @@ export default function AgentStudents() {
 
   useEffect(() => {
     if (!token()) { navigate('/agent/login'); return; }
-    loadStudents();
-  }, [skip]);
-
-  const loadStudents = () => {
     setLoading(true);
     axios.get(`${API}/agent/students`, {
       headers: { Authorization: `Bearer ${token()}` },
@@ -41,9 +37,9 @@ export default function AgentStudents() {
     }).then(r => { setStudents(r.data.items || []); setTotal(r.data.total || 0); })
       .catch(() => navigate('/agent/login'))
       .finally(() => setLoading(false));
-  };
+  }, [skip, search]);
 
-  const handleSearch = () => { setSkip(0); loadStudents(); };
+  const handleSearch = () => { setSkip(0); };
 
   const handleAdd = async () => {
     const token = localStorage.getItem('agent_token');

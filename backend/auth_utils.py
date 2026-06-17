@@ -10,13 +10,19 @@ from fastapi import HTTPException, Header, status
 JWT_SECRET = os.environ.get('JWT_SECRET', 'change_me')
 JWT_ALG = os.environ.get('JWT_ALG', 'HS256')
 
-if JWT_SECRET == 'change_me':
+_env = os.environ.get('APP_ENV', 'production').lower()
+if JWT_SECRET in ('change_me', '', 'secret', 'mysecret', 'jwtsecret'):
     import logging
-    logging.getLogger('wehive').warning(
-        'JWT_SECRET is set to the default value "change_me". '
-        'Set a strong random secret in production.'
-    )
-JWT_EXPIRES_HOURS = int(os.environ.get('JWT_EXPIRES_HOURS', '720'))
+    _log = logging.getLogger('wehive')
+    if _env not in ('development', 'dev', 'test', 'local'):
+        raise RuntimeError(
+            'FATAL: JWT_SECRET is set to an insecure default value. '
+            'Generate a strong secret with: python -c "import secrets; print(secrets.token_hex(64))" '
+            'and set it as JWT_SECRET in your .env before starting in production.'
+        )
+    _log.warning('JWT_SECRET is insecure — acceptable only in local dev. Never deploy this.')
+
+JWT_EXPIRES_HOURS = int(os.environ.get('JWT_EXPIRES_HOURS', '24'))
 OTP_LENGTH = int(os.environ.get('OTP_LENGTH', '6'))
 OTP_TTL_MIN = int(os.environ.get('OTP_TTL_MINUTES', '10'))
 
@@ -45,12 +51,19 @@ def gen_otp(length: int = OTP_LENGTH) -> str:
     return ''.join(secrets.choice(string.digits) for _ in range(length))
 
 
-def sign_jwt(user_id: str) -> str:
+_RESERVED_CLAIMS = frozenset({'sub', 'exp', 'iat', 'nbf', 'jti', 'iss', 'aud'})
+
+
+def sign_jwt(user_id: str, extra: dict = None) -> str:
     payload = {
         'sub': user_id,
         'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRES_HOURS),
         'iat': datetime.utcnow(),
     }
+    if extra:
+        # Prevent caller from overriding reserved security claims.
+        safe_extra = {k: v for k, v in extra.items() if k not in _RESERVED_CLAIMS}
+        payload.update(safe_extra)
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
 
 
@@ -104,4 +117,5 @@ async def get_current_user_optional(authorization: Optional[str] = Header(defaul
 from admin_auth import hash_password, verify_password
 
 def create_access_token(data: dict) -> str:
-    return sign_jwt(data['sub'])
+    extra = {k: v for k, v in data.items() if k != 'sub'}
+    return sign_jwt(data['sub'], extra)

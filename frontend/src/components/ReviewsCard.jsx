@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Star, MessageCircle, ThumbsUp, Loader2, User, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
@@ -15,15 +15,15 @@ export default function ReviewsCard({ universityId }) {
   const [form, setForm] = useState({ rating: 5, title: '', review_text: '', pros: '', cons: '', program_name: '' });
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchReviews = () => {
+  const fetchReviews = useCallback(() => {
     setLoading(true);
     axios.get(`${API}/reviews/${universityId}`)
       .then(r => setData(r.data))
       .catch(() => setData({ total: 0, average_rating: 0, items: [] }))
       .finally(() => setLoading(false));
-  };
+  }, [universityId]);
 
-  useEffect(() => { fetchReviews(); }, [universityId]);
+  useEffect(() => { fetchReviews(); }, [fetchReviews]);
   const handleSubmit = async () => {
     if (!isAuthed) { openAuth('signup'); return; }
     if (!form.review_text.trim()) { toast({ title: 'Please write a review' }); return; }
