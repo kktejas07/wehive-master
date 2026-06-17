@@ -189,7 +189,7 @@ async def upload_document(
         user_dir.mkdir(parents=True, exist_ok=True)
         saved_path = (user_dir / f'{doc_id}__{safe_name}').resolve()
         # Guard against path traversal escaping the upload root.
-        if not str(saved_path).startswith(str(UPLOAD_ROOT.resolve())):
+        if not saved_path.is_relative_to(UPLOAD_ROOT.resolve()):
             raise HTTPException(400, 'Invalid filename')
         with open(saved_path, 'wb') as f:
             f.write(content)

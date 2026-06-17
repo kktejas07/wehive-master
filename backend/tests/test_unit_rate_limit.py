@@ -14,6 +14,8 @@ import time
 import threading
 from unittest.mock import MagicMock
 
+import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from fastapi import HTTPException
@@ -43,32 +45,27 @@ class TestRateLimitBasic:
         req = _make_request('10.0.0.2')
         for _ in range(3):
             limiter(req)
-        try:
+        with pytest.raises(HTTPException) as exc:
             limiter(req)
-            assert False, 'Expected HTTPException(429)'
-        except HTTPException as e:
-            assert e.status_code == 429
+        assert exc.value.status_code == 429
 
     def test_429_has_retry_after_header(self):
         limiter = RateLimit(max_calls=1, window_seconds=30)
         req = _make_request('10.0.0.3')
         limiter(req)
-        try:
+        with pytest.raises(HTTPException) as exc:
             limiter(req)
-            assert False
-        except HTTPException as e:
-            assert e.status_code == 429
-            assert 'Retry-After' in e.headers
-            assert int(e.headers['Retry-After']) > 0
+        assert exc.value.status_code == 429
+        assert 'Retry-After' in exc.value.headers
+        assert int(exc.value.headers['Retry-After']) > 0
 
     def test_429_detail_mentions_retry(self):
         limiter = RateLimit(max_calls=1, window_seconds=60)
         req = _make_request('10.0.0.4')
         limiter(req)
-        try:
+        with pytest.raises(HTTPException) as exc:
             limiter(req)
-        except HTTPException as e:
-            assert 'retry' in e.detail.lower() or 'too many' in e.detail.lower()
+        assert 'retry' in exc.value.detail.lower() or 'too many' in exc.value.detail.lower()
 
 
 class TestRateLimitWindow:
@@ -79,11 +76,8 @@ class TestRateLimitWindow:
         limiter(req)
         limiter(req)
         # Exhaust limit
-        try:
+        with pytest.raises(HTTPException):
             limiter(req)
-            assert False, 'Should have been blocked'
-        except HTTPException:
-            pass
         # Wait for the window to expire
         time.sleep(1.1)
         # Should be allowed again
@@ -107,17 +101,13 @@ class TestRateLimitIsolation:
         # A is exhausted, B should still be fine
         limiter(req_b)
         limiter(req_b)
-        try:
+        with pytest.raises(HTTPException) as exc:
             limiter(req_a)
-            assert False
-        except HTTPException as e:
-            assert e.status_code == 429
+        assert exc.value.status_code == 429
         # B is also now exhausted independently
-        try:
+        with pytest.raises(HTTPException) as exc:
             limiter(req_b)
-            assert False
-        except HTTPException as e:
-            assert e.status_code == 429
+        assert exc.value.status_code == 429
 
     def test_forwarded_for_header_used(self):
         """X-Forwarded-For takes precedence over client.host."""
@@ -135,11 +125,9 @@ class TestRateLimitIsolation:
         limiter(req)  # key should be '1.2.3.4'
         # Second request from same real IP should be blocked
         req2 = _make_request('10.0.0.1', forwarded='1.2.3.4')
-        try:
+        with pytest.raises(HTTPException) as exc:
             limiter(req2)
-            assert False
-        except HTTPException as e:
-            assert e.status_code == 429
+        assert exc.value.status_code == 429
 
 
 class TestRateLimitConcurrency:
@@ -173,11 +161,9 @@ class TestRateLimitEdgeCases:
         limiter = RateLimit(max_calls=1, window_seconds=60)
         req = _make_request('10.2.0.1')
         limiter(req)
-        try:
+        with pytest.raises(HTTPException) as exc:
             limiter(req)
-            assert False
-        except HTTPException as e:
-            assert e.status_code == 429
+        assert exc.value.status_code == 429
 
     def test_no_client_ip(self):
         """Falls back gracefully when client is None."""
@@ -187,8 +173,6 @@ class TestRateLimitEdgeCases:
         req.headers.get = lambda key, default=None: None
         limiter(req)  # should not crash
         limiter(req)
-        try:
+        with pytest.raises(HTTPException) as exc:
             limiter(req)
-            assert False
-        except HTTPException as e:
-            assert e.status_code == 429
+        assert exc.value.status_code == 429

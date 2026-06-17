@@ -90,7 +90,9 @@ export default function AuthCard({ mode, referralCode }) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const nextUrl = searchParams.get('next') || '/account';
+  const rawNext = searchParams.get('next');
+  const isValidRedirect = (url) => url && url.startsWith('/') && !url.startsWith('//');
+  const nextUrl = isValidRedirect(rawNext) ? rawNext : '/account';
   const [tab, setTab] = useState('google');
   const [identifier, setIdentifier] = useState('');
   const [name, setName] = useState('');
@@ -136,7 +138,7 @@ export default function AuthCard({ mode, referralCode }) {
 
   useEffect(() => {
     if (isAuthed) navigate(nextUrl, { replace: true });
-  }, [isAuthed, navigate]);
+  }, [isAuthed, navigate, nextUrl]);
 
   useEffect(() => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };

@@ -191,7 +191,11 @@ class TestPathEscapeGuard:
         root = tmp_path / 'uploads'
         root.mkdir()
         candidate = (root / 'user1' / 'app1' / 'file.pdf').resolve()
-        assert str(candidate).startswith(str(root.resolve()))
+        root_resolved = root.resolve()
+        try:
+            candidate.relative_to(root_resolved)
+        except ValueError:
+            assert False, f'{candidate} should be inside {root_resolved}'
 
     def test_traversal_path_blocked(self, tmp_path):
         """A path that escapes the upload root should be blocked."""
@@ -199,4 +203,9 @@ class TestPathEscapeGuard:
         root.mkdir()
         # Even though _safe_filename strips .., confirm the guard catches it
         candidate = (root / '..' / '..' / 'etc' / 'passwd').resolve()
-        assert not str(candidate).startswith(str(root.resolve()))
+        root_resolved = root.resolve()
+        try:
+            candidate.relative_to(root_resolved)
+            assert False, f'{candidate} escaped {root_resolved}'
+        except ValueError:
+            pass

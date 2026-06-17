@@ -117,5 +117,7 @@ async def get_current_user_optional(authorization: Optional[str] = Header(defaul
 from admin_auth import hash_password, verify_password
 
 def create_access_token(data: dict) -> str:
+    if 'sub' not in data:
+        raise ValueError('create_access_token requires a "sub" key in data')
     extra = {k: v for k, v in data.items() if k != 'sub'}
     return sign_jwt(data['sub'], extra)

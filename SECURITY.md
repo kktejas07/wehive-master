@@ -32,15 +32,23 @@ Remove it from `backend/.env` in production — use the deployment dashboard onl
 
 ---
 
-### 3. Admin Passwords — CHANGE NOW
+### 3. Admin Seeded Credentials — ROTATE NOW
 
-Passwords currently seeded from `.env` (`ADMIN_SEED_PASSWORD`, `ADMIN_SEEDS_JSON`):
+**Secrets to rotate** (remove plain-text values from `.env` and replace with random values):
+
+| Variable | Action |
+|---|---|
+| `ADMIN_SEED_PASSWORD` | Replace with a random string |
+| `ADMIN_SEEDS_JSON` | Replace with a random JSON blob or remove entirely |
+
+These seeded values were used to create the following admin accounts:
+
 - `admin@wehive.co.in`
 - `info@wehive.co.in`
 - `krishnakranthiteja@gmail.com`
 
 Log in to the admin panel and change all three passwords immediately.
-Then remove the plain-text password values from `.env` and use random values going forward.
+Afterward, the env vars above no longer matter — but remove them from `.env` anyway so they are never re-seeded accidentally.
 
 ---
 

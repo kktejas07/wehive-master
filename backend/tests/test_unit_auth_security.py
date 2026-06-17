@@ -12,6 +12,8 @@ import os
 import importlib
 from datetime import datetime, timedelta
 
+import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 # Pre-set required DB env vars before any import
@@ -38,18 +40,13 @@ def _load_auth_utils_with(secret: str, app_env: str = 'production'):
 # ─────────────────────────────────────────────────────────────────────────────
 class TestWeakSecretGuard:
     def test_change_me_blocked_in_production(self):
-        try:
+        with pytest.raises(RuntimeError) as exc:
             _load_auth_utils_with('change_me', 'production')
-            assert False, 'Should have raised RuntimeError'
-        except RuntimeError as e:
-            assert 'insecure' in str(e).lower() or 'fatal' in str(e).lower()
+        assert 'insecure' in str(exc.value).lower() or 'fatal' in str(exc.value).lower()
 
     def test_empty_secret_blocked_in_production(self):
-        try:
+        with pytest.raises(RuntimeError):
             _load_auth_utils_with('', 'production')
-            assert False, 'Should have raised RuntimeError'
-        except RuntimeError:
-            pass
 
     def test_change_me_allowed_in_dev(self):
         mod = _load_auth_utils_with('change_me', 'development')

@@ -12,7 +12,7 @@ import AIScholarshipMatcher from '../components/ai/AIScholarshipMatcher';
 import {
   GraduationCap, Clock, Briefcase, Globe2, Calendar, Award,
   ChevronRight, Loader2, Check, BookOpen, Users, Star, ArrowRight,
-  Globe, FileText, Shield, Zap, Search,
+  Globe, FileText, Shield, Zap, Search, TrendingUp,
   Atom, Cog, Heart, Scale, Palette, BookMarked,
   Sparkles, Calculator, Home, DollarSign,
   BarChart3, Info,

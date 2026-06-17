@@ -200,7 +200,7 @@ export default function UniversityDetail() {
             <span className="text-white font-bold">{uni.name}</span>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          <div className="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="flex items-start gap-5">
               <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
                 {uni.image_url ? (
@@ -210,7 +210,7 @@ export default function UniversityDetail() {
                 )}
               </div>
             </div>
-            <div className="hidden lg:block absolute top-0 right-0">
+            <div className="absolute top-0 right-0">
               <LanguageSwitcher universityId={id} fields={uni} onTranslated={setTranslated} />
             </div>
               <div>
