@@ -1,0 +1,27 @@
+[flake8]
+max-line-length = 120
+exclude = .git,__pycache__,__init__.py,data.py,seed_universities.py
+per-file-ignores =
+    # Late imports for circular dependency avoidance (intentional)
+    routes_admin.py: E402
+    routes_admin_universities.py: E402
+    routes_apps.py: E402
+    routes_scan.py: E402
+    routes_visa_scheduling.py: E402
+    routes_third_party.py: E402
+    routes_i18n.py: E402
+    routes_communication.py: E402
+    seed_events.py: E402
+    seed_universities.py: E402
+    seed_universities_external.py: E402
+    firebase_utils.py: E402
+    server.py: E402
+    tests/: E402
+    # _-prefixed variables are intentionally unused by convention
+    fee_calculator.py: F841
+    routes_admin.py: F841
+extend-ignore =
+    # E203 conflicts with black (spaces before : in slices)
+    E203,
+    # W503 conflicts with black (line break before/after binary operator)
+    W503,
