@@ -24,7 +24,7 @@ async def react_chat(user_prompt: str, context: str, conversation_history: str, 
         user_prompt: The user's message
         context: Retrieved context from RAG
         conversation_history: Recent conversation history
-        marketplace_call: Async function (user_id, system_prompt, user_prompt) -> str
+        marketplace_call: Async callable that accepts a combined prompt string and returns the LLM response
 
     Returns:
         The final response text
@@ -42,7 +42,7 @@ async def react_chat(user_prompt: str, context: str, conversation_history: str, 
     )
 
     # Phase 2: Initial call to the LLM
-    response = await marketplace_call(enriched_prompt)
+    response = await marketplace_call(system + '\n\n' + enriched_prompt)
 
     # Phase 3: Check for tool calls and iterate
     for iteration in range(MAX_ITERATIONS):

@@ -20,9 +20,9 @@ async def retrieve_visa_context(query: str, k: int = 5) -> str:
     country_codes = re.findall(r'\b(us|uk|ca|au|de|fr|it|es|jp|sg|ae|th|ch|np|bt|pl|at|pt|gr|hr)\b', q)
 
     # 2. Look up country data
-    from data import get_country, COUNTRIES
+    from eva_tools import lookup_country
     for code in set(c.casefold() for c in country_codes):
-        data = get_country(code)
+        data = await lookup_country(code)
         if data:
             lines = [f"Country: {data.get('name', code)}"]
             if data.get('visa_types'):
@@ -46,8 +46,8 @@ async def retrieve_visa_context(query: str, k: int = 5) -> str:
                 snippets.append('\n'.join(uni_lines))
 
     # 4. Get fees
+    from eva_tools import get_application_fee
     for code in set(c.casefold() for c in country_codes):
-        from eva_tools import get_application_fee
         fee_data = await get_application_fee(code)
         if fee_data:
             snippets.append(f"App fee for {code.upper()}: ₹{fee_data.get('fee_inr', 'N/A')}")
@@ -57,8 +57,7 @@ async def retrieve_visa_context(query: str, k: int = 5) -> str:
 
 async def retrieve_conversation_history(session_id: str, limit: int = 6) -> str:
     """Retrieve and format recent conversation history for context."""
-    from routes_chatbot import chat_messages
-    cur = chat_messages.find({'session_id': session_id}).sort('created_at', -1).limit(limit)
+    cur = db['chat_messages'].find({'session_id': session_id}).sort('created_at', -1).limit(limit)
     msgs = [m async for m in cur]
     msgs.reverse()
     if not msgs:

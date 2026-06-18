@@ -290,4 +290,5 @@ async def get_reminders(user=Depends(get_current_user_optional)):
     if not user:
         raise HTTPException(401, 'Authentication required')
     all_r = await run_all_checks(db)
-    return {'reminders': [r for r in all_r if r.get('user_id') == user['_id']]}
+    filtered = [r for r in all_r if r.get('user_id') == user['_id']]
+    return {'reminders': filtered, 'count': len(filtered)}

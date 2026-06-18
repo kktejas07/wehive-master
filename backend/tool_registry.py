@@ -114,3 +114,16 @@ def register_all():
         },
         get_application_fee,
     )
+
+    register_tool(
+        'lookup_university',
+        'Look up a specific university by its ID',
+        {
+            'type': 'object',
+            'properties': {
+                'university_id': {'type': 'string', 'description': 'University ID to look up'}
+            },
+            'required': ['university_id'],
+        },
+        lookup_university,
+    )
