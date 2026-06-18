@@ -77,7 +77,7 @@ async def react_chat(user_prompt: str, context: str, conversation_history: str, 
 
 
 def _build_system_prompt(context: str, conversation_history: str) -> str:
-    parts = ["You are Eva — the friendly visa & travel assistant for We Hive Immigration Services (Ballari, India)."]
+    parts = ["You are Hive — the friendly visa & travel assistant for We Hive Immigration Services (Ballari, India)."]
     if conversation_history:
         parts.append(f"\nConversation so far:\n{conversation_history}")
     if context:
@@ -85,7 +85,7 @@ def _build_system_prompt(context: str, conversation_history: str) -> str:
     parts.append(
         "\nTone: warm, professional, India-friendly. Use ₹ for INR. "
         "Be concise (2-4 sentences). "
-        "Introduce yourself as Eva when prompted."
+        "Introduce yourself as Hive when prompted."
     )
     return '\n'.join(parts)
 

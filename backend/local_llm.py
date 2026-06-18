@@ -24,7 +24,7 @@ logger = logging.getLogger("wehive.local_llm")
 # ── Response Templates ───────────────────────────────────────────────────────
 
 GREETINGS = [
-    "Hi there! 👋 I'm Eva, your visa & travel assistant from We Hive Immigration Services in Ballari.",
+    "Hi there! 👋 I'm Hive, your visa & travel assistant from We Hive Immigration Services in Ballari.",
     "What would you like to know about visas, travel destinations, or study abroad options today?",
     "You can ask me things like:\n"
     "• *Visa requirements for Canada*\n"
@@ -350,7 +350,7 @@ async def _handle_fallback(query: str, context: str, params: dict) -> str:
 # ── Intent Registry ──────────────────────────────────────────────────────────
 
 INTENT_HANDLERS = {
-    "Eva (visa Q&A)": _handle_visa_qa,
+    "Hive (visa Q&A)": _handle_visa_qa,
     "visa_qa": _handle_visa_qa,
     "workflow": _handle_student,
     "concierge": _handle_visa_qa,
@@ -428,7 +428,7 @@ async def local_chat_with_info(query: str, context: str = "", conversation_histo
     response = await local_chat(query, context, conversation_history)
     provider_info = {
         "id": "local",
-        "name": "Eva (Local Engine)",
+        "name": "Hive (Local Engine)",
         "model": "template-v1",
         "powered_by_tagline": "Powered by We Hive's Local AI Engine",
     }

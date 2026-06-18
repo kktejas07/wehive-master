@@ -54,7 +54,7 @@ function FaqItem({ item, isOpen, onToggle }) {
   );
 }
 
-function EvaChat({ token }) {
+function HiveChat({ token }) {
   const [sessionId, setSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -93,10 +93,10 @@ function EvaChat({ token }) {
     <div className="rounded-2xl border border-black/10 bg-white overflow-hidden">
       <div className="bg-[hsl(var(--blue-900))] px-5 py-4 flex items-center gap-3">
         <div className="h-8 w-8 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center text-white text-[13px] font-bold">
-          Eva
+          H
         </div>
         <div>
-          <div className="text-[13px] font-bold text-white">Ask Eva — visa assistant</div>
+          <div className="text-[13px] font-bold text-white">Ask Hive — visa assistant</div>
           <div className="text-[11px] text-white/60">Powered by AI · We Hive</div>
         </div>
       </div>
@@ -121,7 +121,7 @@ function EvaChat({ token }) {
         {typing && (
           <div className="flex justify-start">
             <div className="bg-white border border-black/10 rounded-2xl rounded-bl-md px-4 py-2.5 text-[13px] text-[hsl(var(--blue-900))]/50">
-              Eva is typing...
+              Hive is typing...
             </div>
           </div>
         )}
@@ -222,7 +222,7 @@ export default function Help() {
             <div className="space-y-5">
               <div className="rounded-2xl bg-[hsl(var(--blue-900))] p-5 text-white">
                 <h3 className="font-display font-extrabold text-[18px]">Couldn't find answer?</h3>
-                <p className="mt-2 text-[13px] text-white/65">Chat with Eva, our AI visa assistant, available 24/7.</p>
+                <p className="mt-2 text-[13px] text-white/65">Chat with Hive, our AI visa assistant, available 24/7.</p>
                 <div className="mt-4 flex gap-3">
                   <a
                     href="https://wa.me/919113256726"
@@ -240,7 +240,7 @@ export default function Help() {
               </div>
 
               {user && token && (
-                <EvaChat token={token} />
+                <HiveChat token={token} />
               )}
             </div>
           </div>

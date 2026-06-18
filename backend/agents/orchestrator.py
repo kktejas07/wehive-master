@@ -81,7 +81,7 @@ def detect_intent(query: str) -> OrchestratorResult:
         params["intent"] = "visa_info"
 
     agent_names = {
-        "visa_qa": "Eva (visa Q&A)",
+        "visa_qa": "Hive (visa Q&A)",
         "concierge": "Application Concierge",
         "doc_validator": "Document Validator",
         "portal_ai": "Agent Portal AI",
@@ -89,17 +89,17 @@ def detect_intent(query: str) -> OrchestratorResult:
     }
 
     return OrchestratorResult(
-        agent=agent_names.get(best_agent, "Eva"),
+        agent=agent_names.get(best_agent, "Hive"),
         confidence=min(best_score / 10, 1.0),
         params=params,
-        message=f'Routing to {agent_names.get(best_agent, "Eva")} (confidence: {min(best_score / 10, 1.0):.0%})',
+        message=f'Routing to {agent_names.get(best_agent, "Hive")} (confidence: {min(best_score / 10, 1.0):.0%})',
     )
 
 
 def get_agent_endpoint(intent: OrchestratorResult) -> Optional[str]:
     """Get the API endpoint for the detected agent."""
     mapping = {
-        "Eva (visa Q&A)": "POST /api/chatbot/sessions/{id}/messages",
+        "Hive (visa Q&A)": "POST /api/chatbot/sessions/{id}/messages",
         "Application Concierge": "POST /api/chatbot/concierge/start",
         "Document Validator": "POST /api/scan/validate",
         "Agent Portal AI": "GET /api/agent/ai/next-actions",

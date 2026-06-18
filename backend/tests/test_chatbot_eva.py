@@ -1,4 +1,4 @@
-"""Chatbot Eva rename verification (Round 6)."""
+"""Chatbot Hive name verification."""
 import os
 import time
 import requests
@@ -7,8 +7,8 @@ BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://premium-collab-6.pre
 API = f"{BASE_URL}/api"
 
 
-def test_chatbot_eva_self_identifies_as_eva():
-    """POST /chatbot/sessions then send message -> reply mentions Eva (not Hive)."""
+def test_chatbot_hive_self_identifies():
+    """POST /chatbot/sessions then send message -> reply mentions Hive."""
     s = requests.Session()
 
     # create session
@@ -46,10 +46,4 @@ def test_chatbot_eva_self_identifies_as_eva():
     if not reply_text:
         reply_text = str(data)
 
-    assert "Eva" in reply_text, f"Expected 'Eva' in reply, got: {reply_text!r}"
-    # case-insensitive: the assistant should not call itself Hive
-    low = reply_text.lower()
-    # allow brand reference "We Hive" but not "I'm Hive" / "I am Hive"
-    assert "i'm hive" not in low and "i am hive" not in low and "my name is hive" not in low, (
-        f"Assistant still self-identifies as Hive: {reply_text!r}"
-    )
+    assert "Hive" in reply_text, f"Expected 'Hive' in reply, got: {reply_text!r}"
