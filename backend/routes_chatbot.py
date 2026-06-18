@@ -207,6 +207,9 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         raise HTTPException(404, "Session not found")
     if sess.get("user_id") and (not user or sess["user_id"] != user["_id"]):
         raise HTTPException(403, "Not allowed")
+    # Attach user to anonymous session on first message
+    if not sess.get("user_id") and user:
+        await chat_sessions.update_one({"_id": session_id}, {"$set": {"user_id": user["_id"]}})
 
     text = req.text.strip()
     now = datetime.utcnow()
@@ -235,11 +238,9 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
 
     try:
         user_id = user["_id"] if user else None
-        if not user_id:
-            raise HTTPException(401, "Authentication required for AI chat")
-
         has_api_key = bool(os.environ.get("DEFAULT_LLM_KEY", "").strip())
-        if has_api_key:
+
+        if has_api_key and user_id:
             reply_text, provider_info = await marketplace.chat_with_info(
                 user_id=user_id,
                 system_prompt=enriched_system,
