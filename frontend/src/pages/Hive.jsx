@@ -178,36 +178,10 @@ export default function Hive({ inOverlay }) {
   const navigate = useNavigate();
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-  if (!isAuthed) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <div className="h-16 w-16 rounded-2xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center mb-4">
-            <Sparkles className="w-7 h-7" />
-          </div>
-          <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-2">
-            Sign in to use Hive
-          </h2>
-          <p className="text-[13px] text-[hsl(var(--blue-900))]/65 mb-6">
-            Your visa, travel, documents, and study abroad AI assistants are
-            ready — just sign in to start.
-          </p>
-          <Button
-            onClick={() => navigate('/login')}
-            className="h-11 rounded-full px-8 font-bold"
-            style={{ background: 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--accent)) 130%)' }}
-          >
-            Sign in
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   const [activeAgent, setActiveAgent] = useState('hive_visa');
-  const [modelMode, setModelMode] = useState('platform'); // 'platform' | 'byok'
+  const [modelMode, setModelMode] = useState('platform');
   const [ttsEnabled, setTtsEnabled] = useState(true);
-  const [messages, setMessages] = useState([]); // {id, role, text, agentId, agentLabel, sources, ts}
+  const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [listening, setListening] = useState(false);
@@ -347,6 +321,32 @@ export default function Hive({ inOverlay }) {
     },
     [text, sending, activeAgent, activeSpec, headers, messages, speak]
   );
+
+  if (!isAuthed) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="h-16 w-16 rounded-2xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center mb-4">
+            <Sparkles className="w-7 h-7" />
+          </div>
+          <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-2">
+            Sign in to use Hive
+          </h2>
+          <p className="text-[13px] text-[hsl(var(--blue-900))]/65 mb-6">
+            Your visa, travel, documents, and study abroad AI assistants are
+            ready — just sign in to start.
+          </p>
+          <Button
+            onClick={() => navigate('/login')}
+            className="h-11 rounded-full px-8 font-bold"
+            style={{ background: 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--accent)) 130%)' }}
+          >
+            Sign in
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const partsMain = (s) => parseAnswerParts(s).main;
 
