@@ -4,6 +4,7 @@ Eva uses Agentic RAG: looks up real data before answering.
 """
 
 import logging
+import os
 import re
 import uuid
 from datetime import datetime
@@ -16,6 +17,7 @@ from ai_marketplace import marketplace
 from auth_utils import get_current_user_optional
 from db import db
 from eva_tools import get_application_fee, lookup_country, search_universities
+from local_llm import local_chat_with_info
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
@@ -235,23 +237,39 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         user_id = user["_id"] if user else None
         if not user_id:
             raise HTTPException(401, "Authentication required for AI chat")
-        reply_text, provider_info = await marketplace.chat_with_info(
-            user_id=user_id,
-            system_prompt=enriched_system,
-            user_prompt=enriched_prompt,
-            max_tokens=1024,
-        )
+
+        has_api_key = bool(os.environ.get("DEFAULT_LLM_KEY", "").strip())
+        if has_api_key:
+            reply_text, provider_info = await marketplace.chat_with_info(
+                user_id=user_id,
+                system_prompt=enriched_system,
+                user_prompt=enriched_prompt,
+                max_tokens=1024,
+            )
+        else:
+            reply_text, provider_info = await local_chat_with_info(
+                query=text,
+                context=context,
+                conversation_history=history or "",
+            )
         if not reply_text:
             reply_text = "Sorry, I could not generate a reply just now."
     except HTTPException:
         raise
     except Exception as e:
-        reply_text = (
-            "I'm having trouble reaching my brain right now. Please try again, or contact our team at "
-            "+91 91132 56726 for an immediate answer."
-        )
-        logger.exception("Marketplace error: %s", e)
-        provider_info = {}
+        logger.exception("Chat error: %s", e)
+        try:
+            reply_text, provider_info = await local_chat_with_info(
+                query=text,
+                context=context,
+                conversation_history=history or "",
+            )
+        except Exception:
+            reply_text = (
+                "I'm having trouble reaching my brain right now. Please try again, or contact our team at "
+                "+91 91132 56726 for an immediate answer."
+            )
+            provider_info = {}
 
     assistant_msg = {
         "_id": str(uuid.uuid4()),

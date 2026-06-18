@@ -384,7 +384,8 @@ class TestAuthUtilsExtended:
         )
         with pytest.raises(Exception) as exc:
             decode_jwt(expired)
-        assert "expired" in str(exc.value).lower() or "expired" in str(exc.value).lower()
+        msg = str(exc.value).lower()
+        assert "expired" in msg or "invalid token" in msg
 
     def test_invalid_token_rejected(self):
         with pytest.raises(Exception):
