@@ -70,6 +70,60 @@ PROVIDER_REGISTRY: dict[str, dict] = {
         "pricing_tier": PRICING_TIER_FREE,
         "category": "llm",
     },
+    "gpt4all": {
+        "name": "GPT4All",
+        "description": "Local open-source models that run on your own machine (no GPU needed)",
+        "website": "https://gpt4all.io",
+        "requires_key": False,
+        "key_label": "Base URL",
+        "key_placeholder": "http://localhost:4891",
+        "default_url": "http://localhost:4891",
+        "models": ["mistral-7b-openorca", "llama-3.2-3b-instruct", "phi-3-mini", "nous-hermes-2-mixtral"],
+        "docs": "https://docs.gpt4all.io",
+        "powered_by_tagline": "Powered by GPT4All in Association with We Hive",
+        "pricing_tier": PRICING_TIER_FREE,
+        "category": "llm",
+    },
+    "localai": {
+        "name": "LocalAI",
+        "description": "Self-hosted OpenAI-compatible API — run models locally with Docker",
+        "website": "https://localai.io",
+        "requires_key": False,
+        "key_label": "Base URL",
+        "key_placeholder": "http://localhost:8080",
+        "default_url": "http://localhost:8080",
+        "models": ["llama-3.2-3b-instruct", "phi-3-mini-4k", "mistral-7b-openorca"],
+        "docs": "https://localai.io/docs",
+        "powered_by_tagline": "Powered by LocalAI in Association with We Hive",
+        "pricing_tier": PRICING_TIER_FREE,
+        "category": "llm",
+    },
+    "llamacpp": {
+        "name": "llama.cpp",
+        "description": "Run GGUF models locally via llama.cpp server (CPU/GPU, any quant)",
+        "website": "https://github.com/ggerganov/llama.cpp",
+        "requires_key": False,
+        "key_label": "Server URL",
+        "key_placeholder": "http://localhost:8080",
+        "default_url": "http://localhost:8080",
+        "models": ["llama-3.2-3b-instruct-Q4_K_M", "mistral-7b-instruct-v0.3-Q4_K_M"],
+        "docs": "https://github.com/ggerganov/llama.cpp",
+        "powered_by_tagline": "Powered by llama.cpp in Association with We Hive",
+        "pricing_tier": PRICING_TIER_FREE,
+        "category": "llm",
+    },
+    "sentence-transformers": {
+        "name": "Sentence Transformers",
+        "description": "Local embeddings for semantic intent matching and RAG (no API key)",
+        "website": "https://sbert.net",
+        "requires_key": False,
+        "key_label": "", "key_placeholder": "",
+        "base_url": "", "models": ["all-MiniLM-L6-v2", "all-mpnet-base-v2", "multi-qa-mpnet-base-dot-v1"],
+        "docs": "https://sbert.net",
+        "powered_by_tagline": "Powered by Sentence Transformers",
+        "pricing_tier": PRICING_TIER_FREE,
+        "category": "llm",
+    },
     "openrouter": {
         "name": "OpenRouter",
         "description": "Access 200+ models including open-source and commercial LLMs",
@@ -728,6 +782,10 @@ class GoogleProvider(BaseProvider):
 
 PROVIDER_CLASSES: dict[str, type[BaseProvider]] = {
     "ollama": OllamaProvider,
+    "gpt4all": OpenAICompatProvider,
+    "localai": OpenAICompatProvider,
+    "llamacpp": OpenAICompatProvider,
+    "sentence-transformers": OpenAICompatProvider,
     "openrouter": OpenAICompatProvider,
     "huggingface": HuggingFaceProvider,
     "mistral": OpenAICompatProvider,
@@ -751,8 +809,8 @@ def get_provider(provider_id: str, key: str = "", base_url: str = "", model: str
     if not base_url and provider_id in PROVIDER_REGISTRY:
         reg = PROVIDER_REGISTRY[provider_id]
         base_url = reg.get("base_url", "")
-        if provider_id == "ollama":
-            base_url = reg.get("default_url", "http://localhost:11434")
+        if provider_id in ("ollama", "gpt4all", "localai", "llamacpp"):
+            base_url = reg.get("default_url", base_url)
     return cls(key=key, base_url=base_url, model=model)
 
 

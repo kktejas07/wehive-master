@@ -1,25 +1,121 @@
 """Local AI Response Engine — No API keys needed.
 
-Replaces the external LLM marketplace with an intent-driven template system.
-Eva answers visa questions by:
-1. Detecting intent + entities (country, visa type, etc.)
-2. Looking up real data from eva_tools / data.py
-3. Filling response templates with that data
-4. Returning formatted, natural-language answers
+Three-tier architecture:
+  Tier 1 — Ollama (local LLM):     If Ollama is running on http://localhost:11434,
+                                    use it for intelligent, context-aware replies.
+  Tier 2 — Template engine:         Intent-driven template matching with real data
+                                    from eva_tools / data.py.
+  Tier 3 — Fallback:                Graceful "I didn't understand" messages.
 
-Supports the full ReAct agent loop for tool-based queries.
+Optional sentence-transformers for semantic intent matching (pip install sentence-transformers).
 """
 
-import re
+import json
 import logging
+import os
+import re
 from datetime import datetime
 from typing import Optional
+
+import httpx
 
 from agents.orchestrator import detect_intent
 from eva_tools import lookup_country, search_countries, search_universities, get_application_fee, get_visa_requirements
 from tool_registry import list_tools, get_tool
 
 logger = logging.getLogger("wehive.local_llm")
+
+# ── Local LLM backends ────────────────────────────────────────────────────────
+OLLAMA_BASE = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
+
+_ollama_available = None  # lazily checked
+
+
+async def _check_ollama() -> bool:
+    global _ollama_available
+    if _ollama_available is not None:
+        return _ollama_available
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as c:
+            r = await c.get(f"{OLLAMA_BASE}/api/tags")
+            _ollama_available = r.status_code == 200
+    except Exception:
+        _ollama_available = False
+    if _ollama_available:
+        logger.info("Ollama detected at %s — using model %s", OLLAMA_BASE, OLLAMA_MODEL)
+    else:
+        logger.info("Ollama not available — using template engine")
+    return _ollama_available
+
+
+async def _ollama_chat(system: str, prompt: str, context: str = "") -> Optional[str]:
+    """Send a chat request to a local Ollama instance."""
+    full_prompt = system
+    if context:
+        full_prompt += f"\n\nRelevant data:\n{context}"
+    full_prompt += f"\n\nUser: {prompt}\nAssistant:"
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as c:
+            r = await c.post(
+                f"{OLLAMA_BASE}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": full_prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.3, "num_predict": 512},
+                },
+            )
+            if r.status_code == 200:
+                data = r.json()
+                return data.get("response", "").strip()
+    except Exception as e:
+        logger.warning("Ollama request failed: %s", e)
+    return None
+
+
+# ── Optional: sentence-transformers for semantic intent matching ──────────────
+_SEMANTIC_AVAILABLE = False
+_SEMANTIC_MODEL = None
+INTENT_EXAMPLES = {
+    "greeting": ["hi", "hello", "hey", "namaste", "good morning", "what's up"],
+    "visa_qa": ["visa requirements for canada", "how to get us visa", "uk tourist visa fee", "schengen visa documents"],
+    "student": ["study in germany", "universities in canada", "student visa australia", "ielts requirement"],
+    "holiday": ["best time to visit japan", "thailand travel tips", "holiday in dubai", "things to do in paris"],
+    "help": ["what can you do", "how does this work", "help", "commands", "capabilities"],
+    "fees": ["visa fee for uk", "how much does us visa cost", "canada visa price", "application fee"],
+    "docs": ["documents required", "what do i need", "required documents", "checklist"],
+}
+
+
+def _init_semantic():
+    global _SEMANTIC_AVAILABLE, _SEMANTIC_MODEL
+    try:
+        from sentence_transformers import SentenceTransformer, util
+        _SEMANTIC_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
+        _SEMANTIC_AVAILABLE = True
+        logger.info("Sentence-transformers loaded — enabling semantic intent matching")
+    except ImportError:
+        _SEMANTIC_AVAILABLE = False
+
+
+def _semantic_classify(query: str) -> str:
+    """Classify intent using cosine similarity against example queries."""
+    if not _SEMANTIC_AVAILABLE or _SEMANTIC_MODEL is None:
+        _init_semantic()
+    if not _SEMANTIC_AVAILABLE or _SEMANTIC_MODEL is None:
+        return ""
+    query_emb = _SEMANTIC_MODEL.encode(query.lower(), convert_to_tensor=True)
+    best_intent = "fallback"
+    best_score = 0.0
+    for intent, examples in INTENT_EXAMPLES.items():
+        ex_embs = _SEMANTIC_MODEL.encode(examples, convert_to_tensor=True)
+        scores = util.cos_sim(query_emb, ex_embs)
+        max_score = scores.max().item()
+        if max_score > best_score:
+            best_score = max_score
+            best_intent = intent
+    return best_intent if best_score > 0.45 else ""
 
 # ── Response Templates ───────────────────────────────────────────────────────
 
@@ -362,42 +458,42 @@ INTENT_HANDLERS = {
 
 
 def _classify_intent(query: str) -> str:
-    """Classify intent using orchestrator + additional heuristics."""
+    """Classify intent using: semantic (if available) → regex heuristics → orchestrator."""
     q = query.lower().strip()
 
-    # Greeting detection
+    # Tier A — Semantic classification (if sentence-transformers is installed)
+    semantic = _semantic_classify(query)
+    if semantic:
+        return semantic
+
+    # Tier B — Regex heuristics
     greeting_patterns = re.compile(
         r"^(hi|hello|hey|hii|h ello| heyy|namaste|good (morning|afternoon|evening)|"
         r"what'?s up|howdy|sup|yo|^how are you|who are you|what can you do|help)$", re.I
     )
     if greeting_patterns.match(q) or greeting_patterns.search(q):
         return "greeting"
-
-    # Help detection
     if re.search(r"\b(help|what can you do|how (do|can) you (work|help)|guide|commands|capabilities)\b", q):
         return "help"
-
-    # Holiday / travel planning
     if re.search(r"\b(holiday|vacation|trip|travel|visit|tour|destination|best time|weather|attraction|itinerary|plan)", q):
         result = detect_intent(query)
         if "visa" in result.agent.lower() or "qa" in result.agent.lower():
             return "holiday"
         return result.agent
 
-    # Use orchestrator for everything else
+    # Tier C — Orchestrator regex scoring
     return detect_intent(query).agent
 
 
 # ── Main Engine ──────────────────────────────────────────────────────────────
 
 async def local_chat(query: str, context: str = "", conversation_history: str = "") -> str:
-    """Generate a response using intent + templates + tool lookups.
-    No external API calls needed — all data comes from the local database.
+    """Three-tier response generation:
+    1. Ollama (local LLM, if running)
+    2. Template engine (intent-driven)
+    3. Fallback
     """
-    intent_label = _classify_intent(query)
     params = {}
-
-    # Extract country from query or context
     from agents.orchestrator import RE_COUNTRY
     codes = RE_COUNTRY.findall(query)
     if codes:
@@ -409,6 +505,23 @@ async def local_chat(query: str, context: str = "", conversation_history: str = 
                 params["country_id"] = m.group(1).strip().lower()
                 break
 
+    # Tier 1: Try Ollama (local LLM)
+    if await _check_ollama():
+        sys_prompt = (
+            "You are Hive, a friendly visa & travel assistant for We Hive Immigration Services (Ballari, India). "
+            "Answer concisely (2-4 sentences). Use ₹ for INR. Be warm and professional. "
+            "If asked about your name, say 'Hive'. Encourage users to start applications via the dashboard."
+        )
+        if conversation_history:
+            sys_prompt += f"\n\nRecent conversation:\n{conversation_history}"
+        ollama_reply = await _ollama_chat(sys_prompt, query, context)
+        if ollama_reply:
+            logger.info("Used Ollama (%s) for response", OLLAMA_MODEL)
+            return ollama_reply
+        logger.info("Ollama returned nothing — falling back to templates")
+
+    # Tier 2: Template engine with semantic intent matching
+    intent_label = _classify_intent(query)
     handler = INTENT_HANDLERS.get(intent_label, _handle_fallback)
     try:
         response = await handler(query, context, params)
@@ -416,20 +529,17 @@ async def local_chat(query: str, context: str = "", conversation_history: str = 
         logger.exception("local_chat error for intent=%s: %s", intent_label, e)
         response = _help_response()
 
-    # Add conversation context hint if there was history
-    if conversation_history and len(response) > 0:
-        pass  # Already handled via the context parameter
-
     return response
 
 
 async def local_chat_with_info(query: str, context: str = "", conversation_history: str = "") -> tuple:
-    """Like local_chat but returns (response, provider_info) for API compatibility."""
+    """Returns (response, provider_info) for API compatibility."""
     response = await local_chat(query, context, conversation_history)
+    used_model = OLLAMA_MODEL if _ollama_available else "template-v1"
     provider_info = {
         "id": "local",
         "name": "Hive (Local Engine)",
-        "model": "template-v1",
+        "model": used_model,
         "powered_by_tagline": "Powered by We Hive's Local AI Engine",
     }
     return response, provider_info
