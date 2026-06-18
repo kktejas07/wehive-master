@@ -297,6 +297,8 @@ async def invoice_pdf(payment_id: str, user=Depends(get_current_user)):
     payment = await payments.find_one({'_id': payment_id, 'user_id': user['_id']})
     if not payment:
         raise HTTPException(404, 'Payment not found')
+    if payment.get('status') != 'paid':
+        raise HTTPException(400, 'Cannot generate invoice for unpaid payment')
 
     plan = PLANS.get(payment.get('plan_id', ''), {})
     pdf_bytes = generate_invoice_pdf(

@@ -57,6 +57,8 @@ class ConciergeSession:
             self.steps[step]['status'] = StepStatus.COMPLETED
             if data:
                 self.steps[step]['data'] = data
+        else:
+            raise KeyError(f"Unknown step: {step}")
 
     def progress(self) -> str:
         total = len(self.steps)
@@ -107,7 +109,10 @@ async def advance_concierge(user_id: str, country_id: str, step: str, data: dict
     session = get_session(user_id, country_id)
     if not session:
         return {'error': 'No active session. Start with /agent/concierge/start'}
-    session.complete_step(step, data)
+    try:
+        session.complete_step(step, data)
+    except KeyError as e:
+        return {'error': str(e)}
     next_step = session.get_next_step()
     return {
         'session_id': f'{user_id}:{country_id}',

@@ -13,6 +13,8 @@ from typing import List
 
 async def get_trends(db, days: int = 30) -> dict:
     """Analyze application trends over the given period."""
+    if days < 1 or days > 365:
+        days = 30
     since = datetime.utcnow() - timedelta(days=days)
     total = await db['applications'].count_documents({'created_at': {'$gte': since}})
     approved = await db['applications'].count_documents({'status': 'approved', 'created_at': {'$gte': since}})
@@ -93,7 +95,10 @@ async def get_anomalies(db) -> List[dict]:
     stalled = await db['applications'].count_documents({
         'status': 'in_review',
         'updated_at': {'$lte': fourteen_days},
-        'visa_appointment': {'$exists': False},
+        '$or': [
+            {'visa_appointment': {'$exists': False}},
+            {'visa_appointment': None},
+        ],
     })
     if stalled > 5:
         anomalies.append({

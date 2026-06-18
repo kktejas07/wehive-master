@@ -13,7 +13,7 @@ import logging
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
@@ -385,6 +385,7 @@ class ValidateRequest(BaseModel):
 @router.post('/validate', tags=['agent'])
 async def validate_documents(req: ValidateRequest, user=Depends(get_current_user)):
     """Document Validation Agent — check uploaded docs before submission."""
+    _ensure_premium(user)
     from agents.document_validator import validate_application_docs
     result = await validate_application_docs(
         country_id=req.country_id,

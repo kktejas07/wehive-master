@@ -360,11 +360,15 @@ async def ai_commission_summary(agent=Depends(get_current_agent)):
     return summary
 
 
-@router.get('/ai/status-update/{student_email}')
-async def ai_status_update(student_email: str, agent=Depends(get_current_agent)):
+class StatusUpdateRequest(BaseModel):
+    student_email: str
+
+
+@router.post('/ai/status-update')
+async def ai_status_update(req: StatusUpdateRequest, agent=Depends(get_current_agent)):
     """AI: generate a natural-language status update for a student."""
     from agents.portal_ai import generate_status_update
-    update = await generate_status_update(db, agent['_id'], student_email)
+    update = await generate_status_update(db, agent['_id'], req.student_email)
     return {'update': update}
 
 
