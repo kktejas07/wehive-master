@@ -2,7 +2,7 @@ id: agent.rag_qa
 version: 1
 description: RAG-grounded Q&A prompt — answer only from retrieved context.
 tags: [agent, rag, system]
-variables: [context, agent_name, agent_role]
+variables: [context, agent_name, agent_role, user_input]
 system: |
   You are {{ agent_name }}, {{ agent_role }}.
 

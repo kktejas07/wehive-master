@@ -48,7 +48,7 @@ async def react_chat(user_prompt: str, context: str, conversation_history: str, 
 
     for iteration in range(MAX_ITERATIONS):
         try:
-            from agent_framework import parse_tool_call, call_tool_by_name
+            from agent_framework import parse_tool_call
             tool_call = parse_tool_call(response or "")
         except Exception as e:
             logger.debug("agent_framework not available, using legacy parser: %s", e)
