@@ -260,6 +260,28 @@ export default function Hive({ inOverlay }) {
     async (override) => {
       const q = (override ?? text).trim();
       if (!q || sending) return;
+
+      if (!isAuthed) {
+        setMessages((m) => [
+          ...m,
+          {
+            id: 'u-' + Date.now(),
+            role: 'user',
+            text: q,
+            ts: new Date().toISOString(),
+          },
+          {
+            id: 'auth-' + Date.now(),
+            role: 'assistant',
+            text: '',
+            isAuthPrompt: true,
+            ts: new Date().toISOString(),
+          },
+        ]);
+        setText('');
+        return;
+      }
+
       setSending(true);
       setText('');
       setError(null);
@@ -319,34 +341,8 @@ export default function Hive({ inOverlay }) {
         setSending(false);
       }
     },
-    [text, sending, activeAgent, activeSpec, headers, messages, speak]
+    [text, sending, activeAgent, activeSpec, headers, messages, speak, isAuthed]
   );
-
-  if (!isAuthed) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <div className="h-16 w-16 rounded-2xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center mb-4">
-            <Sparkles className="w-7 h-7" />
-          </div>
-          <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-2">
-            Sign in to use Hive
-          </h2>
-          <p className="text-[13px] text-[hsl(var(--blue-900))]/65 mb-6">
-            Your visa, travel, documents, and study abroad AI assistants are
-            ready — just sign in to start.
-          </p>
-          <Button
-            onClick={() => navigate('/login')}
-            className="h-11 rounded-full px-8 font-bold"
-            style={{ background: 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--accent)) 130%)' }}
-          >
-            Sign in
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   const partsMain = (s) => parseAnswerParts(s).main;
 
@@ -469,6 +465,33 @@ export default function Hive({ inOverlay }) {
             {messages.map((m) =>
               m.role === 'user' ? (
                 <Bubble key={m.id} m={m} ttsEnabled={ttsEnabled} />
+              ) : m.isAuthPrompt ? (
+                <div key={m.id} className="rounded-2xl border border-[hsl(var(--accent))]/20 bg-[hsl(var(--accent))]/5 shadow-sm p-6 text-center">
+                  <Sparkles className="w-8 h-8 mx-auto mb-3 text-[hsl(var(--accent))]" />
+                  <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))] mb-2">
+                    Sign in to continue
+                  </h3>
+                  <p className="text-[13px] text-[hsl(var(--blue-900))]/65 mb-4 max-w-sm mx-auto">
+                    Create an account or sign in to ask custom questions and get
+                    personalised visa, travel, and document assistance.
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
+                    <Button
+                      onClick={() => navigate('/signup')}
+                      className="rounded-full font-bold h-10 px-5 text-white"
+                      style={{ background: 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--accent)) 130%)' }}
+                    >
+                      Create account
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/login')}
+                      variant="outline"
+                      className="rounded-full font-bold h-10 px-5 border-[hsl(var(--blue-700))]/30 text-[hsl(var(--blue-700))]"
+                    >
+                      Sign in
+                    </Button>
+                  </div>
+                </div>
               ) : (
                 <AssistantBlock
                   key={m.id}
