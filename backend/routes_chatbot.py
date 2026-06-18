@@ -4,6 +4,7 @@ Eva uses Agentic RAG: looks up real data before answering.
 """
 
 import logging
+import os
 import re
 import uuid
 from datetime import datetime
@@ -16,6 +17,7 @@ from ai_marketplace import marketplace
 from auth_utils import get_current_user_optional
 from db import db
 from eva_tools import get_application_fee, lookup_country, search_universities
+from local_llm import local_chat_with_info
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
@@ -42,7 +44,7 @@ chat_sessions = db["chat_sessions"]
 chat_messages = db["chat_messages"]
 logger = logging.getLogger("wehive.chatbot")
 
-SYSTEM_PROMPT = """You are Eva — the friendly visa & travel assistant for We Hive Immigration Services (Ballari, India).
+SYSTEM_PROMPT = """You are Hive — the friendly visa & travel assistant for We Hive Immigration Services (Ballari, India).
 
 Your role:
 - Help Indian passport holders understand visa requirements for any country.
@@ -52,7 +54,7 @@ Your role:
 - When you need current data on a country, visa, or university, I will provide it to you in the prompt.
 - Encourage starting an application via the We Hive dashboard.
 - If asked about non-visa topics, politely steer back to travel/visa.
-- Introduce yourself as Eva (not Hive) when a greeting prompts a self-introduction.
+- Introduce yourself as Hive when a greeting prompts a self-introduction.
 
 Tone: warm, professional, India-friendly. Use ₹ for INR. Avoid jargon. Use bullet points sparingly only when listing 3+ items.
 """
@@ -205,6 +207,9 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         raise HTTPException(404, "Session not found")
     if sess.get("user_id") and (not user or sess["user_id"] != user["_id"]):
         raise HTTPException(403, "Not allowed")
+    # Attach user to anonymous session on first message
+    if not sess.get("user_id") and user:
+        await chat_sessions.update_one({"_id": session_id}, {"$set": {"user_id": user["_id"]}})
 
     text = req.text.strip()
     now = datetime.utcnow()
@@ -233,25 +238,39 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
 
     try:
         user_id = user["_id"] if user else None
-        if not user_id:
-            raise HTTPException(401, "Authentication required for AI chat")
-        reply_text, provider_info = await marketplace.chat_with_info(
-            user_id=user_id,
-            system_prompt=enriched_system,
-            user_prompt=enriched_prompt,
-            max_tokens=1024,
-        )
+        has_api_key = bool(os.environ.get("DEFAULT_LLM_KEY", "").strip())
+
+        if has_api_key and user_id:
+            reply_text, provider_info = await marketplace.chat_with_info(
+                user_id=user_id,
+                system_prompt=enriched_system,
+                user_prompt=enriched_prompt,
+                max_tokens=1024,
+            )
+        else:
+            reply_text, provider_info = await local_chat_with_info(
+                query=text,
+                context=context,
+                conversation_history=history or "",
+            )
         if not reply_text:
             reply_text = "Sorry, I could not generate a reply just now."
     except HTTPException:
         raise
     except Exception as e:
-        reply_text = (
-            "I'm having trouble reaching my brain right now. Please try again, or contact our team at "
-            "+91 91132 56726 for an immediate answer."
-        )
-        logger.exception("Marketplace error: %s", e)
-        provider_info = {}
+        logger.exception("Chat error: %s", e)
+        try:
+            reply_text, provider_info = await local_chat_with_info(
+                query=text,
+                context=context,
+                conversation_history=history or "",
+            )
+        except Exception:
+            reply_text = (
+                "I'm having trouble reaching my brain right now. Please try again, or contact our team at "
+                "+91 91132 56726 for an immediate answer."
+            )
+            provider_info = {}
 
     assistant_msg = {
         "_id": str(uuid.uuid4()),

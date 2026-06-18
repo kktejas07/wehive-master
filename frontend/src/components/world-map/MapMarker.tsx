@@ -11,6 +11,9 @@ export default function MapMarker({
   active: boolean;
   onHover: (id: string | null) => void;
 }) {
+  const glowR = active ? 20 : 14;
+  const coreR = active ? 8 : 6;
+
   return (
     <g
       style={{ cursor: 'pointer' }}
@@ -29,8 +32,8 @@ export default function MapMarker({
           fill="none"
           stroke={BLUE_GLOW}
           strokeWidth={1.2}
-          initial={{ r: 6, opacity: 0.5 }}
-          animate={{ r: 32, opacity: 0 }}
+          initial={false}
+          animate={{ r: [6, 32], opacity: [0.5, 0] }}
           transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: 'easeOut' }}
         />
       ))}
@@ -39,18 +42,18 @@ export default function MapMarker({
       <circle
         cx={hub.x}
         cy={hub.y}
-        r={active ? 20 : 14}
+        r={glowR}
         fill={BLUE_GLOW}
         opacity={active ? 0.35 : 0.2}
         filter="url(#hub-glow)"
       />
 
-      {/* Core dot with hover scale */}
+      {/* Core dot */}
       <motion.circle
         cx={hub.x}
         cy={hub.y}
         fill={ACCENT}
-        animate={{ r: active ? [8, 9.5, 8] : 6 }}
+        animate={{ r: active ? [coreR, coreR + 1.5, coreR] : coreR }}
         transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
       />
       {/* White center */}

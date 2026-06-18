@@ -108,7 +108,7 @@ export default function OpenMarketAI({ onClose }) {
             Open Market AI
           </h2>
           <p className="mt-1 text-[13.5px] text-[hsl(var(--blue-900))]/55">
-            Ask anything about visas, travel, or documentation — Eva is here to help.
+            Ask anything about visas, travel, or documentation — Hive is here to help.
           </p>
         </div>
         {messages.length > 0 && (
@@ -170,7 +170,7 @@ export default function OpenMarketAI({ onClose }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') onSend(); }}
-          placeholder="Ask Eva anything about visas, travel, or documents..."
+          placeholder="Ask Hive anything about visas, travel, or documents..."
           className="flex-1 h-11 rounded-full border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-5 text-[14px] text-[hsl(var(--blue-900))] transition"
         />
         <button

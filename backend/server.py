@@ -45,6 +45,7 @@ from routes_ai_universities import router as ai_universities_router  # noqa: E40
 from routes_programs import router as programs_router, admin_router as admin_programs_router  # noqa: E402
 from routes_reviews import router as reviews_router  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
+from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -107,8 +108,13 @@ api_router.include_router(programs_router)
 api_router.include_router(admin_programs_router)
 api_router.include_router(reviews_router)
 api_router.include_router(i18n_router)
+api_router.include_router(agents_ai_router)
 
 app.include_router(api_router)
+
+@app.on_event("startup")
+async def startup():
+    start_scheduler()
 
 _raw_origins = os.environ.get('ALLOWED_ORIGINS', '').strip()
 _exact_origins: list[str] = []

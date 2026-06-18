@@ -275,9 +275,9 @@ export default function Contact() {
 
               <div className="rounded-3xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] p-6 sm:p-8">
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--blue-700))] text-white text-[14px] font-bold">
-                  Eva
+                  H
                 </div>
-                <h3 className="mt-4 font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">Chat with Eva</h3>
+                <h3 className="mt-4 font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">Chat with Hive</h3>
                 <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/65">Our AI visa assistant is available 24/7 to answer your questions instantly.</p>
                 <a
                   href="https://wa.me/919000734326"

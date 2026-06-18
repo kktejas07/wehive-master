@@ -18,6 +18,7 @@ import OpenMarketAI from '../components/OpenMarketAI';
 import PremiumGate from '../components/PremiumGate';
 import AIMarketplaceSettings from '../components/ai/AIMarketplaceSettings';
 import UniversityAppsTab from '../components/account/UniversityAppsTab';
+import AIAgentsTab from '../components/account/AIAgentsTab';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },
@@ -25,6 +26,7 @@ const TABS = [
   { id: 'university-apps', label: 'University Apps', Icon: GraduationCap },
   { id: 'referrals', label: 'Referrals', Icon: Users },
   { id: 'aitools', label: 'AI Tools', Icon: Sparkles },
+  { id: 'ai-agents', label: 'AI Agents', Icon: Bot },
   { id: 'scans', label: 'My scans', Icon: ScanLine },
   { id: 'plans', label: 'Saved plans', Icon: Compass },
   { id: 'ai-marketplace', label: 'AI Marketplace', Icon: Bot },
@@ -960,6 +962,7 @@ export default function Account() {
               {tab === 'aitools' && <AIToolsTab token={token} isPremium={user?.is_premium} />}
               {tab === 'scans' && <ScansTab user={user} token={token} />}
               {tab === 'plans' && <PlansTab token={token} />}
+              {tab === 'ai-agents' && <AIAgentsTab />}
               {tab === 'ai-marketplace' && <AIMarketplaceSettings />}
               {tab === 'requests' && <RequestsTab user={user} token={token} />}
               {tab === 'settings' && <SettingsTab user={user} token={token} onUpdated={refreshUser} />}

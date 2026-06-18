@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, Loader2, Mic, MicOff, Volume2 } from 'lucide-react';
 import { API, useAuth } from '../context/AuthContext';
 import { BRAND } from '../data/mock';
 import { useI18n } from '../context/I18nContext';
@@ -55,7 +55,47 @@ export default function ChatbotWidget() {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(true);
   const scroller = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // ── Voice Recognition ─────────────────────────────────────────────────────
+  const startListening = useCallback(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) { alert('Voice recognition not supported in this browser.'); return; }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-IN';
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setText(transcript);
+      setListening(false);
+      setTimeout(() => onSend(transcript), 200);
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+    recognition.start();
+    setListening(true);
+    recognitionRef.current = recognition;
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) { recognitionRef.current.stop(); recognitionRef.current = null; }
+    setListening(false);
+  }, []);
+
+  // ── Text-to-Speech ────────────────────────────────────────────────────────
+  const speak = useCallback((text) => {
+    if (!ttsEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text.replace(/[#*_₹$\[\]()]/g, '').substring(0, 500));
+    utterance.lang = 'en-IN';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.05;
+    window.speechSynthesis.speak(utterance);
+  }, [ttsEnabled]);
 
   useEffect(() => {
     if (!open || !sessionId) return;
@@ -101,10 +141,12 @@ export default function ChatbotWidget() {
         { text: q },
         { headers }
       );
+      const reply = r.data.assistant_message;
+      speak(reply.text);
       setMessages((m) => [
         ...m.filter((x) => x.id !== 'u-' + Date.now()),
         r.data.user_message,
-        r.data.assistant_message,
+        reply,
       ]);
     } catch (e) {
       setMessages((m) => [
@@ -196,7 +238,16 @@ export default function ChatbotWidget() {
             </div>
 
             <footer className="p-3 border-t border-black/5 bg-white/60">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={listening ? stopListening : startListening}
+                  className={`h-9 w-9 rounded-full inline-flex items-center justify-center transition ${
+                    listening ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-black/5 text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-700))]'
+                  }`}
+                  aria-label={listening ? 'Stop listening' : 'Voice input'}
+                >
+                  {listening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                </button>
                 <input
                   value={text}
                   onChange={(e) => setText(e.target.value)}
@@ -206,7 +257,7 @@ export default function ChatbotWidget() {
                       onSend();
                     }
                   }}
-                  placeholder={t('chatbot.placeholder')}
+                  placeholder={listening ? 'Listening...' : t('chatbot.placeholder')}
                   className="flex-1 h-11 rounded-full border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white/85 transition"
                 />
                 <button
@@ -217,6 +268,15 @@ export default function ChatbotWidget() {
                   aria-label="Send"
                 >
                   <Send className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setTtsEnabled(v => !v)}
+                  className={`h-9 w-9 rounded-full inline-flex items-center justify-center transition ${
+                    ttsEnabled ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]' : 'bg-black/5 text-[hsl(var(--blue-900))]/40'
+                  }`}
+                  aria-label={ttsEnabled ? 'Mute voice' : 'Enable voice'}
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </footer>
