@@ -19,6 +19,10 @@ import RequestsTab from '../components/admin/RequestsTab';
 import PromotionsTab from '../components/admin/PromotionsTab';
 import PromoCodesTab from '../components/admin/PromoCodesTab';
 import AgentsTab from '../components/admin/AgentsTab';
+import RAGTab from '../components/admin/RAGTab';
+import PromptsTab from '../components/admin/PromptsTab';
+import AgentsV2Tab from '../components/admin/AgentsV2Tab';
+import HiveLearningTab from '../components/admin/HiveLearningTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
@@ -75,6 +79,10 @@ function AdminRoutes() {
                 <Route path="universities" element={<UniversitiesTab />} />
                 <Route path="programs" element={<ProgramsTab />} />
                 <Route path="settings" element={<SettingsTab />} />
+                <Route path="rag" element={<RAGTab />} />
+                <Route path="prompts" element={<PromptsTab />} />
+                <Route path="agents-v2" element={<AgentsV2Tab />} />
+                <Route path="hive-learning" element={<HiveLearningTab />} />
                 <Route path="destinations" element={<DestinationsTab />} />
                 <Route path="*" element={<OverviewTab />} />
               </Routes>

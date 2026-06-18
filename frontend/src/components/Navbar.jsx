@@ -1,6 +1,6 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Phone, MessageCircle, Send } from 'lucide-react';
+import { Menu, X, Phone, MessageCircle, Send, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
@@ -13,6 +13,7 @@ const NAV = [
   { id: 'home', label: 'Home', to: '/' },
   { id: 'visa', label: 'Visa', to: '/#countries' },
   { id: 'student', label: 'Student', to: '/student-visa' },
+  { id: 'hive', label: 'Hive', to: '/hive', icon: Sparkles },
   { id: 'resources', label: 'Resources', to: '/resources' },
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
   { id: 'about', label: 'About', to: '/about' },
@@ -30,40 +31,48 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
   if (orientation === 'horizontal') {
     return (
       <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 mx-1 flex-1 min-w-0 justify-center">
-        {NAV.map((item) => (
-          <NavLink
-            key={item.id}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              cn(
-                'px-2 lg:px-2.5 xl:px-3.5 py-1.5 text-[11.5px] xl:text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap',
-                isActive ? activeClass : inactiveClass
-              )
-            }
-          >
-            {t('nav.' + item.id, item.label)}
-          </NavLink>
-        ))}
+        {NAV.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.id}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) =>
+                cn(
+                  'px-2 lg:px-2.5 xl:px-3.5 py-1.5 text-[11.5px] xl:text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
+                  isActive ? activeClass : inactiveClass
+                )
+              }
+            >
+              {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
+              {t('nav.' + item.id, item.label)}
+            </NavLink>
+          );
+        })}
       </nav>
     );
   }
   return (
     <div className="flex flex-col gap-1">
-      {NAV.map((item) => (
-        <Link
-          key={item.id}
-          to={item.to}
-          className={cn(
-            'px-3 py-3 text-[15px] font-bold rounded-lg transition-colors',
-            light
-              ? 'text-white hover:bg-white/10'
-              : 'hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]'
-          )}
-        >
-          {t('nav.' + item.id, item.label)}
-        </Link>
-      ))}
+      {NAV.map((item) => {
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.id}
+            to={item.to}
+            className={cn(
+              'px-3 py-3 text-[15px] font-bold rounded-lg transition-colors inline-flex items-center gap-2',
+              light
+                ? 'text-white hover:bg-white/10'
+                : 'hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]'
+            )}
+          >
+            {Icon ? <Icon className="w-4 h-4" /> : null}
+            {t('nav.' + item.id, item.label)}
+          </Link>
+        );
+      })}
     </div>
   );
 }

@@ -25,6 +25,14 @@ from tool_registry import list_tools, get_tool
 
 logger = logging.getLogger("wehive.local_llm")
 
+_FALLBACK_HIVE_PROMPT = (
+    "You are Hive, a friendly visa & travel assistant for We Hive "
+    "Immigration Services (Ballari, India). Answer concisely (2-4 "
+    "sentences). Use ₹ for INR. Be warm and professional. If asked "
+    "about your name, say 'Hive'. Encourage users to start "
+    "applications via the dashboard."
+)
+
 # ── Local LLM backends ────────────────────────────────────────────────────────
 OLLAMA_BASE = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
@@ -507,11 +515,18 @@ async def local_chat(query: str, context: str = "", conversation_history: str = 
 
     # Tier 1: Try Ollama (local LLM)
     if await _check_ollama():
-        sys_prompt = (
-            "You are Hive, a friendly visa & travel assistant for We Hive Immigration Services (Ballari, India). "
-            "Answer concisely (2-4 sentences). Use ₹ for INR. Be warm and professional. "
-            "If asked about your name, say 'Hive'. Encourage users to start applications via the dashboard."
-        )
+        try:
+            from prompts_lib import get_store, render_prompt
+            store = get_store()
+            p = store.get("system.hive")
+            if p:
+                rendered = render_prompt(p, {"user_input": query})
+                sys_prompt = rendered["system"]
+            else:
+                sys_prompt = _FALLBACK_HIVE_PROMPT
+        except Exception as e:
+            logger.debug("prompts_lib unavailable, using inline system prompt: %s", e)
+            sys_prompt = _FALLBACK_HIVE_PROMPT
         if conversation_history:
             sys_prompt += f"\n\nRecent conversation:\n{conversation_history}"
         ollama_reply = await _ollama_chat(sys_prompt, query, context)

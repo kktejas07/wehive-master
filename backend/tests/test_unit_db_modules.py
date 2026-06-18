@@ -467,8 +467,9 @@ class TestEvaTools:
 
 # ─── Agent Loop ───────────────────────────────────────────────────────────────
 from agent_loop import (
-    react_chat, _build_system_prompt, _format_tool_descriptions, _parse_tool_call
+    react_chat, _build_system_prompt, _format_tool_descriptions
 )
+from agent_loop import _parse_tool_call_legacy as _parse_tool_call
 from tool_registry import Tool
 
 

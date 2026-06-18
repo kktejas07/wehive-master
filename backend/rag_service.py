@@ -1,9 +1,10 @@
 """RAG Service — multi-strategy context retrieval for AI prompts.
 
 Strategies (tried in order):
-  1. Semantic (sentence-transformers embeddings) — if package installed
-  2. Keyword expansion + regex country/visa-type extraction
-  3. MongoDB text search (universities, countries)
+  1. Vector store (ChromaDB) via Ollama embeddings — if available
+  2. Semantic (sentence-transformers embeddings) — if package installed
+  3. Keyword expansion + regex country/visa-type extraction
+  4. MongoDB text search (universities, countries)
 
 Used by Hive to augment responses with real data.
 """
@@ -29,6 +30,39 @@ def _init_semantic():
         logger.info("Sentence-transformers loaded for semantic RAG")
     except ImportError:
         _SEMANTIC_AVAILABLE = False
+
+
+async def _vector_store_retrieve(query: str, collections: Optional[List[str]] = None, k: int = 4) -> str:
+    """Try the ChromaDB-backed vector store with Ollama embeddings.
+
+    Returns formatted snippet text, or '' if unavailable / empty.
+    """
+    try:
+        from ollama_embeddings import embed_query
+        from vector_store import query_collection, list_collections as vs_list
+    except Exception as e:
+        logger.debug("vector store import failed: %s", e)
+        return ""
+    try:
+        vec = await embed_query(query)
+    except Exception as e:
+        logger.debug("vector store embed failed: %s", e)
+        return ""
+    if not vec:
+        return ""
+    targets = collections or [c for c in vs_list() if c]
+    snippets: list[str] = []
+    for coll in targets:
+        try:
+            hits = query_collection(coll, vec, n_results=k)
+        except Exception as e:
+            logger.debug("query %s failed: %s", coll, e)
+            continue
+        for h in hits:
+            meta = h.get("metadata") or {}
+            label = meta.get("name") or meta.get("source_key") or h.get("id") or "source"
+            snippets.append(f"[{label}] {h.get('document', '')}")
+    return "\n\n".join(snippets)
 
 
 _COUNTRY_KEYWORDS = {
@@ -94,14 +128,20 @@ def _expand_visa_types(query: str) -> list:
     return found
 
 
-async def retrieve_visa_context(query: str, k: int = 5) -> str:
+async def retrieve_visa_context(query: str, k: int = 5, *, use_vector_store: bool = True) -> str:
     """Retrieve relevant visa/country/university context for a user query.
 
-    Uses sentence-transformers for semantic search if available,
-    otherwise falls back to keyword/regex extraction + MongoDB lookups.
+    Combines:
+      - Vector-store retrieval (Chroma + Ollama embeddings) when enabled
+      - Keyword/regex expansion + MongoDB lookups (the original behaviour)
     """
     snippets = []
     q = query.lower()
+
+    if use_vector_store:
+        vs_text = await _vector_store_retrieve(query, k=k)
+        if vs_text:
+            snippets.append(vs_text)
 
     # 1. Expand country codes from full names + abbreviations
     country_codes = _expand_countries(query)
