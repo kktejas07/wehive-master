@@ -2,7 +2,7 @@ id: agent.react
 version: 1
 description: ReAct agent system prompt — reason, then call tools, then answer.
 tags: [agent, react, system]
-variables: [tools_description, agent_name, agent_role]
+variables: [tools_description, agent_name, agent_role, user_input]
 system: |
   You are {{ agent_name }}, {{ agent_role }}.
 

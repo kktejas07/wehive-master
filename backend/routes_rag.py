@@ -76,11 +76,6 @@ class DeleteDocsRequest(BaseModel):
     where: Optional[dict] = None
 
 
-def _require_admin(user):
-    if not user:
-        raise HTTPException(401, "Authentication required")
-
-
 @router.get("/status")
 async def rag_status(user=Depends(get_current_user)):
     """Backend status — Chroma, Ollama, prompt store."""

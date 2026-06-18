@@ -315,8 +315,8 @@ export default function HiveLearningTab() {
               <div>
                 <div className="font-bold text-white mb-1">Skipped</div>
                 <ul className="space-y-1">
-                  {autoApplyResult.skipped.map((s, i) => (
-                    <li key={i} className="text-slate-400">
+                  {autoApplyResult.skipped.map((s) => (
+                    <li key={s.agent_id || s.reason} className="text-slate-400">
                       <span className="font-mono text-slate-300">{s.agent_id || '—'}</span> · {s.reason}
                     </li>
                   ))}
@@ -325,7 +325,7 @@ export default function HiveLearningTab() {
             )}
             {autoApplyResult.errors?.length > 0 && (
               <div className="mt-2 text-red-300">
-                {autoApplyResult.errors.map((e, i) => <div key={i}>{e.agent_id}: {e.error}</div>)}
+                {autoApplyResult.errors.map((e) => <div key={e.agent_id}>{e.agent_id}: {e.error}</div>)}
               </div>
             )}
           </div>
@@ -357,15 +357,15 @@ export default function HiveLearningTab() {
                 <div>
                   <div className="font-bold text-white mb-1">Top intents</div>
                   <ul className="space-y-1">
-                    {mineResult.intents.map((it, i) => (
-                      <li key={i} className="rounded-lg bg-white/5 border border-white/10 p-2">
+                    {mineResult.intents.map((it) => (
+                      <li key={it.label} className="rounded-lg bg-white/5 border border-white/10 p-2">
                         <div className="flex items-center gap-2 mb-1">
                           <Pill tone="navy">{it.label}</Pill>
                           {it.agents?.map(a => <Pill key={a} tone="slate">{a}</Pill>)}
                         </div>
                         {it.phrasings?.length > 0 && (
                           <ul className="list-disc pl-4 text-slate-300">
-                            {it.phrasings.slice(0, 3).map((p, j) => <li key={j}>{p}</li>)}
+                            {it.phrasings.slice(0, 3).map((p) => <li key={p}>{p}</li>)}
                           </ul>
                         )}
                       </li>
@@ -377,8 +377,8 @@ export default function HiveLearningTab() {
                 <div>
                   <div className="font-bold text-white mb-1">Gaps (weak answers)</div>
                   <ul className="space-y-1">
-                    {mineResult.gaps.map((g, i) => (
-                      <li key={i} className="rounded-lg bg-red-500/5 border border-red-400/20 p-2">
+                    {mineResult.gaps.map((g) => (
+                      <li key={g.label} className="rounded-lg bg-red-500/5 border border-red-400/20 p-2">
                         <div className="font-bold text-red-200">{g.label}</div>
                         <div className="text-slate-300">{g.why_weak}</div>
                         {g.evidence && <div className="text-slate-500 text-[11px]">{g.evidence}</div>}
@@ -391,8 +391,8 @@ export default function HiveLearningTab() {
                 <div>
                   <div className="font-bold text-white mb-1">Missing tools</div>
                   <ul className="space-y-1">
-                    {mineResult.tool_gaps.map((t, i) => (
-                      <li key={i} className="rounded-lg bg-amber-500/5 border border-amber-400/20 p-2">
+                    {mineResult.tool_gaps.map((t) => (
+                      <li key={t.label} className="rounded-lg bg-amber-500/5 border border-amber-400/20 p-2">
                         <div className="font-bold text-amber-200">{t.label}</div>
                         <div className="text-slate-300">{t.description}</div>
                         {t.suggested_tool && <div className="text-slate-500 text-[11px]">→ {t.suggested_tool}</div>}
@@ -452,8 +452,8 @@ export default function HiveLearningTab() {
                 <div>
                   <div className="font-bold text-white mb-1">What changed</div>
                   <ul className="space-y-1">
-                    {proposeResult.changes.map((c, i) => (
-                      <li key={i} className="rounded-lg bg-white/5 border border-white/10 p-2 text-[11.5px]">
+                    {proposeResult.changes.map((c) => (
+                      <li key={c.intent} className="rounded-lg bg-white/5 border border-white/10 p-2 text-[11.5px]">
                         <div className="text-white font-bold">{c.intent}</div>
                         <div className="text-slate-400"><span className="line-through">{c.before}</span> → <span className="text-emerald-200">{c.after}</span></div>
                       </li>
@@ -484,8 +484,8 @@ export default function HiveLearningTab() {
           </div>
           {cardsResult?.prompts?.length > 0 ? (
             <ul className="space-y-2 text-[12.5px]">
-              {cardsResult.prompts.map((p, i) => (
-                <li key={i} className="rounded-lg bg-white/5 border border-white/10 p-3">
+              {cardsResult.prompts.map((p) => (
+                <li key={p.title} className="rounded-lg bg-white/5 border border-white/10 p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <Pill tone="navy">{p.title}</Pill>
                     {p.target_agent && <Pill tone="slate">{p.target_agent}</Pill>}
@@ -511,8 +511,8 @@ export default function HiveLearningTab() {
           </div>
           {toolsResult?.tools?.length > 0 ? (
             <ul className="space-y-2 text-[12.5px]">
-              {toolsResult.tools.map((t, i) => (
-                <li key={i} className="rounded-lg bg-amber-500/5 border border-amber-400/20 p-3">
+              {toolsResult.tools.map((t) => (
+                <li key={t.name} className="rounded-lg bg-amber-500/5 border border-amber-400/20 p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <Pill tone="amber">{t.name}</Pill>
                     {t.target_agent && <Pill tone="slate">{t.target_agent}</Pill>}
@@ -576,8 +576,8 @@ export default function HiveLearningTab() {
             <p className="text-[12.5px] text-slate-400">No proposals yet.</p>
           ) : (
             <ul className="space-y-2 text-[12px] max-h-[420px] overflow-y-auto pr-1">
-              {proposals.map((p, i) => (
-                <li key={i} className="rounded-lg bg-white/5 border border-white/10 p-2.5">
+              {proposals.map((p) => (
+                <li key={p.ts + (p.payload?.agent_id || '')} className="rounded-lg bg-white/5 border border-white/10 p-2.5">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <Pill tone={p.payload?.applied ? 'green' : 'slate'}>{p.kind}</Pill>
                     {p.payload?.agent_id && <Pill tone="navy">{p.payload.agent_id}</Pill>}

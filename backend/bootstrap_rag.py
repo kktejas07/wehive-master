@@ -12,17 +12,17 @@ logger = logging.getLogger("wehive.bootstrap_rag")
 
 
 async def bootstrap_rag_and_prompts(db) -> dict:
+    """Load YAML prompts, seed default prompts into Mongo, and pre-warm
+    the RAG vector store with countries + universities (if empty).
+
+    Returns a summary dict with counts of ingested items.
+    """
     # NOTE: imports happen inside the function to avoid circulars at
     # module load time (agent_framework imports tool_registry which
     # imports eva_tools which imports data).
     from agent_framework import AgentSpec
     from prompts_lib import get_store, Prompt
     from agent_framework import get_agent_registry
-    """Load YAML prompts, seed default prompts into Mongo, and pre-warm
-    the RAG vector store with countries + universities (if empty).
-
-    Returns a summary dict with counts of ingested items.
-    """
     summary: dict = {"prompts": 0, "countries": 0, "universities": 0, "errors": []}
 
     try:

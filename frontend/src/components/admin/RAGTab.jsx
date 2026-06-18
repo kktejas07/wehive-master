@@ -20,7 +20,7 @@ function StatusBadge({ ok, label }) {
 export default function RAGTab() {
   const { admin } = useAdminAuth();
   const { toast } = useToast();
-  const token = admin?.token;
+  const token = admin?.token || admin?.access_token;
 
   const [status, setStatus] = useState(null);
   const [collections, setCollections] = useState([]);

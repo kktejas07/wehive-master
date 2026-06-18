@@ -176,7 +176,7 @@ def _extract_json(text: str) -> Optional[Any]:
             return json.loads(m.group())
         except Exception:
             pass
-    m = re.search(r"\{.*\}", text, re.DOTALL)
+    m = re.search(r"\{.*?\}", text, re.DOTALL)
     if m:
         try:
             return json.loads(m.group())
@@ -556,11 +556,12 @@ async def auto_apply_recent(
 
     # Pre-compute corpus size once
     sample = await recent_feeds(days=days, limit=1)
-    overall["feeds_seen"] = len(sample) and (
-        await db[FEED_COLL].count_documents(
+    if sample:
+        overall["feeds_seen"] = await db[FEED_COLL].count_documents(
             {"ts": {"$gte": (datetime.utcnow() - timedelta(days=days)).isoformat() + "Z"}}
         )
-    )
+    else:
+        overall["feeds_seen"] = 0
 
     if not force and overall["feeds_seen"] < min_feeds:
         overall["note"] = (
