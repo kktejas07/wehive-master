@@ -1,114 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
-import { MessageCircle, X, Send, Sparkles, Loader2, Mic, MicOff, Volume2 } from 'lucide-react';
-import { API, useAuth } from '../context/AuthContext';
-import { BRAND } from '../data/mock';
-import { useI18n } from '../context/I18nContext';
+import { MessageCircle, X } from 'lucide-react';
 
-const KEY_SESSION = 'wehive_chat_session';
-
-function Bubble({ m }) {
-  const me = m.role === 'user';
-  return (
-    <div className={`flex ${me ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 shadow-sm ${
-          me
-            ? 'bg-[hsl(var(--blue-700))] text-white rounded-br-sm'
-            : 'bg-white border border-black/5 text-[hsl(var(--blue-900))] rounded-bl-sm'
-        }`}
-      >
-        <div className="text-[14px] leading-snug whitespace-pre-wrap">{m.text}</div>
-      </div>
-    </div>
-  );
-}
-
-function Suggestions({ onPick }) {
-  const items = [
-    'How long does a US B1/B2 take?',
-    'Best time to visit Japan?',
-    'Documents for Schengen visa?',
-    'Cheapest visa for an Indian passport?',
-  ];
-  return (
-    <div className="flex flex-wrap gap-2">
-      {items.map((q) => (
-        <button
-          key={q}
-          onClick={() => onPick(q)}
-          className="text-[12.5px] font-semibold text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] rounded-full px-3 py-1.5 transition"
-        >
-          {q}
-        </button>
-      ))}
-    </div>
-  );
-}
+const Hive = lazy(() => import('../pages/Hive'));
 
 export default function ChatbotWidget() {
-  const { token } = useAuth();
-  const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const [sessionId, setSessionId] = useState(() => localStorage.getItem(KEY_SESSION));
-  const [messages, setMessages] = useState([]);
-  const [text, setText] = useState('');
-  const [sending, setSending] = useState(false);
-  const [listening, setListening] = useState(false);
-  const [ttsEnabled, setTtsEnabled] = useState(true);
-  const scroller = useRef(null);
-  const recognitionRef = useRef(null);
-
-  // ── Voice Recognition ─────────────────────────────────────────────────────
-  const startListening = useCallback(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) { alert('Voice recognition not supported in this browser.'); return; }
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-IN';
-    recognition.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      setText(transcript);
-      setListening(false);
-      setTimeout(() => onSend(transcript), 200);
-    };
-    recognition.onerror = () => setListening(false);
-    recognition.onend = () => setListening(false);
-    recognition.start();
-    setListening(true);
-    recognitionRef.current = recognition;
-  }, []);
-
-  const stopListening = useCallback(() => {
-    if (recognitionRef.current) { recognitionRef.current.stop(); recognitionRef.current = null; }
-    setListening(false);
-  }, []);
-
-  // ── Text-to-Speech ────────────────────────────────────────────────────────
-  const speak = useCallback((text) => {
-    if (!ttsEnabled || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text.replace(/[#*_₹$\[\]()]/g, '').substring(0, 500));
-    utterance.lang = 'en-IN';
-    utterance.rate = 1.0;
-    utterance.pitch = 1.05;
-    window.speechSynthesis.speak(utterance);
-  }, [ttsEnabled]);
-
-  useEffect(() => {
-    if (!open || !sessionId) return;
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    axios
-      .get(`${API}/chatbot/sessions/${sessionId}/messages`, { headers })
-      .then((r) => setMessages(r.data || []))
-      .catch(() => setMessages([]));
-  }, [open, sessionId, token]);
-
-  useEffect(() => {
-    if (scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight;
-  }, [messages, sending]);
 
   useEffect(() => {
     const handler = () => setOpen(true);
@@ -116,51 +13,11 @@ export default function ChatbotWidget() {
     return () => window.removeEventListener('open-chatbot', handler);
   }, []);
 
-  const ensureSession = async () => {
-    if (sessionId) return sessionId;
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const r = await axios.post(`${API}/chatbot/sessions`, { title: 'New chat' }, { headers });
-    const sid = r.data.session_id;
-    localStorage.setItem(KEY_SESSION, sid);
-    setSessionId(sid);
-    return sid;
-  };
-
-  const onSend = async (override) => {
-    const q = (override ?? text).trim();
-    if (!q || sending) return;
-    setSending(true);
-    setText('');
-    // optimistic
-    setMessages((m) => [...m, { id: 'u-' + Date.now(), role: 'user', text: q }]);
-    try {
-      const sid = await ensureSession();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const r = await axios.post(
-        `${API}/chatbot/sessions/${sid}/messages`,
-        { text: q },
-        { headers }
-      );
-      const reply = r.data.assistant_message;
-      speak(reply.text);
-      setMessages((m) => [
-        ...m.filter((x) => x.id !== 'u-' + Date.now()),
-        r.data.user_message,
-        reply,
-      ]);
-    } catch (e) {
-      setMessages((m) => [
-        ...m,
-        {
-          id: 'err-' + Date.now(),
-          role: 'assistant',
-          text: `Hmm, I could not reply. Please try again or reach our team at ${BRAND.phone}.`,
-        },
-      ]);
-    } finally {
-      setSending(false);
-    }
-  };
+  useEffect(() => {
+    if (open) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
   return (
     <>
@@ -171,7 +28,7 @@ export default function ChatbotWidget() {
         style={{ background: 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--accent)) 130%)' }}
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.95 }}
-        aria-label="Open chatbot"
+        aria-label="Open Hive assistant"
       >
         <AnimatePresence mode="wait">
           {open ? (
@@ -189,97 +46,38 @@ export default function ChatbotWidget() {
         )}
       </motion.button>
 
-      {/* Panel */}
+      {/* Full-screen Hive overlay */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="fixed bottom-24 right-5 z-[80] w-[calc(100vw-2.5rem)] sm:w-[400px] h-[560px] rounded-3xl overflow-hidden flex flex-col backdrop-blur-2xl bg-white/85 border border-white/40 shadow-[0_30px_70px_-20px_rgba(10,44,138,0.45)]"
+            key="hive-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[90] flex flex-col bg-white"
           >
-            <header className="px-5 py-4 flex items-center gap-3 border-b border-black/5 bg-white/60">
-              <span className="h-9 w-9 rounded-full bg-[hsl(var(--blue-700))] text-white inline-flex items-center justify-center">
-                <Sparkles className="w-4 h-4" />
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">{t('chatbot.title')}</div>
-                <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 inline-flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  AI powered
-                </div>
-              </div>
-            </header>
-
-            <div ref={scroller} className="flex-1 p-4 space-y-3 overflow-y-auto">
-              {messages.length === 0 && (
-                <div className="text-center py-6 space-y-4">
-                  <div className="font-display font-extrabold text-[20px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
-                    {t('chatbot.start')}
-                  </div>
-                  <p className="text-[13px] text-[hsl(var(--blue-900))]/65">
-                    Ask me about visa types, fees, holiday plans for any country.
-                  </p>
-                  <Suggestions onPick={(q) => onSend(q)} />
-                </div>
-              )}
-              {messages.map((m) => (
-                <Bubble key={m.id} m={m} />
-              ))}
-              {sending && (
-                <div className="flex justify-start">
-                  <div className="rounded-2xl rounded-bl-sm bg-white border border-black/5 px-3.5 py-2.5 inline-flex items-center gap-2 text-[hsl(var(--blue-900))]/65">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span className="text-[13px]">{t('chatbot.thinking')}</span>
-                  </div>
-                </div>
-              )}
+            {/* Close bar */}
+            <div className="flex items-center justify-end px-4 py-2 border-b border-black/5 bg-white/80 backdrop-blur-md shrink-0">
+              <button
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))] transition"
+              >
+                <X className="w-4 h-4" />
+                Close
+              </button>
             </div>
 
-            <footer className="p-3 border-t border-black/5 bg-white/60">
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={listening ? stopListening : startListening}
-                  className={`h-9 w-9 rounded-full inline-flex items-center justify-center transition ${
-                    listening ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-black/5 text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-700))]'
-                  }`}
-                  aria-label={listening ? 'Stop listening' : 'Voice input'}
-                >
-                  {listening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                </button>
-                <input
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      onSend();
-                    }
-                  }}
-                  placeholder={listening ? 'Listening...' : t('chatbot.placeholder')}
-                  className="flex-1 h-11 rounded-full border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white/85 transition"
-                />
-                <button
-                  onClick={() => onSend()}
-                  disabled={sending || !text.trim()}
-                  className="h-11 w-11 rounded-full text-white inline-flex items-center justify-center disabled:opacity-50"
-                  style={{ background: 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--accent)) 130%)' }}
-                  aria-label="Send"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setTtsEnabled(v => !v)}
-                  className={`h-9 w-9 rounded-full inline-flex items-center justify-center transition ${
-                    ttsEnabled ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]' : 'bg-black/5 text-[hsl(var(--blue-900))]/40'
-                  }`}
-                  aria-label={ttsEnabled ? 'Mute voice' : 'Enable voice'}
-                >
-                  <Volume2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </footer>
+            {/* Hive content */}
+            <div className="flex-1 overflow-y-auto">
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-full text-[hsl(var(--blue-900))]/60">
+                  Loading Hive…
+                </div>
+              }>
+                <Hive />
+              </Suspense>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
