@@ -92,6 +92,8 @@ async def book_appointment(
         'status': 'appointment_scheduled',
         'updated_at': datetime.utcnow(),
     }})
+    from routes_chatbot import notify_status_change
+    await notify_status_change(user['_id'], req.application_id, 'appointment_scheduled')
     return {'message': 'Appointment booked', 'slot': {**slot, 'booked': True}}
 
 

@@ -1,0 +1,24 @@
+{
+  "protected_paths": [
+    "backend/.env",
+    "frontend/.env",
+    "backend/auth_utils.py",
+    "SECURITY.md"
+  ],
+  "freeze_paths": [
+    "backend/routes_payments.py",
+    "backend/routes_auth.py"
+  ],
+  "destructive_patterns": [
+    "rm -rf",
+    "git push --force",
+    "git reset --hard",
+    "DROP TABLE",
+    "DROP DATABASE",
+    "docker system prune",
+    "kubectl delete",
+    "chmod 777",
+    "sudo rm",
+    "--no-verify"
+  ]
+}

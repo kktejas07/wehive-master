@@ -1,6 +1,11 @@
-"""AI Chatbot for visa & travel Q&A — routed through AI Marketplace."""
+"""AI Chatbot for visa & travel Q&A — routed through AI Marketplace.
+
+Eva now uses Agentic RAG: she looks up real visa/country/university data
+from the database and injects it as context before calling the AI.
+"""
 
 import os
+import re
 import uuid
 import logging
 from datetime import datetime
@@ -12,6 +17,7 @@ from pydantic import BaseModel
 from ai_marketplace import marketplace
 from auth_utils import get_current_user_optional
 from db import db
+from eva_tools import TOOL_REGISTRY, search_countries, lookup_country, get_visa_requirements, get_application_fee, search_universities
 
 router = APIRouter(prefix='/chatbot', tags=['chatbot'])
 marketplace.db = db
@@ -27,13 +33,60 @@ Your role:
 - Answer questions about visa types (Tourist, Business, Student, Work), processing times, fees in INR, required documents, validity, and embassy procedures.
 - Suggest holiday plans, best travel seasons, and itinerary ideas.
 - Be concise (2–4 sentences typical), friendly, and accurate.
-- When unsure of a current fee or rule, say "Please confirm with our team at +91 91132 56726 or info@wehive.co.in" — never invent numbers.
+- When you need current data on a country, visa, or university, I will provide it to you in the prompt.
 - Encourage starting an application via the We Hive dashboard.
 - If asked about non-visa topics, politely steer back to travel/visa.
 - Introduce yourself as Eva (not Hive) when a greeting prompts a self-introduction.
 
 Tone: warm, professional, India-friendly. Use ₹ for INR. Avoid jargon. Use bullet points sparingly only when listing 3+ items.
 """
+
+
+RE_COUNTRY_CODE = re.compile(r'\b(us|uk|ca|au|de|fr|it|es|jp|sg|ae|th|ch|np|bt|pl|at|pt|gr|hr)\b', re.I)
+RE_STUDENT_KEYWORDS = re.compile(r'(study|student|university|college|course|program|ielts|toefl|gre|gmat|scholarship|admission|intake|tuition)', re.I)
+RE_VISA_KEYWORDS = re.compile(r'(visa|tourist|business|work|fee|requirement|document|processing|embassy|appointment)', re.I)
+
+
+async def _gather_context(user_prompt: str) -> str:
+    """Look up relevant data based on the user's question and return as context."""
+    snippets = []
+
+    country_codes = RE_COUNTRY_CODE.findall(user_prompt)
+    is_student = bool(RE_STUDENT_KEYWORDS.search(user_prompt))
+    is_visa = bool(RE_VISA_KEYWORDS.search(user_prompt))
+
+    for code in set(c.casefold() for c in country_codes):
+        data = await lookup_country(code)
+        if data:
+            lines = [f"Country: {data.get('name', code)}"]
+            visa_types = data.get('visa_types', [])
+            if visa_types:
+                lines.append(f"  Visa types: {', '.join(visa_types)}")
+            categories = data.get('categories', [])
+            for cat in categories[:3]:
+                lines.append(f"  {cat.get('name')}: ₹{cat.get('fees_inr', 'N/A')} / ${cat.get('fees_usd', 'N/A')}, {cat.get('processing_days', 'N/A')} days, docs: {len(cat.get('documents', []))}")
+            delivery = data.get('delivery', {})
+            lines.append(f"  Delivery: {delivery.get('standard_days', 'N/A')}d standard, {delivery.get('rush_days', 'N/A')}d rush")
+            if is_student and data.get('student_meta'):
+                sm = data['student_meta']
+                lines.append(f"  Student: {sm.get('processing_weeks', 'N/A')}w processing, {sm.get('post_study_months', 0)}m post-study work, intakes: {', '.join(sm.get('intakes', []))}")
+            snippets.append('\n'.join(lines))
+
+    if is_student:
+        uni_country = country_codes[0].lower() if country_codes else None
+        unis = await search_universities(country=uni_country)
+        if unis:
+            uni_lines = ["Universities:"]
+            for u in unis[:5]:
+                uni_lines.append(f"  {u.get('name', '?')} — rank {u.get('rank', 'N/A')}, tuition ${u.get('tuition_usd', 'N/A')}/yr, IELTS {u.get('ielts_min', 'N/A')}")
+            snippets.append('\n'.join(uni_lines))
+
+    if is_visa and country_codes:
+        fee_data = await get_application_fee(country_codes[0].lower())
+        if fee_data:
+            snippets.append(f"Application fee: ₹{fee_data.get('fee_inr', 'N/A')} (embassy: ₹{fee_data.get('embassy_fee', 'N/A')})")
+
+    return '\n\n'.join(snippets) if snippets else ''
 
 
 # ---------- Schemas ---------- #
@@ -137,6 +190,12 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     }
     await chat_messages.insert_one(user_msg)
 
+    # Agentic RAG — gather relevant data from DB
+    context = await _gather_context(text)
+    enriched_prompt = text
+    if context:
+        enriched_prompt = f"Here is current data from our system:\n{context}\n\nUser question: {text}"
+
     try:
         user_id = user['_id'] if user else None
         if not user_id:
@@ -144,7 +203,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         reply_text, provider_info = await marketplace.chat_with_info(
             user_id=user_id,
             system_prompt=SYSTEM_PROMPT,
-            user_prompt=text,
+            user_prompt=enriched_prompt,
             max_tokens=1024,
         )
         if not reply_text:
@@ -190,3 +249,151 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         },
         provider_info=provider_info,
     )
+
+
+# ---------- Multi-step Agent Workflows ---------- #
+
+class WorkflowRequest(BaseModel):
+    query: str
+    country: Optional[str] = None
+    visa_type: Optional[str] = 'tourist'
+
+
+class WorkflowStep(BaseModel):
+    step: str
+    result: dict
+
+
+class WorkflowResponse(BaseModel):
+    query: str
+    steps: list[WorkflowStep]
+
+
+@router.post('/workflow', response_model=WorkflowResponse)
+async def run_workflow(req: WorkflowRequest, user=Depends(get_current_user_optional)):
+    """Multi-step agent workflow: analyze query -> look up data -> compile answer."""
+    steps = []
+    query_lower = req.query.lower()
+    country_id = (req.country or '').lower()
+
+    # Step 1: Extract country from query if not provided
+    if not country_id:
+        match = RE_COUNTRY_CODE.search(query_lower)
+        if match:
+            country_id = match.group(1)
+    steps.append(WorkflowStep(step='parse_query', result={'country': country_id or 'unknown'}))
+
+    # Step 2: Look up visa/country data
+    country_data = await lookup_country(country_id) if country_id else None
+    steps.append(WorkflowStep(step='lookup_country', result={
+        'found': country_data is not None,
+        'name': (country_data or {}).get('name'),
+        'visa_types': (country_data or {}).get('visa_types', []),
+    }))
+
+    # Step 3: Get visa requirements for the specific visa type
+    requirements = None
+    if country_id and req.visa_type:
+        requirements = await get_visa_requirements(country_id, req.visa_type)
+    steps.append(WorkflowStep(step='visa_requirements', result={
+        'found': requirements is not None,
+        'data': requirements,
+    }))
+
+    # Step 4: Get fees
+    fees = await get_application_fee(country_id) if country_id else None
+    steps.append(WorkflowStep(step='application_fees', result={
+        'found': fees is not None,
+        'fee_inr': (fees or {}).get('fee_inr'),
+    }))
+
+    # Step 5: Check for student pathway
+    is_student = bool(RE_STUDENT_KEYWORDS.search(query_lower))
+    universities = []
+    if is_student and country_id:
+        universities = await search_universities(country=country_id)
+    steps.append(WorkflowStep(step='universities', result={
+        'checked': is_student,
+        'count': len(universities),
+        'top': [{'name': u.get('name'), 'rank': u.get('rank'), 'tuition': u.get('tuition_usd')} for u in universities[:3]],
+    }))
+
+    return WorkflowResponse(query=req.query, steps=steps)
+
+
+# ---------- Eva Proactive Notifications ---------- #
+
+async def notify_status_change(user_id: str, application_id: str, new_status: str, country: str = ''):
+    """Send a proactive Eva notification when an application status changes."""
+    from routes_notifications import push_notification
+
+    tips = {
+        'submitted': "Your application has been submitted! 📋 Eva's tip: Double-check that all your documents are uploaded before the embassy review.",
+        'in_review': "Your application is under review! 🔍 Eva's tip: This typically takes 5-15 business days. You can track progress anytime.",
+        'approved': "Congratulations! 🎉 Your visa has been approved! Eva's tip: Check your passport delivery status and plan your travel.",
+        'rejected': "Your application was not approved 😔 Eva's tip: Review the rejection reasons and contact our team at +91 91132 56726 for next steps.",
+        'appointment_scheduled': "Your visa appointment is scheduled! 📅 Eva's tip: Prepare your original documents and arrive 15 minutes early.",
+    }
+
+    message = tips.get(new_status, f"Your application status changed to: {new_status}")
+
+    notif = {
+        'type': 'eva_tip',
+        'title': f'Eva says: {new_status.replace("_", " ").title()}',
+        'body': message,
+        'application_id': application_id,
+        'country': country,
+        'created_at': datetime.utcnow().isoformat(),
+    }
+
+    await notifications_col.insert_one({
+        '_id': str(uuid.uuid4()),
+        'user_id': user_id,
+        'type': 'eva_tip',
+        'title': notif['title'],
+        'body': notif['body'],
+        'data': {'application_id': application_id, 'country': country},
+        'created_at': datetime.utcnow(),
+        'read': False,
+    })
+    await push_notification(user_id, notif)
+
+
+# ---------- Application Concierge Agent ---------- #
+
+class ConciergeStartRequest(BaseModel):
+    country_id: str
+    visa_type: str = 'tourist'
+
+
+class ConciergeAdvanceRequest(BaseModel):
+    country_id: str
+    step: str
+    data: Optional[dict] = None
+
+
+@router.post('/concierge/start')
+async def concierge_start(req: ConciergeStartRequest, user=Depends(get_current_user_optional)):
+    """Start the Application Concierge workflow for a given country + visa type."""
+    from agents.concierge import start_concierge
+    return await start_concierge(user['_id'], req.country_id, req.visa_type)
+
+
+@router.post('/concierge/advance')
+async def concierge_advance(req: ConciergeAdvanceRequest, user=Depends(get_current_user_optional)):
+    """Advance the concierge to the next step."""
+    from agents.concierge import advance_concierge
+    return await advance_concierge(user['_id'], req.country_id, req.step, req.data)
+
+
+# ---------- Deadline & Reminder Agent ---------- #
+
+@router.get('/reminders', tags=['agent'])
+async def get_reminders(user=Depends(get_current_user_optional)):
+    """Get proactive reminders for the current user."""
+    from agents.reminder_agent import run_all_checks
+    if not user:
+        raise HTTPException(401, 'Authentication required')
+    all_reminders = await run_all_checks(db)
+    user_reminders = [r for r in all_reminders if r.get('user_id') == user['_id']]
+    return {'reminders': user_reminders, 'count': len(user_reminders)}

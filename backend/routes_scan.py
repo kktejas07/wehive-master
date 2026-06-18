@@ -366,3 +366,30 @@ async def delete_scan(scan_id: str, user=Depends(get_current_user)):
             {'$pull': {'scans': {'_id': scan_id}}},
         )
     return {'ok': True}
+
+
+# ---------- Document Validation Agent ---------- #
+
+class DocToValidate(BaseModel):
+    filename: str
+    size: int = 0
+
+
+class ValidateRequest(BaseModel):
+    country_id: str
+    visa_type: str = 'tourist'
+    documents: List[DocToValidate] = []
+    passport_expiry: Optional[str] = None
+
+
+@router.post('/validate', tags=['agent'])
+async def validate_documents(req: ValidateRequest, user=Depends(get_current_user)):
+    """Document Validation Agent — check uploaded docs before submission."""
+    from agents.document_validator import validate_application_docs
+    result = await validate_application_docs(
+        country_id=req.country_id,
+        visa_type=req.visa_type,
+        uploaded_docs=[d.dict() for d in req.documents],
+        passport_expiry=req.passport_expiry,
+    )
+    return result

@@ -32,6 +32,13 @@ async def create_review(body: ReviewCreate, user=Depends(get_current_user)):
     uni = await universities_col.find_one({"id": body.university_id}, {"_id": 1})
     if not uni:
         raise HTTPException(404, f"University not found: {body.university_id}")
+
+    # AI moderation
+    from agents.review_moderation import moderate_review
+    moderation = moderate_review(body.review_text, body.rating)
+    if moderation['verdict'] == 'reject':
+        raise HTTPException(400, f'Review rejected: {", ".join(moderation["flags"])}')
+
     doc = {
         "id": str(uuid.uuid4()),
         "university_id": body.university_id,
