@@ -50,6 +50,7 @@ const FinancialTools = lazy(() => import('./pages/FinancialTools'));
 const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
 const VisaChecker = lazy(() => import('./pages/VisaChecker'));
+const Hive = lazy(() => import('./pages/Hive'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -105,6 +106,7 @@ function AnimatedRoutes() {
           <Route path="/emergency" element={<PageTransition><EmergencyCare /></PageTransition>} />
           <Route path="/visa-scheduling" element={<PageTransition><VisaScheduling /></PageTransition>} />
           <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
+          <Route path="/hive" element={<PageTransition><Hive /></PageTransition>} />
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />

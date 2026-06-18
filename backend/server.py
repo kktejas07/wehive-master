@@ -46,6 +46,10 @@ from routes_programs import router as programs_router, admin_router as admin_pro
 from routes_reviews import router as reviews_router  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
 from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
+from routes_rag import router as rag_router  # noqa: E402
+from routes_prompts import router as prompts_router  # noqa: E402
+from routes_agents_v2 import router as agents_v2_router  # noqa: E402
+from routes_hive_learning import router as hive_learning_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -109,6 +113,10 @@ api_router.include_router(admin_programs_router)
 api_router.include_router(reviews_router)
 api_router.include_router(i18n_router)
 api_router.include_router(agents_ai_router)
+api_router.include_router(rag_router)
+api_router.include_router(prompts_router)
+api_router.include_router(agents_v2_router)
+api_router.include_router(hive_learning_router)
 
 app.include_router(api_router)
 
@@ -209,6 +217,12 @@ async def on_startup():
             logger.info('Universities collection has %d docs', uni_count)
     except Exception as e:
         logger.exception('Startup failure: %s', e)
+
+    try:
+        from bootstrap_rag import bootstrap_rag_and_prompts
+        await bootstrap_rag_and_prompts(db)
+    except Exception as e:
+        logger.exception('RAG/prompts bootstrap failed: %s', e)
 
 
 @app.on_event('shutdown')

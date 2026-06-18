@@ -6,7 +6,7 @@ import { adminClient } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
-  Key, User, Building2, BookOpen,
+  Key, User, Building2, BookOpen, Database, FileText, Bot, Brain,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 
@@ -26,7 +26,11 @@ const TABS = [
   { id: 'universities', to: '/admin/universities',  label: 'Universities', Icon: Building2,       testid: 'admin-nav-universities' },
   { id: 'programs',     to: '/admin/programs',      label: 'Programs',     Icon: BookOpen,        testid: 'admin-nav-programs' },
   { id: 'exports',      to: '/admin/exports',       label: 'Exports',      Icon: Download,        testid: 'admin-nav-exports' },
-  { id: 'destinations', to: '/admin/destinations',  label: 'Destinations', Icon: ImageIcon,       testid: 'admin-nav-destinations' },
+  { id: 'destinations', to: '/admin/destinations',  label: 'Destinations', Icon: ImageIcon,        testid: 'admin-nav-destinations' },
+  { id: 'rag',          to: '/admin/rag',           label: 'RAG & Vectors', Icon: Database,        testid: 'admin-nav-rag' },
+  { id: 'prompts',      to: '/admin/prompts',       label: 'Prompts',      Icon: FileText,         testid: 'admin-nav-prompts' },
+  { id: 'agents-v2',    to: '/admin/agents-v2',     label: 'Agents V2',    Icon: Bot,              testid: 'admin-nav-agents-v2' },
+  { id: 'hive-learning', to: '/admin/hive-learning', label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning' },
   { id: 'settings',     to: '/admin/settings',      label: 'Settings',     Icon: Settings,        testid: 'admin-nav-settings' },
 ];
 
