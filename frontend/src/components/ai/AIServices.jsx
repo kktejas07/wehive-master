@@ -68,7 +68,7 @@ function AIToolCard({ tool, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative rounded-2xl border border-black/8 bg-white p-5 sm:p-6 transition-all"
+      className="group relative flex-1 min-w-[180px] max-w-[260px] rounded-2xl border border-black/8 bg-white p-4 sm:p-5 transition-all"
     >
       <GlowingEffect
         blur={30}
@@ -80,28 +80,25 @@ function AIToolCard({ tool, index }) {
         inactiveZone={0.01}
       />
       {tool.badge && (
-        <span className={`absolute top-4 right-4 text-[10px] uppercase tracking-[0.14em] font-bold px-2.5 py-0.5 rounded-full ${
+        <span className={`absolute top-3 right-3 text-[10px] uppercase tracking-[0.14em] font-bold px-2 py-0.5 rounded-full ${
           tool.badge === 'New' ? 'bg-emerald-100 text-emerald-700' : 'bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))]'
         }`}>
           {tool.badge}
         </span>
       )}
-      <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center gap-3 mb-2">
         <div
-          className="h-11 w-11 shrink-0 rounded-xl inline-flex items-center justify-center"
+          className="h-10 w-10 shrink-0 rounded-xl inline-flex items-center justify-center"
           style={{ background: `${tool.color}15` }}
         >
-          <Icon className="w-5 h-5" style={{ color: tool.color }} />
+          <Icon className="w-[18px] h-[18px]" style={{ color: tool.color }} />
         </div>
-        <h3 className="font-display text-[17px] font-extrabold text-[hsl(var(--blue-900))] tracking-[-0.01em]">
+        <h3 className="font-display text-[14px] font-extrabold text-[hsl(var(--blue-900))] tracking-[-0.01em] leading-tight">
           {tool.label}
         </h3>
       </div>
-      <p className="text-[13px] text-[hsl(var(--blue-900))]/60 leading-relaxed">
-        {tool.desc}
-      </p>
-      <div className="mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--blue-900))]/40">
-        {tool.cta} <ArrowRight className="w-3.5 h-3.5" />
+      <div className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[hsl(var(--blue-900))]/40">
+        {tool.cta} <ArrowRight className="w-3 h-3" />
       </div>
     </motion.div>
   );
@@ -141,7 +138,7 @@ export default function AIServices() {
           </p>
         </Reveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-5">
           {AI_TOOLS.map((tool, i) => (
             <AIToolCard key={tool.id} tool={tool} index={i} />
           ))}
