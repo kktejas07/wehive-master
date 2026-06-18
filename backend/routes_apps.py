@@ -17,6 +17,7 @@ from rate_limit import RateLimit
 _upload_limiter = RateLimit(max_calls=20, window_seconds=60)
 from config import CONSULTANT_NAME, CONSULTANT_AUTO_REPLY
 from db import db, applications
+from routes_chatbot import notify_status_change
 from serializers import serialize_doc
 _serialize = serialize_doc
 import storage as r2
@@ -255,6 +256,7 @@ async def submit_application(application_id: str, user=Depends(get_current_user)
         {'_id': application_id},
         {'$set': {'status': 'in_review', 'timeline': events, 'updated_at': now}},
     )
+    await notify_status_change(user['_id'], application_id, 'in_review')
     return {'ok': True, 'status': 'in_review'}
 
 
@@ -297,6 +299,19 @@ async def receipt_pdf(application_id: str, user=Depends(get_current_user)):
         io.BytesIO(pdf_bytes),
         media_type='application/pdf',
         headers={'Content-Disposition': f'attachment; filename="wehive-receipt-{application_id[:8]}.pdf"'},
+    )
+
+
+@router.get('/{application_id}/summary.pdf')
+async def summary_pdf(application_id: str, user=Depends(get_current_user)):
+    """Download a full application summary as PDF."""
+    from agents.pdf_agent import generate_application_summary_pdf
+    app = await _get_app_for_user(application_id, user["_id"])
+    pdf_bytes = generate_application_summary_pdf(app, user)
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type='application/pdf',
+        headers={'Content-Disposition': f'attachment; filename="wehive-summary-{application_id[:8]}.pdf"'},
     )
 
 

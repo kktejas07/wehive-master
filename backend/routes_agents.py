@@ -340,3 +340,37 @@ async def admin_record_commission(
         {'$inc': {'total_revenue': commission['amount_inr']}, '$set': {'updated_at': datetime.utcnow()}},
     )
     return {'message': 'Commission recorded', 'commission': commission}
+
+
+# ---------- Agent Portal AI Assistant ---------- #
+
+@router.get('/ai/students-needing-attention')
+async def ai_students_attention(agent=Depends(get_current_agent)):
+    """AI: find students who need agent attention."""
+    from agents.portal_ai import get_students_needing_attention
+    students = await get_students_needing_attention(db, agent['_id'])
+    return {'students': students, 'count': len(students)}
+
+
+@router.get('/ai/commission-summary')
+async def ai_commission_summary(agent=Depends(get_current_agent)):
+    """AI: get commission summary and forecasts."""
+    from agents.portal_ai import get_commission_summary
+    summary = await get_commission_summary(db, agent['_id'])
+    return summary
+
+
+@router.get('/ai/status-update/{student_email}')
+async def ai_status_update(student_email: str, agent=Depends(get_current_agent)):
+    """AI: generate a natural-language status update for a student."""
+    from agents.portal_ai import generate_status_update
+    update = await generate_status_update(db, agent['_id'], student_email)
+    return {'update': update}
+
+
+@router.get('/ai/next-actions')
+async def ai_next_actions(agent=Depends(get_current_agent)):
+    """AI: suggest next actions for the agent's students."""
+    from agents.portal_ai import suggest_next_actions
+    actions = await suggest_next_actions(db, agent['_id'])
+    return {'actions': actions, 'count': len(actions)}

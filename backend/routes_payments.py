@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import hashlib
 import hmac
 import os
@@ -10,6 +11,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from auth_utils import get_current_user
@@ -283,3 +285,30 @@ async def my_subscription(user=Depends(get_current_user)):
         'premium_since': user.get('premium_since').isoformat() if user.get('premium_since') else None,
         'payments': payments_list,
     }
+
+
+# ---------- Invoice PDF ----------
+
+@router.get('/invoice/{payment_id}.pdf')
+async def invoice_pdf(payment_id: str, user=Depends(get_current_user)):
+    """Download a payment invoice as PDF."""
+    from agents.pdf_agent import generate_invoice_pdf
+
+    payment = await payments.find_one({'_id': payment_id, 'user_id': user['_id']})
+    if not payment:
+        raise HTTPException(404, 'Payment not found')
+
+    plan = PLANS.get(payment.get('plan_id', ''), {})
+    pdf_bytes = generate_invoice_pdf(
+        invoice_id=payment_id[:8].upper(),
+        customer_name=user.get('name', 'Customer'),
+        customer_email=user.get('email', ''),
+        items=[{'name': plan.get('name', 'Service'), 'amount': payment.get('amount_usd', 0)}],
+        amount_paid=payment.get('amount_usd', 0),
+        payment_method='Razorpay',
+    )
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type='application/pdf',
+        headers={'Content-Disposition': f'attachment; filename="wehive-invoice-{payment_id[:8]}.pdf"'},
+    )

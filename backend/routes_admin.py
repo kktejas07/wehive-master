@@ -240,6 +240,36 @@ async def admin_metrics(_=Depends(get_current_admin)):
     }
 
 
+# ---------- AI Analytics ----------
+
+@router.get('/ai/trends')
+async def ai_trends(days: int = 30, _=Depends(get_current_admin)):
+    """AI: application trends and approval rates."""
+    from agents.admin_analytics import get_trends
+    return await get_trends(db, days)
+
+
+@router.get('/ai/revenue')
+async def ai_revenue(days: int = 30, _=Depends(get_current_admin)):
+    """AI: revenue summary and forecasts."""
+    from agents.admin_analytics import get_revenue_summary
+    return await get_revenue_summary(db, days)
+
+
+@router.get('/ai/agent-performance')
+async def ai_agent_performance(_=Depends(get_current_admin)):
+    """AI: agent performance comparison."""
+    from agents.admin_analytics import get_agent_performance
+    return {'agents': await get_agent_performance(db)}
+
+
+@router.get('/ai/anomalies')
+async def ai_anomalies(_=Depends(get_current_admin)):
+    """AI: detect anomalies in applications and payments."""
+    from agents.admin_analytics import get_anomalies
+    return {'anomalies': await get_anomalies(db)}
+
+
 # ---------- users ----------
 @router.get('/users')
 async def admin_list_users(

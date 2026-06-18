@@ -1,10 +1,15 @@
 import re
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
+import json
 import logging
 import os
+from datetime import datetime, timezone
 from pathlib import Path
+
+from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
+from starlette.middleware.cors import CORSMiddleware
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -59,7 +64,14 @@ async def root():
 
 @api_router.get('/health')
 async def health():
-    return {'ok': True}
+    checks = {}
+    try:
+        await db.command('ping')
+        checks['database'] = 'ok'
+    except Exception:
+        checks['database'] = 'error'
+    ok = all(v == 'ok' for v in checks.values())
+    return {'ok': ok, 'checks': checks}
 
 
 # Mount routers under /api
@@ -130,11 +142,42 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-)
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            'ts': datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
+            'level': record.levelname,
+            'logger': record.name,
+            'message': record.getMessage(),
+            'module': record.module,
+            'line': record.lineno,
+        }, default=str)
+
+_handler = logging.StreamHandler()
+_handler.setFormatter(JsonFormatter())
+root = logging.getLogger()
+root.handlers.clear()
+root.addHandler(_handler)
+root.setLevel(logging.INFO)
 logger = logging.getLogger('wehive')
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.warning('HTTP %s: %s', exc.status_code, exc.detail, extra={'path': str(request.url)})
+    return JSONResponse(status_code=exc.status_code, content={'ok': False, 'detail': exc.detail})
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.warning('Validation error: %s', exc.errors(), extra={'path': str(request.url)})
+    return JSONResponse(status_code=422, content={'ok': False, 'detail': exc.errors()})
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception('Unhandled error: %s', exc, extra={'path': str(request.url)})
+    return JSONResponse(status_code=500, content={'ok': False, 'detail': 'Internal server error'})
 
 
 @app.on_event('startup')
