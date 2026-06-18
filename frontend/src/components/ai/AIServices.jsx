@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FileText, Calendar, ShieldAlert, ListChecks, MessageSquare, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import Reveal from '../Reveal';
 import TextFlipAnimation from '../ui/TextFlipAnimation';
 import { GlowingEffect } from '../ui/glowing-effect';
+import { useAuth } from '../../context/AuthContext';
 
 const AI_TOOLS = [
   {
@@ -85,16 +86,18 @@ function AIToolCard({ tool, index }) {
           {tool.badge}
         </span>
       )}
-      <div
-        className="h-11 w-11 rounded-xl inline-flex items-center justify-center mb-4"
-        style={{ background: `${tool.color}15` }}
-      >
-        <Icon className="w-5 h-5" style={{ color: tool.color }} />
+      <div className="flex items-center gap-3 mb-3">
+        <div
+          className="h-11 w-11 shrink-0 rounded-xl inline-flex items-center justify-center"
+          style={{ background: `${tool.color}15` }}
+        >
+          <Icon className="w-5 h-5" style={{ color: tool.color }} />
+        </div>
+        <h3 className="font-display text-[17px] font-extrabold text-[hsl(var(--blue-900))] tracking-[-0.01em]">
+          {tool.label}
+        </h3>
       </div>
-      <h3 className="font-display text-[17px] font-extrabold text-[hsl(var(--blue-900))] tracking-[-0.01em]">
-        {tool.label}
-      </h3>
-      <p className="mt-2 text-[13px] text-[hsl(var(--blue-900))]/60 leading-relaxed">
+      <p className="text-[13px] text-[hsl(var(--blue-900))]/60 leading-relaxed">
         {tool.desc}
       </p>
       <div className="mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--blue-900))]/40">
@@ -105,6 +108,17 @@ function AIToolCard({ tool, index }) {
 }
 
 export default function AIServices() {
+  const { isAuthed } = useAuth();
+  const navigate = useNavigate();
+
+  const handleStartApp = () => {
+    if (isAuthed) {
+      navigate('/account');
+    } else {
+      navigate('/signup');
+    }
+  };
+
   return (
     <section className="py-16 sm:py-24 lg:py-28 bg-[hsl(var(--soft-bg))]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
@@ -134,11 +148,9 @@ export default function AIServices() {
         </div>
 
         <Reveal className="text-center mt-10">
-          <Link to="/account">
-            <Button className="rounded-full btn-accent text-white h-11 px-7 font-bold">
-              Start your application <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
+          <Button onClick={handleStartApp} className="rounded-full btn-accent text-white h-11 px-7 font-bold">
+            Start your application <ArrowRight className="w-4 h-4 ml-1" />
+          </Button>
         </Reveal>
       </div>
     </section>

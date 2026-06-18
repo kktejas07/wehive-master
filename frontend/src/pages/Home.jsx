@@ -197,10 +197,10 @@ export default function Home() {
       <EventsBanner />
       <AIServices />
       <HowItWorks />
-      <Testimonials />
       <TravelStoriesSection />
       <Faq />
       <CtaBanner />
+      <Testimonials />
       <Footer />
     </div>
   );

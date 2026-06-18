@@ -1,7 +1,9 @@
 import { ArrowRight, Phone, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
+import { useAuth } from '../context/AuthContext';
 import Reveal from './Reveal';
 
 const METRICS = [
@@ -20,6 +22,17 @@ function MetricCard({ k, v }) {
 }
 
 export default function CtaBanner() {
+  const { isAuthed } = useAuth();
+  const navigate = useNavigate();
+
+  const handleStartApp = () => {
+    if (isAuthed) {
+      navigate('/account');
+    } else {
+      navigate('/signup');
+    }
+  };
+
   return (
     <section id="contact" className="relative py-16 sm:py-24 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
@@ -57,7 +70,7 @@ export default function CtaBanner() {
                 only when you are ready to submit.
               </p>
               <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">
-                <Button className="rounded-full bg-white text-[hsl(var(--blue-900))] hover:bg-white/90 h-12 px-6 font-bold">
+                <Button onClick={handleStartApp} className="rounded-full bg-white text-[hsl(var(--blue-900))] hover:bg-white/90 h-12 px-6 font-bold">
                   Start my application
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
