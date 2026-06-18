@@ -21,7 +21,7 @@ async def fetch_visa_requirements(from_country: str, to_country: str, api_key: s
             )
             r.raise_for_status()
             return r.json()
-    except Exception:
+    except httpx.HTTPError:
         return None
 
 
@@ -49,7 +49,7 @@ async def fetch_flights(origin: str, destination: str, api_key: str) -> Optional
             r.raise_for_status()
             data = r.json()
             return data.get('content', {}).get('results', {}).get('itineraries', [])
-    except Exception:
+    except httpx.HTTPError:
         return None
 
 
@@ -65,5 +65,5 @@ async def fetch_exchange_rate(from_currency: str, to_currency: str, api_key: str
             r.raise_for_status()
             data = r.json()
             return data[0].get('rate') if isinstance(data, list) else None
-    except Exception:
+    except httpx.HTTPError:
         return None

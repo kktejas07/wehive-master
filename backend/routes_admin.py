@@ -243,14 +243,14 @@ async def admin_metrics(_=Depends(get_current_admin)):
 # ---------- AI Analytics ----------
 
 @router.get('/ai/trends')
-async def ai_trends(days: int = 30, _=Depends(get_current_admin)):
+async def ai_trends(days: int = Query(30, ge=1, le=365), _=Depends(get_current_admin)):
     """AI: application trends and approval rates."""
     from agents.admin_analytics import get_trends
     return await get_trends(db, days)
 
 
 @router.get('/ai/revenue')
-async def ai_revenue(days: int = 30, _=Depends(get_current_admin)):
+async def ai_revenue(days: int = Query(30, ge=1, le=365), _=Depends(get_current_admin)):
     """AI: revenue summary and forecasts."""
     from agents.admin_analytics import get_revenue_summary
     return await get_revenue_summary(db, days)

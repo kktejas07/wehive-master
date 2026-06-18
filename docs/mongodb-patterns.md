@@ -18,7 +18,7 @@ Adapted from PostgreSQL patterns for this codebase (Motor + MongoDB).
 | IDs | `ObjectId` / `str` | Stored as `_id`, serialized to `id` |
 | Strings | `str` | Index with `sparse=True` for optional fields |
 | Timestamps | `datetime` | UTC, indexed with descending sort |
-| Money | `int` (paise) or `float` | Stored in INR/USD |
+| Money | `int` (paise) or `Decimal128` | Store in smallest unit to avoid precision loss |
 | Booleans | `bool` | Used for `is_premium`, `active` flags |
 
 ## Common Patterns

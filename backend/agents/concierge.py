@@ -57,6 +57,8 @@ class ConciergeSession:
             self.steps[step]['status'] = StepStatus.COMPLETED
             if data:
                 self.steps[step]['data'] = data
+        else:
+            raise KeyError(f"Unknown step: {step}")
 
     def progress(self) -> str:
         total = len(self.steps)

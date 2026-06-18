@@ -1,7 +1,6 @@
 """AI Chatbot for visa & travel Q&A — routed through AI Marketplace.
 
-Eva now uses Agentic RAG: she looks up real visa/country/university data
-from the database and injects it as context before calling the AI.
+Eva uses Agentic RAG: looks up real data before answering.
 """
 
 import os
@@ -17,7 +16,7 @@ from pydantic import BaseModel
 from ai_marketplace import marketplace
 from auth_utils import get_current_user_optional
 from db import db
-from eva_tools import TOOL_REGISTRY, search_countries, lookup_country, get_visa_requirements, get_application_fee, search_universities
+from eva_tools import search_countries, lookup_country, get_visa_requirements, get_application_fee, search_universities
 
 router = APIRouter(prefix='/chatbot', tags=['chatbot'])
 marketplace.db = db
@@ -48,9 +47,7 @@ RE_VISA_KEYWORDS = re.compile(r'(visa|tourist|business|work|fee|requirement|docu
 
 
 async def _gather_context(user_prompt: str) -> str:
-    """Look up relevant data based on the user's question and return as context."""
     snippets = []
-
     country_codes = RE_COUNTRY_CODE.findall(user_prompt)
     is_student = bool(RE_STUDENT_KEYWORDS.search(user_prompt))
     is_visa = bool(RE_VISA_KEYWORDS.search(user_prompt))
@@ -89,7 +86,6 @@ async def _gather_context(user_prompt: str) -> str:
     return '\n\n'.join(snippets) if snippets else ''
 
 
-# ---------- Schemas ---------- #
 class ChatStartRequest(BaseModel):
     title: Optional[str] = 'New chat'
 
@@ -117,7 +113,6 @@ class ChatSessionItem(BaseModel):
     updated_at: datetime
 
 
-# ---------- Endpoints ---------- #
 @router.post('/sessions', response_model=ChatStartResponse)
 async def start_session(req: ChatStartRequest, user=Depends(get_current_user_optional)):
     sid = str(uuid.uuid4())
@@ -190,11 +185,17 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     }
     await chat_messages.insert_one(user_msg)
 
-    # Agentic RAG — gather relevant data from DB
     context = await _gather_context(text)
+
+    from rag_service import retrieve_conversation_history
+    history = await retrieve_conversation_history(session_id, limit=6)
+    enriched_system = SYSTEM_PROMPT
+    if history:
+        enriched_system = SYSTEM_PROMPT + f"\n\nRecent conversation:\n{history}"
+
     enriched_prompt = text
     if context:
-        enriched_prompt = f"Here is current data from our system:\n{context}\n\nUser question: {text}"
+        enriched_prompt = f"Current data from our system:\n{context}\n\nUser question: {text}"
 
     try:
         user_id = user['_id'] if user else None
@@ -202,12 +203,14 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
             raise HTTPException(401, 'Authentication required for AI chat')
         reply_text, provider_info = await marketplace.chat_with_info(
             user_id=user_id,
-            system_prompt=SYSTEM_PROMPT,
+            system_prompt=enriched_system,
             user_prompt=enriched_prompt,
             max_tokens=1024,
         )
         if not reply_text:
             reply_text = 'Sorry, I could not generate a reply just now.'
+    except HTTPException:
+        raise
     except Exception as e:
         reply_text = (
             "I'm having trouble reaching my brain right now. Please try again, or contact our team at "
@@ -225,7 +228,6 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     }
     await chat_messages.insert_one(assistant_msg)
 
-    # Update session metadata: title (from first user msg) + last preview
     new_title = sess.get('title') or 'New chat'
     if new_title in ('New chat', None, ''):
         new_title = (text[:40] + ('…' if len(text) > 40 else ''))
@@ -251,114 +253,6 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     )
 
 
-# ---------- Multi-step Agent Workflows ---------- #
-
-class WorkflowRequest(BaseModel):
-    query: str
-    country: Optional[str] = None
-    visa_type: Optional[str] = 'tourist'
-
-
-class WorkflowStep(BaseModel):
-    step: str
-    result: dict
-
-
-class WorkflowResponse(BaseModel):
-    query: str
-    steps: list[WorkflowStep]
-
-
-@router.post('/workflow', response_model=WorkflowResponse)
-async def run_workflow(req: WorkflowRequest, user=Depends(get_current_user_optional)):
-    """Multi-step agent workflow: analyze query -> look up data -> compile answer."""
-    steps = []
-    query_lower = req.query.lower()
-    country_id = (req.country or '').lower()
-
-    # Step 1: Extract country from query if not provided
-    if not country_id:
-        match = RE_COUNTRY_CODE.search(query_lower)
-        if match:
-            country_id = match.group(1)
-    steps.append(WorkflowStep(step='parse_query', result={'country': country_id or 'unknown'}))
-
-    # Step 2: Look up visa/country data
-    country_data = await lookup_country(country_id) if country_id else None
-    steps.append(WorkflowStep(step='lookup_country', result={
-        'found': country_data is not None,
-        'name': (country_data or {}).get('name'),
-        'visa_types': (country_data or {}).get('visa_types', []),
-    }))
-
-    # Step 3: Get visa requirements for the specific visa type
-    requirements = None
-    if country_id and req.visa_type:
-        requirements = await get_visa_requirements(country_id, req.visa_type)
-    steps.append(WorkflowStep(step='visa_requirements', result={
-        'found': requirements is not None,
-        'data': requirements,
-    }))
-
-    # Step 4: Get fees
-    fees = await get_application_fee(country_id) if country_id else None
-    steps.append(WorkflowStep(step='application_fees', result={
-        'found': fees is not None,
-        'fee_inr': (fees or {}).get('fee_inr'),
-    }))
-
-    # Step 5: Check for student pathway
-    is_student = bool(RE_STUDENT_KEYWORDS.search(query_lower))
-    universities = []
-    if is_student and country_id:
-        universities = await search_universities(country=country_id)
-    steps.append(WorkflowStep(step='universities', result={
-        'checked': is_student,
-        'count': len(universities),
-        'top': [{'name': u.get('name'), 'rank': u.get('rank'), 'tuition': u.get('tuition_usd')} for u in universities[:3]],
-    }))
-
-    return WorkflowResponse(query=req.query, steps=steps)
-
-
-# ---------- Eva Proactive Notifications ---------- #
-
-async def notify_status_change(user_id: str, application_id: str, new_status: str, country: str = ''):
-    """Send a proactive Eva notification when an application status changes."""
-    from routes_notifications import push_notification
-
-    tips = {
-        'submitted': "Your application has been submitted! 📋 Eva's tip: Double-check that all your documents are uploaded before the embassy review.",
-        'in_review': "Your application is under review! 🔍 Eva's tip: This typically takes 5-15 business days. You can track progress anytime.",
-        'approved': "Congratulations! 🎉 Your visa has been approved! Eva's tip: Check your passport delivery status and plan your travel.",
-        'rejected': "Your application was not approved 😔 Eva's tip: Review the rejection reasons and contact our team at +91 91132 56726 for next steps.",
-        'appointment_scheduled': "Your visa appointment is scheduled! 📅 Eva's tip: Prepare your original documents and arrive 15 minutes early.",
-    }
-
-    message = tips.get(new_status, f"Your application status changed to: {new_status}")
-
-    notif = {
-        'type': 'eva_tip',
-        'title': f'Eva says: {new_status.replace("_", " ").title()}',
-        'body': message,
-        'application_id': application_id,
-        'country': country,
-        'created_at': datetime.utcnow().isoformat(),
-    }
-
-    await notifications_col.insert_one({
-        '_id': str(uuid.uuid4()),
-        'user_id': user_id,
-        'type': 'eva_tip',
-        'title': notif['title'],
-        'body': notif['body'],
-        'data': {'application_id': application_id, 'country': country},
-        'created_at': datetime.utcnow(),
-        'read': False,
-    })
-    await push_notification(user_id, notif)
-
-
 # ---------- Application Concierge Agent ---------- #
 
 class ConciergeStartRequest(BaseModel):
@@ -374,26 +268,26 @@ class ConciergeAdvanceRequest(BaseModel):
 
 @router.post('/concierge/start')
 async def concierge_start(req: ConciergeStartRequest, user=Depends(get_current_user_optional)):
-    """Start the Application Concierge workflow for a given country + visa type."""
+    if not user:
+        raise HTTPException(401, 'Authentication required')
     from agents.concierge import start_concierge
     return await start_concierge(user['_id'], req.country_id, req.visa_type)
 
 
 @router.post('/concierge/advance')
 async def concierge_advance(req: ConciergeAdvanceRequest, user=Depends(get_current_user_optional)):
-    """Advance the concierge to the next step."""
+    if not user:
+        raise HTTPException(401, 'Authentication required')
     from agents.concierge import advance_concierge
     return await advance_concierge(user['_id'], req.country_id, req.step, req.data)
 
 
 # ---------- Deadline & Reminder Agent ---------- #
 
-@router.get('/reminders', tags=['agent'])
+@router.get('/reminders')
 async def get_reminders(user=Depends(get_current_user_optional)):
-    """Get proactive reminders for the current user."""
     from agents.reminder_agent import run_all_checks
     if not user:
         raise HTTPException(401, 'Authentication required')
-    all_reminders = await run_all_checks(db)
-    user_reminders = [r for r in all_reminders if r.get('user_id') == user['_id']]
-    return {'reminders': user_reminders, 'count': len(user_reminders)}
+    all_r = await run_all_checks(db)
+    return {'reminders': [r for r in all_r if r.get('user_id') == user['_id']]}

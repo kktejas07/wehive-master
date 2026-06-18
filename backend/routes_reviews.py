@@ -33,9 +33,10 @@ async def create_review(body: ReviewCreate, user=Depends(get_current_user)):
     if not uni:
         raise HTTPException(404, f"University not found: {body.university_id}")
 
-    # AI moderation
+    # AI moderation — check all user-provided free-text fields
     from agents.review_moderation import moderate_review
-    moderation = moderate_review(body.review_text, body.rating)
+    all_text = f"{body.title} {body.review_text} {body.pros} {body.cons} {body.program_name}"
+    moderation = moderate_review(all_text, body.rating)
     if moderation['verdict'] == 'reject':
         raise HTTPException(400, f'Review rejected: {", ".join(moderation["flags"])}')
 

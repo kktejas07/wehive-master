@@ -71,7 +71,8 @@ async def health():
     except Exception:
         checks['database'] = 'error'
     ok = all(v == 'ok' for v in checks.values())
-    return {'ok': ok, 'checks': checks}
+    status_code = 200 if ok else 503
+    return JSONResponse(status_code=status_code, content={'ok': ok, 'checks': checks})
 
 
 # Mount routers under /api

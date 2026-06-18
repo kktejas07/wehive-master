@@ -49,7 +49,7 @@ else
 fi
 if cd frontend && npm audit --audit-level=high 2>/dev/null; then pass "npm audit"; else fail "npm audit"; fi
 cd "$(dirname "$0")/.."
-if grep -rE 'console\.log|process\.env\.' frontend/src/ --include='*.{js,jsx,ts,tsx}' 2>/dev/null | grep -v 'console.error' | grep -v '.env.test'; then
+if grep -rE 'console\.log|process\.env\.' frontend/src/ --include='*.js' --include='*.jsx' --include='*.ts' --include='*.tsx' 2>/dev/null | grep -v 'console.error' | grep -v '.env.test'; then
   fail "console.log / process.env leaks in frontend"
 else
   pass "No console.log / env leaks in frontend"

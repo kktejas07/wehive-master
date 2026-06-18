@@ -5,7 +5,7 @@ RUN pip install --no-cache-dir --extra-index-url https://d33sy5i8bnduwe.cloudfro
 
 FROM python:3.12-slim AS runner
 WORKDIR /app
-RUN addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 appuser
+RUN addgroup --gid 1001 appgroup && adduser --uid 1001 --gid 1001 --disabled-password --gecos "" appuser
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY . .

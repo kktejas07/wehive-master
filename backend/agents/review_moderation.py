@@ -24,9 +24,9 @@ def moderate_review(text: str, rating: int) -> dict:
     flags = []
 
     # Spam check
-    for pattern in SPAM_PATTERNS:
-        if pattern.search(text):
-            flags.append('spam_pattern_detected')
+    has_spam = any(pattern.search(text) for pattern in SPAM_PATTERNS)
+    if has_spam:
+        flags.append('spam_pattern_detected')
 
     # Rating vs text sentiment mismatch
     positive_words = ['great', 'excellent', 'amazing', 'good', 'love', 'helpful', 'best']
