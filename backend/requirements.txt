@@ -39,7 +39,7 @@ h11==0.16.0
 hf-xet==1.4.3
 httpcore==1.0.9
 httplib2==0.31.2
-httpx==0.27.2
+httpx==0.28.1
 rapidfuzz==3.12.2
 pycountry==24.6.1
 huggingface_hub==1.9.2
@@ -126,4 +126,4 @@ yarl==1.23.0
 zipp==3.23.0
 firebase-admin==6.2.0
 chromadb==0.5.20
-ollama==0.4.4
+ollama==0.6.2
