@@ -232,12 +232,30 @@ async def _handle_greeting(query: str, context: str, params: dict) -> str:
     return _greeting_response()
 
 
+# ── Visa category keywords (sorted by specificity) ──────────────────────────
+VISA_TYPE_KEYWORDS = {
+    "sticker": ["sticker", "traditional", "embassy", "consulate", "in-person", "appointment", "biometric"],
+    "e-visa": ["e-visa", "evisa", "electronic visa", "online visa", "digital visa", "eta"],
+    "on-arrival": ["on-arrival", "on arrival", "landing", "arrival visa", "visa on arrival", "voa"],
+    "visa-free": ["visa-free", "visa free", "no visa", "without visa", "free entry", "visa exempt", "visa exemption"],
+    "transit": ["transit", "layover", "connecting flight", "stopover", "airport transit"],
+    "medical": ["medical", "health", "treatment", "medical visa"],
+    "business": ["business", "corporate", "work trip", "business trip", "conference"],
+    "student": ["study", "student", "university", "college", "academic"],
+    "work": ["work", "employment", "job", "professional", "employee"],
+    "tourist": ["tourist", "tourism", "travel", "vacation", "sightseeing"],
+}
+
+
 async def _handle_visa_qa(query: str, context: str, params: dict) -> str:
     country_id = params.get("country_id")
-    visa_type = None
-    for vt in ["tourist", "business", "student", "work", "transit", "medical"]:
-        if vt in query.lower():
-            visa_type = vt
+    q = query.lower()
+
+    # Detect visa category (more specific first)
+    visa_category = None
+    for cat, keywords in VISA_TYPE_KEYWORDS.items():
+        if any(kw in q for kw in keywords):
+            visa_category = cat
             break
 
     if not country_id:
@@ -247,15 +265,50 @@ async def _handle_visa_qa(query: str, context: str, params: dict) -> str:
     if not data:
         return COUNTRY_NOT_FOUND
 
-    is_fee = any(kw in query.lower() for kw in ["fee", "cost", "price", "how much", "₹", "$", "payment"])
-    is_docs = any(kw in query.lower() for kw in ["document", "need", "required", "upload", "submit"])
+    is_fee = any(kw in q for kw in ["fee", "cost", "price", "how much", "₹", "$", "payment"])
+    is_docs = any(kw in q for kw in ["document", "need", "required", "upload", "submit"])
+    is_list = any(kw in q for kw in ["list", "all visa", "types", "categories", "available", "options", "show"])
+
+    # List all visa types available for a country
+    if is_list or q.startswith("list"):
+        visa_types = data.get("visa_types", [])
+        categories = data.get("categories", [])
+        lines = [f"📋 **Visa options for {data.get('name', country_id)}:**\n"]
+        highlights = data.get("highlights", [])
+        if highlights:
+            lines.append(f"✨ {', '.join(highlights)}\n")
+        for cat in categories:
+            lines.append(f"  • **{cat.get('name')}** — {_fmt_money(cat.get('fees_inr'))} / {_fmt_money(cat.get('fees_usd'), '$')}, {cat.get('processing_days', 'N/A')} days")
+        if visa_types:
+            lines.append(f"\nAvailable categories: {', '.join(visa_types)}")
+        return "\n".join(lines)
 
     if is_fee:
         return _fees_response(data)
-    if is_docs and visa_type:
-        return _docs_response(visa_type)
+    if is_docs and visa_category:
+        return _docs_response(visa_category)
 
-    return _visa_requirements_response(data, visa_type)
+    # If specific category requested, filter categories
+    matching = []
+    categories = data.get("categories", [])
+    if visa_category:
+        # Check if any category name matches
+        for cat in categories:
+            cname = cat.get("name", "").lower()
+            for kw in VISA_TYPE_KEYWORDS.get(visa_category, []):
+                if kw in cname or visa_category in cname:
+                    matching.append(cat)
+                    break
+        if not matching:
+            # Try broader match by checking visa_type names
+            visa_types = [vt.lower() for vt in data.get("visa_types", [])]
+            if visa_category in visa_types or any(visa_category in vt for vt in visa_types):
+                matching = categories
+
+    if matching:
+        return _visa_requirements_response(data, visa_category)
+
+    return _visa_requirements_response(data, visa_category)
 
 
 async def _handle_student(query: str, context: str, params: dict) -> str:
