@@ -398,6 +398,7 @@ async def run_agent(
             "agent_name": spec.name,
             "agent_role": spec.role,
             "context": rag_context,
+            "today": datetime.now().strftime("%B %d, %Y"),
         }
         rendered = render_prompt(prompt, variables)
         system_prompt = rendered["system"]
