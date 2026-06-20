@@ -321,7 +321,13 @@ async def _upsert_chunks(collection: str, items: Iterable[dict], chunk_chars: in
         })
     try:
         get_collection(collection)
-        upsert_documents(collection, payload)
+        upsert_documents(
+            collection,
+            ids=[d["id"] for d in payload],
+            documents=[d["document"] for d in payload],
+            embeddings=[d["embedding"] for d in payload],
+            metadatas=[d["metadata"] for d in payload],
+        )
         return len(payload)
     except Exception as e:
         logger.warning("Upsert into %s failed: %s", collection, e)
