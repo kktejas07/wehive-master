@@ -1,9 +1,21 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, Plug, CheckCircle2, AlertTriangle, Trash2, TestTube, X, KeyRound, ChevronDown } from 'lucide-react';
+import { Loader2, Plug, CheckCircle2, AlertTriangle, Trash2, TestTube, X, KeyRound, ChevronDown, Cpu } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, apiClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
+
+const LLM_PROVIDERS = [
+  { id: 'groq', name: 'Groq' },
+  { id: 'openai', name: 'OpenAI' },
+  { id: 'anthropic', name: 'Anthropic' },
+  { id: 'google', name: 'Google Gemini' },
+  { id: 'openrouter', name: 'OpenRouter' },
+  { id: 'mistral', name: 'Mistral AI' },
+  { id: 'together', name: 'Together AI' },
+  { id: 'deepseek', name: 'DeepSeek' },
+  { id: 'ollama', name: 'Ollama (local)' },
+];
 
 const CHANNELS = [
   { id: 'mock',             label: 'Mock (123456)',        hint: 'Dev-friendly — always uses the code `123456`.' },
@@ -131,6 +143,14 @@ export default function IntegrationsTab() {
   const [connecting, setConnecting] = useState(false);
   const [testing, setTesting] = useState(false);
 
+  // Platform Default LLM
+  const [llmConfig, setLlmConfig] = useState(null);
+  const [llmProvider, setLlmProvider] = useState('groq');
+  const [llmKey, setLlmKey] = useState('');
+  const [llmModel, setLlmModel] = useState('');
+  const [llmSaving, setLlmSaving] = useState(false);
+  const [llmTesting, setLlmTesting] = useState(false);
+
   const loadIntegrations = useCallback(async () => {
     const r = await adminClient(token).get('/integrations');
     setOtpData(r.data);
@@ -149,10 +169,23 @@ export default function IntegrationsTab() {
     }
   }, [token]);
 
+  const loadDefaultLlm = useCallback(async () => {
+    try {
+      const r = await adminClient(token).get('/settings/default_llm');
+      const cfg = r.data?.config || {};
+      setLlmConfig(cfg);
+      if (cfg.provider) setLlmProvider(cfg.provider);
+      if (cfg.model) setLlmModel(cfg.model);
+    } catch (e) {
+      // not configured yet — fine
+    }
+  }, [token]);
+
   useEffect(() => {
     loadIntegrations();
     loadThirdParty();
-  }, [loadIntegrations, loadThirdParty]);
+    loadDefaultLlm();
+  }, [loadIntegrations, loadThirdParty, loadDefaultLlm]);
 
   const setChannel = async (id) => {
     setBusy(true);
@@ -164,6 +197,44 @@ export default function IntegrationsTab() {
       toast({ title: 'Failed', description: e?.response?.data?.detail || e.message });
     } finally {
       setBusy(false);
+    }
+  };
+
+  const saveDefaultLlm = async () => {
+    if (!llmKey.trim()) return;
+    setLlmSaving(true);
+    try {
+      await adminClient(token).put('/settings/default_llm', {
+        config: { provider: llmProvider, key: llmKey.trim(), model: llmModel.trim() },
+      });
+      toast({ title: 'Default LLM saved' });
+      setLlmConfig({ provider: llmProvider, key: llmKey.trim(), model: llmModel.trim() });
+    } catch (e) {
+      toast({ title: 'Failed to save', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    } finally {
+      setLlmSaving(false);
+    }
+  };
+
+  const testDefaultLlm = async () => {
+    if (!llmKey.trim()) return;
+    setLlmTesting(true);
+    try {
+      const r = await apiClient(token).post('/ai-marketplace/test', {
+        provider_id: llmProvider,
+        api_key: llmKey.trim(),
+        model: llmModel.trim(),
+        prompt: 'Say hello in one word.',
+      });
+      if (r.data.ok) {
+        toast({ title: 'Connection successful', description: r.data.reply?.slice(0, 120) });
+      } else {
+        toast({ title: 'Test failed', description: r.data.error, variant: 'destructive' });
+      }
+    } catch (e) {
+      toast({ title: 'Test failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    } finally {
+      setLlmTesting(false);
     }
   };
 
@@ -252,6 +323,54 @@ export default function IntegrationsTab() {
               </button>
             );
           })}
+        </div>
+      </Panel>
+
+      {/* Platform Default LLM */}
+      <Panel className="mb-4">
+        <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-white/5">
+          <Cpu className="w-4 h-4 text-emerald-400" />
+          <div>
+            <div className="text-[13.5px] font-bold text-white">Default LLM Provider</div>
+            <div className="text-[11.5px] text-slate-400">Platform-wide default AI provider used when users haven't connected their own key</div>
+          </div>
+          {llmConfig?.key && (
+            <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[11px] font-bold uppercase tracking-[0.14em]">
+              <CheckCircle2 className="w-3 h-3" /> Configured
+            </span>
+          )}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] font-bold text-slate-400 mb-1">Provider</label>
+            <select value={llmProvider} onChange={e => setLlmProvider(e.target.value)}
+              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--accent))]/50">
+              {LLM_PROVIDERS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-slate-400 mb-1">Model</label>
+            <input value={llmModel} onChange={e => setLlmModel(e.target.value)} placeholder="llama-3.3-70b-versatile"
+              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white placeholder-slate-600 outline-none focus:border-[hsl(var(--accent))]/50" />
+          </div>
+        </div>
+        <div className="mt-2">
+          <label className="block text-[11px] font-bold text-slate-400 mb-1">API Key</label>
+          <div className="relative">
+            <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+            <input type="password" value={llmKey} onChange={e => setLlmKey(e.target.value)} placeholder={llmConfig?.key ? '(key saved — enter new value to replace)' : 'gsk_...'}
+              className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 outline-none focus:border-[hsl(var(--accent))]/50" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2 mt-3">
+          <button onClick={testDefaultLlm} disabled={llmTesting || !llmKey.trim()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-[11px] font-bold text-slate-400 hover:bg-white/5 disabled:opacity-40 transition">
+            {llmTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />} Test
+          </button>
+          <button onClick={saveDefaultLlm} disabled={llmSaving || !llmKey.trim()}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[hsl(var(--accent))] text-white text-[11px] font-bold hover:bg-[hsl(var(--accent))]/80 disabled:opacity-40 transition">
+            {llmSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plug className="w-3 h-3" />} Save
+          </button>
         </div>
       </Panel>
 

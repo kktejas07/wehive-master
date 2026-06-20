@@ -848,6 +848,21 @@ class AIMarketplace:
             default_model = os.environ.get("DEFAULT_LLM_MODEL", "").strip()
             provider = get_provider(default_provider, key=default_key, model=default_model)
             return provider, default_provider
+
+        # Platform-wide default configured by admin via Settings → Default LLM
+        try:
+            from settings_service import get_default_llm_config
+            llm_cfg = await get_default_llm_config()
+            if llm_cfg:
+                default_key = llm_cfg.get("key", "").strip()
+                if default_key:
+                    default_provider = llm_cfg.get("provider", "openai").strip()
+                    default_model = llm_cfg.get("model", "").strip()
+                    provider = get_provider(default_provider, key=default_key, model=default_model)
+                    return provider, default_provider
+        except Exception:
+            pass
+
         return None, ""
 
     async def chat(self, user_id: str, system_prompt: str, user_prompt: str, max_tokens: int = 1024) -> str:

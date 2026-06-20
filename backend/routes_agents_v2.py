@@ -19,7 +19,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from auth_utils import get_current_user
+from auth_utils import get_current_user, get_current_user_optional
 from admin_auth import get_current_admin_flex
 from db import db
 from agent_framework import (
@@ -82,7 +82,7 @@ async def delete_agent(agent_id: str, _=Depends(get_current_admin_flex)):
 
 
 @router.post("/{agent_id}/run")
-async def run_agent_endpoint(agent_id: str, req: RunAgentRequest, user=Depends(get_current_user)):
+async def run_agent_endpoint(agent_id: str, req: RunAgentRequest, user=Depends(get_current_user_optional)):
     reg = _registry()
     spec = await reg.get(agent_id)
     if not spec:

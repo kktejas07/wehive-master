@@ -72,3 +72,7 @@ async def get_branding_config() -> dict:
 
 async def get_r2_config() -> dict:
     return await _load('r2')
+
+
+async def get_default_llm_config() -> dict:
+    return await _load('default_llm')

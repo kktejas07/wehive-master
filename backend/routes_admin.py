@@ -792,7 +792,7 @@ async def admin_update_integrations(payload: IntegrationSettings, _=Depends(get_
     return {'ok': True, **update}
 
 
-ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding'}
+ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'default_llm'}
 
 
 @router.get('/settings/{namespace}')

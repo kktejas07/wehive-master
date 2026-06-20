@@ -261,7 +261,7 @@ export default function Hive({ inOverlay }) {
       const q = (override ?? text).trim();
       if (!q || sending) return;
 
-      if (!isAuthed) {
+      if (!isAuthed && !override) {
         setMessages((m) => [
           ...m,
           {
