@@ -14,8 +14,24 @@ const LLM_PROVIDERS = [
   { id: 'mistral', name: 'Mistral AI' },
   { id: 'together', name: 'Together AI' },
   { id: 'deepseek', name: 'DeepSeek' },
+  { id: 'fireworks', name: 'Fireworks AI' },
+  { id: 'sambanova', name: 'SambaNova' },
   { id: 'ollama', name: 'Ollama (local)' },
 ];
+
+const LLM_MODELS = {
+  groq: ['llama-3.3-70b-versatile', 'llama-3.1-405b-reasoning', 'mixtral-8x7b-32768', 'gemma2-9b-it'],
+  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+  anthropic: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
+  google: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'],
+  openrouter: ['meta-llama/llama-3.2-70b-instruct', 'meta-llama/llama-3.1-405b-instruct', 'mistralai/mistral-large-2411', 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o'],
+  mistral: ['mistral-large-latest', 'mistral-medium-latest', 'codestral-latest'],
+  together: ['meta-llama/Llama-3.3-70B-Instruct-Turbo', 'meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo', 'mistralai/Mixtral-8x22B-Instruct-v0.1'],
+  deepseek: ['deepseek-chat', 'deepseek-reasoner'],
+  fireworks: ['accounts/fireworks/models/llama-v3p3-70b-instruct', 'accounts/fireworks/models/llama-v3p2-90b-vision-instruct'],
+  sambanova: ['Meta-Llama-3.3-70B-Instruct', 'Meta-Llama-3.2-90B-Vision-Instruct'],
+  ollama: ['llama3.2', 'llama3.1', 'mistral', 'gemma2', 'phi4'],
+};
 
 const CHANNELS = [
   { id: 'mock',             label: 'Mock (123456)',        hint: 'Dev-friendly — always uses the code `123456`.' },
@@ -350,8 +366,15 @@ export default function IntegrationsTab() {
           </div>
           <div>
             <label className="block text-[11px] font-bold text-slate-400 mb-1">Model</label>
-            <input value={llmModel} onChange={e => setLlmModel(e.target.value)} placeholder="llama-3.3-70b-versatile"
-              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white placeholder-slate-600 outline-none focus:border-[hsl(var(--accent))]/50" />
+            <select value={llmModel} onChange={e => setLlmModel(e.target.value)}
+              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--accent))]/50">
+              {llmModel && !LLM_MODELS[llmProvider]?.includes(llmModel) && (
+                <option value={llmModel}>{llmModel}</option>
+              )}
+              {(LLM_MODELS[llmProvider] || []).map(m => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="mt-2">
