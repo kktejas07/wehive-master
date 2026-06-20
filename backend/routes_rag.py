@@ -77,7 +77,7 @@ class DeleteDocsRequest(BaseModel):
 
 
 @router.get("/status")
-async def rag_status(user=Depends(get_current_user)):
+async def rag_status(user=Depends(get_current_admin_flex)):
     """Backend status — Chroma, Ollama, prompt store."""
     from ollama_embeddings import is_available, OLLAMA_EMBED_MODEL
     from vector_store import list_collections, _USE_CHROMA, CHROMA_PATH
@@ -110,7 +110,7 @@ async def rag_status(user=Depends(get_current_user)):
 
 
 @router.get("/collections")
-async def list_rag_collections(user=Depends(get_current_user)):
+async def list_rag_collections(user=Depends(get_current_admin_flex)):
     from vector_store import list_collections, collection_count
 
     collections = list_collections()
@@ -120,14 +120,14 @@ async def list_rag_collections(user=Depends(get_current_user)):
 
 
 @router.get("/collections/{name}")
-async def get_collection_info(name: str, user=Depends(get_current_user)):
+async def get_collection_info(name: str, user=Depends(get_current_admin_flex)):
     from vector_store import collection_count
 
     return {"name": name, "count": collection_count(name)}
 
 
 @router.post("/retrieve")
-async def retrieve_only(req: RetrieveRequest, user=Depends(get_current_user)):
+async def retrieve_only(req: RetrieveRequest, user=Depends(get_current_admin_flex)):
     """RAG retrieval only — no LLM call. Returns the matching chunks."""
     from agent_framework import _retrieve_rag_context
 
@@ -138,7 +138,7 @@ async def retrieve_only(req: RetrieveRequest, user=Depends(get_current_user)):
 
 
 @router.post("/query")
-async def rag_query(req: QueryRequest, user=Depends(get_current_user)):
+async def rag_query(req: QueryRequest, user=Depends(get_current_admin_flex)):
     """RAG-augmented Q&A: retrieve chunks, then call the LLM with them as context."""
     from agent_framework import _retrieve_rag_context, _llm_call
 
