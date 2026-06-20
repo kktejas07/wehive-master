@@ -259,11 +259,23 @@ async def _llm_call(
 ) -> tuple[str, dict]:
     """Invoke the LLM via AI Marketplace, optionally with a forced provider.
 
-    Returns (reply_text, provider_info). Falls back to local Ollama via
-    local_llm if no marketplace provider is configured.
+    Priority:
+      1. User's connected provider (BYOK via AI Marketplace).
+      2. Platform default LLM (admin settings or env vars).
+      3. Agent's forced provider (if provider_id + model are set in the spec).
+      4. Local Ollama fallback.
+
+    Returns (reply_text, provider_info).
     """
     from ai_marketplace import marketplace
 
+    # 1 & 2 — marketplace handles user BYOK first, then platform default
+    try:
+        return await marketplace.chat_with_info(user_id, system_prompt, user_prompt, max_tokens)
+    except Exception as e:
+        logger.debug("Marketplace chat unavailable: %s", e)
+
+    # 3 — forced provider from agent spec (e.g. Ollama)
     if provider_id and model:
         try:
             from ai_marketplace import get_provider, PROVIDER_REGISTRY
@@ -278,16 +290,13 @@ async def _llm_call(
                 "powered_by_tagline": meta.get("powered_by_tagline", ""),
             }
         except Exception as e:
-            logger.warning("Forced provider %s/%s failed: %s — falling back to marketplace", provider_id, model, e)
+            logger.warning("Forced provider %s/%s failed: %s", provider_id, model, e)
 
-    try:
-        return await marketplace.chat_with_info(user_id, system_prompt, user_prompt, max_tokens)
-    except Exception as e:
-        logger.warning("Marketplace chat failed: %s — trying local Ollama", e)
-        from local_llm import local_chat_with_info
+    # 4 — local Ollama as final fallback
+    from local_llm import local_chat_with_info
 
-        reply, info = await local_chat_with_info(user_prompt, context=system_prompt)
-        return reply, info
+    reply, info = await local_chat_with_info(user_prompt, context=system_prompt)
+    return reply, info
 
 
 # ---------------------------------------------------------------------------
