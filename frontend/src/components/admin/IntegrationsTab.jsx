@@ -192,6 +192,7 @@ export default function IntegrationsTab() {
       setLlmConfig(cfg);
       if (cfg.provider) setLlmProvider(cfg.provider);
       if (cfg.model) setLlmModel(cfg.model);
+      if (cfg.key) setLlmKey(cfg.key);
     } catch (e) {
       // not configured yet — fine
     }
