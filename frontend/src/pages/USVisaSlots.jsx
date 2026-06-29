@@ -22,8 +22,6 @@ import {
   Users,
   AlertCircle,
   Building2,
-  Search,
-  Filter,
   Phone,
   PhoneCall,
 } from 'lucide-react';
@@ -55,8 +53,6 @@ export default function USVisaSlots() {
   const [selectedVisas, setSelectedVisas] = useState(['b1b2']);
   const [selectedConsulates, setSelectedConsulates] = useState(CONSULATE_ORDER);
   const [showSubscribeForm, setShowSubscribeForm] = useState(false);
-  const [filterVisa, setFilterVisa] = useState('');
-  const [filterConsulate, setFilterConsulate] = useState('');
 
   const toggleVisa = (id) => {
     setSelectedVisas(prev =>
@@ -295,46 +291,9 @@ export default function USVisaSlots() {
           {isAuthed && (
             <>
 
-          {/* Quick Filter */}
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <div className="flex items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/50">
-              <Filter className="w-3.5 h-3.5" />
-              <span>Filter:</span>
-            </div>
-            <select
-              value={filterVisa}
-              onChange={e => setFilterVisa(e.target.value)}
-              className="h-9 rounded-full border border-black/10 px-3 text-[12px] font-bold text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--blue-700))]"
-            >
-              <option value="">All Visa Types</option>
-              {[{ id: 'b1b2', label: 'B1/B2 Tourist' }, { id: 'f1', label: 'F1 Student' }, { id: 'h1b', label: 'H1B Work' }, { id: 'h4', label: 'H4 Dependent' }, { id: 'l1', label: 'L1 Transfer' }, { id: 'j1', label: 'J1 Exchange' }].map(vt => (
-                <option key={vt.id} value={vt.id}>{vt.label}</option>
-              ))}
-            </select>
-            <select
-              value={filterConsulate}
-              onChange={e => setFilterConsulate(e.target.value)}
-              className="h-9 rounded-full border border-black/10 px-3 text-[12px] font-bold text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--blue-700))]"
-            >
-              <option value="">All Consulates</option>
-              {CONSULATE_ORDER.map(cid => (
-                <option key={cid} value={cid}>{cid.charAt(0).toUpperCase() + cid.slice(1)}</option>
-              ))}
-            </select>
-            {(filterVisa || filterConsulate) && (
-              <button
-                onClick={() => { setFilterVisa(''); setFilterConsulate(''); }}
-                className="text-[11px] font-bold text-[hsl(var(--blue-700))] hover:underline"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-
           {/* Consulate Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {CONSULATE_ORDER.map(cid => {
-              if (filterConsulate && filterConsulate !== cid) return null;
               const data = summary?.consulates?.[cid];
               if (!data) return null;
               const available = data.total_slots > 0;
@@ -360,7 +319,6 @@ export default function USVisaSlots() {
 
                   <div className="flex flex-wrap gap-1.5">
                     {Object.entries(data.visa_types || {}).map(([vtId, vtData]) => {
-                      if (filterVisa && filterVisa !== vtId) return null;
                       const colors = VISA_TYPE_COLORS[vtId] || VISA_TYPE_COLORS.b1b2;
                       const hasData = vtData.wait_time && vtData.wait_time !== 'N/A';
                       return (

@@ -164,11 +164,11 @@ async def _run_slot_check():
             cid = consulate["id"]
             for vt in VISA_TYPES:
                 wt = wait_times.get(cid, {}).get(vt["id"], "N/A")
-
                 existing = await usvisa_slots_col.find_one({
                     "consulate": cid,
                     "visa_type": vt["id"],
                     "check_date": check_date,
+                    "source": "wait_time_estimate",
                 })
                 if not existing:
                     import uuid
@@ -185,8 +185,20 @@ async def _run_slot_check():
                         "booking_url_bls": _get_bls_booking_url(cid, vt["id"]),
                         "check_date": check_date,
                         "detected_at": datetime.utcnow(),
-                        "source": "visahq_or_published",
+                        "source": "wait_time_estimate",
                     })
+
+    try:
+        from telegram_slot_reader import read_all_channels, store_telegram_slots
+        tg_slots = await read_all_channels()
+        if tg_slots:
+            stored = await store_telegram_slots(tg_slots)
+            if stored:
+                logger.info("Stored %d slot mentions from Telegram channels", stored)
+    except ImportError:
+        pass
+    except Exception as e:
+        logger.debug("Telegram slot reader skipped: %s", e)
 
     if TELEGRAM_BOT_TOKEN and wait_times:
         telegram = TelegramService(TELEGRAM_BOT_TOKEN)
@@ -195,7 +207,7 @@ async def _run_slot_check():
             await telegram.send_message(TELEGRAM_CHANNEL_ID, summary)
         _notifications_sent += 1
 
-    logger.info("Wait-time check complete (mode=%s)", CHECKER_MODE)
+    logger.info("Slot check complete (wait_times + Telegram)")
 
 
 async def _slot_monitor_loop():
