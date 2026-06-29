@@ -40,7 +40,7 @@ export default function UserMenu() {
   }
 
   const initial = (user.name || user.email || user.phone || '?').charAt(0).toUpperCase();
-  const display = user.name || user.email || user.phone;
+  const display = user.name || user.email || user.phone || 'Account';
   const seed = user.avatar_seed || user.email || user.phone || user.id;
   const aUrl = avatarUrl({ seed, gender: user.gender || 'hero', style: user.avatar_style });
 
@@ -53,9 +53,6 @@ export default function UserMenu() {
       >
         <span className="h-8 w-8 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-1 ring-black/5">
           <img src={aUrl} alt={initial} className="h-full w-full object-cover" />
-        </span>
-        <span className="text-[13px] font-bold text-[hsl(var(--blue-900))] max-w-[120px] truncate">
-          {display || 'Account'}
         </span>
         <ChevronDown className="w-3.5 h-3.5 text-[hsl(var(--blue-900))]/55" />
       </button>
