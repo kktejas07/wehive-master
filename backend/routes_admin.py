@@ -805,7 +805,7 @@ async def admin_integrations(_=Depends(get_current_admin)):
 
 
 class IntegrationSettings(BaseModel):
-    OTP_CHANNEL: Optional[Literal['mock', 'twilio_sms', 'twilio_whatsapp', 'email', 'auto']] = None
+    OTP_CHANNEL: Optional[Literal['mock', 'twilio_sms', 'twilio_whatsapp', 'whatsapp', 'email', 'auto']] = None
 
 
 @router.patch('/integrations')

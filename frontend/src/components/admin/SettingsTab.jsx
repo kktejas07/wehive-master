@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Loader2, Save, Eye, EyeOff, Info,
   CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud, ShieldCheck,
-  Palette, Upload as UploadIcon, Key, Server,
+  Palette, Upload as UploadIcon, Key, Server, ChevronDown,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -121,21 +121,19 @@ function ToggleField({ label, tooltip, value, onChange }) {
   );
 }
 
-const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'postal', 'openwa', 'email'];
+const NAMESPACES = ['firebase', 'razorpay', 'email', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'openwa'];
 
 const SECTION_META = {
   firebase: { label: 'Firebase', icon: Globe, title: 'Firebase Authentication' },
   razorpay: { label: 'Razorpay', icon: CreditCard, title: 'Razorpay Payments' },
-  smtp: { label: 'SMTP Email', icon: Mail, title: 'SMTP Email' },
+  email: { label: 'Email', icon: Mail, title: 'Email (SMTP / Postal)' },
   twilio: { label: 'Twilio', icon: Smartphone, title: 'Twilio SMS / WhatsApp' },
   auth_methods: { label: 'Auth Methods', icon: ShieldCheck, title: 'Authentication Methods' },
   notifications: { label: 'Notifications', icon: Bell, title: 'Notifications (Telegram / Discord / WhatsApp)' },
   general: { label: 'General', icon: MessageSquare, title: 'General' },
   r2: { label: 'R2 Storage', icon: Cloud, title: 'Cloudflare R2 Image Storage' },
   branding: { label: 'Branding', icon: Palette, title: 'Site Branding & Assets' },
-  postal: { label: 'Postal', icon: Mail, title: 'Postal Email API' },
   openwa: { label: 'OpenWA', icon: MessageSquare, title: 'OpenWA WhatsApp API' },
-  email: { label: 'Email Provider', icon: Server, title: 'Email Provider Selection' },
 };
 
 const FIELDS = {
@@ -153,13 +151,19 @@ const FIELDS = {
     { type: 'secret', key: 'key_secret', label: 'Key Secret', tooltip: 'Razorpay API Key Secret — keep this confidential' },
     { type: 'secret', key: 'webhook_secret', label: 'Webhook Secret', tooltip: 'Secret set in Razorpay Dashboard → Settings → Webhooks for signature verification' },
   ],
-  smtp: [
-    { type: 'text', key: 'host', label: 'SMTP Host', tooltip: 'Email server e.g. smtp.gmail.com, smtp.sendgrid.net' },
-    { type: 'text', key: 'port', label: 'SMTP Port', tooltip: 'Usually 587 (TLS) or 465 (SSL)' },
-    { type: 'text', key: 'user', label: 'Username', tooltip: 'Full email address or SMTP login user' },
-    { type: 'secret', key: 'password', label: 'Password', tooltip: 'SMTP password or App Password (Google requires an App Password)' },
-    { type: 'text', key: 'from_address', label: 'From Address', tooltip: 'Sender email e.g. noreply@wehive.co.in' },
-    { type: 'text', key: 'from_name', label: 'From Name', tooltip: 'Display name e.g. We Hive' },
+  email: [
+    { type: 'select', key: 'provider', label: 'Provider', tooltip: 'Choose SMTP or Postal for sending all emails (OTP, welcome, payments, invoices, password reset)',
+      options: [{ value: 'smtp', label: 'SMTP (Gmail, SendGrid, etc.)' }, { value: 'postal', label: 'Postal (self-hosted email API)' }] },
+    { type: 'text', key: 'from_address', label: 'From Address', tooltip: 'Sender email for all outgoing mail e.g. noreply@wehive.co.in' },
+    { type: 'text', key: 'from_name', label: 'From Name', tooltip: 'Display name for outgoing mail e.g. We Hive' },
+    { type: 'divider', key: 'smtp_divider', label: 'SMTP Settings', visibleWhen: { key: 'provider', value: 'smtp' } },
+    { type: 'text', key: 'smtp_host', label: 'SMTP Host', tooltip: 'e.g. smtp.gmail.com, smtp.sendgrid.net', visibleWhen: { key: 'provider', value: 'smtp' } },
+    { type: 'text', key: 'smtp_port', label: 'SMTP Port', tooltip: 'Usually 587 (TLS) or 465 (SSL)', visibleWhen: { key: 'provider', value: 'smtp' } },
+    { type: 'text', key: 'smtp_user', label: 'SMTP Username', tooltip: 'Full email address or SMTP login user', visibleWhen: { key: 'provider', value: 'smtp' } },
+    { type: 'secret', key: 'smtp_password', label: 'SMTP Password', tooltip: 'SMTP password or App Password (Google requires an App Password)', visibleWhen: { key: 'provider', value: 'smtp' } },
+    { type: 'divider', key: 'postal_divider', label: 'Postal Settings', visibleWhen: { key: 'provider', value: 'postal' } },
+    { type: 'text', key: 'postal_api_url', label: 'Postal API URL', tooltip: 'e.g. https://postal.yourdomain.com', visibleWhen: { key: 'provider', value: 'postal' } },
+    { type: 'secret', key: 'postal_api_key', label: 'Postal API Key', tooltip: 'From Postal admin panel → Credentials', visibleWhen: { key: 'provider', value: 'postal' } },
   ],
   twilio: [
     { type: 'secret', key: 'account_sid', label: 'Account SID', tooltip: 'Twilio Account SID from twilio.com/console' },
@@ -206,14 +210,9 @@ const FIELDS = {
     { type: 'text', key: 'from_name', label: 'From Name', tooltip: 'Display name e.g. We Hive' },
   ],
   openwa: [
-    { type: 'text', key: 'api_url', label: 'API URL', tooltip: 'OpenWA server URL e.g. https://wa.yourdomain.com' },
-    { type: 'secret', key: 'api_key', label: 'API Key', tooltip: 'OpenWA API key for authentication' },
-    { type: 'text', key: 'instance_id', label: 'Instance ID', tooltip: 'OpenWA instance ID (default: "default")' },
-  ],
-  email: [
-    { type: 'text', key: 'provider', label: 'Provider', tooltip: 'Email provider: "smtp" (default) or "postal". Changes apply to all emails including OTP, welcome, payments, and password reset.' },
-    { type: 'text', key: 'from_address', label: 'From Address', tooltip: 'Override sender email for all email communications' },
-    { type: 'text', key: 'from_name', label: 'From Name', tooltip: 'Override sender display name' },
+    { type: 'text', key: 'api_url', label: 'API URL', tooltip: 'OpenWA server URL e.g. http://167.233.39.15:2785' },
+    { type: 'secret', key: 'api_key', label: 'API Key', tooltip: 'OpenWA API key (starts with owa_k1_...)' },
+    { type: 'text', key: 'instance_id', label: 'Instance ID', tooltip: 'OpenWA session ID from dashboard' },
   ],
 };
 
@@ -239,6 +238,27 @@ export default function SettingsTab() {
           })
         );
         for (const { ns, config } of nsResults) results[ns] = config;
+
+        // Also load smtp and postal for the consolidated email tab
+        const smtpRes = await client.get('/settings/smtp').catch(() => ({ data: { config: {} } }));
+        const postalRes = await client.get('/settings/postal').catch(() => ({ data: { config: {} } }));
+        const smtpCfg = smtpRes.data.config || {};
+        const postalCfg = postalRes.data.config || {};
+
+        // Merge into email: SMTP fields prefixed with smtp_, Postal with postal_
+        if (!results.email) results.email = {};
+        if (smtpCfg.host) results.email.smtp_host = smtpCfg.host;
+        if (smtpCfg.port) results.email.smtp_port = smtpCfg.port;
+        if (smtpCfg.user) results.email.smtp_user = smtpCfg.user;
+        if (smtpCfg.password) results.email.smtp_password = smtpCfg.password;
+        if (postalCfg.api_url) results.email.postal_api_url = postalCfg.api_url;
+        if (postalCfg.api_key) results.email.postal_api_key = postalCfg.api_key;
+        // Fall back from_address/from_name from smtp/postal if email namespace doesn't have them
+        if (!results.email.from_address && smtpCfg.from_address) results.email.from_address = smtpCfg.from_address;
+        if (!results.email.from_name && smtpCfg.from_name) results.email.from_name = smtpCfg.from_name;
+        if (!results.email.from_address && postalCfg.from_address) results.email.from_address = postalCfg.from_address;
+        if (!results.email.from_name && postalCfg.from_name) results.email.from_name = postalCfg.from_name;
+
         setSettings(results);
         setOriginals(JSON.parse(JSON.stringify(results)));
         const brandingRes = await client.get('/branding');
@@ -284,9 +304,37 @@ export default function SettingsTab() {
     setSaving(ns);
     try {
       const client = adminClient();
-      await client.put(`/settings/${ns}`, { config: settings[ns] });
+      if (ns === 'email') {
+        // Split config into email, smtp, postal namespaces
+        const vals = settings.email || {};
+        const emailCfg = {};
+        if (vals.provider) emailCfg.provider = vals.provider;
+        if (vals.from_address) emailCfg.from_address = vals.from_address;
+        if (vals.from_name) emailCfg.from_name = vals.from_name;
+
+        const smtpCfg = {};
+        if (vals.smtp_host) smtpCfg.host = vals.smtp_host;
+        if (vals.smtp_port) smtpCfg.port = vals.smtp_port;
+        if (vals.smtp_user) smtpCfg.user = vals.smtp_user;
+        if (vals.smtp_password) smtpCfg.password = vals.smtp_password;
+        if (vals.from_address) smtpCfg.from_address = vals.from_address;
+        if (vals.from_name) smtpCfg.from_name = vals.from_name;
+
+        const postalCfg = {};
+        if (vals.postal_api_url) postalCfg.api_url = vals.postal_api_url;
+        if (vals.postal_api_key) postalCfg.api_key = vals.postal_api_key;
+        if (vals.from_address) postalCfg.from_address = vals.from_address;
+        if (vals.from_name) postalCfg.from_name = vals.from_name;
+
+        await client.put(`/settings/email`, { config: emailCfg });
+        await client.put(`/settings/smtp`, { config: smtpCfg });
+        await client.put(`/settings/postal`, { config: postalCfg });
+        toast({ title: 'Email settings saved', variant: 'success' });
+      } else {
+        await client.put(`/settings/${ns}`, { config: settings[ns] });
+        toast({ title: `${meta.label} settings saved`, variant: 'success' });
+      }
       setOriginals((prev) => ({ ...prev, [ns]: JSON.parse(JSON.stringify(settings[ns])) }));
-      toast({ title: `${meta.label} settings saved`, variant: 'success' });
     } catch (e) {
       toast({ title: `Failed to save ${meta.label}`, description: e.response?.data?.detail || e.message, variant: 'error' });
     } finally {
@@ -362,64 +410,97 @@ export default function SettingsTab() {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            {fields.map((field) => (
-              <div key={field.key}>
-                {field.type === 'secret' ? (
-                  <SecretField
-                    label={field.label}
-                    tooltip={field.tooltip}
-                    value={values[field.key] || ''}
-                    onChange={(v) => setField(field.key, v)}
-                  />
-                ) : field.type === 'toggle' ? (
-                  <ToggleField
-                    label={field.label}
-                    tooltip={field.tooltip}
-                    value={values[field.key] ?? true}
-                    onChange={(v) => setField(field.key, v)}
-                  />
-                ) : field.type === 'file' ? (
-                  <div>
+            {fields.map((field) => {
+              if (field.visibleWhen) {
+                const depVal = values[field.visibleWhen.key];
+                if (depVal !== field.visibleWhen.value) return null;
+              }
+              if (field.type === 'divider') {
+                return (
+                  <div key={field.key} className="sm:col-span-2 pt-2 border-t border-white/10">
+                    <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-slate-400">{field.label}</div>
+                  </div>
+                );
+              }
+              return (
+                <div key={field.key}>
+                  {field.type === 'select' ? (
                     <label className="block">
                       <span className="flex items-center text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400 mb-1.5">
                         {field.label}
                         {field.tooltip && <Tooltip text={field.tooltip} />}
                       </span>
+                      <div className="relative">
+                        <select
+                          value={values[field.key] || ''}
+                          onChange={(e) => setField(field.key, e.target.value)}
+                          className="w-full h-11 px-4 pr-10 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] text-[14px] text-white outline-none transition appearance-none"
+                        >
+                          <option value="">Select provider...</option>
+                          {field.options.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                      </div>
                     </label>
-                    <div className="flex items-center gap-2">
-                      <label className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[12px] font-bold transition cursor-pointer shrink-0">
-                        {uploading === field.key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadIcon className="w-3.5 h-3.5" />}
-                        {uploading === field.key ? 'Uploading...' : `Upload ${field.label}`}
-                        <input
-                          type="file"
-                          accept={field.accept || 'image/*'}
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleFileUpload(field.key, file);
-                          }}
-                        />
+                  ) : field.type === 'secret' ? (
+                    <SecretField
+                      label={field.label}
+                      tooltip={field.tooltip}
+                      value={values[field.key] || ''}
+                      onChange={(v) => setField(field.key, v)}
+                    />
+                  ) : field.type === 'toggle' ? (
+                    <ToggleField
+                      label={field.label}
+                      tooltip={field.tooltip}
+                      value={values[field.key] ?? true}
+                      onChange={(v) => setField(field.key, v)}
+                    />
+                  ) : field.type === 'file' ? (
+                    <div>
+                      <label className="block">
+                        <span className="flex items-center text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400 mb-1.5">
+                          {field.label}
+                          {field.tooltip && <Tooltip text={field.tooltip} />}
+                        </span>
                       </label>
-                      {brandingAssets[field.key]?.url && (
-                        <img src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-auto max-w-[120px] rounded-lg object-contain border border-white/10 bg-white/5" />
+                      <div className="flex items-center gap-2">
+                        <label className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[12px] font-bold transition cursor-pointer shrink-0">
+                          {uploading === field.key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadIcon className="w-3.5 h-3.5" />}
+                          {uploading === field.key ? 'Uploading...' : `Upload ${field.label}`}
+                          <input
+                            type="file"
+                            accept={field.accept || 'image/*'}
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileUpload(field.key, file);
+                            }}
+                          />
+                        </label>
+                        {brandingAssets[field.key]?.url && (
+                          <img src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-auto max-w-[120px] rounded-lg object-contain border border-white/10 bg-white/5" />
+                        )}
+                      </div>
+                      {brandingAssets[field.key] && (
+                        <p className="mt-1 text-[10px] text-slate-500">
+                          Uploaded • {(brandingAssets[field.key].size / 1024).toFixed(1)} KB
+                        </p>
                       )}
                     </div>
-                    {brandingAssets[field.key] && (
-                      <p className="mt-1 text-[10px] text-slate-500">
-                        Uploaded • {(brandingAssets[field.key].size / 1024).toFixed(1)} KB
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <Field
-                    label={field.label}
-                    tooltip={field.tooltip}
-                    value={values[field.key] || ''}
-                    onChange={(v) => setField(field.key, v)}
-                  />
-                )}
-              </div>
-            ))}
+                  ) : (
+                    <Field
+                      label={field.label}
+                      tooltip={field.tooltip}
+                      value={values[field.key] || ''}
+                      onChange={(v) => setField(field.key, v)}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </Panel>
       </div>
