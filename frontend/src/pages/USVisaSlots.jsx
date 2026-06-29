@@ -19,7 +19,6 @@ import {
   ExternalLink,
   RefreshCw,
   Send,
-  Users,
   AlertCircle,
   Building2,
   Phone,
@@ -117,7 +116,6 @@ export default function USVisaSlots() {
   const [slots, setSlots] = useState([]);
   const [summary, setSummary] = useState(null);
   const [status, setStatus] = useState(null);
-  const [groups, setGroups] = useState([]);
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -141,14 +139,12 @@ export default function USVisaSlots() {
 
   const fetchAll = useCallback(async () => {
     try {
-      const [summaryRes, groupsRes, statusRes] = await Promise.all([
+      const [summaryRes, statusRes] = await Promise.all([
         axios.get(`${API}/usvisa/slots/summary`),
-        axios.get(`${API}/usvisa/telegram-groups`),
         axios.get(`${API}/usvisa/status`),
       ]);
       setSummary(summaryRes.data);
-      setGroups(groupsRes.data.groups || []);
-      setWhatsappNumber(groupsRes.data.whatsapp_number || '');
+      setWhatsappNumber('+91 9000734326');
       setStatus(statusRes.data);
 
       if (statusRes.data.last_slot_detected_at) {
@@ -162,11 +158,6 @@ export default function USVisaSlots() {
         consulates: FALLBACK_WAIT_TIMES,
         overall: { total_slots: 30, consulates_with_slots: 5, visa_type_counts: { b1b2: 5, f1: 5, h1b: 5 } },
       });
-      setGroups([
-        { visa_type: 'b1b2', visa_name: 'B1/B2', visa_label: 'Tourist & Business', telegram_link: 'https://t.me/USvisaAppointmentsHelp' },
-        { visa_type: 'f1', visa_name: 'F1', visa_label: 'Student', telegram_link: 'https://t.me/US_F1_Visa_Updates' },
-        { visa_type: 'h1b', visa_name: 'H1B', visa_label: 'Work', telegram_link: 'https://t.me/h1b_slots' },
-      ]);
       setWhatsappNumber('+91 9000734326');
       setStatus({ check_interval_seconds: 7200, mode: 'wait_time_estimates' });
     } finally {
@@ -310,7 +301,7 @@ export default function USVisaSlots() {
                     {summary.overall.total_slots} slots available across {summary.overall.consulates_with_slots} consulates!
                   </h3>
                   <p className="mt-1 text-[12px] text-emerald-700">
-                    Join our Telegram groups for instant notifications when new slots open up.
+                    Wait times available across {summary.overall.consulates_with_slots} consulates. Call or WhatsApp us to book.
                   </p>
                 </div>
               </div>
@@ -444,42 +435,6 @@ export default function USVisaSlots() {
           {/* ── End of gated content ── */}
           </>
           )}
-
-          {/* Telegram Groups */}
-          <div className="mb-8">
-            <h2 className="font-display font-extrabold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))] mb-4">
-              Join Telegram for Instant Alerts
-            </h2>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {groups.map(group => {
-                const colors = VISA_TYPE_COLORS[group.visa_type] || VISA_TYPE_COLORS.b1b2;
-                return (
-                  <a
-                    key={group.visa_type}
-                    href={group.telegram_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`group rounded-2xl border-2 p-5 transition hover:-translate-y-0.5 ${colors.border} ${colors.bg}`}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-xl ${colors.text}/10 flex items-center justify-center`}>
-                        <Send className={`w-5 h-5 ${colors.text}`} />
-                      </div>
-                      <div>
-                        <h3 className={`font-bold text-[15px] ${colors.text}`}>{group.visa_name} Visa</h3>
-                        <p className="text-[12px] text-[hsl(var(--blue-900))]/50">{group.visa_label}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--blue-700))] group-hover:underline">
-                      <Users className="w-4 h-4" />
-                      Join Telegram Group
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Notification Subscription */}
           <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8 mb-8">
@@ -639,7 +594,7 @@ export default function USVisaSlots() {
                 {
                   icon: <BellRing className="w-6 h-6" />,
                   title: 'Instant Alerts',
-                  desc: 'The moment slots open up, we send notifications via Telegram, WhatsApp, and in-app.',
+                  desc: 'The moment wait times change, we update your dashboard and can notify you.',
                 },
                 {
                   icon: <MapPin className="w-6 h-6" />,
