@@ -72,9 +72,10 @@ async def get_slots(
 @router.get("/slots/summary")
 async def get_slots_summary(
     hours: int = Query(24, ge=1, le=720),
+    country: str = Query("usa", description="Country code: usa, uk, schengen, canada, australia, uae"),
 ):
-    from slot_monitor import get_wait_times_for_display
-    data = get_wait_times_for_display()
+    from slot_monitor import get_wait_times_for_display, list_corridors
+    data = get_wait_times_for_display(country)
 
     summary = {}
     consulates_with_data = 0
@@ -219,6 +220,12 @@ async def list_consulates():
         "consulates": US_CONSULATES_INDIA,
         "visa_types": VISA_TYPES,
     }
+
+
+@router.get("/corridors")
+async def list_corridors_endpoint():
+    from slot_monitor import list_corridors
+    return {"ok": True, "corridors": list_corridors()}
 
 
 def _serialize_slots(slots: list[dict]) -> list[dict]:

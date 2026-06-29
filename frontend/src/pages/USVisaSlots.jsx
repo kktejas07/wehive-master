@@ -122,6 +122,7 @@ export default function USVisaSlots() {
   const [selectedVisas, setSelectedVisas] = useState(['b1b2']);
   const [selectedConsulates, setSelectedConsulates] = useState(CONSULATE_ORDER);
   const [showSubscribeForm, setShowSubscribeForm] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('usa');
 
   const toggleVisa = (id) => {
     setSelectedVisas(prev =>
@@ -138,7 +139,7 @@ export default function USVisaSlots() {
   const fetchAll = useCallback(async () => {
     try {
       const [summaryRes, statusRes] = await Promise.all([
-        axios.get(`${API}/usvisa/slots/summary`),
+        axios.get(`${API}/usvisa/slots/summary`, { params: { country: selectedCountry } }),
         axios.get(`${API}/usvisa/status`),
       ]);
       setSummary(summaryRes.data);
@@ -161,7 +162,7 @@ export default function USVisaSlots() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedCountry]);
 
   useEffect(() => {
     fetchAll();
@@ -252,7 +253,7 @@ export default function USVisaSlots() {
           </div>
 
           <div className="flex justify-center mb-6">
-            <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[hsl(var(--accent))]/10 border-2 border-[hsl(var(--accent))] text-[13px] font-extrabold text-[hsl(var(--accent))] uppercase tracking-[0.15em] animate-pulse">
+            <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[hsl(var(--accent))] border-2 border-[hsl(var(--accent))] text-[13px] font-extrabold text-white uppercase tracking-[0.15em] animate-pulse shadow-[0_0_20px_rgba(var(--accent-hsl),0.3)]">
               <Clock className="w-4 h-4" />
               Hurry — Slots Fill Fast!
             </span>
@@ -263,10 +264,10 @@ export default function USVisaSlots() {
               <RefreshCw className="w-3.5 h-3.5" /> Live Wait Times
             </div>
             <h1 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-              US Visa Appointment Slots
+              Visa Appointment Slots
             </h1>
             <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/55 max-w-xl mx-auto">
-              Current wait times for US visa appointments across all 5 consulates in India. Updated regularly.
+              Current wait times for visa appointments across VFS centres. Choose your destination above.
             </p>
           </div>
 
@@ -290,6 +291,32 @@ export default function USVisaSlots() {
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
+          </div>
+
+          {/* Country Selector */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex rounded-full bg-white border border-black/10 p-1 gap-0.5">
+              {[
+                { id: 'usa', flag: '🇺🇸', label: 'USA' },
+                { id: 'uk', flag: '🇬🇧', label: 'UK' },
+                { id: 'schengen', flag: '🇪🇺', label: 'Schengen' },
+                { id: 'canada', flag: '🇨🇦', label: 'Canada' },
+                { id: 'australia', flag: '🇦🇺', label: 'Australia' },
+                { id: 'uae', flag: '🇦🇪', label: 'UAE' },
+              ].map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCountry(c.id)}
+                  className={`px-3.5 py-2 rounded-full text-[12px] font-bold transition-colors ${
+                    selectedCountry === c.id
+                      ? 'bg-[hsl(var(--accent))] text-white'
+                      : 'text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))]'
+                  }`}
+                >
+                  {c.flag} {c.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ── Gated Content: Register to view live slots ── */}
