@@ -503,11 +503,6 @@ export default function USVisaSlots() {
                 <Send className="w-4 h-4" />
                 Chat on WhatsApp
               </a>
-              {whatsappNumber && (
-                <div className="inline-flex items-center h-11 px-6 rounded-full border border-green-200 text-[13px] font-bold text-green-700">
-                  {whatsappNumber}
-                </div>
-              )}
             </div>
           </div>
 
