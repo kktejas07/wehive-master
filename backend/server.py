@@ -50,6 +50,20 @@ from routes_rag import router as rag_router  # noqa: E402
 from routes_prompts import router as prompts_router  # noqa: E402
 from routes_agents_v2 import router as agents_v2_router  # noqa: E402
 from routes_hive_learning import router as hive_learning_router  # noqa: E402
+from routes_slot_monitor import router as slot_monitor_router  # noqa: E402
+from routes_learning_resources import router as learning_resources_router  # noqa: E402
+from routes_people_intelligence import router as people_intelligence_router  # noqa: E402
+from routes_gen_ai import router as gen_ai_router  # noqa: E402
+from routes_open_source import router as open_source_router  # noqa: E402
+from routes_google_knowledge import router as google_knowledge_router  # noqa: E402
+from routes_agentic_ai import router as agentic_ai_router  # noqa: E402
+from routes_ai_operations import router as ai_operations_router  # noqa: E402
+from routes_mcp import router as mcp_router  # noqa: E402
+from routes_training import router as training_router  # noqa: E402
+from routes_knowledge_services import router as knowledge_services_router  # noqa: E402
+from routes_model_router import router as model_router_router  # noqa: E402
+from routes_n8n import router as n8n_router  # noqa: E402
+from routes_adapters import router as adapters_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -117,12 +131,28 @@ api_router.include_router(rag_router)
 api_router.include_router(prompts_router)
 api_router.include_router(agents_v2_router)
 api_router.include_router(hive_learning_router)
+api_router.include_router(slot_monitor_router)
+api_router.include_router(learning_resources_router)
+api_router.include_router(people_intelligence_router)
+api_router.include_router(gen_ai_router)
+api_router.include_router(open_source_router)
+api_router.include_router(google_knowledge_router)
+api_router.include_router(agentic_ai_router)
+api_router.include_router(ai_operations_router)
+api_router.include_router(mcp_router)
+api_router.include_router(training_router)
+api_router.include_router(knowledge_services_router)
+api_router.include_router(model_router_router)
+api_router.include_router(n8n_router)
+api_router.include_router(adapters_router)
 
 app.include_router(api_router)
 
 @app.on_event("startup")
 async def startup():
     start_scheduler()
+    from slot_monitor import start_slot_monitor
+    start_slot_monitor()
 
 _raw_origins = os.environ.get('ALLOWED_ORIGINS', '').strip()
 _exact_origins: list[str] = []
