@@ -630,6 +630,7 @@ export const FOOTER_COLS = [
   ]},
   { id: 'resources', title: 'Resources', links: [
     { id: 'l-help', label: 'Help center', to: '/help' },
+    { id: 'l-us-slots', label: 'US Visa Slots — Live Tracker', to: '/us-visa-slots' },
     { id: 'l-intake', label: 'Intake Calendar', to: '/intake-calendar' },
     { id: 'l-financial', label: 'Financial Tools — GIC, Budgets, Loans', to: '/financial-tools' },
     { id: 'l-universities', label: 'University Search — Browse & Compare', to: '/universities' },

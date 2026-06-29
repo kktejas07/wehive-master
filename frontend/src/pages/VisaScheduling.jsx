@@ -91,6 +91,13 @@ export default function VisaScheduling() {
             <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60 max-w-xl mx-auto">
               Select your embassy location and available time slot.
             </p>
+            <Link
+              to="/us-visa-slots"
+              className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--accent))] hover:underline"
+            >
+              <Clock className="w-4 h-4" />
+              Track US Visa Slots — Live Wait Times
+            </Link>
           </div>
 
           <div className="flex items-center justify-center gap-2 mb-8">
