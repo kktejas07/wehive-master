@@ -1,6 +1,6 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Phone, MessageCircle, Send, Sparkles, Clock } from 'lucide-react';
+import { Menu, X, Phone, MessageCircle, Send } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
@@ -13,8 +13,7 @@ const NAV = [
   { id: 'home', label: 'Home', to: '/' },
   { id: 'visa', label: 'Visa', to: '/#countries' },
   { id: 'student', label: 'Student', to: '/student-visa' },
-  { id: 'us-slots', label: 'US Slots', to: '/us-visa-slots', icon: Clock },
-  { id: 'hive', label: 'Hive', to: '/hive', icon: Sparkles },
+  { id: 'us-slots', label: 'US Slots', to: '/us-visa-slots', badge: 'HURRY' },
   { id: 'resources', label: 'Resources', to: '/resources' },
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
   { id: 'about', label: 'About', to: '/about' },
@@ -48,6 +47,11 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
             >
               {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
               {t('nav.' + item.id, item.label)}
+              {item.badge && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                  {item.badge}
+                </span>
+              )}
             </NavLink>
           );
         })}
@@ -71,6 +75,11 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
           >
             {Icon ? <Icon className="w-4 h-4" /> : null}
             {t('nav.' + item.id, item.label)}
+            {item.badge && (
+              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                {item.badge}
+              </span>
+            )}
           </Link>
         );
       })}
