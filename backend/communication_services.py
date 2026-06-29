@@ -1,28 +1,44 @@
 """Communication services: Telegram, Discord, WhatsApp
-
+ 
+Config is loaded from DB `notifications` settings namespace first, falling
+back to env vars.  This lets admins configure via the dashboard without
+server restart.
+ 
 Telegram: Send messages via bot API (free, no per-message cost)
 Discord: Send notifications via webhooks (free)
-WhatsApp: Send messages via Twilio (existing, per-message cost)
+WhatsApp: Send messages via OpenWA (primary) or Twilio (fallback)
 """
 
-import os
-import httpx
+import logging
 from typing import Optional
 
-TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
-DISCORD_WEBHOOK_URL = os.environ.get('DISCORD_WEBHOOK_URL', '')
-WHATSAPP_GROUP_INVITE_LINK = os.environ.get('WHATSAPP_GROUP_INVITE_LINK', '')
+import httpx
+
+from settings_service import get_notification_config
+
+logger = logging.getLogger('wehive.communication')
+
+
+async def _load_notif(key: str, env_var: str = '', default: str = '') -> str:
+    """Load a value from DB notifications config, falling back to env var, then default."""
+    import os
+    cfg = await get_notification_config()
+    return cfg.get(key) or os.environ.get(env_var, default)
 
 
 class TelegramService:
-    def __init__(self, bot_token: str = TELEGRAM_BOT_TOKEN):
-        self.bot_token = bot_token
-        self.base_url = f'https://api.telegram.org/bot{bot_token}' if bot_token else None
+    def __init__(self, bot_token: str = ''):
+        self._bot_token = bot_token
+
+    async def _ensure_token(self):
+        if not self._bot_token:
+            self._bot_token = await _load_notif('telegram_bot_token', 'TELEGRAM_BOT_TOKEN')
+        self.base_url = f'https://api.telegram.org/bot{self._bot_token}' if self._bot_token else None
 
     async def send_message(self, chat_id: str, text: str, parse_mode: str = 'Markdown') -> dict:
+        await self._ensure_token()
         if not self.base_url:
-            return {'ok': False, 'error': 'Telegram bot token not configured'}
+            return {'ok': False, 'error': 'Telegram bot token not configured — set in Admin → Settings → Notifications'}
 
         async with httpx.AsyncClient() as client:
             try:
@@ -51,6 +67,7 @@ class TelegramService:
         return await self.send_message(chat_id, message)
 
     async def get_updates(self) -> dict:
+        await self._ensure_token()
         if not self.base_url:
             return {'ok': False, 'error': 'Telegram bot token not configured'}
         async with httpx.AsyncClient() as client:
@@ -59,8 +76,12 @@ class TelegramService:
 
 
 class DiscordService:
-    def __init__(self, webhook_url: str = DISCORD_WEBHOOK_URL):
-        self.webhook_url = webhook_url
+    def __init__(self, webhook_url: str = ''):
+        self._webhook_url = webhook_url
+
+    async def _ensure_url(self):
+        if not self._webhook_url:
+            self._webhook_url = await _load_notif('discord_webhook_url', 'DISCORD_WEBHOOK_URL')
 
     async def send_message(
         self,
@@ -69,8 +90,9 @@ class DiscordService:
         avatar_url: Optional[str] = None,
         embeds: Optional[list] = None,
     ) -> dict:
-        if not self.webhook_url:
-            return {'ok': False, 'error': 'Discord webhook URL not configured'}
+        await self._ensure_url()
+        if not self._webhook_url:
+            return {'ok': False, 'error': 'Discord webhook URL not configured — set in Admin → Settings → Notifications'}
 
         payload = {
             'content': content,
@@ -84,7 +106,7 @@ class DiscordService:
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.post(
-                    self.webhook_url,
+                    self._webhook_url,
                     json=payload,
                     timeout=10.0,
                 )
@@ -131,21 +153,27 @@ class DiscordService:
 
 
 class WhatsAppService:
-    def __init__(self, group_invite_link: str = WHATSAPP_GROUP_INVITE_LINK):
-        self.group_invite_link = group_invite_link
+    def __init__(self, group_invite_link: str = ''):
+        self._group_invite_link = group_invite_link
 
-    def get_community_invite(self) -> str:
-        return self.group_invite_link or 'https://chat.whatsapp.com/invite'
+    async def _ensure_link(self):
+        if not self._group_invite_link:
+            self._group_invite_link = await _load_notif('whatsapp_group_invite_link', 'WHATSAPP_GROUP_INVITE_LINK')
+
+    async def get_community_invite(self) -> str:
+        await self._ensure_link()
+        return self._group_invite_link or 'https://chat.whatsapp.com/invite'
 
     async def send_invite_message(self, phone: str, group_name: str = 'We Hive Community') -> dict:
+        await self._ensure_link()
         from otp_providers import deliver_whatsapp_message
-        if not self.group_invite_link:
-            return {'ok': False, 'error': 'WhatsApp group invite not configured'}
+        if not self._group_invite_link:
+            return {'ok': False, 'error': 'WhatsApp group invite not configured — set in Admin → Settings → Notifications'}
 
         message = (
-            f"Welcome to {group_name}! 🐝\n\n"
+            f"Welcome to {group_name}! \U0001f41d\n\n"
             f"Join our community to connect with other travelers, get visa updates, and exclusive offers.\n\n"
-            f"Click here to join: {self.group_invite_link}"
+            f"Click here to join: {self._group_invite_link}"
         )
         return await deliver_whatsapp_message(phone, message)
 

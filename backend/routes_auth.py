@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, Request, BackgroundTasks
 from datetime import datetime
 import json
 from pydantic import BaseModel, Field
@@ -75,7 +75,9 @@ async def _find_or_create_user(identifier: str, kind: str, name: str = '', refer
     field = 'email' if kind == 'email' else 'phone'
     user = await users.find_one({field: identifier})
     now = datetime.utcnow()
+    is_new = False
     if not user:
+        is_new = True
         user = {
             '_id': str(uuid.uuid4()),
             'name': name or '',
@@ -112,7 +114,7 @@ async def _find_or_create_user(identifier: str, kind: str, name: str = '', refer
             update['name'] = name
         await users.update_one({'_id': user['_id']}, {'$set': update})
         user = await users.find_one({'_id': user['_id']})
-    return user
+    return user, is_new
 
 
 @router.post('/send-otp', response_model=SendOtpResponse)
@@ -139,12 +141,11 @@ async def send_otp(req: SendOtpRequest, request: Request, _=Depends(_otp_limiter
         delivered = True
         channel_used = 'mock'
         dev_code = os.environ.get('MOCK_OTP_CODE', '123456')
-        # Re-store with the mock code so verify-otp works
         from otp_service import store_otp as store_mock
         await store_mock(identifier, kind, dev_code, purpose=req.purpose)
-    elif kind == 'email':
-        from email_otp_service import send_otp_email
-        delivered = await send_otp_email(identifier, otp_code, req.purpose)
+    elif kind in ('email', 'sms', 'phone', 'whatsapp'):
+        from otp_providers import deliver_otp
+        delivered, channel_used, _ = await deliver_otp(identifier, kind, otp_code)
     else:
         raise HTTPException(status_code=400, detail=f'Unsupported OTP channel: {kind}')
 
@@ -161,7 +162,7 @@ async def send_otp(req: SendOtpRequest, request: Request, _=Depends(_otp_limiter
 
 
 @router.post('/verify-otp', response_model=AuthTokens)
-async def verify_otp(req: VerifyOtpRequest):
+async def verify_otp(req: VerifyOtpRequest, bg: BackgroundTasks):
     from otp_service import consume_otp
 
     kind = req.channel or classify_identifier(req.identifier)
@@ -172,8 +173,21 @@ async def verify_otp(req: VerifyOtpRequest):
     if not result['ok']:
         raise HTTPException(status_code=400, detail=result['error'])
 
-    user = await _find_or_create_user(identifier, channel, req.name or '', req.referral_code or '')
+    user, is_new = await _find_or_create_user(identifier, channel, req.name or '', req.referral_code or '')
     token = sign_jwt(user['_id'])
+
+    if is_new and result.get('purpose') == 'signup':
+        user_email = user.get('email')
+        if user_email:
+            from email_service import build_welcome_html, send_email
+            bg.add_task(
+                send_email,
+                to_email=user_email,
+                subject='Welcome to We Hive!',
+                html_body=build_welcome_html(user.get('name', '')),
+                text_body=f'Welcome to We Hive, {user.get("name", "there")}! Explore 190+ countries, apply to universities, and track your applications.',
+            )
+
     return AuthTokens(access_token=token, user=_public(user))
 
 

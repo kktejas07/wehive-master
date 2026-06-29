@@ -215,7 +215,7 @@ export default function AuthCard({ mode, referralCode }) {
 
   const onSendOtp = async () => {
     if (!identifier.trim()) {
-      toast({ title: otpChannel === 'email' ? 'Enter your email' : 'Enter your mobile number' });
+      toast({ title: otpChannel === 'email' ? 'Enter your email' : 'Enter your WhatsApp number' });
       return;
     }
     setSending(true);
@@ -225,9 +225,10 @@ export default function AuthCard({ mode, referralCode }) {
         setOtpInfo(info);
         setStep('otp');
         setCountdown(60);
-        toast({ title: 'Code sent', description: `via WhatsApp to ${info.masked}` });
+        toast({ title: 'Code sent', description: `via Firebase to ${info.masked}` });
       } else {
-        const data = await sendOtp({ identifier, channel: 'email', purpose: isSignup ? 'signup' : 'login' });
+        const channel = otpChannel === 'whatsapp' ? 'whatsapp' : 'email';
+        const data = await sendOtp({ identifier, channel, purpose: isSignup ? 'signup' : 'login' });
         setOtpInfo(data);
         setStep('otp');
         setCountdown(60);
@@ -251,10 +252,11 @@ export default function AuthCard({ mode, referralCode }) {
       if (otpChannel === 'phone') {
         await verifyPhoneOtpCode(otp);
       } else {
+        const channel = otpChannel === 'whatsapp' ? 'whatsapp' : 'email';
         await verifyOtp({
           identifier,
           code: otp,
-          channel: 'email',
+          channel: channel,
           name: isSignup ? name : undefined,
           referral_code: referralCode,
         });
@@ -275,7 +277,6 @@ export default function AuthCard({ mode, referralCode }) {
   };
 
   const placeholder = otpChannel === 'email' ? 'you@example.com' : '+91 98765 43210';
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.97 }}
@@ -328,7 +329,7 @@ export default function AuthCard({ mode, referralCode }) {
             ? 'Quick one-click sign in with your Google account.'
             : tab === 'emailpwd'
               ? isSignup ? 'Create account with email and password.' : 'Sign in with your email and password.'
-              : `We'll send a code via ${otpChannel === 'email' ? 'email' : 'WhatsApp'}.`}
+              : `We'll send a code via ${otpChannel === 'email' ? 'email' : otpChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'}.`}
       </motion.p>
 
       {step === 'input' ? (
@@ -401,7 +402,7 @@ export default function AuthCard({ mode, referralCode }) {
               )}
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-                  {otpChannel === 'email' ? 'Email address' : 'Mobile number'}
+                  {otpChannel === 'email' ? 'Email address' : otpChannel === 'whatsapp' ? 'WhatsApp number' : 'Mobile number'}
                 </label>
                 <input value={identifier} onChange={(e) => setIdentifier(e.target.value)}
                   placeholder={placeholder} inputMode={otpChannel === 'email' ? 'email' : 'tel'}
@@ -416,13 +417,21 @@ export default function AuthCard({ mode, referralCode }) {
                   }`}>
                   <Mail className="w-3.5 h-3.5 inline-block mr-1" /> Email
                 </button>
+                <button type="button" onClick={() => setOtpChannel('whatsapp')}
+                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                    otpChannel === 'whatsapp'
+                      ? 'bg-[hsl(var(--blue-700))] text-white'
+                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
+                  }`}>
+                  <MessageSquare className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
+                </button>
                 <button type="button" onClick={() => setOtpChannel('phone')}
                   className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
                     otpChannel === 'phone'
                       ? 'bg-[hsl(var(--blue-700))] text-white'
                       : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
                   }`}>
-                  <Phone className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
+                  <Phone className="w-3.5 h-3.5 inline-block mr-1" /> SMS
                 </button>
               </div>
               <Button disabled={sending} onClick={onSendOtp}

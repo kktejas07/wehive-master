@@ -115,58 +115,35 @@ async def clear_attempts(login_attempts, identifier: str) -> None:
 
 
 # ---------- email ----------
-def _send_reset_email(to_email: str, reset_link: str, reset_code: str) -> bool:
-    host = os.environ.get('SMTP_HOST', '')
-    port = int(os.environ.get('SMTP_PORT', '587'))
-    user = os.environ.get('SMTP_USER', '')
-    pwd = os.environ.get('SMTP_PASSWORD', '')
-    sender = os.environ.get('SMTP_FROM', user)
-    sender_name = os.environ.get('SMTP_FROM_NAME', 'We Hive Admin')
-
-    if not host or not user or not pwd or 'REPLACE' in pwd:
-        return False
-
-    subject = 'Reset your We Hive admin password'
-    body = f"""Hello,
-
-You (or someone using your email) requested a password reset for your We Hive
-admin account.
-
-Click the link below within {RESET_TOKEN_TTL_MIN} minutes to set a new password:
-
-    {reset_link}
-
-Or enter this code manually on the reset page:
-
-    {reset_code}
-
-If you didn't request this, you can safely ignore this email — your password
-will stay the same.
-
-— We Hive Immigration Services
-"""
-    msg = MIMEText(body, 'plain', 'utf-8')
-    msg['Subject'] = subject
-    msg['From'] = formataddr((sender_name, sender))
-    msg['To'] = to_email
-
-    try:
-        ctx = ssl.create_default_context()
-        with smtplib.SMTP(host, port, timeout=10) as s:
-            s.starttls(context=ctx)
-            s.login(user, pwd)
-            s.sendmail(sender, [to_email], msg.as_string())
-        return True
-    except Exception as e:  # noqa: BLE001
-        import logging
-        logging.getLogger('wehive').warning('SMTP reset send failed: %s', e)
-        return False
+def _build_reset_email_html(reset_link: str, reset_code: str) -> str:
+    from email_service import _wrap_html
+    minutes = RESET_TOKEN_TTL_MIN
+    content = f"""
+    <tr><td style="padding:0 32px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Hello,</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">You (or someone using your email) requested a password reset for your We Hive admin account.</p>
+      <div style="background:#f8fafc;border-radius:12px;padding:24px;margin:16px 0;text-align:center">
+        <p style="font-size:13px;color:#64748b;margin:0 0 12px 0">Reset code</p>
+        <div style="font-size:24px;font-weight:800;color:#e0212c;letter-spacing:4px;margin:0 0 16px 0">{reset_code}</div>
+        <a href="{reset_link}" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Reset Password</a>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin:12px 0 0 0;line-height:1.6">This link expires in {minutes} minutes.</p>
+    </td></tr>
+    """
+    return _wrap_html('Password Reset Request', content)
 
 
-def send_reset_email_or_log(to_email: str, raw_token: str, frontend_url: str) -> dict:
-    """Try SMTP. If not configured, return the token in the response (dev mode)."""
+async def send_reset_email_or_log(to_email: str, raw_token: str, frontend_url: str) -> dict:
+    """Try unified email service. If not configured, return the token in the response (dev mode)."""
+    from email_service import send_email
     reset_link = f'{frontend_url.rstrip("/")}/admin/reset-password?token={raw_token}'
-    sent = _send_reset_email(to_email, reset_link, raw_token)
+    html = _build_reset_email_html(reset_link, raw_token)
+    sent = await send_email(
+        to_email=to_email,
+        subject='Reset your We Hive admin password',
+        html_body=html,
+        text_body=f'Use this code to reset your password: {raw_token}\nOr click: {reset_link}',
+    )
     return {
         'sent': sent,
         'dev_token': None if sent else raw_token,

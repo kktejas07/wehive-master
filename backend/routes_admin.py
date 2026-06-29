@@ -733,6 +733,18 @@ async def admin_integrations(_=Depends(get_current_admin)):
     ai_active = ai_doc.get('active_provider', '')
     ai_configured = len(ai_providers) > 0
 
+    # Postal email provider
+    postal_cfg = await _get_settings('postal')
+    postal_api_url = postal_cfg.get('api_url') or os.environ.get('POSTAL_API_URL', '')
+    postal_api_key = postal_cfg.get('api_key') or os.environ.get('POSTAL_API_KEY', '')
+    postal_ok = bool(postal_api_url and postal_api_key)
+
+    # OpenWA WhatsApp provider
+    openwa_cfg = await _get_settings('openwa')
+    openwa_api_url = openwa_cfg.get('api_url') or os.environ.get('OPENWA_API_URL', '')
+    openwa_api_key = openwa_cfg.get('api_key') or os.environ.get('OPENWA_API_KEY', '')
+    openwa_ok = bool(openwa_api_url and openwa_api_key)
+
     return {
         'otp_channel': otp_channel,
         'services': [
@@ -747,6 +759,16 @@ async def admin_integrations(_=Depends(get_current_admin)):
                 'action': 'Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in backend/.env',
             },
             {
+                'id': 'openwa',
+                'name': 'OpenWA (WhatsApp API)',
+                'status': 'configured' if openwa_ok else 'missing',
+                'details': {
+                    'api_url': openwa_api_url or '—',
+                    'api_key': _mask(openwa_api_key, 0) if openwa_api_key else '—',
+                },
+                'action': 'Set OpenWA API URL and Key in Admin → Settings → OpenWA',
+            },
+            {
                 'id': 'smtp',
                 'name': 'SMTP (Email OTP)',
                 'status': 'configured' if smtp_ok else 'mock',
@@ -756,6 +778,16 @@ async def admin_integrations(_=Depends(get_current_admin)):
                     'password': _mask(smtp_pwd, 0) if smtp_pwd and 'REPLACE' not in smtp_pwd else 'not set',
                 },
                 'action': 'Generate a Gmail App Password and update backend/.env::SMTP_PASSWORD',
+            },
+            {
+                'id': 'postal',
+                'name': 'Postal (Email API)',
+                'status': 'configured' if postal_ok else 'missing',
+                'details': {
+                    'api_url': postal_api_url or '—',
+                    'api_key': _mask(postal_api_key, 0) if postal_api_key else '—',
+                },
+                'action': 'Set Postal API URL and Key in Admin → Settings → Postal',
             },
             {
                 'id': 'ai_marketplace',
@@ -792,7 +824,7 @@ async def admin_update_integrations(payload: IntegrationSettings, _=Depends(get_
     return {'ok': True, **update}
 
 
-ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'default_llm'}
+ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'default_llm', 'together', 'postal', 'openwa', 'email'}
 
 
 @router.get('/settings/{namespace}')
@@ -1319,9 +1351,13 @@ async def admin_regenerate_destination(
     cfg = await _get_r2_settings()
     client, bucket, public_url = _r2_client_from_cfg(cfg)
 
-    together_key = os.environ.get('TOGETHER_API_KEY', '')
+    from settings_service import get_all as _get_settings
+    together_cfg = await _get_settings('together') or {}
+    together_key = together_cfg.get('api_key') or os.environ.get('TOGETHER_API_KEY', '')
+    together_url = together_cfg.get('url') or os.environ.get('TOGETHER_URL', 'https://api.together.xyz/v1/images/generations')
+    together_model = together_cfg.get('model') or os.environ.get('TOGETHER_IMAGE_MODEL', 'black-forest-labs/FLUX.1-schnell')
     if not together_key:
-        raise HTTPException(400, 'TOGETHER_API_KEY environment variable not set')
+        raise HTTPException(400, 'Together AI API key not configured — set via Admin → Settings → Together or TOGETHER_API_KEY env var')
 
     # Build prompt
     style_suffix = (
@@ -1337,9 +1373,9 @@ async def admin_regenerate_destination(
 
     # Call Together AI
     resp = _httpx.post(
-        'https://api.together.xyz/v1/images/generations',
+        together_url,
         json={
-            'model': 'black-forest-labs/FLUX.1-schnell',
+            'model': together_model,
             'prompt': prompt,
             'width': 1024,
             'height': 1536,
