@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
@@ -40,6 +40,7 @@ const CONSULATE_ORDER = ['mumbai', 'delhi', 'chennai', 'kolkata', 'hyderabad'];
 export default function USVisaSlots() {
   const { token, isAuthed } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [slots, setSlots] = useState([]);
   const [summary, setSummary] = useState(null);
   const [status, setStatus] = useState(null);
@@ -234,6 +235,56 @@ export default function USVisaSlots() {
             </div>
           )}
 
+          {/* ── Gated Content: Register to view live slots ── */}
+          {!isAuthed && (
+            <div className="rounded-3xl bg-gradient-to-br from-[hsl(var(--blue-700))] via-[hsl(var(--blue-800))] to-[hsl(var(--blue-900))] p-8 sm:p-10 mb-8 text-center text-white">
+              <div className="inline-flex h-16 w-16 rounded-2xl bg-white/15 items-center justify-center mb-5">
+                <Clock className="w-8 h-8" />
+              </div>
+              <h2 className="font-display font-extrabold text-[26px] sm:text-[32px] tracking-[-0.02em] mb-3">
+                Don't Miss Your Slot — Slots Fill in Minutes!
+              </h2>
+              <p className="text-[15px] text-white/75 max-w-lg mx-auto mb-2 leading-relaxed">
+                US visa appointment slots open unpredictably and disappear fast. Our system monitors all 5 consulates <strong className="text-white">24/7</strong> so you never miss one.
+              </p>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-[14px] text-white/80">
+                <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-4 py-2">
+                  <MapPin className="w-4 h-4" /> Mumbai, Delhi, Chennai, Kolkata, Hyderabad
+                </span>
+                <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-4 py-2">
+                  <RefreshCw className="w-4 h-4" /> Checked every few minutes
+                </span>
+              </div>
+
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button
+                  onClick={() => navigate('/signup')}
+                  className="h-12 px-8 rounded-full bg-white text-[hsl(var(--blue-800))] hover:bg-white/90 font-bold text-[14px]"
+                >
+                  Register Free to View Live Slots
+                </Button>
+                <span className="text-white/60 text-[13px] hidden sm:inline">or</span>
+                <a
+                  href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '') || '919000734326'}?text=Hi%2C%20I%20need%20help%20with%20a%20US%20visa%20appointment.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold text-[14px] transition"
+                >
+                  <Send className="w-4 h-4" />
+                  Chat on WhatsApp
+                </a>
+              </div>
+
+              <p className="mt-6 text-[12px] text-white/50">
+                Already registered? <button onClick={() => navigate('/login')} className="font-bold text-white/80 hover:text-white underline">Sign in</button> to view live slot availability.
+              </p>
+            </div>
+          )}
+
+          {/* ── Slot data visible only to registered users ── */}
+          {isAuthed && (
+            <>
+
           {/* Quick Filter */}
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <div className="flex items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/50">
@@ -336,6 +387,10 @@ export default function USVisaSlots() {
               );
             })}
           </div>
+
+          {/* ── End of gated content ── */}
+          </>
+          )}
 
           {/* Telegram Groups */}
           <div className="mb-8">
@@ -468,7 +523,7 @@ export default function USVisaSlots() {
           </div>
 
           {/* Recent Slots Table */}
-          {slots.length > 0 && (
+          {isAuthed && slots.length > 0 && (
             <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
               <h2 className="font-display font-extrabold text-[20px] text-[hsl(var(--blue-900))] mb-4">
                 Recently Detected Slots
