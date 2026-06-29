@@ -33,7 +33,7 @@ TELEGRAM_GROUPS = {
     "h1b": os.environ.get("TELEGRAM_H1B_GROUP", "https://t.me/US_H1B_Visa_Updates"),
 }
 
-WHATSAPP_NUMBER = os.environ.get("WHATSAPP_VISA_NUMBER", "+91 9654586074")
+WHATSAPP_NUMBER = os.environ.get("WHATSAPP_VISA_NUMBER", "+91 9000734326")
 
 
 class SubscribeRequest(BaseModel):
