@@ -54,8 +54,8 @@ export default function UserMenu() {
         <span className="h-8 w-8 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-1 ring-black/5">
           <img src={aUrl} alt={initial} className="h-full w-full object-cover" />
         </span>
-        <span className="hidden sm:inline text-[13px] font-bold text-[hsl(var(--blue-900))] max-w-[140px] truncate">
-          {display}
+        <span className="text-[13px] font-bold text-[hsl(var(--blue-900))] max-w-[120px] truncate">
+          {display || 'Account'}
         </span>
         <ChevronDown className="w-3.5 h-3.5 text-[hsl(var(--blue-900))]/55" />
       </button>
