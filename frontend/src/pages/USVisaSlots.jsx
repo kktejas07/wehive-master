@@ -24,6 +24,8 @@ import {
   Building2,
   Search,
   Filter,
+  Phone,
+  PhoneCall,
 } from 'lucide-react';
 
 const VISA_TYPE_COLORS = {
@@ -200,7 +202,7 @@ export default function USVisaSlots() {
               <div className="flex items-center gap-2">
                 <div className={`w-2.5 h-2.5 rounded-full ${hasSlots ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'}`} />
                 <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">
-                  {hasSlots ? 'Slots Available' : 'Monitoring Active'}
+                  {hasSlots ? `${summary.overall.total_slots} visa types tracked` : 'Wait Times Available'}
                 </span>
               </div>
               <div className="text-[12px] text-[hsl(var(--blue-900))]/50">
@@ -272,6 +274,14 @@ export default function USVisaSlots() {
                 >
                   <Send className="w-4 h-4" />
                   Chat on WhatsApp
+                </a>
+              </div>
+
+              <div className="mt-4 flex items-center justify-center gap-2 text-[13px] text-white/70">
+                <PhoneCall className="w-4 h-4" />
+                <span>Call us: </span>
+                <a href={`tel:${(whatsappNumber || '+91 9000734326').replace(/[\s+]/g, '')}`} className="font-bold text-white hover:underline">
+                  {whatsappNumber || '+91 9000734326'}
                 </a>
               </div>
 
@@ -352,17 +362,18 @@ export default function USVisaSlots() {
                     {Object.entries(data.visa_types || {}).map(([vtId, vtData]) => {
                       if (filterVisa && filterVisa !== vtId) return null;
                       const colors = VISA_TYPE_COLORS[vtId] || VISA_TYPE_COLORS.b1b2;
+                      const hasData = vtData.wait_time && vtData.wait_time !== 'N/A';
                       return (
                         <span
                           key={vtId}
                           className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold border ${
-                            vtData.available
+                            hasData
                               ? `${colors.bg} ${colors.text} ${colors.border}`
                               : 'bg-gray-50 text-gray-300 border-gray-100'
                           }`}
                         >
-                          <div className={`w-1.5 h-1.5 rounded-full ${vtData.available ? colors.dot : 'bg-gray-300'}`} />
-                          {vtData.name}
+                          <div className={`w-1.5 h-1.5 rounded-full ${hasData ? colors.dot : 'bg-gray-300'}`} />
+                          {vtData.name || vtId.toUpperCase()}: {vtData.wait_time || 'Unknown'}
                         </span>
                       );
                     })}
@@ -370,7 +381,7 @@ export default function USVisaSlots() {
 
                   {available && data.earliest_date && (
                     <p className="mt-3 text-[11px] text-emerald-700">
-                      Earliest: {new Date(data.earliest_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      Earliest: {data.earliest_date}
                     </p>
                   )}
 
@@ -505,6 +516,13 @@ export default function USVisaSlots() {
               Our team can help you find and book early US visa appointments. Message us on WhatsApp.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
+              <a
+                href={`tel:${(whatsappNumber || '+91 9000734326').replace(/[\s+]/g, '')}`}
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white font-bold text-[13px] transition"
+              >
+                <Phone className="w-4 h-4" />
+                Call {whatsappNumber || '+91 9000734326'}
+              </a>
               <a
                 href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '')}?text=Hi%2C%20I%20need%20help%20with%20a%20US%20visa%20appointment.`}
                 target="_blank"

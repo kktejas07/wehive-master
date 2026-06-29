@@ -73,52 +73,55 @@ async def get_slots(
 async def get_slots_summary(
     hours: int = Query(24, ge=1, le=720),
 ):
-    since = datetime.utcnow() - timedelta(hours=hours)
-    cursor = usvisa_slots_col.find({"detected_at": {"$gte": since}})
-    slots = await cursor.to_list(5000)
+    from slot_monitor import get_wait_times_for_display
+    data = get_wait_times_for_display()
 
     summary = {}
-    for c in US_CONSULATES_INDIA:
-        cid = c["id"]
+    consulates_with_data = 0
+    visa_counts = {}
+
+    for cid, cdata in data.items():
+        wait_times = cdata.get("wait_times", {})
+        has_data = any(
+            wt.get("wait", "N/A") not in ("N/A", "")
+            for wt in wait_times.values()
+        )
+        if has_data:
+            consulates_with_data += 1
+
         summary[cid] = {
-            "name": c["name"],
-            "city": c["city"],
+            "name": cdata["name"],
+            "city": cdata["city"],
+            "jurisdiction": cdata.get("jurisdiction", ""),
+            "booking_url": cdata.get("booking_url", ""),
             "visa_types": {},
             "total_slots": 0,
             "earliest_date": None,
         }
-        for vt in VISA_TYPES:
-            matching = [
-                s for s in slots
-                if s["consulate"] == cid and s["visa_type"] == vt["id"]
-            ]
-            summary[cid]["visa_types"][vt["id"]] = {
-                "name": vt["name"],
-                "label": vt["label"],
-                "count": len(matching),
-                "available": len(matching) > 0,
-                "earliest_date": min((s["date"] for s in matching), default=None),
+        for vt_id, vt_data in wait_times.items():
+            wait_str = vt_data.get("wait", "N/A")
+            summary[cid]["visa_types"][vt_id] = {
+                "name": vt_data.get("visa", vt_id.upper()),
+                "label": vt_data.get("visa", ""),
+                "wait_time": wait_str,
+                "available": wait_str != "N/A",
+                "count": 1 if wait_str != "N/A" else 0,
+                "earliest_date": wait_str,
             }
-            summary[cid]["total_slots"] += len(matching)
-
-        matching_dates = [s["date"] for s in slots if s["consulate"] == cid]
-        summary[cid]["earliest_date"] = min(matching_dates, default=None)
+            if wait_str != "N/A":
+                summary[cid]["total_slots"] += 1
+                visa_counts[vt_id] = visa_counts.get(vt_id, 0) + 1
 
     overall = {
-        "total_slots": len(slots),
-        "consulates_with_slots": sum(1 for c in summary.values() if c["total_slots"] > 0),
-        "visa_type_counts": {},
+        "total_slots": sum(c["total_slots"] for c in summary.values()),
+        "consulates_with_slots": consulates_with_data,
+        "visa_type_counts": visa_counts,
     }
-    for vt in VISA_TYPES:
-        count = sum(
-            summary[cid]["visa_types"][vt["id"]]["count"]
-            for cid in summary
-        )
-        overall["visa_type_counts"][vt["id"]] = count
 
     return {
         "ok": True,
         "since_hours": hours,
+        "source": "wait_time_estimates",
         "overall": overall,
         "consulates": summary,
     }
