@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Loader2, Save, Eye, EyeOff, Info,
   CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud, ShieldCheck,
-  Palette, Upload as UploadIcon,
+  Palette, Upload as UploadIcon, Key, Server,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -121,7 +121,7 @@ function ToggleField({ label, tooltip, value, onChange }) {
   );
 }
 
-const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding'];
+const NAMESPACES = ['firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'postal', 'openwa', 'email'];
 
 const SECTION_META = {
   firebase: { label: 'Firebase', icon: Globe, title: 'Firebase Authentication' },
@@ -133,6 +133,9 @@ const SECTION_META = {
   general: { label: 'General', icon: MessageSquare, title: 'General' },
   r2: { label: 'R2 Storage', icon: Cloud, title: 'Cloudflare R2 Image Storage' },
   branding: { label: 'Branding', icon: Palette, title: 'Site Branding & Assets' },
+  postal: { label: 'Postal', icon: Mail, title: 'Postal Email API' },
+  openwa: { label: 'OpenWA', icon: MessageSquare, title: 'OpenWA WhatsApp API' },
+  email: { label: 'Email Provider', icon: Server, title: 'Email Provider Selection' },
 };
 
 const FIELDS = {
@@ -195,6 +198,22 @@ const FIELDS = {
     { type: 'file', key: 'og-image', label: 'OG Image', tooltip: 'Social sharing preview image (1200x630 recommended).', accept: 'image/png,image/jpeg,image/webp' },
     { type: 'text', key: 'site_name', label: 'Site Name', tooltip: 'Used in page titles and SEO metadata (e.g. "We Hive")' },
     { type: 'text', key: 'tagline', label: 'Tagline', tooltip: 'Short description shown in hero section and meta description' },
+  ],
+  postal: [
+    { type: 'text', key: 'api_url', label: 'API URL', tooltip: 'Postal server URL e.g. https://postal.yourdomain.com' },
+    { type: 'secret', key: 'api_key', label: 'API Key', tooltip: 'Postal server API key from Postal admin panel → Credentials' },
+    { type: 'text', key: 'from_address', label: 'From Address', tooltip: 'Verified sender email in Postal e.g. noreply@wehive.co.in' },
+    { type: 'text', key: 'from_name', label: 'From Name', tooltip: 'Display name e.g. We Hive' },
+  ],
+  openwa: [
+    { type: 'text', key: 'api_url', label: 'API URL', tooltip: 'OpenWA server URL e.g. https://wa.yourdomain.com' },
+    { type: 'secret', key: 'api_key', label: 'API Key', tooltip: 'OpenWA API key for authentication' },
+    { type: 'text', key: 'instance_id', label: 'Instance ID', tooltip: 'OpenWA instance ID (default: "default")' },
+  ],
+  email: [
+    { type: 'text', key: 'provider', label: 'Provider', tooltip: 'Email provider: "smtp" (default) or "postal". Changes apply to all emails including OTP, welcome, payments, and password reset.' },
+    { type: 'text', key: 'from_address', label: 'From Address', tooltip: 'Override sender email for all email communications' },
+    { type: 'text', key: 'from_name', label: 'From Name', tooltip: 'Override sender display name' },
   ],
 };
 
