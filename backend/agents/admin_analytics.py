@@ -108,3 +108,27 @@ async def get_anomalies(db) -> List[dict]:
         })
 
     return anomalies
+
+
+async def llm_anomaly_insight(anomalies: list) -> str:
+    """Use LLM to generate actionable insights from detected anomalies."""
+    if not anomalies:
+        return "No anomalies detected. System is healthy."
+
+    anomaly_text = "\n".join(f"- {a.get('type','')}: {a.get('message','')}" for a in anomalies)
+    try:
+        from model_router import chat_with_profile
+        response = await chat_with_profile(
+            "fast_cheap",
+            [
+                {"role": "system", "content": (
+                    "You are an analytics expert for a visa platform. Given detected anomalies, "
+                    "provide a concise 2-sentence insight on root cause and recommended action."
+                )},
+                {"role": "user", "content": f"Anomalies:\n{anomaly_text}"},
+            ],
+            max_tokens=150,
+        )
+        return response.get("content", "Review anomalies manually.").strip()
+    except Exception:
+        return f"Detected anomalies: {anomaly_text[:200]}"

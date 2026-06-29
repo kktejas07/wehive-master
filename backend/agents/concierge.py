@@ -13,6 +13,10 @@ Steps:
 
 from datetime import datetime
 from typing import List, Optional
+
+import json
+
+from db import db as _db
 from enum import Enum
 
 from data import get_country
@@ -118,7 +122,25 @@ async def advance_concierge(user_id: str, country_id: str, step: str, data: dict
         'session_id': f'{user_id}:{country_id}',
         'completed_step': step,
         'next_step': next_step,
-        'progress': session.progress(),
-        'steps': {k: {'label': v['label'], 'status': v['status'].value} for k, v in session.steps.items()},
-        'done': next_step is None,
     }
+
+
+async def llm_conversation_step(session, user_message: str) -> dict:
+    """Use LLM to determine the next best action in the concierge flow."""
+    try:
+        from model_router import chat_with_profile
+        response = await chat_with_profile(
+            "fast_cheap",
+            [
+                {"role": "system", "content": (
+                    "You are a visa application concierge. Given the current state and user message, "
+                    "suggest the next step. Return JSON: {\"action\": \"...\", \"response\": \"...\", \"next_step\": \"...\"}. "
+                    "Only return JSON."
+                )},
+                {"role": "user", "content": f"Session: {session.to_dict()}\nUser: {user_message}"},
+            ],
+            max_tokens=300,
+        )
+        return json.loads(response.get("content", "{}"))
+    except Exception:
+        return {"action": "continue", "response": "Let me help you with that.", "next_step": session.get_next_step()}
