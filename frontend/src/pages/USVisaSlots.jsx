@@ -255,6 +255,13 @@ export default function USVisaSlots() {
             <span className="font-bold text-[hsl(var(--blue-900))]">US Visa Slot Tracker</span>
           </div>
 
+          <div className="flex justify-center mb-6">
+            <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[hsl(var(--accent))]/10 border-2 border-[hsl(var(--accent))] text-[13px] font-extrabold text-[hsl(var(--accent))] uppercase tracking-[0.15em] animate-pulse">
+              <Clock className="w-4 h-4" />
+              Hurry — Slots Fill Fast!
+            </span>
+          </div>
+
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
               <RefreshCw className="w-3.5 h-3.5" /> Live Monitoring
