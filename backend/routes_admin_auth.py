@@ -14,7 +14,7 @@ import os
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks
 from pydantic import BaseModel, EmailStr, Field
 
 from admin_auth import (
@@ -163,7 +163,7 @@ class ChangePasswordRequest(BaseModel):
 
 # ---------- signup ----------
 @router.post('/signup')
-async def admin_signup(req: SignupRequest):
+async def admin_signup(req: SignupRequest, bg: BackgroundTasks = None):
     email = req.email.lower().strip()
     if email not in ADMIN_EMAILS:
         raise HTTPException(403, 'This email is not authorised for admin signup. Contact your super admin.')
@@ -173,6 +173,7 @@ async def admin_signup(req: SignupRequest):
 
     now = datetime.utcnow()
     existing = await users.find_one({'email': email})
+    is_new_admin = False
     if existing and existing.get('password_hash'):
         raise HTTPException(409, 'An admin account already exists for this email. Use login or forgot password.')
 
@@ -190,6 +191,7 @@ async def admin_signup(req: SignupRequest):
         )
         uid = existing['_id']
     else:
+        is_new_admin = True
         uid = str(uuid.uuid4())
         await users.insert_one({
             '_id': uid,
@@ -208,6 +210,17 @@ async def admin_signup(req: SignupRequest):
 
     fresh = await users.find_one({'_id': uid})
     token = sign_admin_jwt(uid)
+
+    if is_new_admin:
+        from email_service import build_welcome_html, send_email
+        bg.add_task(
+            send_email,
+            to_email=email,
+            subject='Welcome to We Hive Admin!',
+            html_body=build_welcome_html(req.name.strip()),
+            text_body=f'Welcome to We Hive Admin, {req.name.strip()}! Your admin account is ready.',
+        )
+
     return {'access_token': token, 'token_type': 'bearer', 'user': _public_admin(fresh)}
 
 
@@ -274,7 +287,7 @@ async def admin_forgot(req: ForgotRequest):
 
     # Best-effort frontend URL for the reset link
     front = FRONTEND_URL or 'https://wehive.co.in'
-    result = send_reset_email_or_log(email, raw, front)
+    result = await send_reset_email_or_log(email, raw, front)
 
     # In dev mode (SMTP not configured) we surface the token so the admin
     # can continue without email — never do this when SMTP is active.

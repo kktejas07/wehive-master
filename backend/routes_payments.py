@@ -5,12 +5,13 @@ from __future__ import annotations
 import io
 import hashlib
 import hmac
+import logging
 import os
 import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -18,6 +19,7 @@ from auth_utils import get_current_user
 from db import db, users, payments
 
 router = APIRouter(prefix='/payments', tags=['payments'])
+logger = logging.getLogger('wehive.payments')
 
 PAYMENT_BYPASS_ENABLED = os.environ.get('PAYMENT_BYPASS_ENABLED', '').lower() in ('1', 'true', 'yes')
 
@@ -138,7 +140,7 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
 
 
 @router.post('/verify')
-async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
+async def verify_payment(req: VerifyRequest, user=Depends(get_current_user), bg: BackgroundTasks = None):
     from settings_service import get_razorpay_keys
 
     plan = PLANS.get(req.plan_id)
@@ -165,6 +167,9 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
             {'_id': user['_id']},
             {'$set': {'is_premium': True, 'premium_since': now, 'updated_at': now}}
         )
+        fresh_payment = await payments.find_one({'_id': doc['_id']})
+        fresh_user = await users.find_one({'_id': user['_id']})
+        bg.add_task(_send_payment_email, fresh_user, plan, fresh_payment, True)
         return {
             'ok': True,
             'is_premium': True,
@@ -183,6 +188,12 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
         hashlib.sha256
     ).hexdigest()
     if not hmac.compare_digest(generated, req.razorpay_signature):
+        await payments.update_one(
+            {'_id': doc['_id']},
+            {'$set': {'status': 'failed', 'razorpay_payment_id': req.razorpay_payment_id, 'updated_at': datetime.utcnow()}}
+        )
+        failed_doc = await payments.find_one({'_id': doc['_id']})
+        bg.add_task(_send_payment_email, user, plan, failed_doc, False)
         raise HTTPException(400, 'Invalid signature')
 
     now = datetime.utcnow()
@@ -198,6 +209,9 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
         {'_id': user['_id']},
         {'$set': {'is_premium': True, 'premium_since': now, 'updated_at': now}}
     )
+    fresh_payment = await payments.find_one({'_id': doc['_id']})
+    fresh_user = await users.find_one({'_id': user['_id']})
+    bg.add_task(_send_payment_email, fresh_user, plan, fresh_payment, True)
 
     return {
         'ok': True,
@@ -207,8 +221,74 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user)):
     }
 
 
+async def _send_payment_email(user: dict, plan: dict, payment_doc: dict, success: bool):
+    try:
+        from email_service import (
+            send_email, build_payment_success_html, build_payment_failed_html,
+            build_subscription_activated_html,
+        )
+        user_email = user.get('email')
+        if not user_email:
+            return
+        user_name = user.get('name', '')
+
+        if success:
+            from agents.pdf_agent import generate_invoice_pdf
+            invoice_id = payment_doc['_id'][:8].upper()
+            pdf_bytes = generate_invoice_pdf(
+                invoice_id=invoice_id,
+                customer_name=user_name or 'Customer',
+                customer_email=user_email,
+                items=[{'name': plan['name'], 'amount': payment_doc.get('amount_usd', 0)}],
+                amount_paid=payment_doc.get('amount_usd', 0),
+            )
+
+            html = build_payment_success_html(
+                name=user_name,
+                plan_name=plan['name'],
+                amount=payment_doc.get('amount_usd', 0),
+                currency='USD',
+                invoice_id=invoice_id,
+            )
+            await send_email(
+                to_email=user_email,
+                subject=f'Payment Confirmed — We Hive {plan["name"]}',
+                html_body=html,
+                text_body=f'Your payment of USD {payment_doc.get("amount_usd", 0):,} for {plan["name"]} was successful. Invoice #{invoice_id} is attached.',
+                pdf_bytes=pdf_bytes,
+                pdf_filename=f'WeHive-Invoice-{invoice_id}.pdf',
+            )
+
+            sub_html = build_subscription_activated_html(
+                name=user_name,
+                plan_name=plan['name'],
+                since=datetime.utcnow().strftime('%d %b %Y'),
+            )
+            await send_email(
+                to_email=user_email,
+                subject=f'Subscription Active — We Hive {plan["name"]}',
+                html_body=sub_html,
+                text_body=f'Your {plan["name"]} subscription is now active.',
+            )
+        else:
+            html = build_payment_failed_html(
+                name=user_name,
+                plan_name=plan['name'],
+                amount=payment_doc.get('amount_usd', 0),
+                currency='USD',
+            )
+            await send_email(
+                to_email=user_email,
+                subject=f'Payment Failed — We Hive {plan["name"]}',
+                html_body=html,
+                text_body=f'Your payment of USD {payment_doc.get("amount_usd", 0):,} for {plan["name"]} could not be completed.',
+            )
+    except Exception as e:
+        logger.exception('Failed to send payment email to user %s: %s', user.get('_id'), e)
+
+
 @router.post('/webhook')
-async def razorpay_webhook(payload: dict, x_razorpay_signature: str = Header(None)):
+async def razorpay_webhook(payload: dict, x_razorpay_signature: str = Header(None), bg: BackgroundTasks = None):
     """Razorpay sends this when a payment succeeds or fails."""
     from settings_service import get_razorpay_keys
 
@@ -249,11 +329,21 @@ async def razorpay_webhook(payload: dict, x_razorpay_signature: str = Header(Non
                     'premium_since': datetime.utcnow(),
                 }}
             )
+            fresh_user = await users.find_one({'_id': doc['user_id']})
+            plan = PLANS.get(doc.get('plan_id', ''), {})
+            if fresh_user and plan:
+                bg.add_task(_send_payment_email, fresh_user, plan, doc, True)
     elif event == 'payment.failed':
-        await payments.update_one(
+        doc = await payments.find_one_and_update(
             {'razorpay_order_id': order_id},
-            {'$set': {'status': 'failed', 'updated_at': datetime.utcnow()}}
+            {'$set': {'status': 'failed', 'updated_at': datetime.utcnow()}},
+            return_document=True,
         )
+        if doc:
+            user = await users.find_one({'_id': doc['user_id']})
+            plan = PLANS.get(doc.get('plan_id', ''), {})
+            if user and plan:
+                bg.add_task(_send_payment_email, user, plan, doc, False)
 
     return {'ok': True}
 

@@ -74,5 +74,17 @@ async def get_r2_config() -> dict:
     return await _load('r2')
 
 
+async def get_postal_config() -> dict:
+    return await _load('postal')
+
+
+async def get_openwa_config() -> dict:
+    return await _load('openwa')
+
+
+async def get_email_config() -> dict:
+    return await _load('email')
+
+
 async def get_default_llm_config() -> dict:
     return await _load('default_llm')
