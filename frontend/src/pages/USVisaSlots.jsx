@@ -396,7 +396,7 @@ export default function USVisaSlots() {
                     href="https://visa.vfsglobal.com/ind/en/usa/book-an-appointment"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 w-full justify-center h-10 rounded-full bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-bold transition"
+                    className="inline-flex items-center gap-1.5 w-full justify-center h-10 rounded-full bg-[hsl(var(--blue-700))] text-white text-[13px] font-bold hover:bg-[hsl(229,85%,28%)] active:scale-[0.98] transition-colors"
                   >
                     Book on VFS Global
                     <ExternalLink className="w-3 h-3" />
