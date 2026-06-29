@@ -8,7 +8,6 @@ import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import {
-  Calendar,
   Clock,
   MapPin,
   ChevronRight,
@@ -19,7 +18,6 @@ import {
   ExternalLink,
   RefreshCw,
   Send,
-  AlertCircle,
   Building2,
   Phone,
   PhoneCall,
@@ -242,8 +240,6 @@ export default function USVisaSlots() {
     );
   }
 
-  const hasSlots = summary && summary.overall && summary.overall.total_slots > 0;
-
   return (
     <div className="bg-[hsl(var(--soft-bg))] min-h-screen">
       <Navbar />
@@ -264,28 +260,25 @@ export default function USVisaSlots() {
 
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
-              <RefreshCw className="w-3.5 h-3.5" /> Live Monitoring
+              <RefreshCw className="w-3.5 h-3.5" /> Live Wait Times
             </div>
-            <h1 className="font-display font-extrabold text-[32px] sm:text-[40px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <h1 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
               US Visa Appointment Slots
             </h1>
-            <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60 max-w-xl mx-auto">
-              We monitor the official US visa scheduling portal every 2-3 minutes for all consulates in India.
+            <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/55 max-w-xl mx-auto">
+              Current wait times for US visa appointments across all 5 consulates in India. Updated regularly.
             </p>
           </div>
 
           {/* Status Bar */}
-          <div className="rounded-2xl bg-white border border-black/5 p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="rounded-2xl bg-white border border-black/5 p-4 mb-8 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className={`w-2.5 h-2.5 rounded-full ${hasSlots ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'}`} />
-                <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">
-                  {hasSlots ? `${summary.overall.total_slots} visa types tracked` : 'Wait Times Available'}
-                </span>
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Live</span>
               </div>
               <div className="text-[12px] text-[hsl(var(--blue-900))]/50">
-                Checked every {status?.check_interval_seconds ? `${Math.round(status.check_interval_seconds / 60)}m` : '3m'}
-                {status?.last_check && ` · Last: ${new Date(status.last_check).toLocaleTimeString()}`}
+                Wait times refreshed regularly
               </div>
             </div>
             <Button
@@ -298,22 +291,6 @@ export default function USVisaSlots() {
               {refreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
           </div>
-
-          {hasSlots && (
-            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-bold text-[14px] text-emerald-800">
-                    {summary.overall.total_slots} slots available across {summary.overall.consulates_with_slots} consulates!
-                  </h3>
-                  <p className="mt-1 text-[12px] text-emerald-700">
-                    Wait times available across {summary.overall.consulates_with_slots} consulates. Call or WhatsApp us to book.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ── Gated Content: Register to view live slots ── */}
           {!isAuthed && (
@@ -382,54 +359,44 @@ export default function USVisaSlots() {
               return (
                 <div
                   key={cid}
-                  className={`rounded-2xl bg-white border p-5 transition ${
-                    available ? 'border-emerald-300 shadow-sm' : 'border-black/5'
+                  className={`rounded-2xl bg-white border p-5 transition hover:shadow-md ${
+                    available ? 'border-emerald-200' : 'border-black/5'
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between mb-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <Building2 className={`w-4 h-4 ${available ? 'text-emerald-600' : 'text-[hsl(var(--blue-900))]/30'}`} />
-                        <h3 className="font-bold text-[15px] text-[hsl(var(--blue-900))]">{data.name}</h3>
+                        <Building2 className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+                        <h3 className="font-bold text-[15px] text-[hsl(var(--blue-900))]">{data.city}</h3>
                       </div>
-                      <p className="text-[12px] text-[hsl(var(--blue-900))]/50 mt-0.5">{data.city}</p>
-                    </div>
-                    <div className={`text-[13px] font-bold ${available ? 'text-emerald-600' : 'text-[hsl(var(--blue-900))]/30'}`}>
-                      {data.total_slots > 0 ? `${data.total_slots} slots` : 'No slots'}
+                      <p className="text-[12px] text-[hsl(var(--blue-900))]/40 mt-0.5">{data.jurisdiction || data.name}</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="space-y-2 mb-4">
                     {Object.entries(data.visa_types || {}).map(([vtId, vtData]) => {
                       const colors = VISA_TYPE_COLORS[vtId] || VISA_TYPE_COLORS.b1b2;
                       const hasData = vtData.wait_time && vtData.wait_time !== 'N/A';
                       return (
-                        <span
-                          key={vtId}
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold border ${
-                            hasData
-                              ? `${colors.bg} ${colors.text} ${colors.border}`
-                              : 'bg-gray-50 text-gray-300 border-gray-100'
-                          }`}
-                        >
-                          <div className={`w-1.5 h-1.5 rounded-full ${hasData ? colors.dot : 'bg-gray-300'}`} />
-                          {vtData.name || vtId.toUpperCase()}: {vtData.wait_time || 'Unknown'}
-                        </span>
+                        <div key={vtId} className="flex items-center justify-between">
+                          <span className="text-[13px] font-medium text-[hsl(var(--blue-900))]/70">
+                            {vtData.name || vtId.toUpperCase()}
+                          </span>
+                          <span className={`text-[17px] font-display font-extrabold tracking-[-0.02em] tabular-nums ${
+                            hasData ? colors.text : 'text-[hsl(var(--blue-900))]/25'
+                          }`}>
+                            {hasData ? vtData.wait_time : '—'}
+                          </span>
+                        </div>
                       );
                     })}
                   </div>
 
-                  {available && data.earliest_date && (
-                    <p className="mt-3 text-[11px] text-emerald-700">
-                      Earliest: {data.earliest_date}
-                    </p>
-                  )}
-
                   <a
-                    href={`https://visa.vfsglobal.com/ind/en/usa/book-an-appointment`}
+                    href="https://visa.vfsglobal.com/ind/en/usa/book-an-appointment"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 w-full justify-center h-9 rounded-full border-2 border-[hsl(var(--blue-700))]/20 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))] hover:border-[hsl(var(--blue-700))]/40 transition"
+                    className="inline-flex items-center gap-1.5 w-full justify-center h-10 rounded-full bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-bold transition"
                   >
                     Book on VFS Global
                     <ExternalLink className="w-3 h-3" />
