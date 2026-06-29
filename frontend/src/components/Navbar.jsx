@@ -1,6 +1,6 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Phone, MessageCircle, Send, Sparkles } from 'lucide-react';
+import { Menu, X, Phone, MessageCircle, Send, Sparkles, Clock } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
@@ -13,6 +13,8 @@ const NAV = [
   { id: 'home', label: 'Home', to: '/' },
   { id: 'visa', label: 'Visa', to: '/#countries' },
   { id: 'student', label: 'Student', to: '/student-visa' },
+  { id: 'us-slots', label: 'US Slots', to: '/us-visa-slots', icon: Clock },
+  { id: 'hive', label: 'Hive', to: '/hive', icon: Sparkles },
   { id: 'resources', label: 'Resources', to: '/resources' },
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
   { id: 'about', label: 'About', to: '/about' },
