@@ -66,11 +66,12 @@ async def _get_openwa_config() -> dict:
 
 
 async def _send_openwa_whatsapp(to: str, body: str) -> bool:
-    """Send WhatsApp message via OpenWA API (open-wa / whatsapp-web.js based).
+    """Send WhatsApp message via OpenWA API.
 
     Supports self-hosted OpenWA instances. Expects:
-    - OPENWA_API_URL  (e.g. https://your-openwa-server.com)
-    - OPENWA_API_KEY  (API key for authentication)
+    - OPENWA_API_URL  (e.g. http://167.233.39.15:2785)
+    - OPENWA_API_KEY  (API key starting with owa_k1_...)
+    - OPENWA_INSTANCE_ID  (Session ID from OpenWA dashboard)
     """
     cfg = await _get_openwa_config()
     api_url = cfg.get('api_url') or _env('OPENWA_API_URL', '')
@@ -85,25 +86,23 @@ async def _send_openwa_whatsapp(to: str, body: str) -> bool:
     if not phone.startswith('91') and len(phone) <= 10:
         phone = '91' + phone
 
+    endpoint = f'{api_url.rstrip("/")}/api/sessions/{instance_id}/messages/send-text'
     payload = {
         'chatId': f'{phone}@c.us',
-        'body': body,
+        'text': body,
     }
 
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {api_key}',
+        'X-API-Key': api_key,
     }
 
     async with httpx.AsyncClient(timeout=20) as client:
         try:
-            resp = await client.post(
-                f'{api_url.rstrip("/")}/api/{instance_id}/sendText',
-                json=payload,
-                headers=headers,
-            )
-            if resp.status_code in (200, 201):
-                logger.info('OpenWA sent WhatsApp to %s', phone)
+            resp = await client.post(endpoint, json=payload, headers=headers)
+            data = resp.json()
+            if resp.status_code in (200, 201) and data.get('messageId'):
+                logger.info('OpenWA sent WhatsApp to %s (msgId=%s)', phone, data.get('messageId'))
                 return True
             logger.error('OpenWA send failed: %s %s', resp.status_code, resp.text[:300])
             return False
