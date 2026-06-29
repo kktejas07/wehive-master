@@ -102,9 +102,41 @@ async def check_passport_validity(db) -> List[dict]:
 
 
 async def run_all_checks(db) -> List[dict]:
-    """Run all document readiness checks."""
     results = []
     results.extend(await check_missing_required_docs(db))
     results.extend(await check_document_validity(db))
     results.extend(await check_passport_validity(db))
+
+    try:
+        llm = await llm_document_assessment(results)
+        if llm:
+            results.append({"type": "llm_assessment", "severity": "info", "message": llm})
+    except Exception:
+        pass
+
     return results
+
+
+async def llm_document_assessment(check_results: list) -> str:
+    """Use LLM to provide a human-readable document readiness assessment."""
+    issues = [r for r in check_results if r.get("severity") in ("critical", "warning")]
+    if not issues:
+        return "All documents look good. Your application is ready."
+
+    issue_text = "\n".join(r.get("message", "") for r in issues)
+    try:
+        from model_router import chat_with_profile
+        response = await chat_with_profile(
+            "fast_cheap",
+            [
+                {"role": "system", "content": (
+                    "You are a visa document expert. Given document issues found, write a helpful, "
+                    "actionable 2-sentence recommendation on what to fix. Be encouraging."
+                )},
+                {"role": "user", "content": f"Issues: {issue_text}"},
+            ],
+            max_tokens=150,
+        )
+        return response.get("content", "Review your documents.").strip()
+    except Exception:
+        return f"Please fix: {issue_text[:200]}"
