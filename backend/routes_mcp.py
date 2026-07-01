@@ -2,7 +2,7 @@
 external MCP servers, tools, and configurations.
 
 Endpoints:
-  GET  /api/mcp/servers           List all 24 MCP servers
+  GET  /api/mcp/servers           List all MCP servers
   GET  /api/mcp/servers/{slug}    Get server details
   POST /api/mcp/config            Save MCP configuration
   GET  /api/mcp/config            Get current MCP configuration
@@ -28,6 +28,14 @@ MCP_SERVERS = [
      "description": "Repository management, issues, PRs, and code search", "free": True},
     {"slug": "supabase", "name": "Supabase", "category": "Database",
      "description": "PostgreSQL database, auth, and storage management", "free": True},
+    {"slug": "pinecone", "name": "Pinecone", "category": "Database",
+     "description": "Managed vector database for semantic search and RAG", "free": True,
+     "install": "npm install -g @pinecone-database/mcp-server", "env_var": "PINECONE_API_KEY",
+     "docs": "https://docs.pinecone.io", "github": "https://github.com/pinecone-io/pinecone-mcp"},
+    {"slug": "qdrant", "name": "Qdrant", "category": "Database",
+     "description": "Open-source vector database with managed cloud option", "free": True,
+     "install": "pip install qdrant-mcp-server", "env_var": "QDRANT_URL",
+     "docs": "https://qdrant.tech/documentation", "github": "https://github.com/qdrant/qdrant-mcp"},
     {"slug": "brave-search", "name": "Brave Search", "category": "Search",
      "description": "Privacy-focused web search with AI summaries. Free tier: 2K queries/month.", "free": True,
      "install": "npx @brave/brave-search-mcp", "env_var": "BRAVE_SEARCH_API_KEY",
@@ -73,6 +81,40 @@ MCP_SERVERS = [
      "description": "Structured entity data from Google Knowledge Graph", "free": False},
     {"slug": "bias-detector", "name": "Bias Detector", "category": "Compliance",
      "description": "Detect and mitigate bias in AI outputs and hiring", "free": True},
+    {"slug": "scrapingbee", "name": "ScrapingBee", "category": "Search",
+     "description": "Web scraping API with proxy rotation and headless browser support", "free": False,
+     "install": "npm install -g @scrapingbee/mcp-server", "env_var": "SCRAPINGBEE_API_KEY",
+     "docs": "https://www.scrapingbee.com/docs", "github": "https://github.com/ScrapingBee/mcp-server"},
+    {"slug": "browserbase", "name": "Browserbase", "category": "Search",
+     "description": "Cloud headless browser automation for web scraping and testing", "free": False,
+     "install": "npm install -g @browserbasehq/mcp-server", "env_var": "BROWSERBASE_API_KEY",
+     "docs": "https://docs.browserbase.com", "github": "https://github.com/browserbase/mcp-server"},
+    {"slug": "brightdata", "name": "Bright Data", "category": "Search",
+     "description": "Enterprise proxy and web data collection platform", "free": False,
+     "install": "npm install -g @brightdata/mcp-server", "env_var": "BRIGHTDATA_API_KEY",
+     "docs": "https://docs.brightdata.com", "github": "https://github.com/brightdata/mcp-server"},
+    {"slug": "hyra-tools", "name": "Hyra Tools", "category": "Internal",
+     "description": "Internal We Hive tools and platform utilities", "free": True},
+    {"slug": "immigration-tools", "name": "Immigration Tools", "category": "Internal",
+     "description": "Visa, embassy, and immigration-specific data tools", "free": True},
+    {"slug": "employee-tools", "name": "Employee Tools", "category": "HR",
+     "description": "Employee directory, org chart, and profile lookups", "free": True},
+    {"slug": "payroll-tools", "name": "Payroll Tools", "category": "HR",
+     "description": "Payroll calculations, payslips, and salary data", "free": True},
+    {"slug": "timeoff-tools", "name": "Timeoff Tools", "category": "HR",
+     "description": "Leave balances, time-off requests, and holiday calendars", "free": True},
+    {"slug": "bamboohr", "name": "BambooHR", "category": "HR",
+     "description": "BambooHR HRIS integration for employee data and PTO", "free": False,
+     "install": "npm install -g @bamboohr/mcp-server", "env_var": "BAMBOOHR_API_KEY",
+     "docs": "https://documentation.bamboohr.com", "github": "https://github.com/BambooHR"},
+    {"slug": "greenhouse", "name": "Greenhouse", "category": "HR",
+     "description": "Greenhouse ATS integration for recruiting and candidates", "free": False,
+     "install": "npm install -g @greenhouse/mcp-server", "env_var": "GREENHOUSE_API_KEY",
+     "docs": "https://developers.greenhouse.io", "github": "https://github.com/grnhse"},
+    {"slug": "checkr", "name": "Checkr", "category": "HR",
+     "description": "Background checks and candidate screening", "free": False,
+     "install": "npm install -g @checkr/mcp-server", "env_var": "CHECKR_API_KEY",
+     "docs": "https://docs.checkr.com", "github": "https://github.com/checkr"},
 ]
 
 PLUGINS = [
