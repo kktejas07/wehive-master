@@ -972,40 +972,40 @@ export default function USVisaSlots() {
           )}
 
           {/* Notification Subscription */}
-          <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8 mb-8">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))]/10 flex items-center justify-center flex-shrink-0">
-                <BellRing className="w-6 h-6 text-[hsl(var(--blue-700))]" />
+          <div className="rounded-2xl bg-white border border-black/5 p-5 sm:p-6 mb-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-[hsl(var(--blue-700))]/10 flex items-center justify-center flex-shrink-0">
+                <BellRing className="w-5 h-5 text-[hsl(var(--blue-700))]" />
               </div>
               <div>
-                <h2 className="font-display font-extrabold text-[20px] text-[hsl(var(--blue-900))]">
+                <h2 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">
                   Get Notified Instantly
                 </h2>
-                <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/60">
+                <p className="mt-0.5 text-[13px] text-[hsl(var(--blue-900))]/60">
                   We check every 2-3 minutes and send alerts the moment {meta.adj} visa slots open up.
                 </p>
               </div>
             </div>
 
             {subscribed ? (
-              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5 text-center">
-                <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                <h3 className="font-bold text-[15px] text-emerald-800">You're subscribed!</h3>
-                <p className="mt-1 text-[13px] text-emerald-700">
+              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-center">
+                <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto mb-1.5" />
+                <h3 className="font-bold text-[14px] text-emerald-800">You're subscribed!</h3>
+                <p className="mt-0.5 text-[12px] text-emerald-700">
                   You will receive in-app notifications when {meta.adj} visa slots become available.
                 </p>
-                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <div className="mt-3 flex flex-wrap justify-center gap-2">
                   <Button
                     onClick={() => setShowSubscribeForm(true)}
                     variant="outline"
-                    className="h-9 rounded-full text-[12px] font-bold"
+                    className="h-8 rounded-full text-[11px] font-bold"
                   >
                     Update Preferences
                   </Button>
                   <Button
                     onClick={handleUnsubscribe}
                     variant="outline"
-                    className="h-9 rounded-full text-[12px] font-bold text-red-600 border-red-200 hover:bg-red-50"
+                    className="h-8 rounded-full text-[11px] font-bold text-red-600 border-red-200 hover:bg-red-50"
                   >
                     Unsubscribe
                   </Button>
