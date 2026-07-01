@@ -124,14 +124,14 @@ CORRIDORS = {
             {"id": "kolkata", "name": "Kolkata", "city": "Kolkata", "jurisdiction": "East & NE India"},
         ],
         "visa_types": [
-            {"id": "visitor", "name": "Standard Visitor", "label": "Tourist, Business, Family"},
-            {"id": "student", "name": "Student (Tier 4)", "label": "Study"},
-            {"id": "work", "name": "Skilled Worker", "label": "Work"},
+            {"id": "visitor_uk", "name": "Standard Visitor", "label": "Tourist, Business, Family"},
+            {"id": "student_uk", "name": "Student (Tier 4)", "label": "Study"},
+            {"id": "work_uk", "name": "Skilled Worker", "label": "Work"},
         ],
         "wait_times": {
-            "visitor": {"mumbai": "3-6w", "delhi": "4-7w", "chennai": "3-5w", "kolkata": "3-6w"},
-            "student": {"mumbai": "2-4w", "delhi": "2-5w", "chennai": "2-4w", "kolkata": "2-5w"},
-            "work": {"mumbai": "4-8w", "delhi": "5-8w", "chennai": "4-7w", "kolkata": "4-8w"},
+            "visitor_uk": {"mumbai": "3-6w", "delhi": "4-7w", "chennai": "3-5w", "kolkata": "3-6w"},
+            "student_uk": {"mumbai": "2-4w", "delhi": "2-5w", "chennai": "2-4w", "kolkata": "2-5w"},
+            "work_uk": {"mumbai": "4-8w", "delhi": "5-8w", "chennai": "4-7w", "kolkata": "4-8w"},
         },
     },
     "schengen": {
@@ -146,11 +146,11 @@ CORRIDORS = {
         ],
         "visa_types": [
             {"id": "short-stay", "name": "Short Stay", "label": "Tourism, Business (90 days)"},
-            {"id": "student", "name": "Student", "label": "Long-stay Study"},
+            {"id": "student_sc", "name": "Student", "label": "Long-stay Study"},
         ],
         "wait_times": {
             "short-stay": {"mumbai": "2-4w", "delhi": "2-5w", "chennai": "2-4w", "kolkata": "2-4w"},
-            "student": {"mumbai": "4-8w", "delhi": "4-8w", "chennai": "4-7w", "kolkata": "4-8w"},
+            "student_sc": {"mumbai": "4-8w", "delhi": "4-8w", "chennai": "4-7w", "kolkata": "4-8w"},
         },
     },
     "canada": {
@@ -163,12 +163,12 @@ CORRIDORS = {
             {"id": "chennai", "name": "Chennai", "city": "Chennai", "jurisdiction": "South India"},
         ],
         "visa_types": [
-            {"id": "visitor", "name": "Visitor (TRV)", "label": "Tourist, Business"},
-            {"id": "student", "name": "Student Permit", "label": "Study"},
+            {"id": "visitor_ca", "name": "Visitor (TRV)", "label": "Tourist, Business"},
+            {"id": "student_ca", "name": "Student Permit", "label": "Study"},
         ],
         "wait_times": {
-            "visitor": {"delhi": "4-8w", "mumbai": "4-7w", "chennai": "3-6w"},
-            "student": {"delhi": "8-12w", "mumbai": "8-11w", "chennai": "7-10w"},
+            "visitor_ca": {"delhi": "4-8w", "mumbai": "4-7w", "chennai": "3-6w"},
+            "student_ca": {"delhi": "8-12w", "mumbai": "8-11w", "chennai": "7-10w"},
         },
     },
     "australia": {
@@ -181,12 +181,12 @@ CORRIDORS = {
             {"id": "chennai", "name": "Chennai", "city": "Chennai", "jurisdiction": "South India"},
         ],
         "visa_types": [
-            {"id": "visitor", "name": "Visitor (600)", "label": "Tourist, Business"},
-            {"id": "student", "name": "Student (500)", "label": "Study"},
+            {"id": "visitor_au", "name": "Visitor (600)", "label": "Tourist, Business"},
+            {"id": "student_au", "name": "Student (500)", "label": "Study"},
         ],
         "wait_times": {
-            "visitor": {"delhi": "2-4w", "mumbai": "2-4w", "chennai": "2-3w"},
-            "student": {"delhi": "4-8w", "mumbai": "4-8w", "chennai": "4-7w"},
+            "visitor_au": {"delhi": "2-4w", "mumbai": "2-4w", "chennai": "2-3w"},
+            "student_au": {"delhi": "4-8w", "mumbai": "4-8w", "chennai": "4-7w"},
         },
     },
     "uae": {
@@ -198,10 +198,10 @@ CORRIDORS = {
             {"id": "delhi", "name": "New Delhi", "city": "New Delhi", "jurisdiction": "North India"},
         ],
         "visa_types": [
-            {"id": "visitor", "name": "Visit Visa", "label": "Tourist, Business"},
+            {"id": "visitor_ae", "name": "Visit Visa", "label": "Tourist, Business"},
         ],
         "wait_times": {
-            "visitor": {"mumbai": "3-7d", "delhi": "3-7d"},
+            "visitor_ae": {"mumbai": "3-7d", "delhi": "3-7d"},
         },
     },
 }
@@ -210,6 +210,7 @@ _scheduler_task: Optional[asyncio.Task] = None
 _last_check: Optional[str] = None
 
 _total_checks = 0
+_slots_found = 0
 _notifications_sent = 0
 
 
