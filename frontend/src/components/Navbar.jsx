@@ -2,7 +2,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { Menu, X, Phone, MessageCircle, Send } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { LogoSvg } from './ui/LogoSvg';
+
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
 import UserMenu from './UserMenu';
@@ -183,37 +183,13 @@ export default function Navbar({ variant = 'default' }) {
         scrolled ? 'h-[68px] sm:h-[76px]' : 'h-[110px] sm:h-[130px]'
       )}>
         <Link to="/" className="flex items-center gap-2 group shrink-0 relative">
-          <div className={cn(
-            'relative transition-[width,height] duration-500 ease overflow-visible',
-            scrolled ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-24 h-24 sm:w-28 sm:h-28'
-          )}>
-            {/* Full logo — visible when at top */}
-            <div className={cn(
-              'absolute inset-0 flex items-center justify-center transition-all duration-500 group-hover:scale-[1.04]',
-              scrolled ? 'opacity-0 scale-50 rotate-[-12deg] pointer-events-none' : 'opacity-100 scale-100 rotate-0'
-            )}>
-              <img
-                src="/brand/wehive-logo-wordmark.svg"
-                alt="We Hive"
-                draggable={false}
-                className="h-full w-full object-contain select-none"
-              />
-            </div>
-            {/* Favicon — visible when scrolled (mini glyph) */}
-            <LogoSvg size={40} className={cn(
-              'absolute inset-0 select-none transition-all duration-500 group-hover:scale-[1.08] group-hover:rotate-[6deg]',
-              scrolled ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-150 rotate-12 pointer-events-none'
-            )} />
-          </div>
-          {/* Wordmark next to favicon when scrolled */}
           <img
-            src="/brand/wehive-logo-wordmark.svg"
-            alt="We Hive"
+            src={BRAND.logo}
+            alt={BRAND.name}
+            draggable={false}
             className={cn(
-              'h-[22px] select-none transition-all duration-500',
-              scrolled
-                ? 'opacity-100 translate-x-0'
-                : 'opacity-0 -translate-x-3 pointer-events-none'
+              'w-auto select-none object-contain transition-all duration-500 group-hover:scale-[1.04]',
+              scrolled ? 'h-10 sm:h-11' : 'h-16 sm:h-20'
             )}
           />
         </Link>
