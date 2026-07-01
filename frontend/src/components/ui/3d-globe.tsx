@@ -45,7 +45,6 @@ function latLngToPosition(lat, lng, radius) {
 
 function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
   const { x, y, z } = latLngToPosition(marker.lat, marker.lng, radius);
-  const scale = useTransform(isHovered ? 1 : 0, [0, 1], [1, 1.5]);
 
   return (
     <motion.div
@@ -151,8 +150,8 @@ export function Globe3D({
           <motion.div
             className="absolute inset-0 rounded-full"
             style={{
-              rotateY,
-              rotateX,
+              rotateY: rotationY,
+              rotateX: rotationX,
               transformStyle: 'preserve-3d',
             }}
           >

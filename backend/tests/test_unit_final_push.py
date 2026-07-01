@@ -66,26 +66,9 @@ class TestDB:
     @pytest.mark.asyncio
     async def test_ensure_indexes(self):
         from db import ensure_indexes
-        with patch("db.users") as users, \
-             patch("db.otps") as otps, \
-             patch("db.applications") as apps, \
-             patch("db.holiday_plans") as plans, \
-             patch("db.scans") as scans, \
-             patch("db.payments") as payments, \
-             patch("db.notifications_col") as notifs, \
-             patch("db.referrals_col") as refs, \
-             patch("db.db") as mdb:
-            users.create_index = AsyncMock()
-            otps.create_index = AsyncMock()
-            apps.create_index = AsyncMock()
-            plans.create_index = AsyncMock()
-            scans.create_index = AsyncMock()
-            payments.create_index = AsyncMock()
-            notifs.create_index = AsyncMock()
-            refs.create_index = AsyncMock()
-            mdb.__getitem__.return_value.create_index = AsyncMock()
+        with patch("motor.motor_asyncio.AsyncIOMotorCollection.create_index", new_callable=AsyncMock) as mock_create:
             await ensure_indexes()
-            assert users.create_index.called
+            assert mock_create.called
 
 
 # ─── Routes helpers (pure functions from route files) ────────────────────────

@@ -39,8 +39,17 @@ Profiles:
 
 import logging
 import time
+import uuid
 from enum import Enum
 from typing import Optional
+
+import httpx
+
+from orchestrator.budget import BudgetEnforcer
+from orchestrator.failover import CircuitBreaker, FailoverRouter
+from orchestrator.pricing import calculate_cost, estimate_tokens
+from orchestrator.token_pool import TokenPoolManager
+from orchestrator.vault import AccountsVault, PROVIDER_BASE_URLS
 
 logger = logging.getLogger("wehive.model_router")
 
@@ -343,6 +352,14 @@ PROFILE_FALLBACKS = {
 }
 
 
+# Orchestrator components (persistent circuit breaker + budget/usage tracking)
+_orchestrator_vault = AccountsVault()
+_orchestrator_pool = TokenPoolManager()
+_orchestrator_budget = BudgetEnforcer(vault=_orchestrator_vault, token_pool=_orchestrator_pool)
+_orchestrator_breaker = CircuitBreaker()
+_orchestrator_failover = FailoverRouter(token_pool=_orchestrator_pool, breaker=_orchestrator_breaker)
+
+
 class CircuitBreaker:
     """Tracks provider failures and prevents cascading retries."""
 
@@ -405,11 +422,117 @@ def list_profiles(tier: Optional[str] = None, provider: Optional[str] = None) ->
 
 
 def get_circuit_breaker() -> CircuitBreaker:
-    return _circuit_breaker
+    return _orchestrator_breaker
 
 
-async def chat_with_profile(profile_id: str, messages: list[dict], max_tokens: int = 1024, temperature: float = None) -> dict:
-    """Chat using a curated model profile with automatic failover."""
+def _extract_content(response: dict) -> str:
+    choices = response.get("choices", [])
+    if choices and isinstance(choices[0], dict):
+        message = choices[0].get("message", {})
+        return message.get("content", "")
+    return ""
+
+
+async def _resolve_provider_key(provider_id: str, user_id: str = "") -> str:
+    """Resolve an API key for a provider from orchestrator vault, BYOK vault, or env vars."""
+    try:
+        acct = await _orchestrator_vault.get_account(provider_id)
+        if acct and acct.get("api_key"):
+            return acct["api_key"]
+    except Exception:
+        pass
+    try:
+        from byok_vault import resolve_key
+        key = await resolve_key(provider_id, user_id)
+        if key:
+            return key
+    except Exception:
+        pass
+    return ""
+
+
+def _provider_base_url(provider_id: str) -> str:
+    """Return the configured base URL for a provider."""
+    from ai_marketplace import PROVIDER_REGISTRY
+
+    registry = PROVIDER_REGISTRY.get(provider_id, {})
+    base_url = PROVIDER_BASE_URLS.get(provider_id, "")
+    if registry.get("base_url"):
+        base_url = registry["base_url"]
+    if provider_id in ("ollama", "gpt4all", "localai", "llamacpp", "vllm", "kobold"):
+        base_url = registry.get("default_url", base_url)
+    return base_url
+
+
+def _extract_system_user(messages: list[dict]) -> tuple[str, str]:
+    system = "You are a helpful AI assistant."
+    user = ""
+    for m in messages:
+        role = m.get("role")
+        content = m.get("content", "")
+        if role == "system" and not user:
+            system = content
+        elif role == "user":
+            user = content
+    if not user:
+        user = messages[-1].get("content", "") if messages else ""
+    return system, user
+
+
+async def _route_provider(
+    provider_id: str,
+    model: str,
+    messages: list[dict],
+    max_tokens: int,
+    temperature: float,
+    user_id: str = "",
+) -> tuple[Optional[dict], int]:
+    """Call a provider through the orchestrator and return (response_dict, status_code)."""
+    from ai_marketplace import PROVIDER_REGISTRY, get_provider
+
+    registry = PROVIDER_REGISTRY.get(provider_id, {})
+    api_key = ""
+    if registry.get("requires_key", True):
+        api_key = await _resolve_provider_key(provider_id, user_id)
+        if not api_key:
+            return None, 0
+
+    base_url = _provider_base_url(provider_id)
+    provider = get_provider(provider_id, key=api_key, base_url=base_url, model=model)
+    system_prompt, user_prompt = _extract_system_user(messages)
+
+    try:
+        content = await provider.chat(system_prompt, user_prompt, max_tokens)
+        return {
+            "id": f"wehive-{uuid.uuid4().hex[:12]}",
+            "object": "chat.completion",
+            "model": model,
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {"role": "assistant", "content": content},
+                    "finish_reason": "stop",
+                }
+            ],
+            "usage": {},
+        }, 200
+    except httpx.HTTPStatusError as e:
+        status = e.response.status_code if e.response else 500
+        logger.warning("Provider %s HTTP error %s: %s", provider_id, status, e)
+        return None, status
+    except Exception as e:
+        logger.warning("Provider %s call failed: %s", provider_id, e)
+        return None, 500
+
+
+async def chat_with_profile(
+    profile_id: str,
+    messages: list[dict],
+    max_tokens: int = 1024,
+    temperature: float = None,
+    user_id: str = "",
+) -> dict:
+    """Chat using a curated model profile with budget checks and automatic failover."""
     profile = get_profile(profile_id)
     if not profile:
         return {"error": f"Unknown profile: {profile_id}"}
@@ -419,53 +542,101 @@ async def chat_with_profile(profile_id: str, messages: list[dict], max_tokens: i
     temp = temperature if temperature is not None else profile.get("temperature", 0.5)
     tok = max_tokens or profile.get("max_tokens", 1024)
 
-    if _circuit_breaker.is_open(provider_id):
+    with_profile = list(messages)
+    if not any(m.get("role") == "system" for m in with_profile):
+        with_profile.insert(0, {"role": "system", "content": "You are a helpful AI assistant."})
+
+    estimated_prompt_tokens = estimate_tokens(with_profile, model)
+
+    # Check persistent circuit breaker
+    if not _orchestrator_breaker.allow(provider_id):
         fallback_id = get_fallback_profile(profile_id)
         if fallback_id:
             logger.info("Provider %s circuit open, falling back to %s", provider_id, fallback_id)
-            return await chat_with_profile(fallback_id, messages, max_tokens, temperature)
+            return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
         return {"error": f"Provider {provider_id} unavailable and no fallback configured"}
 
+    # Check budget (skip if no orchestrator account exists; env/BYOK keys are treated as unlimited)
     try:
-        from ai_marketplace import marketplace
+        acct = await _orchestrator_vault.get_account(provider_id)
+        if acct and not await _orchestrator_budget.pre_check(provider_id, estimated_prompt_tokens + tok):
+            logger.warning("Provider %s budget exhausted; falling back", provider_id)
+            fallback_id = get_fallback_profile(profile_id)
+            if fallback_id:
+                return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
+            return {"error": f"Provider {provider_id} budget exhausted"}
+    except Exception as e:
+        logger.warning("Budget pre-check failed for %s: %s", provider_id, e)
 
-        with_profile = list(messages)
-        if not any(m.get("role") == "system" for m in with_profile):
-            with_profile.insert(0, {"role": "system", "content": "You are a helpful AI assistant."})
-
-        response = await marketplace.chat(
-            messages=with_profile,
-            model=model,
-            max_tokens=tok,
-            temperature=temp,
-            provider=provider_id,
+    request_id = str(uuid.uuid4())
+    try:
+        response, status_code = await _route_provider(
+            provider_id, model, with_profile, tok, temp, user_id
         )
 
-        _circuit_breaker.record_success(provider_id)
-        return {
-            "ok": True,
-            "profile": profile_id,
-            "provider": provider_id,
-            "model": model,
-            "tier": profile.get("tier", QualityTier.BALANCED).value,
-            "content": response.get("content", "") if isinstance(response, dict) else str(response),
-            "usage": response.get("usage", {}) if isinstance(response, dict) else {},
-        }
+        if response:
+            await _orchestrator_breaker.record_success(provider_id)
+            usage = response.get("usage", {}) or {}
+            prompt_tokens = usage.get("prompt_tokens") or estimated_prompt_tokens
+            completion_tokens = usage.get("completion_tokens") or estimate_tokens(
+                [{"role": "assistant", "content": _extract_content(response)}], model
+            )
+            total_tokens = usage.get("total_tokens") or (prompt_tokens + completion_tokens)
+            cost_usd = calculate_cost(provider_id, prompt_tokens, completion_tokens, model)
+            await _orchestrator_pool.record_consumption(
+                provider_id, model, total_tokens, request_id=request_id, cost_usd=cost_usd
+            )
+            return {
+                "ok": True,
+                "profile": profile_id,
+                "provider": provider_id,
+                "model": model,
+                "tier": profile.get("tier", QualityTier.BALANCED).value,
+                "content": _extract_content(response),
+                "usage": {
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "total_tokens": total_tokens,
+                    "estimated_cost_usd": cost_usd,
+                },
+                "request_id": request_id,
+            }
 
-    except Exception as e:
-        logger.error("Profile %s (provider %s) failed: %s", profile_id, provider_id, e)
-        _circuit_breaker.record_failure(provider_id)
+        # Provider returned an error status code
+        await _orchestrator_breaker.record_failure(provider_id, status_code or 500)
+        logger.error("Profile %s (provider %s) failed with status %s", profile_id, provider_id, status_code)
 
         fallback_id = get_fallback_profile(profile_id)
         if fallback_id and fallback_id != profile_id:
             logger.info("Failing over from %s to %s", profile_id, fallback_id)
-            return await chat_with_profile(fallback_id, messages, max_tokens, temperature)
+            return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
 
-        raise
+        return {"error": f"Provider {provider_id} failed (status {status_code})"}
+
+    except httpx.HTTPStatusError as e:
+        status_code = e.response.status_code if e.response else 500
+        logger.error("Profile %s (provider %s) HTTP error: %s", profile_id, provider_id, e)
+        await _orchestrator_breaker.record_failure(provider_id, status_code)
+        fallback_id = get_fallback_profile(profile_id)
+        if fallback_id and fallback_id != profile_id:
+            return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
+        return {"error": f"Provider {provider_id} HTTP error {status_code}"}
+
+    except Exception as e:
+        logger.error("Profile %s (provider %s) failed: %s", profile_id, provider_id, e)
+        await _orchestrator_breaker.record_failure(provider_id, 500)
+
+        fallback_id = get_fallback_profile(profile_id)
+        if fallback_id and fallback_id != profile_id:
+            logger.info("Failing over from %s to %s", profile_id, fallback_id)
+            return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
+
+        return {"error": f"Provider {provider_id} error: {e}"}
 
 
 def circuit_breaker_status() -> dict:
     statuses = {}
     for provider in set(p["provider"] for p in MODEL_PROFILES.values()):
-        statuses[provider] = _circuit_breaker.status(provider)
+        state = _orchestrator_breaker.get_state(provider)
+        statuses[provider] = state["state"].lower()
     return {"circuit_breaker": statuses, "profiles_available": len(MODEL_PROFILES)}

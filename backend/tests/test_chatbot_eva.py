@@ -3,7 +3,9 @@ import os
 import time
 import requests
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://premium-collab-6.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
+if not BASE_URL or not BASE_URL.startswith('http'):
+    BASE_URL = 'https://premium-collab-6.preview.emergentagent.com'
 API = f"{BASE_URL}/api"
 
 

@@ -89,3 +89,11 @@ async def ensure_indexes():
     await mcp_configs_col.create_index('user_id', unique=True, sparse=True)
     await db['byok_vault'].create_index([('user_id', 1), ('provider_id', 1)], unique=True)
     await amadeus_cache_col.create_index([('key', 1), ('cached_at', -1)])
+    # Orchestrator collections
+    await db['orchestrator_accounts'].create_index('provider', unique=True, sparse=True)
+    await db['orchestrator_accounts'].create_index([('status', 1), ('priority', 1)])
+    await db['orchestrator_circuit_breakers'].create_index('provider', unique=True, sparse=True)
+    await db['orchestrator_token_usage'].create_index([('provider', 1), ('timestamp', -1)])
+    await db['orchestrator_token_usage'].create_index('request_id')
+    await db['orchestrator_failover_log'].create_index([('timestamp', -1)])
+    await db['orchestrator_budget_log'].create_index([('timestamp', -1)])

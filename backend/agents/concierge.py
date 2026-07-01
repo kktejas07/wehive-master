@@ -122,6 +122,7 @@ async def advance_concierge(user_id: str, country_id: str, step: str, data: dict
         'session_id': f'{user_id}:{country_id}',
         'completed_step': step,
         'next_step': next_step,
+        'done': next_step is None,
     }
 
 

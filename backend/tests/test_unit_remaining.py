@@ -198,15 +198,17 @@ class TestDiscord:
 
 
 class TestWhatsApp:
-    def test_get_community_invite_default(self):
+    @pytest.mark.asyncio
+    async def test_get_community_invite_default(self):
         from communication_services import WhatsAppService
         svc = WhatsAppService(group_invite_link="")
-        assert svc.get_community_invite() == "https://chat.whatsapp.com/invite"
+        assert await svc.get_community_invite() == "https://chat.whatsapp.com/invite"
 
-    def test_get_community_invite_custom(self):
+    @pytest.mark.asyncio
+    async def test_get_community_invite_custom(self):
         from communication_services import WhatsAppService
         svc = WhatsAppService(group_invite_link="https://chat.whatsapp.com/abc123")
-        assert svc.get_community_invite() == "https://chat.whatsapp.com/abc123"
+        assert await svc.get_community_invite() == "https://chat.whatsapp.com/abc123"
 
     @pytest.mark.asyncio
     async def test_send_invite_not_configured(self):
