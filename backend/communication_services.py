@@ -27,11 +27,11 @@ async def _load_notif(key: str, env_var: str = '', default: str = '') -> str:
 
 
 class TelegramService:
-    def __init__(self, bot_token: str = ''):
+    def __init__(self, bot_token: Optional[str] = None):
         self._bot_token = bot_token
 
     async def _ensure_token(self):
-        if not self._bot_token:
+        if self._bot_token is None:
             self._bot_token = await _load_notif('telegram_bot_token', 'TELEGRAM_BOT_TOKEN')
         self.base_url = f'https://api.telegram.org/bot{self._bot_token}' if self._bot_token else None
 
@@ -76,11 +76,11 @@ class TelegramService:
 
 
 class DiscordService:
-    def __init__(self, webhook_url: str = ''):
+    def __init__(self, webhook_url: Optional[str] = None):
         self._webhook_url = webhook_url
 
     async def _ensure_url(self):
-        if not self._webhook_url:
+        if self._webhook_url is None:
             self._webhook_url = await _load_notif('discord_webhook_url', 'DISCORD_WEBHOOK_URL')
 
     async def send_message(
@@ -153,11 +153,11 @@ class DiscordService:
 
 
 class WhatsAppService:
-    def __init__(self, group_invite_link: str = ''):
+    def __init__(self, group_invite_link: Optional[str] = None):
         self._group_invite_link = group_invite_link
 
     async def _ensure_link(self):
-        if not self._group_invite_link:
+        if self._group_invite_link is None:
             self._group_invite_link = await _load_notif('whatsapp_group_invite_link', 'WHATSAPP_GROUP_INVITE_LINK')
 
     async def get_community_invite(self) -> str:

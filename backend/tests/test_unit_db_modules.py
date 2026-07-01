@@ -520,20 +520,21 @@ class TestAgentLoop:
 
     def test_build_system_prompt_empty(self):
         result = _build_system_prompt("", "")
-        assert "Eva" in result
+        assert "Hive" in result
 
     def test_format_tool_descriptions(self):
         async def h(**kw):
             return ""
         tool = Tool("test_tool", "A test tool", {"properties": {"p1": {"description": "Param 1"}}}, h)
         with patch("agent_loop.list_tools", return_value=[tool]):
-            result = _format_tool_descriptions()
-            assert "test_tool" in result
-            assert "Param 1" in result
+            with patch("tool_registry.get_tool", return_value=tool):
+                result = _format_tool_descriptions()
+                assert "test_tool" in result
+                assert "Param 1" in result
 
     def test_format_tool_descriptions_empty(self):
         with patch("agent_loop.list_tools", return_value=[]):
-            assert "No tools available" in _format_tool_descriptions()
+            assert "no tools available" in _format_tool_descriptions()
 
     def test_parse_tool_call_valid(self):
         result = _parse_tool_call("TOOL: lookup_country(country_id=ca)")
