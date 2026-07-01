@@ -72,9 +72,15 @@ async def get_slots(
 @router.get("/slots/summary")
 async def get_slots_summary(
     hours: int = Query(24, ge=1, le=720),
-    country: str = Query("usa", description="Country code: usa, uk, schengen, canada, australia, uae"),
+    country: str = Query(
+        "usa",
+        description=(
+            "Country code: usa, uk, schengen, canada, australia, uae, "
+            "singapore, thailand, japan, south-korea"
+        ),
+    ),
 ):
-    from slot_monitor import get_wait_times_for_display, list_corridors
+    from slot_monitor import get_wait_times_for_display
     data = get_wait_times_for_display(country)
 
     summary = {}

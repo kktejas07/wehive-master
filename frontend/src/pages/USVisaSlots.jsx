@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import { format, parseISO, isValid } from 'date-fns';
 import {
   Clock,
   MapPin,
@@ -21,6 +22,7 @@ import {
   Building2,
   Phone,
   PhoneCall,
+  Calendar,
 } from 'lucide-react';
 
 const COUNTRY_META = {
@@ -30,6 +32,10 @@ const COUNTRY_META = {
   canada: { flag: '🇨🇦', label: 'Canada', adj: 'Canada' },
   australia: { flag: '🇦🇺', label: 'Australia', adj: 'Australia' },
   uae: { flag: '🇦🇪', label: 'UAE', adj: 'UAE' },
+  singapore: { flag: '🇸🇬', label: 'Singapore', adj: 'Singapore' },
+  thailand: { flag: '🇹🇭', label: 'Thailand', adj: 'Thailand' },
+  japan: { flag: '🇯🇵', label: 'Japan', adj: 'Japan' },
+  'south-korea': { flag: '🇰🇷', label: 'South Korea', adj: 'South Korean' },
 };
 
 const CONSULATE_ORDER_US = ['mumbai', 'delhi', 'chennai', 'kolkata', 'hyderabad'];
@@ -279,11 +285,217 @@ const FALLBACK_COUNTRIES = {
       total_slots: 1, earliest_date: "3-7d",
     },
   },
+  singapore: {
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/sgp/book-an-appointment",
+      visa_types: {
+        visitor_sg: { name: "Visitor Visa", label: "Tourist, Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_sg: { name: "Student Pass", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_sg: { name: "Employment Pass", label: "Work", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/sgp/book-an-appointment",
+      visa_types: {
+        visitor_sg: { name: "Visitor Visa", label: "Tourist, Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_sg: { name: "Student Pass", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_sg: { name: "Employment Pass", label: "Work", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    chennai: {
+      name: "Chennai VAC", city: "Chennai",
+      jurisdiction: "South India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/sgp/book-an-appointment",
+      visa_types: {
+        visitor_sg: { name: "Visitor Visa", label: "Tourist, Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_sg: { name: "Student Pass", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_sg: { name: "Employment Pass", label: "Work", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    kolkata: {
+      name: "Kolkata VAC", city: "Kolkata",
+      jurisdiction: "East India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/sgp/book-an-appointment",
+      visa_types: {
+        visitor_sg: { name: "Visitor Visa", label: "Tourist, Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_sg: { name: "Student Pass", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_sg: { name: "Employment Pass", label: "Work", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+  },
+  thailand: {
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/tha/book-an-appointment",
+      visa_types: {
+        tourist_th: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        business_th: { name: "Business Visa", label: "Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        education_th: { name: "Education Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/tha/book-an-appointment",
+      visa_types: {
+        tourist_th: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        business_th: { name: "Business Visa", label: "Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        education_th: { name: "Education Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    chennai: {
+      name: "Chennai VAC", city: "Chennai",
+      jurisdiction: "South India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/tha/book-an-appointment",
+      visa_types: {
+        tourist_th: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        business_th: { name: "Business Visa", label: "Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        education_th: { name: "Education Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    kolkata: {
+      name: "Kolkata VAC", city: "Kolkata",
+      jurisdiction: "East India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/tha/book-an-appointment",
+      visa_types: {
+        tourist_th: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        business_th: { name: "Business Visa", label: "Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        education_th: { name: "Education Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+  },
+  japan: {
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/jpn/book-an-appointment",
+      visa_types: {
+        tourist_jp: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        business_jp: { name: "Business Visa", label: "Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_jp: { name: "Student Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/jpn/book-an-appointment",
+      visa_types: {
+        tourist_jp: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        business_jp: { name: "Business Visa", label: "Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_jp: { name: "Student Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    chennai: {
+      name: "Chennai VAC", city: "Chennai",
+      jurisdiction: "South India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/jpn/book-an-appointment",
+      visa_types: {
+        tourist_jp: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        business_jp: { name: "Business Visa", label: "Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_jp: { name: "Student Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    kolkata: {
+      name: "Kolkata VAC", city: "Kolkata",
+      jurisdiction: "East India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/jpn/book-an-appointment",
+      visa_types: {
+        tourist_jp: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        business_jp: { name: "Business Visa", label: "Business", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_jp: { name: "Student Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+  },
+  'south-korea': {
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/kor/book-an-appointment",
+      visa_types: {
+        tourist_kr: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_kr: { name: "Student Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_kr: { name: "Work Visa", label: "Work", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/kor/book-an-appointment",
+      visa_types: {
+        tourist_kr: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_kr: { name: "Student Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_kr: { name: "Work Visa", label: "Work", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    chennai: {
+      name: "Chennai VAC", city: "Chennai",
+      jurisdiction: "South India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/kor/book-an-appointment",
+      visa_types: {
+        tourist_kr: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_kr: { name: "Student Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_kr: { name: "Work Visa", label: "Work", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+    kolkata: {
+      name: "Kolkata VAC", city: "Kolkata",
+      jurisdiction: "East India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/kor/book-an-appointment",
+      visa_types: {
+        tourist_kr: { name: "Tourist Visa", label: "Tourism", wait_time: "5-10d", available: true, count: 1, earliest_date: "5-10d" },
+        student_kr: { name: "Student Visa", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_kr: { name: "Work Visa", label: "Work", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+      },
+      total_slots: 3, earliest_date: "5-10d",
+    },
+  },
 };
 
 function getConsulatesForCountry(country) {
   const data = FALLBACK_COUNTRIES[country] || FALLBACK_COUNTRIES['usa'];
   return Object.keys(data);
+}
+
+function formatSlotDate(dateValue, fallback = 'N/A') {
+  if (!dateValue || dateValue === 'N/A' || dateValue === 'TBD') return fallback;
+  const parsed = typeof dateValue === 'string' ? parseISO(dateValue) : new Date(dateValue);
+  if (!isValid(parsed)) return fallback;
+  return format(parsed, 'dd MMM yyyy');
+}
+
+function formatDetectedAt(dateValue) {
+  if (!dateValue) return '';
+  const parsed = typeof dateValue === 'string' ? parseISO(dateValue) : new Date(dateValue);
+  if (!isValid(parsed)) return '';
+  const now = new Date();
+  const diffMs = now - parsed;
+  const diffMins = Math.round(diffMs / 60000);
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.round(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.round(diffHours / 24);
+  return `${diffDays}d ago`;
 }
 
 const COUNTRY_VISA_TYPES = {
@@ -314,6 +526,26 @@ const COUNTRY_VISA_TYPES = {
   ],
   uae: [
     { id: 'visitor_ae', label: 'Visit Visa' },
+  ],
+  singapore: [
+    { id: 'visitor_sg', label: 'Visitor Visa' },
+    { id: 'student_sg', label: 'Student Pass' },
+    { id: 'work_sg', label: 'Employment Pass' },
+  ],
+  thailand: [
+    { id: 'tourist_th', label: 'Tourist Visa' },
+    { id: 'business_th', label: 'Business Visa' },
+    { id: 'education_th', label: 'Education Visa' },
+  ],
+  japan: [
+    { id: 'tourist_jp', label: 'Tourist Visa' },
+    { id: 'business_jp', label: 'Business Visa' },
+    { id: 'student_jp', label: 'Student Visa' },
+  ],
+  'south-korea': [
+    { id: 'tourist_kr', label: 'Tourist Visa' },
+    { id: 'student_kr', label: 'Student Visa' },
+    { id: 'work_kr', label: 'Work Visa' },
   ],
 };
 
@@ -350,6 +582,30 @@ const COUNTRY_CONSOLATE_LABELS = {
   uae: [
     { id: 'mumbai', label: 'Mumbai' },
     { id: 'delhi', label: 'Delhi' },
+  ],
+  singapore: [
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'chennai', label: 'Chennai' },
+    { id: 'kolkata', label: 'Kolkata' },
+  ],
+  thailand: [
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'chennai', label: 'Chennai' },
+    { id: 'kolkata', label: 'Kolkata' },
+  ],
+  japan: [
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'chennai', label: 'Chennai' },
+    { id: 'kolkata', label: 'Kolkata' },
+  ],
+  'south-korea': [
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'chennai', label: 'Chennai' },
+    { id: 'kolkata', label: 'Kolkata' },
   ],
 };
 
@@ -577,6 +833,10 @@ export default function USVisaSlots() {
                 { id: 'canada', flag: '🇨🇦', label: 'Canada' },
                 { id: 'australia', flag: '🇦🇺', label: 'Australia' },
                 { id: 'uae', flag: '🇦🇪', label: 'UAE' },
+                { id: 'singapore', flag: '🇸🇬', label: 'Singapore' },
+                { id: 'thailand', flag: '🇹🇭', label: 'Thailand' },
+                { id: 'japan', flag: '🇯🇵', label: 'Japan' },
+                { id: 'south-korea', flag: '🇰🇷', label: 'South Korea' },
               ].map(c => (
                 <button
                   key={c.id}
@@ -809,41 +1069,72 @@ export default function USVisaSlots() {
             </div>
           </div>
 
-          {/* Recent Slots Table */}
+          {/* Recent Slots */}
           {isAuthed && slots.length > 0 && (
             <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-              <h2 className="font-display font-extrabold text-[20px] text-[hsl(var(--blue-900))] mb-4">
-                Recently Detected Slots
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-black/5">
-                      <th className="pb-3 text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50">Consulate</th>
-                      <th className="pb-3 text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50">Visa</th>
-                      <th className="pb-3 text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50">Date</th>
-                      <th className="pb-3 text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50">Time</th>
-                      <th className="pb-3 text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50">Day</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {slots.slice(0, 20).map((slot, i) => (
-                      <tr key={i} className="border-b border-black/[0.02] hover:bg-[hsl(var(--soft-bg))]">
-                        <td className="py-2.5 text-[13px] font-bold text-[hsl(var(--blue-900))]">{slot.city || slot.consulate_name}</td>
-                        <td className="py-2.5">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))]">
-                            {slot.visa_name}
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-[13px] text-[hsl(var(--blue-900))]">
-                          {new Date(slot.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </td>
-                        <td className="py-2.5 text-[13px] font-mono text-[hsl(var(--blue-900))]">{slot.time}</td>
-                        <td className="py-2.5 text-[12px] text-[hsl(var(--blue-900))]/50">{slot.day_of_week}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="font-display font-extrabold text-[20px] text-[hsl(var(--blue-900))]">
+                  Recently Detected Slots
+                </h2>
+                <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]/40">
+                  {slots.slice(0, 20).length} latest
+                </span>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {slots.slice(0, 20).map((slot, i) => {
+                  const hasDate = Boolean(slot.date && slot.date !== 'N/A');
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: i * 0.03 }}
+                      className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 p-4 hover:border-[hsl(var(--accent))]/30 hover:shadow-sm transition"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-white border border-black/5 flex items-center justify-center">
+                            <MapPin className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{slot.city || slot.consulate_name}</p>
+                            <p className="text-[11px] text-[hsl(var(--blue-900))]/40">{slot.consulate_name || slot.consulate}</p>
+                          </div>
+                        </div>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))]">
+                          {slot.visa_name}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`flex-1 rounded-xl p-3 ${hasDate ? 'bg-white border border-emerald-100' : 'bg-white/50 border border-black/5'}`}>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Calendar className={`w-3.5 h-3.5 ${hasDate ? 'text-emerald-600' : 'text-[hsl(var(--blue-900))]/30'}`} />
+                            <span className="text-[10px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40">Date</span>
+                          </div>
+                          <p className={`text-[15px] font-display font-extrabold ${hasDate ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/30'}`}>
+                            {formatSlotDate(slot.date, 'Not available')}
+                          </p>
+                        </div>
+                        {slot.time && (
+                          <div className="flex-1 rounded-xl bg-white p-3 border border-black/5">
+                            <span className="text-[10px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40 block mb-1">Time</span>
+                            <p className="text-[15px] font-display font-extrabold text-[hsl(var(--blue-900))] font-mono">{slot.time}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        {slot.day_of_week && (
+                          <span className="text-[12px] font-medium text-[hsl(var(--blue-900))]/50">{slot.day_of_week}</span>
+                        )}
+                        <span className="text-[11px] font-medium text-[hsl(var(--blue-900))]/40">
+                          {formatDetectedAt(slot.detected_at)}
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           )}

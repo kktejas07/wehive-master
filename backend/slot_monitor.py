@@ -204,6 +204,90 @@ CORRIDORS = {
             "visitor_ae": {"mumbai": "3-7d", "delhi": "3-7d"},
         },
     },
+    "singapore": {
+        "id": "singapore", "name": "Singapore", "flag": "🇸🇬",
+        "from_country": "in", "to_country": "sg",
+        "booking_url": "https://visa.vfsglobal.com/ind/en/sgp/book-an-appointment",
+        "consulates": [
+            {"id": "mumbai", "name": "Mumbai", "city": "Mumbai", "jurisdiction": "West India"},
+            {"id": "delhi", "name": "New Delhi", "city": "New Delhi", "jurisdiction": "North India"},
+            {"id": "chennai", "name": "Chennai", "city": "Chennai", "jurisdiction": "South India"},
+            {"id": "kolkata", "name": "Kolkata", "city": "Kolkata", "jurisdiction": "East India"},
+        ],
+        "visa_types": [
+            {"id": "visitor_sg", "name": "Visitor Visa", "label": "Tourist, Business"},
+            {"id": "student_sg", "name": "Student Pass", "label": "Study"},
+            {"id": "work_sg", "name": "Employment Pass", "label": "Work"},
+        ],
+        "wait_times": {
+            "visitor_sg": {"mumbai": "5-10d", "delhi": "5-10d", "chennai": "5-10d", "kolkata": "5-10d"},
+            "student_sg": {"mumbai": "2-4w", "delhi": "2-4w", "chennai": "2-4w", "kolkata": "2-4w"},
+            "work_sg": {"mumbai": "3-6w", "delhi": "3-6w", "chennai": "3-6w", "kolkata": "3-6w"},
+        },
+    },
+    "thailand": {
+        "id": "thailand", "name": "Thailand", "flag": "🇹🇭",
+        "from_country": "in", "to_country": "th",
+        "booking_url": "https://visa.vfsglobal.com/ind/en/tha/book-an-appointment",
+        "consulates": [
+            {"id": "mumbai", "name": "Mumbai", "city": "Mumbai", "jurisdiction": "West India"},
+            {"id": "delhi", "name": "New Delhi", "city": "New Delhi", "jurisdiction": "North India"},
+            {"id": "chennai", "name": "Chennai", "city": "Chennai", "jurisdiction": "South India"},
+            {"id": "kolkata", "name": "Kolkata", "city": "Kolkata", "jurisdiction": "East India"},
+        ],
+        "visa_types": [
+            {"id": "tourist_th", "name": "Tourist Visa", "label": "Tourism"},
+            {"id": "business_th", "name": "Business Visa", "label": "Business"},
+            {"id": "education_th", "name": "Education Visa", "label": "Study"},
+        ],
+        "wait_times": {
+            "tourist_th": {"mumbai": "5-10d", "delhi": "5-10d", "chennai": "5-10d", "kolkata": "5-10d"},
+            "business_th": {"mumbai": "5-10d", "delhi": "5-10d", "chennai": "5-10d", "kolkata": "5-10d"},
+            "education_th": {"mumbai": "2-4w", "delhi": "2-4w", "chennai": "2-4w", "kolkata": "2-4w"},
+        },
+    },
+    "japan": {
+        "id": "japan", "name": "Japan", "flag": "🇯🇵",
+        "from_country": "in", "to_country": "jp",
+        "booking_url": "https://visa.vfsglobal.com/ind/en/jpn/book-an-appointment",
+        "consulates": [
+            {"id": "mumbai", "name": "Mumbai", "city": "Mumbai", "jurisdiction": "West India"},
+            {"id": "delhi", "name": "New Delhi", "city": "New Delhi", "jurisdiction": "North India"},
+            {"id": "chennai", "name": "Chennai", "city": "Chennai", "jurisdiction": "South India"},
+            {"id": "kolkata", "name": "Kolkata", "city": "Kolkata", "jurisdiction": "East India"},
+        ],
+        "visa_types": [
+            {"id": "tourist_jp", "name": "Tourist Visa", "label": "Tourism"},
+            {"id": "business_jp", "name": "Business Visa", "label": "Business"},
+            {"id": "student_jp", "name": "Student Visa", "label": "Study"},
+        ],
+        "wait_times": {
+            "tourist_jp": {"mumbai": "5-10d", "delhi": "5-10d", "chennai": "5-10d", "kolkata": "5-10d"},
+            "business_jp": {"mumbai": "5-10d", "delhi": "5-10d", "chennai": "5-10d", "kolkata": "5-10d"},
+            "student_jp": {"mumbai": "2-4w", "delhi": "2-4w", "chennai": "2-4w", "kolkata": "2-4w"},
+        },
+    },
+    "south-korea": {
+        "id": "south-korea", "name": "South Korea", "flag": "🇰🇷",
+        "from_country": "in", "to_country": "kr",
+        "booking_url": "https://visa.vfsglobal.com/ind/en/kor/book-an-appointment",
+        "consulates": [
+            {"id": "mumbai", "name": "Mumbai", "city": "Mumbai", "jurisdiction": "West India"},
+            {"id": "delhi", "name": "New Delhi", "city": "New Delhi", "jurisdiction": "North India"},
+            {"id": "chennai", "name": "Chennai", "city": "Chennai", "jurisdiction": "South India"},
+            {"id": "kolkata", "name": "Kolkata", "city": "Kolkata", "jurisdiction": "East India"},
+        ],
+        "visa_types": [
+            {"id": "tourist_kr", "name": "Tourist Visa", "label": "Tourism"},
+            {"id": "student_kr", "name": "Student Visa", "label": "Study"},
+            {"id": "work_kr", "name": "Work Visa", "label": "Work"},
+        ],
+        "wait_times": {
+            "tourist_kr": {"mumbai": "5-10d", "delhi": "5-10d", "chennai": "5-10d", "kolkata": "5-10d"},
+            "student_kr": {"mumbai": "2-4w", "delhi": "2-4w", "chennai": "2-4w", "kolkata": "2-4w"},
+            "work_kr": {"mumbai": "3-6w", "delhi": "3-6w", "chennai": "3-6w", "kolkata": "3-6w"},
+        },
+    },
 }
 
 _scheduler_task: Optional[asyncio.Task] = None
