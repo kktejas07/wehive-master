@@ -96,7 +96,7 @@ export default function VisaScheduling() {
               className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--accent))] hover:underline"
             >
               <Clock className="w-4 h-4" />
-              Track US Visa Slots — Live Wait Times
+              Track Visa Slots — Live Wait Times
             </Link>
           </div>
 

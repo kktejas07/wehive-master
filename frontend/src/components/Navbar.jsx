@@ -2,6 +2,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { Menu, X, Phone, MessageCircle, Send } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { LogoSvg } from './ui/LogoSvg';
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
 import UserMenu from './UserMenu';
@@ -13,7 +14,7 @@ const NAV = [
   { id: 'home', label: 'Home', to: '/' },
   { id: 'visa', label: 'Visa', to: '/#countries' },
   { id: 'student', label: 'Student', to: '/student-visa' },
-  { id: 'us-slots', label: 'US Slots', to: '/us-visa-slots', badge: 'HURRY' },
+  { id: 'us-slots', label: 'Visa Slots', to: '/us-visa-slots', badge: 'HURRY' },
   { id: 'resources', label: 'Resources', to: '/resources' },
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
   { id: 'about', label: 'About', to: '/about' },
@@ -187,35 +188,34 @@ export default function Navbar({ variant = 'default' }) {
             scrolled ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-24 h-24 sm:w-28 sm:h-28'
           )}>
             {/* Full logo — visible when at top */}
-            <img
-              src="/brand/wehive-logo.png"
-              alt="We Hive"
-              draggable={false}
-              className={cn(
-                'absolute inset-0 h-full w-full object-contain select-none transition-all duration-500 group-hover:scale-[1.04]',
-                scrolled ? 'opacity-0 scale-50 rotate-[-12deg] pointer-events-none' : 'opacity-100 scale-100 rotate-0'
-              )}
-            />
+            <div className={cn(
+              'absolute inset-0 flex items-center justify-center transition-all duration-500 group-hover:scale-[1.04]',
+              scrolled ? 'opacity-0 scale-50 rotate-[-12deg] pointer-events-none' : 'opacity-100 scale-100 rotate-0'
+            )}>
+              <img
+                src="/brand/wehive-logo-wordmark.svg"
+                alt="We Hive"
+                draggable={false}
+                className="h-full w-full object-contain select-none"
+              />
+            </div>
             {/* Favicon — visible when scrolled (mini glyph) */}
-            <img
-              src="/brand/wehive-favicon.png"
-              alt="We Hive"
-              draggable={false}
-              className={cn(
-                'absolute inset-0 h-full w-full object-contain select-none transition-all duration-500 group-hover:scale-[1.08] group-hover:rotate-[6deg]',
-                scrolled ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-150 rotate-12 pointer-events-none'
-              )}
-            />
+            <LogoSvg size={40} className={cn(
+              'absolute inset-0 select-none transition-all duration-500 group-hover:scale-[1.08] group-hover:rotate-[6deg]',
+              scrolled ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-150 rotate-12 pointer-events-none'
+            )} />
           </div>
           {/* Wordmark next to favicon when scrolled */}
-          <span className={cn(
-            'font-display font-extrabold text-[hsl(var(--blue-900))] tracking-[-0.03em] leading-none transition-all duration-500',
-            scrolled
-              ? 'opacity-100 text-[20px] sm:text-[22px] translate-x-0'
-              : 'opacity-0 text-[20px] -translate-x-3 pointer-events-none'
-          )}>
-            We Hive
-          </span>
+          <img
+            src="/brand/wehive-logo-wordmark.svg"
+            alt="We Hive"
+            className={cn(
+              'h-[22px] select-none transition-all duration-500',
+              scrolled
+                ? 'opacity-100 translate-x-0'
+                : 'opacity-0 -translate-x-3 pointer-events-none'
+            )}
+          />
         </Link>
 
         <NavLinks light={isLight} />
@@ -228,7 +228,7 @@ export default function Navbar({ variant = 'default' }) {
             href="https://chat.whatsapp.com/F0R1TYMOr8dLwIbr5jLRau"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-green-50 text-green-600 transition-colors"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-600 hover:text-white ring-1 ring-green-200 hover:ring-green-600 transition-all duration-200"
             title="Join WhatsApp Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -239,7 +239,7 @@ export default function Navbar({ variant = 'default' }) {
             href="https://t.me/wehivecommunity"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 text-blue-600 transition-colors"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white ring-1 ring-blue-200 hover:ring-blue-600 transition-all duration-200"
             title="Join Telegram Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

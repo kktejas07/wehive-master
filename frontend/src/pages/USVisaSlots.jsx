@@ -23,88 +23,334 @@ import {
   PhoneCall,
 } from 'lucide-react';
 
-const VISA_TYPE_COLORS = {
-  b1b2: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500' },
-  f1: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500' },
-  h1b: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
-  h4: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', dot: 'bg-orange-500' },
-  l1: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', dot: 'bg-purple-500' },
-  j1: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', dot: 'bg-rose-500' },
+const COUNTRY_META = {
+  usa: { flag: '🇺🇸', label: 'USA', adj: 'US' },
+  uk: { flag: '🇬🇧', label: 'UK', adj: 'UK' },
+  schengen: { flag: '🇪🇺', label: 'Schengen', adj: 'Schengen' },
+  canada: { flag: '🇨🇦', label: 'Canada', adj: 'Canada' },
+  australia: { flag: '🇦🇺', label: 'Australia', adj: 'Australia' },
+  uae: { flag: '🇦🇪', label: 'UAE', adj: 'UAE' },
 };
 
-const CONSULATE_ORDER = ['mumbai', 'delhi', 'chennai', 'kolkata', 'hyderabad'];
+const CONSULATE_ORDER_US = ['mumbai', 'delhi', 'chennai', 'kolkata', 'hyderabad'];
 
-const FALLBACK_WAIT_TIMES = {
-  mumbai: {
-    name: "Mumbai VAC", city: "Mumbai",
-    jurisdiction: "MH, GJ, RJ, MP, Goa",
-    booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
-    visa_types: {
-      b1b2: { name: "B1/B2", label: "Tourist", wait_time: "408 days", available: true, count: 1, earliest_date: "408 days" },
-      f1: { name: "F1", label: "Student", wait_time: "98 days", available: true, count: 1, earliest_date: "98 days" },
-      h1b: { name: "H1B", label: "Work", wait_time: "156 days", available: true, count: 1, earliest_date: "156 days" },
-      h4: { name: "H4", label: "Dependent", wait_time: "210 days", available: true, count: 1, earliest_date: "210 days" },
-      l1: { name: "L1", label: "Transfer", wait_time: "89 days", available: true, count: 1, earliest_date: "89 days" },
-      j1: { name: "J1", label: "Exchange", wait_time: "45 days", available: true, count: 1, earliest_date: "45 days" },
+const FALLBACK_COUNTRIES = {
+  usa: {
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "MH, GJ, RJ, MP, Goa",
+      booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
+      visa_types: {
+        b1b2: { name: "B1/B2", label: "Tourist", wait_time: "408 days", available: true, count: 1, earliest_date: "408 days" },
+        f1: { name: "F1", label: "Student", wait_time: "98 days", available: true, count: 1, earliest_date: "98 days" },
+        h1b: { name: "H1B", label: "Work", wait_time: "156 days", available: true, count: 1, earliest_date: "156 days" },
+        h4: { name: "H4", label: "Dependent", wait_time: "210 days", available: true, count: 1, earliest_date: "210 days" },
+        l1: { name: "L1", label: "Transfer", wait_time: "89 days", available: true, count: 1, earliest_date: "89 days" },
+        j1: { name: "J1", label: "Exchange", wait_time: "45 days", available: true, count: 1, earliest_date: "45 days" },
+      },
+      total_slots: 6, earliest_date: "408 days",
     },
-    total_slots: 6, earliest_date: "408 days",
-  },
-  delhi: {
-    name: "New Delhi Embassy", city: "New Delhi",
-    jurisdiction: "DL, PB, HR, UK, HP, JK",
-    booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
-    visa_types: {
-      b1b2: { name: "B1/B2", label: "Tourist", wait_time: "442 days", available: true, count: 1, earliest_date: "442 days" },
-      f1: { name: "F1", label: "Student", wait_time: "112 days", available: true, count: 1, earliest_date: "112 days" },
-      h1b: { name: "H1B", label: "Work", wait_time: "178 days", available: true, count: 1, earliest_date: "178 days" },
-      h4: { name: "H4", label: "Dependent", wait_time: "234 days", available: true, count: 1, earliest_date: "234 days" },
-      l1: { name: "L1", label: "Transfer", wait_time: "95 days", available: true, count: 1, earliest_date: "95 days" },
-      j1: { name: "J1", label: "Exchange", wait_time: "52 days", available: true, count: 1, earliest_date: "52 days" },
+    delhi: {
+      name: "New Delhi Embassy", city: "New Delhi",
+      jurisdiction: "DL, PB, HR, UK, HP, JK",
+      booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
+      visa_types: {
+        b1b2: { name: "B1/B2", label: "Tourist", wait_time: "442 days", available: true, count: 1, earliest_date: "442 days" },
+        f1: { name: "F1", label: "Student", wait_time: "112 days", available: true, count: 1, earliest_date: "112 days" },
+        h1b: { name: "H1B", label: "Work", wait_time: "178 days", available: true, count: 1, earliest_date: "178 days" },
+        h4: { name: "H4", label: "Dependent", wait_time: "234 days", available: true, count: 1, earliest_date: "234 days" },
+        l1: { name: "L1", label: "Transfer", wait_time: "95 days", available: true, count: 1, earliest_date: "95 days" },
+        j1: { name: "J1", label: "Exchange", wait_time: "52 days", available: true, count: 1, earliest_date: "52 days" },
+      },
+      total_slots: 6, earliest_date: "442 days",
     },
-    total_slots: 6, earliest_date: "442 days",
-  },
-  chennai: {
-    name: "Chennai Consulate", city: "Chennai",
-    jurisdiction: "TN, KL, KA, AP, Telangana",
-    booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
-    visa_types: {
-      b1b2: { name: "B1/B2", label: "Tourist", wait_time: "397 days", available: true, count: 1, earliest_date: "397 days" },
-      f1: { name: "F1", label: "Student", wait_time: "87 days", available: true, count: 1, earliest_date: "87 days" },
-      h1b: { name: "H1B", label: "Work", wait_time: "142 days", available: true, count: 1, earliest_date: "142 days" },
-      h4: { name: "H4", label: "Dependent", wait_time: "195 days", available: true, count: 1, earliest_date: "195 days" },
-      l1: { name: "L1", label: "Transfer", wait_time: "76 days", available: true, count: 1, earliest_date: "76 days" },
-      j1: { name: "J1", label: "Exchange", wait_time: "38 days", available: true, count: 1, earliest_date: "38 days" },
+    chennai: {
+      name: "Chennai Consulate", city: "Chennai",
+      jurisdiction: "TN, KL, KA, AP, Telangana",
+      booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
+      visa_types: {
+        b1b2: { name: "B1/B2", label: "Tourist", wait_time: "397 days", available: true, count: 1, earliest_date: "397 days" },
+        f1: { name: "F1", label: "Student", wait_time: "87 days", available: true, count: 1, earliest_date: "87 days" },
+        h1b: { name: "H1B", label: "Work", wait_time: "142 days", available: true, count: 1, earliest_date: "142 days" },
+        h4: { name: "H4", label: "Dependent", wait_time: "195 days", available: true, count: 1, earliest_date: "195 days" },
+        l1: { name: "L1", label: "Transfer", wait_time: "76 days", available: true, count: 1, earliest_date: "76 days" },
+        j1: { name: "J1", label: "Exchange", wait_time: "38 days", available: true, count: 1, earliest_date: "38 days" },
+      },
+      total_slots: 6, earliest_date: "397 days",
     },
-    total_slots: 6, earliest_date: "397 days",
-  },
-  kolkata: {
-    name: "Kolkata Consulate", city: "Kolkata",
-    jurisdiction: "WB, BR, JH, OD, NE states",
-    booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
-    visa_types: {
-      b1b2: { name: "B1/B2", label: "Tourist", wait_time: "379 days", available: true, count: 1, earliest_date: "379 days" },
-      f1: { name: "F1", label: "Student", wait_time: "82 days", available: true, count: 1, earliest_date: "82 days" },
-      h1b: { name: "H1B", label: "Work", wait_time: "135 days", available: true, count: 1, earliest_date: "135 days" },
-      h4: { name: "H4", label: "Dependent", wait_time: "185 days", available: true, count: 1, earliest_date: "185 days" },
-      l1: { name: "L1", label: "Transfer", wait_time: "72 days", available: true, count: 1, earliest_date: "72 days" },
-      j1: { name: "J1", label: "Exchange", wait_time: "35 days", available: true, count: 1, earliest_date: "35 days" },
+    kolkata: {
+      name: "Kolkata Consulate", city: "Kolkata",
+      jurisdiction: "WB, BR, JH, OD, NE states",
+      booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
+      visa_types: {
+        b1b2: { name: "B1/B2", label: "Tourist", wait_time: "379 days", available: true, count: 1, earliest_date: "379 days" },
+        f1: { name: "F1", label: "Student", wait_time: "82 days", available: true, count: 1, earliest_date: "82 days" },
+        h1b: { name: "H1B", label: "Work", wait_time: "135 days", available: true, count: 1, earliest_date: "135 days" },
+        h4: { name: "H4", label: "Dependent", wait_time: "185 days", available: true, count: 1, earliest_date: "185 days" },
+        l1: { name: "L1", label: "Transfer", wait_time: "72 days", available: true, count: 1, earliest_date: "72 days" },
+        j1: { name: "J1", label: "Exchange", wait_time: "35 days", available: true, count: 1, earliest_date: "35 days" },
+      },
+      total_slots: 6, earliest_date: "379 days",
     },
-    total_slots: 6, earliest_date: "379 days",
-  },
-  hyderabad: {
-    name: "Hyderabad Consulate", city: "Hyderabad",
-    jurisdiction: "Telangana, AP",
-    booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
-    visa_types: {
-      b1b2: { name: "B1/B2", label: "Tourist", wait_time: "391 days", available: true, count: 1, earliest_date: "391 days" },
-      f1: { name: "F1", label: "Student", wait_time: "95 days", available: true, count: 1, earliest_date: "95 days" },
-      h1b: { name: "H1B", label: "Work", wait_time: "151 days", available: true, count: 1, earliest_date: "151 days" },
-      h4: { name: "H4", label: "Dependent", wait_time: "205 days", available: true, count: 1, earliest_date: "205 days" },
-      l1: { name: "L1", label: "Transfer", wait_time: "82 days", available: true, count: 1, earliest_date: "82 days" },
-      j1: { name: "J1", label: "Exchange", wait_time: "44 days", available: true, count: 1, earliest_date: "44 days" },
+    hyderabad: {
+      name: "Hyderabad Consulate", city: "Hyderabad",
+      jurisdiction: "Telangana, AP",
+      booking_url: "https://visa.vfsglobal.com/ind/en/usa/book-an-appointment",
+      visa_types: {
+        b1b2: { name: "B1/B2", label: "Tourist", wait_time: "391 days", available: true, count: 1, earliest_date: "391 days" },
+        f1: { name: "F1", label: "Student", wait_time: "95 days", available: true, count: 1, earliest_date: "95 days" },
+        h1b: { name: "H1B", label: "Work", wait_time: "151 days", available: true, count: 1, earliest_date: "151 days" },
+        h4: { name: "H4", label: "Dependent", wait_time: "205 days", available: true, count: 1, earliest_date: "205 days" },
+        l1: { name: "L1", label: "Transfer", wait_time: "82 days", available: true, count: 1, earliest_date: "82 days" },
+        j1: { name: "J1", label: "Exchange", wait_time: "44 days", available: true, count: 1, earliest_date: "44 days" },
+      },
+      total_slots: 6, earliest_date: "391 days",
     },
-    total_slots: 6, earliest_date: "391 days",
   },
+  uk: {
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West & Central India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/gbr/book-an-appointment",
+      visa_types: {
+        visitor_uk: { name: "Standard Visitor", label: "Tourist, Business, Family", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+        student_uk: { name: "Student (Tier 4)", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_uk: { name: "Skilled Worker", label: "Work", wait_time: "4-8w", available: true, count: 1, earliest_date: "4-8w" },
+      },
+      total_slots: 3, earliest_date: "2-4w",
+    },
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/gbr/book-an-appointment",
+      visa_types: {
+        visitor_uk: { name: "Standard Visitor", label: "Tourist, Business, Family", wait_time: "4-7w", available: true, count: 1, earliest_date: "4-7w" },
+        student_uk: { name: "Student (Tier 4)", label: "Study", wait_time: "2-5w", available: true, count: 1, earliest_date: "2-5w" },
+        work_uk: { name: "Skilled Worker", label: "Work", wait_time: "5-8w", available: true, count: 1, earliest_date: "5-8w" },
+      },
+      total_slots: 3, earliest_date: "4-7w",
+    },
+    chennai: {
+      name: "Chennai VAC", city: "Chennai",
+      jurisdiction: "South India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/gbr/book-an-appointment",
+      visa_types: {
+        visitor_uk: { name: "Standard Visitor", label: "Tourist, Business, Family", wait_time: "3-5w", available: true, count: 1, earliest_date: "3-5w" },
+        student_uk: { name: "Student (Tier 4)", label: "Study", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        work_uk: { name: "Skilled Worker", label: "Work", wait_time: "4-7w", available: true, count: 1, earliest_date: "4-7w" },
+      },
+      total_slots: 3, earliest_date: "3-5w",
+    },
+    kolkata: {
+      name: "Kolkata VAC", city: "Kolkata",
+      jurisdiction: "East & NE India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/gbr/book-an-appointment",
+      visa_types: {
+        visitor_uk: { name: "Standard Visitor", label: "Tourist, Business, Family", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+        student_uk: { name: "Student (Tier 4)", label: "Study", wait_time: "2-5w", available: true, count: 1, earliest_date: "2-5w" },
+        work_uk: { name: "Skilled Worker", label: "Work", wait_time: "4-8w", available: true, count: 1, earliest_date: "4-8w" },
+      },
+      total_slots: 3, earliest_date: "3-6w",
+    },
+  },
+  schengen: {
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/fra/book-an-appointment",
+      visa_types: {
+        'short-stay': { name: "Short Stay (90d)", label: "Tourism, Business", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        student_sc: { name: "Student", label: "Long-stay Study", wait_time: "4-8w", available: true, count: 1, earliest_date: "4-8w" },
+      },
+      total_slots: 2, earliest_date: "2-4w",
+    },
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/fra/book-an-appointment",
+      visa_types: {
+        'short-stay': { name: "Short Stay (90d)", label: "Tourism, Business", wait_time: "2-5w", available: true, count: 1, earliest_date: "2-5w" },
+        student_sc: { name: "Student", label: "Long-stay Study", wait_time: "4-8w", available: true, count: 1, earliest_date: "4-8w" },
+      },
+      total_slots: 2, earliest_date: "2-5w",
+    },
+    chennai: {
+      name: "Chennai VAC", city: "Chennai",
+      jurisdiction: "South India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/fra/book-an-appointment",
+      visa_types: {
+        'short-stay': { name: "Short Stay (90d)", label: "Tourism, Business", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        student_sc: { name: "Student", label: "Long-stay Study", wait_time: "4-7w", available: true, count: 1, earliest_date: "4-7w" },
+      },
+      total_slots: 2, earliest_date: "2-4w",
+    },
+    kolkata: {
+      name: "Kolkata VAC", city: "Kolkata",
+      jurisdiction: "East India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/fra/book-an-appointment",
+      visa_types: {
+        'short-stay': { name: "Short Stay (90d)", label: "Tourism, Business", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        student_sc: { name: "Student", label: "Long-stay Study", wait_time: "4-8w", available: true, count: 1, earliest_date: "4-8w" },
+      },
+      total_slots: 2, earliest_date: "2-4w",
+    },
+  },
+  canada: {
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/can/book-an-appointment",
+      visa_types: {
+        visitor_ca: { name: "Visitor (TRV)", label: "Tourist, Business", wait_time: "4-8w", available: true, count: 1, earliest_date: "4-8w" },
+        student_ca: { name: "Student Permit", label: "Study", wait_time: "8-12w", available: true, count: 1, earliest_date: "8-12w" },
+      },
+      total_slots: 2, earliest_date: "4-8w",
+    },
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/can/book-an-appointment",
+      visa_types: {
+        visitor_ca: { name: "Visitor (TRV)", label: "Tourist, Business", wait_time: "4-7w", available: true, count: 1, earliest_date: "4-7w" },
+        student_ca: { name: "Student Permit", label: "Study", wait_time: "8-11w", available: true, count: 1, earliest_date: "8-11w" },
+      },
+      total_slots: 2, earliest_date: "4-7w",
+    },
+    chennai: {
+      name: "Chennai VAC", city: "Chennai",
+      jurisdiction: "South India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/can/book-an-appointment",
+      visa_types: {
+        visitor_ca: { name: "Visitor (TRV)", label: "Tourist, Business", wait_time: "3-6w", available: true, count: 1, earliest_date: "3-6w" },
+        student_ca: { name: "Student Permit", label: "Study", wait_time: "7-10w", available: true, count: 1, earliest_date: "7-10w" },
+      },
+      total_slots: 2, earliest_date: "3-6w",
+    },
+  },
+  australia: {
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/aus/book-an-appointment",
+      visa_types: {
+        visitor_au: { name: "Visitor (600)", label: "Tourist, Business", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        student_au: { name: "Student (500)", label: "Study", wait_time: "4-8w", available: true, count: 1, earliest_date: "4-8w" },
+      },
+      total_slots: 2, earliest_date: "2-4w",
+    },
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/aus/book-an-appointment",
+      visa_types: {
+        visitor_au: { name: "Visitor (600)", label: "Tourist, Business", wait_time: "2-4w", available: true, count: 1, earliest_date: "2-4w" },
+        student_au: { name: "Student (500)", label: "Study", wait_time: "4-8w", available: true, count: 1, earliest_date: "4-8w" },
+      },
+      total_slots: 2, earliest_date: "2-4w",
+    },
+    chennai: {
+      name: "Chennai VAC", city: "Chennai",
+      jurisdiction: "South India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/aus/book-an-appointment",
+      visa_types: {
+        visitor_au: { name: "Visitor (600)", label: "Tourist, Business", wait_time: "2-3w", available: true, count: 1, earliest_date: "2-3w" },
+        student_au: { name: "Student (500)", label: "Study", wait_time: "4-7w", available: true, count: 1, earliest_date: "4-7w" },
+      },
+      total_slots: 2, earliest_date: "2-3w",
+    },
+  },
+  uae: {
+    mumbai: {
+      name: "Mumbai VAC", city: "Mumbai",
+      jurisdiction: "West India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/are/book-an-appointment",
+      visa_types: {
+        visitor_ae: { name: "Visit Visa", label: "Tourist, Business", wait_time: "3-7d", available: true, count: 1, earliest_date: "3-7d" },
+      },
+      total_slots: 1, earliest_date: "3-7d",
+    },
+    delhi: {
+      name: "New Delhi VAC", city: "New Delhi",
+      jurisdiction: "North India",
+      booking_url: "https://visa.vfsglobal.com/ind/en/are/book-an-appointment",
+      visa_types: {
+        visitor_ae: { name: "Visit Visa", label: "Tourist, Business", wait_time: "3-7d", available: true, count: 1, earliest_date: "3-7d" },
+      },
+      total_slots: 1, earliest_date: "3-7d",
+    },
+  },
+};
+
+function getConsulatesForCountry(country) {
+  const data = FALLBACK_COUNTRIES[country] || FALLBACK_COUNTRIES['usa'];
+  return Object.keys(data);
+}
+
+const COUNTRY_VISA_TYPES = {
+  usa: [
+    { id: 'b1b2', label: 'B1/B2 Tourist' },
+    { id: 'f1', label: 'F1 Student' },
+    { id: 'h1b', label: 'H1B Work' },
+    { id: 'h4', label: 'H4 Dependent' },
+    { id: 'l1', label: 'L1 Transfer' },
+    { id: 'j1', label: 'J1 Exchange' },
+  ],
+  uk: [
+    { id: 'visitor_uk', label: 'Standard Visitor' },
+    { id: 'student_uk', label: 'Student (Tier 4)' },
+    { id: 'work_uk', label: 'Skilled Worker' },
+  ],
+  schengen: [
+    { id: 'short-stay', label: 'Short Stay (90d)' },
+    { id: 'student_sc', label: 'Student' },
+  ],
+  canada: [
+    { id: 'visitor_ca', label: 'Visitor (TRV)' },
+    { id: 'student_ca', label: 'Student Permit' },
+  ],
+  australia: [
+    { id: 'visitor_au', label: 'Visitor (600)' },
+    { id: 'student_au', label: 'Student (500)' },
+  ],
+  uae: [
+    { id: 'visitor_ae', label: 'Visit Visa' },
+  ],
+};
+
+const COUNTRY_CONSOLATE_LABELS = {
+  usa: [
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'chennai', label: 'Chennai' },
+    { id: 'kolkata', label: 'Kolkata' },
+    { id: 'hyderabad', label: 'Hyderabad' },
+  ],
+  uk: [
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'chennai', label: 'Chennai' },
+    { id: 'kolkata', label: 'Kolkata' },
+  ],
+  schengen: [
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'chennai', label: 'Chennai' },
+    { id: 'kolkata', label: 'Kolkata' },
+  ],
+  canada: [
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'chennai', label: 'Chennai' },
+  ],
+  australia: [
+    { id: 'delhi', label: 'Delhi' },
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'chennai', label: 'Chennai' },
+  ],
+  uae: [
+    { id: 'mumbai', label: 'Mumbai' },
+    { id: 'delhi', label: 'Delhi' },
+  ],
 };
 
 export default function USVisaSlots() {
@@ -120,7 +366,7 @@ export default function USVisaSlots() {
   const [subscribing, setSubscribing] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [selectedVisas, setSelectedVisas] = useState(['b1b2']);
-  const [selectedConsulates, setSelectedConsulates] = useState(CONSULATE_ORDER);
+  const [selectedConsulates, setSelectedConsulates] = useState(CONSULATE_ORDER_US);
   const [showSubscribeForm, setShowSubscribeForm] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('usa');
 
@@ -152,10 +398,21 @@ export default function USVisaSlots() {
       }
     } catch (err) {
       console.warn('Using fallback wait-time data — API unreachable');
+      const fb = FALLBACK_COUNTRIES[selectedCountry] || FALLBACK_COUNTRIES['usa'];
+      let totalSlots = 0;
+      let vtCounts = {};
+      Object.values(fb).forEach(consul => {
+        Object.entries(consul.visa_types || {}).forEach(([vtId, vtData]) => {
+          if (vtData.available) {
+            totalSlots++;
+            vtCounts[vtId] = (vtCounts[vtId] || 0) + 1;
+          }
+        });
+      });
       setSummary({
         ok: true,
-        consulates: FALLBACK_WAIT_TIMES,
-        overall: { total_slots: 30, consulates_with_slots: 5, visa_type_counts: { b1b2: 5, f1: 5, h1b: 5 } },
+        consulates: fb,
+        overall: { total_slots: totalSlots, consulates_with_slots: Object.keys(fb).length, visa_type_counts: vtCounts },
       });
       setWhatsappNumber('+91 9000734326');
       setStatus({ check_interval_seconds: 7200, mode: 'wait_time_estimates' });
@@ -165,7 +422,11 @@ export default function USVisaSlots() {
   }, [selectedCountry]);
 
   useEffect(() => {
+    setLoading(true);
     fetchAll();
+  }, [selectedCountry]);
+
+  useEffect(() => {
     const interval = setInterval(fetchAll, 120000);
     return () => clearInterval(interval);
   }, [fetchAll]);
@@ -205,7 +466,7 @@ export default function USVisaSlots() {
       }, { headers: { Authorization: `Bearer ${token}` } });
       setSubscribed(true);
       setShowSubscribeForm(false);
-      toast({ title: 'Subscribed!', description: 'You will be notified when US visa slots open up.' });
+      toast({ title: 'Subscribed!', description: `You will be notified when ${COUNTRY_META[selectedCountry].adj} visa slots open up.` });
     } catch (err) {
       toast({ title: 'Subscription failed', description: err.response?.data?.detail || 'Please try again.' });
     } finally {
@@ -220,11 +481,24 @@ export default function USVisaSlots() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSubscribed(false);
-      toast({ title: 'Unsubscribed', description: 'You will no longer receive US visa slot alerts.' });
+      toast({ title: 'Unsubscribed', description: 'You will no longer receive visa slot alerts.' });
     } catch (err) {
       toast({ title: 'Error', description: 'Failed to unsubscribe.' });
     }
   };
+
+  const handleCountryChange = (country) => {
+    if (country === selectedCountry) return;
+    setSelectedCountry(country);
+    const visas = COUNTRY_VISA_TYPES[country] || COUNTRY_VISA_TYPES['usa'];
+    const consulates = COUNTRY_CONSOLATE_LABELS[country] || COUNTRY_CONSOLATE_LABELS['usa'];
+    setSelectedVisas([visas[0].id]);
+    setSelectedConsulates(consulates.map(c => c.id));
+    setShowSubscribeForm(false);
+  };
+
+  const meta = COUNTRY_META[selectedCountry] || COUNTRY_META['usa'];
+  const consulateOrder = getConsulatesForCountry(selectedCountry);
 
   if (loading) {
     return (
@@ -249,7 +523,7 @@ export default function USVisaSlots() {
           <div className="flex items-center gap-1.5 text-[13px] text-[hsl(var(--blue-900))]/55 mb-6">
             <Link to="/" className="hover:text-[hsl(var(--blue-700))]">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="font-bold text-[hsl(var(--blue-900))]">US Visa Slot Tracker</span>
+            <span className="font-bold text-[hsl(var(--blue-900))]">{meta.label} Visa Slot Tracker</span>
           </div>
 
           <div className="flex justify-center mb-6">
@@ -264,10 +538,10 @@ export default function USVisaSlots() {
               <RefreshCw className="w-3.5 h-3.5" /> Live Wait Times
             </div>
             <h1 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-              Visa Appointment Slots
+              {meta.label} Visa Appointment Slots
             </h1>
             <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/55 max-w-xl mx-auto">
-              Current wait times for visa appointments across VFS centres. Choose your destination above.
+              Current wait times for {meta.adj} visa appointments across VFS centres. Choose your destination above.
             </p>
           </div>
 
@@ -295,7 +569,7 @@ export default function USVisaSlots() {
 
           {/* Country Selector */}
           <div className="flex justify-center mb-8">
-            <div className="inline-flex rounded-full bg-white border border-black/10 p-1 gap-0.5">
+            <div className="inline-flex rounded-full bg-white border border-black/10 p-1 gap-0.5 overflow-x-auto max-w-full no-scrollbar">
               {[
                 { id: 'usa', flag: '🇺🇸', label: 'USA' },
                 { id: 'uk', flag: '🇬🇧', label: 'UK' },
@@ -306,8 +580,8 @@ export default function USVisaSlots() {
               ].map(c => (
                 <button
                   key={c.id}
-                  onClick={() => setSelectedCountry(c.id)}
-                  className={`px-3.5 py-2 rounded-full text-[12px] font-bold transition-colors ${
+                  onClick={() => handleCountryChange(c.id)}
+                  className={`px-3.5 py-2 min-h-[36px] sm:min-h-0 rounded-full text-[12px] font-bold transition-colors whitespace-nowrap ${
                     selectedCountry === c.id
                       ? 'bg-[hsl(var(--accent))] text-white'
                       : 'text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))]'
@@ -329,11 +603,11 @@ export default function USVisaSlots() {
                 Don't Miss Your Slot — Slots Fill in Minutes!
               </h2>
               <p className="text-[15px] text-white/75 max-w-lg mx-auto mb-2 leading-relaxed">
-                US visa appointment slots open unpredictably and disappear fast. Our system monitors all 5 consulates <strong className="text-white">24/7</strong> so you never miss one.
+                {meta.adj} visa appointment slots open unpredictably and disappear fast. Our system monitors all consulates <strong className="text-white">24/7</strong> so you never miss one.
               </p>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-[14px] text-white/80">
                 <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-4 py-2">
-                  <MapPin className="w-4 h-4" /> Mumbai, Delhi, Chennai, Kolkata, Hyderabad
+                  <MapPin className="w-4 h-4" /> {getConsulatesForCountry(selectedCountry).map(c => summary?.consulates?.[c]?.city || c.charAt(0).toUpperCase() + c.slice(1)).join(', ')}
                 </span>
                 <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-4 py-2">
                   <RefreshCw className="w-4 h-4" /> Checked every few minutes
@@ -349,7 +623,7 @@ export default function USVisaSlots() {
                 </Button>
                 <span className="text-white/60 text-[13px] hidden sm:inline">or</span>
                 <a
-                  href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '') || '919000734326'}?text=Hi%2C%20I%20need%20help%20with%20a%20US%20visa%20appointment.`}
+                  href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '') || '919000734326'}?text=Hi%2C%20I%20need%20help%20with%20a%20${meta.adj}%20visa%20appointment.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold text-[14px] transition"
@@ -379,10 +653,11 @@ export default function USVisaSlots() {
 
           {/* Consulate Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {CONSULATE_ORDER.map(cid => {
+            {consulateOrder.map(cid => {
               const data = summary?.consulates?.[cid];
               if (!data) return null;
               const available = data.total_slots > 0;
+              const bookingUrl = data.booking_url || FALLBACK_COUNTRIES[selectedCountry]?.[cid]?.booking_url || '#';
               return (
                 <div
                   key={cid}
@@ -402,7 +677,6 @@ export default function USVisaSlots() {
 
                   <div className="space-y-2 mb-4">
                     {Object.entries(data.visa_types || {}).map(([vtId, vtData]) => {
-                      const colors = VISA_TYPE_COLORS[vtId] || VISA_TYPE_COLORS.b1b2;
                       const hasData = vtData.wait_time && vtData.wait_time !== 'N/A';
                       return (
                         <div key={vtId} className="flex items-center justify-between">
@@ -410,7 +684,7 @@ export default function USVisaSlots() {
                             {vtData.name || vtId.toUpperCase()}
                           </span>
                           <span className={`text-[17px] font-display font-extrabold tracking-[-0.02em] tabular-nums ${
-                            hasData ? colors.text : 'text-[hsl(var(--blue-900))]/25'
+                            hasData ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/25'
                           }`}>
                             {hasData ? vtData.wait_time : '—'}
                           </span>
@@ -420,10 +694,10 @@ export default function USVisaSlots() {
                   </div>
 
                   <a
-                    href="https://visa.vfsglobal.com/ind/en/usa/book-an-appointment"
+                    href={bookingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 w-full justify-center h-10 rounded-full bg-[hsl(var(--blue-700))] text-white text-[13px] font-bold hover:bg-[hsl(229,85%,28%)] active:scale-[0.98] transition-colors"
+                    className="inline-flex items-center gap-1.5 w-full justify-center min-h-[44px] rounded-full bg-[hsl(var(--blue-700))] text-white text-[13px] font-bold hover:bg-[hsl(229,85%,28%)] active:scale-[0.98] transition-colors"
                   >
                     Book on VFS Global
                     <ExternalLink className="w-3 h-3" />
@@ -448,7 +722,7 @@ export default function USVisaSlots() {
                   Get Notified Instantly
                 </h2>
                 <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/60">
-                  We check every 2-3 minutes and send alerts the moment US visa slots open up.
+                  We check every 2-3 minutes and send alerts the moment {meta.adj} visa slots open up.
                 </p>
               </div>
             </div>
@@ -458,7 +732,7 @@ export default function USVisaSlots() {
                 <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
                 <h3 className="font-bold text-[15px] text-emerald-800">You're subscribed!</h3>
                 <p className="mt-1 text-[13px] text-emerald-700">
-                  You will receive in-app notifications when US visa slots become available.
+                  You will receive in-app notifications when {meta.adj} visa slots become available.
                 </p>
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   <Button
@@ -486,6 +760,7 @@ export default function USVisaSlots() {
                       onToggleConsulate={toggleConsulate}
                       onSubscribe={handleSubscribe}
                       subscribing={subscribing}
+                      country={selectedCountry}
                     />
                   </div>
                 )}
@@ -498,6 +773,7 @@ export default function USVisaSlots() {
                 onToggleConsulate={toggleConsulate}
                 onSubscribe={handleSubscribe}
                 subscribing={subscribing}
+                country={selectedCountry}
               />
             )}
           </div>
@@ -511,7 +787,7 @@ export default function USVisaSlots() {
               Need Help Booking?
             </h2>
             <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/60 max-w-md mx-auto">
-              Our team can help you find and book early US visa appointments. Message us on WhatsApp.
+              Our team can help you find and book early {meta.adj} visa appointments. Message us on WhatsApp.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
               <a
@@ -522,7 +798,7 @@ export default function USVisaSlots() {
                 Call {whatsappNumber || '+91 9000734326'}
               </a>
               <a
-                href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '')}?text=Hi%2C%20I%20need%20help%20with%20a%20US%20visa%20appointment.`}
+                href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '')}?text=Hi%2C%20I%20need%20help%20with%20a%20${meta.adj}%20visa%20appointment.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-green-600 hover:bg-green-700 text-white font-bold text-[13px] transition"
@@ -551,24 +827,21 @@ export default function USVisaSlots() {
                     </tr>
                   </thead>
                   <tbody>
-                    {slots.slice(0, 20).map((slot, i) => {
-                      const colors = VISA_TYPE_COLORS[slot.visa_type] || VISA_TYPE_COLORS.b1b2;
-                      return (
-                        <tr key={i} className="border-b border-black/[0.02] hover:bg-[hsl(var(--soft-bg))]">
-                          <td className="py-2.5 text-[13px] font-bold text-[hsl(var(--blue-900))]">{slot.city || slot.consulate_name}</td>
-                          <td className="py-2.5">
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${colors.bg} ${colors.text}`}>
-                              {slot.visa_name}
-                            </span>
-                          </td>
-                          <td className="py-2.5 text-[13px] text-[hsl(var(--blue-900))]">
-                            {new Date(slot.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </td>
-                          <td className="py-2.5 text-[13px] font-mono text-[hsl(var(--blue-900))]">{slot.time}</td>
-                          <td className="py-2.5 text-[12px] text-[hsl(var(--blue-900))]/50">{slot.day_of_week}</td>
-                        </tr>
-                      );
-                    })}
+                    {slots.slice(0, 20).map((slot, i) => (
+                      <tr key={i} className="border-b border-black/[0.02] hover:bg-[hsl(var(--soft-bg))]">
+                        <td className="py-2.5 text-[13px] font-bold text-[hsl(var(--blue-900))]">{slot.city || slot.consulate_name}</td>
+                        <td className="py-2.5">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))]">
+                            {slot.visa_name}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-[13px] text-[hsl(var(--blue-900))]">
+                          {new Date(slot.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td className="py-2.5 text-[13px] font-mono text-[hsl(var(--blue-900))]">{slot.time}</td>
+                        <td className="py-2.5 text-[12px] text-[hsl(var(--blue-900))]/50">{slot.day_of_week}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -585,7 +858,7 @@ export default function USVisaSlots() {
                 {
                   icon: <RefreshCw className="w-6 h-6" />,
                   title: '24/7 Monitoring',
-                  desc: 'Our system checks the official US visa scheduling portal every 2-3 minutes, around the clock.',
+                  desc: `Our system checks the official ${meta.adj} visa scheduling portal every 2-3 minutes, around the clock.`,
                 },
                 {
                   icon: <BellRing className="w-6 h-6" />,
@@ -595,7 +868,7 @@ export default function USVisaSlots() {
                 {
                   icon: <MapPin className="w-6 h-6" />,
                   title: 'All Consulates',
-                  desc: 'We monitor all 5 US consulates in India: Mumbai, Delhi, Chennai, Kolkata, Hyderabad.',
+                  desc: `We monitor all ${meta.adj} visa consulates across India.`,
                 },
               ].map((item, i) => (
                 <div key={i} className="text-center">
@@ -615,7 +888,10 @@ export default function USVisaSlots() {
   );
 }
 
-function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onToggleConsulate, onSubscribe, subscribing }) {
+function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onToggleConsulate, onSubscribe, subscribing, country = 'usa' }) {
+  const visaTypes = COUNTRY_VISA_TYPES[country] || COUNTRY_VISA_TYPES['usa'];
+  const consulateLabels = COUNTRY_CONSOLATE_LABELS[country] || COUNTRY_CONSOLATE_LABELS['usa'];
+
   return (
     <div className="space-y-5">
       <div>
@@ -623,29 +899,19 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
           Visa Types
         </label>
         <div className="flex flex-wrap gap-2">
-          {[
-            { id: 'b1b2', label: 'B1/B2 Tourist' },
-            { id: 'f1', label: 'F1 Student' },
-            { id: 'h1b', label: 'H1B Work' },
-            { id: 'h4', label: 'H4 Dependent' },
-            { id: 'l1', label: 'L1 Transfer' },
-            { id: 'j1', label: 'J1 Exchange' },
-          ].map(vt => {
-            const colors = VISA_TYPE_COLORS[vt.id] || VISA_TYPE_COLORS.b1b2;
-            return (
-              <button
-                key={vt.id}
-                onClick={() => onToggleVisa(vt.id)}
-                className={`px-3.5 py-2 rounded-full text-[12px] font-bold border-2 transition ${
-                  selectedVisas.includes(vt.id)
-                    ? `${colors.bg} ${colors.text} ${colors.border}`
-                    : 'border-black/10 text-[hsl(var(--blue-900))]/40 hover:border-black/20'
-                }`}
-              >
-                {vt.label}
-              </button>
-            );
-          })}
+          {visaTypes.map(vt => (
+            <button
+              key={vt.id}
+              onClick={() => onToggleVisa(vt.id)}
+              className={`px-3.5 py-2 rounded-full text-[12px] font-bold border-2 transition ${
+                selectedVisas.includes(vt.id)
+                  ? 'bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))]/30'
+                  : 'border-black/10 text-[hsl(var(--blue-900))]/40 hover:border-black/20'
+              }`}
+            >
+              {vt.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -654,13 +920,7 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
           Consulates
         </label>
         <div className="flex flex-wrap gap-2">
-          {[
-            { id: 'mumbai', label: 'Mumbai' },
-            { id: 'delhi', label: 'Delhi' },
-            { id: 'chennai', label: 'Chennai' },
-            { id: 'kolkata', label: 'Kolkata' },
-            { id: 'hyderabad', label: 'Hyderabad' },
-          ].map(c => (
+          {consulateLabels.map(c => (
             <button
               key={c.id}
               onClick={() => onToggleConsulate(c.id)}
