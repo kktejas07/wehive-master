@@ -229,7 +229,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
   return (
     <div className="flex-1 flex flex-col overflow-y-auto pb-12 bg-slate-50">
       {/* Visual Header Banner */}
-      <div className={`${theme.primaryBg} text-white px-5 pt-6 pb-12 rounded-b-[32px] shadow-lg relative overflow-hidden transition-colors duration-500`}>
+      <div className={`${theme.primaryBg} text-white px-5 pt-6 pb-8 rounded-b-[32px] shadow-lg relative overflow-hidden transition-colors duration-500`}>
         {/* Decorative ambient glowing circles */}
         <div className={`absolute -right-16 -top-16 w-48 h-48 rounded-full blur-2xl transition-all duration-500 ${
           colorScheme === "forced-navy" ? "bg-blue-500/20" : colorScheme === "forced-red" ? "bg-red-600/25" : "bg-red-600/10"
@@ -239,7 +239,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
         }`} />
 
         <div className="flex justify-between items-center relative z-10 mb-4">
-          <WeHiveLogo size="md" theme="white" showTagline={false} />
+          <WeHiveLogo size="sm" theme="white" showTagline={false} />
           <div className="flex items-center gap-2">
             {onLock && (
               <button
@@ -548,7 +548,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               </p>
               <button
                 onClick={() => onNavigate("evaluator")}
-                className="mt-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-1.5 shadow-md shadow-blue-950/20 cursor-pointer"
+                className="mt-4 bg-white text-blue-950 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 transition-colors flex items-center gap-1.5 shadow-md shadow-blue-950/20 cursor-pointer"
               >
                 <span>Assess Profile Now</span>
                 <ChevronRight className="w-3.5 h-3.5 text-red-500" />

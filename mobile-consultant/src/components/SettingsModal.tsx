@@ -67,6 +67,10 @@ export default function SettingsModal({
         return null;
     }
   };
+      default:
+        return null;
+    }
+  };
 
   // Security Emergency contacts and Calling Simulation States
   const [securityActiveCountry, setSecurityActiveCountry] = React.useState<string>(() => {

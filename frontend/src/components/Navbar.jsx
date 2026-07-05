@@ -49,7 +49,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
   if (orientation === 'horizontal') {
     return (
-      <nav className="hidden xl:flex items-center gap-1 xl:gap-2 mx-1 flex-1 min-w-0 justify-center overflow-x-auto no-scrollbar">
+      <nav className="hidden xl:flex items-center gap-0.5 xl:gap-1.5 mx-1 flex-1 min-w-0 justify-center">
         {NAV.map((item) => {
           const Icon = item.icon;
           return (
@@ -59,12 +59,12 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
               end={item.to === '/'}
               className={({ isActive }) =>
                 cn(
-                  'shrink-0 px-2 xl:px-2.5 py-1.5 text-[12px] xl:text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1 xl:gap-1.5',
+                  'px-2.5 xl:px-3.5 py-1.5 text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
                   isActive ? activeClass : inactiveClass
                 )
               }
             >
-              {Icon ? <Icon className="w-3.5 h-3.5 hidden 2xl:inline-block" /> : null}
+              {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
               {t('nav.' + item.id, item.label)}
               {item.badge && (
                 <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
@@ -197,7 +197,7 @@ export default function Navbar({ variant = 'default' }) {
       )}
     >
       <div className={cn(
-        '        max-w-[1440px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 sm:gap-4 transition-[height] duration-300',
+        '        max-w-[1440px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 transition-[height] duration-300',
         scrolled ? 'h-[68px] sm:h-[76px]' : 'h-[110px] sm:h-[130px]'
       )}>
         <Link to="/" className="flex items-center gap-2 group shrink-0 relative">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { 
   Coins, Wallet, Landmark, ArrowRight, CheckCircle2, AlertCircle, 
   HelpCircle, Calculator, Building, ArrowUpRight, TrendingUp, Info 
@@ -18,37 +18,27 @@ const COST_DATA = {
 };
 
 export default function FinanceTab({ onTriggerNotification, colorScheme }: FinanceTabProps) {
-  const [costData, setCostData] = useState<Record<string, any>>(COST_DATA);
-  const [selectedCountry, setSelectedCountry] = useState<string>("de");
+  const [selectedCountry, setSelectedCountry] = useState<keyof typeof COST_DATA>("de");
   const [customRent, setCustomRent] = useState<string>("");
   
   // Loan application states
   const [loanAmount, setLoanAmount] = useState("₹15,00,000");
   const [loanStatus, setLoanStatus] = useState<"not_applied" | "submitting" | "applied">("not_applied");
 
-  useEffect(() => {
-    fetch("/api/finance/costs").then(r => r.json()).then(data => {
-      if (data.costs) setCostData(data.costs);
-    }).catch(() => {});
-  }, []);
-
-  const currentCost = costData[selectedCountry] || COST_DATA[selectedCountry];
+  const currentCost = COST_DATA[selectedCountry];
   const activeRent = customRent ? parseFloat(customRent) || 0 : currentCost.rent;
   const totalMonthlyCost = activeRent + currentCost.food + currentCost.transport + currentCost.insurance;
 
   const handleApplyLoan = (e: React.FormEvent) => {
     e.preventDefault();
     setLoanStatus("submitting");
-    fetch("/api/finance/loan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: loanAmount }) })
-      .then(r => r.json())
-      .then(data => {
-        setLoanStatus("applied");
-        onTriggerNotification("Loan Application Received", data.message || `Your request for ${loanAmount} has been submitted.`);
-      })
-      .catch(() => {
-        setLoanStatus("applied");
-        onTriggerNotification("Loan Application Received", `Your request for ${loanAmount} has been forwarded for priority processing.`);
-      });
+    setTimeout(() => {
+      setLoanStatus("applied");
+      onTriggerNotification(
+        "Loan Application Received",
+        `Your request for ${loanAmount} has been forwarded to HDFC & Auxilo for priority processing.`
+      );
+    }, 1500);
   };
 
   return (
@@ -74,11 +64,11 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
           <div>
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Country</label>
             <div className="grid grid-cols-5 gap-1.5">
-              {Object.keys(costData).map((k) => (
+              {Object.keys(COST_DATA).map((k) => (
                 <button
                   key={k}
                   onClick={() => {
-                    setSelectedCountry(k);
+                    setSelectedCountry(k as any);
                     setCustomRent("");
                   }}
                   className={`py-1.5 rounded-lg text-[10.5px] font-bold border transition ${
@@ -87,7 +77,7 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
                       : "bg-slate-50 border-slate-200 text-slate-600"
                   }`}
                 >
-                  {(costData[k]?.country || "").split(" ")[0]}
+                  {COST_DATA[k as keyof typeof COST_DATA].country.split(" ")[0]}
                 </button>
               ))}
             </div>
