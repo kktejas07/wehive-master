@@ -68,7 +68,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
               {t('nav.' + item.id, item.label)}
               {item.badge && (
                 <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
-                  {item.badge}
+                  {t('badge.' + item.badge.toLowerCase(), item.badge)}
                 </span>
               )}
             </NavLink>
@@ -96,7 +96,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
             {t('nav.' + item.id, item.label)}
             {item.badge && (
               <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
-                {item.badge}
+                {t('badge.' + item.badge.toLowerCase(), item.badge)}
               </span>
             )}
           </Link>
