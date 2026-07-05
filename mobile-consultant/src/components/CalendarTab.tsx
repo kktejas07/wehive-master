@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Calendar, Clock, CheckCircle2, AlertCircle, Info, Bell, 
   ArrowRight, BookOpen, Star, RefreshCw 
@@ -16,8 +16,15 @@ const DEADLINES = [
 ];
 
 export default function CalendarTab({ onTriggerNotification, colorScheme }: CalendarTabProps) {
+  const [deadlines, setDeadlines] = useState(DEADLINES);
   // Test Prep Countdown
   const [ieltsDate, setIeltsDate] = useState("2026-07-20");
+
+  useEffect(() => {
+    fetch("/api/calendar/deadlines").then(r => r.json()).then(data => {
+      if (data.deadlines) setDeadlines(data.deadlines);
+    }).catch(() => {});
+  }, []);
   
   // Notification preference toggles
   const [notify30, setNotify30] = useState(true);
@@ -62,7 +69,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
         </div>
 
         <div className="space-y-3">
-          {DEADLINES.map((dl) => (
+          {deadlines.map((dl) => (
             <div key={dl.id} className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl flex justify-between items-center">
               <div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{dl.country}</div>

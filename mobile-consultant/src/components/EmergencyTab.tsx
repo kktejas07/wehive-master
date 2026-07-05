@@ -16,6 +16,13 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
   // Health Card States
   const [policyNum, setPolicyNum] = useState("DE-SHI-88201-992");
   const [insurer, setInsurer] = useState("Techniker Krankenkasse (TK)");
+
+  useEffect(() => {
+    fetch("/api/emergency/insurance").then(r => r.json()).then(data => {
+      if (data.policy) setPolicyNum(data.policy);
+      if (data.insurer) setInsurer(data.insurer);
+    }).catch(() => {});
+  }, []);
   
   useEffect(() => {
     let timer: any = null;
