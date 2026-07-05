@@ -86,7 +86,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setNotifications([
       {
         id: "hist-1",
-        title: "Welcome to WeHive!",
+        title: "Our Ambition. Our Guidance. No Frontiers",
         body: "Unlock premium global admissions consultation. Your profile is ready.",
         timestamp: "2 hours ago",
         type: "system",

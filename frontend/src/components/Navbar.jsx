@@ -14,11 +14,12 @@ const NAV = [
   { id: 'home', label: 'Home', to: '/' },
   { id: 'visa', label: 'Visa', to: '/#countries' },
   { id: 'student', label: 'Student', to: '/student-visa' },
+  { id: 'assessment', label: 'Visa Calculator', to: '/assessment' },
+  { id: 'track', label: 'Track Application', to: '/track' },
   { id: 'us-slots', label: 'Visa Slots', to: '/us-visa-slots', badge: 'HURRY' },
   { id: 'resources', label: 'Resources', to: '/resources' },
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
   { id: 'about', label: 'About', to: '/about' },
-  { id: 'fly', label: 'Fly', to: '/contact' },
 ];
 
 function NavLinks({ orientation = 'horizontal', light = false }) {

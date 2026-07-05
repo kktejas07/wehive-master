@@ -213,7 +213,7 @@ def build_welcome_html(name: str) -> str:
     content = f"""
     <tr><td style="padding:0 32px;text-align:left">
       <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Hi{f' {name}' if name else ''},</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Welcome to <strong>We Hive</strong> — your all-in-one platform for visa applications, university admissions, and immigration services.</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6"><strong>Our Ambition. Our Guidance. No Frontiers</strong> — your all-in-one platform for visa applications, university admissions, and immigration services.</p>
       <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Here's what you can do now:</p>
       <ul style="font-size:14px;color:#475569;margin:0 0 20px 0;padding-left:20px;line-height:1.8">
         <li>Explore 190+ countries and check visa requirements</li>

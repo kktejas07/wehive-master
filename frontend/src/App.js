@@ -29,10 +29,14 @@ const Admin = lazy(() => import('./pages/Admin'));
 const HolidayPlanner = lazy(() => import('./pages/HolidayPlanner'));
 const ApplicationDetail = lazy(() => import('./pages/ApplicationDetail'));
 const TrackStatus = lazy(() => import('./pages/TrackStatus'));
+const VisaAssessment = lazy(() => import('./pages/VisaAssessment'));
+const CountryHub = lazy(() => import('./pages/CountryHub'));
+const TrackPortal = lazy(() => import('./pages/TrackPortal'));
 const Help = lazy(() => import('./pages/Help'));
 const Contact = lazy(() => import('./pages/Contact'));
 const StudentVisa = lazy(() => import('./pages/StudentVisa'));
 const VisaInterview = lazy(() => import('./pages/VisaInterview'));
+const VisaInterviewSandbox = lazy(() => import('./pages/VisaInterviewSandbox'));
 const UniversityDetail = lazy(() => import('./pages/UniversityDetail'));
 const ProgramList = lazy(() => import('./pages/ProgramList'));
 const MapView = lazy(() => import('./pages/MapView'));
@@ -91,6 +95,10 @@ function AnimatedRoutes() {
           <Route path="/account" element={<PrivateRoute><PageTransition><Account /></PageTransition></PrivateRoute>} />
           <Route path="/account/applications/:id" element={<PrivateRoute><PageTransition><ApplicationDetail /></PageTransition></PrivateRoute>} />
           <Route path="/track/:id" element={<PageTransition><TrackStatus /></PageTransition>} />
+          <Route path="/track" element={<PageTransition><TrackPortal /></PageTransition>} />
+          <Route path="/assessment" element={<PageTransition><VisaAssessment /></PageTransition>} />
+          <Route path="/destinations/:countryId" element={<PageTransition><CountryHub /></PageTransition>} />
+          <Route path="/visa-interview-sandbox" element={<PageTransition><VisaInterviewSandbox /></PageTransition>} />
           <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />

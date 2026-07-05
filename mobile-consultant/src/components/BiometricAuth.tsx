@@ -458,8 +458,7 @@ export default function BiometricAuth({
             }
             onSuccess();
           }}
-          disabled={authState === "success" || authState === "verifying"}
-          className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 px-4 rounded-xl text-xs font-mono transition-all border border-white/10 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+          className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 px-4 rounded-xl text-xs font-mono transition-all border border-white/10 flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           BYPASS WITH ADMIN KEY

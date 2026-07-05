@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Award, Users, BookOpen, Globe, Calendar, Clock, Video, Phone, CheckCircle, ChevronRight, Sparkles, Bell, Lock, Settings, HelpCircle, ChevronDown, X, PiggyBank, TrendingUp, TrendingDown, Coins, DollarSign, Info, RefreshCw, AlertCircle, FileText, CheckCircle2 } from "lucide-react";
+import { Award, Users, BookOpen, Globe, Calendar, Clock, Video, Phone, CheckCircle, ChevronRight, Sparkles, Bell, Lock, Settings, HelpCircle, ChevronDown, X, PiggyBank, TrendingUp, TrendingDown, Coins, DollarSign, Info, RefreshCw, AlertCircle, FileText, CheckCircle2, Mic } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { STUDY_DESTINATIONS, CONSULTANTS } from "../data";
 import { Consultation } from "../types";
@@ -557,6 +557,32 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
           </div>
         </div>
 
+        {/* Mock Visa Interview Sandbox Call-To-Action Card */}
+        <div className="mb-6 bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden border border-white/5">
+          <div className="absolute right-0 bottom-0 translate-x-4 translate-y-4 w-28 h-28 bg-white/5 rounded-full" />
+          <div className="flex items-start gap-3 relative z-10">
+            <div className="p-3 bg-white/10 rounded-2xl">
+              <Mic className="w-6 h-6 text-emerald-400 animate-pulse" />
+            </div>
+            <div className="flex-1">
+              <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Embassy Prep
+              </span>
+              <h3 className="text-base font-bold mt-1.5">Visa Interview Sandbox</h3>
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                Practice answering tough embassy questions with interactive voice inputs and scorecards.
+              </p>
+              <button
+                onClick={() => onNavigate("chat")}
+                className="mt-4 bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-600 transition-colors flex items-center gap-1.5 shadow-md shadow-slate-950/20 cursor-pointer"
+              >
+                <span>Start Practice Sandbox</span>
+                <ChevronRight className="w-3.5 h-3.5 text-white" />
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Recommended Next Steps Engine Panel */}
         <div className="mb-6 bg-white rounded-2xl p-5 border border-slate-200/50 shadow-sm space-y-4" id="ai-recommended-steps-card">
           <div className="flex items-center justify-between">
@@ -654,8 +680,16 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                       <button
                         onClick={() => {
                           const labelLower = item.actionLabel.toLowerCase();
-                          if (labelLower.includes("vault") || labelLower.includes("upload") || labelLower.includes("document") || labelLower.includes("visa")) {
-                            onNavigate("tracking");
+                          if (labelLower.includes("vault") || labelLower.includes("upload") || labelLower.includes("document")) {
+                            onNavigate("vault");
+                          } else if (labelLower.includes("finance") || labelLower.includes("blocked") || labelLower.includes("gic") || labelLower.includes("loan") || labelLower.includes("budget")) {
+                            onNavigate("finance");
+                          } else if (labelLower.includes("calendar") || labelLower.includes("intake") || labelLower.includes("deadline")) {
+                            onNavigate("calendar");
+                          } else if (labelLower.includes("agent") || labelLower.includes("refer") || labelLower.includes("lead")) {
+                            onNavigate("agent");
+                          } else if (labelLower.includes("emergency") || labelLower.includes("hotline") || labelLower.includes("sos")) {
+                            onNavigate("emergency");
                           } else if (labelLower.includes("assess") || labelLower.includes("evaluate") || labelLower.includes("profile")) {
                             onNavigate("evaluator");
                           } else if (labelLower.includes("chat") || labelLower.includes("ask") || labelLower.includes("hivy")) {

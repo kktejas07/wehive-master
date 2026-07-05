@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Home, Compass, MessageSquare, CheckSquare, Sparkles } from "lucide-react";
+import { Home, Compass, MessageSquare, CheckSquare, Sparkles, Folder } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { syncOfflineEvaluations } from "./utils/offlineCache";
 
@@ -10,7 +10,13 @@ import ExploreTab from "./components/ExploreTab";
 import ChatTab from "./components/ChatTab";
 import TrackingTab from "./components/TrackingTab";
 import EvaluatorTab from "./components/EvaluatorTab";
+import VaultTab from "./components/VaultTab";
+import FinanceTab from "./components/FinanceTab";
+import EmergencyTab from "./components/EmergencyTab";
+import CalendarTab from "./components/CalendarTab";
+import AgentTab from "./components/AgentTab";
 import BiometricAuth from "./components/BiometricAuth";
+import MobileAuthScreen from "./components/MobileAuthScreen";
 
 // Notification imports
 import { NotificationProvider, useNotifications } from "./components/NotificationContext";
@@ -27,6 +33,7 @@ import { Consultation, SecurityLog, BiometricAnimationStyle } from "./types";
 function AppContent() {
   const { colorScheme, theme } = useColorScheme();
   const [activeTab, setActiveTab] = useState<string>("home");
+  const [isCredentialAuthenticated, setIsCredentialAuthenticated] = useState<boolean>(false);
   const [platform, setPlatform] = useState<"ios" | "android">("ios");
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
   const [bookedSessions, setBookedSessions] = useState<Consultation[]>([]);
@@ -278,7 +285,10 @@ function AppContent() {
             onSelectCountry={handleSelectCountry}
             bookedSessions={bookedSessions}
             onBookSession={handleBookSession}
-            onLock={() => setIsAuthenticated(false)}
+            onLock={() => {
+              setIsAuthenticated(false);
+              setIsCredentialAuthenticated(false);
+            }}
             onOpenNotifications={() => setIsNotifCenterOpen(true)}
             onOpenSettings={() => setIsSettingsOpen(true)}
           />
@@ -298,6 +308,46 @@ function AppContent() {
       case "chat":
         screenElement = <ChatTab />;
         break;
+      case "vault":
+        screenElement = (
+          <VaultTab
+            onTriggerNotification={triggerNotification}
+            colorScheme={colorScheme}
+          />
+        );
+        break;
+      case "finance":
+        screenElement = (
+          <FinanceTab
+            onTriggerNotification={triggerNotification}
+            colorScheme={colorScheme}
+          />
+        );
+        break;
+      case "emergency":
+        screenElement = (
+          <EmergencyTab
+            onTriggerNotification={triggerNotification}
+            colorScheme={colorScheme}
+          />
+        );
+        break;
+      case "calendar":
+        screenElement = (
+          <CalendarTab
+            onTriggerNotification={triggerNotification}
+            colorScheme={colorScheme}
+          />
+        );
+        break;
+      case "agent":
+        screenElement = (
+          <AgentTab
+            onTriggerNotification={triggerNotification}
+            colorScheme={colorScheme}
+          />
+        );
+        break;
       case "tracking":
         screenElement = <TrackingTab />;
         break;
@@ -311,7 +361,10 @@ function AppContent() {
             onSelectCountry={handleSelectCountry}
             bookedSessions={bookedSessions}
             onBookSession={handleBookSession}
-            onLock={() => setIsAuthenticated(false)}
+            onLock={() => {
+              setIsAuthenticated(false);
+              setIsCredentialAuthenticated(false);
+            }}
             onOpenNotifications={() => setIsNotifCenterOpen(true)}
             onOpenSettings={() => setIsSettingsOpen(true)}
           />
@@ -339,7 +392,12 @@ function AppContent() {
       {/* Screen Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <AnimatePresence mode="wait">
-          {!isAuthenticated && biometricEnabled && (
+          {!isCredentialAuthenticated ? (
+            <MobileAuthScreen
+              onSuccess={() => setIsCredentialAuthenticated(true)}
+              colorScheme={colorScheme}
+            />
+          ) : !isAuthenticated && biometricEnabled ? (
             <BiometricAuth
               platform={platform}
               onSuccess={() => setIsAuthenticated(true)}
@@ -347,7 +405,7 @@ function AppContent() {
               onLogAttempt={handleLogAttempt}
               animationStyle={biometricAnimationStyle}
             />
-          )}
+          ) : null}
         </AnimatePresence>
 
         {/* Real-time Push Notification Banner */}
@@ -364,11 +422,15 @@ function AppContent() {
         <SettingsModal
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
+          onNavigate={handleNavigate}
           biometricEnabled={biometricEnabled}
           setBiometricEnabled={setBiometricEnabled}
           biometricMethod={biometricMethod}
           setBiometricMethod={setBiometricMethod}
-          onLockApp={() => setIsAuthenticated(false)}
+          onLockApp={() => {
+            setIsAuthenticated(false);
+            setIsCredentialAuthenticated(false);
+          }}
           platform={platform}
           securityLogs={securityLogs}
           onClearLogs={handleClearLogs}
@@ -402,8 +464,32 @@ function AppContent() {
             onClick={() => handleNavigate("explore")}
             className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("explore")}`}
           >
-            <Compass className="w-5 h-5 shrink-0" />
+            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
+              <g fill="currentColor" fillRule="evenodd">
+                <path d="M12 2.75c-2.59 0-4.93 1.06-6.61 2.77 -.29.29-.77.3-1.07.01 -.3-.29-.31-.77-.02-1.07 1.95-1.99 4.66-3.23 7.67-3.23 5.93 0 10.75 4.81 10.75 10.75 0 5.93-4.82 10.75-10.75 10.75 -5.94 0-10.75-4.82-10.75-10.75 0-.74.07-1.46.21-2.15 .08-.41.47-.67.88-.59 .4.08.66.47.58.88 -.13.59-.19 1.21-.19 1.85 0 5.1 4.14 9.25 9.25 9.25 5.1 0 9.25-4.15 9.25-9.25 0-5.11-4.15-9.25-9.25-9.25Z"/>
+                <path d="M1.75 15c0-.42.33-.75.75-.75h5c1.24 0 2.25 1 2.25 2.25 0 .41.33.75.75.75H12c1.51 0 2.75 1.23 2.75 2.75v1.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V20c0-.7-.56-1.25-1.25-1.25h-1.5c-1.25 0-2.25-1.01-2.25-2.25 0-.42-.34-.75-.75-.75h-5c-.42 0-.75-.34-.75-.75Z"/>
+                <path d="M13.43 1.88c.33.23.42.2.18.54l-2.82 4.02c-.27.37-.3.86-.1 1.27l.98 1.96c.32.65 1.15.89 1.78.5l.37-.24c1.32-.83 3.07-.39 3.84.96l.39.68c.22.38.63.62 1.08.62h2.83c.41 0 .25.33.25.75 0 .41.16.75-.25.75h-2.84c-.99 0-1.9-.53-2.39-1.39l-.4-.69c-.36-.62-1.15-.82-1.75-.44l-.38.23c-1.38.85-3.2.34-3.92-1.11l-.99-1.97c-.46-.91-.38-1.99.2-2.81l2.81-4.03c.23-.34.7.07 1.04.31Z"/>
+              </g>
+            </svg>
             <span className="text-[9px] mt-1 font-mono tracking-wide">Explore</span>
+          </button>
+
+          {/* Tab Button: Vault */}
+          <button
+            onClick={() => handleNavigate("vault")}
+            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("vault")}`}
+          >
+            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
+              <g fill="currentColor" fillRule="evenodd">
+                <path d="M1.25 4.34c0-1.18 1.13-2.02 2.25-1.68l8.71 2.61c.31.09.53.38.53.71v16c0 .23-.12.46-.31.6 -.2.14-.44.18-.67.11L2.47 19.9c-.75-.23-1.25-.91-1.25-1.68V4.3Zm1.82-.24c-.17-.05-.33.07-.33.23v13.91c0 .11.07.2.17.23l8.32 2.49V6.52L3.05 4.06Z"/>
+                <path d="M22.75 4.34c0-1.18-1.13-2.02-2.26-1.68l-8.72 2.61c-.32.09-.54.38-.54.71v16c0 .23.11.46.3.6 .19.14.43.18.66.11l9.28-2.79c.74-.23 1.24-.91 1.24-1.68V8.96c0-.42-.34-.75-.75-.75 -.42 0-.75.33-.75.75v.256c0 .11-.08.2-.18.23l-8.33 2.49V6.5l8.17-2.46c.16-.05.32.07.32.23v.65c0 .41.33.75.75.75 .41 0 .75-.34.75-.75v-.66Z"/>
+                <path d="M7 9.75c-.42 0-.75.33-.75.75 0 .41.33.75.75.75 .41 0 .75-.34.75-.75 0-.42-.34-.75-.75-.75Zm-2.25.75c0-1.25 1-2.25 2.25-2.25 1.24 0 2.25 1 2.25 2.25 0 1.24-1.01 2.25-2.25 2.25 -1.25 0-2.25-1.01-2.25-2.25Z"/>
+                <path d="M7 14.75c-.97 0-1.75.78-1.75 1.75 0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75 0-1.8 1.45-3.25 3.25-3.25 1.79 0 3.25 1.45 3.25 3.25 0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75 0-.97-.79-1.75-1.75-1.75Z"/>
+                <path d="M14.25 10c0-.42.33-.75.75-.75h4c.41 0 .75.33.75.75 0 .41-.34.75-.75.75h-4c-.42 0-.75-.34-.75-.75Z"/>
+                <path d="M14.25 14c0-.42.33-.75.75-.75h4c.41 0 .75.33.75.75 0 .41-.34.75-.75.75h-4c-.42 0-.75-.34-.75-.75Z"/>
+              </g>
+            </svg>
+            <span className="text-[9px] mt-1 font-mono tracking-wide">Vault</span>
           </button>
 
           {/* Tab Button: Hive AI Chat */}
@@ -427,15 +513,6 @@ function AppContent() {
           >
             <CheckSquare className="w-5 h-5 shrink-0" />
             <span className="text-[9px] mt-1 font-mono tracking-wide">Journey</span>
-          </button>
-
-          {/* Tab Button: Eligibility Evaluator */}
-          <button
-            onClick={() => handleNavigate("evaluator")}
-            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("evaluator")}`}
-          >
-            <Sparkles className="w-5 h-5 shrink-0" />
-            <span className="text-[9px] mt-1 font-mono tracking-wide">Evaluator</span>
           </button>
         </div>
       </div>

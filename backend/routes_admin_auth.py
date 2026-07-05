@@ -216,9 +216,9 @@ async def admin_signup(req: SignupRequest, bg: BackgroundTasks = None):
         bg.add_task(
             send_email,
             to_email=email,
-            subject='Welcome to We Hive Admin!',
+            subject='Our Ambition. Our Guidance. No Frontiers (Admin)',
             html_body=build_welcome_html(req.name.strip()),
-            text_body=f'Welcome to We Hive Admin, {req.name.strip()}! Your admin account is ready.',
+            text_body=f'Our Ambition. Our Guidance. No Frontiers. Your admin account is ready.',
         )
 
     return {'access_token': token, 'token_type': 'bearer', 'user': _public_admin(fresh)}
