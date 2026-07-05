@@ -298,83 +298,22 @@ export default function CountryHub() {
   const country = COUNTRY_DATA[countryId] || COUNTRY_DATA.ca;
   const [activeVisa, setActiveVisa] = useState('pr');
 
-  const renderDashedIcon = (key, className = "w-5 h-5") => {
+  const renderRegularIcon = (key, className = "w-5 h-5") => {
     switch (key) {
       case 'pr':
       case 'shield':
-        return (
-          <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M12 2.75c-2.59 0-4.93 1.06-6.61 2.77 -.29.29-.77.3-1.07.01 -.3-.29-.31-.77-.02-1.07 1.95-1.99 4.66-3.23 7.67-3.23 5.93 0 10.75 4.81 10.75 10.75 0 5.93-4.82 10.75-10.75 10.75 -5.94 0-10.75-4.82-10.75-10.75 0-.74.07-1.46.21-2.15 .08-.41.47-.67.88-.59 .4.08.66.47.58.88 -.13.59-.19 1.21-.19 1.85 0 5.1 4.14 9.25 9.25 9.25 5.1 0 9.25-4.15 9.25-9.25 0-5.11-4.15-9.25-9.25-9.25Z"/>
-              <path d="M1.75 15c0-.42.33-.75.75-.75h5c1.24 0 2.25 1 2.25 2.25 0 .41.33.75.75.75H12c1.51 0 2.75 1.23 2.75 2.75v1.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V20c0-.7-.56-1.25-1.25-1.25h-1.5c-1.25 0-2.25-1.01-2.25-2.25 0-.42-.34-.75-.75-.75h-5c-.42 0-.75-.34-.75-.75Z"/>
-              <path d="M13.43 1.88c.33.23.42.2.18.54l-2.82 4.02c-.27.37-.3.86-.1 1.27l.98 1.96c.32.65 1.15.89 1.78.5l.37-.24c1.32-.83 3.07-.39 3.84.96l.39.68c.22.38.63.62 1.08.62h2.83c.41 0 .25.33.25.75 0 .41.16.75-.25.75h-2.84c-.99 0-1.9-.53-2.39-1.39l-.4-.69c-.36-.62-1.15-.82-1.75-.44l-.38.23c-1.38.85-3.2.34-3.92-1.11l-.99-1.97c-.46-.91-.38-1.99.2-2.81l2.81-4.03c.23-.34.7.07 1.04.31Z"/>
-            </g>
-          </svg>
-        );
+        return <ShieldCheck className={className} />;
       case 'student':
-        return (
-          <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M1.25 4.34c0-1.18 1.13-2.02 2.25-1.68l8.71 2.61c.31.09.53.38.53.71v16c0 .23-.12.46-.31.6 -.2.14-.44.18-.67.11L2.47 19.9c-.75-.23-1.25-.91-1.25-1.68V4.3Zm1.82-.24c-.17-.05-.33.07-.33.23v13.91c0 .11.07.2.17.23l8.32 2.49V6.52L3.05 4.06Z"/>
-              <path d="M22.75 4.34c0-1.18-1.13-2.02-2.26-1.68l-8.72 2.61c-.32.09-.54.38-.54.71v16c0 .23.11.46.3.6 .19.14.43.18.66.11l9.28-2.79c.74-.23 1.24-.91 1.24-1.68V8.96c0-.42-.34-.75-.75-.75 -.42 0-.75.33-.75.75v.256c0 .11-.08.2-.18.23l-8.33 2.49V6.5l8.17-2.46c.16-.05.32.07.32.23v.65c0 .41.33.75.75.75 .41 0 .75-.34.75-.75v-.66Z"/>
-              <path d="M7 9.75c-.42 0-.75.33-.75.75 0 .41.33.75.75.75 .41 0 .75-.34.75-.75 0-.42-.34-.75-.75-.75Zm-2.25.75c0-1.25 1-2.25 2.25-2.25 1.24 0 2.25 1 2.25 2.25 0 1.24-1.01 2.25-2.25 2.25 -1.25 0-2.25-1.01-2.25-2.25Z"/>
-              <path d="M7 14.75c-.97 0-1.75.78-1.75 1.75 0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75 0-1.8 1.45-3.25 3.25-3.25 1.79 0 3.25 1.45 3.25 3.25 0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75 0-.97-.79-1.75-1.75-1.75Z"/>
-              <path d="M14.25 10c0-.42.33-.75.75-.75h4c.41 0 .75.33.75.75 0 .41-.34.75-.75.75h-4c-.42 0-.75-.34-.75-.75Z"/>
-              <path d="M14.25 14c0-.42.33-.75.75-.75h4c.41 0 .75.33.75.75 0 .41-.34.75-.75.75h-4c-.42 0-.75-.34-.75-.75Z"/>
-            </g>
-          </svg>
-        );
+        return <GraduationCap className={className} />;
       case 'work':
-        return (
-          <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M1.25 7c0-.97.78-1.75 1.75-1.75h18c.96 0 1.75.78 1.75 1.75v13c0 .96-.79 1.75-1.75 1.75h-2c-.42 0-.75-.34-.75-.75 0-.42.33-.75.75-.75h2c.13 0 .25-.12.25-.25V7c0-.14-.12-.25-.25-.25H3c-.14 0-.25.11-.25.25v13c0 .13.11.25.25.25h12c.41 0 .75.33.75.75 0 .41-.34.75-.75.75H3c-.97 0-1.75-.79-1.75-1.75V7Z"/>
-              <path d="M1.25 7c0-.97.78-1.75 1.75-1.75h18c.96 0 1.75.78 1.75 1.75v4c0 .34-.24.64-.57.72l-8.06 2.01c-1.4.34-2.86.34-4.25 0l-8.06-2.02c-.34-.09-.57-.39-.57-.73v-4ZM3 6.75c-.14 0-.25.11-.25.25v3.41l7.49 1.87c1.15.28 2.36.28 3.51 0l7.49-1.88V6.98c0-.14-.12-.25-.25-.25h-18Z"/>
-              <path d="M6.25 4c0-.97.78-1.75 1.75-1.75h8c.96 0 1.75.78 1.75 1.75v2c0 .41-.34.75-.75.75H7c-.42 0-.75-.34-.75-.75V4ZM8 3.75c-.14 0-.25.11-.25.25v1.25h8.5V4c0-.14-.12-.25-.25-.25H8Z"/>
-              <path d="M12 11.25c-.42 0-.75.33-.75.75v3c0 .41.33.75.75.75 .41 0 .75-.34.75-.75v-3c0-.42-.34-.75-.75-.75ZM9.75 12c0-1.25 1-2.25 2.25-2.25 1.24 0 2.25 1 2.25 2.25v3c0 1.24-1.01 2.25-2.25 2.25 -1.25 0-2.25-1.01-2.25-2.25v-3Z"/>
-            </g>
-          </svg>
-        );
+        return <Briefcase className={className} />;
       case 'tourist':
       case 'globe':
-        return (
-          <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M3.46 6.46c.14-.15.33-.22.53-.22h4.99c.14 0 .29.04.41.12l1.08.72 1.08-.73c.12-.09.26-.13.41-.13h8c.19 0 .38.07.53.21l2 2c.14.14.21.33.21.53v6c0 .19-.08.38-.22.53l-2.01 2c-.15.14-.34.21-.54.21h-8c-.15 0-.3-.05-.42-.13l-1.09-.73 -1.09.72c-.13.08-.27.12-.42.12h-5c-.2 0-.39-.08-.54-.22l-2.01-2c-.15-.15-.22-.34-.22-.54l0-1c0-.42.33-.75.75-.75 .41 0 .74.33.74.75l-.01.68 1.56 1.56h4.46l1.31-.88c.25-.17.58-.17.83 0l1.31.87h7.46l1.56-1.57V9.2l-1.57-1.57h-7.47l-1.32.87c-.26.16-.59.16-.84 0l-1.32-.88H4.12L2.55 9.18l-.01.68c-.01.41-.34.75-.76.75s-.75-.34-.75-.76l0-1c0-.2.07-.39.21-.54l2-2Z"/>
-              <path d="M10.5 9.75c.41 0 .75.33.75.75v3c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-3c0-.42.33-.75.75-.75Z"/>
-              <path d="M13.25 10c0-.42.33-.75.75-.75h4c.41 0 .75.33.75.75 0 .41-.34.75-.75.75h-4c-.42 0-.75-.34-.75-.75Z"/>
-              <path d="M13.25 13c0-.42.33-.75.75-.75h5c.41 0 .75.33.75.75 0 .41-.34.75-.75.75h-5c-.42 0-.75-.34-.75-.75Z"/>
-            </g>
-          </svg>
-        );
+        return <Globe className={className} />;
       case 'clock':
-        return (
-          <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M1.25 6c0-1.52 1.23-2.75 2.75-2.75h16c1.51 0 2.75 1.23 2.75 2.75v4c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V6c0-.7-.56-1.25-1.25-1.25H4c-.7 0-1.25.55-1.25 1.25v14.5c0 .69.55 1.25 1.25 1.25h16c.69 0 1.25-.56 1.25-1.25V14c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v6.5c0 1.51-1.24 2.75-2.75 2.75H4c-1.52 0-2.75-1.24-2.75-2.75V6Z"/>
-              <path d="M7.25 15c0-.97.78-1.75 1.75-1.75h6c.96 0 1.75.78 1.75 1.75v4c0 .96-.79 1.75-1.75 1.75H9c-.97 0-1.75-.79-1.75-1.75v-4ZM9 14.75c-.14 0-.25.11-.25.25v4c0 .13.11.25.25.25h6c.13 0 .25-.12.25-.25v-4c0-.14-.12-.25-.25-.25H9Z"/>
-              <path d="M1.25 6c0-1.52 1.23-2.75 2.75-2.75h16c1.51 0 2.75 1.23 2.75 2.75v3c0 .41-.34.75-.75.75H2c-.42 0-.75-.34-.75-.75V6ZM4 4.75c-.7 0-1.25.55-1.25 1.25v2.25h18.5V6c0-.7-.56-1.25-1.25-1.25H4Z"/>
-              <path d="M5 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-              <path d="M12 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-              <path d="M19 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-              <path d="M7.25 16.407c.05-.42.42-.71.83-.66l3.9.48 3.9-.49c.41-.06.78.24.83.65 .05.41-.25.78-.66.83l-4 .5c-.07 0-.13 0-.19 0l-4-.5c-.42-.06-.71-.43-.66-.84Z"/>
-              <path d="M11 12.25c-.14 0-.25.11-.25.25v1c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-1c0-.97.78-1.75 1.75-1.75h2c.96 0 1.75.78 1.75 1.75v1c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-1c0-.14-.12-.25-.25-.25h-2Z"/>
-            </g>
-          </svg>
-        );
+        return <Clock className={className} />;
       case 'coins':
-        return (
-          <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M17.5 2.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-2.08-1.68-3.75-3.75-3.75ZM12.25 6.5c0-2.9 2.35-5.25 5.25-5.25 2.89 0 5.25 2.35 5.25 5.25 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25Z"/>
-              <path d="M6.5 13.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-.42.33-.75.75-.75 .41 0 .75.33.75.75 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25 0-2.9 2.35-5.25 5.25-5.25 1.07 0 2.08.32 2.91.88 .34.23.43.69.2 1.04 -.24.34-.7.43-1.05.2 -.6-.4-1.32-.64-2.09-.64Z"/>
-              <path d="M19 14.25c.41 0 .75.33.75.75v5c0 .41-.34.75-.75.75h-4c-.42 0-.75-.34-.75-.75 0-.42.33-.75.75-.75h3.25V15c0-.42.33-.75.75-.75Z"/>
-              <path d="M18.61 14.35c.24-.15.55-.15.79.01l2.32 1.5c.34.22.44.68.22 1.03 -.23.34-.69.44-1.04.22l-1.93-1.25 -2.1 1.25c-.36.21-.82.09-1.029-.26 -.22-.36-.1-.82.25-1.029l2.5-1.5Z"/>
-              <path d="M5.32 9.75c-.42 0-.75-.34-.75-.75V4c0-.42.33-.75.75-.75h4c.41 0 .75.33.75.75 0 .41-.34.75-.76.75H6.06V9c0 .41-.34.75-.75.75Z"/>
-              <path d="M5.7 9.64c-.25.14-.56.14-.8-.02l-2.33-1.5c-.35-.23-.45-.69-.23-1.04 .22-.35.68-.45 1.037-.23l1.92 1.24 2.09-1.26c.35-.22.81-.1 1.02.25 .21.35.09.81-.26 1.02l-2.5 1.5Z"/>
-            </g>
-          </svg>
-        );
+        return <Coins className={className} />;
       default:
         return null;
     }
@@ -445,7 +384,7 @@ export default function CountryHub() {
                         : 'bg-white border border-black/5 hover:border-black/10 text-[hsl(var(--blue-900))]/80'
                     }`}
                   >
-                    {renderDashedIcon(tab.id, `w-4 h-4 ${active ? 'text-[hsl(var(--accent))]' : 'text-[hsl(var(--blue-700))]'}`)}
+                    {renderRegularIcon(tab.id, `w-4 h-4 ${active ? 'text-[hsl(var(--accent))]' : 'text-[hsl(var(--blue-700))]'}`)}
                     {tab.label}
                   </button>
                 );
@@ -480,7 +419,7 @@ export default function CountryHub() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="h-10 w-10 rounded-xl bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center">
-                      {renderDashedIcon(activeVisa, "w-5 h-5")}
+                      {renderRegularIcon(activeVisa, "w-5 h-5")}
                     </span>
                     <div>
                       <h2 className="text-[22px] font-display font-black leading-tight text-[hsl(var(--blue-900))]">
@@ -495,7 +434,7 @@ export default function CountryHub() {
 
                   <div className="grid sm:grid-cols-2 gap-4 pt-2">
                     <div className="p-4 rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 flex items-start gap-3">
-                      {renderDashedIcon('clock', "w-5 h-5 text-[hsl(var(--accent))] shrink-0 mt-0.5")}
+                      {renderRegularIcon('clock', "w-5 h-5 text-[hsl(var(--accent))] shrink-0 mt-0.5")}
                       <div>
                         <div className="text-[11px] uppercase tracking-wider text-[hsl(var(--blue-900))]/40 font-bold font-mono">Processing Time</div>
                         <div className="text-[16px] font-bold text-[hsl(var(--blue-900))] mt-0.5">{currentVisa.timeline}</div>
@@ -503,7 +442,7 @@ export default function CountryHub() {
                     </div>
                     
                     <div className="p-4 rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 flex items-start gap-3">
-                      {renderDashedIcon('coins', "w-5 h-5 text-[hsl(var(--accent))] shrink-0 mt-0.5")}
+                      {renderRegularIcon('coins', "w-5 h-5 text-[hsl(var(--accent))] shrink-0 mt-0.5")}
                       <div>
                         <div className="text-[11px] uppercase tracking-wider text-[hsl(var(--blue-900))]/40 font-bold font-mono">Government Fee</div>
                         <div className="text-[16px] font-bold text-[hsl(var(--blue-900))] mt-0.5">{currentVisa.fees}</div>

@@ -1,6 +1,22 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Phone, MessageCircle, Send } from 'lucide-react';
+import { 
+  Menu, 
+  X, 
+  Phone, 
+  MessageCircle, 
+  Send,
+  Home,
+  Globe,
+  GraduationCap,
+  Plane,
+  Calculator,
+  Search,
+  Calendar,
+  BookOpen,
+  CreditCard,
+  Info 
+} from 'lucide-react';
 import { cn } from '../lib/utils';
 
 import { Button } from './ui/button';
@@ -11,15 +27,16 @@ import NotificationBell from './NotificationBell';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 const NAV = [
-  { id: 'home', label: 'Home', to: '/' },
-  { id: 'visa', label: 'Visa', to: '/#countries' },
-  { id: 'student', label: 'Student', to: '/student-visa' },
-  { id: 'assessment', label: 'Visa Calculator', to: '/assessment' },
-  { id: 'track', label: 'Track Application', to: '/track' },
-  { id: 'us-slots', label: 'Visa Slots', to: '/us-visa-slots', badge: 'HURRY' },
-  { id: 'resources', label: 'Resources', to: '/resources' },
-  { id: 'pricing', label: 'Pricing', to: '/pricing' },
-  { id: 'about', label: 'About', to: '/about' },
+  { id: 'home', label: 'Home', to: '/', icon: Home },
+  { id: 'visa', label: 'Visa', to: '/#countries', icon: Globe },
+  { id: 'student', label: 'Student', to: '/student-visa', icon: GraduationCap },
+  { id: 'fly', label: 'Fly', to: '/map', icon: Plane },
+  { id: 'assessment', label: 'Visa Calculator', to: '/assessment', icon: Calculator },
+  { id: 'track', label: 'Track Application', to: '/track', icon: Search },
+  { id: 'us-slots', label: 'Visa Slots', to: '/us-visa-slots', badge: 'HURRY', icon: Calendar },
+  { id: 'resources', label: 'Resources', to: '/resources', icon: BookOpen },
+  { id: 'pricing', label: 'Pricing', to: '/pricing', icon: CreditCard },
+  { id: 'about', label: 'About', to: '/about', icon: Info },
 ];
 
 function NavLinks({ orientation = 'horizontal', light = false }) {
@@ -32,7 +49,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
   if (orientation === 'horizontal') {
     return (
-      <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 mx-1 flex-1 min-w-0 justify-center">
+      <nav className="hidden xl:flex items-center gap-0.5 xl:gap-1.5 mx-1 flex-1 min-w-0 justify-center">
         {NAV.map((item) => {
           const Icon = item.icon;
           return (
@@ -42,7 +59,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
               end={item.to === '/'}
               className={({ isActive }) =>
                 cn(
-                  'px-2 lg:px-2.5 xl:px-3.5 py-1.5 text-[11.5px] xl:text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
+                  'px-2.5 xl:px-3.5 py-1.5 text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
                   isActive ? activeClass : inactiveClass
                 )
               }
@@ -114,7 +131,7 @@ function MobileMenu({ open, light = false }) {
   if (!open) return null;
   return (
     <div className={cn(
-      'lg:hidden border-t backdrop-blur-xl',
+      'xl:hidden border-t backdrop-blur-xl',
       light ? 'border-white/10 bg-[hsl(var(--blue-900))]/90' : 'border-black/5 bg-white/95'
     )}>
       <div className="px-5 py-4 flex flex-col gap-1">
@@ -226,7 +243,7 @@ export default function Navbar({ variant = 'default' }) {
           <LanguageSwitcher />
           <button
             onClick={() => setOpen((v) => !v)}
-            className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
+            className="xl:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
             aria-label="Toggle menu"
           >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

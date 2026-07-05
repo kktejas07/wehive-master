@@ -49,16 +49,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
       {/* Header */}
       <div className="mb-6">
         <span className="text-[10px] font-black uppercase text-blue-700 tracking-wider font-mono flex items-center gap-1">
-          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M1.25 6c0-1.52 1.23-2.75 2.75-2.75h16c1.51 0 2.75 1.23 2.75 2.75v4c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V6c0-.7-.56-1.25-1.25-1.25H4c-.7 0-1.25.55-1.25 1.25v14.5c0 .69.55 1.25 1.25 1.25h16c.69 0 1.25-.56 1.25-1.25V14c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v6.5c0 1.51-1.24 2.75-2.75 2.75H4c-1.52 0-2.75-1.24-2.75-2.75V6Z"/>
-              <path d="M7.25 15c0-.97.78-1.75 1.75-1.75h6c.96 0 1.75.78 1.75 1.75v4c0 .96-.79 1.75-1.75 1.75H9c-.97 0-1.75-.79-1.75-1.75v-4ZM9 14.75c-.14 0-.25.11-.25.25v4c0 .13.11.25.25.25h6c.13 0 .25-.12.25-.25v-4c0-.14-.12-.25-.25-.25H9Z"/>
-              <path d="M1.25 6c0-1.52 1.23-2.75 2.75-2.75h16c1.51 0 2.75 1.23 2.75 2.75v3c0 .41-.34.75-.75.75H2c-.42 0-.75-.34-.75-.75V6ZM4 4.75c-.7 0-1.25.55-1.25 1.25v2.25h18.5V6c0-.7-.56-1.25-1.25-1.25H4Z"/>
-              <path d="M5 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-              <path d="M12 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-              <path d="M19 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-            </g>
-          </svg> Admission Calendar
+          <Calendar className="w-3 h-3" /> Admission Calendar
         </span>
         <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Intake & Deadlines</h2>
       </div>
@@ -66,16 +57,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
       {/* Global Intake Deadlines */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <svg className="w-4.5 h-4.5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M1.25 6c0-1.52 1.23-2.75 2.75-2.75h16c1.51 0 2.75 1.23 2.75 2.75v4c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V6c0-.7-.56-1.25-1.25-1.25H4c-.7 0-1.25.55-1.25 1.25v14.5c0 .69.55 1.25 1.25 1.25h16c.69 0 1.25-.56 1.25-1.25V14c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v6.5c0 1.51-1.24 2.75-2.75 2.75H4c-1.52 0-2.75-1.24-2.75-2.75V6Z"/>
-              <path d="M7.25 15c0-.97.78-1.75 1.75-1.75h6c.96 0 1.75.78 1.75 1.75v4c0 .96-.79 1.75-1.75 1.75H9c-.97 0-1.75-.79-1.75-1.75v-4ZM9 14.75c-.14 0-.25.11-.25.25v4c0 .13.11.25.25.25h6c.13 0 .25-.12.25-.25v-4c0-.14-.12-.25-.25-.25H9Z"/>
-              <path d="M1.25 6c0-1.52 1.23-2.75 2.75-2.75h16c1.51 0 2.75 1.23 2.75 2.75v3c0 .41-.34.75-.75.75H2c-.42 0-.75-.34-.75-.75V6ZM4 4.75c-.7 0-1.25.55-1.25 1.25v2.25h18.5V6c0-.7-.56-1.25-1.25-1.25H4Z"/>
-              <path d="M5 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-              <path d="M12 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-              <path d="M19 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
-            </g>
-          </svg>
+          <Calendar className="w-4.5 h-4.5 text-blue-900" />
           <h3 className="text-xs font-extrabold text-slate-800">Target University Deadlines</h3>
         </div>
 

@@ -47,12 +47,7 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
       {/* Header */}
       <div className="mb-6">
         <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider font-mono flex items-center gap-1">
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M17.5 2.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-2.08-1.68-3.75-3.75-3.75ZM12.25 6.5c0-2.9 2.35-5.25 5.25-5.25 2.89 0 5.25 2.35 5.25 5.25 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25Z"/>
-              <path d="M6.5 13.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-.42.33-.75.75-.75 .41 0 .75.33.75.75 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25 0-2.9 2.35-5.25 5.25-5.25 1.07 0 2.08.32 2.91.88 .34.23.43.69.2 1.04 -.24.34-.7.43-1.05.2 -.6-.4-1.32-.64-2.09-.64Z"/>
-            </g>
-          </svg> Financial Hub
+          <Coins className="w-3.5 h-3.5" /> Financial Hub
         </span>
         <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Finance & Budgets</h2>
       </div>
@@ -60,12 +55,7 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
       {/* Cost-of-Living Calculator Section */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <svg className="w-4.5 h-4.5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M17.5 2.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-2.08-1.68-3.75-3.75-3.75ZM12.25 6.5c0-2.9 2.35-5.25 5.25-5.25 2.89 0 5.25 2.35 5.25 5.25 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25Z"/>
-              <path d="M6.5 13.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-.42.33-.75.75-.75 .41 0 .75.33.75.75 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25 0-2.9 2.35-5.25 5.25-5.25 1.07 0 2.08.32 2.91.88 .34.23.43.69.2 1.04 -.24.34-.7.43-1.05.2 -.6-.4-1.32-.64-2.09-.64Z"/>
-            </g>
-          </svg>
+          <Coins className="w-4.5 h-4.5 text-blue-900" />
           <h3 className="text-xs font-extrabold text-slate-800">Cost-of-Living Calculator</h3>
         </div>
 
@@ -148,15 +138,7 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
       {currentCost.gic !== "N/A" && (
         <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-            <svg className="w-4.5 h-4.5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-              <g fill="currentColor" fillRule="evenodd">
-                <path d="M18 7.25c-.42 0-.75.33-.75.75v11c0 .41.33.75.75.75h3c.41 0 .75-.34.75-.75V8c0-.42-.34-.75-.75-.75h-3Z"/>
-                <path d="M10.5 7.25c-.42 0-.75.33-.75.75v11c0 .41.33.75.75.75h3c.41 0 .75-.34.75-.75V8c0-.42-.34-.75-.75-.75h-3Z"/>
-                <path d="M3 7.25c-.42 0-.75.33-.75.75v11c0 .41.33.75.75.75h3c.41 0 .75-.34.75-.75V8c0-.42-.34-.75-.75-.75H3Z"/>
-                <path d="M12.24 1.29c-.17-.06-.34-.06-.5 0l-10 3.5c-.31.1-.51.38-.51.7v2.5c0 .41.33.75.75.75h20c.41 0 .75-.34.75-.75v-2.5c0-.32-.21-.61-.51-.71l-10-3.5Z"/>
-                <path d="M2 18.25c-.42 0-.75.33-.75.75v3c0 .41.33.75.75.75h20c.41 0 .75-.34.75-.75v-3c0-.42-.34-.75-.75-.75H2Z"/>
-              </g>
-            </svg>
+            <Landmark className="w-4.5 h-4.5 text-blue-900" />
             <h3 className="text-xs font-extrabold text-slate-800">Mandatory Blocked Account</h3>
           </div>
 
@@ -179,15 +161,7 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
       {/* Student Loan Application Form */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <svg className="w-4.5 h-4.5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M18 7.25c-.42 0-.75.33-.75.75v11c0 .41.33.75.75.75h3c.41 0 .75-.34.75-.75V8c0-.42-.34-.75-.75-.75h-3Z"/>
-              <path d="M10.5 7.25c-.42 0-.75.33-.75.75v11c0 .41.33.75.75.75h3c.41 0 .75-.34.75-.75V8c0-.42-.34-.75-.75-.75h-3Z"/>
-              <path d="M3 7.25c-.42 0-.75.33-.75.75v11c0 .41.33.75.75.75h3c.41 0 .75-.34.75-.75V8c0-.42-.34-.75-.75-.75H3Z"/>
-              <path d="M12.24 1.29c-.17-.06-.34-.06-.5 0l-10 3.5c-.31.1-.51.38-.51.7v2.5c0 .41.33.75.75.75h20c.41 0 .75-.34.75-.75v-2.5c0-.32-.21-.61-.51-.71l-10-3.5Z"/>
-              <path d="M2 18.25c-.42 0-.75.33-.75.75v3c0 .41.33.75.75.75h20c.41 0 .75-.34.75-.75v-3c0-.42-.34-.75-.75-.75H2Z"/>
-            </g>
-          </svg>
+          <Landmark className="w-4.5 h-4.5 text-blue-900" />
           <h3 className="text-xs font-extrabold text-slate-800">Education Loan Desk</h3>
         </div>
 
