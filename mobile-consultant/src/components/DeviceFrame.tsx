@@ -41,13 +41,10 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
   if (isMobileScreen) {
     return (
       <div id="wehive-app-root" className="w-full h-screen bg-slate-50 dark:bg-slate-950 flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
-        {/* Safe Area Status Bar with WeHive Branding */}
-        <div className="bg-blue-950 text-white px-5 pt-3 pb-2.5 flex justify-between items-center select-none shrink-0 z-50">
+        {/* Safe Area Status Bar */}
+        <div className="bg-blue-950 text-white px-5 pt-4 pb-3 flex justify-between items-center select-none shrink-0 z-50">
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded bg-red-600 flex items-center justify-center font-black text-white text-xs shadow-md">
-              W
-            </div>
-            <span className="text-sm font-black tracking-wider text-blue-100 font-mono">WEHIVE</span>
+            <img src="/favicon-48.png" alt="" className="w-8 h-8 object-contain" />
           </div>
           <div className="flex items-center gap-2 text-xs text-blue-200 font-medium">
             <span>{currentTime}</span>
@@ -123,17 +120,14 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
 
         {/* Operating System Status Bar */}
         <div
-          className={`shrink-0 h-11 px-6 flex justify-between items-end pb-1.5 text-xs font-semibold select-none z-40 transition-colors duration-300 ${
+          className={`shrink-0 h-14 px-6 flex justify-between items-end pb-2 text-xs font-semibold select-none z-40 transition-colors duration-300 ${
             platform === "ios"
               ? "bg-blue-950 text-white rounded-t-[43px]"
               : "bg-blue-950 text-white rounded-t-[32px]"
           }`}
         >
           <div className="flex items-center gap-1.5 leading-none">
-            <div className="w-4 h-4 rounded bg-red-600 flex items-center justify-center font-black text-white text-[10px] shadow-sm">
-              W
-            </div>
-            <span className="text-[10px] font-black tracking-wider text-blue-100 font-mono">WEHIVE</span>
+            <img src="/favicon-48.png" alt="" className="w-7 h-7 object-contain" />
           </div>
           <span className="text-[11px] leading-none select-none tracking-tight">{currentTime}</span>
           <div className="flex items-center gap-1.5 leading-none">

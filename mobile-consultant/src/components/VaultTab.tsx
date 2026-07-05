@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Folder, Upload, ShieldCheck, Eye, Trash2, Info, Lock, 
   AlertCircle, CheckCircle2, RefreshCw, Sparkles, FileText, FileCheck 
@@ -61,6 +61,12 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
   ]);
 
   const [loadingDocId, setLoadingDocId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/vault/documents").then(r => r.json()).then(data => {
+      if (data.documents) setDocuments(data.documents);
+    }).catch(() => {});
+  }, []);
 
   const handleUploadSimulate = (docId: string, docName: string) => {
     setLoadingDocId(docId);
