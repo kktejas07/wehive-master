@@ -19,6 +19,7 @@ import PremiumGate from '../components/PremiumGate';
 import AIMarketplaceSettings from '../components/ai/AIMarketplaceSettings';
 import UniversityAppsTab from '../components/account/UniversityAppsTab';
 import AIAgentsTab from '../components/account/AIAgentsTab';
+import AIInsightsPanel from '../components/AIInsightsPanel';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },
@@ -162,6 +163,11 @@ function ProfileTab({ user, token, onUpdated }) {
             <option value="female">Female</option>
             <option value="other">Other</option>
           </EditSelect>
+        </div>
+      )}
+      {!editing && (
+        <div className="mt-8 border-t border-black/5 pt-8">
+          <AIInsightsPanel />
         </div>
       )}
     </div>

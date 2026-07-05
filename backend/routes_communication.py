@@ -112,7 +112,7 @@ async def send_community_invite(
         result = await telegram.send_message(
             chat_id=f'@{user["telegram_username"]}',
             text=(
-                "Welcome to We Hive Community! 🐝\n\n"
+                "Our Ambition. Our Guidance. No Frontiers! 🐝\n\n"
                 "Click here to join our Telegram group: https://t.me/wehivecommunity"
             )
         )

@@ -68,6 +68,13 @@ class TranslateRequest(BaseModel):
     target_lang: str = "en"
 
 
+class NextStepsRequest(BaseModel):
+    academicLevel: Optional[str] = "Master's Degree"
+    dreamCountry: Optional[str] = "Germany"
+    milestones: Optional[list] = []
+    vaultDocs: Optional[list] = []
+
+
 AI_SEARCH_SCHEMA = {
     "collections": [
         {"name": "countries_v2", "fields": ["name", "capital", "region", "visa_types", "notes"], "type": "visa"},
@@ -485,3 +492,67 @@ async def translate(req: TranslateRequest):
         return {"ok": True, "source": req.source_lang, "target": req.target_lang, "translated": translated}
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
+
+
+@router.post("/next-steps")
+async def generate_next_steps(req: NextStepsRequest):
+    try:
+        from ai_marketplace import marketplace
+        import json
+
+        prompt = (
+            "Analyze the study abroad preparation progress for the following student:\n"
+            f"- Target Academic Level: {req.academicLevel}\n"
+            f"- Target Dream Country: {req.dreamCountry}\n\n"
+            "Current Milestones Progress:\n"
+        )
+        for m in req.milestones or []:
+            status_text = "COMPLETED" if m.get("status") == "completed" else "PENDING"
+            prompt += f"- [{status_text}] {m.get('title')}: {m.get('description')} ({m.get('category')})\n"
+        
+        prompt += "\nUploaded Documents in Vault:\n"
+        for d in req.vaultDocs or []:
+            prompt += f"- [{d.get('status')}] {d.get('name')} ({d.get('type')}) - {d.get('fileName')}\n"
+
+        prompt += (
+            "\nBased on their progress (e.g. which milestones are pending, which documents are missing or still under review, and their country specific requirements), suggest exactly 3-4 personalized next steps with a brief explanation and actionable advice. Categorize them and assign a priority level. Also include a short, encouraging AI Advisory note summarizing their overall preparation status.\n\n"
+            "Format your response as a valid JSON object with the following schema:\n"
+            "{\n"
+            "  \"recommendations\": [\n"
+            "    {\n"
+            "      \"title\": \"Clear short title of task\",\n"
+            "      \"description\": \"Detailed specific actionable advice\",\n"
+            "      \"priority\": \"High\",\n"
+            "      \"category\": \"Preparation\",\n"
+            "      \"actionLabel\": \"Call-to-action button label\"\n"
+            "    }\n"
+            "  ],\n"
+            "  \"advisoryNote\": \"A concise encouraging note (2-3 sentences)\"\n"
+            "}"
+        )
+
+        response = await marketplace.chat(
+            messages=[
+                {"role": "system", "content": "You are WeHive's AI Next Steps Engine. You must return only a valid JSON object matching the requested schema. Do not write any markdown code blocks or explanations outside the JSON."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.4,
+        )
+        content = response.get("content", "") if isinstance(response, dict) else ""
+        clean_content = content.replace("```json", "").replace("```", "").strip()
+        data = json.loads(clean_content)
+        return {"ok": True, **data}
+    except Exception as e:
+        return {
+            "ok": True,
+            "recommendations": [
+                {
+                    "title": "Complete Your Profile",
+                    "description": "Please fill out your visa calculator parameters to receive customized next steps.",
+                    "priority": "High",
+                    "category": "Preparation",
+                    "actionLabel": "Go to Profile"
+                }
+            ],
+            "advisoryNote": "Get started by taking our 2-minute Visa Eligibility Calculator."
+        }

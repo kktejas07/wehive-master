@@ -160,7 +160,7 @@ export default function AuthCard({ mode, referralCode }) {
     setGoogleLoading(true);
     try {
       await loginWithGoogle();
-      toast({ title: 'Welcome to We Hive', description: 'Signed in with Google.' });
+      toast({ title: 'Our Ambition. Our Guidance. No Frontiers', description: 'Signed in with Google.' });
       navigate(nextUrl, { replace: true });
     } catch (e) {
       if (e.code !== 'auth/popup-closed-by-user') {
@@ -191,7 +191,7 @@ export default function AuthCard({ mode, referralCode }) {
         if (firebaseUser && !firebaseUser.emailVerified) {
           toast({ title: 'Verify your email', description: 'Please verify your email address.' });
         } else {
-          toast({ title: 'Welcome to We Hive', description: 'Signed in with email.' });
+          toast({ title: 'Our Ambition. Our Guidance. No Frontiers', description: 'Signed in with email.' });
           navigate(nextUrl, { replace: true });
         }
       }
@@ -261,7 +261,7 @@ export default function AuthCard({ mode, referralCode }) {
           referral_code: referralCode,
         });
       }
-      toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
+      toast({ title: 'Our Ambition. Our Guidance. No Frontiers', description: 'You are signed in.' });
       navigate(nextUrl, { replace: true });
     } catch (e) {
       const msg = e?.response?.data?.detail || e?.message || 'Invalid code. Try again.';

@@ -4,7 +4,8 @@ import {
   X, Lock, Shield, Fingerprint, ScanFace, 
   Settings, Check, Smartphone, Palette, ChevronRight,
   History, Trash2, Activity, RotateCw, Grid, Play, WifiOff, Wifi,
-  Sun, Moon, Monitor, Phone, ShieldAlert, Plus, PhoneCall, UserPlus, Globe, Volume2, VolumeX
+  Sun, Moon, Monitor, Phone, ShieldAlert, Plus, PhoneCall, UserPlus, Globe, Volume2, VolumeX,
+  Coins, HeartHandshake, Calendar, Users
 } from "lucide-react";
 import { useColorScheme } from "../hooks/useColorScheme";
 import { SecurityLog, BiometricAnimationStyle } from "../types";
@@ -12,6 +13,7 @@ import { SecurityLog, BiometricAnimationStyle } from "../types";
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onNavigate?: (tabId: string) => void;
   biometricEnabled: boolean;
   setBiometricEnabled: (enabled: boolean) => void;
   biometricMethod: "system" | "face" | "fingerprint";
@@ -31,6 +33,7 @@ interface SettingsModalProps {
 export default function SettingsModal({
   isOpen,
   onClose,
+  onNavigate,
   biometricEnabled,
   setBiometricEnabled,
   biometricMethod,
@@ -49,6 +52,67 @@ export default function SettingsModal({
   const { colorScheme, setColorScheme, darkMode, setDarkMode, theme } = useColorScheme();
   const [previewState, setPreviewState] = React.useState<"idle" | "testing" | "success">("idle");
   const [previewProgress, setPreviewProgress] = React.useState(0);
+
+  const renderToolIcon = (id: string) => {
+    switch (id) {
+      case "finance":
+        return (
+          <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor" fillRule="evenodd">
+              <path d="M17.5 2.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-2.08-1.68-3.75-3.75-3.75ZM12.25 6.5c0-2.9 2.35-5.25 5.25-5.25 2.89 0 5.25 2.35 5.25 5.25 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25Z"/>
+              <path d="M6.5 13.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-.42.33-.75.75-.75 .41 0 .75.33.75.75 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25 0-2.9 2.35-5.25 5.25-5.25 1.07 0 2.08.32 2.91.88 .34.23.43.69.2 1.04 -.24.34-.7.43-1.05.2 -.6-.4-1.32-.64-2.09-.64Z"/>
+              <path d="M19 14.25c.41 0 .75.33.75.75v5c0 .41-.34.75-.75.75h-4c-.42 0-.75-.34-.75-.75 0-.42.33-.75.75-.75h3.25V15c0-.42.33-.75.75-.75Z"/>
+              <path d="M18.61 14.35c.24-.15.55-.15.79.01l2.32 1.5c.34.22.44.68.22 1.03 -.23.34-.69.44-1.04.22l-1.93-1.25 -2.1 1.25c-.36.21-.82.09-1.029-.26 -.22-.36-.1-.82.25-1.029l2.5-1.5Z"/>
+              <path d="M5.32 9.75c-.42 0-.75-.34-.75-.75V4c0-.42.33-.75.75-.75h4c.41 0 .75.33.75.75 0 .41-.34.75-.76.75H6.06V9c0 .41-.34.75-.75.75Z"/>
+              <path d="M5.7 9.64c-.25.14-.56.14-.8-.02l-2.33-1.5c-.35-.23-.45-.69-.23-1.04 .22-.35.68-.45 1.037-.23l1.92 1.24 2.09-1.26c.35-.22.81-.1 1.02.25 .21.35.09.81-.26 1.02l-2.5 1.5Z"/>
+            </g>
+          </svg>
+        );
+      case "emergency":
+        return (
+          <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor" fillRule="evenodd">
+              <path d="M18.25 8c0-1.25 1-2.25 2.25-2.25 1.24 0 2.25 1 2.25 2.25v1c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V8c0-.42-.34-.75-.75-.75 -.42 0-.75.33-.75.75v5.5c0 .19-.08.38-.22.53l-2 2c-.3.29-.77.29-1.07 0 -.3-.3-.3-.77 0-1.07l1.78-1.79V7.98ZM22 12.25c.41 0 .75.33.75.75v2.08c0 .46-.19.9-.52 1.23l-4.49 4.48v1.68c0 .41-.34.75-.75.75h-5c-.42 0-.75-.34-.75-.75v-6c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v5.25h3.5v-1.25c0-.2.07-.39.21-.54l4.7-4.71c.04-.05.07-.12.07-.18v-2.09c0-.42.33-.75.75-.75Z"/>
+              <path d="M5.75 8c0-1.25-1.01-2.25-2.25-2.25 -1.25 0-2.25 1-2.25 2.25v7.08c0 .46.18.9.51 1.23l4.48 4.48v1.68c0 .41.33.75.75.75h5c.41 0 .75-.34.75-.75v-6c0-.42-.34-.75-.75-.75 -.42 0-.75.33-.75.75v5.25h-3.5v-1.25c0-.2-.08-.39-.22-.54l-4.71-4.71c-.05-.05-.08-.12-.08-.18V7.95c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v5.5c0 .19.07.38.21.53l2 2c.29.29.76.29 1.06 0 .29-.3.29-.77 0-1.07l-1.79-1.79V7.93Z"/>
+              <path d="M18.25 12.91c0-.6-.72-.89-1.14-.47l-4.59 4.58c-.3.29-.77.29-1.07 0 -.3-.3-.3-.77 0-1.07l4.58-4.59c1.36-1.37 3.69-.4 3.69 1.53 0 .57-.23 1.12-.64 1.53L17.49 16c-.3.29-.77.29-1.07 0 -.3-.3-.3-.77 0-1.07L18 13.34c.12-.13.19-.3.19-.47Z"/>
+              <path d="M5.75 12.91c0-.6.71-.89 1.13-.47l4.58 4.58c.29.29.76.29 1.06 0 .29-.3.29-.77 0-1.07l-4.59-4.59c-1.37-1.37-3.7-.4-3.7 1.53 0 .57.22 1.12.63 1.53L6.44 16c.29.29.76.29 1.06 0 .29-.3.29-.77 0-1.07l-1.59-1.59c-.13-.13-.2-.3-.2-.47Z"/>
+              <path d="M12 1.75c.41 0 .75.33.75.75v6c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-6c0-.42.33-.75.75-.75Z"/>
+              <path d="M8.25 5.5c0-.42.33-.75.75-.75h6c.41 0 .75.33.75.75 0 .41-.34.75-.75.75H9c-.42 0-.75-.34-.75-.75Z"/>
+            </g>
+          </svg>
+        );
+      case "calendar":
+        return (
+          <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor" fillRule="evenodd">
+              <path d="M1.25 6c0-1.52 1.23-2.75 2.75-2.75h16c1.51 0 2.75 1.23 2.75 2.75v4c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V6c0-.7-.56-1.25-1.25-1.25H4c-.7 0-1.25.55-1.25 1.25v14.5c0 .69.55 1.25 1.25 1.25h16c.69 0 1.25-.56 1.25-1.25V14c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v6.5c0 1.51-1.24 2.75-2.75 2.75H4c-1.52 0-2.75-1.24-2.75-2.75V6Z"/>
+              <path d="M7.25 15c0-.97.78-1.75 1.75-1.75h6c.96 0 1.75.78 1.75 1.75v4c0 .96-.79 1.75-1.75 1.75H9c-.97 0-1.75-.79-1.75-1.75v-4ZM9 14.75c-.14 0-.25.11-.25.25v4c0 .13.11.25.25.25h6c.13 0 .25-.12.25-.25v-4c0-.14-.12-.25-.25-.25H9Z"/>
+              <path d="M1.25 6c0-1.52 1.23-2.75 2.75-2.75h16c1.51 0 2.75 1.23 2.75 2.75v3c0 .41-.34.75-.75.75H2c-.42 0-.75-.34-.75-.75V6ZM4 4.75c-.7 0-1.25.55-1.25 1.25v2.25h18.5V6c0-.7-.56-1.25-1.25-1.25H4Z"/>
+              <path d="M5 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
+              <path d="M12 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
+              <path d="M19 1.25c.41 0 .75.33.75.75v3.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V2c0-.42.33-.75.75-.75Z"/>
+              <path d="M7.25 16.407c.05-.42.42-.71.83-.66l3.9.48 3.9-.49c.41-.06.78.24.83.65 .05.41-.25.78-.66.83l-4 .5c-.07 0-.13 0-.19 0l-4-.5c-.42-.06-.71-.43-.66-.84Z"/>
+              <path d="M11 12.25c-.14 0-.25.11-.25.25v1c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-1c0-.97.78-1.75 1.75-1.75h2c.96 0 1.75.78 1.75 1.75v1c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-1c0-.14-.12-.25-.25-.25h-2Z"/>
+            </g>
+          </svg>
+        );
+      case "agent":
+        return (
+          <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor" fillRule="evenodd">
+              <path d="M5.25 19c0-2.63 2.12-4.75 4.75-4.75h4c2.62 0 4.75 2.12 4.75 4.75v3c0 .41-.34.75-.75.75h-7c-.42 0-.75-.34-.75-.75 0-.42.33-.75.75-.75h6.25V19c0-1.8-1.46-3.25-3.25-3.25h-4c-1.8 0-3.25 1.45-3.25 3.25v2.25H7c.41 0 .75.33.75.75 0 .41-.34.75-.75.75H6c-.42 0-.75-.34-.75-.75v-3Z"/>
+              <path d="M7.75 8c0-2.08 1.67-3.75 3.75-3.75h1c2.07 0 3.75 1.67 3.75 3.75v2c0 2.07-1.68 3.75-3.75 3.75h-1c-2.08 0-3.75-1.68-3.75-3.75V8Zm3.75-2.25c-1.25 0-2.25 1-2.25 2.25v2c0 1.24 1 2.25 2.25 2.25h1c1.24 0 2.25-1.01 2.25-2.25V8c0-1.25-1.01-2.25-2.25-2.25h-1Z"/>
+              <path d="M14.75 8c0-.42.33-.75.75-.75H18c.41 0 .75.33.75.75v3c0 .41-.34.75-.75.75h-2.5c-.42 0-.75-.34-.75-.75V8Zm1.5.75v1.5h1v-1.5h-1Z"/>
+              <path d="M5.25 8c0-.42.33-.75.75-.75h2.5c.41 0 .75.33.75.75v3c0 .41-.34.75-.75.75H6c-.42 0-.75-.34-.75-.75V8Zm1.5.75v1.5h1v-1.5h-1Z"/>
+              <path d="M5.25 7c0-3.18 2.57-5.75 5.75-5.75h2c3.17 0 5.75 2.57 5.75 5.75v3c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V7c0-2.35-1.91-4.25-4.25-4.25h-2c-2.35 0-4.25 1.9-4.25 4.25v3c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V7Z"/>
+              <path d="M12 14.25c.41 0 .75.33.75.75v7c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-7c0-.42.33-.75.75-.75Z"/>
+            </g>
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
 
   // Security Emergency contacts and Calling Simulation States
   const [securityActiveCountry, setSecurityActiveCountry] = React.useState<string>(() => {
@@ -257,6 +321,41 @@ export default function SettingsModal({
           {/* Modal Content - Scrollable */}
           <div className="flex-1 overflow-y-auto p-5 space-y-5 pb-10">
             
+            {/* 0. More Tools & Services */}
+            <div className="space-y-2.5">
+              <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block px-1">
+                More Tools & Services
+              </span>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: "finance", label: "Finance Hub", desc: "Blocked accounts & budgets", icon: Coins, color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30" },
+                  { id: "emergency", label: "Emergency Assist", desc: "Consulates & SOS helper", icon: HeartHandshake, color: "text-rose-500 bg-rose-50 dark:bg-rose-950/30" },
+                  { id: "calendar", label: "Calendar", desc: "Deadlines & test dates", icon: Calendar, color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30" },
+                  { id: "agent", label: "Sub-Agent Hub", desc: "Leads & commissions", icon: Users, color: "text-violet-500 bg-violet-50 dark:bg-violet-950/30" },
+                ].map((tool) => {
+                  const ToolIcon = tool.icon;
+                  return (
+                    <button
+                      key={tool.id}
+                      onClick={() => {
+                        onClose();
+                        onNavigate?.(tool.id);
+                      }}
+                      className="bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl p-4.5 text-left hover:scale-102 transition-all cursor-pointer shadow-sm flex flex-col justify-between h-28"
+                    >
+                      <div className={`p-2 rounded-xl w-fit ${tool.color}`}>
+                        {renderToolIcon(tool.id)}
+                      </div>
+                      <div className="mt-2.5">
+                        <div className="text-[12px] font-extrabold text-slate-800 dark:text-slate-200">{tool.label}</div>
+                        <p className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">{tool.desc}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* 1. Biometric Security Settings */}
             <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 space-y-3">
               <div className="flex items-start justify-between">

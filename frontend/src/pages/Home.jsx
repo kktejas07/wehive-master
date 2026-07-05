@@ -5,6 +5,7 @@ import Hero from '../components/Hero';
 import CountryGrid from '../components/CountryGrid';
 import HowItWorks from '../components/HowItWorks';
 import Testimonials from '../components/Testimonials';
+import SuccessWall from '../components/SuccessWall';
 
 import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
@@ -201,6 +202,7 @@ export default function Home() {
       <Faq />
       <CtaBanner />
       <Testimonials />
+      <SuccessWall />
       <Footer />
     </div>
   );
