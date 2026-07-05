@@ -47,12 +47,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
       {/* Header */}
       <div className="mb-6">
         <span className="text-[10px] font-black uppercase text-rose-600 tracking-wider font-mono flex items-center gap-1">
-          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M18.25 8c0-1.25 1-2.25 2.25-2.25 1.24 0 2.25 1 2.25 2.25v1c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V8c0-.42-.34-.75-.75-.75 -.42 0-.75.33-.75.75v5.5c0 .19-.08.38-.22.53l-2 2c-.3.29-.77.29-1.07 0 -.3-.3-.3-.77 0-1.07l1.78-1.79V7.98ZM22 12.25c.41 0 .75.33.75.75v2.08c0 .46-.19.9-.52 1.23l-4.49 4.48v1.68c0 .41-.34.75-.75.75h-5c-.42 0-.75-.34-.75-.75v-6c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v5.25h3.5v-1.25c0-.2.07-.39.21-.54l4.7-4.71c.04-.05.07-.12.07-.18v-2.09c0-.42.33-.75.75-.75Z"/>
-              <path d="M5.75 8c0-1.25-1.01-2.25-2.25-2.25 -1.25 0-2.25 1-2.25 2.25v7.08c0 .46.18.9.51 1.23l4.48 4.48v1.68c0 .41.33.75.75.75h5c.41 0 .75-.34.75-.75v-6c0-.42-.34-.75-.75-.75 -.42 0-.75.33-.75.75v5.25h-3.5v-1.25c0-.2-.08-.39-.22-.54l-4.71-4.71c-.05-.05-.08-.12-.08-.18V7.95c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v5.5c0 .19.07.38.21.53l2 2c.29.29.76.29 1.06 0 .29-.3.29-.77 0-1.07l-1.79-1.79V7.93Z"/>
-            </g>
-          </svg> Secure & Support
+          <HeartHandshake className="w-3 h-3" /> Secure & Support
         </span>
         <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Emergency Assist</h2>
       </div>
@@ -76,15 +71,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
               onClick={triggerSos}
               className="h-20 w-20 rounded-full bg-rose-600 text-white inline-flex items-center justify-center shadow-lg shadow-rose-600/30 hover:bg-rose-700 transition cursor-pointer"
             >
-              <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-                <g fill="currentColor" fillRule="evenodd">
-                  <path d="M5 2.25c.41 0 .75.33.75.75v2c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V3c0-.42.33-.75.75-.75Z"/>
-                  <path d="M5.5 11.25c.41 0 .75.33.75.75v8c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-8c0-.42.33-.75.75-.75Z"/>
-                  <path d="M1.25 6c0-.97.78-1.75 1.75-1.75h5c.96 0 1.75.78 1.75 1.75v5c0 .96-.79 1.75-1.75 1.75H3c-.97 0-1.75-.79-1.75-1.75v-.5c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v.5c0 .13.11.25.25.25h5c.13 0 .25-.12.25-.25V6c0-.14-.12-.25-.25-.25H3c-.14 0-.25.11-.25.25v.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V6Z"/>
-                  <path d="M8.25 6.5c0-.42.33-.75.75-.75h11c1.51 0 2.75 1.23 2.75 2.75 0 1.51-1.24 2.75-2.75 2.75H9c-.42 0-.75-.34-.75-.75v-4Zm1.5.75v2.5H20c.69 0 1.25-.56 1.25-1.25 0-.7-.56-1.25-1.25-1.25H9.75Z"/>
-                  <path d="M2.25 20c0-.42.33-.75.75-.75h5c.41 0 .75.33.75.75 0 .41-.34.75-.75.75H3c-.42 0-.75-.34-.75-.75Z"/>
-                </g>
-              </svg>
+              <HeartHandshake className="w-10 h-10 text-white" />
             </button>
             <div>
               <h3 className="text-xs font-extrabold text-slate-800">One-Tap Crisis SOS</h3>
@@ -99,12 +86,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
       {/* Embassy Hotline Finder */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <svg className="w-4.5 h-4.5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M12 2.75c-2.59 0-4.93 1.06-6.61 2.77 -.29.29-.77.3-1.07.01 -.3-.29-.31-.77-.02-1.07 1.95-1.99 4.66-3.23 7.67-3.23 5.93 0 10.75 4.81 10.75 10.75 0 5.93-4.82 10.75-10.75 10.75 -5.94 0-10.75-4.82-10.75-10.75 0-.74.07-1.46.21-2.15 .08-.41.47-.67.88-.59 .4.08.66.47.58.88 -.13.59-.19 1.21-.19 1.85 0 5.1 4.14 9.25 9.25 9.25 5.1 0 9.25-4.15 9.25-9.25 0-5.11-4.15-9.25-9.25-9.25Z"/>
-              <path d="M1.75 15c0-.42.33-.75.75-.75h5c1.24 0 2.25 1 2.25 2.25 0 .41.33.75.75.75H12c1.51 0 2.75 1.23 2.75 2.75v1.5c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V20c0-.7-.56-1.25-1.25-1.25h-1.5c-1.25 0-2.25-1.01-2.25-2.25 0-.42-.34-.75-.75-.75h-5c-.42 0-.75-.34-.75-.75Z"/>
-            </g>
-          </svg>
+          <ShieldAlert className="w-4.5 h-4.5 text-blue-900" />
           <h3 className="text-xs font-extrabold text-slate-800">Embassy & Consulate Directory</h3>
         </div>
 
@@ -142,12 +124,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
       {/* Insurance Card Wallet */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <svg className="w-4.5 h-4.5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M18.25 8c0-1.25 1-2.25 2.25-2.25 1.24 0 2.25 1 2.25 2.25v1c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V8c0-.42-.34-.75-.75-.75 -.42 0-.75.33-.75.75v5.5c0 .19-.08.38-.22.53l-2 2c-.3.29-.77.29-1.07 0 -.3.3-.3-.77 0-1.07l1.78-1.79V7.98ZM22 12.25c.41 0 .75.33.75.75v2.08c0 .46-.19.9-.52 1.23l-4.49 4.48v1.68c0 .41-.34.75-.75.75h-5c-.42 0-.75-.34-.75-.75v-6c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v5.25h3.5v-1.25c0-.2.07-.39.21-.54l4.7-4.71c.04-.05.07-.12.07-.18v-2.09c0-.42.33-.75.75-.75Z"/>
-              <path d="M5.75 8c0-1.25-1.01-2.25-2.25-2.25 -1.25 0-2.25 1-2.25 2.25v7.08c0 .46.18.9.51 1.23l4.48 4.48v1.68c0 .41.33.75.75.75h5c.41 0 .75-.34.75-.75v-6c0-.42-.34-.75-.75-.75 -.42 0-.75.33-.75.75v5.25h-3.5v-1.25c0-.2-.08-.39-.22-.54l-4.71-4.71c-.05-.05-.08-.12-.08-.18V7.95c0-.42.33-.75.75-.75 .41 0 .75.33.75.75v5.5c0 .19.07.38.21.53l2 2c.29.29.76.29 1.06 0 .29-.3.29-.77 0-1.07l-1.79-1.79V7.93Z"/>
-            </g>
-          </svg>
+          <HeartHandshake className="w-4.5 h-4.5 text-blue-900" />
           <h3 className="text-xs font-extrabold text-slate-800">Health Insurance Card Wallet</h3>
         </div>
 

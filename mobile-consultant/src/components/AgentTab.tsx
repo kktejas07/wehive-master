@@ -49,16 +49,7 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
       {/* Header */}
       <div className="mb-6">
         <span className="text-[10px] font-black uppercase text-blue-700 tracking-wider font-mono flex items-center gap-1">
-          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M5.25 19c0-2.63 2.12-4.75 4.75-4.75h4c2.62 0 4.75 2.12 4.75 4.75v3c0 .41-.34.75-.75.75h-7c-.42 0-.75-.34-.75-.75 0-.42.33-.75.75-.75h6.25V19c0-1.8-1.46-3.25-3.25-3.25h-4c-1.8 0-3.25 1.45-3.25 3.25v2.25H7c.41 0 .75.33.75.75 0 .41-.34.75-.75.75H6c-.42 0-.75-.34-.75-.75v-3Z"/>
-              <path d="M7.75 8c0-2.08 1.67-3.75 3.75-3.75h1c2.07 0 3.75 1.67 3.75 3.75v2c0 2.07-1.68 3.75-3.75 3.75h-1c-2.08 0-3.75-1.68-3.75-3.75V8Zm3.75-2.25c-1.25 0-2.25 1-2.25 2.25v2c0 1.24 1 2.25 2.25 2.25h1c1.24 0 2.25-1.01 2.25-2.25V8c0-1.25-1.01-2.25-2.25-2.25h-1Z"/>
-              <path d="M14.75 8c0-.42.33-.75.75-.75H18c.41 0 .75.33.75.75v3c0 .41-.34.75-.75.75h-2.5c-.42 0-.75-.34-.75-.75V8Zm1.5.75v1.5h1v-1.5h-1Z"/>
-              <path d="M5.25 8c0-.42.33-.75.75-.75h2.5c.41 0 .75.33.75.75v3c0 .41-.34.75-.75.75H6c-.42 0-.75-.34-.75-.75V8Zm1.5.75v1.5h1v-1.5h-1Z"/>
-              <path d="M5.25 7c0-3.18 2.57-5.75 5.75-5.75h2c3.17 0 5.75 2.57 5.75 5.75v3c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V7c0-2.35-1.91-4.25-4.25-4.25h-2c-2.35 0-4.25 1.9-4.25 4.25v3c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V7Z"/>
-              <path d="M12 14.25c.41 0 .75.33.75.75v7c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-7c0-.42.33-.75.75-.75Z"/>
-            </g>
-          </svg> Agent Hub
+          <Users className="w-3 h-3" /> Agent Hub
         </span>
         <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Sub-Agent Console</h2>
       </div>
@@ -66,12 +57,7 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
       {/* Referral & Rewards Dashboard */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <svg className="w-4.5 h-4.5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M17.5 2.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-2.08-1.68-3.75-3.75-3.75ZM12.25 6.5c0-2.9 2.35-5.25 5.25-5.25 2.89 0 5.25 2.35 5.25 5.25 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25Z"/>
-              <path d="M6.5 13.75c-2.08 0-3.75 1.67-3.75 3.75 0 2.07 1.67 3.75 3.75 3.75 2.07 0 3.75-1.68 3.75-3.75 0-.42.33-.75.75-.75 .41 0 .75.33.75.75 0 2.89-2.36 5.25-5.25 5.25 -2.9 0-5.25-2.36-5.25-5.25 0-2.9 2.35-5.25 5.25-5.25 1.07 0 2.08.32 2.91.88 .34.23.43.69.2 1.04 -.24.34-.7.43-1.05.2 -.6-.4-1.32-.64-2.09-.64Z"/>
-            </g>
-          </svg>
+          <Coins className="w-4.5 h-4.5 text-blue-900" />
           <h3 className="text-xs font-extrabold text-slate-800">Referral Commissions</h3>
         </div>
 
@@ -99,16 +85,7 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
       {/* Lead Board Registration */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <svg className="w-4.5 h-4.5 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fillRule="evenodd">
-              <path d="M5.25 19c0-2.63 2.12-4.75 4.75-4.75h4c2.62 0 4.75 2.12 4.75 4.75v3c0 .41-.34.75-.75.75h-7c-.42 0-.75-.34-.75-.75 0-.42.33-.75.75-.75h6.25V19c0-1.8-1.46-3.25-3.25-3.25h-4c-1.8 0-3.25 1.45-3.25 3.25v2.25H7c.41 0 .75.33.75.75 0 .41-.34.75-.75.75H6c-.42 0-.75-.34-.75-.75v-3Z"/>
-              <path d="M7.75 8c0-2.08 1.67-3.75 3.75-3.75h1c2.07 0 3.75 1.67 3.75 3.75v2c0 2.07-1.68 3.75-3.75 3.75h-1c-2.08 0-3.75-1.68-3.75-3.75V8Zm3.75-2.25c-1.25 0-2.25 1-2.25 2.25v2c0 1.24 1 2.25 2.25 2.25h1c1.24 0 2.25-1.01 2.25-2.25V8c0-1.25-1.01-2.25-2.25-2.25h-1Z"/>
-              <path d="M14.75 8c0-.42.33-.75.75-.75H18c.41 0 .75.33.75.75v3c0 .41-.34.75-.75.75h-2.5c-.42 0-.75-.34-.75-.75V8Zm1.5.75v1.5h1v-1.5h-1Z"/>
-              <path d="M5.25 8c0-.42.33-.75.75-.75h2.5c.41 0 .75.33.75.75v3c0 .41-.34.75-.75.75H6c-.42 0-.75-.34-.75-.75V8Zm1.5.75v1.5h1v-1.5h-1Z"/>
-              <path d="M5.25 7c0-3.18 2.57-5.75 5.75-5.75h2c3.17 0 5.75 2.57 5.75 5.75v3c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V7c0-2.35-1.91-4.25-4.25-4.25h-2c-2.35 0-4.25 1.9-4.25 4.25v3c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75V7Z"/>
-              <path d="M12 14.25c.41 0 .75.33.75.75v7c0 .41-.34.75-.75.75 -.42 0-.75-.34-.75-.75v-7c0-.42.33-.75.75-.75Z"/>
-            </g>
-          </svg>
+          <Users className="w-4.5 h-4.5 text-blue-900" />
           <h3 className="text-xs font-extrabold text-slate-800">Register New Student Lead</h3>
         </div>
 
