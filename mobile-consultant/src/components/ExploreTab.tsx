@@ -486,17 +486,10 @@ export default function ExploreTab({
   const [showComparison, setShowComparison] = useState(false);
   const [compareA, setCompareA] = useState<string>("uk");
   const [compareB, setCompareB] = useState<string>("usa");
-  const [comparisonData, setComparisonData] = useState(COMPARISON_DATA);
-  const [countryPhrases, setCountryPhrases] = useState(COUNTRY_PHRASES);
 
   useEffect(() => {
     setDestinations(getCachedCountryGuides());
     setOfflineActive(isAppOffline());
-    fetch("/api/destinations").then(r => r.json()).then(data => {
-      if (data.destinations) setDestinations(data.destinations);
-      if (data.comparison) setComparisonData(data.comparison);
-      if (data.phrases) setCountryPhrases(data.phrases);
-    }).catch(() => {});
   }, [selectedCountryId]);
 
   const [activeCountry, setActiveCountry] = useState<CountryInfo | null>(null);
@@ -948,7 +941,7 @@ export default function ExploreTab({
                         const val = e.target.value;
                         setCompareA(val);
                         if (val === compareB) {
-                          const nextOpt = Object.keys(comparisonData).find((k) => k !== val) || "usa";
+                          const nextOpt = Object.keys(COMPARISON_DATA).find((k) => k !== val) || "usa";
                           setCompareB(nextOpt);
                         }
                       }}
@@ -969,7 +962,7 @@ export default function ExploreTab({
                         const val = e.target.value;
                         setCompareB(val);
                         if (val === compareA) {
-                          const nextOpt = Object.keys(comparisonData).find((k) => k !== val) || "uk";
+                          const nextOpt = Object.keys(COMPARISON_DATA).find((k) => k !== val) || "uk";
                           setCompareA(nextOpt);
                         }
                       }}
@@ -998,28 +991,28 @@ export default function ExploreTab({
                           <RadarChart cx="50%" cy="50%" outerRadius="65%" data={[
                             {
                               subject: "Tuition Affordability",
-                              A: comparisonData[compareA]?.tuitionScore || 50,
-                              B: comparisonData[compareB]?.tuitionScore || 50
+                              A: COMPARISON_DATA[compareA]?.tuitionScore || 50,
+                              B: COMPARISON_DATA[compareB]?.tuitionScore || 50
                             },
                             {
                               subject: "Living Affordability",
-                              A: comparisonData[compareA]?.livingScore || 50,
-                              B: comparisonData[compareB]?.livingScore || 50
+                              A: COMPARISON_DATA[compareA]?.livingScore || 50,
+                              B: COMPARISON_DATA[compareB]?.livingScore || 50
                             },
                             {
                               subject: "Visa Speed",
-                              A: comparisonData[compareA]?.visaSpeedScore || 50,
-                              B: comparisonData[compareB]?.visaSpeedScore || 50
+                              A: COMPARISON_DATA[compareA]?.visaSpeedScore || 50,
+                              B: COMPARISON_DATA[compareB]?.visaSpeedScore || 50
                             },
                             {
                               subject: "Visa Success",
-                              A: comparisonData[compareA]?.visaSuccessScore || 50,
-                              B: comparisonData[compareB]?.visaSuccessScore || 50
+                              A: COMPARISON_DATA[compareA]?.visaSuccessScore || 50,
+                              B: COMPARISON_DATA[compareB]?.visaSuccessScore || 50
                             },
                             {
                               subject: "Post-Study Stay",
-                              A: comparisonData[compareA]?.workPermitScore || 50,
-                              B: comparisonData[compareB]?.workPermitScore || 50
+                              A: COMPARISON_DATA[compareA]?.workPermitScore || 50,
+                              B: COMPARISON_DATA[compareB]?.workPermitScore || 50
                             }
                           ]}>
                             <PolarGrid stroke="#e2e8f0" />
@@ -1061,36 +1054,36 @@ export default function ExploreTab({
                         {/* Tuition */}
                         <div className="grid grid-cols-3 p-2.5 items-center hover:bg-slate-50/40">
                           <div className="font-bold text-slate-500">Tuition Expenses</div>
-                          <div className="text-center font-mono text-slate-700 font-medium">{comparisonData[compareA]?.tuitionLabel}</div>
-                          <div className="text-center font-mono text-slate-700 font-medium">{comparisonData[compareB]?.tuitionLabel}</div>
+                          <div className="text-center font-mono text-slate-700 font-medium">{COMPARISON_DATA[compareA]?.tuitionLabel}</div>
+                          <div className="text-center font-mono text-slate-700 font-medium">{COMPARISON_DATA[compareB]?.tuitionLabel}</div>
                         </div>
 
                         {/* Living Cost */}
                         <div className="grid grid-cols-3 p-2.5 items-center hover:bg-slate-50/40">
                           <div className="font-bold text-slate-500">Living Cost</div>
-                          <div className="text-center font-mono text-slate-700 font-medium">{comparisonData[compareA]?.livingLabel}</div>
-                          <div className="text-center font-mono text-slate-700 font-medium">{comparisonData[compareB]?.livingLabel}</div>
+                          <div className="text-center font-mono text-slate-700 font-medium">{COMPARISON_DATA[compareA]?.livingLabel}</div>
+                          <div className="text-center font-mono text-slate-700 font-medium">{COMPARISON_DATA[compareB]?.livingLabel}</div>
                         </div>
 
                         {/* Visa Speed */}
                         <div className="grid grid-cols-3 p-2.5 items-center hover:bg-slate-50/40">
                           <div className="font-bold text-slate-500">Visa Processing</div>
-                          <div className="text-center font-mono text-slate-700 font-medium">{comparisonData[compareA]?.visaSpeedLabel}</div>
-                          <div className="text-center font-mono text-slate-700 font-medium">{comparisonData[compareB]?.visaSpeedLabel}</div>
+                          <div className="text-center font-mono text-slate-700 font-medium">{COMPARISON_DATA[compareA]?.visaSpeedLabel}</div>
+                          <div className="text-center font-mono text-slate-700 font-medium">{COMPARISON_DATA[compareB]?.visaSpeedLabel}</div>
                         </div>
 
                         {/* Visa Success */}
                         <div className="grid grid-cols-3 p-2.5 items-center hover:bg-slate-50/40">
                           <div className="font-bold text-slate-500">Visa Success</div>
-                          <div className="text-center font-bold text-emerald-600 font-mono">{comparisonData[compareA]?.visaSuccessLabel}</div>
-                          <div className="text-center font-bold text-emerald-600 font-mono">{comparisonData[compareB]?.visaSuccessLabel}</div>
+                          <div className="text-center font-bold text-emerald-600 font-mono">{COMPARISON_DATA[compareA]?.visaSuccessLabel}</div>
+                          <div className="text-center font-bold text-emerald-600 font-mono">{COMPARISON_DATA[compareB]?.visaSuccessLabel}</div>
                         </div>
 
                         {/* Stay Duration */}
                         <div className="grid grid-cols-3 p-2.5 items-center hover:bg-slate-50/40">
                           <div className="font-bold text-slate-500">Stay Duration</div>
-                          <div className="text-center text-slate-700 font-bold">{comparisonData[compareA]?.workPermitLabel}</div>
-                          <div className="text-center text-slate-700 font-bold">{comparisonData[compareB]?.workPermitLabel}</div>
+                          <div className="text-center text-slate-700 font-bold">{COMPARISON_DATA[compareA]?.workPermitLabel}</div>
+                          <div className="text-center text-slate-700 font-bold">{COMPARISON_DATA[compareB]?.workPermitLabel}</div>
                         </div>
                       </div>
                     </div>
@@ -1101,9 +1094,9 @@ export default function ExploreTab({
                     }`}>
                       <span className="font-black">📊 Index Comparison:</span> 
                       {` Comparing `}<strong>{destinations.find(c => c.id === compareA)?.name}</strong>{` and `}<strong>{destinations.find(c => c.id === compareB)?.name}</strong>{` reveals `}<strong>
-                        {comparisonData[compareA].tuitionScore > comparisonData[compareB].tuitionScore ? destinations.find(c => c.id === compareA)?.name : destinations.find(c => c.id === compareB)?.name}
+                        {COMPARISON_DATA[compareA].tuitionScore > COMPARISON_DATA[compareB].tuitionScore ? destinations.find(c => c.id === compareA)?.name : destinations.find(c => c.id === compareB)?.name}
                       </strong>{` is more budget-friendly for tuition fees, whereas `}<strong>
-                        {comparisonData[compareA].workPermitScore > comparisonData[compareB].workPermitScore ? destinations.find(c => c.id === compareA)?.name : destinations.find(c => c.id === compareB)?.name}
+                        {COMPARISON_DATA[compareA].workPermitScore > COMPARISON_DATA[compareB].workPermitScore ? destinations.find(c => c.id === compareA)?.name : destinations.find(c => c.id === compareB)?.name}
                       </strong>{` offers a longer post-study work allowance.`}
                     </div>
                   </div>
@@ -1424,7 +1417,7 @@ export default function ExploreTab({
 
                 {/* Quick Phrases Widget */}
                 {(() => {
-                  const phrases = countryPhrases[activeCountry.id] || [];
+                  const phrases = COUNTRY_PHRASES[activeCountry.id] || [];
                   if (phrases.length === 0) return null;
 
                   const phraseCategories = ["All", ...Array.from(new Set(phrases.map(p => p.category)))];

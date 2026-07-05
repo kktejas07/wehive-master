@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { 
   Users, Gift, Landmark, CreditCard, ChevronRight, CheckCircle2, 
   Send, RefreshCw, Sparkles, UserPlus, FileText, ArrowUpRight 
@@ -14,7 +14,6 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
     { id: "lead-1", name: "Aman Gupta", email: "aman@example.com", country: "Canada", status: "applied" },
     { id: "lead-2", name: "Neha Sen", email: "neha@example.com", country: "Germany", status: "completed" },
   ]);
-  const [commissions, setCommissions] = useState({ earned: 15500, pending: 5000, nextPayout: "July 10, 2026" });
 
   // Lead Form States
   const [newLeadName, setNewLeadName] = useState("");
@@ -22,37 +21,26 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
   const [newLeadCountry, setNewLeadCountry] = useState("Canada");
   const [addingLead, setAddingLead] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/leads").then(r => r.json()).then(data => {
-      if (data.leads) setLeads(data.leads);
-    }).catch(() => {});
-    fetch("/api/agent/commissions").then(r => r.json()).then(data => {
-      if (data.earned) setCommissions({ earned: data.earned, pending: data.pending, nextPayout: data.nextPayout });
-    }).catch(() => {});
-  }, []);
-
   const handleAddLead = (e: React.FormEvent) => {
     e.preventDefault();
     setAddingLead(true);
-    fetch("/api/leads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: newLeadName, email: newLeadEmail, country: newLeadCountry }) })
-      .then(r => r.json())
-      .then(data => {
-        if (data.lead) {
-          setLeads(prev => [data.lead, ...prev]);
-        }
-        setNewLeadName("");
-        setNewLeadEmail("");
-        setAddingLead(false);
-        onTriggerNotification("Student Lead Added", data.message || `"${newLeadName}" has been registered.`);
-      })
-      .catch(() => {
-        const newLead = { id: `lead-${Date.now()}`, name: newLeadName, email: newLeadEmail, country: newLeadCountry, status: "new" };
-        setLeads(prev => [newLead, ...prev]);
-        setNewLeadName("");
-        setNewLeadEmail("");
-        setAddingLead(false);
-        onTriggerNotification("Student Lead Added", `"${newLead.name}" has been registered.`);
-      });
+    setTimeout(() => {
+      const newLead = {
+        id: `lead-${Date.now()}`,
+        name: newLeadName,
+        email: newLeadEmail,
+        country: newLeadCountry,
+        status: "applied",
+      };
+      setLeads(prev => [newLead, ...prev]);
+      setNewLeadName("");
+      setNewLeadEmail("");
+      setAddingLead(false);
+      onTriggerNotification(
+        "Student Lead Added",
+        `"${newLead.name}" has been registered under your agent profile. Commission tracking active.`
+      );
+    }, 1200);
   };
 
   return (
@@ -76,19 +64,19 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/50">
             <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Commission Earned</div>
-            <div className="text-md font-black text-slate-800 mt-0.5">₹{commissions.earned.toLocaleString()}</div>
+            <div className="text-md font-black text-slate-800 mt-0.5">₹15,500</div>
           </div>
 
           <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/50">
             <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Pending Approval</div>
-            <div className="text-md font-black text-slate-800 mt-0.5">₹{commissions.pending.toLocaleString()}</div>
+            <div className="text-md font-black text-slate-800 mt-0.5">₹5,000</div>
           </div>
         </div>
 
         <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3.5 flex justify-between items-center text-xs">
           <div>
             <div className="font-bold text-blue-950">Next Payout Scheduled</div>
-            <p className="text-[10px] text-blue-900/60 mt-0.5">Scheduled direct transfer: {commissions.nextPayout}</p>
+            <p className="text-[10px] text-blue-900/60 mt-0.5">Scheduled direct transfer: July 10, 2026</p>
           </div>
           <CreditCard className="w-4.5 h-4.5 text-blue-700 shrink-0" />
         </div>

@@ -468,20 +468,6 @@ function AppContent() {
             <span className="text-[9px] mt-1 font-mono tracking-wide">Explore</span>
           </button>
 
-          {/* Tab Button: Hive AI Chat (3rd) */}
-          <button
-            onClick={() => handleNavigate("chat")}
-            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("chat")}`}
-          >
-            <div className="relative">
-              <img src="/favicon-48.png" alt="" className="w-5 h-5 object-contain" />
-              <span className={`absolute -top-1 -right-1.5 w-2 h-2 rounded-full border border-white animate-pulse ${
-                colorScheme === "forced-navy" ? "bg-blue-600" : "bg-red-600"
-              }`} />
-            </div>
-            <span className="text-[9px] mt-1 font-mono tracking-wide">Hive AI</span>
-          </button>
-
           {/* Tab Button: Vault */}
           <button
             onClick={() => handleNavigate("vault")}
@@ -489,6 +475,20 @@ function AppContent() {
           >
             <Folder className="w-5 h-5 shrink-0" />
             <span className="text-[9px] mt-1 font-mono tracking-wide">Vault</span>
+          </button>
+
+          {/* Tab Button: Hive AI Chat */}
+          <button
+            onClick={() => handleNavigate("chat")}
+            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("chat")}`}
+          >
+            <div className="relative">
+              <MessageSquare className="w-5 h-5 shrink-0" />
+              <span className={`absolute -top-1 -right-1.5 w-2 h-2 rounded-full border border-white animate-pulse ${
+                colorScheme === "forced-navy" ? "bg-blue-600" : "bg-red-600"
+              }`} />
+            </div>
+            <span className="text-[9px] mt-1 font-mono tracking-wide">Hive AI</span>
           </button>
 
           {/* Tab Button: Journey Tracking */}
