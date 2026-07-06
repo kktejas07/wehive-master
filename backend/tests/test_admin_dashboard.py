@@ -13,11 +13,16 @@ import pytest
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
     # Fall back to .env so pytest can run without exporting
-    with open('/app/frontend/.env') as fh:
-        for line in fh:
-            if line.startswith('REACT_APP_BACKEND_URL='):
-                BASE_URL = line.split('=', 1)[1].strip().strip('"').rstrip('/')
-                break
+    local_env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../frontend/.env'))
+    env_path = local_env_path if os.path.exists(local_env_path) else '/app/frontend/.env'
+    if os.path.exists(env_path):
+        with open(env_path) as fh:
+            for line in fh:
+                if line.startswith('REACT_APP_BACKEND_URL='):
+                    BASE_URL = line.split('=', 1)[1].strip().strip('"').rstrip('/')
+                    break
+if not BASE_URL or not BASE_URL.startswith('http'):
+    BASE_URL = 'https://premium-collab-6.preview.emergentagent.com'
 
 ADMIN_EMAIL = 'admin@wehive.co.in'
 MOCK_OTP = '123456'

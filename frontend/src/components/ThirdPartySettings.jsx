@@ -19,6 +19,11 @@ import {
   TestTube,
   AlertCircle,
   KeyRound,
+  Brain,
+  Layers,
+  Database,
+  Puzzle,
+  Building2,
 } from 'lucide-react';
 
 const CATEGORY_ICONS = {
@@ -27,9 +32,14 @@ const CATEGORY_ICONS = {
   payments_forex: CreditCard,
   travel_insurance: ShieldCheck,
   appt_slots: CalendarDays,
+  llm_providers: Brain,
+  ai_frameworks: Layers,
+  vector_dbs: Database,
+  mcp_external: Puzzle,
+  mcp_internal: Building2,
 };
 
-const SERVICE_ICONS: Record<string, React.ElementType> = {
+const SERVICE_ICONS = {
   atlys: Zap,
   visahq: Globe,
   ivisa: Zap,
@@ -356,7 +366,8 @@ export default function ThirdPartySettings() {
           Third-Party Integrations
         </h2>
         <p className="mt-1 text-[13.5px] text-[hsl(var(--blue-900))]/55">
-          Connect visa APIs, travel booking, payment, insurance, and appointment slot services.
+          Connect visa APIs, travel booking, payment, insurance, appointment slots, LLM providers,
+          AI frameworks, vector databases, and MCP servers.
         </p>
       </div>
 

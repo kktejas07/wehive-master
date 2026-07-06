@@ -10,6 +10,7 @@ import { API, useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { cn } from '../lib/utils';
+import VoiceWaveform from '../components/VoiceWaveform';
 
 // ── Static UI spec — matches the Hive mockup exactly ──────────────────────
 const AGENTS = [
@@ -518,6 +519,11 @@ export default function Hive({ inOverlay }) {
             {error && (
               <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-[12.5px]">
                 {error}
+              </div>
+            )}
+            {(listening || speaking) && (
+              <div className="px-3 py-2 border-t border-black/5 bg-white/40">
+                <VoiceWaveform isActive={listening} isSpeaking={speaking} />
               </div>
             )}
           </div>

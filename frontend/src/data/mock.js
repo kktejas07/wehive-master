@@ -24,7 +24,7 @@ export const COUNTRIES = [
     valid: '10 YEARS',
     fees: '$185',
     image:
-      'https://images.unsplash.com/photo-1611596825222-dba035a86416?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
+      '/images/hero/statue-of-liberty.png',
     eta: '21 May 2025, 9:24 AM',
     processing: '4–6 weeks',
     popular: true,
@@ -37,7 +37,7 @@ export const COUNTRIES = [
     valid: '6 MONTHS',
     fees: '$140',
     image:
-      'https://images.unsplash.com/photo-1665573456818-67a4c48110c0?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
+      '/images/hero/big-ben.png',
     eta: '8 May 2025, 9:54 AM',
     processing: '15 working days',
     popular: true,
@@ -89,7 +89,7 @@ export const COUNTRIES = [
     valid: '60 DAYS',
     fees: '$80',
     image:
-      'https://images.unsplash.com/photo-1677632227671-cc52e6f7f130?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
+      '/images/hero/burj-khalifa.png',
     eta: '13 May 2025, 9:39 AM',
     processing: '2–4 days',
     popular: true,
@@ -414,7 +414,7 @@ export const COUNTRIES = [
     valid: '90 DAYS',
     fees: '$45',
     image:
-      'https://images.unsplash.com/photo-1528127269322-539801943592?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
+      '/images/hero/ha-long-bay.png',
     eta: '11 May 2025, 9:30 AM',
     processing: '5–7 days',
     popular: false,
@@ -479,7 +479,7 @@ export const COUNTRIES = [
     valid: '90 DAYS',
     fees: '$55',
     image:
-      'https://images.unsplash.com/photo-1545906198-b91dba30c2bf?crop=entropy&cs=srgb&fm=jpg&q=80&w=900',
+      '/images/hero/victoria-falls.png',
     eta: '21 May 2025, 9:00 AM',
     processing: '7–10 days',
     popular: false,
@@ -613,13 +613,12 @@ export const PLANS = [
 
 // Footer columns with stable IDs (review fix)
 export const FOOTER_COLS = [
-  { id: 'visas', title: 'Popular visas', links: [
-    { id: 'l-us', label: 'United States', to: '/visa/us' },
-    { id: 'l-uk', label: 'United Kingdom', to: '/visa/uk' },
-    { id: 'l-fr', label: 'Schengen', to: '/visa/fr' },
-    { id: 'l-jp', label: 'Japan', to: '/visa/jp' },
-    { id: 'l-sg', label: 'Singapore', to: '/visa/sg' },
-    { id: 'l-ae', label: 'UAE', to: '/visa/ae' },
+  { id: 'visas', title: 'Destinations & Visas', links: [
+    { id: 'l-ca-hub', label: 'Canada Hub 🇨🇦', to: '/destinations/ca' },
+    { id: 'l-uk-hub', label: 'United Kingdom Hub 🇬🇧', to: '/destinations/gb' },
+    { id: 'l-us-hub', label: 'United States Hub 🇺🇸', to: '/destinations/us' },
+    { id: 'l-au-hub', label: 'Australia Hub 🇦🇺', to: '/destinations/au' },
+    { id: 'l-de-hub', label: 'Germany Hub 🇩🇪', to: '/destinations/de' },
   ]},
   { id: 'company', title: 'Company', links: [
     { id: 'l-about', label: 'About', to: '/about' },
@@ -628,13 +627,14 @@ export const FOOTER_COLS = [
     { id: 'l-contact', label: 'Contact', to: '/#contact' },
     { id: 'l-trust', label: 'Trust & safety', to: '/about' },
   ]},
-  { id: 'resources', title: 'Resources', links: [
+  { id: 'resources', title: 'Resources & Tools', links: [
+    { id: 'l-assessment', label: 'Visa Eligibility Calculator', to: '/assessment' },
     { id: 'l-help', label: 'Help center', to: '/help' },
+    { id: 'l-us-slots', label: 'Visa Slot Tracker — Live Wait Times', to: '/us-visa-slots' },
     { id: 'l-intake', label: 'Intake Calendar', to: '/intake-calendar' },
     { id: 'l-financial', label: 'Financial Tools — GIC, Budgets, Loans', to: '/financial-tools' },
     { id: 'l-universities', label: 'University Search — Browse & Compare', to: '/universities' },
     { id: 'l-visa-checker', label: 'Visa Checker — Do I Need a Visa?', to: '/visa-checker' },
-    { id: 'l-refund', label: 'Refund policy', to: '/' },
   ]},
   { id: 'legal', title: 'Legal', links: [
     { id: 'l-terms', label: 'Terms', to: '/' },

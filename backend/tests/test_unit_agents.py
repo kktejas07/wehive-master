@@ -25,49 +25,58 @@ from agents.orchestrator import detect_intent, get_agent_endpoint, OrchestratorR
 
 
 class TestOrchestrator:
-    def test_detect_visa_qa(self):
-        result = detect_intent("What are the visa requirements for US?")
+    @pytest.mark.asyncio
+    async def test_detect_visa_qa(self):
+        result = await detect_intent("What are the visa requirements for US?")
         assert "visa Q&A" in result.agent
         assert result.confidence > 0
 
-    def test_detect_concierge(self):
-        result = detect_intent("I want to apply for a tourist visa to Canada")
+    @pytest.mark.asyncio
+    async def test_detect_concierge(self):
+        result = await detect_intent("I want to apply for a tourist visa to Canada")
         assert "Concierge" in result.agent
 
-    def test_detect_doc_validator(self):
-        result = detect_intent("Can you check this document for me?")
+    @pytest.mark.asyncio
+    async def test_detect_doc_validator(self):
+        result = await detect_intent("Can you check this document for me?")
         assert "Document Validator" in result.agent
 
-    def test_detect_portal_ai(self):
-        result = detect_intent("Show me my students needing attention")
+    @pytest.mark.asyncio
+    async def test_detect_portal_ai(self):
+        result = await detect_intent("Show me my students needing attention")
         assert "Portal AI" in result.agent
 
-    def test_detect_workflow(self):
-        result = detect_intent("I want to study at a university in Canada")
+    @pytest.mark.asyncio
+    async def test_detect_workflow(self):
+        result = await detect_intent("I want to study at a university in Canada")
         assert "Research" in result.agent or "workflow" in result.agent.lower() or "visa" in result.agent.lower()
 
-    def test_empty_query_defaults_to_visa_qa(self):
-        result = detect_intent("hello")
+    @pytest.mark.asyncio
+    async def test_empty_query_defaults_to_visa_qa(self):
+        result = await detect_intent("hello")
         assert result.agent is not None
 
-    def test_params_extracted(self):
-        result = detect_intent("Tell me about visa for UK")
+    @pytest.mark.asyncio
+    async def test_params_extracted(self):
+        result = await detect_intent("Tell me about visa for UK")
         assert result.params.get("country_id") == "uk"
 
-    def test_student_intent(self):
-        result = detect_intent("Can I study in Australia?")
+    @pytest.mark.asyncio
+    async def test_student_intent(self):
+        result = await detect_intent("Can I study in Australia?")
         assert result.params.get("intent") == "student"
 
     def test_get_agent_endpoint_known(self):
-        result = OrchestratorResult("Eva (visa Q&A)", 0.8, {})
+        result = OrchestratorResult("Hive (visa Q&A)", 0.8, {})
         assert get_agent_endpoint(result) == "POST /api/chatbot/sessions/{id}/messages"
 
     def test_get_agent_endpoint_unknown(self):
         result = OrchestratorResult("Unknown Agent", 0.0, {})
         assert get_agent_endpoint(result) is None
 
-    def test_confidence_capped(self):
-        result = detect_intent("visa visa visa visa visa visa visa visa visa visa visa")
+    @pytest.mark.asyncio
+    async def test_confidence_capped(self):
+        result = await detect_intent("visa visa visa visa visa visa visa visa visa visa visa")
         assert result.confidence <= 1.0
 
 
@@ -467,7 +476,7 @@ class TestToolRegistry:
                         with patch("eva_tools.get_application_fee", new=AsyncMock()):
                             with patch("eva_tools.lookup_university", new=AsyncMock()):
                                 tr.register_all()
-        assert len(tr.list_tools()) == 6
+        assert len(tr.list_tools()) == 11
 
 
 # ─── Third-Party Agent (mocked HTTP) ──────────────────────────────────────────

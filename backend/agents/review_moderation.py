@@ -7,6 +7,7 @@ Checks:
 - Flagging for manual review
 """
 
+import json
 import re
 
 
@@ -61,3 +62,25 @@ def moderate_review(text: str, rating: int) -> dict:
         'length': len(text),
         'is_spam': 'spam_pattern_detected' in flags,
     }
+
+
+async def llm_moderate_review(text: str, rating: int) -> dict:
+    """Use LLM for more accurate spam and sentiment detection."""
+    try:
+        from model_router import chat_with_profile
+        response = await chat_with_profile(
+            "fast_cheap",
+            [
+                {"role": "system", "content": (
+                    "You are a review moderator. Analyze this review for spam, "
+                    "appropriateness, and sentiment. Return JSON: "
+                    '{"is_spam": bool, "sentiment": "positive/neutral/negative", '
+                    '"verdict": "approve/flag/reject", "reason": "..."}. Only return JSON.'
+                )},
+                {"role": "user", "content": f"Rating: {rating}/5\nReview: {text}"},
+            ],
+            max_tokens=200,
+        )
+        return json.loads(response.get("content", "{}"))
+    except Exception:
+        return {"is_spam": False, "sentiment": "neutral", "verdict": "approve", "reason": "fallback"}

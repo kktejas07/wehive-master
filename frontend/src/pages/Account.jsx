@@ -19,6 +19,7 @@ import PremiumGate from '../components/PremiumGate';
 import AIMarketplaceSettings from '../components/ai/AIMarketplaceSettings';
 import UniversityAppsTab from '../components/account/UniversityAppsTab';
 import AIAgentsTab from '../components/account/AIAgentsTab';
+import AIInsightsPanel from '../components/AIInsightsPanel';
 
 const TABS = [
   { id: 'profile', label: 'Profile', Icon: UserIcon },
@@ -162,6 +163,11 @@ function ProfileTab({ user, token, onUpdated }) {
             <option value="female">Female</option>
             <option value="other">Other</option>
           </EditSelect>
+        </div>
+      )}
+      {!editing && (
+        <div className="mt-8 border-t border-black/5 pt-8">
+          <AIInsightsPanel />
         </div>
       )}
     </div>
@@ -545,9 +551,20 @@ function ReferralsTab({ token }) {
 
   useEffect(() => {
     if (!token) return;
-    axios.get(`${API}/referrals/code`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => setCode(r.data.code))
-      .catch(() => {});
+    setLoading(true);
+    axios.get(`${API}/referrals/my-code`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (r) => {
+        let referralCode = r.data.code;
+        if (!referralCode) {
+          try {
+            const createRes = await axios.post(`${API}/referrals/code`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            referralCode = createRes.data.code;
+          } catch {}
+        }
+        setCode(referralCode);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
     axios.get(`${API}/referrals/stats`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => setStats(r.data))
       .catch(() => {});
@@ -585,24 +602,33 @@ function ReferralsTab({ token }) {
           <Gift className="w-5 h-5 text-white/70" />
           <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/70">Your referral code</span>
         </div>
-        <div className="text-4xl font-display font-extrabold tracking-[0.1em] mb-6">{code || '---------'}</div>
+        <div className="h-14 flex items-center mb-6">
+          {loading ? (
+            <Loader2 className="w-7 h-7 animate-spin text-white/70" />
+          ) : (
+            <div className="text-4xl font-display font-extrabold tracking-[0.1em]">{code || '---------'}</div>
+          )}
+        </div>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => handleShare('copy')}
-            className="inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 px-5 py-2.5 text-[13px] font-bold transition"
+            disabled={loading || !code}
+            className="inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-2.5 text-[13px] font-bold transition"
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             {copied ? 'Copied!' : 'Copy code'}
           </button>
           <button
             onClick={() => handleShare('whatsapp')}
-            className="inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-600 px-5 py-2.5 text-[13px] font-bold transition"
+            disabled={loading || !code}
+            className="inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-2.5 text-[13px] font-bold transition"
           >
             Share on WhatsApp
           </button>
           <button
             onClick={() => handleShare('email')}
-            className="inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 px-5 py-2.5 text-[13px] font-bold transition"
+            disabled={loading || !code}
+            className="inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-2.5 text-[13px] font-bold transition"
           >
             Share via Email
           </button>

@@ -120,7 +120,7 @@ export default function AuthModal() {
           name: isSignup ? formData.name : undefined,
         });
       }
-      toast({ title: 'Welcome to We Hive', description: 'You are signed in.' });
+      toast({ title: 'Our Ambition. Our Guidance. No Frontiers', description: 'You are signed in.' });
       closeAuth();
       window.location.href = '/account';
     } catch (e) {

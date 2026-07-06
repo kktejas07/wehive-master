@@ -1,0 +1,202 @@
+import React, { useState } from "react";
+import { 
+  Coins, Wallet, Landmark, ArrowRight, CheckCircle2, AlertCircle, 
+  HelpCircle, Calculator, Building, ArrowUpRight, TrendingUp, Info 
+} from "lucide-react";
+
+interface FinanceTabProps {
+  onTriggerNotification: (title: string, body: string, type?: any, actionTab?: string) => void;
+  colorScheme: any;
+}
+
+const COST_DATA = {
+  ca: { country: "Canada", currency: "CAD", rent: 850, food: 300, transport: 120, insurance: 80, gic: "$20,635 CAD" },
+  de: { country: "Germany", currency: "EUR", rent: 450, food: 250, transport: 80, insurance: 110, gic: "€11,208 EUR" },
+  us: { country: "United States", currency: "USD", rent: 1100, food: 350, transport: 150, insurance: 180, gic: "N/A" },
+  gb: { country: "United Kingdom", currency: "GBP", rent: 750, food: 280, transport: 100, insurance: 70, gic: "N/A" },
+  au: { country: "Australia", currency: "AUD", rent: 950, food: 320, transport: 130, insurance: 90, gic: "N/A" },
+};
+
+export default function FinanceTab({ onTriggerNotification, colorScheme }: FinanceTabProps) {
+  const [selectedCountry, setSelectedCountry] = useState<keyof typeof COST_DATA>("de");
+  const [customRent, setCustomRent] = useState<string>("");
+  
+  // Loan application states
+  const [loanAmount, setLoanAmount] = useState("₹15,00,000");
+  const [loanStatus, setLoanStatus] = useState<"not_applied" | "submitting" | "applied">("not_applied");
+
+  const currentCost = COST_DATA[selectedCountry];
+  const activeRent = customRent ? parseFloat(customRent) || 0 : currentCost.rent;
+  const totalMonthlyCost = activeRent + currentCost.food + currentCost.transport + currentCost.insurance;
+
+  const handleApplyLoan = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoanStatus("submitting");
+    setTimeout(() => {
+      setLoanStatus("applied");
+      onTriggerNotification(
+        "Loan Application Received",
+        `Your request for ${loanAmount} has been forwarded to HDFC & Auxilo for priority processing.`
+      );
+    }, 1500);
+  };
+
+  return (
+    <div className="flex-1 bg-slate-50 p-4 font-sans select-none" style={{ fontFamily: "system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif" }}>
+      
+      {/* Header */}
+      <div className="mb-6">
+        <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider font-mono flex items-center gap-1">
+          <Coins className="w-3.5 h-3.5" /> Financial Hub
+        </span>
+        <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Finance & Budgets</h2>
+      </div>
+
+      {/* Cost-of-Living Calculator Section */}
+      <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
+        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+          <Coins className="w-4.5 h-4.5 text-blue-900" />
+          <h3 className="text-xs font-extrabold text-slate-800">Cost-of-Living Calculator</h3>
+        </div>
+
+        <div className="space-y-3">
+          {/* Country Selection */}
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Country</label>
+            <div className="grid grid-cols-5 gap-1.5">
+              {Object.keys(COST_DATA).map((k) => (
+                <button
+                  key={k}
+                  onClick={() => {
+                    setSelectedCountry(k as any);
+                    setCustomRent("");
+                  }}
+                  className={`py-1.5 rounded-lg text-[10.5px] font-bold border transition ${
+                    selectedCountry === k
+                      ? "bg-slate-900 border-slate-900 text-white"
+                      : "bg-slate-50 border-slate-200 text-slate-600"
+                  }`}
+                >
+                  {COST_DATA[k as keyof typeof COST_DATA].country.split(" ")[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Budget Grid */}
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
+              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Rent / Lodging</div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-sm font-bold text-slate-800">{currentCost.currency}</span>
+                <input
+                  type="number"
+                  placeholder={currentCost.rent.toString()}
+                  value={customRent}
+                  onChange={(e) => setCustomRent(e.target.value)}
+                  className="w-16 bg-transparent font-black text-sm text-slate-800 focus:outline-none placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
+              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Food / Groceries</div>
+              <div className="mt-1 text-sm font-bold text-slate-800">
+                {currentCost.currency} {currentCost.food}
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
+              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Local Transit</div>
+              <div className="mt-1 text-sm font-bold text-slate-800">
+                {currentCost.currency} {currentCost.transport}
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
+              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Health Insurance</div>
+              <div className="mt-1 text-sm font-bold text-slate-800">
+                {currentCost.currency} {currentCost.insurance}
+              </div>
+            </div>
+          </div>
+
+          {/* Sum Banner */}
+          <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3.5 flex justify-between items-center mt-2">
+            <div>
+              <div className="text-[10px] font-bold text-blue-900/60 uppercase tracking-wider">Estimated Monthly Budget</div>
+              <div className="text-lg font-black text-blue-950 mt-0.5">
+                {currentCost.currency} {totalMonthlyCost.toLocaleString()}
+              </div>
+            </div>
+            <Info className="w-4 h-4 text-blue-700 shrink-0" />
+          </div>
+        </div>
+      </div>
+
+      {/* GIC / Block Account Setup Progress */}
+      {currentCost.gic !== "N/A" && (
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <Landmark className="w-4.5 h-4.5 text-blue-900" />
+            <h3 className="text-xs font-extrabold text-slate-800">Mandatory Blocked Account</h3>
+          </div>
+
+          <div className="flex justify-between items-center bg-slate-50 p-3.5 rounded-xl border border-slate-200/50">
+            <div>
+              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Required Funds</div>
+              <div className="text-md font-extrabold text-slate-800 mt-0.5">{currentCost.gic}</div>
+            </div>
+            <button 
+              onClick={() => alert("Redirecting to Fintiba secure portal...")}
+              className="inline-flex items-center gap-1 rounded-lg bg-slate-900 text-white text-[10px] font-bold px-3 h-8 hover:bg-slate-800 transition"
+            >
+              <span>Setup Portal</span>
+              <ArrowUpRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Student Loan Application Form */}
+      <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+          <Landmark className="w-4.5 h-4.5 text-blue-900" />
+          <h3 className="text-xs font-extrabold text-slate-800">Education Loan Desk</h3>
+        </div>
+
+        {loanStatus === "applied" ? (
+          <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-center space-y-2">
+            <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+            <h4 className="text-xs font-extrabold text-emerald-800">Loan Application Submitted</h4>
+            <p className="text-[10.5px] text-emerald-700 leading-relaxed">
+              We have dispatched your portfolio to Auxiliary & HDFC bank managers. You will receive contact inside 24 hours.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleApplyLoan} className="space-y-3">
+            <div>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Loan Amount</label>
+              <input
+                required
+                type="text"
+                value={loanAmount}
+                onChange={(e) => setLoanAmount(e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 focus:border-slate-400 focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loanStatus === "submitting"}
+              className="w-full inline-flex items-center justify-center gap-1 bg-[hsl(var(--accent))] text-white text-xs font-bold h-10 rounded-xl hover:opacity-90 disabled:opacity-50 transition"
+            >
+              {loanStatus === "submitting" ? "Submitting..." : "Request Priority Application"}
+            </button>
+          </form>
+        )}
+      </div>
+
+    </div>
+  );
+}

@@ -3,6 +3,7 @@
 We avoid invoking real Gemini Vision by inserting fake scan records
 directly into the `scans` MongoDB collection (per testing instructions).
 """
+from __future__ import annotations
 import os
 import uuid
 import asyncio
@@ -13,11 +14,26 @@ import requests
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
-load_dotenv('/app/frontend/.env')
-load_dotenv('/app/backend/.env')
+# Try loading from local environment files if running locally, otherwise fall back to Docker paths
+local_frontend_env = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../frontend/.env'))
+local_backend_env = os.path.abspath(os.path.join(os.path.dirname(__file__), '../.env'))
 
-BASE_URL = os.environ['REACT_APP_BACKEND_URL'].rstrip('/')
-MONGO_URL = os.environ['MONGO_URL']
+frontend_env = local_frontend_env if os.path.exists(local_frontend_env) else '/app/frontend/.env'
+backend_env = local_backend_env if os.path.exists(local_backend_env) else '/app/backend/.env'
+
+if os.path.exists(frontend_env):
+    load_dotenv(frontend_env)
+if os.path.exists(backend_env):
+    load_dotenv(backend_env)
+
+# Use env var if present and not empty, otherwise default to the preview URL
+base_url_env = os.environ.get('REACT_APP_BACKEND_URL', '')
+if not base_url_env:
+    BASE_URL = "https://premium-collab-6.preview.emergentagent.com"
+else:
+    BASE_URL = base_url_env.rstrip('/')
+
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 DB_NAME = os.environ.get('DB_NAME', 'wehive')
 
 

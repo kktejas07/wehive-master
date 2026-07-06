@@ -28,6 +28,14 @@ promotions_col = db['promotions']
 agents_col = db['agents']
 agent_students_col = db['agent_students']
 commissions_col = db['commissions']
+usvisa_slots_col = db['usvisa_slots']
+usvisa_subscriptions_col = db['usvisa_subscriptions']
+training_enrollments_col = db['training_enrollments']
+training_certificates_col = db['training_certificates']
+kg_entity_cache_col = db['kg_entity_cache']
+kg_insight_runs_col = db['kg_insight_runs']
+mcp_configs_col = db['mcp_configs']
+amadeus_cache_col = db['amadeus_cache']
 
 
 async def ensure_indexes():
@@ -69,4 +77,23 @@ async def ensure_indexes():
     await commissions_col.create_index([('status', 1), ('created_at', -1)])
     await db['profile_change_requests'].create_index([('user_id', 1), ('created_at', -1)])
     await db['profile_change_requests'].create_index([('status', 1), ('created_at', -1)])
-
+    await usvisa_slots_col.create_index([('consulate', 1), ('visa_type', 1), ('check_date', -1)])
+    await usvisa_slots_col.create_index('detected_at')
+    await usvisa_subscriptions_col.create_index('user_id')
+    await usvisa_subscriptions_col.create_index('telegram_chat_id')
+    await training_enrollments_col.create_index([('user_id', 1), ('course_id', 1)])
+    await training_certificates_col.create_index([('user_id', 1), ('course_id', 1)])
+    await kg_entity_cache_col.create_index('kg_id', unique=True, sparse=True)
+    await kg_entity_cache_col.create_index('name')
+    await kg_insight_runs_col.create_index([('topic', 1), ('run_at', -1)])
+    await mcp_configs_col.create_index('user_id', unique=True, sparse=True)
+    await db['byok_vault'].create_index([('user_id', 1), ('provider_id', 1)], unique=True)
+    await amadeus_cache_col.create_index([('key', 1), ('cached_at', -1)])
+    # Orchestrator collections
+    await db['orchestrator_accounts'].create_index('provider', unique=True, sparse=True)
+    await db['orchestrator_accounts'].create_index([('status', 1), ('priority', 1)])
+    await db['orchestrator_circuit_breakers'].create_index('provider', unique=True, sparse=True)
+    await db['orchestrator_token_usage'].create_index([('provider', 1), ('timestamp', -1)])
+    await db['orchestrator_token_usage'].create_index('request_id')
+    await db['orchestrator_failover_log'].create_index([('timestamp', -1)])
+    await db['orchestrator_budget_log'].create_index([('timestamp', -1)])

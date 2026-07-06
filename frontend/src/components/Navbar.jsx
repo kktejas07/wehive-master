@@ -6,7 +6,6 @@ import {
   Phone, 
   MessageCircle, 
   Send,
-  Sparkles,
   Home,
   Globe,
   GraduationCap,
@@ -16,9 +15,10 @@ import {
   Calendar,
   BookOpen,
   CreditCard,
-  Info
+  Info 
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
 import UserMenu from './UserMenu';
@@ -51,36 +51,32 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
 
   if (orientation === 'horizontal') {
     return (
-      <div className="hidden xl:flex items-center gap-0 mx-2 flex-1 justify-center relative min-w-0">
-        <nav
-          className="flex items-center gap-1 2xl:gap-2 overflow-x-auto scroll-smooth pb-0.5 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[hsl(var(--blue-200))] [&::-webkit-scrollbar-track]:bg-transparent"
-        >
-          {NAV.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.id}
-                to={item.to}
-                end={item.to === '/'}
-                className={({ isActive }) =>
-                  cn(
-                    'px-2 2xl:px-3 py-1.5 text-[12px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5 shrink-0',
-                    isActive ? activeClass : inactiveClass
-                  )
-                }
-              >
-                {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
-                {t('nav.' + item.id, item.label)}
-                {item.badge && (
-                  <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
-                    {t('badge.' + item.badge.toLowerCase(), item.badge)}
-                  </span>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
-      </div>
+      <nav className="hidden xl:flex items-center gap-1 2xl:gap-2 mx-2 flex-1 justify-center overflow-x-auto no-scrollbar">
+        {NAV.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.id}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) =>
+                cn(
+                  'px-2 2xl:px-3 py-1.5 text-[12px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
+                  isActive ? activeClass : inactiveClass
+                )
+              }
+            >
+              {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
+              {t('nav.' + item.id, item.label)}
+              {item.badge && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                  {t('badge.' + item.badge.toLowerCase(), item.badge)}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
+      </nav>
     );
   }
   return (
@@ -100,6 +96,11 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
           >
             {Icon ? <Icon className="w-4 h-4" /> : null}
             {t('nav.' + item.id, item.label)}
+            {item.badge && (
+              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                {t('badge.' + item.badge.toLowerCase(), item.badge)}
+              </span>
+            )}
           </Link>
         );
       })}
@@ -132,7 +133,7 @@ function MobileMenu({ open, light = false }) {
   if (!open) return null;
   return (
     <div className={cn(
-      'lg:hidden border-t backdrop-blur-xl',
+      'xl:hidden border-t backdrop-blur-xl',
       light ? 'border-white/10 bg-[hsl(var(--blue-900))]/90' : 'border-black/5 bg-white/95'
     )}>
       <div className="px-5 py-4 flex flex-col gap-1">
@@ -198,49 +199,24 @@ export default function Navbar({ variant = 'default' }) {
       )}
     >
       <div className={cn(
-        '        max-w-[1440px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 transition-[height] duration-300',
-        scrolled ? 'h-[68px] sm:h-[76px]' : 'h-[110px] sm:h-[130px]'
+        'max-w-[1600px] mx-auto px-4 sm:px-8 xl:px-12 flex items-center justify-between gap-4 xl:gap-8 transition-[height] duration-300',
+        scrolled ? 'h-[68px] sm:h-[76px]' : 'h-[90px] sm:h-[110px]'
       )}>
         <Link to="/" className="flex items-center gap-2 group shrink-0 relative">
-          <div className={cn(
-            'relative transition-[width,height] duration-500 ease overflow-visible',
-            scrolled ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-24 h-24 sm:w-28 sm:h-28'
-          )}>
-            {/* Full logo — visible when at top */}
-            <img
-              src="/brand/wehive-logo.png"
-              alt="We Hive"
-              draggable={false}
-              className={cn(
-                'absolute inset-0 h-full w-full object-contain select-none transition-all duration-500 group-hover:scale-[1.04]',
-                scrolled ? 'opacity-0 scale-50 rotate-[-12deg] pointer-events-none' : 'opacity-100 scale-100 rotate-0'
-              )}
-            />
-            {/* Favicon — visible when scrolled (mini glyph) */}
-            <img
-              src="/brand/wehive-favicon.png"
-              alt="We Hive"
-              draggable={false}
-              className={cn(
-                'absolute inset-0 h-full w-full object-contain select-none transition-all duration-500 group-hover:scale-[1.08] group-hover:rotate-[6deg]',
-                scrolled ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-150 rotate-12 pointer-events-none'
-              )}
-            />
-          </div>
-          {/* Wordmark next to favicon when scrolled */}
-          <span className={cn(
-            'font-display font-extrabold text-[hsl(var(--blue-900))] tracking-[-0.03em] leading-none transition-all duration-500',
-            scrolled
-              ? 'opacity-100 text-[20px] sm:text-[22px] translate-x-0'
-              : 'opacity-0 text-[20px] -translate-x-3 pointer-events-none'
-          )}>
-            We Hive
-          </span>
+          <img
+            src={BRAND.logo}
+            alt={BRAND.name}
+            draggable={false}
+            className={cn(
+              'w-auto select-none object-contain transition-all duration-500 group-hover:scale-[1.04]',
+              scrolled ? 'h-10 sm:h-11' : 'h-16 sm:h-20'
+            )}
+          />
         </Link>
 
         <NavLinks light={isLight} />
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <NotificationBell />
           <PhoneBlock />
           <UserMenu />
@@ -248,7 +224,7 @@ export default function Navbar({ variant = 'default' }) {
             href="https://chat.whatsapp.com/F0R1TYMOr8dLwIbr5jLRau"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-green-50 text-green-600 transition-colors"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-600 hover:text-white ring-1 ring-green-200 hover:ring-green-600 transition-all duration-200"
             title="Join WhatsApp Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -259,7 +235,7 @@ export default function Navbar({ variant = 'default' }) {
             href="https://t.me/wehivecommunity"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 text-blue-600 transition-colors"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white ring-1 ring-blue-200 hover:ring-blue-600 transition-all duration-200"
             title="Join Telegram Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -269,7 +245,7 @@ export default function Navbar({ variant = 'default' }) {
           <LanguageSwitcher />
           <button
             onClick={() => setOpen((v) => !v)}
-            className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
+            className="xl:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
             aria-label="Toggle menu"
           >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

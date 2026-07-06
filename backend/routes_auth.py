@@ -183,9 +183,9 @@ async def verify_otp(req: VerifyOtpRequest, bg: BackgroundTasks):
             bg.add_task(
                 send_email,
                 to_email=user_email,
-                subject='Welcome to We Hive!',
+                subject='Our Ambition. Our Guidance. No Frontiers',
                 html_body=build_welcome_html(user.get('name', '')),
-                text_body=f'Welcome to We Hive, {user.get("name", "there")}! Explore 190+ countries, apply to universities, and track your applications.',
+                text_body=f'Our Ambition. Our Guidance. No Frontiers. Hello {user.get("name", "there")}! Explore 190+ countries, apply to universities, and track your applications.',
             )
 
     return AuthTokens(access_token=token, user=_public(user))

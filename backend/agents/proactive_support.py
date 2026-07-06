@@ -85,9 +85,42 @@ async def check_recent_rejections(db) -> List[dict]:
 
 
 async def run_all_checks(db) -> List[dict]:
-    """Run all proactive support checks."""
     results = []
     results.extend(await check_incomplete_profiles(db))
     results.extend(await check_browsing_without_applying(db))
     results.extend(await check_recent_rejections(db))
+
+    try:
+        llm = await llm_behavior_insight(results)
+        if llm:
+            results.append({"type": "llm_insight", "severity": "info", "message": llm})
+    except Exception:
+        pass
+
     return results
+
+
+async def llm_behavior_insight(check_results: list) -> str:
+    """Use LLM to generate a personalized nudge based on user behavior."""
+    signals = [r.get("message", "") for r in check_results if r.get("message")]
+    if not signals:
+        return "Everything looks good. Keep going!"
+
+    signal_text = "\n".join(signals)
+    try:
+        from model_router import chat_with_profile
+        response = await chat_with_profile(
+            "fast_cheap",
+            [
+                {"role": "system", "content": (
+                    "You are a helpful immigration assistant. Given user behavior signals, "
+                    "write a friendly, motivating 2-sentence nudge to help them take the next step. "
+                    "Be encouraging, never pushy."
+                )},
+                {"role": "user", "content": f"Signals: {signal_text}"},
+            ],
+            max_tokens=150,
+        )
+        return response.get("content", "We're here to help!").strip()
+    except Exception:
+        return signal_text[:200]
