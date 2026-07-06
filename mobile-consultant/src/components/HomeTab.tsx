@@ -548,7 +548,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               </p>
               <button
                 onClick={() => onNavigate("evaluator")}
-                className="mt-4 bg-white text-blue-950 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 transition-colors flex items-center gap-1.5 shadow-md shadow-blue-950/20 cursor-pointer"
+                className="mt-4 bg-blue-950 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-900 transition-colors flex items-center gap-1.5 shadow-md shadow-blue-950/40 cursor-pointer"
               >
                 <span>Assess Profile Now</span>
                 <ChevronRight className="w-3.5 h-3.5 text-red-500" />

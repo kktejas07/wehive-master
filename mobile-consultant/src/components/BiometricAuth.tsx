@@ -364,7 +364,7 @@ export default function BiometricAuth({
                 <LottiePlayer
                   url={
                     isFaceID
-                      ? "https://raw.githubusercontent.com/alirezat66/Lottie-Animations/master/face.json"
+                      ? ""
                       : "https://raw.githubusercontent.com/Anirudh-C/Lottie-Animations/master/fingerprint.json"
                   }
                   loop={authState === "scanning"}

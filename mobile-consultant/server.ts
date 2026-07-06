@@ -3,6 +3,8 @@ import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import multer from "multer";
+import fs from "fs";
 
 // Load environment variables
 dotenv.config();
@@ -11,6 +13,34 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+// Setup Multer for file uploads
+const uploadDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage });
+app.use("/uploads", express.static(uploadDir));
+
+// Setup Database Persistence
+const dbPath = path.join(process.cwd(), "db.json");
+if (!fs.existsSync(dbPath)) {
+  fs.writeFileSync(dbPath, JSON.stringify([], null, 2));
+}
+function getDocuments() {
+  try { return JSON.parse(fs.readFileSync(dbPath, "utf-8")); } 
+  catch (e) { return []; }
+}
+function saveDocuments(docs: any[]) {
+  fs.writeFileSync(dbPath, JSON.stringify(docs, null, 2));
+}
 
 // Lazy-initialized Gemini Client to prevent crash if key is missing during build/startup
 let aiInstance: GoogleGenAI | null = null;
@@ -271,6 +301,22 @@ app.post("/api/next-steps", async (req, res) => {
   try {
     const { academicLevel, dreamCountry, milestones, vaultDocs } = req.body;
 
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
+      return res.json({
+        recommendations: [
+          {
+            title: "Configure Gemini API Key",
+            description: "To get real AI suggestions, please add your GEMINI_API_KEY to the .env file.",
+            priority: "High",
+            category: "Preparation",
+            actionLabel: "Settings"
+          }
+        ],
+        advisoryNote: "You are currently viewing mock AI data because your API key is missing."
+      });
+    }
+
     const ai = getGeminiClient();
 
     const prompt = `Analyze the study abroad preparation progress for the following student:
@@ -328,6 +374,85 @@ If they already uploaded all documents or completed all milestones, give them ce
   } catch (error: any) {
     console.error("Error in /api/next-steps:", error);
     res.status(500).json({ error: error.message || "Failed to generate recommended next steps." });
+  }
+});
+
+// 5. Document Management Routes
+app.get("/api/documents", (req, res) => {
+  res.json(getDocuments());
+});
+
+app.post("/api/documents", upload.single("file"), async (req, res) => {
+  try {
+    const { name, category, type, requiredFor } = req.body;
+    const file = req.file;
+
+    const newDoc = {
+      id: "doc-" + Date.now(),
+      name,
+      type,
+      status: "pending_review",
+      fileName: file ? file.filename : "",
+      fileSize: file ? (file.size / (1024 * 1024)).toFixed(2) + " MB" : "",
+      requiredFor,
+      category,
+      tag: undefined
+    };
+
+    const docs = getDocuments();
+    docs.push(newDoc);
+    saveDocuments(docs);
+
+    res.json(newDoc);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. OCR Extraction Route
+app.post("/api/ocr", upload.single("file"), async (req, res) => {
+  try {
+    const { documentName, documentType } = req.body;
+    const file = req.file;
+    
+    if (!file) {
+      return res.status(400).json({ error: "No file provided for OCR." });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
+      // Mock OCR if key is missing
+      return res.json({
+        extractedText: `[MOCK OCR DATA]\nName: Sample Applicant\nDocument: ${documentName}\nType: ${documentType}\nStatus: Verified Complete`,
+        success: true
+      });
+    }
+
+    // Read real file bytes
+    const fileBytes = fs.readFileSync(file.path);
+    const base64Data = fileBytes.toString("base64");
+
+    const ai = getGeminiClient();
+    
+    const prompt = `Perform OCR on this uploaded image. The user claims it is a "${documentType}" named "${documentName}". Extract the raw text as it appears. Keep it brief.`;
+    
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: [
+        {
+          inlineData: {
+            mimeType: file.mimetype,
+            data: base64Data
+          }
+        },
+        prompt
+      ],
+    });
+
+    res.json({ extractedText: response.text, success: true });
+  } catch (error: any) {
+    console.error("Error in /api/ocr:", error);
+    res.status(500).json({ error: error.message || "Failed to extract text." });
   }
 });
 
