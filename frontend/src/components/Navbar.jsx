@@ -1,11 +1,9 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Menu, 
   X, 
   Phone, 
-  MessageCircle, 
-  Send,
   Home,
   Globe,
   GraduationCap,
@@ -15,7 +13,11 @@ import {
   Calendar,
   BookOpen,
   CreditCard,
-  Info 
+  Briefcase,
+  ChevronDown,
+  FileText,
+  Mail,
+  ArrowRight
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -28,19 +30,31 @@ import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 const NAV = [
   { id: 'home', label: 'Home', to: '/', icon: Home },
-  { id: 'visa', label: 'Visa', to: '/#countries', icon: Globe },
-  { id: 'student', label: 'Student', to: '/student-visa', icon: GraduationCap },
-  { id: 'fly', label: 'Fly', to: '/map', icon: Plane },
-  { id: 'assessment', label: 'Visa Calculator', to: '/assessment', icon: Calculator },
-  { id: 'track', label: 'Track Application', to: '/track', icon: Search },
-  { id: 'us-slots', label: 'Visa Slots', to: '/us-visa-slots', badge: 'HURRY', icon: Calendar },
-  { id: 'resources', label: 'Resources', to: '/resources', icon: BookOpen },
+  {
+    id: 'solutions', label: 'Solutions', icon: Briefcase,
+    children: [
+      { id: 'visa', label: 'Visa Services', to: '/#countries', icon: Globe },
+      { id: 'student', label: 'Student Visa', to: '/student-visa', icon: GraduationCap },
+      { id: 'us-slots', label: 'Visa Slots', to: '/us-visa-slots', badge: 'HURRY', icon: Calendar },
+      { id: 'fly', label: 'Fly', to: '/map', icon: Plane },
+    ]
+  },
+  {
+    id: 'resources', label: 'Resources', icon: BookOpen,
+    children: [
+      { id: 'assessment', label: 'Visa Calculator', to: '/assessment', icon: Calculator },
+      { id: 'track', label: 'Track Application', to: '/track', icon: Search },
+      { id: 'blog', label: 'Blog', to: '/blog', icon: FileText },
+    ]
+  },
   { id: 'pricing', label: 'Pricing', to: '/pricing', icon: CreditCard },
-  { id: 'about', label: 'About', to: '/about', icon: Info },
+  { id: 'contact', label: 'Contact', to: '/contact', icon: Mail },
 ];
 
 function NavLinks({ orientation = 'horizontal', light = false }) {
   const { t } = useI18n();
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const dropdownRef = useRef(null);
 
   const activeClass = light
     ? 'text-white bg-white/20'
@@ -48,12 +62,81 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
   const inactiveClass = light
     ? 'text-white/80 hover:text-white hover:bg-white/10'
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
+  const dropdownItemClass = light
+    ? 'text-white/80 hover:text-white hover:bg-white/10'
+    : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
+
+  useEffect(() => {
+    if (!openDropdown) return;
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openDropdown]);
 
   if (orientation === 'horizontal') {
     return (
-      <nav className="hidden xl:flex items-center gap-1 2xl:gap-2 mx-2 flex-1 justify-center overflow-x-auto no-scrollbar">
+      <nav className="hidden lg:flex items-center gap-0.5 mx-2 flex-1 justify-center">
         {NAV.map((item) => {
           const Icon = item.icon;
+          if (item.children) {
+            const isOpen = openDropdown === item.id;
+            return (
+              <div key={item.id} className="relative" ref={isOpen ? dropdownRef : null}>
+                <button
+                  onClick={() => setOpenDropdown(isOpen ? null : item.id)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className={cn(
+                    'px-2.5 xl:px-3.5 py-1.5 text-[13px] xl:text-[14px] font-bold tracking-tight rounded-full transition-colors inline-flex items-center gap-1.5',
+                    isOpen ? activeClass : inactiveClass
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                  {t('nav.' + item.id, item.label)}
+                  <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', isOpen && 'rotate-180')} />
+                </button>
+                {isOpen && (
+                  <div className={cn(
+                    'absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[220px] rounded-2xl p-2 shadow-xl border backdrop-blur-xl',
+                    light ? 'bg-[hsl(var(--blue-900))]/95 border-white/10' : 'bg-white/95 border-black/5'
+                  )}>
+                    {item.children.map((child) => {
+                      const ChildIcon = child.icon;
+                      return (
+                        <NavLink
+                          key={child.id}
+                          to={child.to}
+                          end={child.to === '/'}
+                          onClick={() => setOpenDropdown(null)}
+                          className={({ isActive }) =>
+                            cn(
+                              'px-3 py-2.5 text-[13px] font-bold rounded-xl transition-colors flex items-center gap-3',
+                              isActive ? activeClass : dropdownItemClass
+                            )
+                          }
+                        >
+                          <span className="shrink-0 w-8 h-8 rounded-lg bg-[hsl(var(--blue-50))] flex items-center justify-center">
+                            <ChildIcon className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+                          </span>
+                          <div className="flex-1">
+                            <div>{t('nav.' + child.id, child.label)}</div>
+                          </div>
+                          {child.badge && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                              {t('badge.' + child.badge.toLowerCase(), child.badge)}
+                            </span>
+                          )}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
           return (
             <NavLink
               key={item.id}
@@ -61,28 +144,59 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
               end={item.to === '/'}
               className={({ isActive }) =>
                 cn(
-                  'px-2 2xl:px-3 py-1.5 text-[12px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
+                  'px-2.5 xl:px-3.5 py-1.5 text-[13px] xl:text-[14px] font-bold tracking-tight rounded-full transition-colors inline-flex items-center gap-1.5',
                   isActive ? activeClass : inactiveClass
                 )
               }
             >
-              {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
+              {Icon ? <Icon className="w-4 h-4" /> : null}
               {t('nav.' + item.id, item.label)}
-              {item.badge && (
-                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
-                  {t('badge.' + item.badge.toLowerCase(), item.badge)}
-                </span>
-              )}
             </NavLink>
           );
         })}
       </nav>
     );
   }
+
   return (
     <div className="flex flex-col gap-1">
       {NAV.map((item) => {
         const Icon = item.icon;
+        if (item.children) {
+          return (
+            <div key={item.id}>
+              <div className={cn(
+                'px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em]',
+                light ? 'text-white/50' : 'text-[hsl(var(--blue-400))]'
+              )}>
+                {t('nav.' + item.id, item.label)}
+              </div>
+              {item.children.map((child) => {
+                const ChildIcon = child.icon;
+                return (
+                  <Link
+                    key={child.id}
+                    to={child.to}
+                    className={cn(
+                      'px-3 py-3 text-[15px] font-bold rounded-lg transition-colors inline-flex items-center gap-2',
+                      light
+                        ? 'text-white hover:bg-white/10'
+                        : 'hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]'
+                    )}
+                  >
+                    <ChildIcon className="w-4 h-4" />
+                    {t('nav.' + child.id, child.label)}
+                    {child.badge && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                        {t('badge.' + child.badge.toLowerCase(), child.badge)}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          );
+        }
         return (
           <Link
             key={item.id}
@@ -108,20 +222,14 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
   );
 }
 
-function PhoneBlock() {
-  const { t } = useI18n();
+function PhoneIcon() {
   return (
     <a
       href={`tel:${BRAND.phoneRaw}`}
-      className="hidden 2xl:inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--red-600))] text-white pr-4 pl-1.5 py-1.5 transition-colors group"
+      className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-600))] transition-colors"
+      title="Call us"
     >
-      <span className="h-8 w-8 rounded-full bg-white/15 group-hover:bg-white/25 inline-flex items-center justify-center">
-        <Phone className="w-3.5 h-3.5" />
-      </span>
-      <div className="leading-tight text-left">
-        <div className="text-[9px] uppercase tracking-[0.14em] text-white/80 font-bold">{t('cta.callUs')}</div>
-        <div className="text-[12.5px] font-bold tracking-tight">{BRAND.phone}</div>
-      </div>
+      <Phone className="w-5 h-5" />
     </a>
   );
 }
@@ -216,15 +324,16 @@ export default function Navbar({ variant = 'default' }) {
 
         <NavLinks light={isLight} />
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <NotificationBell />
-          <PhoneBlock />
-          <UserMenu />
+        <div className="flex items-center gap-1">
+          <button className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-600))] transition-colors" aria-label="Search">
+            <Search className="w-5 h-5" />
+          </button>
+          <PhoneIcon />
           <a
             href="https://chat.whatsapp.com/F0R1TYMOr8dLwIbr5jLRau"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-600 hover:text-white ring-1 ring-green-200 hover:ring-green-600 transition-all duration-200"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-green-50 text-green-600 transition-colors"
             title="Join WhatsApp Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -235,7 +344,7 @@ export default function Navbar({ variant = 'default' }) {
             href="https://t.me/wehivecommunity"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white ring-1 ring-blue-200 hover:ring-blue-600 transition-all duration-200"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 text-blue-600 transition-colors"
             title="Join Telegram Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -243,9 +352,20 @@ export default function Navbar({ variant = 'default' }) {
             </svg>
           </a>
           <LanguageSwitcher />
+          <div className="hidden sm:flex items-center gap-1.5 ml-1.5 pl-1.5 border-l border-black/10">
+            <NotificationBell />
+            <UserMenu />
+            <Button
+              className="rounded-full btn-primary text-white h-9 px-4 text-[13px] font-bold gap-1.5"
+              onClick={() => navigate('/assessment')}
+            >
+              Apply Now
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
           <button
             onClick={() => setOpen((v) => !v)}
-            className="xl:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
+            className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
             aria-label="Toggle menu"
           >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
