@@ -142,13 +142,12 @@ async def hive_ask(
                 "For visa questions, always mention specific requirements and fees where available."
             )
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": req.question},
-        ]
-
-        response = await marketplace.chat(messages=messages, model=HIVE_MODEL or None)
-        answer = response.get("content", "") if isinstance(response, dict) else str(response)
+        response = await marketplace.chat(
+            user_id=user["id"] if isinstance(user, dict) else getattr(user, "id", "system"),
+            system_prompt=system_prompt,
+            user_prompt=req.question,
+        )
+        answer = response if isinstance(response, str) else str(response)
 
         return {
             "ok": True,
@@ -258,12 +257,12 @@ async def run_workflow(
                     f"Research Context: {context or 'No external data available.'}\n\n"
                     f"Provide a detailed analysis covering key facts, considerations, and actionable insights."
                 )
-                messages = [
-                    {"role": "system", "content": "You are an analytical AI agent. Be thorough and structured."},
-                    {"role": "user", "content": analysis_prompt},
-                ]
-                resp = await marketplace.chat(messages=messages)
-                analysis = resp.get("content", "") if isinstance(resp, dict) else str(resp)
+                resp = await marketplace.chat(
+                    user_id=user["id"] if isinstance(user, dict) else getattr(user, "id", "system"),
+                    system_prompt="You are an analytical AI agent. Be thorough and structured.",
+                    user_prompt=analysis_prompt,
+                )
+                analysis = resp if isinstance(resp, str) else str(resp)
                 results.append({"step": "analyze", "analysis": analysis})
 
             elif step == "answer":
@@ -282,12 +281,12 @@ async def run_workflow(
                     f"Analysis: {analysis}\n\n"
                     f"Provide a concise, helpful final answer to the user."
                 )
-                messages = [
-                    {"role": "system", "content": "You are Hive, a helpful visa and travel assistant. Be concise."},
-                    {"role": "user", "content": answer_prompt},
-                ]
-                resp = await marketplace.chat(messages=messages)
-                answer = resp.get("content", "") if isinstance(resp, dict) else str(resp)
+                resp = await marketplace.chat(
+                    user_id=user["id"] if isinstance(user, dict) else getattr(user, "id", "system"),
+                    system_prompt="You are Hive, a helpful visa and travel assistant. Be concise.",
+                    user_prompt=answer_prompt,
+                )
+                answer = resp if isinstance(resp, str) else str(resp)
                 results.append({"step": "answer", "answer": answer})
 
         return {

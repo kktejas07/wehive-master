@@ -362,11 +362,7 @@ export default function BiometricAuth({
                 className="relative w-28 h-28 flex items-center justify-center overflow-hidden"
               >
                 <LottiePlayer
-                  url={
-                    isFaceID
-                      ? ""
-                      : "https://raw.githubusercontent.com/Anirudh-C/Lottie-Animations/master/fingerprint.json"
-                  }
+                  url=""
                   loop={authState === "scanning"}
                   autoplay={authState === "scanning"}
                   className="w-full h-full"
