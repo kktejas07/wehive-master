@@ -102,8 +102,7 @@ export default function WeHiveLogo({
       <img 
         src="/favicon.png" 
         alt="WeHive Icon" 
-        className={`object-contain ${className}`}
-        style={{ width: size, height: size }}
+        className={`object-contain ${selectedSize.height} ${className}`}
       />
     );
   }
@@ -113,8 +112,7 @@ export default function WeHiveLogo({
       <img 
         src="/wehive-logo.png" 
         alt="WeHive Logo" 
-        className="object-contain"
-        style={{ height: size * 1.5 }} // Adjust height proportionally
+        className={`object-contain ${selectedSize.height}`}
       />
       {/* Subtitle / Tagline below */}
       {showTagline && (
