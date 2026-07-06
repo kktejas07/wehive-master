@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Award, Users, BookOpen, Globe, Calendar, Clock, Video, Phone, CheckCircle, ChevronRight, Sparkles, Bell, Lock, Settings, HelpCircle, ChevronDown, X, PiggyBank, TrendingUp, TrendingDown, Coins, DollarSign, Info, RefreshCw, AlertCircle, FileText, CheckCircle2, Mic } from "lucide-react";
+import { Award, Users, BookOpen, Globe, Calendar, Clock, Video, Phone, CheckCircle, ChevronRight, Sparkles, Bell, Lock, Settings, HelpCircle, ChevronDown, X, PiggyBank, TrendingUp, TrendingDown, Coins, DollarSign, Info, RefreshCw, AlertCircle, FileText, CheckCircle2, Mic, Search, Scan } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { STUDY_DESTINATIONS, CONSULTANTS } from "../data";
 import { Consultation } from "../types";
@@ -262,6 +262,13 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               )}
               <Bell className="w-4 h-4" />
             </button>
+            <button 
+              onClick={() => onNavigate("vault")}
+              title="Scan Documents"
+              className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
+            >
+              <Scan className="w-4 h-4" />
+            </button>
             {onOpenSettings && (
               <button
                 onClick={onOpenSettings}
@@ -278,10 +285,23 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
         </div>
 
         <div className="relative z-10 mt-2">
-          <p className={`${colorScheme === "forced-navy" ? "text-blue-400" : "text-red-400"} text-xs font-semibold tracking-wide uppercase font-mono`}>Immigration & Education</p>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-1 text-white">
+          <p className="text-white/80 text-sm font-semibold mb-1 flex items-center gap-1.5">
+            Good morning, Tejas 👋
+          </p>
+          <p className={`${colorScheme === "forced-navy" ? "text-blue-400" : "text-red-400"} text-[10px] font-semibold tracking-wider uppercase font-mono`}>Immigration & Education</p>
+          <h1 className="text-2xl font-extrabold tracking-tight mt-0.5 text-white">
             Where would you <br />like to study & work?
           </h1>
+
+          {/* Search Bar */}
+          <div className="relative mt-4">
+            <Search className="absolute left-4 top-3.5 w-4 h-4 text-white/50" />
+            <input 
+              type="text" 
+              placeholder="Search universities, programs, or visas..." 
+              className="w-full bg-blue-950/40 backdrop-blur-md border border-white/20 rounded-2xl pl-11 pr-4 py-3 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all shadow-inner"
+            />
+          </div>
         </div>
 
         {/* Compact 'Profile Preview' Widget */}
@@ -307,16 +327,29 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               </div>
             </div>
 
-            {/* Completion Percentage Bar & Tag */}
-            <div className="flex flex-col items-end gap-1">
-              <span className="text-[10px] font-black text-emerald-400 font-mono">
-                {profileCompletion}% COMPLETED
-              </span>
-              <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden border border-white/5">
-                <div 
-                  className="h-full bg-emerald-400 rounded-full transition-all duration-500" 
-                  style={{ width: `${profileCompletion}%` }}
-                />
+            {/* Completion Percentage Circle */}
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end gap-0.5 mt-0.5">
+                <span className="text-[11px] font-black text-emerald-400 font-mono">
+                  {profileCompletion}%
+                </span>
+                <span className="text-[8px] text-white/60 uppercase tracking-widest">
+                  Completed
+                </span>
+              </div>
+              <div className="relative w-12 h-12 flex items-center justify-center">
+                <svg className="w-12 h-12 transform -rotate-90">
+                  <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-white/10" />
+                  <circle 
+                    cx="24" cy="24" r="20" 
+                    stroke="currentColor" 
+                    strokeWidth="4" 
+                    fill="transparent" 
+                    strokeDasharray="125.6" 
+                    strokeDashoffset={125.6 - (125.6 * profileCompletion) / 100} 
+                    className="text-emerald-400 transition-all duration-1000 ease-out drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" 
+                  />
+                </svg>
               </div>
             </div>
           </div>
