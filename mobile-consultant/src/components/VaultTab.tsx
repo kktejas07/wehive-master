@@ -6,7 +6,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import jsPDF from "jspdf";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import Joyride, { Step } from "react-joyride";
+import { Joyride, Step } from "react-joyride";
 
 interface DocumentItem {
   id: string;

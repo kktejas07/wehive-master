@@ -99,34 +99,25 @@ export default function WeHiveLogo({
 
   if (iconOnly) {
     return (
-      <div className={`inline-flex items-center justify-center ${className}`}>
-        {renderWing()}
-      </div>
+      <img 
+        src="/favicon.png" 
+        alt="WeHive Icon" 
+        className={`object-contain ${selectedSize.height} ${className} ${theme === "white" ? "brightness-0 invert" : ""}`}
+      />
     );
   }
 
   return (
     <div className={`inline-flex flex-col items-center justify-center ${className}`}>
-      {/* Brand logo text & mark horizontal lockup */}
-      <div className={`flex items-center ${selectedSize.gap} font-sans`}>
-        {/* WE HI */}
-        <span className={`${colors.blueText} ${selectedSize.text} uppercase`}>
-          We Hi
-        </span>
-        
-        {/* Wing Mark representing the 'V' inside 'HIVE' */}
-        {renderWing()}
-
-        {/* E */}
-        <span className={`${colors.blueText} ${selectedSize.text} uppercase`}>
-          e
-        </span>
-      </div>
-
+      <img 
+        src="/wehive-logo.png" 
+        alt="WeHive Logo" 
+        className={`object-contain ${selectedSize.height} ${theme === "white" ? "brightness-0 invert" : ""}`}
+      />
       {/* Subtitle / Tagline below */}
       {showTagline && (
         <span
-          className={`mt-1 font-mono tracking-widest text-center uppercase block font-semibold ${colors.taglineText} ${selectedSize.tagline}`}
+          className={`mt-2 font-mono tracking-widest text-center uppercase block font-semibold ${colors.taglineText} ${selectedSize.tagline}`}
         >
           Your Global Journey Starts Here
         </span>
