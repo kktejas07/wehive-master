@@ -49,7 +49,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
   if (orientation === 'horizontal') {
     return (
-      <nav className="hidden xl:flex items-center gap-0.5 xl:gap-1.5 mx-1 flex-1 min-w-0 justify-center">
+      <nav className="hidden xl:flex items-center gap-1 2xl:gap-2 mx-2 flex-1 justify-center overflow-x-auto no-scrollbar">
         {NAV.map((item) => {
           const Icon = item.icon;
           return (
@@ -59,7 +59,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
               end={item.to === '/'}
               className={({ isActive }) =>
                 cn(
-                  'px-2.5 xl:px-3.5 py-1.5 text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
+                  'px-2 2xl:px-3 py-1.5 text-[12px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
                   isActive ? activeClass : inactiveClass
                 )
               }
@@ -197,8 +197,8 @@ export default function Navbar({ variant = 'default' }) {
       )}
     >
       <div className={cn(
-        '        max-w-[1440px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 transition-[height] duration-300',
-        scrolled ? 'h-[68px] sm:h-[76px]' : 'h-[110px] sm:h-[130px]'
+        'max-w-[1600px] mx-auto px-4 sm:px-8 xl:px-12 flex items-center justify-between gap-4 xl:gap-8 transition-[height] duration-300',
+        scrolled ? 'h-[68px] sm:h-[76px]' : 'h-[90px] sm:h-[110px]'
       )}>
         <Link to="/" className="flex items-center gap-2 group shrink-0 relative">
           <img
@@ -214,7 +214,7 @@ export default function Navbar({ variant = 'default' }) {
 
         <NavLinks light={isLight} />
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <NotificationBell />
           <PhoneBlock />
           <UserMenu />
