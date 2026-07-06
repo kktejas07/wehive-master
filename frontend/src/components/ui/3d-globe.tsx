@@ -50,10 +50,11 @@ function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
     <motion.div
       className="absolute cursor-pointer"
       style={{
+        left: '50%',
+        top: '50%',
         x,
         y,
         z,
-        transform: `translate(-50%, -50%)`,
       }}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
@@ -61,11 +62,11 @@ function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
       onMouseEnter={() => onHover(marker)}
       onMouseLeave={onLeave}
       onClick={() => onClick?.(marker)}
-      whileHover={{ scale: 1.3 }}
     >
       <motion.div
-        className="relative"
+        className="relative -translate-x-1/2 -translate-y-1/2"
         animate={isHovered ? { scale: 1.2 } : { scale: 1 }}
+        whileHover={{ scale: 1.3 }}
       >
         <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-all duration-300 ${isHovered ? 'bg-[hsl(var(--accent))]' : 'bg-[hsl(var(--blue-700))]'}`}>
           <MapPin className="w-4 h-4 text-white" />
@@ -97,13 +98,27 @@ export function Globe3D({
 }: Globe3DProps) {
   const [hoveredMarker, setHoveredMarker] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [radius, setRadius] = useState(160); // Default for w-80
   const containerRef = useRef(null);
+  const globeRef = useRef(null);
+  
   const rotationY = useMotionValue(0);
   const rotationX = useMotionValue(-15);
+  const lastMousePos = useRef({ x: 0, y: 0 });
 
-  const rotateYRange = [-180, 180];
-  const rotateXRange = [-30, 30];
+  // Handle responsive radius
+  useEffect(() => {
+    if (!globeRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setRadius(entry.contentRect.width / 2);
+      }
+    });
+    observer.observe(globeRef.current);
+    return () => observer.disconnect();
+  }, []);
 
+  // Auto-rotation
   useEffect(() => {
     if (!isDragging) {
       const controls = animate(rotationY, rotationY.get() + 360, {
@@ -113,17 +128,30 @@ export function Globe3D({
       });
       return controls.stop;
     }
-  }, [isDragging, autoRotateSpeed]);
+  }, [isDragging, autoRotateSpeed, rotationY]);
 
-  const handleMouseDown = () => setIsDragging(true);
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    // Support touch and mouse
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    lastMousePos.current = { x: clientX, y: clientY };
+  };
+
   const handleMouseUp = () => setIsDragging(false);
+
   const handleMouseMove = (e) => {
-    if (!isDragging || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const deltaX = (e.clientX - rect.left - rect.width / 2) / rect.width;
-    const deltaY = (e.clientY - rect.top - rect.height / 2) / rect.height;
-    rotationY.set(rotationY.get() + deltaX * 5);
-    rotationX.set(Math.max(-30, Math.min(30, rotationX.get() - deltaY * 3)));
+    if (!isDragging) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    const deltaX = clientX - lastMousePos.current.x;
+    const deltaY = clientY - lastMousePos.current.y;
+    
+    rotationY.set(rotationY.get() + deltaX * 0.5);
+    rotationX.set(Math.max(-60, Math.min(60, rotationX.get() - deltaY * 0.5)));
+    
+    lastMousePos.current = { x: clientX, y: clientY };
   };
 
   const handleMarkerHover = (marker) => {
@@ -144,9 +172,12 @@ export function Globe3D({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onMouseMove={handleMouseMove}
+      onTouchStart={handleMouseDown}
+      onTouchEnd={handleMouseUp}
+      onTouchMove={handleMouseMove}
     >
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
+        <div ref={globeRef} className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
           <motion.div
             className="absolute inset-0 rounded-full"
             style={{
@@ -185,7 +216,7 @@ export function Globe3D({
               <Marker
                 key={i}
                 marker={marker}
-                radius={90}
+                radius={radius}
                 isHovered={hoveredMarker === marker}
                 onHover={handleMarkerHover}
                 onLeave={handleMarkerLeave}
