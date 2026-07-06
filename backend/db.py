@@ -36,6 +36,7 @@ kg_entity_cache_col = db['kg_entity_cache']
 kg_insight_runs_col = db['kg_insight_runs']
 mcp_configs_col = db['mcp_configs']
 amadeus_cache_col = db['amadeus_cache']
+ai_token_usage = db['ai_token_usage']
 
 
 async def ensure_indexes():
@@ -97,3 +98,4 @@ async def ensure_indexes():
     await db['orchestrator_token_usage'].create_index('request_id')
     await db['orchestrator_failover_log'].create_index([('timestamp', -1)])
     await db['orchestrator_budget_log'].create_index([('timestamp', -1)])
+    await ai_token_usage.create_index([('user_id', 1), ('date', 1)], unique=True)
