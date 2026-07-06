@@ -1,50 +1,41 @@
 appId: com.apple.mobilesafari
 ---
-- openLink: www.wehive.co.in
-# WeHive Maestro E2E Flows
+- launchApp:
+    clearState: true
+- openLink: "https://wehive.co.in"
 
-Six flows covering auth, visa, flights, hotels, and destination discovery.
-Drop the `.maestro/` folder into the WeHive mobile repo root.
+# 1. Landing Page Verification
+- assertVisible: "We Hive"
+- scroll
 
-## Before first run
+# 2. Authentication Flow
+- tapOn: "Login" 
+- assertVisible: "Welcome"
+- tapOn: "Email"
+- inputText: "test@wehive.co.in"
+- tapOn: "Submit"
+- assertVisible: "Dashboard"
 
-1. **App ID** — replace `com.axiss.wehive` in every file with the real value
-   from `app.json` (`android.package` / `ios.bundleIdentifier`).
-2. **Build** — Maestro needs a real build installed on the emulator/simulator.
-   Use an Expo dev client or EAS build (`eas build --profile development`),
-   not Expo Go, so the app ID matches.
-3. **Firebase test phone number** — Console → Authentication → Sign-in method →
-   Phone → add a test number with a fixed OTP. Update `02-login-phone-otp.yaml`.
-4. **Test account** — create a dedicated email/password user for
-   `01-login-email.yaml`.
-5. **Sandbox APIs** — point the E2E build at Duffel test mode and Hotelbeds
-   sandbox so searches don't hit production quotas.
-6. **testIDs** — the flows reference ids like `flight-search-button`. Add
-   `testID="..."` props to those elements, or open `maestro studio` against
-   the running app and swap in whatever selectors it shows you. Text-based
-   `tapOn: "..."` works too but breaks when copy changes.
+# 3. AI Consultation (Stark/Hive)
+- tapOn: "Consultant"
+- assertVisible: "Chat"
+- tapOn: "Type a message"
+- inputText: "What are the requirements for a US Student Visa?"
+- tapOn: "Send"
+- assertVisible: "US" 
+- scroll
 
-## Running
+# 4. Eligibility Evaluator
+- tapOn: "Evaluate"
+- tapOn: "Target Country"
+- inputText: "Canada"
+- tapOn: "Evaluate Profile"
+- assertVisible: "Score"
 
-```bash
-# one flow
-maestro test .maestro/01-login-email.yaml
-
-# everything
-maestro test .maestro/
-```
-
-## Composing flows
-
-Flows 03–06 assume a logged-in state. Either rely on session persistence
-(run login first, don't clear state), or make each flow self-contained:
-
-```yaml
-- runFlow: 01-login-email.yaml
-```
-
-## CI
-
-Screenshots land in `~/.maestro/tests/`. In GitHub Actions, run on an
-Android emulator (e.g. reactivecircus/android-emulator-runner) and upload
-that folder as an artifact on failure.
+# 5. Explore Universities
+- tapOn: "Universities"
+- tapOn: "Search"
+- inputText: "Toronto"
+- pressKey: Enter
+- assertVisible: "Toronto"
+- tapOn: "Toronto"
