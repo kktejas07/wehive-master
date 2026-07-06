@@ -301,24 +301,6 @@ app.post("/api/next-steps", async (req, res) => {
   try {
     const { academicLevel, dreamCountry, milestones, vaultDocs } = req.body;
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
-      return res.json({
-        recommendations: [
-          {
-            title: "Configure Gemini API Key",
-            description: "To get real AI suggestions, please add your GEMINI_API_KEY to the .env file.",
-            priority: "High",
-            category: "Preparation",
-            actionLabel: "Settings"
-          }
-        ],
-        advisoryNote: "You are currently viewing mock AI data because your API key is missing."
-      });
-    }
-
-    const ai = getGeminiClient();
-
     const prompt = `Analyze the study abroad preparation progress for the following student:
 - Target Academic Level: ${academicLevel || "Master's Degree"}
 - Target Dream Country: ${dreamCountry || "Germany"}
@@ -335,42 +317,30 @@ Based on their progress (e.g. which milestones are pending, which documents are 
 Make your recommendations highly relevant to their target country (e.g. Blocked Account for Germany, F-1 visa prep for USA, CAS letter for UK, GIC for Canada, English tests, SOP/LOR preparation if those are pending).
 If they already uploaded all documents or completed all milestones, give them celebratory advice and advanced steps (like booking accommodation, pre-departure health insurance, or network building on LinkedIn).`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          required: ["recommendations", "advisoryNote"],
-          properties: {
-            recommendations: {
-              type: Type.ARRAY,
-              description: "A list of 3 to 4 recommended next steps.",
-              items: {
-                type: Type.OBJECT,
-                required: ["title", "description", "priority", "category", "actionLabel"],
-                properties: {
-                  title: { type: Type.STRING, description: "Clear, short title of the task (e.g. 'Draft your SOP', 'Open German Blocked Account')" },
-                  description: { type: Type.STRING, description: "Detailed, specific, actionable description explaining what to do, why it's important, and how it relates to their progress/country." },
-                  priority: { type: Type.STRING, description: "Priority level: 'High', 'Medium', or 'Low'" },
-                  category: { type: Type.STRING, description: "Category of task: 'Preparation', 'Admission', 'Visa', 'Finance', 'Pre-Departure'" },
-                  actionLabel: { type: Type.STRING, description: "Call-to-action text (e.g., 'Draft SOP', 'View Blocked Accounts', 'Go to Vault')" }
-                }
-              }
-            },
-            advisoryNote: {
-              type: Type.STRING,
-              description: "A concise, encouraging note (2-3 sentences) summarizing their current trajectory and giving motivating feedback."
-            }
-          }
-        }
-      }
+    const question = `${systemInstruction}\n\n${prompt}\n\nPlease respond strictly with a valid JSON object matching this structure: { "recommendations": [ { "title": "", "description": "", "priority": "High|Medium|Low", "category": "Preparation|Admission|Visa|Finance|Pre-Departure", "actionLabel": "" } ], "advisoryNote": "2-3 sentences" } without Markdown backticks or extra text.`;
+
+    const backendUrl = process.env.API_URL || process.env.VITE_API_URL || "http://localhost:8000";
+    const apiResponse = await fetch(`${backendUrl}/api/agentic/hive/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, use_stark: true })
     });
 
-    const responseText = response.text || "{}";
-    res.json(JSON.parse(responseText.trim()));
+    if (!apiResponse.ok) {
+      throw new Error(`Backend returned ${apiResponse.status}: ${await apiResponse.text()}`);
+    }
+
+    const data = await apiResponse.json();
+    let parsedResponse;
+    try {
+      const cleanedAnswer = data.answer.replace(/```json/g, "").replace(/```/g, "").trim();
+      parsedResponse = JSON.parse(cleanedAnswer);
+    } catch (e) {
+      console.error("Failed to parse JSON from Hive agent:", data.answer);
+      throw new Error("Failed to parse JSON from Hive agent.");
+    }
+
+    res.json(parsedResponse);
   } catch (error: any) {
     console.error("Error in /api/next-steps:", error);
     res.status(500).json({ error: error.message || "Failed to generate recommended next steps." });
