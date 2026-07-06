@@ -238,9 +238,9 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
           colorScheme === "forced-navy" ? "bg-indigo-500/20" : colorScheme === "forced-red" ? "bg-rose-600/20" : "bg-blue-500/10"
         }`} />
 
-        <div className="flex justify-between items-center relative z-10 mb-16">
+        <div className="flex justify-between items-center relative z-10 mb-6">
           <WeHiveLogo size="md" theme="white" showTagline={false} />
-          <div className="flex items-center gap-2 pb-4">
+          <div className="flex items-center gap-2">
             {onLock && (
               <button
                 onClick={onLock}
