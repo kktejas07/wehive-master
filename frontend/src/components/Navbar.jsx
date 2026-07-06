@@ -1,6 +1,23 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Phone, MessageCircle, Send, Sparkles } from 'lucide-react';
+import { 
+  Menu, 
+  X, 
+  Phone, 
+  MessageCircle, 
+  Send,
+  Sparkles,
+  Home,
+  Globe,
+  GraduationCap,
+  Plane,
+  Calculator,
+  Search,
+  Calendar,
+  BookOpen,
+  CreditCard,
+  Info
+} from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { BRAND } from '../data/mock';
@@ -10,46 +27,60 @@ import NotificationBell from './NotificationBell';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 const NAV = [
-  { id: 'home', label: 'Home', to: '/' },
-  { id: 'visa', label: 'Visa', to: '/#countries' },
-  { id: 'student', label: 'Student', to: '/student-visa' },
-  { id: 'resources', label: 'Resources', to: '/resources' },
-  { id: 'pricing', label: 'Pricing', to: '/pricing' },
-  { id: 'about', label: 'About', to: '/about' },
-  { id: 'fly', label: 'Fly', to: '/contact' },
+  { id: 'home', label: 'Home', to: '/', icon: Home },
+  { id: 'visa', label: 'Visa', to: '/#countries', icon: Globe },
+  { id: 'student', label: 'Student', to: '/student-visa', icon: GraduationCap },
+  { id: 'fly', label: 'Fly', to: '/map', icon: Plane },
+  { id: 'assessment', label: 'Visa Calculator', to: '/assessment', icon: Calculator },
+  { id: 'track', label: 'Track Application', to: '/track', icon: Search },
+  { id: 'us-slots', label: 'Visa Slots', to: '/us-visa-slots', badge: 'HURRY', icon: Calendar },
+  { id: 'resources', label: 'Resources', to: '/resources', icon: BookOpen },
+  { id: 'pricing', label: 'Pricing', to: '/pricing', icon: CreditCard },
+  { id: 'about', label: 'About', to: '/about', icon: Info },
 ];
 
 function NavLinks({ orientation = 'horizontal', light = false }) {
   const { t } = useI18n();
+
   const activeClass = light
     ? 'text-white bg-white/20'
     : 'text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]';
   const inactiveClass = light
     ? 'text-white/80 hover:text-white hover:bg-white/10'
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
+
   if (orientation === 'horizontal') {
     return (
-      <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 mx-1 flex-1 min-w-0 justify-center">
-        {NAV.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.id}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) =>
-                cn(
-                  'px-2 lg:px-2.5 xl:px-3.5 py-1.5 text-[11.5px] xl:text-[13px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5',
-                  isActive ? activeClass : inactiveClass
-                )
-              }
-            >
-              {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
-              {t('nav.' + item.id, item.label)}
-            </NavLink>
-          );
-        })}
-      </nav>
+      <div className="hidden xl:flex items-center gap-0 mx-2 flex-1 justify-center relative min-w-0">
+        <nav
+          className="flex items-center gap-1 2xl:gap-2 overflow-x-auto scroll-smooth pb-0.5 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[hsl(var(--blue-200))] [&::-webkit-scrollbar-track]:bg-transparent"
+        >
+          {NAV.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.id}
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) =>
+                  cn(
+                    'px-2 2xl:px-3 py-1.5 text-[12px] 2xl:text-[14px] font-bold tracking-tight rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5 shrink-0',
+                    isActive ? activeClass : inactiveClass
+                  )
+                }
+              >
+                {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
+                {t('nav.' + item.id, item.label)}
+                {item.badge && (
+                  <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                    {t('badge.' + item.badge.toLowerCase(), item.badge)}
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
+        </nav>
+      </div>
     );
   }
   return (
