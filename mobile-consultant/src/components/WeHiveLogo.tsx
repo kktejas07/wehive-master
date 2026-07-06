@@ -102,7 +102,7 @@ export default function WeHiveLogo({
       <img 
         src="/favicon.png" 
         alt="WeHive Icon" 
-        className={`object-contain ${selectedSize.height} ${className}`}
+        className={`object-contain ${selectedSize.height} ${className} ${theme === "white" ? "brightness-0 invert" : ""}`}
       />
     );
   }
@@ -112,7 +112,7 @@ export default function WeHiveLogo({
       <img 
         src="/wehive-logo.png" 
         alt="WeHive Logo" 
-        className={`object-contain ${selectedSize.height}`}
+        className={`object-contain ${selectedSize.height} ${theme === "white" ? "brightness-0 invert" : ""}`}
       />
       {/* Subtitle / Tagline below */}
       {showTagline && (
