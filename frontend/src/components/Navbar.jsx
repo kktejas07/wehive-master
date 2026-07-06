@@ -41,12 +41,14 @@ const NAV = [
 
 function NavLinks({ orientation = 'horizontal', light = false }) {
   const { t } = useI18n();
+
   const activeClass = light
     ? 'text-white bg-white/20'
     : 'text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]';
   const inactiveClass = light
     ? 'text-white/80 hover:text-white hover:bg-white/10'
     : 'text-[hsl(var(--blue-900))]/75 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]';
+
   if (orientation === 'horizontal') {
     return (
       <nav className="hidden xl:flex items-center gap-1 2xl:gap-2 mx-2 flex-1 justify-center overflow-x-auto no-scrollbar">
