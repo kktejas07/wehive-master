@@ -240,7 +240,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
         <div className="flex justify-between items-center relative z-10 mb-16">
           <WeHiveLogo size="md" theme="white" showTagline={false} />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pb-4">
             {onLock && (
               <button
                 onClick={onLock}
