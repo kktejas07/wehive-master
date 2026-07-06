@@ -16,8 +16,7 @@ import {
   Briefcase,
   ChevronDown,
   FileText,
-  Mail,
-  ArrowRight
+  Mail
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -222,14 +221,20 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
   );
 }
 
-function PhoneIcon() {
+function PhoneBlock() {
+  const { t } = useI18n();
   return (
     <a
       href={`tel:${BRAND.phoneRaw}`}
-      className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-600))] transition-colors"
-      title="Call us"
+      className="hidden 2xl:inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--red-600))] text-white pr-4 pl-1.5 py-1.5 transition-colors group"
     >
-      <Phone className="w-5 h-5" />
+      <span className="h-8 w-8 rounded-full bg-white/15 group-hover:bg-white/25 inline-flex items-center justify-center">
+        <Phone className="w-3.5 h-3.5" />
+      </span>
+      <div className="leading-tight text-left">
+        <div className="text-[9px] uppercase tracking-[0.14em] text-white/80 font-bold">{t('cta.callUs')}</div>
+        <div className="text-[12.5px] font-bold tracking-tight">{BRAND.phone}</div>
+      </div>
     </a>
   );
 }
@@ -324,16 +329,15 @@ export default function Navbar({ variant = 'default' }) {
 
         <NavLinks light={isLight} />
 
-        <div className="flex items-center gap-1">
-          <button className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-600))] transition-colors" aria-label="Search">
-            <Search className="w-5 h-5" />
-          </button>
-          <PhoneIcon />
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <NotificationBell />
+          <PhoneBlock />
+          <UserMenu />
           <a
             href="https://chat.whatsapp.com/F0R1TYMOr8dLwIbr5jLRau"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-green-50 text-green-600 transition-colors"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-600 hover:text-white ring-1 ring-green-200 hover:ring-green-600 transition-all duration-200"
             title="Join WhatsApp Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -344,7 +348,7 @@ export default function Navbar({ variant = 'default' }) {
             href="https://t.me/wehivecommunity"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 text-blue-600 transition-colors"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white ring-1 ring-blue-200 hover:ring-blue-600 transition-all duration-200"
             title="Join Telegram Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -352,17 +356,6 @@ export default function Navbar({ variant = 'default' }) {
             </svg>
           </a>
           <LanguageSwitcher />
-          <div className="hidden sm:flex items-center gap-1.5 ml-1.5 pl-1.5 border-l border-black/10">
-            <NotificationBell />
-            <UserMenu />
-            <Button
-              className="rounded-full btn-primary text-white h-9 px-4 text-[13px] font-bold gap-1.5"
-              onClick={() => navigate('/assessment')}
-            >
-              Apply Now
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </div>
           <button
             onClick={() => setOpen((v) => !v)}
             className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))]"
