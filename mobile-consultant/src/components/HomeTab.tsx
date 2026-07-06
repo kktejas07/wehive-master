@@ -278,9 +278,6 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                 <Settings className="w-4 h-4" />
               </button>
             )}
-            <span className="text-[9px] bg-blue-800/60 px-2 py-0.5 rounded-full text-blue-200 border border-blue-800/30 font-mono font-bold">
-              Global
-            </span>
           </div>
         </div>
 
