@@ -753,6 +753,50 @@ PROVIDER_REGISTRY: dict[str, dict] = {
         "pricing_tier": PRICING_TIER_PAID, "category": "image",
         "models": ["fal-ai/flux/dev", "fal-ai/flux/schnell"],
     },
+    "github": {
+        "name": "GitHub Models API",
+        "description": "Free OpenAI-compatible endpoint for developers via GitHub Tokens",
+        "website": "https://github.com/marketplace/models", "requires_key": True,
+        "key_label": "GitHub Personal Access Token", "key_placeholder": "ghp_...",
+        "base_url": "https://models.inference.ai.azure.com",
+        "docs": "https://docs.github.com/en/github-models",
+        "powered_by_tagline": "Powered by GitHub Models",
+        "pricing_tier": PRICING_TIER_FREE, "category": "llm",
+        "models": ["gpt-4o", "meta-llama-3.1-70b-instruct", "Mistral-large"],
+    },
+    "upstage": {
+        "name": "Upstage (Solar)",
+        "description": "Creators of the highly efficient Solar LLM — free trial credits",
+        "website": "https://upstage.ai", "requires_key": True,
+        "key_label": "API Key", "key_placeholder": "up_...",
+        "base_url": "https://api.upstage.ai/v1/solar",
+        "docs": "https://developers.upstage.ai/docs/getting-started",
+        "powered_by_tagline": "Powered by Upstage",
+        "pricing_tier": PRICING_TIER_FREE_PAID, "category": "llm",
+        "models": ["solar-1-mini-chat", "solar-pro"],
+    },
+    "shuttleai": {
+        "name": "ShuttleAI",
+        "description": "Popular free/cheap API aggregator with OpenAI compatibility",
+        "website": "https://shuttleai.app", "requires_key": True,
+        "key_label": "API Key", "key_placeholder": "shuttle-...",
+        "base_url": "https://api.shuttleai.app/v1",
+        "docs": "https://docs.shuttleai.app",
+        "powered_by_tagline": "Powered by ShuttleAI",
+        "pricing_tier": PRICING_TIER_FREE, "category": "llm",
+        "models": ["shuttle-1", "gpt-4o-mini-free"],
+    },
+    "clarifai": {
+        "name": "Clarifai",
+        "description": "Enterprise platform with generous 1,000 free operations/month",
+        "website": "https://clarifai.com", "requires_key": True,
+        "key_label": "Personal Access Token", "key_placeholder": "PAT...",
+        "base_url": "https://api.clarifai.com/v2/users/openai/apps/chat/models",
+        "docs": "https://docs.clarifai.com",
+        "powered_by_tagline": "Powered by Clarifai",
+        "pricing_tier": PRICING_TIER_FREE, "category": "llm",
+        "models": ["gpt-4", "llama-3-70b-instruct"],
+    },
 }
 
 
@@ -1072,23 +1116,110 @@ PROVIDER_CLASSES: dict[str, type[BaseProvider]] = {
     "cloudflare": OpenAICompatProvider,
     "pollinations": OpenAICompatProvider,
     "nebius": OpenAICompatProvider,
+    "github": OpenAICompatProvider,
+    "upstage": OpenAICompatProvider,
+    "shuttleai": OpenAICompatProvider,
+    "clarifai": OpenAICompatProvider,
 }
 
 
 def get_provider(provider_id: str, key: str = "", base_url: str = "", model: str = "") -> BaseProvider:
     """Factory: return instantiated provider."""
     cls = PROVIDER_CLASSES.get(provider_id, OpenAICompatProvider)
-    if not base_url and provider_id in PROVIDER_REGISTRY:
+    if provider_id in PROVIDER_REGISTRY:
         reg = PROVIDER_REGISTRY[provider_id]
-        base_url = reg.get("base_url", "")
-        if provider_id in ("ollama", "gpt4all", "localai", "llamacpp", "vllm", "kobold"):
-            base_url = reg.get("default_url", base_url)
+        if not base_url:
+            base_url = reg.get("base_url", "")
+            if provider_id in ("ollama", "gpt4all", "localai", "llamacpp", "vllm", "kobold"):
+                base_url = reg.get("default_url", base_url)
+        if not model and "models" in reg and reg["models"]:
+            model = reg["models"][0]
     return cls(key=key, base_url=base_url, model=model)
 
 
 # ---------------------------------------------------------------------------
-# Marketplace manager
+# Marketplace manager & Smart Routing
 # ---------------------------------------------------------------------------
+
+def get_fallback_providers() -> list[tuple[BaseProvider, str]]:
+    pool = []
+    ENV_PROVIDER_MAP = {
+        "OPENAI_API_KEY": "openai",
+        "ANTHROPIC_API_KEY": "anthropic",
+        "GEMINI_API_KEY": "google",
+        "GROQ_API_KEY": "groq",
+        "DEEPSEEK_API_KEY": "deepseek",
+        "CEREBRAS_API_KEY": "cerebras",
+        "MISTRAL_API_KEY": "mistral",
+        "OPENROUTER_API_KEY": "openrouter",
+        "HUGGINGFACE_API_KEY": "huggingface",
+        "COHERE_API_KEY": "cohere",
+        "NVIDIA_API_KEY": "nvidia_nim",
+        "FIREWORKS_API_KEY": "fireworks",
+        "XAI_API_KEY": "xai",
+        "REPLICATE_API_TOKEN": "replicate",
+        "DEEPINFRA_API_KEY": "deepinfra",
+        "NOVITA_API_KEY": "novita",
+        "AI21_API_KEY": "ai21",
+        "MOONSHOT_API_KEY": "moonshot",
+        "CLOUDFLARE_API_KEY": "cloudflare",
+        "SAMBANOVA_API_KEY": "sambanova",
+        "GITHUB_MODELS_API_KEY": "github",
+        "UPSTAGE_API_KEY": "upstage",
+        "SHUTTLEAI_API_KEY": "shuttleai",
+        "CLARIFAI_API_KEY": "clarifai",
+    }
+    for env_var, pid in ENV_PROVIDER_MAP.items():
+        key = os.environ.get(env_var, "").strip()
+        if key:
+            pool.append((get_provider(pid, key=key), pid))
+            
+    # Also add default if it exists
+    default_key = os.environ.get("DEFAULT_LLM_KEY", "").strip()
+    if default_key:
+        default_provider = os.environ.get("DEFAULT_LLM_PROVIDER", "openai").strip()
+        default_model = os.environ.get("DEFAULT_LLM_MODEL", "").strip()
+        pool.append((get_provider(default_provider, key=default_key, model=default_model), default_provider))
+        
+    return pool
+
+class FallbackRouterProvider(BaseProvider):
+    def __init__(self, providers: list[tuple[BaseProvider, str]]):
+        super().__init__()
+        self.providers = providers
+        self.active_pid = "router"
+        self.model = "auto"
+
+    @property
+    def name(self) -> str:
+        return "Fallback Router"
+
+    async def chat(self, system_prompt: str, user_prompt: str, max_tokens: int = 1024) -> str:
+        last_err = None
+        for provider, pid in self.providers:
+            try:
+                reply = await provider.chat(system_prompt, user_prompt, max_tokens)
+                self.active_pid = pid
+                self.model = provider.model
+                return reply
+            except Exception as e:
+                logger.warning("Provider %s failed: %s", pid, e)
+                last_err = e
+        raise RuntimeError(f"All fallback providers failed. Last error: {last_err}")
+        
+    async def chat_with_image(self, system_prompt: str, user_prompt: str, image_b64: str, mime: str, max_tokens: int = 1024) -> str:
+        last_err = None
+        for provider, pid in self.providers:
+            try:
+                reply = await provider.chat_with_image(system_prompt, user_prompt, image_b64, mime, max_tokens)
+                self.active_pid = pid
+                self.model = provider.model
+                return reply
+            except Exception as e:
+                logger.warning("Provider %s failed image chat: %s", pid, e)
+                last_err = e
+        raise RuntimeError(f"All fallback providers failed image chat. Last error: {last_err}")
+
 
 class AIMarketplace:
     """Routes LLM calls to the user's selected provider."""
@@ -1098,28 +1229,26 @@ class AIMarketplace:
 
     async def get_active_provider(self, user_id: str) -> tuple[BaseProvider, str] | tuple[None, str]:
         """Return (provider, provider_id) for the given user, or (None, '').
-        Falls back to DEFAULT_LLM_* env vars when no user-level config exists."""
-        if self.db is None:
-            from db import db as _db
-            self.db = _db
-        doc = await self.db["ai_settings"].find_one({"user_id": user_id})
-        if doc and doc.get("active_provider"):
-            pid = doc["active_provider"]
-            cfg = doc.get("providers", {}).get(pid, {})
-            provider = get_provider(
-                pid,
-                key=cfg.get("key", ""),
-                base_url=cfg.get("base_url", ""),
-                model=cfg.get("model", ""),
-            )
-            return provider, pid
-        # Global fallback from environment (no user config needed)
-        default_key = os.environ.get("DEFAULT_LLM_KEY", "").strip()
-        if default_key:
-            default_provider = os.environ.get("DEFAULT_LLM_PROVIDER", "openai").strip()
-            default_model = os.environ.get("DEFAULT_LLM_MODEL", "").strip()
-            provider = get_provider(default_provider, key=default_key, model=default_model)
-            return provider, default_provider
+        Falls back to a smart router using all available .env keys when no user-level config exists."""
+        try:
+            if self.db is None:
+                from db import db as _db
+                self.db = _db
+            doc = await self.db["ai_settings"].find_one({"user_id": user_id})
+            if doc and doc.get("active_provider"):
+                pid = doc["active_provider"]
+                cfg = doc.get("providers", {}).get(pid, {})
+                provider = get_provider(
+                    pid,
+                    key=cfg.get("key", ""),
+                    base_url=cfg.get("base_url", ""),
+                    model=cfg.get("model", ""),
+                )
+                return provider, pid
+        except Exception as e:
+            logger.warning("Failed to fetch user provider from DB, falling back to smart router: %s", e)
+
+        pool = get_fallback_providers()
 
         # Platform-wide default configured by admin via Settings → Default LLM
         try:
@@ -1130,39 +1259,150 @@ class AIMarketplace:
                 if default_key:
                     default_provider = llm_cfg.get("provider", "openai").strip()
                     default_model = llm_cfg.get("model", "").strip()
-                    provider = get_provider(default_provider, key=default_key, model=default_model)
-                    return provider, default_provider
+                    pool.insert(0, (get_provider(default_provider, key=default_key, model=default_model), default_provider))
         except Exception:
             pass
 
+        if pool:
+            return FallbackRouterProvider(pool), "router"
+
         return None, ""
+
+    async def _estimate_and_track_usage(self, user_id: str, prompt_text: str, reply_text: str) -> None:
+        try:
+            from datetime import date
+            today_str = date.today().isoformat()
+            # Simple length-based estimation
+            est_tokens = (len(prompt_text) + len(reply_text)) // 4
+            
+            await self.db["ai_token_usage"].update_one(
+                {"user_id": user_id, "date": today_str},
+                {"$inc": {"tokens_used": est_tokens}},
+                upsert=True
+            )
+        except Exception as e:
+            logger.warning("Failed to track token usage: %s", e)
+
+    async def _check_quota(self, user_id: str) -> bool:
+        """Returns True if user has free tokens remaining."""
+        try:
+            from datetime import date
+            today_str = date.today().isoformat()
+            
+            limit = int(os.environ.get("DAILY_FREE_TOKENS_PER_USER", "10000"))
+            doc = await self.db["ai_token_usage"].find_one({"user_id": user_id, "date": today_str})
+            if not doc:
+                return True
+                
+            return doc.get("tokens_used", 0) < limit
+        except Exception as e:
+            logger.warning("Failed to check token quota: %s", e)
+            return True # Fail open on DB errors
 
     async def chat(self, user_id: str, system_prompt: str, user_prompt: str, max_tokens: int = 1024) -> str:
         provider, pid = await self.get_active_provider(user_id)
-        if provider is None:
-            raise RuntimeError("No AI provider configured. Please set one in Settings → AI Marketplace.")
-        return await provider.chat(system_prompt, user_prompt, max_tokens)
+        
+        # 1. Tier 0: User BYOK (Not Fallback Router)
+        if provider and not isinstance(provider, FallbackRouterProvider):
+            return await provider.chat(system_prompt, user_prompt, max_tokens)
+            
+        # 2. Tier 1: Free Token Pool (Fallback Router)
+        has_quota = await self._check_quota(user_id)
+        if has_quota and provider is not None:
+            try:
+                reply = await provider.chat(system_prompt, user_prompt, max_tokens)
+                await self._estimate_and_track_usage(user_id, system_prompt + user_prompt, reply)
+                return reply
+            except Exception as e:
+                logger.warning("Tier 1 free pool failed: %s", e)
+                # Fall through to Tier 2
+                
+        # 3. Tier 2: Local LLM Fallback
+        try:
+            from local_llm import local_chat_with_info
+            reply_dict = await local_chat_with_info(user_prompt, context=system_prompt)
+            content = reply_dict.get("content", "").strip()
+            if content:
+                return content
+        except Exception as e:
+            logger.warning("Tier 2 local LLM failed: %s", e)
+            
+        # 4. Tier 3: Exhausted / Unavailable -> BYOK Prompt
+        raise RuntimeError("Daily free token limit reached and local fallback is unavailable. Please configure your own API key in Settings (BYOK).")
 
     async def chat_with_info(self, user_id: str, system_prompt: str, user_prompt: str, max_tokens: int = 1024) -> tuple[str, dict]:
         """Returns (reply_text, provider_info) so callers can include the tagline."""
         provider, pid = await self.get_active_provider(user_id)
-        if provider is None:
-            raise RuntimeError("No AI provider configured. Please set one in Settings → AI Marketplace.")
-        reply = await provider.chat(system_prompt, user_prompt, max_tokens)
-        meta = PROVIDER_REGISTRY.get(pid, {})
-        provider_info = {
-            "id": pid,
-            "name": meta.get("name", pid),
-            "model": provider.model,
-            "powered_by_tagline": meta.get("powered_by_tagline", f"Powered by {meta.get('name', pid)} in Association with We Hive"),
-        }
-        return reply, provider_info
+        
+        # 1. Tier 0: User BYOK
+        if provider and not isinstance(provider, FallbackRouterProvider):
+            reply = await provider.chat(system_prompt, user_prompt, max_tokens)
+            meta = PROVIDER_REGISTRY.get(pid, {})
+            provider_info = {
+                "id": pid,
+                "name": meta.get("name", pid),
+                "model": provider.model,
+                "powered_by_tagline": meta.get("powered_by_tagline", f"Powered by {meta.get('name', pid)} in Association with We Hive"),
+            }
+            return reply, provider_info
+            
+        # 2. Tier 1: Free Token Pool
+        has_quota = await self._check_quota(user_id)
+        if has_quota and provider is not None:
+            try:
+                reply = await provider.chat(system_prompt, user_prompt, max_tokens)
+                await self._estimate_and_track_usage(user_id, system_prompt + user_prompt, reply)
+                
+                active_pid = provider.active_pid if isinstance(provider, FallbackRouterProvider) else pid
+                meta = PROVIDER_REGISTRY.get(active_pid, {})
+                provider_info = {
+                    "id": active_pid,
+                    "name": meta.get("name", active_pid),
+                    "model": provider.model,
+                    "powered_by_tagline": meta.get("powered_by_tagline", f"Powered by {meta.get('name', active_pid)} in Association with We Hive"),
+                }
+                return reply, provider_info
+            except Exception as e:
+                logger.warning("Tier 1 free pool failed: %s", e)
+                
+        # 3. Tier 2: Local LLM Fallback
+        try:
+            from local_llm import local_chat_with_info
+            reply_dict = await local_chat_with_info(user_prompt, context=system_prompt)
+            content = reply_dict.get("content", "").strip()
+            if content:
+                provider_info = {
+                    "id": "local",
+                    "name": "Local Assistant",
+                    "model": "offline",
+                    "powered_by_tagline": "Powered by Local LLM (Free Quota Exceeded)",
+                }
+                return content, provider_info
+        except Exception as e:
+            logger.warning("Tier 2 local LLM failed: %s", e)
+            
+        # 4. Tier 3: Exhausted
+        raise RuntimeError("Daily free token limit reached and local fallback is unavailable. Please configure your own API key in Settings (BYOK).")
 
     async def chat_with_image(self, user_id: str, system_prompt: str, user_prompt: str, image_b64: str, mime: str, max_tokens: int = 1024) -> str:
         provider, pid = await self.get_active_provider(user_id)
-        if provider is None:
-            raise RuntimeError("No AI provider configured. Please set one in Settings → AI Marketplace.")
-        return await provider.chat_with_image(system_prompt, user_prompt, image_b64, mime, max_tokens)
+        
+        # 1. Tier 0: User BYOK
+        if provider and not isinstance(provider, FallbackRouterProvider):
+            return await provider.chat_with_image(system_prompt, user_prompt, image_b64, mime, max_tokens)
+            
+        # 2. Tier 1: Free Token Pool
+        has_quota = await self._check_quota(user_id)
+        if has_quota and provider is not None:
+            try:
+                reply = await provider.chat_with_image(system_prompt, user_prompt, image_b64, mime, max_tokens)
+                await self._estimate_and_track_usage(user_id, system_prompt + user_prompt, reply)
+                return reply
+            except Exception as e:
+                logger.warning("Tier 1 free pool image chat failed: %s", e)
+                
+        # (Local LLM image fallback not supported, go straight to BYOK)
+        raise RuntimeError("Daily free token limit reached or free vision models unavailable. Please configure your own API key in Settings (BYOK).")
 
 
 marketplace = AIMarketplace()

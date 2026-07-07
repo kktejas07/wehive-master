@@ -1,0 +1,41 @@
+appId: com.apple.mobilesafari
+---
+- launchApp:
+    clearState: true
+- openLink: "https://wehive.co.in"
+
+# 1. Landing Page Verification
+- assertVisible: "We Hive"
+- scroll
+
+# 2. Authentication Flow
+- tapOn: "Login" 
+- assertVisible: "Welcome"
+- tapOn: "Email"
+- inputText: "test@wehive.co.in"
+- tapOn: "Submit"
+- assertVisible: "Dashboard"
+
+# 3. AI Consultation (Stark/Hive)
+- tapOn: "Consultant"
+- assertVisible: "Chat"
+- tapOn: "Type a message"
+- inputText: "What are the requirements for a US Student Visa?"
+- tapOn: "Send"
+- assertVisible: "US" 
+- scroll
+
+# 4. Eligibility Evaluator
+- tapOn: "Evaluate"
+- tapOn: "Target Country"
+- inputText: "Canada"
+- tapOn: "Evaluate Profile"
+- assertVisible: "Score"
+
+# 5. Explore Universities
+- tapOn: "Universities"
+- tapOn: "Search"
+- inputText: "Toronto"
+- pressKey: Enter
+- assertVisible: "Toronto"
+- tapOn: "Toronto"
