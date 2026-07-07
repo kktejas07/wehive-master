@@ -16,7 +16,10 @@ import {
   Briefcase,
   ChevronDown,
   FileText,
-  Mail
+  Mail,
+  Wrench,
+  Mic,
+  Award
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -34,7 +37,6 @@ const NAV = [
     children: [
       { id: 'visa', label: 'Visa Services', to: '/#countries', icon: Globe },
       { id: 'student', label: 'Student Visa', to: '/student-visa', icon: GraduationCap },
-      { id: 'us-slots', label: 'Visa Slots', to: '/us-visa-slots', badge: 'HURRY', icon: Calendar },
       { id: 'fly', label: 'Fly', to: '/map', icon: Plane },
     ]
   },
@@ -44,6 +46,21 @@ const NAV = [
       { id: 'assessment', label: 'Visa Calculator', to: '/assessment', icon: Calculator },
       { id: 'track', label: 'Track Application', to: '/track', icon: Search },
       { id: 'blog', label: 'Blog', to: '/blog', icon: FileText },
+    ]
+  },
+  {
+    id: 'tools', label: 'Tools', icon: Wrench,
+    children: [
+      { id: 'visa-slot-tracker', label: 'Visa Slot Tracker', to: '/us-visa-slots', icon: Calendar },
+      { id: 'intake-calendar', label: 'Intake Calendar', to: '/intake-calendar', icon: BookOpen },
+      { id: 'financial-tools', label: 'Financial Tools', to: '/financial-tools', icon: CreditCard },
+      { id: 'university-search', label: 'University Search', to: '/universities', icon: Search },
+      { id: 'visa-checker', label: 'Visa Checker', to: '/visa-checker', icon: Globe },
+      { id: 'visa-interview', label: 'Visa Interview Simulator', to: '/visa-interview', icon: Mic },
+      { id: 'scholarship-matcher', label: 'AI Scholarship Matcher', to: '/student-visa', icon: Award },
+      { id: 'uni-recommender', label: 'AI University Recommender', to: '/student-visa', icon: GraduationCap },
+      { id: 'cost-of-living', label: 'Cost of Living Calculator', to: '/student-visa', icon: Calculator },
+      { id: 'sop-lor-writer', label: 'AI SOP / LOR Writer', to: '/student-visa', icon: FileText },
     ]
   },
   { id: 'pricing', label: 'Pricing', to: '/pricing', icon: CreditCard },
