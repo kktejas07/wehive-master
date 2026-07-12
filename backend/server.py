@@ -26,6 +26,7 @@ from routes_flights import router as flights_router  # noqa: E402
 from routes_admin import router as admin_router  # noqa: E402
 from routes_admin_auth import router as admin_auth_router, ensure_seed_admin  # noqa: E402
 from routes_public import router as public_router  # noqa: E402
+from routes_events import router as events_router  # noqa: E402
 from routes_ai_docs import router as ai_docs_router  # noqa: E402
 from routes_payments import router as payments_router  # noqa: E402
 from routes_notifications import router as notifications_router  # noqa: E402
@@ -106,6 +107,7 @@ api_router.include_router(leads_router)
 api_router.include_router(admin_router)
 api_router.include_router(admin_auth_router)
 api_router.include_router(public_router)
+api_router.include_router(events_router)
 api_router.include_router(ai_docs_router)
 api_router.include_router(payments_router)
 api_router.include_router(notifications_router)

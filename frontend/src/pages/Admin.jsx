@@ -13,6 +13,7 @@ import UniversitiesTab from '../components/admin/UniversitiesTab';
 import ProgramsTab from '../components/admin/ProgramsTab';
 import PricingTab from '../components/admin/PricingTab';
 import EventsTab from '../components/admin/EventsTab';
+import GlobalEventsTab from '../components/admin/GlobalEventsTab';
 import SettingsTab from '../components/admin/SettingsTab';
 import DestinationsTab from '../components/admin/DestinationsTab';
 import RequestsTab from '../components/admin/RequestsTab';
@@ -69,6 +70,7 @@ function AdminRoutes() {
                 <Route path="countries" element={<CountriesTab />} />
                 <Route path="pricing" element={<PricingTab />} />
                 <Route path="events" element={<EventsTab />} />
+                <Route path="global-events" element={<GlobalEventsTab />} />
                 <Route path="requests" element={<RequestsTab />} />
                 <Route path="promotions" element={<PromotionsTab />} />
                 <Route path="promocodes" element={<PromoCodesTab />} />

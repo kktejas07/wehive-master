@@ -56,6 +56,7 @@ const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
 const VisaChecker = lazy(() => import('./pages/VisaChecker'));
 const Hive = lazy(() => import('./pages/Hive'));
 const USVisaSlots = lazy(() => import('./pages/USVisaSlots'));
+const GlobalEvents = lazy(() => import('./pages/GlobalEvents'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -115,6 +116,7 @@ function AnimatedRoutes() {
           <Route path="/emergency" element={<PageTransition><EmergencyCare /></PageTransition>} />
           <Route path="/visa-scheduling" element={<PageTransition><VisaScheduling /></PageTransition>} />
           <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
+          <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/hive" element={<PageTransition><Hive /></PageTransition>} />
           <Route path="/us-visa-slots" element={<PageTransition><USVisaSlots /></PageTransition>} />
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />

@@ -1604,3 +1604,4 @@ async def admin_re_seed_universities(admin=Depends(get_current_admin_flex)):
         return {'ok': True, 'result': result}
     except Exception as e:
         raise HTTPException(500, f'Re-seed failed: {e}')
+
