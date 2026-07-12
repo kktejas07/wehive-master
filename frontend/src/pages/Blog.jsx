@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, RefreshCw, AlertCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { API_URL } from '../config';
+import { API } from '../context/AuthContext';
 import { ContentCard, ContentCardGrid } from '../components/ui/ContentCard';
 
 export default function Blog() {
@@ -20,7 +20,7 @@ export default function Blog() {
       setLoading(true);
       setError(null);
       try {
-        let url = `${API_URL}/api/blogs?limit=50`;
+        let url = `${API}/blogs?limit=50`;
         if (category !== "All") url += `&category=${category}`;
         const response = await axios.get(url);
         setBlogs(response.data || []);

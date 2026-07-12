@@ -6,6 +6,7 @@ import { Consultation } from "../types";
 import { useNotifications } from "./NotificationContext";
 import { useColorScheme } from "../hooks/useColorScheme";
 import WeHiveLogo from "./WeHiveLogo";
+import NewsWidget from "./NewsWidget";
 
 interface HomeTabProps {
   onNavigate: (tabId: string) => void;
@@ -766,6 +767,8 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
             ))}
           </div>
         </div>
+
+        <NewsWidget />
 
         {/* WeHive Success Index Stats Banner */}
         <div className="mb-6 bg-white rounded-2xl p-4 border border-slate-200/50 shadow-xs">

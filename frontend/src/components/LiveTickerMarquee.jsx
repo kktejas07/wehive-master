@@ -1,17 +1,16 @@
 import { motion } from 'framer-motion';
-import { CheckCircle2, Clock, Plane, Star } from 'lucide-react';
+import { CheckCircle2, Clock, Plane, Star, Newspaper } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { API } from '../context/AuthContext';
 
-const LIVE_UPDATES = [
+const FALLBACK_UPDATES = [
   { icon: CheckCircle2, text: 'Visa approved for Priya S. · Dubai', time: '2 min ago', color: 'text-emerald-500' },
   { icon: Plane, text: 'Flights booked for Rajesh K. · Tokyo', time: '5 min ago', color: 'text-[hsl(var(--blue-700))]' },
   { icon: Star, text: 'New 5-star review from Sarah M.', time: '8 min ago', color: 'text-amber-500' },
   { icon: CheckCircle2, text: 'Visa approved for Amit C. · Singapore', time: '12 min ago', color: 'text-emerald-500' },
   { icon: Clock, text: 'Application submitted by Deepa R. · UK', time: '15 min ago', color: 'text-[hsl(var(--blue-700))]' },
   { icon: CheckCircle2, text: 'Visa approved for Vikram J. · USA', time: '18 min ago', color: 'text-emerald-500' },
-  { icon: Plane, text: 'Hotel booked for WeHive client · Bali', time: '22 min ago', color: 'text-[hsl(var(--blue-700))]' },
-  { icon: Star, text: 'New 5-star review from Kumar P.', time: '25 min ago', color: 'text-amber-500' },
-  { icon: CheckCircle2, text: 'Visa approved for Neha G. · Canada', time: '28 min ago', color: 'text-emerald-500' },
-  { icon: Clock, text: 'Processing started for Farhan A. · Australia', time: '32 min ago', color: 'text-[hsl(var(--blue-700))]' },
 ];
 
 function LiveBadge() {
@@ -37,7 +36,29 @@ function UpdateItem({ icon: Icon, text, time, color }) {
 }
 
 export default function LiveTickerMarquee() {
-  const doubled = [...LIVE_UPDATES, ...LIVE_UPDATES];
+  const [updates, setUpdates] = useState(FALLBACK_UPDATES);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await axios.get(`${API}/news?limit=10`);
+        if (res.data && res.data.length > 0) {
+          const formatted = res.data.map(news => ({
+            icon: Newspaper,
+            text: news.title,
+            time: new Date(news.date || news.created_at).toLocaleDateString(),
+            color: 'text-white' // Making icon white to match marquee
+          }));
+          setUpdates(formatted);
+        }
+      } catch (err) {
+        // silently fallback
+      }
+    };
+    fetchNews();
+  }, []);
+
+  const doubled = [...updates, ...updates, ...updates, ...updates, ...updates, ...updates];
 
   return (
     <div className="relative bg-gradient-to-r from-[hsl(var(--blue-900))] via-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))] py-3 overflow-hidden">
