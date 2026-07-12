@@ -54,7 +54,6 @@ function GlobalReachSection() {
           <WorldMap className="absolute inset-0" showConnections />
         </motion.div>
 
-        </motion.div>
       </div>
     </section>
   );
