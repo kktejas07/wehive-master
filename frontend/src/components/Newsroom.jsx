@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Newspaper, AlertCircle, RefreshCw, AlertTriangle } from 'lucide-react';
-import { API_URL } from '../config';
+import { API } from '../context/AuthContext';
 
 const Newsroom = ({ countryId }) => {
   const [news, setNews] = useState([]);
@@ -16,7 +16,7 @@ const Newsroom = ({ countryId }) => {
     setLoading(true);
     setErrorState(null);
     try {
-      let url = `${API_URL}/api/news?limit=5`;
+      let url = `${API}/news?limit=5`;
       if (countryId) url += `&country_id=${countryId}`;
       if (category && category !== "All") url += `&category=${category}`;
       

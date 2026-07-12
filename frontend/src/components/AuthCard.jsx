@@ -363,13 +363,13 @@ export default function AuthCard({ mode, referralCode }) {
               )}
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Email address</label>
-                <input type="email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com"
+                <input type="email" data-testid="email-input" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com"
                   className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
               </div>
               <div>
                 <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Password</label>
                 <div className="relative">
-                  <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
+                  <input type={showPassword ? 'text' : 'password'} data-testid="password-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
                     className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
                   <button type="button" onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-700))] transition">
@@ -377,7 +377,7 @@ export default function AuthCard({ mode, referralCode }) {
                   </button>
                 </div>
               </div>
-              <Button type="submit" disabled={emailPwdLoading}
+              <Button type="submit" data-testid={isSignup ? "signup-submit" : "login-submit"} disabled={emailPwdLoading}
                 className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
                 {emailPwdLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isSignup ? 'Create account' : 'Sign in'}
               </Button>

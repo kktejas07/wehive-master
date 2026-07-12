@@ -940,7 +940,7 @@ export default function Account() {
   return (
     <div className="bg-white">
       <Navbar />
-      <main className="pt-28 pb-16 bg-[hsl(var(--soft-bg))] min-h-[80vh]">
+      <main data-testid="account-dashboard" className="pt-28 pb-16 bg-[hsl(var(--soft-bg))] min-h-[80vh]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-12">
             <PromoBanner className="mb-2" />
