@@ -7,7 +7,7 @@ import HowItWorks from '../components/HowItWorks';
 import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
 import DealsSection from '../components/DealsSection';
-
+import Newsroom from '../components/Newsroom';
 import EventsBanner from '../components/EventsBanner';
 import StatsStrip from '../components/StatsStrip';
 import AIServices from '../components/ai/AIServices';
@@ -59,40 +59,31 @@ function GlobalReachSection() {
   );
 }
 
-const TRAVEL_STORIES = [
-  {
-    id: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a?auto=format&fit=crop&w=800&q=80',
-    title: 'How I got my US tourist visa in 4 days',
-    description: 'A complete guide to the DS-160 form and interview preparation that helped me succeed.',
-    author: { name: 'Priya Sharma', initials: 'PS' },
-    readTime: '5 min read',
-    category: 'Visa Guide',
-    accentColor: '#0a2c8a',
-  },
-  {
-    id: 2,
-    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80',
-    title: 'Student visa success story: Canada Edition',
-    description: 'From acceptance letter to visa approval in 3 weeks. Here is everything I learned.',
-    author: { name: 'Rahul Mehta', initials: 'RM' },
-    readTime: '7 min read',
-    category: 'Student Visa',
-    accentColor: '#22c55e',
-  },
-  {
-    id: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-    title: 'Maldives visa on arrival: What you need to know',
-    description: 'No prior visa required for Indian passport holders. Here is the complete checklist.',
-    author: { name: 'Anita Desai', initials: 'AD' },
-    readTime: '3 min read',
-    category: 'Travel Tips',
-    accentColor: '#0a2c8a',
-  },
-];
+import axios from 'axios';
+import { API_URL } from '../config';
+import { useEffect, useState } from 'react';
 
 function TravelStoriesSection() {
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/blogs?limit=3`);
+        setStories(res.data || []);
+      } catch (error) {
+        console.error("Failed to fetch blogs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBlogs();
+  }, []);
+
+  if (loading) return null;
+  if (stories.length === 0) return null;
+
   return (
     <section className="py-16 sm:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
@@ -123,7 +114,7 @@ function TravelStoriesSection() {
         </motion.div>
 
         <ContentCardGrid>
-          {TRAVEL_STORIES.map((story, i) => (
+          {stories.map((story, i) => (
             <motion.div
               key={story.id}
               initial={{ opacity: 0, y: 20 }}
@@ -132,13 +123,13 @@ function TravelStoriesSection() {
               transition={{ delay: i * 0.1, duration: 0.5 }}
             >
               <ContentCard
-                imageUrl={story.imageUrl}
+                imageUrl={story.imageUrl || "https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a"}
                 title={story.title}
                 description={story.description}
                 author={story.author}
-                readTime={story.readTime}
+                readTime={story.readTime || '5 min read'}
                 category={story.category}
-                accentColor={story.accentColor}
+                accentColor="#0a2c8a"
                 onClick={() => {}}
               />
             </motion.div>
@@ -163,6 +154,7 @@ export default function Home() {
       <StatsStrip />
       <DealsSection />
       <EventsBanner />
+      <Newsroom />
       <AIServices />
       <HowItWorks />
       <TravelStoriesSection />

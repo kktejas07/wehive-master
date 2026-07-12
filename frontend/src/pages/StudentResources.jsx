@@ -1,6 +1,6 @@
 import { useState, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, Award, Users, Home, PenTool, DollarSign, ChevronRight, Calendar, Banknote, IdCard } from 'lucide-react';
+import { BookOpen, Award, Users, Home, PenTool, DollarSign, ChevronRight, Calendar, Banknote, IdCard, FileText, Newspaper } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -138,6 +138,8 @@ export default function StudentResources() {
                   { to: '/financial-tools', Icon: Banknote, label: 'Financial Tools', desc: 'GIC, budgets, loans' },
                   { to: '/universities', Icon: BookOpen, label: 'University Search', desc: 'Browse & compare universities' },
                   { to: '/visa-checker', Icon: IdCard, label: 'Visa Checker', desc: 'Check visa requirements by nationality' },
+                  { to: '/blog', Icon: FileText, label: 'Travel & Visa Blog', desc: 'Guides and success stories' },
+                  { to: '/news', Icon: Newspaper, label: 'Immigration News', desc: 'Latest policy and visa updates' },
                 ].map(({ to, Icon, label, desc }) => (
                   <Link key={to} to={to}
                     className="flex items-center gap-3 rounded-xl border border-black/5 bg-white px-4 py-3 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition min-w-0">

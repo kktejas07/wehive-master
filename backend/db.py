@@ -38,7 +38,8 @@ mcp_configs_col = db['mcp_configs']
 amadeus_cache_col = db['amadeus_cache']
 ai_token_usage = db['ai_token_usage']
 global_events_col = db['global_events']
-
+global_blogs_col = db['global_blogs']
+global_news_col = db['global_news']
 
 async def ensure_indexes():
     await users.create_index('email', unique=True, sparse=True)
@@ -103,3 +104,11 @@ async def ensure_indexes():
     await global_events_col.create_index('country_id')
     await global_events_col.create_index('status')
     await global_events_col.create_index([('created_at', -1)])
+    await global_blogs_col.create_index('country_id')
+    await global_blogs_col.create_index('status')
+    await global_blogs_col.create_index('category')
+    await global_blogs_col.create_index([('created_at', -1)])
+    await global_news_col.create_index('country_id')
+    await global_news_col.create_index('status')
+    await global_news_col.create_index('category')
+    await global_news_col.create_index([('created_at', -1)])
