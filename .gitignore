@@ -125,3 +125,8 @@ credentials.json
 *.key
 .credentials
 frontend/node_modules/.cache/default-development/10.pack
+
+# Test virtual environments
+test_env/
+test_uv/
+test_venv/
