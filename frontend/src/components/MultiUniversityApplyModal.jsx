@@ -162,7 +162,7 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
               <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl h-12 border-black/10">
                 Close
               </Button>
-              <Button onClick={() => { window.location.href = `/account/applications/${result.id}`; }} className="flex-1 rounded-xl h-12 btn-primary text-white font-bold">
+              <Button onClick={() => { navigate(`/account/applications/${result.id}`); }} className="flex-1 rounded-xl h-12 btn-primary text-white font-bold">
                 View Application <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </div>

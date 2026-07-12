@@ -4,9 +4,6 @@ import Footer from '../components/Footer';
 import Hero from '../components/Hero';
 import CountryGrid from '../components/CountryGrid';
 import HowItWorks from '../components/HowItWorks';
-import Testimonials from '../components/Testimonials';
-import SuccessWall from '../components/SuccessWall';
-
 import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
 import DealsSection from '../components/DealsSection';
@@ -18,7 +15,6 @@ import OnTimeGuarantee from '../components/OnTimeGuarantee';
 import WorldMap from '../components/world-map/WorldMap';
 
 import LiveTickerMarquee from '../components/LiveTickerMarquee';
-import PromoCards from '../components/PromoCards';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
 import { motion } from 'framer-motion';
@@ -58,33 +54,6 @@ function GlobalReachSection() {
           <WorldMap className="absolute inset-0" showConnections />
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-6 flex flex-wrap items-center justify-center gap-4"
-        >
-          <div className="flex items-center gap-2 bg-[hsl(var(--soft-bg))] rounded-full px-4 py-2">
-            <Plane className="w-6 h-6 text-[hsl(var(--blue-700))]" />
-            <div>
-              <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">500+ Daily Bookings</div>
-              <div className="text-[10px] text-[hsl(var(--blue-900))]/60">Across all routes</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 bg-[hsl(var(--soft-bg))] rounded-full px-4 py-2">
-            <Globe className="w-6 h-6 text-[hsl(var(--blue-700))]" />
-            <div>
-              <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">250+ Countries</div>
-              <div className="text-[10px] text-[hsl(var(--blue-900))]/60">Visa destinations</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 bg-[hsl(var(--soft-bg))] rounded-full px-4 py-2">
-            <Zap className="w-6 h-6 text-[hsl(var(--blue-700))]" />
-            <div>
-              <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">Real-time Tracking</div>
-              <div className="text-[10px] text-[hsl(var(--blue-900))]/60">Application status</div>
-            </div>
-          </div>
         </motion.div>
       </div>
     </section>
@@ -194,15 +163,12 @@ export default function Home() {
       <OnTimeGuarantee />
       <StatsStrip />
       <DealsSection />
-      <PromoCards />
       <EventsBanner />
       <AIServices />
       <HowItWorks />
       <TravelStoriesSection />
       <Faq />
       <CtaBanner />
-      <Testimonials />
-      <SuccessWall />
       <Footer />
     </div>
   );

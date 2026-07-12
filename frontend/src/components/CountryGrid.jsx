@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Grid2X2, Map as MapIcon, Sparkle, Loader2, Compass, Search } from 'lucide-react';
@@ -63,6 +63,7 @@ async function fetchCountryImage(countryName) {
 }
 
 function CountryCard({ c, index = 0 }) {
+  const navigate = useNavigate();
   const isNoVisa = c.no_visa;
   const types = c.visa_types || [];
   const landmark = landmarkFor(c);
@@ -196,12 +197,12 @@ function CountryCard({ c, index = 0 }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              window.location.href = `/holiday/${c.id}`;
+              navigate(`/holiday/${c.id}`);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
-                window.location.href = `/holiday/${c.id}`;
+                navigate(`/holiday/${c.id}`);
               }
             }}
             className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[11.5px] font-bold transition cursor-pointer"

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { X, Mail, Phone, ArrowLeft, Loader2, Check, ShieldCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from './ui/button';
@@ -50,6 +50,7 @@ function OtpDigits({ value, onChange, length = 6 }) {
 }
 
 export default function AuthModal() {
+  const navigate = useNavigate();
   const { authOpen, authMode, closeAuth, sendOtp, verifyOtp, setAuthMode } = useAuth();
   const { phoneOtp, verifyPhoneOtpCode } = useFirebaseAuth();
   const { toast } = useToast();
@@ -122,7 +123,7 @@ export default function AuthModal() {
       }
       toast({ title: 'Our Ambition. Our Guidance. No Frontiers', description: 'You are signed in.' });
       closeAuth();
-      window.location.href = '/account';
+      navigate('/account');
     } catch (e) {
       toast({ title: 'Verification failed', description: e?.response?.data?.detail || e?.message || 'Invalid code' });
     } finally {

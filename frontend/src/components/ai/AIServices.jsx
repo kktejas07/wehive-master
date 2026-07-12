@@ -61,6 +61,7 @@ const AI_TOOLS = [
 ];
 
 function AIToolCard({ tool, index }) {
+  const navigate = useNavigate();
   const Icon = tool.Icon;
   return (
     <motion.div
@@ -68,7 +69,8 @@ function AIToolCard({ tool, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative flex-1 min-w-[180px] max-w-[260px] rounded-2xl border border-black/8 bg-white p-4 sm:p-5 transition-all"
+      onClick={() => tool.href && navigate(tool.href)}
+      className={`group relative flex-1 min-w-[180px] max-w-[260px] rounded-2xl border border-black/8 bg-white p-4 sm:p-5 transition-all ${tool.href ? 'cursor-pointer hover:shadow-md' : ''}`}
     >
       <GlowingEffect
         blur={30}

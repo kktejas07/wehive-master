@@ -1,7 +1,9 @@
 import { Loader2, Lock, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export default function PremiumGate({ open, onClose, feature }) {
+  const navigate = useNavigate();
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
@@ -17,7 +19,7 @@ export default function PremiumGate({ open, onClose, feature }) {
         </p>
         <div className="mt-6 flex flex-col gap-3">
           <Button
-            onClick={() => { onClose?.(); window.location.href = '/pricing'; }}
+            onClick={() => { onClose?.(); navigate('/pricing'); }}
             className="w-full rounded-full h-12 font-bold btn-accent text-white"
           >
             <Sparkles className="w-4 h-4 mr-2" /> Upgrade to Premium

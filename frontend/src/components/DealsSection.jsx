@@ -86,9 +86,9 @@ function DealCard({ deal, category, onCall }) {
                 <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}</span>
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
               </div>
-              <button onClick={(e) => { e.stopPropagation(); onCall(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
+              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
                 <Phone className="w-3.5 h-3.5 text-white" /> Call
-              </button>
+              </a>
             </div>
           </>
         )}
@@ -105,9 +105,9 @@ function DealCard({ deal, category, onCall }) {
                 <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}</span>
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
               </div>
-              <button onClick={(e) => { e.stopPropagation(); onCall(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
+              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
                 <Phone className="w-3.5 h-3.5 text-white" /> Call
-              </button>
+              </a>
             </div>
           </>
         )}
@@ -124,9 +124,9 @@ function DealCard({ deal, category, onCall }) {
                 <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/day</span>
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/day</span></div>
               </div>
-              <button onClick={(e) => { e.stopPropagation(); onCall(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
+              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
                 <Phone className="w-3.5 h-3.5 text-white" /> Call
-              </button>
+              </a>
             </div>
           </>
         )}
@@ -144,9 +144,9 @@ function DealCard({ deal, category, onCall }) {
                 <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/night</span>
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/night</span></div>
               </div>
-              <button onClick={(e) => { e.stopPropagation(); onCall(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
+              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
                 <Phone className="w-3.5 h-3.5 text-white" /> Call
-              </button>
+              </a>
             </div>
           </>
         )}
@@ -179,7 +179,6 @@ function CategorySection({ category, deals }) {
               <DealCard
                 deal={deal}
                 category={category.id}
-                onCall={() => window.open(`tel:${BRAND.phoneRaw}`, '_blank')}
               />
             </div>
           ))}
@@ -235,13 +234,13 @@ export default function DealsSection() {
         </div>
 
         <div className="mt-6 text-center">
-          <button
-            onClick={() => window.open(`tel:${BRAND.phoneRaw}`, '_blank')}
+          <a
+            href={`tel:${BRAND.phoneRaw}`}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[hsl(var(--blue-700))] text-white text-[14px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors"
           >
             <Phone className="w-4 h-4" />
             Call for all deals · {BRAND.phone}
-          </button>
+          </a>
         </div>
       </div>
     </section>

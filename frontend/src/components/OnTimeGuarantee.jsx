@@ -128,14 +128,14 @@ export default function OnTimeGuarantee() {
             <p className="text-white/60 text-[14px] max-w-md">
               We process visas across 120+ destinations. Our PRO team monitors every application to ensure it reaches you on time.
             </p>
-            <button
-              onClick={() => window.location.href = `tel:${BRAND.phoneRaw}`}
+            <a
+              href={`tel:${BRAND.phoneRaw}`}
               className="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[hsl(var(--accent))] text-white font-bold hover:opacity-90 transition"
             >
               <Phone className="w-4 h-4" />
               Talk to our team
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </a>
           </div>
         </Reveal>
       </div>
