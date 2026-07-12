@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
-from auth_utils import get_current_user
-from communication_services import telegram, discord, whatsapp_service
-from db import users
+from core.auth_utils import get_current_user
+from shared.communication_services import telegram, discord, whatsapp_service
+from core.db import users
 
 router = APIRouter(prefix='/communication', tags=['communication'])
 

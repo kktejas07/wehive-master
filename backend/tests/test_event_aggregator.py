@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
-from event_aggregator_agent import _route_social_media_url, fetch_events_from_url, fetch_events_for_country_fallback
+from shared.event_aggregator_agent import _route_social_media_url, fetch_events_from_url, fetch_events_for_country_fallback
 
 def test_route_social_media_url():
     # Test Twitter routing

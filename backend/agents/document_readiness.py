@@ -125,7 +125,7 @@ async def llm_document_assessment(check_results: list) -> str:
 
     issue_text = "\n".join(r.get("message", "") for r in issues)
     try:
-        from model_router import chat_with_profile
+        from shared.model_router import chat_with_profile
         response = await chat_with_profile(
             "fast_cheap",
             [

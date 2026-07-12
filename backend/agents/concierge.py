@@ -16,11 +16,11 @@ from typing import List, Optional
 
 import json
 
-from db import db as _db
+from core.db import db as _db
 from enum import Enum
 
-from data import get_country
-from eva_tools import lookup_country, get_visa_requirements, get_application_fee
+from shared.data import get_country
+from shared.eva_tools import lookup_country, get_visa_requirements, get_application_fee
 
 
 class StepStatus(str, Enum):
@@ -129,7 +129,7 @@ async def advance_concierge(user_id: str, country_id: str, step: str, data: dict
 async def llm_conversation_step(session, user_message: str) -> dict:
     """Use LLM to determine the next best action in the concierge flow."""
     try:
-        from model_router import chat_with_profile
+        from shared.model_router import chat_with_profile
         response = await chat_with_profile(
             "fast_cheap",
             [

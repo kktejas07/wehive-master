@@ -9,7 +9,7 @@ os.environ['JWT_SECRET'] = 'test_secret'
 os.environ['ADMIN_EMAILS'] = 'admin@test.com'
 
 from datetime import datetime
-from serializers import serialize_doc, public_user, public_admin
+from core.serializers import serialize_doc, public_user, public_admin
 
 
 class TestSerializeDoc:

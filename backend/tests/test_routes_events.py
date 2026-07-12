@@ -3,8 +3,8 @@ from fastapi.testclient import TestClient
 from server import api_router
 from fastapi import FastAPI
 from unittest.mock import patch, AsyncMock
-from admin_auth import get_current_admin_flex
-from routes_events import router
+from core.admin_auth import get_current_admin_flex
+from modules.core_api.routes_events import router
 
 app = FastAPI()
 app.include_router(router)

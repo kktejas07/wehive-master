@@ -14,9 +14,7 @@ import AIServices from '../components/ai/AIServices';
 import OnTimeGuarantee from '../components/OnTimeGuarantee';
 import WorldMap from '../components/world-map/WorldMap';
 
-import LiveTickerMarquee from '../components/LiveTickerMarquee';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
-import SchengenCarousel from '../components/SchengenCarousel';
 import { motion } from 'framer-motion';
 import { Globe, ArrowRight, Sparkles, Plane, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -32,15 +30,13 @@ export default function Home() {
     <div>
       <Navbar />
       <Hero filters={filters} onFilters={setFilters} />
-      <LiveTickerMarquee />
-      <SchengenCarousel />
+      <AIServices />
       <CountryGrid filters={filters} />
       <OnTimeGuarantee />
       <StatsStrip />
       <DealsSection />
       <EventsBanner />
       <Newsroom />
-      <AIServices />
       <HowItWorks />
       <Faq />
       <CtaBanner />

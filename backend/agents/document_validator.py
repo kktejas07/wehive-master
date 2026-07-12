@@ -9,7 +9,7 @@ Validates:
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from data import get_country
+from shared.data import get_country
 
 REQUIRED_DOCS = {
     "tourist": [

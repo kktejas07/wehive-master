@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 from typing import Any, Optional
 
-from db import db
+from core.db import db
 
 logger = logging.getLogger('wehive.audit')
 

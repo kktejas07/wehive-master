@@ -6,7 +6,7 @@ so admin can change values via the dashboard without restarting the server.
 
 import os
 from datetime import datetime
-from db import db
+from core.db import db
 
 settings_col = db['settings']
 

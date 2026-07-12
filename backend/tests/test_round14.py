@@ -241,7 +241,7 @@ class TestScanR2Helpers:
         try:
             import sys
             sys.path.insert(0, '/app/backend')
-            import storage as r2  # type: ignore
+            import core.storage as r2  # type: ignore
         except Exception as e:
             pytest.skip(f'storage module unavailable: {e}')
         if not r2.is_configured():

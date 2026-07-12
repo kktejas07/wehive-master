@@ -34,7 +34,7 @@ class TestAIMarketplace:
 # ─── admin_auth (all remaining functions) ────────────────────────────────────
 class TestAdminAuthExtended:
     def test_hash_and_verify(self):
-        from admin_auth import hash_password, verify_password
+        from core.admin_auth import hash_password, verify_password
         h = hash_password("test123")
         assert verify_password("test123", h)
         assert not verify_password("wrong", h)
@@ -42,21 +42,21 @@ class TestAdminAuthExtended:
 
     @pytest.mark.asyncio
     async def test_get_current_admin_flex_no_header(self):
-        from admin_auth import get_current_admin_flex
+        from core.admin_auth import get_current_admin_flex
         from fastapi import HTTPException
         with pytest.raises(HTTPException):
             await get_current_admin_flex(None)
 
     @pytest.mark.asyncio
     async def test_get_current_admin_flex_not_bearer(self):
-        from admin_auth import get_current_admin_flex
+        from core.admin_auth import get_current_admin_flex
         from fastapi import HTTPException
         with pytest.raises(HTTPException):
             await get_current_admin_flex("Token abc")
 
     @pytest.mark.asyncio
     async def test_get_current_admin_flex_bad_token(self):
-        from admin_auth import get_current_admin_flex
+        from core.admin_auth import get_current_admin_flex
         with pytest.raises(Exception):
             await get_current_admin_flex("Bearer badtoken")
 
@@ -65,7 +65,7 @@ class TestAdminAuthExtended:
 class TestDB:
     @pytest.mark.asyncio
     async def test_ensure_indexes(self):
-        from db import ensure_indexes
+        from core.db import ensure_indexes
         with patch("motor.motor_asyncio.AsyncIOMotorCollection.create_index", new_callable=AsyncMock) as mock_create:
             await ensure_indexes()
             assert mock_create.called
@@ -74,20 +74,20 @@ class TestDB:
 # ─── Routes helpers (pure functions from route files) ────────────────────────
 class TestRouteHelpers:
     def test_sanitize_hint(self):
-        from routes_scan import sanitize_hint
+        from modules.integrations.routes_scan import sanitize_hint
         assert sanitize_hint("normal") == "normal"
         assert "<" not in sanitize_hint("<script>")
         assert len(sanitize_hint("x" * 300)) == 200
 
     def test_build_prompt_with_hint(self):
-        from routes_scan import build_prompt_with_hint
+        from modules.integrations.routes_scan import build_prompt_with_hint
         p = build_prompt_with_hint("BASE", "hint")
         assert "BASE" in p
         assert "hint" in p
         assert build_prompt_with_hint("BASE", "") == "BASE"
 
     def test_notify_status_change_exists(self):
-        from routes_chatbot import notify_status_change
+        from modules.integrations.routes_chatbot import notify_status_change
         import inspect
         assert inspect.iscoroutinefunction(notify_status_change)
 
@@ -95,26 +95,26 @@ class TestRouteHelpers:
 # ─── routes_scan helpers (more tests) ────────────────────────────────────────
 class TestScanHelpersExtended:
     def test_detect_mime_valid(self):
-        from routes_scan import _detect_scan_mime
+        from modules.integrations.routes_scan import _detect_scan_mime
         assert _detect_scan_mime(b"\xff\xd8\xff\xe0" + b"\x00" * 10) == "image/jpeg"
         assert _detect_scan_mime(b"\x89PNG\r\n\x1a\n" + b"\x00" * 10) == "image/png"
 
     def test_detect_scan_mime_none(self):
-        from routes_scan import _detect_scan_mime
+        from modules.integrations.routes_scan import _detect_scan_mime
         assert _detect_scan_mime(b"\x00\x01\x02") is None
 
 
 # ─── storage remaining coverage ──────────────────────────────────────────────
 class TestStorageRemaining:
     def test_is_configured(self):
-        import storage
+        import core.storage as storage
         assert hasattr(storage, 'is_configured')
 
     def test_upload_and_delete(self):
         with patch("storage._get_client") as get_c:
             client = MagicMock()
             get_c.return_value = client
-            from storage import upload_bytes, delete_object
+            from core.storage import upload_bytes, delete_object
             r = upload_bytes("test/k", b"data")
             assert r["storage"] == "r2"
             assert r["key"] == "test/k"

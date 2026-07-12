@@ -15,7 +15,7 @@ os.environ.setdefault('DB_NAME', 'wehive_test')
 os.environ.setdefault('JWT_SECRET', 'test_secret_key_for_unit_tests_do_not_use_in_prod')
 os.environ.setdefault('APP_ENV', 'test')
 
-from routes_scan import sanitize_hint, build_prompt_with_hint
+from modules.integrations.routes_scan import sanitize_hint, build_prompt_with_hint
 
 
 BASE_PROMPT = 'You are a document OCR engine. Extract fields as JSON.'

@@ -30,7 +30,7 @@ def _load_auth_utils_with(secret: str, app_env: str = 'production'):
     """Reload auth_utils with specific JWT_SECRET and APP_ENV values."""
     os.environ['JWT_SECRET'] = secret
     os.environ['APP_ENV'] = app_env
-    import auth_utils
+    import core.auth_utils as auth_utils
     importlib.reload(auth_utils)
     return auth_utils
 
@@ -76,7 +76,7 @@ class TestJwtTtl:
         os.environ['APP_ENV'] = 'test'
         os.environ.pop('JWT_EXPIRES_HOURS', None)
         global _auth
-        import auth_utils
+        import core.auth_utils as auth_utils
         importlib.reload(auth_utils)
         _auth = auth_utils
 
@@ -103,7 +103,7 @@ class TestJwtTtl:
 
     def test_custom_ttl_via_env(self):
         os.environ['JWT_EXPIRES_HOURS'] = '48'
-        import auth_utils
+        import core.auth_utils as auth_utils
         importlib.reload(auth_utils)
         assert auth_utils.JWT_EXPIRES_HOURS == 48
         os.environ.pop('JWT_EXPIRES_HOURS', None)
@@ -116,7 +116,7 @@ class TestExtraPayload:
     def setup_method(self, _method):
         os.environ['JWT_SECRET'] = 'test_secret_key_for_unit_tests_12345_LONG_ENOUGH'
         os.environ['APP_ENV'] = 'test'
-        import auth_utils
+        import core.auth_utils as auth_utils
         importlib.reload(auth_utils)
         global _auth
         _auth = auth_utils
@@ -152,7 +152,7 @@ class TestPasswordStrength:
         os.environ['APP_ENV'] = 'test'
         from fastapi import HTTPException
         self.HTTPException = HTTPException
-        import routes_users
+        import modules.core_api.routes_users as routes_users
         importlib.reload(routes_users)
         self._validate = routes_users._validate_password_strength
 

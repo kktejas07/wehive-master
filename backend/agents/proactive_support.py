@@ -108,7 +108,7 @@ async def llm_behavior_insight(check_results: list) -> str:
 
     signal_text = "\n".join(signals)
     try:
-        from model_router import chat_with_profile
+        from shared.model_router import chat_with_profile
         response = await chat_with_profile(
             "fast_cheap",
             [

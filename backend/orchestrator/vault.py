@@ -7,8 +7,8 @@ import logging
 from datetime import datetime, timezone
 
 
-from byok_vault import decrypt_key, encrypt_key
-from db import db
+from shared.byok_vault import decrypt_key, encrypt_key
+from core.db import db
 
 logger = logging.getLogger(__name__)
 

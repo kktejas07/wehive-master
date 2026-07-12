@@ -238,12 +238,12 @@ def _make_response(id: Any, result: Any = None, error: dict = None) -> dict:
 
 
 async def _execute_tool(tool_name: str, arguments: dict) -> dict:
-    from db import db as mongo_db
+    from core.db import db as mongo_db
 
     if tool_name == "wehive_visa_lookup":
         country = arguments.get("country", "").lower()
         try:
-            from eva_tools import lookup_country
+            from shared.eva_tools import lookup_country
             result = await lookup_country(country)
             return {"content": [{"type": "text", "text": json.dumps(result or {}, default=str)}]}
         except Exception as e:
@@ -270,7 +270,7 @@ async def _execute_tool(tool_name: str, arguments: dict) -> dict:
         visa_type = arguments.get("visa_type", "tourist")
         applicants = arguments.get("applicants", 1)
         try:
-            from eva_tools import get_application_fee
+            from shared.eva_tools import get_application_fee
             fee = await get_application_fee(country, visa_type)
             result = {"country": country, "visa_type": visa_type, "applicants": applicants,
                       "fee_per_applicant": fee, "total": fee * applicants,
@@ -302,7 +302,7 @@ async def _execute_tool(tool_name: str, arguments: dict) -> dict:
     elif tool_name == "wehive_risk_assessment":
         app_id = arguments.get("application_id", "")
         try:
-            from routes_people_intelligence import _compute_risk_score
+            from modules.integrations.routes_people_intelligence import _compute_risk_score
             app = await mongo_db["applications"].find_one({"_id": app_id})
             if app and app.get("user_id"):
                 risk = await _compute_risk_score(app["user_id"])
@@ -315,7 +315,7 @@ async def _execute_tool(tool_name: str, arguments: dict) -> dict:
         query = arguments.get("query", "")
         top_k = arguments.get("top_k", 5)
         try:
-            from rag_service import retrieve_context
+            from shared.rag_service import retrieve_context
             context = await retrieve_context(query, top_k=top_k)
             return {"content": [{"type": "text", "text": context[:3000]}]}
         except Exception as e:
@@ -400,7 +400,7 @@ async def _execute_tool(tool_name: str, arguments: dict) -> dict:
 
 
 async def _read_resource(uri: str) -> dict:
-    from db import db as mongo_db
+    from core.db import db as mongo_db
 
     if uri == "wehive://countries/list":
         countries = await mongo_db["countries_v2"].find({}, {"name": 1, "capital": 1, "region": 1, "id": 1}).to_list(300)

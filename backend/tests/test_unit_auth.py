@@ -11,7 +11,7 @@ os.environ["JWT_SECRET"] = "test_secret_key_for_unit_tests_12345"
 os.environ["OTP_LENGTH"] = "6"
 os.environ["OTP_TTL_MINUTES"] = "10"
 
-from auth_utils import (
+from core.auth_utils import (
     classify_identifier,
     normalize_phone,
     mask,

@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 os.environ['MONGO_URL'] = 'mongodb://localhost:27017'
 os.environ['DB_NAME'] = 'wehive_test'
 
-from fee_calculator import (
+from shared.fee_calculator import (
     compute_fees, compute_multi_university_fees, base_fee_for,
     FLAT_APPLICATION_FEE_INR, DEFAULT_BASE_FEE_BY_TYPE,
     DEFAULT_SURCHARGE_INR, DEFAULT_GST_RATE,

@@ -164,7 +164,7 @@ def amadeus_status() -> dict:
 
 async def _cache_to_mongo(collection_name: str, key: str, data: dict, ttl_hours: int = 6):
     try:
-        from db import db
+        from core.db import db
         await db[collection_name].update_one(
             {"key": key},
             {"$set": {"key": key, "data": data, "cached_at": datetime.utcnow()}},
@@ -176,7 +176,7 @@ async def _cache_to_mongo(collection_name: str, key: str, data: dict, ttl_hours:
 
 async def _get_from_mongo(collection_name: str, key: str, ttl_hours: int = 6) -> Optional[dict]:
     try:
-        from db import db
+        from core.db import db
         doc = await db[collection_name].find_one({"key": key})
         if doc and (datetime.utcnow() - doc["cached_at"]).total_seconds() < ttl_hours * 3600:
             return doc["data"]

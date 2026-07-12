@@ -28,7 +28,7 @@ class OrchestratorResult:
 async def detect_intent_llm(query: str) -> Optional[dict]:
     """Use LLM to detect intent with higher accuracy than regex."""
     try:
-        from model_router import chat_with_profile
+        from shared.model_router import chat_with_profile
         response = await chat_with_profile(
             "fast_cheap",
             [

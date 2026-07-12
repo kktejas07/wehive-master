@@ -70,7 +70,7 @@ class TestPublicRoutes:
             e.find = MagicMock(return_value=AsyncIter([]))
             a.find_one = AsyncMock(return_value={"_id": "a1", "country_id": "ca", "visa_type": "Tourist", "status": "in_review", "timeline": []})
             c.find_one = AsyncMock(return_value={"name": "Canada"})
-            import routes_public
+            import modules.core_api.routes_public as routes_public
             app = FastAPI(); app.include_router(routes_public.router); self.client = TestClient(app)
             yield
 
@@ -86,7 +86,7 @@ class TestLeadsRoutes:
     def setup(self):
         with patch("routes_leads.leads") as col:
             col.insert_one = AsyncMock()
-            import routes_leads
+            import modules.core_api.routes_leads as routes_leads
             app = FastAPI(); app.include_router(routes_leads.router); self.client = TestClient(app)
             yield
     def test_create(self):
@@ -126,7 +126,7 @@ class TestCountriesRoutes:
                 distinct=AsyncMock(return_value=["Tourist"]),
             )
             db.__getitem__.return_value = c
-            import routes_countries
+            import modules.core_api.routes_countries as routes_countries
             app = FastAPI(); app.include_router(routes_countries.router); self.client = TestClient(app)
             yield
     def test_list(self):
@@ -142,8 +142,8 @@ class TestNotificationsRoutes:
         with patch("routes_notifications.notifications_col") as col:
             col.update_one = AsyncMock(); col.update_many = AsyncMock()
             col.delete_one = AsyncMock(); col.count_documents = AsyncMock(return_value=5)
-            from auth_utils import get_current_user
-            import routes_notifications
+            from core.auth_utils import get_current_user
+            import modules.core_api.routes_notifications as routes_notifications
             app = FastAPI(); app.include_router(routes_notifications.router)
             app.dependency_overrides[get_current_user] = lambda: {"_id": "u1"}
             self.client = TestClient(app)
@@ -168,7 +168,7 @@ class TestProgramsRoutes:
                 find_one=AsyncMock(return_value={"_id": "p1", "name": "CS", "requirements": []}),
             )
             db.__getitem__.return_value = c
-            import routes_programs
+            import modules.core_api.routes_programs as routes_programs
             app = FastAPI(); app.include_router(routes_programs.router); self.client = TestClient(app)
             yield
     def test_list(self):
@@ -184,8 +184,8 @@ class TestReviewsRoutes:
         with patch("routes_reviews.reviews_col") as col:
             col.insert_one = AsyncMock(); col.delete_one = AsyncMock()
             col.count_documents = AsyncMock(return_value=0)
-            from auth_utils import get_current_user
-            import routes_reviews
+            from core.auth_utils import get_current_user
+            import modules.core_api.routes_reviews as routes_reviews
             app = FastAPI(); app.include_router(routes_reviews.router)
             app.dependency_overrides[get_current_user] = lambda: {"_id": "u1"}
             self.client = TestClient(app)
@@ -200,8 +200,8 @@ class TestProfileRequestRoutes:
     def setup(self):
         with patch("routes_profile_requests.profile_change_requests") as col:
             col.insert_one = AsyncMock(); col.update_one = AsyncMock()
-            from auth_utils import get_current_user
-            import routes_profile_requests
+            from core.auth_utils import get_current_user
+            import modules.agents.routes_profile_requests as routes_profile_requests
             app = FastAPI(); app.include_router(routes_profile_requests.router)
             app.dependency_overrides[get_current_user] = lambda: {"_id": "u1"}
             self.client = TestClient(app)
@@ -221,8 +221,8 @@ class TestChatbotRoutes:
             s.find_one = AsyncMock(return_value={"_id": "s1", "user_id": "u1"})
             m.insert_one = AsyncMock()
             n.insert_one = AsyncMock()
-            from auth_utils import get_current_user_optional
-            import routes_chatbot
+            from core.auth_utils import get_current_user_optional
+            import modules.integrations.routes_chatbot as routes_chatbot
             app = FastAPI(); app.include_router(routes_chatbot.router)
             app.dependency_overrides[get_current_user_optional] = lambda: {"_id": "u1"}
             self.client = TestClient(app)
@@ -247,8 +247,8 @@ class TestUsersRoutes:
             apps.find = MagicMock(return_value=AsyncIter([]))
             plans.insert_one = AsyncMock()
             plans.find = MagicMock(return_value=AsyncIter([]))
-            from auth_utils import get_current_user
-            import routes_users
+            from core.auth_utils import get_current_user
+            import modules.core_api.routes_users as routes_users
             app = FastAPI(); app.include_router(routes_users.router)
             app.dependency_overrides[get_current_user] = lambda: {"_id": "u1"}
             self.client = TestClient(app)

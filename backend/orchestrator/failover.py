@@ -10,7 +10,7 @@ import time
 from collections import defaultdict
 from typing import Optional
 
-from db import db
+from core.db import db
 from orchestrator.models import CircuitState
 from orchestrator.vault import PROVIDER_BASE_URLS, AccountsVault
 

@@ -17,8 +17,8 @@ os.environ.setdefault('APP_ENV', 'test')
 
 
 # ── import helpers directly from the modules ─────────────────────────────────
-from routes_apps import _detect_mime, _safe_filename, UPLOAD_ROOT, ALLOWED_MIME
-from routes_scan import _detect_scan_mime, ALLOWED_MIME as SCAN_ALLOWED_MIME
+from modules.core_api.routes_apps import _detect_mime, _safe_filename, UPLOAD_ROOT, ALLOWED_MIME
+from modules.integrations.routes_scan import _detect_scan_mime, ALLOWED_MIME as SCAN_ALLOWED_MIME
 
 
 # ─────────────────────────────────────────────────────────────────────────────

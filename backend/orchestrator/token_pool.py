@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 
-from db import db
+from core.db import db
 from orchestrator.vault import AccountsVault
 
 logger = logging.getLogger(__name__)

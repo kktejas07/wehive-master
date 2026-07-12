@@ -67,7 +67,7 @@ def moderate_review(text: str, rating: int) -> dict:
 async def llm_moderate_review(text: str, rating: int) -> dict:
     """Use LLM for more accurate spam and sentiment detection."""
     try:
-        from model_router import chat_with_profile
+        from shared.model_router import chat_with_profile
         response = await chat_with_profile(
             "fast_cheap",
             [

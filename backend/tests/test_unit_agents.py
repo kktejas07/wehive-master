@@ -423,13 +423,13 @@ class TestPdfAgent:
 
 
 # ─── Tool Registry ────────────────────────────────────────────────────────────
-from tool_registry import Tool, register_tool, get_tool, list_tools, tool_definitions
+from shared.tool_registry import Tool, register_tool, get_tool, list_tools, tool_definitions
 
 
 class TestToolRegistry:
     def setup_method(self):
         # Clear registry
-        import tool_registry as tr
+        import shared.tool_registry as tr
         tr._tools.clear()
 
     def test_register_and_get_tool(self):
@@ -467,7 +467,7 @@ class TestToolRegistry:
         assert defs[0]["name"] == "def_test"
 
     def test_register_all(self):
-        import tool_registry as tr
+        import shared.tool_registry as tr
         tr._tools.clear()
         with patch("eva_tools.lookup_country", new=AsyncMock()):
             with patch("eva_tools.search_countries", new=AsyncMock()):

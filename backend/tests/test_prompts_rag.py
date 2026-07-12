@@ -24,7 +24,7 @@ import pytest
 
 # ─── prompts_lib ─────────────────────────────────────────────────────────────
 
-from prompts_lib import (
+from shared.prompts_lib import (
     Prompt,
     PromptStore,
     render,
@@ -163,7 +163,7 @@ class TestPromptStore:
 
 # ─── vector_store ────────────────────────────────────────────────────────────
 
-from vector_store import (
+from shared.vector_store import (
     reset_client,
     get_collection,
     list_collections,
@@ -251,7 +251,7 @@ class TestVectorStore:
 
 # ─── rag_ingest ─────────────────────────────────────────────────────────────
 
-from rag_ingest import chunk_text, dict_to_text, make_id, ingest_documents
+from shared.rag_ingest import chunk_text, dict_to_text, make_id, ingest_documents
 
 
 class TestChunkText:
@@ -346,7 +346,7 @@ class TestIngestDocuments:
 
     @pytest.mark.asyncio
     async def test_ingest_text_documents(self):
-        from rag_ingest import ingest_text_documents
+        from shared.rag_ingest import ingest_text_documents
         with patch("rag_ingest.embed_texts", new=AsyncMock(return_value=[[0.1, 0.2]] * 2)):
             res = await ingest_text_documents(
                 "faq_test",
@@ -361,7 +361,7 @@ class TestIngestDocuments:
 
 # ─── ollama_embeddings ──────────────────────────────────────────────────────
 
-from ollama_embeddings import (
+from shared.ollama_embeddings import (
     embed_texts,
     embed_query,
     _stub_vector,
@@ -412,7 +412,7 @@ class TestEmbedOffline:
 
     @pytest.mark.asyncio
     async def test_raise_on_offline(self):
-        from ollama_embeddings import embed_texts
+        from shared.ollama_embeddings import embed_texts
         with patch("ollama_embeddings.is_available", new=AsyncMock(return_value=False)):
             with pytest.raises(RuntimeError):
                 await embed_texts(["x"], raise_on_offline=True)

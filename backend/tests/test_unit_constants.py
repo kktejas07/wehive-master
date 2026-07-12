@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 os.environ['MONGO_URL'] = 'mongodb://localhost:27017'
 os.environ['DB_NAME'] = 'wehive_test'
 
-from constants import AppStatus, OtpChannel, BILLABLE_STATUSES, STATUS_LABELS, REFERRAL_REWARD_INR, MIN_DEPOSIT_FOR_REWARD
+from core.constants import AppStatus, OtpChannel, BILLABLE_STATUSES, STATUS_LABELS, REFERRAL_REWARD_INR, MIN_DEPOSIT_FOR_REWARD
 
 
 class TestAppStatus:

@@ -5,7 +5,7 @@ Each agent independently checks conditions and returns actionable items.
 import logging
 from typing import List
 
-from db import db
+from core.db import db
 from agents.application_progress import run_all_checks as check_progress
 from agents.deadline_agent import run_all_checks as check_deadlines
 from agents.document_readiness import run_all_checks as check_documents

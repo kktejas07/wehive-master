@@ -117,7 +117,7 @@ async def llm_anomaly_insight(anomalies: list) -> str:
 
     anomaly_text = "\n".join(f"- {a.get('type','')}: {a.get('message','')}" for a in anomalies)
     try:
-        from model_router import chat_with_profile
+        from shared.model_router import chat_with_profile
         response = await chat_with_profile(
             "fast_cheap",
             [

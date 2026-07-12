@@ -1232,7 +1232,7 @@ class AIMarketplace:
         Falls back to a smart router using all available .env keys when no user-level config exists."""
         try:
             if self.db is None:
-                from db import db as _db
+                from core.db import db as _db
                 self.db = _db
             doc = await self.db["ai_settings"].find_one({"user_id": user_id})
             if doc and doc.get("active_provider"):
@@ -1319,7 +1319,7 @@ class AIMarketplace:
                 
         # 3. Tier 2: Local LLM Fallback
         try:
-            from local_llm import local_chat_with_info
+            from shared.local_llm import local_chat_with_info
             reply_dict = await local_chat_with_info(user_prompt, context=system_prompt)
             content = reply_dict.get("content", "").strip()
             if content:
@@ -1367,7 +1367,7 @@ class AIMarketplace:
                 
         # 3. Tier 2: Local LLM Fallback
         try:
-            from local_llm import local_chat_with_info
+            from shared.local_llm import local_chat_with_info
             reply_dict = await local_chat_with_info(user_prompt, context=system_prompt)
             content = reply_dict.get("content", "").strip()
             if content:

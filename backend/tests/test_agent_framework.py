@@ -15,7 +15,7 @@ os.environ.setdefault("APP_ENV", "test")
 from unittest.mock import AsyncMock, patch, MagicMock
 import pytest
 
-from agent_framework import (
+from shared.agent_framework import (
     AgentSpec,
     AgentStep,
     AgentRun,
@@ -176,7 +176,7 @@ class TestStringifyToolResult:
 
 class TestGetToolDescriptions:
     def setup_method(self):
-        import tool_registry as tr
+        import shared.tool_registry as tr
         tr._tools.clear()
         async def handler(**kwargs):
             return "ok"
@@ -188,7 +188,7 @@ class TestGetToolDescriptions:
         )
 
     def teardown_method(self):
-        import tool_registry as tr
+        import shared.tool_registry as tr
         tr._tools.clear()
 
     def test_describes_known_tool(self):
@@ -211,7 +211,7 @@ class TestGetToolDescriptions:
 
 class TestRunAgent:
     def setup_method(self):
-        import tool_registry as tr
+        import shared.tool_registry as tr
         tr._tools.clear()
         async def echo_handler(**kwargs):
             return {"echo": kwargs}
@@ -228,12 +228,12 @@ class TestRunAgent:
         )
 
     def teardown_method(self):
-        import tool_registry as tr
+        import shared.tool_registry as tr
         tr._tools.clear()
 
     @pytest.mark.asyncio
     async def test_final_answer_no_tool_call(self):
-        from prompts_lib import reset_store, Prompt, PromptStore
+        from shared.prompts_lib import reset_store, Prompt, PromptStore
         reset_store()
         tmp = os.path.join(os.path.dirname(__file__), "_tmp_prompts_no_tool")
         os.makedirs(tmp, exist_ok=True)
@@ -259,7 +259,7 @@ class TestRunAgent:
 
     @pytest.mark.asyncio
     async def test_tool_call_then_final_answer(self):
-        from prompts_lib import reset_store, PromptStore
+        from shared.prompts_lib import reset_store, PromptStore
         reset_store()
         tmp = os.path.join(os.path.dirname(__file__), "_tmp_prompts_tool")
         os.makedirs(tmp, exist_ok=True)
@@ -296,7 +296,7 @@ class TestRunAgent:
 
     @pytest.mark.asyncio
     async def test_unknown_tool_recovers(self):
-        from prompts_lib import reset_store, PromptStore
+        from shared.prompts_lib import reset_store, PromptStore
         reset_store()
         tmp = os.path.join(os.path.dirname(__file__), "_tmp_prompts_unknown")
         os.makedirs(tmp, exist_ok=True)
@@ -329,7 +329,7 @@ class TestRunAgent:
 
     @pytest.mark.asyncio
     async def test_max_iterations_uses_last_thought(self):
-        from prompts_lib import reset_store, PromptStore
+        from shared.prompts_lib import reset_store, PromptStore
         reset_store()
         tmp = os.path.join(os.path.dirname(__file__), "_tmp_prompts_max")
         os.makedirs(tmp, exist_ok=True)
@@ -357,7 +357,7 @@ class TestRunAgent:
 
     @pytest.mark.asyncio
     async def test_llm_error_sets_run_error(self):
-        from prompts_lib import reset_store, PromptStore
+        from shared.prompts_lib import reset_store, PromptStore
         reset_store()
         tmp = os.path.join(os.path.dirname(__file__), "_tmp_prompts_err")
         os.makedirs(tmp, exist_ok=True)

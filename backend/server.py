@@ -14,64 +14,73 @@ from starlette.middleware.cors import CORSMiddleware
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-from db import ensure_indexes  # noqa: E402
-from routes_auth import router as auth_router  # noqa: E402
-from routes_users import router as users_router  # noqa: E402
-from routes_countries import router as countries_router  # noqa: E402
-from routes_leads import router as leads_router  # noqa: E402
-from routes_apps import router as apps_router  # noqa: E402
-from routes_chatbot import router as chatbot_router  # noqa: E402
-from routes_scan import router as scan_router  # noqa: E402
-from routes_flights import router as flights_router  # noqa: E402
-from routes_admin import router as admin_router  # noqa: E402
-from routes_admin_auth import router as admin_auth_router, ensure_seed_admin  # noqa: E402
-from routes_public import router as public_router  # noqa: E402
-from routes_events import router as events_router  # noqa: E402
-from routes_blogs import router as blogs_router  # noqa: E402
-from routes_news import router as news_router  # noqa: E402
-from routes_ai_docs import router as ai_docs_router  # noqa: E402
-from routes_payments import router as payments_router  # noqa: E402
-from routes_notifications import router as notifications_router  # noqa: E402
-from routes_referrals import router as referrals_router  # noqa: E402
-from routes_ai_marketplace import router as ai_marketplace_router  # noqa: E402
-from routes_third_party import router as third_party_router  # noqa: E402
-from routes_universities import router as universities_router  # noqa: E402
+from core.db import ensure_indexes  # noqa: E402
+from modules.core_api.routes_auth import router as auth_router  # noqa: E402
+from modules.core_api.routes_users import router as users_router  # noqa: E402
+from modules.core_api.routes_countries import router as countries_router  # noqa: E402
+from modules.core_api.routes_leads import router as leads_router  # noqa: E402
+from modules.core_api.routes_apps import router as apps_router  # noqa: E402
+from modules.integrations.routes_chatbot import router as chatbot_router  # noqa: E402
+from modules.integrations.routes_scan import router as scan_router  # noqa: E402
+from modules.core_api.routes_flights import router as flights_router  # noqa: E402
+from modules.admin.routes_admin import router as admin_router  # noqa: E402
+from modules.admin.routes_admin_auth import router as admin_auth_router, ensure_seed_admin  # noqa: E402
+from modules.core_api.routes_public import router as public_router  # noqa: E402
+from modules.core_api.routes_events import router as events_router  # noqa: E402
+from modules.core_api.routes_blogs import router as blogs_router  # noqa: E402
+from modules.core_api.routes_news import router as news_router  # noqa: E402
+from modules.ai.routes_ai_docs import router as ai_docs_router  # noqa: E402
+from modules.core_api.routes_payments import router as payments_router  # noqa: E402
+from modules.core_api.routes_notifications import router as notifications_router  # noqa: E402
+from modules.core_api.routes_referrals import router as referrals_router  # noqa: E402
+from modules.ai.routes_ai_marketplace import router as ai_marketplace_router  # noqa: E402
+from modules.integrations.routes_third_party import router as third_party_router  # noqa: E402
+from modules.core_api.routes_universities import router as universities_router  # noqa: E402
 from routes_communication import router as communication_router  # noqa: E402
-from routes_profile_requests import router as profile_requests_router  # noqa: E402
-from routes_promotions import router as promotions_router  # noqa: E402
-from routes_agents import router as agents_router  # noqa: E402
-from routes_visa_scheduling import router as visa_scheduling_router  # noqa: E402
-from routes_shortlist import router as shortlist_router  # noqa: E402
-from routes_university_apps import router as university_apps_router  # noqa: E402
-from routes_admin_universities import router as admin_universities_router  # noqa: E402
-from routes_ai_universities import router as ai_universities_router  # noqa: E402
-from routes_programs import router as programs_router, admin_router as admin_programs_router  # noqa: E402
-from routes_reviews import router as reviews_router  # noqa: E402
-from routes_i18n import router as i18n_router  # noqa: E402
-from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
-from routes_rag import router as rag_router  # noqa: E402
-from routes_prompts import router as prompts_router  # noqa: E402
-from routes_agents_v2 import router as agents_v2_router  # noqa: E402
-from routes_hive_learning import router as hive_learning_router  # noqa: E402
-from routes_slot_monitor import router as slot_monitor_router  # noqa: E402
-from routes_learning_resources import router as learning_resources_router  # noqa: E402
-from routes_people_intelligence import router as people_intelligence_router  # noqa: E402
-from routes_gen_ai import router as gen_ai_router  # noqa: E402
-from routes_open_source import router as open_source_router  # noqa: E402
-from routes_google_knowledge import router as google_knowledge_router  # noqa: E402
-from routes_agentic_ai import router as agentic_ai_router  # noqa: E402
-from routes_ai_operations import router as ai_operations_router  # noqa: E402
-from routes_mcp import router as mcp_router  # noqa: E402
-from routes_training import router as training_router  # noqa: E402
-from routes_knowledge_services import router as knowledge_services_router  # noqa: E402
-from routes_model_router import router as model_router_router  # noqa: E402
-from routes_n8n import router as n8n_router  # noqa: E402
-from routes_adapters import router as adapters_router  # noqa: E402
-from seed_countries import seed as seed_countries  # noqa: E402
-from seed_universities import seed as seed_universities  # noqa: E402
-from db import countries_v2, db  # noqa: E402
+from modules.agents.routes_profile_requests import router as profile_requests_router  # noqa: E402
+from modules.core_api.routes_promotions import router as promotions_router  # noqa: E402
+from modules.agents.routes_agents import router as agents_router  # noqa: E402
+from modules.core_api.routes_visa_scheduling import router as visa_scheduling_router  # noqa: E402
+from modules.core_api.routes_shortlist import router as shortlist_router  # noqa: E402
+from modules.core_api.routes_university_apps import router as university_apps_router  # noqa: E402
+from modules.admin.routes_admin_universities import router as admin_universities_router  # noqa: E402
+from modules.ai.routes_ai_universities import router as ai_universities_router  # noqa: E402
+from modules.core_api.routes_programs import router as programs_router, admin_router as admin_programs_router  # noqa: E402
+from modules.core_api.routes_reviews import router as reviews_router  # noqa: E402
+from modules.core_api.routes_i18n import router as i18n_router  # noqa: E402
+from modules.ai.routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
+from modules.ai.routes_rag import router as rag_router  # noqa: E402
+from modules.ai.routes_prompts import router as prompts_router  # noqa: E402
+from modules.agents.routes_agents_v2 import router as agents_v2_router  # noqa: E402
+from modules.integrations.routes_hive_learning import router as hive_learning_router  # noqa: E402
+from modules.core_api.routes_slot_monitor import router as slot_monitor_router  # noqa: E402
+from modules.integrations.routes_learning_resources import router as learning_resources_router  # noqa: E402
+from modules.integrations.routes_people_intelligence import router as people_intelligence_router  # noqa: E402
+from modules.ai.routes_gen_ai import router as gen_ai_router  # noqa: E402
+from modules.integrations.routes_open_source import router as open_source_router  # noqa: E402
+from modules.integrations.routes_google_knowledge import router as google_knowledge_router  # noqa: E402
+from modules.ai.routes_agentic_ai import router as agentic_ai_router  # noqa: E402
+from modules.ai.routes_ai_operations import router as ai_operations_router  # noqa: E402
+from modules.integrations.routes_mcp import router as mcp_router  # noqa: E402
+from modules.integrations.routes_training import router as training_router  # noqa: E402
+from modules.ai.routes_knowledge_services import router as knowledge_services_router  # noqa: E402
+from modules.ai.routes_model_router import router as model_router_router  # noqa: E402
+from modules.integrations.routes_n8n import router as n8n_router  # noqa: E402
+from modules.integrations.routes_adapters import router as adapters_router  # noqa: E402
+from seed.seed_countries import seed as seed_countries  # noqa: E402
+from seed.seed_universities import seed as seed_universities  # noqa: E402
+from core.db import countries_v2, db  # noqa: E402
+from core.rate_limit import RateLimit
+from fastapi import Depends
 
-app = FastAPI(title='We Hive API', version='1.0.0')
+# Global DDoS Protection: 600 requests per IP per minute
+global_limiter = RateLimit(max_calls=600, window_seconds=60, by='ip')
+
+app = FastAPI(
+    title='We Hive API', 
+    version='1.0.0', 
+    dependencies=[Depends(global_limiter)]
+)
 
 api_router = APIRouter(prefix='/api')
 
@@ -157,7 +166,7 @@ app.include_router(api_router)
 @app.on_event("startup")
 async def startup():
     start_scheduler()
-    from slot_monitor import start_slot_monitor
+    from shared.slot_monitor import start_slot_monitor
     start_slot_monitor()
 
 _raw_origins = os.environ.get('ALLOWED_ORIGINS', '').strip()
@@ -192,6 +201,16 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+@app.middleware("http")
+async def security_headers_middleware(request, call_next):
+    response = await call_next(request)
+    # Basic helmet-style headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):
@@ -255,7 +274,7 @@ async def on_startup():
         logger.exception('Startup failure: %s', e)
 
     try:
-        from bootstrap_rag import bootstrap_rag_and_prompts
+        from shared.bootstrap_rag import bootstrap_rag_and_prompts
         await bootstrap_rag_and_prompts(db)
     except Exception as e:
         logger.exception('RAG/prompts bootstrap failed: %s', e)
@@ -263,5 +282,5 @@ async def on_startup():
 
 @app.on_event('shutdown')
 async def on_shutdown():
-    from db import client
+    from core.db import client
     client.close()

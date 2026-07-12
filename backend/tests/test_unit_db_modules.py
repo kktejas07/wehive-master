@@ -385,8 +385,8 @@ class TestAudit:
 
 
 # ─── Eva Tools ────────────────────────────────────────────────────────────────
-from eva_tools import lookup_country, search_countries, lookup_university, search_universities
-from eva_tools import get_visa_requirements, get_application_fee
+from shared.eva_tools import lookup_country, search_countries, lookup_university, search_universities
+from shared.eva_tools import get_visa_requirements, get_application_fee
 
 
 class TestEvaTools:
@@ -466,11 +466,11 @@ class TestEvaTools:
 
 
 # ─── Agent Loop ───────────────────────────────────────────────────────────────
-from agent_loop import (
+from shared.agent_loop import (
     react_chat, _build_system_prompt, _format_tool_descriptions
 )
-from agent_loop import _parse_tool_call_legacy as _parse_tool_call
-from tool_registry import Tool
+from shared.agent_loop import _parse_tool_call_legacy as _parse_tool_call
+from shared.tool_registry import Tool
 
 
 class TestAgentLoop:
@@ -557,7 +557,7 @@ class TestAgentLoop:
 
 
 # ─── Storage ──────────────────────────────────────────────────────────────────
-from storage import (
+from core.storage import (
     R2_BUCKET, doc_key, scan_key, is_configured, _get_client,
     upload_bytes, signed_download_url, delete_object
 )
@@ -583,7 +583,7 @@ class TestStorage:
     def test_get_client_not_configured_raises(self):
         with patch.dict(os.environ, {}, clear=True):
             import importlib
-            import storage as st
+            import core.storage as st
             importlib.reload(st)
             with pytest.raises(Exception):
                 st._get_client()

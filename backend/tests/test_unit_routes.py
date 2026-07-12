@@ -23,7 +23,7 @@ import pytest
 
 
 # ─── Routes Scan (remaining pure helpers) ─────────────────────────────────────
-from routes_scan import sanitize_hint, build_prompt_with_hint
+from modules.integrations.routes_scan import sanitize_hint, build_prompt_with_hint
 
 
 class TestScanHelpers:
@@ -51,11 +51,11 @@ class TestScanHelpers:
 
 
 # ─── Routes Chatbot (pure helpers) ────────────────────────────────────────────
-from routes_chatbot import (
+from modules.integrations.routes_chatbot import (
     _gather_context, notify_status_change, ChatStartRequest, ChatStartResponse,
     ChatMessageRequest, ChatMessageResponse, ChatSessionItem
 )
-from routes_chatbot import RE_COUNTRY_CODE, RE_STUDENT_KEYWORDS, RE_VISA_KEYWORDS
+from modules.integrations.routes_chatbot import RE_COUNTRY_CODE, RE_STUDENT_KEYWORDS, RE_VISA_KEYWORDS
 
 
 class TestChatbotHelpers:
@@ -133,7 +133,7 @@ class TestChatbotHelpers:
 
 # ─── Routes Countries (handlers use db) ───────────────────────────────────────
 # We can test the router creation and schema models
-from routes_countries import router as countries_router
+from modules.core_api.routes_countries import router as countries_router
 
 
 class TestCountriesRouter:
@@ -142,7 +142,7 @@ class TestCountriesRouter:
 
 
 # ─── Routes Public ────────────────────────────────────────────────────────────
-from routes_public import router as public_router
+from modules.core_api.routes_public import router as public_router
 
 
 class TestPublicRouter:
@@ -151,7 +151,7 @@ class TestPublicRouter:
 
 
 # ─── Routes Leads ─────────────────────────────────────────────────────────────
-from routes_leads import router as leads_router
+from modules.core_api.routes_leads import router as leads_router
 
 
 class TestLeadsRouter:
@@ -160,7 +160,7 @@ class TestLeadsRouter:
 
 
 # ─── Routes i18n ──────────────────────────────────────────────────────────────
-from routes_i18n import router as i18n_router
+from modules.core_api.routes_i18n import router as i18n_router
 
 
 class TestI18nRouter:
@@ -169,7 +169,7 @@ class TestI18nRouter:
 
 
 # ─── Routes Shortlist ─────────────────────────────────────────────────────────
-from routes_shortlist import router as shortlist_router
+from modules.core_api.routes_shortlist import router as shortlist_router
 
 
 class TestShortlistRouter:
@@ -178,7 +178,7 @@ class TestShortlistRouter:
 
 
 # ─── Routes Promotions ────────────────────────────────────────────────────────
-from routes_promotions import router as promotions_router
+from modules.core_api.routes_promotions import router as promotions_router
 
 
 class TestPromotionsRouter:
@@ -187,7 +187,7 @@ class TestPromotionsRouter:
 
 
 # ─── Routes Reviews ───────────────────────────────────────────────────────────
-from routes_reviews import router as reviews_router
+from modules.core_api.routes_reviews import router as reviews_router
 
 
 class TestReviewsRouter:
@@ -196,7 +196,7 @@ class TestReviewsRouter:
 
 
 # ─── Routes Referrals ─────────────────────────────────────────────────────────
-from routes_referrals import router as referrals_router
+from modules.core_api.routes_referrals import router as referrals_router
 
 
 class TestReferralsRouter:
@@ -214,7 +214,7 @@ class TestCommunicationRouter:
 
 
 # ─── Routes Flights ───────────────────────────────────────────────────────────
-from routes_flights import router as flights_router
+from modules.core_api.routes_flights import router as flights_router
 
 
 class TestFlightsRouter:
@@ -223,7 +223,7 @@ class TestFlightsRouter:
 
 
 # ─── Routes Profile Requests ──────────────────────────────────────────────────
-from routes_profile_requests import router as profile_requests_router
+from modules.agents.routes_profile_requests import router as profile_requests_router
 
 
 class TestProfileRequestsRouter:
@@ -232,7 +232,7 @@ class TestProfileRequestsRouter:
 
 
 # ─── Routes Programs ──────────────────────────────────────────────────────────
-from routes_programs import router as programs_router
+from modules.core_api.routes_programs import router as programs_router
 
 
 class TestProgramsRouter:
@@ -241,7 +241,7 @@ class TestProgramsRouter:
 
 
 # ─── Routes Third Party ───────────────────────────────────────────────────────
-from routes_third_party import router as third_party_router
+from modules.integrations.routes_third_party import router as third_party_router
 
 
 class TestThirdPartyRouter:
@@ -250,7 +250,7 @@ class TestThirdPartyRouter:
 
 
 # ─── Routes Notifications ─────────────────────────────────────────────────────
-from routes_notifications import router as notifications_router
+from modules.core_api.routes_notifications import router as notifications_router
 
 
 class TestNotificationsRouter:
@@ -259,8 +259,8 @@ class TestNotificationsRouter:
 
 
 # ─── Routes Users (partial — handlers use db, test models) ────────────────────
-from routes_users import router as users_router
-from models import UpdateProfileRequest, ApplicationCreate
+from modules.core_api.routes_users import router as users_router
+from core.models import UpdateProfileRequest, ApplicationCreate
 
 
 class TestUsersRouter:

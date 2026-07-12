@@ -22,7 +22,7 @@ import jwt as pyjwt
 
 
 # ─── Fee Calculator (full coverage) ──────────────────────────────────────────
-from fee_calculator import (
+from shared.fee_calculator import (
     compute_fees, compute_multi_university_fees, base_fee_for, revenue_for,
     FLAT_APPLICATION_FEE_INR, DEFAULT_BASE_FEE_BY_TYPE, DEFAULT_SURCHARGE_INR, DEFAULT_GST_RATE
 )
@@ -115,7 +115,7 @@ async def test_revenue_for_appointment_fee():
 
 
 # ─── Serializers (full coverage) ─────────────────────────────────────────────
-from serializers import _serialize_datetime, serialize_doc, public_user, public_admin, serialize_event
+from core.serializers import _serialize_datetime, serialize_doc, public_user, public_admin, serialize_event
 
 
 class TestSerializeDatetime:
@@ -191,7 +191,7 @@ class TestSerializeEvent:
 
 
 # ─── Normalize ────────────────────────────────────────────────────────────────
-from normalize import normalize_university
+from shared.normalize import normalize_university
 
 
 class TestNormalize:
@@ -221,20 +221,20 @@ class TestNormalize:
 # ─── Config ──────────────────────────────────────────────────────────────────
 class TestConfig:
     def test_admin_emails_parsed(self):
-        import config
+        import core.config as config
         assert "admin@test.com" in config.ADMIN_EMAILS
 
     def test_jwt_secret_set(self):
-        import config
+        import core.config as config
         assert config.JWT_SECRET
 
     def test_otp_ttl(self):
-        import config
+        import core.config as config
         assert config.OTP_TTL_MIN == 10
 
 
 # ─── Constants ────────────────────────────────────────────────────────────────
-from constants import AppStatus, OtpChannel, BILLABLE_STATUSES, STATUS_LABELS, REFERRAL_REWARD_INR, MIN_DEPOSIT_FOR_REWARD
+from core.constants import AppStatus, OtpChannel, BILLABLE_STATUSES, STATUS_LABELS, REFERRAL_REWARD_INR, MIN_DEPOSIT_FOR_REWARD
 
 
 class TestConstants:
@@ -258,7 +258,7 @@ class TestConstants:
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
-from models import (
+from core.models import (
     SendOtpRequest, VerifyOtpRequest, ApplicationCreate, Application,
     SavedPlanCreate, LeadCreate, Lead, UniversityApplicationCreate,
     PrimaryApplicant, UpdateProfileRequest, PublicUser, AuthTokens
@@ -302,7 +302,7 @@ class TestModels:
         assert p.name == "John"
 
     def test_university_app_create(self):
-        from models import UniversitySelection
+        from core.models import UniversitySelection
         sel = UniversitySelection(university_id="u1")
         req = UniversityApplicationCreate(universities=[sel], country_id="ca")
         assert len(req.universities) == 1
@@ -318,7 +318,7 @@ class TestModels:
 
 
 # ─── Auth Utils (remaining coverage) ─────────────────────────────────────────
-from auth_utils import (
+from core.auth_utils import (
     classify_identifier, normalize_phone, mask, sign_jwt, decode_jwt,
     gen_otp, otp_expiry, create_access_token, get_current_user,
     get_current_user_optional

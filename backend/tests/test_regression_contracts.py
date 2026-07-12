@@ -3,7 +3,7 @@
 Follows the AI-regression-testing approach: test response *contracts*
 where bugs were found, so regressions in API shape are caught early.
 """
-from models import (
+from core.models import (
     SendOtpRequest, SendOtpResponse, VerifyOtpRequest,
     AuthTokens, PublicUser, Application, ApplicationCreate,
     Lead, LeadCreate,

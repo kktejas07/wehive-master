@@ -19,7 +19,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from fastapi import HTTPException
-from rate_limit import RateLimit
+from core.rate_limit import RateLimit
 
 
 def _make_request(ip: str = '1.2.3.4', forwarded: str = None) -> MagicMock:

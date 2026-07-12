@@ -46,6 +46,7 @@ const NAV = [
       { id: 'assessment', label: 'Visa Calculator', to: '/assessment', icon: Calculator },
       { id: 'track', label: 'Track Application', to: '/track', icon: Search },
       { id: 'blog', label: 'Blog', to: '/blog', icon: FileText },
+      { id: 'news', label: 'News', to: '/news', icon: FileText },
     ]
   },
   {
