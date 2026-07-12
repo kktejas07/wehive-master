@@ -425,14 +425,7 @@ export default function AuthCard({ mode, referralCode }) {
                   }`}>
                   <MessageSquare className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
                 </button>
-                <button type="button" onClick={() => setOtpChannel('phone')}
-                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
-                    otpChannel === 'phone'
-                      ? 'bg-[hsl(var(--blue-700))] text-white'
-                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
-                  }`}>
-                  <Phone className="w-3.5 h-3.5 inline-block mr-1" /> SMS
-                </button>
+
               </div>
               <Button disabled={sending} onClick={onSendOtp}
                 className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
