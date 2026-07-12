@@ -110,3 +110,4 @@ async def public_firebase_config():
             'measurementId': config.get('measurementId', ''),
         },
     }
+
