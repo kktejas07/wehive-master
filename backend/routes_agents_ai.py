@@ -126,9 +126,32 @@ async def _scheduler_loop():
         await asyncio.sleep(SCHEDULE_INTERVAL)
 
 
+_daily_task: Optional[asyncio.Task] = None
+
+async def _daily_aggregator_loop():
+    """Background loop: run web aggregators (events, news, blogs) every 24 hours."""
+    while True:
+        try:
+            logger.info("Daily Aggregator Scheduler: running...")
+            from event_aggregator_agent import run_aggregator as run_events
+            from news_aggregator_agent import run_aggregator as run_news
+            from blog_aggregator_agent import run_aggregator as run_blogs
+            await run_events()
+            await run_news()
+            await run_blogs()
+            logger.info("Daily Aggregator Scheduler: complete")
+        except Exception as e:
+            logger.exception("Daily Aggregator Scheduler error: %s", e)
+        await asyncio.sleep(86400)  # 24 hours
+
+
+
 def start_scheduler():
     """Start the background scheduler (called from server.py on startup)."""
-    global _scheduler_task
+    global _scheduler_task, _daily_task
     if _scheduler_task is None or _scheduler_task.done():
         _scheduler_task = asyncio.create_task(_scheduler_loop())
         logger.info("Agent scheduler started (interval=%ds)", SCHEDULE_INTERVAL)
+    if _daily_task is None or _daily_task.done():
+        _daily_task = asyncio.create_task(_daily_aggregator_loop())
+        logger.info("Daily aggregator scheduler started (interval=86400s)")
