@@ -342,7 +342,7 @@ export default function Navbar({ variant = 'default' }) {
             draggable={false}
             className={cn(
               'w-auto select-none object-contain transition-all duration-500 group-hover:scale-[1.04]',
-              scrolled ? 'h-10 sm:h-11' : 'h-16 sm:h-20'
+              scrolled ? 'h-12 sm:h-14' : 'h-20 sm:h-24'
             )}
           />
         </Link>
