@@ -41,8 +41,8 @@ def _parse_agent_response(response_text: str) -> List[Dict[str, Any]]:
 
 async def fetch_blogs_for_country(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
     """LLM generation for blog articles."""
-    prompt = f"""
-    You are an expert immigration and travel writer.
+    system_prompt = "You are an expert immigration and travel writer. Always respond with valid JSON only."
+    user_prompt = f"""
     Please write 2 engaging blog posts or news summaries regarding {country}.
     You MUST categorize each post into exactly ONE of these categories: F1, H1B, O1, EB1, Business, Travel.
     Format the output strictly as a JSON array of objects with the following keys:
@@ -57,11 +57,15 @@ async def fetch_blogs_for_country(marketplace: AIMarketplace, country: str) -> L
     Return ONLY the JSON array.
     """
     
-    response = await marketplace.chat(
-        provider="ollama", # Or openai/anthropic based on config
-        model="llama3", 
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
+    provider, pid = await marketplace.get_active_provider("system")
+    if not provider:
+        logger.error("No LLM provider available for blog generation")
+        return []
+    
+    response = await provider.chat(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        max_tokens=2000
     )
     
     return _parse_agent_response(response or "")
@@ -72,6 +76,7 @@ async def run_aggregator():
     marketplace = AIMarketplace()
     
     total_added = 0
+    total_skipped = 0
     vector_ids = []
     vector_docs = []
     vector_metas = []
@@ -79,15 +84,30 @@ async def run_aggregator():
     for country in TARGET_COUNTRIES:
         country_id = country.lower().replace(" ", "-")
         logger.info(f"Generating blogs for {country}...")
-        blogs = await fetch_blogs_for_country(marketplace, country)
+        try:
+            blogs = await fetch_blogs_for_country(marketplace, country)
+        except Exception as e:
+            logger.error(f"Blog generation failed for {country}: {e}")
+            continue
         
         for blog in blogs:
+            title = blog.get("title")
+            category = blog.get("category", "Travel")
+            
+            existing = await global_blogs_col.find_one({
+                "title": title,
+                "country_id": country_id,
+            })
+            if existing:
+                total_skipped += 1
+                continue
+            
             doc = {
-                "title": blog.get("title"),
+                "title": title,
                 "country_id": country_id,
                 "description": blog.get("description"),
                 "readTime": blog.get("readTime", "5 min read"),
-                "category": blog.get("category", "Travel"),
+                "category": category,
                 "imageUrl": blog.get("imageUrl"),
                 "author": {
                     "name": blog.get("author_name", "AI Writer"),
@@ -99,33 +119,30 @@ async def run_aggregator():
             res = await global_blogs_col.insert_one(doc)
             total_added += 1
             
-            # Prepare for Vector DB
             doc_id = str(res.inserted_id)
             vector_ids.append(doc_id)
-            vector_docs.append(f"{blog.get('title')} {blog.get('description')}")
+            vector_docs.append(f"{title} {blog.get('description', '')}")
             vector_metas.append({
                 "type": "blog",
                 "country_id": country_id,
-                "category": blog.get("category", "Travel")
+                "category": category
             })
         
         await asyncio.sleep(2)
         
-    # Ingest into Vector DB
     if vector_ids:
         try:
-            from ollama_embeddings import get_embedding
+            from ollama_embeddings import embed_query
             embeddings = []
             for text in vector_docs:
-                emb = await get_embedding(text)
+                emb = await embed_query(text)
                 embeddings.append(emb)
-                
             upsert_documents("wehive_rag", vector_ids, vector_docs, embeddings, vector_metas)
             logger.info(f"Ingested {len(vector_ids)} blogs into Vector DB.")
         except Exception as e:
             logger.error(f"Failed to ingest blogs into vector DB: {e}")
 
-    logger.info(f"Aggregator finished. Inserted {total_added} pending blogs.")
+    logger.info(f"Aggregator finished. Inserted {total_added} pending blogs, skipped {total_skipped} duplicates.")
 
 async def run_auto_approval():
     """Fallback task that runs periodically to auto-approve safe blogs older than 2 hours."""

@@ -1,13 +1,14 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import List, Optional
 from pydantic import BaseModel
 from bson import ObjectId
+from datetime import datetime, timedelta
 import logging
 
 from db import global_news_col
 from news_aggregator_agent import run_aggregator
 
-router = APIRouter(prefix="/api/news", tags=["News"])
+router = APIRouter(prefix="/news", tags=["News"])
 logger = logging.getLogger("wehive.routes_news")
 
 class NewsResponse(BaseModel):
@@ -27,28 +28,75 @@ def serialize_doc(doc) -> dict:
     del doc["_id"]
     return doc
 
-@router.get("/", response_model=List[NewsResponse])
-async def get_news(country_id: Optional[str] = None, category: Optional[str] = None, limit: int = 10):
-    filt = {"status": "approved"}
+@router.get("/")
+async def get_news(
+    country_id: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    status: Optional[str] = Query(None, description="Filter by status"),
+    date_from: Optional[str] = Query(None, description="ISO date filter start"),
+    date_to: Optional[str] = Query(None, description="ISO date filter end"),
+    period: Optional[str] = Query(None, description="'old' or 'new' relative filter"),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=200),
+    sort: str = Query("created_at"),
+    order: str = Query("desc", regex="^(asc|desc)$"),
+):
+    filt = {"status": status or "approved"}
     if country_id:
         filt["country_id"] = country_id
     if category:
         filt["category"] = category
+
+    if date_from or date_to:
+        date_filt = {}
+        if date_from:
+            date_filt['$gte'] = datetime.fromisoformat(date_from)
+        if date_to:
+            date_filt['$lte'] = datetime.fromisoformat(date_to) + timedelta(days=1)
+        filt['created_at'] = date_filt
+
+    if period == 'new':
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        filt.setdefault('created_at', {})['$gte'] = seven_days_ago
+    elif period == 'old':
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        filt.setdefault('created_at', {})['$lt'] = seven_days_ago
+
+    sort_dir = -1 if order == 'desc' else 1
+    skip = (page - 1) * limit
         
     try:
-        cursor = global_news_col.find(filt).sort('created_at', -1).limit(limit)
+        total = await global_news_col.count_documents(filt)
+        cursor = global_news_col.find(filt).sort(sort, sort_dir).skip(skip).limit(limit)
         docs = await cursor.to_list(length=limit)
-        return [serialize_doc(doc) for doc in docs]
+        return {
+            'items': [serialize_doc(doc) for doc in docs],
+            'total': total,
+            'page': page,
+            'limit': limit,
+            'pages': (total + limit - 1) // limit if total > 0 else 0,
+        }
     except Exception as e:
         logger.error(f"Error fetching news: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@router.get("/pending", response_model=List[NewsResponse])
-async def get_pending_news():
+@router.get("/pending")
+async def get_pending_news(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=200),
+):
     try:
-        cursor = global_news_col.find({"status": "pending"}).sort('created_at', -1)
-        docs = await cursor.to_list(length=100)
-        return [serialize_doc(doc) for doc in docs]
+        total = await global_news_col.count_documents({"status": "pending"})
+        skip = (page - 1) * limit
+        cursor = global_news_col.find({"status": "pending"}).sort('created_at', -1).skip(skip).limit(limit)
+        docs = await cursor.to_list(length=limit)
+        return {
+            'items': [serialize_doc(doc) for doc in docs],
+            'total': total,
+            'page': page,
+            'limit': limit,
+            'pages': (total + limit - 1) // limit if total > 0 else 0,
+        }
     except Exception as e:
         logger.error(f"Error fetching pending news: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
