@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, User as UserIcon, LogOut, FileText, Compass, Settings, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useI18n } from '../context/I18nContext';
 import { avatarUrl } from '../lib/avatars';
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
+  const { logout: firebaseLogout } = useFirebaseAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -94,6 +96,10 @@ export default function UserMenu() {
           <button
             onClick={() => {
               setOpen(false);
+              // Clear both the Firebase session (Google/email sign-ins) and the backend
+              // JWT (OTP sign-ins) — logging out only the backend token left a stale
+              // Firebase session behind for Google/email users.
+              firebaseLogout();
               logout();
             }}
             className="w-full text-left flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] text-[hsl(var(--accent))] hover:bg-red-50"

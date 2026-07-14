@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { auth, sendPhoneOtp, verifyPhoneOtp, getRecaptchaVerifier } from '../lib/firebase';
 import { firebaseAuth, getFirebaseIdToken } from '../lib/firebase-auth';
+import { useAuth } from './AuthContext';
 import axios from 'axios';
 
 const API = `${(process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001').replace(/\/api\/?$/i, '')}/api`;
@@ -15,6 +16,7 @@ export function useFirebaseAuth() {
 }
 
 export function FirebaseAuthProvider({ children }) {
+  const { setAuthToken, logout: logoutBackendSession } = useAuth();
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [verificationSent, setVerificationSent] = useState(false);
@@ -38,12 +40,15 @@ export function FirebaseAuthProvider({ children }) {
         { id_token: idToken }
       );
       const { access_token, user: backendUser } = res.data;
-      localStorage.setItem('wehive_token', access_token);
+      // Hand the token to AuthContext directly so isAuthed flips immediately —
+      // writing only to localStorage left AuthContext's live state stale until
+      // the next full page reload (see F1 in playwright/REPORT.md).
+      setAuthToken(access_token);
       return { access_token, user: backendUser };
     } catch (_e) {
       return null;
     }
-  }, []);
+  }, [setAuthToken]);
 
   const loginWithGoogle = useCallback(async () => {
     const user = await firebaseAuth.google();
@@ -75,9 +80,14 @@ export function FirebaseAuthProvider({ children }) {
     }
   }, [firebaseUser]);
 
+  const sendPasswordReset = useCallback(async (email) => {
+    await firebaseAuth.sendPasswordReset(email);
+  }, []);
+
   const logout = useCallback(async () => {
     await firebaseAuth.logout();
-  }, []);
+    logoutBackendSession();
+  }, [logoutBackendSession]);
 
   const phoneOtp = useCallback(async (phoneNumber) => {
     const verifier = getRecaptchaVerifier();
@@ -92,9 +102,9 @@ export function FirebaseAuthProvider({ children }) {
     setPhoneConfirmation(null);
     const res = await axios.post(`${API}/auth/firebase-sync`, { id_token: idToken });
     const { access_token, user: backendUser } = res.data;
-    localStorage.setItem('wehive_token', access_token);
+    setAuthToken(access_token);
     return { access_token, user: backendUser };
-  }, [phoneConfirmation]);
+  }, [phoneConfirmation, setAuthToken]);
 
   const value = {
     firebaseUser,
@@ -105,6 +115,7 @@ export function FirebaseAuthProvider({ children }) {
     signupWithEmail,
     loginWithEmail,
     resendVerification,
+    sendPasswordReset,
     logout,
     syncWithBackend,
     phoneOtp,

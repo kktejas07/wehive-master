@@ -77,6 +77,14 @@ export function AuthProvider({ children }) {
     if (token) await fetchMe(token);
   }, [token, fetchMe]);
 
+  // Lets other auth providers (e.g. FirebaseAuthContext, which handles Google/email
+  // sign-in) hand a freshly-issued backend token to this context directly, instead of
+  // writing to localStorage and leaving this context's live state stale until reload.
+  const setAuthToken = useCallback((newToken) => {
+    localStorage.setItem(TOKEN_KEY, newToken);
+    setToken(newToken);
+  }, []);
+
   const value = {
     user,
     token,
@@ -87,6 +95,7 @@ export function AuthProvider({ children }) {
     verifyOtp,
     logout,
     refreshUser,
+    setAuthToken,
   };
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;

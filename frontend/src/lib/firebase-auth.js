@@ -4,6 +4,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendEmailVerification,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged,
   updateProfile,
@@ -45,6 +46,11 @@ export const firebaseAuth = {
 
   sendVerification: async (user) => {
     await sendEmailVerification(user);
+  },
+
+  sendPasswordReset: async (email) => {
+    const auth = await ensureAuth();
+    await sendPasswordResetEmail(auth, email);
   },
 
   logout: async () => {

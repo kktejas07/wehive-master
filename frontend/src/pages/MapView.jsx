@@ -20,6 +20,7 @@ import {
 
 const POPULAR_VISAS = [
   {
+    id: 'us',
     country: 'USA',
     flag: '',
     visaType: 'B1/B2 Tourist',
@@ -31,6 +32,7 @@ const POPULAR_VISAS = [
     popular: true,
   },
   {
+    id: 'uk',
     country: 'UK',
     flag: '',
     visaType: 'Standard Visitor',
@@ -42,6 +44,7 @@ const POPULAR_VISAS = [
     popular: true,
   },
   {
+    id: 'au',
     country: 'Australia',
     flag: '',
     visaType: 'Subclass 600',
@@ -53,6 +56,7 @@ const POPULAR_VISAS = [
     popular: false,
   },
   {
+    id: 'jp',
     country: 'Japan',
     flag: '',
     visaType: 'Tourist Visa',
@@ -64,6 +68,7 @@ const POPULAR_VISAS = [
     popular: true,
   },
   {
+    id: 'ca',
     country: 'Canada',
     flag: '',
     visaType: 'Visitor Visa',
@@ -75,6 +80,7 @@ const POPULAR_VISAS = [
     popular: false,
   },
   {
+    id: 'ae',
     country: 'UAE',
     flag: '',
     visaType: 'Tourist/Transit',
@@ -86,6 +92,7 @@ const POPULAR_VISAS = [
     popular: true,
   },
   {
+    id: 'de',
     country: 'Germany',
     flag: '',
     visaType: 'Schengen Visa',
@@ -97,6 +104,7 @@ const POPULAR_VISAS = [
     popular: false,
   },
   {
+    id: 'sg',
     country: 'Singapore',
     flag: '',
     visaType: 'Tourist Visa',
@@ -154,7 +162,7 @@ function VisaCard({ visa, index, onClick }) {
           </div>
         </div>
         <Link
-          to={`/visa/${visa.country.toLowerCase()}`}
+          to={`/visa/${visa.id}`}
           className="mt-3 flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold group-hover:bg-[hsl(var(--blue-800))] transition-colors"
         >
           Apply Now

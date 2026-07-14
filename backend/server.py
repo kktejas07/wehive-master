@@ -193,6 +193,23 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+
+@app.middleware('http')
+async def add_security_headers(request, call_next):
+    """Baseline security headers missing from every response (see F3 in
+    playwright/REPORT.md). Deliberately does NOT set Content-Security-Policy here —
+    a separate Cloudflare-managed Report-Only CSP already exists and is mismatched
+    with the app's real resource origins (Firebase, PostHog, Razorpay, own bundle);
+    adding a second, hastily-scoped CSP risks compounding that rather than fixing it
+    (see F4). CSP needs its own careful allowlist pass, not a quick add here.
+    """
+    response = await call_next(request)
+    response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
+
 class JsonFormatter(logging.Formatter):
     def format(self, record):
         return json.dumps({

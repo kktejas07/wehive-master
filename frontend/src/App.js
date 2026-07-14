@@ -15,10 +15,12 @@ import RouteFallback from './components/RouteFallback';
 import { Toaster } from './components/ui/toaster';
 import { setPricing } from './components/FeeBreakdown';
 import { setCurrency } from './lib/utils';
+import { getPageTitle } from './lib/pageTitles';
 
 // Lazy-loaded route components — each becomes its own JS chunk so the
 // landing page boots fast and other pages stream in only when visited.
 const Home = lazy(() => import('./pages/Home'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 const VisaDetail = lazy(() => import('./pages/VisaDetail'));
 const About = lazy(() => import('./pages/About'));
 const Pricing = lazy(() => import('./pages/Pricing'));
@@ -83,6 +85,11 @@ function ScrollToTop() {
 
 function AnimatedRoutes() {
   const location = useLocation();
+
+  useEffect(() => {
+    document.title = getPageTitle(location.pathname);
+  }, [location.pathname]);
+
   return (
     <AnimatePresence mode="wait">
       <Suspense fallback={<RouteFallback />}>
@@ -126,7 +133,7 @@ function AnimatedRoutes() {
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
-          <Route path="*" element={<PageTransition><Home /></PageTransition>} />
+          <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>
     </AnimatePresence>

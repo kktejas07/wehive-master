@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Loader2, FileText, ChevronRight } from 'lucide-react';
+import { Loader2, FileText, ChevronRight, AlertTriangle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
@@ -33,12 +33,15 @@ export default function VisaDetail() {
   const navigate = useNavigate();
   const { isAuthed } = useAuth();
   const [country, setCountry] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const [type, setType] = useState('Tourist');
   const [applicants, setApplicants] = useState(1);
   const [reviewOpen, setReviewOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
+    setCountry(null);
+    setNotFound(false);
     axios
       .get(`${API}/countries/${id}`)
       .then((r) => {
@@ -47,11 +50,36 @@ export default function VisaDetail() {
         const types = Object.keys(r.data.categories || {});
         if (types.length) setType(types[0]);
       })
-      .catch(() => mounted && setCountry(null));
+      .catch(() => {
+        if (!mounted) return;
+        setCountry(null);
+        setNotFound(true);
+      });
     return () => {
       mounted = false;
     };
   }, [id]);
+
+  if (notFound) {
+    return (
+      <div className="bg-white">
+        <Navbar />
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-5 text-center">
+          <AlertTriangle className="w-10 h-10 text-[hsl(var(--accent))]" />
+          <h1 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">
+            We couldn't find that visa page
+          </h1>
+          <p className="text-[hsl(var(--blue-900))]/60 max-w-md">
+            "{id}" isn't a destination we recognize. Try browsing our full list of destinations instead.
+          </p>
+          <Button onClick={() => navigate('/student-visa')} className="rounded-full btn-accent text-white h-11 px-6 font-bold">
+            Browse destinations
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!country) {
     return (
