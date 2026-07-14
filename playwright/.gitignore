@@ -1,0 +1,6 @@
+node_modules/
+test-results/
+artifacts/screens/
+artifacts/html-report/
+artifacts/*.webm
+artifacts/results.json
