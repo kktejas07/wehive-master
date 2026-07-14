@@ -25,7 +25,7 @@ from event_aggregator_agent import fetch_events_from_url, run_aggregator as run_
 router = APIRouter(prefix="/events", tags=["events"])
 
 # --- PUBLIC ROUTES ---
-@router.get("/")
+@router.get("")
 async def public_events(
     country: Optional[str] = Query(None),
     category: Optional[str] = Query(None),

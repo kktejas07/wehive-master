@@ -29,7 +29,7 @@ def serialize_doc(doc) -> dict:
     del doc["_id"]
     return doc
 
-@router.get("/")
+@router.get("")
 async def get_blogs(
     country_id: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
