@@ -86,7 +86,7 @@ function GoogleIcon() {
 
 export default function AuthCard({ mode, referralCode }) {
   const { sendOtp, verifyOtp, isAuthed } = useAuth();
-  const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent, phoneOtp, verifyPhoneOtpCode } = useFirebaseAuth();
+  const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent, phoneOtp, verifyPhoneOtpCode, sendPasswordReset } = useFirebaseAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -107,6 +107,7 @@ export default function AuthCard({ mode, referralCode }) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailPwdLoading, setEmailPwdLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotSending, setForgotSending] = useState(false);
   const timerRef = useRef(null);
 
   const isSignup = mode === 'signup';
@@ -210,6 +211,26 @@ export default function AuthCard({ mode, referralCode }) {
       toast({ title: messages[code] || 'Auth failed', description: messages[code] ? '' : e.message });
     } finally {
       setEmailPwdLoading(false);
+    }
+  };
+
+  const onForgotPassword = async () => {
+    if (!identifier.trim()) {
+      toast({ title: 'Enter your email first', description: 'We need your email address to send the reset link.' });
+      return;
+    }
+    setForgotSending(true);
+    try {
+      await sendPasswordReset(identifier);
+      toast({ title: 'Reset link sent', description: `Check ${identifier} for a link to reset your password.` });
+    } catch (e) {
+      const messages = {
+        'auth/user-not-found': 'No account found with this email.',
+        'auth/invalid-email': 'Please enter a valid email address.',
+      };
+      toast({ title: messages[e.code] || 'Could not send reset link', description: messages[e.code] ? '' : e.message });
+    } finally {
+      setForgotSending(false);
     }
   };
 
@@ -376,6 +397,12 @@ export default function AuthCard({ mode, referralCode }) {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {!isSignup && (
+                  <button type="button" onClick={onForgotPassword} disabled={forgotSending}
+                    className="mt-1.5 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline disabled:opacity-50">
+                    {forgotSending ? 'Sending reset link…' : 'Forgot password?'}
+                  </button>
+                )}
               </div>
               <Button type="submit" data-testid={isSignup ? "signup-submit" : "login-submit"} disabled={emailPwdLoading}
                 className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
