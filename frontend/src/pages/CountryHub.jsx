@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, GraduationCap, ShieldCheck, Briefcase, FileText, Compass, Clock, Coins, ArrowRight, Checklist } from 'lucide-react';
+import { Globe, GraduationCap, ShieldCheck, Briefcase, FileText, Compass, Clock, Coins, ArrowRight, Checklist, CheckCircle2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
