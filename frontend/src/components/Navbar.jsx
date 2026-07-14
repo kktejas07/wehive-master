@@ -19,7 +19,8 @@ import {
   Mail,
   Wrench,
   Mic,
-  Award
+  Award,
+  Newspaper
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -46,6 +47,8 @@ const NAV = [
       { id: 'assessment', label: 'Visa Calculator', to: '/assessment', icon: Calculator },
       { id: 'track', label: 'Track Application', to: '/track', icon: Search },
       { id: 'blog', label: 'Blog', to: '/blog', icon: FileText },
+      { id: 'news', label: 'News', to: '/news', icon: Newspaper },
+      { id: 'events', label: 'Global Events', to: '/events', icon: Calendar },
     ]
   },
   {
