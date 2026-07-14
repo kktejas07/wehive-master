@@ -11,9 +11,11 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any
 import json
 import os
+import httpx
 
 from db import db, global_events_col
 from ai_marketplace import AIMarketplace
+from vector_store import upsert_documents
 
 try:
     import nest_asyncio
@@ -85,10 +87,30 @@ def _route_social_media_url(url: str, platform: str = None) -> str:
         
     return url
 
+async def _openai_available() -> bool:
+    """Quick check if OpenAI API is reachable (not rate-limited/quota-exceeded)."""
+    key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not key:
+        return False
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            r = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "hi"}], "max_tokens": 1},
+            )
+            return r.status_code == 200
+    except Exception:
+        return False
+
 async def fetch_events_from_url(url: str, country: str, platform: str = None) -> List[Dict[str, Any]]:
     """Use ScrapeGraphAI to extract events from a specific URL or social media handle."""
     if not SCRAPEGRAPH_AVAILABLE:
         logger.warning("ScrapeGraphAI is not installed. Falling back to LLM hallucination.")
+        return await fetch_events_for_country_fallback(AIMarketplace(), country)
+
+    if not await _openai_available():
+        logger.warning("OpenAI unavailable (quota/rate-limit). Skipping ScrapeGraphAI, using LLM fallback.")
         return await fetch_events_for_country_fallback(AIMarketplace(), country)
 
     # Route URL through proxy if it's social media
@@ -145,8 +167,8 @@ async def fetch_events_from_url(url: str, country: str, platform: str = None) ->
 
 async def fetch_events_for_country_fallback(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
     """Fallback LLM generation if scraping fails or isn't triggered via URL."""
-    prompt = f"""
-    You are an expert global event aggregator.
+    system_prompt = "You are an expert global event aggregator. Always respond with valid JSON only."
+    user_prompt = f"""
     Please list 3 major upcoming events, festivals, or conferences in {country}.
     Format the output strictly as a JSON array of objects with the following keys:
     - "name": string
@@ -158,11 +180,15 @@ async def fetch_events_for_country_fallback(marketplace: AIMarketplace, country:
     Return ONLY the JSON array.
     """
     
-    response = await marketplace.chat(
-        provider="ollama", # Or openai/anthropic based on config
-        model="llama3", 
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3
+    provider, pid = await marketplace.get_active_provider("system")
+    if not provider:
+        logger.error("No LLM provider available for event fallback")
+        return []
+    
+    response = await provider.chat(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        max_tokens=2000
     )
     
     return _parse_agent_response(response or "")
@@ -173,51 +199,121 @@ async def run_aggregator():
     marketplace = AIMarketplace()
     
     total_added = 0
+    total_skipped = 0
+    vector_ids = []
+    vector_docs = []
+    vector_metas = []
 
     # 1. Scrape predefined seed URLs across platforms
     for country_id, seeds in SEED_URLS.items():
         logger.info(f"Scraping {len(seeds)} seed URLs for {country_id}...")
         for seed in seeds:
-            events = await fetch_events_from_url(seed["url"], country_id, seed.get("platform"))
+            try:
+                events = await fetch_events_from_url(seed["url"], country_id, seed.get("platform"))
+            except Exception as e:
+                logger.error(f"Scrape failed for {seed['url']}: {e}")
+                continue
             for evt in events:
-                doc = {
-                    "name": evt.get("name"),
+                name = evt.get("name")
+                category = evt.get("category")
+                date = evt.get("date")
+                
+                existing = await global_events_col.find_one({
+                    "name": name,
                     "country_id": country_id,
-                    "date": evt.get("date"),
-                    "category": evt.get("category"),
+                    "date": date,
+                })
+                if existing:
+                    total_skipped += 1
+                    continue
+                
+                doc = {
+                    "name": name,
+                    "country_id": country_id,
+                    "date": date,
+                    "category": category,
                     "image_url": evt.get("image_url"),
                     "status": "pending",
                     "is_high_risk": evt.get("is_high_risk", False),
                     "created_at": datetime.utcnow()
                 }
-                await global_events_col.insert_one(doc)
+                res = await global_events_col.insert_one(doc)
                 total_added += 1
-            await asyncio.sleep(2) # rate limit between URLs
+                
+                doc_id = str(res.inserted_id)
+                vector_ids.append(doc_id)
+                vector_docs.append(f"{name} {category} {date}")
+                vector_metas.append({
+                    "type": "event",
+                    "country_id": country_id,
+                    "category": category,
+                    "is_high_risk": evt.get("is_high_risk", False)
+                })
+            await asyncio.sleep(2)
             
     # 2. Fallback LLM generation for countries without seeds
     for country in TARGET_COUNTRIES:
         country_id = country.lower().replace(" ", "-")
         if country_id not in SEED_URLS:
             logger.info(f"No seeds found for {country}, using LLM fallback...")
-            events = await fetch_events_for_country_fallback(marketplace, country)
+            try:
+                events = await fetch_events_for_country_fallback(marketplace, country)
+            except Exception as e:
+                logger.error(f"LLM fallback failed for {country}: {e}")
+                continue
             
             for evt in events:
-                doc = {
-                    "name": evt.get("name"),
+                name = evt.get("name")
+                category = evt.get("category")
+                date = evt.get("date")
+                
+                existing = await global_events_col.find_one({
+                    "name": name,
                     "country_id": country_id,
-                    "date": evt.get("date"),
-                    "category": evt.get("category"),
+                    "date": date,
+                })
+                if existing:
+                    total_skipped += 1
+                    continue
+                
+                doc = {
+                    "name": name,
+                    "country_id": country_id,
+                    "date": date,
+                    "category": category,
                     "image_url": evt.get("image_url"),
                     "status": "pending",
                     "is_high_risk": evt.get("is_high_risk", False),
                     "created_at": datetime.utcnow()
                 }
-                await global_events_col.insert_one(doc)
+                res = await global_events_col.insert_one(doc)
                 total_added += 1
+                
+                doc_id = str(res.inserted_id)
+                vector_ids.append(doc_id)
+                vector_docs.append(f"{name} {category} {date}")
+                vector_metas.append({
+                    "type": "event",
+                    "country_id": country_id,
+                    "category": category,
+                    "is_high_risk": evt.get("is_high_risk", False)
+                })
             
             await asyncio.sleep(2)
         
-    logger.info(f"Aggregator finished. Inserted {total_added} pending events.")
+    if vector_ids:
+        try:
+            from ollama_embeddings import embed_query
+            embeddings = []
+            for text in vector_docs:
+                emb = await embed_query(text)
+                embeddings.append(emb)
+            upsert_documents("wehive_rag", vector_ids, vector_docs, embeddings, vector_metas)
+            logger.info(f"Ingested {len(vector_ids)} events into Vector DB.")
+        except Exception as e:
+            logger.error(f"Failed to ingest events into vector DB: {e}")
+            
+    logger.info(f"Aggregator finished. Inserted {total_added} pending events, skipped {total_skipped} duplicates.")
 
 async def run_auto_approval():
     """Fallback task that runs periodically to auto-approve safe events older than 2 hours."""

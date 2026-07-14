@@ -260,6 +260,17 @@ async def on_startup():
     except Exception as e:
         logger.exception('RAG/prompts bootstrap failed: %s', e)
 
+    try:
+        ev_count = await db['events'].estimated_document_count()
+        if ev_count == 0:
+            from seed_events import seed as seed_events
+            seeded = await seed_events()
+            logger.info('Seeded %d promotional events', seeded)
+        else:
+            logger.info('Promotional events collection already has %d docs', ev_count)
+    except Exception as e:
+        logger.exception('Promotional event seed failed: %s', e)
+
 
 @app.on_event('shutdown')
 async def on_shutdown():

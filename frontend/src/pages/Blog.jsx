@@ -20,10 +20,10 @@ export default function Blog() {
       setLoading(true);
       setError(null);
       try {
-        let url = `${API}/blogs?limit=50`;
+        let url = `${API}/blogs?limit=30`;
         if (category !== "All") url += `&category=${category}`;
         const response = await axios.get(url);
-        setBlogs(response.data || []);
+        setBlogs(response.data?.items || response.data || []);
       } catch (err) {
         setError("Failed to load blog posts. Please try again later.");
       } finally {

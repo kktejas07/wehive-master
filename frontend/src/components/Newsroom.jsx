@@ -16,12 +16,12 @@ const Newsroom = ({ countryId }) => {
     setLoading(true);
     setErrorState(null);
     try {
-      let url = `${API}/news?limit=5`;
+      let url = `${API}/news?limit=30`;
       if (countryId) url += `&country_id=${countryId}`;
       if (category && category !== "All") url += `&category=${category}`;
       
       const response = await axios.get(url);
-      setNews(response.data || []);
+      setNews(response.data?.items || response.data || []);
     } catch (error) {
       if (error.response) {
         const status = error.response.status;

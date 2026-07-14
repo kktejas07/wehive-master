@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any
 import json
 import os
+import httpx
 
 from db import db, global_news_col
 from ai_marketplace import AIMarketplace
@@ -84,10 +85,30 @@ def _route_social_media_url(url: str, platform: str = None) -> str:
         
     return url
 
+async def _openai_available() -> bool:
+    """Quick check if OpenAI API is reachable (not rate-limited/quota-exceeded)."""
+    key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not key:
+        return False
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            r = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "hi"}], "max_tokens": 1},
+            )
+            return r.status_code == 200
+    except Exception:
+        return False
+
 async def fetch_news_from_url(url: str, country: str, platform: str = None) -> List[Dict[str, Any]]:
     """Use ScrapeGraphAI to extract news from a specific URL or social media handle."""
     if not SCRAPEGRAPH_AVAILABLE:
         logger.warning("ScrapeGraphAI is not installed. Falling back to LLM hallucination.")
+        return await fetch_news_for_country_fallback(AIMarketplace(), country)
+
+    if not await _openai_available():
+        logger.warning("OpenAI unavailable (quota/rate-limit). Skipping ScrapeGraphAI, using LLM fallback.")
         return await fetch_news_for_country_fallback(AIMarketplace(), country)
 
     target_url = _route_social_media_url(url, platform)
@@ -140,9 +161,9 @@ async def fetch_news_from_url(url: str, country: str, platform: str = None) -> L
 
 async def fetch_news_for_country_fallback(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
     """Fallback LLM generation if scraping fails."""
-    prompt = f"""
-    You are an expert immigration news reporter.
-    Please write 2 mock news headlines regarding recent visa or immigration updates in {country}.
+    system_prompt = "You are an expert immigration news reporter. Always respond with valid JSON only."
+    user_prompt = f"""
+    Please write 2 news headlines regarding recent visa or immigration updates in {country}.
     You MUST categorize each news item into exactly ONE of these categories: F1, H1B, O1, EB1, Business, Travel.
     Format the output strictly as a JSON array of objects with the following keys:
     - "title": string
@@ -154,11 +175,15 @@ async def fetch_news_for_country_fallback(marketplace: AIMarketplace, country: s
     Return ONLY the JSON array.
     """
     
-    response = await marketplace.chat(
-        provider="ollama", # Or openai/anthropic based on config
-        model="llama3", 
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3
+    provider, pid = await marketplace.get_active_provider("system")
+    if not provider:
+        logger.error("No LLM provider available for news fallback")
+        return []
+    
+    response = await provider.chat(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        max_tokens=2000
     )
     
     return _parse_agent_response(response or "")
@@ -169,6 +194,7 @@ async def run_aggregator():
     marketplace = AIMarketplace()
     
     total_added = 0
+    total_skipped = 0
     vector_ids = []
     vector_docs = []
     vector_metas = []
@@ -177,13 +203,28 @@ async def run_aggregator():
     for country_id, seeds in SEED_URLS.items():
         logger.info(f"Scraping {len(seeds)} seed URLs for {country_id}...")
         for seed in seeds:
-            news_items = await fetch_news_from_url(seed["url"], country_id, seed.get("platform"))
+            try:
+                news_items = await fetch_news_from_url(seed["url"], country_id, seed.get("platform"))
+            except Exception as e:
+                logger.error(f"Scrape failed for {seed['url']}: {e}")
+                continue
             for news in news_items:
+                title = news.get("title")
+                category = news.get("category", "Travel")
+                
+                existing = await global_news_col.find_one({
+                    "title": title,
+                    "country_id": country_id,
+                })
+                if existing:
+                    total_skipped += 1
+                    continue
+                
                 doc = {
-                    "title": news.get("title"),
+                    "title": title,
                     "country_id": country_id,
                     "date": news.get("date"),
-                    "category": news.get("category", "Travel"),
+                    "category": category,
                     "content": news.get("content"),
                     "source_url": news.get("source_url"),
                     "status": "pending",
@@ -194,11 +235,11 @@ async def run_aggregator():
                 
                 doc_id = str(res.inserted_id)
                 vector_ids.append(doc_id)
-                vector_docs.append(f"{news.get('title')} {news.get('content')}")
+                vector_docs.append(f"{title} {news.get('content', '')}")
                 vector_metas.append({
                     "type": "news",
                     "country_id": country_id,
-                    "category": news.get("category", "Travel")
+                    "category": category
                 })
             await asyncio.sleep(2)
             
@@ -207,14 +248,29 @@ async def run_aggregator():
         country_id = country.lower().replace(" ", "-")
         if country_id not in SEED_URLS:
             logger.info(f"No seeds found for {country}, using LLM fallback...")
-            news_items = await fetch_news_for_country_fallback(marketplace, country)
+            try:
+                news_items = await fetch_news_for_country_fallback(marketplace, country)
+            except Exception as e:
+                logger.error(f"LLM fallback failed for {country}: {e}")
+                continue
             
             for news in news_items:
+                title = news.get("title")
+                category = news.get("category", "Travel")
+                
+                existing = await global_news_col.find_one({
+                    "title": title,
+                    "country_id": country_id,
+                })
+                if existing:
+                    total_skipped += 1
+                    continue
+                
                 doc = {
-                    "title": news.get("title"),
+                    "title": title,
                     "country_id": country_id,
                     "date": news.get("date"),
-                    "category": news.get("category", "Travel"),
+                    "category": category,
                     "content": news.get("content"),
                     "source_url": news.get("source_url"),
                     "status": "pending",
@@ -225,30 +281,28 @@ async def run_aggregator():
                 
                 doc_id = str(res.inserted_id)
                 vector_ids.append(doc_id)
-                vector_docs.append(f"{news.get('title')} {news.get('content')}")
+                vector_docs.append(f"{title} {news.get('content', '')}")
                 vector_metas.append({
                     "type": "news",
                     "country_id": country_id,
-                    "category": news.get("category", "Travel")
+                    "category": category
                 })
             
             await asyncio.sleep(2)
             
-    # Ingest into Vector DB
     if vector_ids:
         try:
-            from ollama_embeddings import get_embedding
+            from ollama_embeddings import embed_query
             embeddings = []
             for text in vector_docs:
-                emb = await get_embedding(text)
+                emb = await embed_query(text)
                 embeddings.append(emb)
-                
             upsert_documents("wehive_rag", vector_ids, vector_docs, embeddings, vector_metas)
             logger.info(f"Ingested {len(vector_ids)} news items into Vector DB.")
         except Exception as e:
             logger.error(f"Failed to ingest news into vector DB: {e}")
         
-    logger.info(f"Aggregator finished. Inserted {total_added} pending news items.")
+    logger.info(f"Aggregator finished. Inserted {total_added} pending news items, skipped {total_skipped} duplicates.")
 
 async def run_auto_approval():
     """Fallback task that runs periodically to auto-approve safe news older than 2 hours."""
