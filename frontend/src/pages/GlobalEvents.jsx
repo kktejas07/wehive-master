@@ -14,7 +14,7 @@ export default function GlobalEvents() {
 
   useEffect(() => {
     let mounted = true;
-    axios.get(`${API}/events`)
+    axios.get(`${API}/events?limit=30`)
       .then(r => {
         if (mounted) {
           setEvents(r.data.items || []);

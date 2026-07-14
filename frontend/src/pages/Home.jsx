@@ -8,7 +8,6 @@ import Faq from '../components/Faq';
 import CtaBanner from '../components/CtaBanner';
 import DealsSection from '../components/DealsSection';
 import Newsroom from '../components/Newsroom';
-import EventsBanner from '../components/EventsBanner';
 import StatsStrip from '../components/StatsStrip';
 import AIServices from '../components/ai/AIServices';
 import OnTimeGuarantee from '../components/OnTimeGuarantee';
@@ -38,7 +37,6 @@ export default function Home() {
       <OnTimeGuarantee />
       <StatsStrip />
       <DealsSection />
-      <EventsBanner />
       <Newsroom />
       <AIServices />
       <HowItWorks />
