@@ -20,7 +20,7 @@ export default function Blog() {
       setLoading(true);
       setError(null);
       try {
-        let url = `${API}/blogs/?limit=30`;
+        let url = `${API}/blogs?limit=30`;
         if (category !== "All") url += `&category=${category}`;
         const response = await axios.get(url);
         setBlogs(response.data?.items || response.data || []);

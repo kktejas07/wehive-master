@@ -16,7 +16,7 @@ const Newsroom = ({ countryId }) => {
     setLoading(true);
     setErrorState(null);
     try {
-      let url = `${API}/news/?limit=30`;
+      let url = `${API}/news?limit=30`;
       if (countryId) url += `&country_id=${countryId}`;
       if (category && category !== "All") url += `&category=${category}`;
       
