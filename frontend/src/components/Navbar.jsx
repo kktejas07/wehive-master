@@ -303,11 +303,22 @@ function MobileMenu({ open, light = false }) {
 export default function Navbar({ variant = 'default' }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
   const { pathname } = useLocation();
   const isLight = variant === 'light';
 
   const onScroll = useCallback(() => {
-    setScrolled(window.scrollY > 12);
+    const currentScrollY = window.scrollY;
+    setScrolled(currentScrollY > 12);
+    
+    if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+      setHidden(true);
+    } else if (currentScrollY < lastScrollY.current) {
+      setHidden(false);
+    }
+    
+    lastScrollY.current = currentScrollY;
   }, []);
 
   useEffect(() => {
@@ -323,7 +334,8 @@ export default function Navbar({ variant = 'default' }) {
   return (
     <header
       className={cn(
-        'fixed top-0 inset-x-0 z-50 transition-[background,backdrop-filter,border-color] duration-300',
+        'fixed top-0 inset-x-0 z-50 transition-all duration-300',
+        hidden ? '-translate-y-full' : 'translate-y-0',
         scrolled
           ? 'bg-white/85 backdrop-blur-xl border-b border-black/5 shadow-[0_4px_30px_-20px_rgba(10,44,138,0.18)]'
           : isLight
