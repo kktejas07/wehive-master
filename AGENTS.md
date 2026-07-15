@@ -24,3 +24,9 @@ Before writing custom code, always research existing solutions:
 - Never `git push --force` to shared branches
 - Always run `scripts/verify.sh` before PR
 - Get explicit approval before modifying auth/payment routes
+
+## Ponytail Mode Enforcement
+
+- **Always Active**: Maintain `ponytail` at full intensity for every prompt and response. 
+- Build the absolute minimum code necessary.
+- Emphasize deletion over addition and standard libraries over dependencies.

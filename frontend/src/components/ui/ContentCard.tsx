@@ -13,6 +13,7 @@ interface ContentCardProps {
   };
   readTime?: string;
   category?: string;
+  countryId?: string;
   accentColor?: string;
   className?: string;
   onClick?: () => void;
@@ -25,10 +26,34 @@ export function ContentCard({
   author,
   readTime,
   category,
+  countryId,
   accentColor = 'hsl(var(--blue-700))',
   className = '',
   onClick,
 }: ContentCardProps) {
+
+  const getCategoryColor = (cat?: string) => {
+    const c = cat?.toLowerCase() || '';
+    if (c.includes('f1') || c.includes('student')) return 'bg-blue-500/90 border-blue-400';
+    if (c.includes('h1b') || c.includes('o1') || c.includes('eb1') || c.includes('work')) return 'bg-emerald-500/90 border-emerald-400';
+    if (c.includes('business')) return 'bg-purple-500/90 border-purple-400';
+    if (c.includes('travel')) return 'bg-amber-500/90 border-amber-400';
+    return 'bg-white/20 border-white/30';
+  };
+
+  const getCountryInfo = (cid?: string) => {
+    if (!cid) return null;
+    const c = cid.toLowerCase();
+    if (c.includes('us') || c.includes('united-states')) return { color: 'bg-blue-600', label: 'USA 🇺🇸' };
+    if (c.includes('uk') || c.includes('united-kingdom')) return { color: 'bg-red-600', label: 'UK 🇬🇧' };
+    if (c.includes('australia')) return { color: 'bg-orange-600', label: 'AUS 🇦🇺' };
+    if (c.includes('canada')) return { color: 'bg-red-500', label: 'CAN 🇨🇦' };
+    if (c.includes('germany')) return { color: 'bg-yellow-600', label: 'GER 🇩🇪' };
+    return { color: 'bg-gray-500', label: cid.toUpperCase().substring(0, 3) };
+  };
+
+  const countryInfo = getCountryInfo(countryId);
+
   return (
     <motion.div
       whileHover={{ y: -4, scale: 1.01 }}
@@ -53,14 +78,19 @@ export function ContentCard({
 
       {/* Content Container */}
       <div className="relative h-full flex flex-col justify-between p-5 sm:p-6 min-h-[280px] sm:min-h-[320px]">
-        {/* Top Section - Category Badge */}
-        {category && (
-          <div className="mb-auto">
-            <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-[10px] uppercase tracking-[0.14em] font-bold">
+        {/* Top Section - Badges */}
+        <div className="mb-auto flex gap-2 flex-wrap">
+          {category && (
+            <span className={`inline-block px-3 py-1 rounded-full backdrop-blur-md text-white text-[10px] uppercase tracking-[0.14em] font-bold border ${getCategoryColor(category)}`}>
               {category}
             </span>
-          </div>
-        )}
+          )}
+          {countryInfo && (
+            <span className={`inline-block px-3 py-1 rounded-full text-white text-[10px] uppercase tracking-[0.1em] font-bold shadow-sm ${countryInfo.color}`}>
+              {countryInfo.label}
+            </span>
+          )}
+        </div>
 
         {/* Bottom Section - Author, Title, Description */}
         <div className="space-y-3">

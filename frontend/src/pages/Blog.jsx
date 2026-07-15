@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, RefreshCw, AlertCircle } from 'lucide-react';
+import { FileText, RefreshCw, AlertCircle, X, Calendar, User as UserIcon } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API } from '../context/AuthContext';
@@ -12,8 +12,26 @@ export default function Blog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [category, setCategory] = useState('All');
+  const [selectedBlog, setSelectedBlog] = useState(null);
 
   const CATEGORIES = ["All", "F1", "H1B", "O1", "EB1", "Business", "Travel"];
+
+  const getRelevantImage = (cat) => {
+    const c = cat?.toLowerCase() || '';
+    if (c.includes('f1') || c.includes('student')) {
+      return "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop";
+    }
+    if (c.includes('h1b') || c.includes('o1') || c.includes('eb1') || c.includes('work')) {
+      return "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop";
+    }
+    if (c.includes('business')) {
+      return "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop";
+    }
+    if (c.includes('travel') || c.includes('tourism')) {
+      return "https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a?q=80&w=2070&auto=format&fit=crop";
+    }
+    return "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop";
+  };
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -123,14 +141,15 @@ export default function Blog() {
                       transition={{ delay: i * 0.1, duration: 0.5 }}
                     >
                       <ContentCard
-                        imageUrl={story.imageUrl || "https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a"}
+                        imageUrl={(story.imageUrl && !story.imageUrl.includes('unsplash')) ? story.imageUrl : getRelevantImage(story.category)}
                         title={story.title}
                         description={story.description}
                         author={story.author}
                         readTime={story.readTime || '5 min read'}
                         category={story.category}
+                        countryId={story.country_id}
                         accentColor="#0a2c8a"
-                        onClick={() => {}}
+                        onClick={() => setSelectedBlog(story)}
                       />
                     </motion.div>
                   ))}
@@ -140,6 +159,75 @@ export default function Blog() {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Blog Preview Modal */}
+      <AnimatePresence>
+        {selectedBlog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col relative"
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedBlog(null)}
+                className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Cover Image */}
+              <div className="relative h-64 sm:h-80 w-full shrink-0">
+                <img 
+                  src={(selectedBlog.imageUrl && !selectedBlog.imageUrl.includes('unsplash')) ? selectedBlog.imageUrl : getRelevantImage(selectedBlog.category)} 
+                  alt={selectedBlog.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div className="flex gap-2 mb-3">
+                    <span className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full uppercase tracking-wider">
+                      {selectedBlog.category}
+                    </span>
+                    {selectedBlog.country_id && (
+                      <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/30">
+                        {selectedBlog.country_id.substring(0,3)}
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight">
+                    {selectedBlog.title}
+                  </h2>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 sm:p-8 overflow-y-auto">
+                <div className="flex items-center gap-6 mb-8 text-sm text-gray-500 font-medium pb-6 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="w-4 h-4" />
+                    <span>{selectedBlog.author?.name || 'WeHive Editor'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>
+                      {selectedBlog.created_at ? new Date(selectedBlog.created_at).toLocaleDateString() : 'Recent'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed">
+                  {selectedBlog.description?.split('\\n').map((paragraph, i) => (
+                    <p key={i} className="mb-4">{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </div>

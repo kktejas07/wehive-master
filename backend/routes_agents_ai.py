@@ -8,7 +8,7 @@ Endpoints:
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -162,7 +162,13 @@ async def _daily_aggregator_loop():
     first_run = True
     while True:
         if not first_run:
-            await asyncio.sleep(86400)
+            now = datetime.utcnow()
+            target = now.replace(hour=3, minute=0, second=0, microsecond=0)
+            if target <= now:
+                target += timedelta(days=1)
+            sleep_seconds = (target - now).total_seconds()
+            logger.info("Daily Aggregator sleeping for %d seconds until next 03:00 UTC", sleep_seconds)
+            await asyncio.sleep(sleep_seconds)
         first_run = False
 
         start_ts = datetime.utcnow().isoformat()
