@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, RefreshCw, AlertCircle, X, Calendar, User as UserIcon } from 'lucide-react';
+import { FileText, RefreshCw, AlertCircle, X, Calendar, User as UserIcon, Mic, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API } from '../context/AuthContext';
@@ -13,6 +13,8 @@ export default function Blog() {
   const [error, setError] = useState(null);
   const [category, setCategory] = useState('All');
   const [selectedBlog, setSelectedBlog] = useState(null);
+  const [podcastData, setPodcastData] = useState(null);
+  const [generatingPodcast, setGeneratingPodcast] = useState(false);
 
   const CATEGORIES = ["All", "F1", "H1B", "O1", "EB1", "Business", "Travel"];
 
@@ -205,18 +207,57 @@ export default function Blog() {
 
               {/* Content */}
               <div className="p-6 sm:p-8 overflow-y-auto">
-                <div className="flex items-center gap-6 mb-8 text-sm text-gray-500 font-medium pb-6 border-b border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="w-4 h-4" />
-                    <span>{selectedBlog.author?.name || 'WeHive Editor'}</span>
+                <div className="flex items-center justify-between mb-8 text-sm text-gray-500 font-medium pb-6 border-b border-gray-100 flex-wrap gap-4">
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="w-4 h-4" />
+                      <span>{selectedBlog.author?.name || 'WeHive Editor'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {selectedBlog.created_at ? new Date(selectedBlog.created_at).toLocaleDateString() : 'Recent'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>
-                      {selectedBlog.created_at ? new Date(selectedBlog.created_at).toLocaleDateString() : 'Recent'}
-                    </span>
-                  </div>
+                  
+                  <button
+                    onClick={async () => {
+                      if (podcastData) return;
+                      setGeneratingPodcast(true);
+                      try {
+                        const res = await axios.get(`${API}/blogs/${selectedBlog.id}/podcast`);
+                        setPodcastData(res.data.podcast);
+                      } catch (e) {
+                        alert("Failed to generate podcast");
+                      } finally {
+                        setGeneratingPodcast(false);
+                      }
+                    }}
+                    disabled={generatingPodcast || podcastData}
+                    className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold transition disabled:opacity-50"
+                  >
+                    {generatingPodcast ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+                    {podcastData ? 'Podcast Ready' : 'Generate AI Podcast'}
+                  </button>
                 </div>
+                
+                {/* Podcast Display */}
+                {podcastData && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-8 bg-indigo-900 text-indigo-50 rounded-2xl p-6 shadow-inner">
+                    <h3 className="font-black text-xl mb-4 flex items-center gap-2 text-white">
+                      <Mic className="text-indigo-400" /> AI Podcast Transcript
+                    </h3>
+                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2 scrollbar-hide">
+                      {podcastData.map((line, idx) => (
+                        <div key={idx} className={`p-3 rounded-xl max-w-[85%] ${line.speaker === 'Host' ? 'bg-indigo-800 ml-0 rounded-tl-sm' : 'bg-indigo-700 ml-auto rounded-tr-sm text-right'}`}>
+                          <div className="text-[10px] uppercase font-bold text-indigo-300 mb-1 tracking-widest">{line.speaker}</div>
+                          <div className="text-[14px] leading-relaxed">{line.text}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
 
                 <div className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed">
                   {selectedBlog.description?.split('\\n').map((paragraph, i) => (

@@ -5,11 +5,13 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { API } from '../context/AuthContext';
-import { Loader2, MapPin, Calendar, Compass, ArrowRight, ShieldAlert } from 'lucide-react';
+import { Loader2, MapPin, Calendar, Compass, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function GlobalEvents() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [digest, setDigest] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,6 +26,15 @@ export default function GlobalEvents() {
       .finally(() => {
         if (mounted) setLoading(false);
       });
+      
+    axios.get(`${API}/events/digest`)
+      .then(r => {
+        if (mounted && r.data?.digest) {
+          setDigest(r.data.digest);
+        }
+      })
+      .catch(e => console.warn("No AI digest available yet."));
+      
     return () => { mounted = false; };
   }, []);
 
@@ -46,9 +57,39 @@ export default function GlobalEvents() {
         </div>
       </section>
 
-      {/* Events Grid */}
+      {/* Events Grid & AI Digest */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          
+          {/* AI Digest Hero Banner */}
+          {digest && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+              className="mb-12 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100/50 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                <Sparkles className="w-48 h-48 text-emerald-600" />
+              </div>
+              <div className="relative z-10 max-w-4xl">
+                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-600 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5" /> AI Monthly Events Briefing
+                </div>
+                <h3 className="text-2xl font-black text-gray-900 mb-4">{digest.title || "Global Events Summary"}</h3>
+                <p className="text-gray-700 text-lg leading-relaxed mb-6">{digest.summary}</p>
+                {digest.key_points && digest.key_points.length > 0 && (
+                  <ul className="space-y-3">
+                    {digest.key_points.map((pt, i) => (
+                      <li key={i} className="flex items-start gap-3 text-gray-800 font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </motion.div>
+          )}
+
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--blue-700))]" />
