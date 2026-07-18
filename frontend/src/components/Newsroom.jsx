@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Newspaper, AlertCircle, RefreshCw, AlertTriangle, X } from 'lucide-react';
+import { Newspaper, AlertCircle, RefreshCw, AlertTriangle, X, Sparkles } from 'lucide-react';
 import { API } from '../context/AuthContext';
 
 const Newsroom = ({ countryId }) => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [digest, setDigest] = useState(null);
   const [errorState, setErrorState] = useState(null); // { status, message }
   const [category, setCategory] = useState('All');
   const [selectedNews, setSelectedNews] = useState(null);
@@ -43,6 +44,16 @@ const Newsroom = ({ countryId }) => {
       
       const response = await axios.get(url);
       setNews(response.data?.items || response.data || []);
+      
+      // Also try to fetch AI digest (fails silently if missing)
+      try {
+        const digestRes = await axios.get(`${API}/news/digest`);
+        if (digestRes.data?.digest) {
+          setDigest(digestRes.data.digest);
+        }
+      } catch (e) {
+        console.warn("No AI digest available yet.");
+      }
     } catch (error) {
       if (error.response) {
         const status = error.response.status;
@@ -71,6 +82,35 @@ const Newsroom = ({ countryId }) => {
 
   return (
     <div className="my-16 px-4 max-w-7xl mx-auto">
+      {/* AI Digest Hero Banner */}
+      {digest && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          className="mb-10 bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-100/50 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+            <Sparkles className="w-48 h-48 text-blue-600" />
+          </div>
+          <div className="relative z-10 max-w-4xl">
+            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-600 mb-3 flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5" /> AI Daily Briefing
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 mb-4">{digest.title || "Global Immigration Update"}</h3>
+            <p className="text-gray-700 text-lg leading-relaxed mb-6">{digest.summary}</p>
+            {digest.key_points && digest.key_points.length > 0 && (
+              <ul className="space-y-3">
+                {digest.key_points.map((pt, i) => (
+                  <li key={i} className="flex items-start gap-3 text-gray-800 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0"></span>
+                    <span>{pt}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </motion.div>
+      )}
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
