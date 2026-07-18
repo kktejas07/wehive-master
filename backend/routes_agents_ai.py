@@ -162,13 +162,8 @@ async def _daily_aggregator_loop():
     first_run = True
     while True:
         if not first_run:
-            now = datetime.utcnow()
-            target = now.replace(hour=3, minute=0, second=0, microsecond=0)
-            if target <= now:
-                target += timedelta(days=1)
-            sleep_seconds = (target - now).total_seconds()
-            logger.info("Daily Aggregator sleeping for %d seconds until next 03:00 UTC", sleep_seconds)
-            await asyncio.sleep(sleep_seconds)
+            logger.info("Aggregator sleeping for 2 hours (7200 seconds)")
+            await asyncio.sleep(7200)
         first_run = False
 
         start_ts = datetime.utcnow().isoformat()
@@ -191,10 +186,14 @@ async def _daily_aggregator_loop():
         from news_aggregator_agent import run_auto_approval as approve_news
         from blog_aggregator_agent import run_aggregator as run_blogs
         from blog_aggregator_agent import run_auto_approval as approve_blogs
+        from intake_aggregator_agent import run_aggregator as run_intakes
+
+        async def _noop(): pass
 
         results["events"] = await _run_one("events", run_events, approve_events)
         results["news"] = await _run_one("news", run_news, approve_news)
         results["blogs"] = await _run_one("blogs", run_blogs, approve_blogs)
+        results["intakes"] = await _run_one("intakes", run_intakes, _noop)
 
         # Record run in DB for monitoring
         try:
@@ -219,4 +218,4 @@ def start_scheduler():
         logger.info("Agent scheduler started (interval=%ds)", SCHEDULE_INTERVAL)
     if _daily_task is None or _daily_task.done():
         _daily_task = asyncio.create_task(_daily_aggregator_loop())
-        logger.info("Daily aggregator scheduler started (interval=86400s)")
+        logger.info("Periodic aggregator scheduler started (interval=7200s)")
