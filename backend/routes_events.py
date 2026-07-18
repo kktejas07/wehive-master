@@ -18,9 +18,11 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from pydantic import BaseModel
 
 from admin_auth import get_current_admin_flex
+from auth_utils import get_current_user
 from db import global_events_col
 from audit import record as audit_record
 from event_aggregator_agent import fetch_events_from_url, run_aggregator as run_event_aggregator
+from ai_marketplace import marketplace
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -80,6 +82,39 @@ async def public_events(
         'pages': (total + limit - 1) // limit if total > 0 else 0,
     }
 
+@router.get("/digest")
+async def get_events_digest(
+    user=Depends(get_current_user)
+):
+    """Generates an intelligent digest of upcoming events."""
+    one_day_ago = datetime.utcnow() - timedelta(days=7)
+    
+    cursor = global_events_col.find({"created_at": {"$gte": one_day_ago}, "status": "approved"}).limit(30)
+    events = []
+    async for evt in cursor:
+        events.append(evt)
+        
+    if not events:
+        return {"digest": "No new events added recently to digest."}
+        
+    events_text = "\n\n".join([f"Name: {e.get('name')}\nCategory: {e.get('category')}\nDate: {e.get('date')}" for e in events])
+    
+    prompt = f"""You are an elite Event Coordinator AI. Review the following upcoming events and write a high-quality 'Weekend Planner / Event Digest'.
+Group the events logically. Use bullet points and an engaging tone.
+
+Events:
+{events_text}
+"""
+    try:
+        reply = await marketplace.chat(
+            user_id=user["_id"],
+            system_prompt="You are an elite AI coordinator. Output clean markdown.",
+            user_prompt=prompt,
+            max_tokens=1000
+        )
+        return {"digest": reply}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail="AI Service is busy")
 
 # --- ADMIN ROUTES ---
 class GlobalEventAction(BaseModel):

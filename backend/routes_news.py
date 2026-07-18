@@ -7,6 +7,8 @@ import logging
 
 from db import global_news_col
 from news_aggregator_agent import run_aggregator
+from ai_marketplace import marketplace
+from auth_utils import get_current_user
 
 router = APIRouter(prefix="/news", tags=["News"])
 logger = logging.getLogger("wehive.routes_news")
@@ -79,6 +81,39 @@ async def get_news(
     except Exception as e:
         logger.error(f"Error fetching news: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/digest")
+async def get_news_digest(
+    user=Depends(get_current_user)
+):
+    """Generates a daily intelligence digest (HN Briefing / DevPulse style) of recent news."""
+    one_day_ago = datetime.utcnow() - timedelta(days=1)
+    
+    cursor = global_news_col.find({"created_at": {"$gte": one_day_ago}, "status": "approved"}).limit(30)
+    recent_news = await cursor.to_list(length=30)
+    
+    if not recent_news:
+        return {"digest": "No new news in the last 24 hours to digest."}
+        
+    news_text = "\n\n".join([f"Title: {n.get('title')}\nCategory: {n.get('category')}\nContent: {n.get('content')}" for n in recent_news])
+    
+    prompt = f"""You are an elite Signal Intelligence Agent. Review the following news items from the last 24 hours and write a high-quality, executive 'Daily Digest'.
+Group the news logically (e.g., Policy Updates, Travel Advisories, General News). Use bullet points. Keep it professional and concise.
+
+News Items:
+{news_text}
+"""
+    try:
+        reply = await marketplace.chat(
+            user_id=user["_id"],
+            system_prompt="You are an elite AI intelligence analyst. Output clean markdown.",
+            user_prompt=prompt,
+            max_tokens=1000
+        )
+        return {"digest": reply}
+    except Exception as e:
+        logger.error(f"Error generating news digest: {e}")
+        raise HTTPException(status_code=502, detail="AI Service is busy")
 
 @router.get("/pending")
 async def get_pending_news(

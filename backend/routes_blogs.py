@@ -7,6 +7,8 @@ import logging
 
 from db import global_blogs_col
 from blog_aggregator_agent import run_aggregator
+from ai_marketplace import marketplace
+from auth_utils import get_current_user
 
 router = APIRouter(prefix="/blogs", tags=["Blogs"])
 logger = logging.getLogger("wehive.routes_blogs")
@@ -125,6 +127,42 @@ async def reject_blog(blog_id: str):
     except Exception as e:
         logger.error(f"Error rejecting blog {blog_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/{blog_id}/podcast")
+async def generate_podcast_script(
+    blog_id: str,
+    user=Depends(get_current_user)
+):
+    """Generates a podcast script out of the given blog content."""
+    try:
+        query = {"_id": ObjectId(blog_id)}
+        blog = await global_blogs_col.find_one(query)
+        if not blog:
+            raise HTTPException(status_code=404, detail="Blog not found")
+            
+        content = blog.get("description", "")
+        if not content:
+            return {"script": "This blog has no content to convert."}
+            
+        prompt = f"""You are a creative AI Podcast Producer. Convert the following blog post into an engaging, conversational 2-person podcast script between a Host and a Co-host.
+Make it sound natural, fun, and insightful.
+
+Blog Title: {blog.get('title')}
+Blog Content:
+{content}
+"""
+        reply = await marketplace.chat(
+            user_id=user["_id"],
+            system_prompt="You are a professional podcast scriptwriter. Output clean text.",
+            user_prompt=prompt,
+            max_tokens=1500
+        )
+        return {"script": reply}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating podcast script for {blog_id}: {e}")
+        raise HTTPException(status_code=502, detail="AI Service is busy")
 
 @router.post("/run_aggregator")
 async def trigger_aggregator():
