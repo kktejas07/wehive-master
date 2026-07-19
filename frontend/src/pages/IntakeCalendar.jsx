@@ -266,6 +266,9 @@ function InsightsModal({ uni, onClose }) {
 export default function IntakeCalendar() {
   const now = new Date();
   const currentMonth = MONTHS[now.getMonth()];
+  const sixMonthsLater = new Date();
+  sixMonthsLater.setMonth(now.getMonth() + 6);
+  const endMonth = MONTHS[sixMonthsLater.getMonth()];
   
   const [activeTrack, setActiveTrack] = useState('Engineering & Masters');
   const [data, setData] = useState(FALLBACK_INTAKES);
@@ -311,7 +314,7 @@ export default function IntakeCalendar() {
           </p>
           <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[hsl(var(--soft-bg))] border border-black/5 px-4 py-2 text-[12.5px] text-[hsl(var(--blue-900))]/70">
             <Clock className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
-            Current month: <strong className="text-[hsl(var(--blue-900))]">{currentMonth} {now.getFullYear()}</strong>
+            Forecast window: <strong className="text-[hsl(var(--blue-900))]">{currentMonth} {now.getFullYear()} – {endMonth} {sixMonthsLater.getFullYear()}</strong>
           </div>
         </motion.div>
 

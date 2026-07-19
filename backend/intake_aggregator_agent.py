@@ -24,7 +24,7 @@ async def run_aggregator():
     # We ask the LLM to output a JSON list of countries with intakes broken down by track
     prompt = f"""
 You are an expert global education admissions counselor.
-Generate the current, standard university application intake cycles and deadlines for the following countries:
+Generate the standard university application intake cycles and deadlines for the NEXT 6 MONTHS for the following countries:
 {", ".join(TARGET_COUNTRIES)}
 Important: EXCLUDE India. Do not generate data for India.
 
