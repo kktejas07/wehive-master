@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { DollarSign, Calculator, TrendingUp, CreditCard, ChevronRight, Globe, Check, Bot, RefreshCw, Send } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import api from '../lib/api';
+import axios from 'axios';
+import { API } from '../context/AuthContext';
 
 // ── Proof of Funds Estimator ──────────────────────────────────────────────────
 
@@ -132,7 +133,7 @@ function AIFinancialAdvisor() {
     setLoading(true);
 
     try {
-      const res = await api.post('/financials/insights', { query: userMsg });
+      const res = await axios.post(`${API}/financials/insights`, { query: userMsg });
       setChat(prev => [...prev, { role: 'ai', content: res.data.insight }]);
     } catch (e) {
       setChat(prev => [...prev, { role: 'ai', content: "Sorry, I couldn't fetch an answer right now. Please try again." }]);
