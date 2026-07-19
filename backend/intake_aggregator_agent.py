@@ -14,7 +14,8 @@ global_intakes_col = db["global_intakes"]
 
 TARGET_COUNTRIES = [
     "USA", "United Kingdom", "Canada", "Australia", 
-    "Germany", "France", "Ireland", "New Zealand", "Netherlands"
+    "Germany", "France", "Ireland", "New Zealand", "Netherlands",
+    "Singapore", "Russia", "China", "Italy", "Philippines"
 ]
 
 async def run_aggregator():
