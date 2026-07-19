@@ -264,7 +264,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
         "website": "https://ai.google.dev",
         "requires_key": True, "key_label": "API Key", "key_placeholder": "AIza...",
         "base_url": "https://generativelanguage.googleapis.com/v1beta",
-        "models": ["gemini-2.5-flash-preview-05-20", "gemini-2.0-flash", "gemini-1.5-pro"],
+        "models": ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"],
         "docs": "https://ai.google.dev/docs",
         "powered_by_tagline": "Powered by Google AI in Association with We Hive",
         "pricing_tier": PRICING_TIER_FREE_PAID,

@@ -41,6 +41,132 @@ const FALLBACK_INTAKES = [
       ]
     },
     notes: 'Apply via UCAS for undergraduate. Postgraduate applications go directly to universities.',
+  },
+  {
+    country: 'USA',
+    flag: '🇺🇸',
+    color: '#0ea5e9',
+    tracks: {
+      "Engineering & Masters": [
+        { name: 'Fall Intake', months: 'Aug-Dec', apply_start: 'Nov', apply_end: 'Jan', popular: true },
+        { name: 'Spring Intake', months: 'Jan-May', apply_start: 'Jun', apply_end: 'Aug', popular: false },
+      ],
+      MBA: [
+        { name: 'Round 1', months: 'Sep', apply_start: 'Sep', apply_end: 'Oct', popular: true },
+        { name: 'Round 2', months: 'Jan', apply_start: 'Jan', apply_end: 'Feb', popular: true },
+      ],
+      MBBS: [
+        { name: 'Pre-Med / MD', months: 'Aug', apply_start: 'May', apply_end: 'Oct', popular: true },
+      ]
+    },
+    notes: 'Most major universities prioritize the Fall intake for scholarships.',
+  },
+  {
+    country: 'Australia',
+    flag: '🇦🇺',
+    color: '#eab308',
+    tracks: {
+      "Engineering & Masters": [
+        { name: 'Semester 1', months: 'Feb-Jun', apply_start: 'Sep', apply_end: 'Dec', popular: true },
+        { name: 'Semester 2', months: 'Jul-Nov', apply_start: 'Mar', apply_end: 'May', popular: false },
+      ],
+      MBA: [
+        { name: 'Term 1', months: 'Feb', apply_start: 'Oct', apply_end: 'Nov', popular: true },
+      ],
+      MBBS: [
+        { name: 'Medicine Intake', months: 'Jan', apply_start: 'Mar', apply_end: 'Jun', popular: true },
+      ]
+    },
+    notes: 'Semester 1 in February is the primary intake for Australia.',
+  },
+  {
+    country: 'New Zealand',
+    flag: '🇳🇿',
+    color: '#14b8a6',
+    tracks: {
+      "Engineering & Masters": [
+        { name: 'Semester 1', months: 'Feb-Jun', apply_start: 'Oct', apply_end: 'Dec', popular: true },
+      ],
+      MBA: [
+        { name: 'Quarter 1', months: 'Feb', apply_start: 'Nov', apply_end: 'Jan', popular: true },
+      ],
+      MBBS: [
+        { name: 'Pre-Med Intake', months: 'Feb', apply_start: 'Aug', apply_end: 'Nov', popular: true },
+      ]
+    },
+    notes: 'Intakes largely mirror Australia due to the southern hemisphere calendar.',
+  },
+  {
+    country: 'Germany', flag: '🇩🇪', color: '#f59e0b',
+    tracks: {
+      "Engineering & Masters": [{ name: 'Winter Semester', months: 'Oct-Feb', apply_start: 'May', apply_end: 'Jul', popular: true }],
+      MBA: [{ name: 'Winter Intake', months: 'Oct', apply_start: 'Apr', apply_end: 'Jun', popular: true }],
+      MBBS: [{ name: 'Medicine Intake', months: 'Oct', apply_start: 'May', apply_end: 'Jul', popular: true }]
+    }, notes: 'Public universities usually require German proficiency for undergraduate programs.'
+  },
+  {
+    country: 'France', flag: '🇫🇷', color: '#3b82f6',
+    tracks: {
+      "Engineering & Masters": [{ name: 'Fall Intake', months: 'Sep-Jan', apply_start: 'Jan', apply_end: 'Apr', popular: true }],
+      MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Jan', apply_end: 'May', popular: true }],
+      MBBS: [{ name: 'PASS/LAS', months: 'Sep', apply_start: 'Jan', apply_end: 'Mar', popular: true }]
+    }, notes: 'Grande Écoles have earlier deadlines compared to public universities.'
+  },
+  {
+    country: 'Ireland', flag: '🇮🇪', color: '#22c55e',
+    tracks: {
+      "Engineering & Masters": [{ name: 'Autumn Intake', months: 'Sep-Dec', apply_start: 'Nov', apply_end: 'Jul', popular: true }],
+      MBA: [{ name: 'Autumn Intake', months: 'Sep', apply_start: 'Nov', apply_end: 'Jun', popular: true }],
+      MBBS: [{ name: 'Medicine', months: 'Sep', apply_start: 'Nov', apply_end: 'Feb', popular: true }]
+    }, notes: 'Excellent post-study work visa opportunities attract many international students.'
+  },
+  {
+    country: 'Netherlands', flag: '🇳🇱', color: '#f97316',
+    tracks: {
+      "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'Oct', apply_end: 'Apr', popular: true }],
+      MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Oct', apply_end: 'May', popular: true }],
+      MBBS: [{ name: 'Medicine', months: 'Sep', apply_start: 'Oct', apply_end: 'Jan', popular: true }]
+    }, notes: 'Highly competitive programs have numerus fixus (fixed quotas) with early deadlines (Jan 15).'
+  },
+  {
+    country: 'Singapore', flag: '🇸🇬', color: '#dc2626',
+    tracks: {
+      "Engineering & Masters": [{ name: 'August Intake', months: 'Aug-Dec', apply_start: 'Jan', apply_end: 'Mar', popular: true }],
+      MBA: [{ name: 'August Intake', months: 'Aug', apply_start: 'Oct', apply_end: 'Mar', popular: true }],
+      MBBS: [{ name: 'Medicine', months: 'Aug', apply_start: 'Oct', apply_end: 'Feb', popular: true }]
+    }, notes: 'Extremely competitive admissions at NUS and NTU.'
+  },
+  {
+    country: 'Russia', flag: '🇷🇺', color: '#1d4ed8',
+    tracks: {
+      "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'May', apply_end: 'Aug', popular: true }],
+      MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'May', apply_end: 'Aug', popular: true }],
+      MBBS: [{ name: 'General Medicine', months: 'Sep', apply_start: 'May', apply_end: 'Aug', popular: true }]
+    }, notes: 'Popular for affordable medical programs. Preparatory language year often required.'
+  },
+  {
+    country: 'China', flag: '🇨🇳', color: '#ef4444',
+    tracks: {
+      "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'Feb', apply_end: 'Jun', popular: true }],
+      MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Mar', apply_end: 'May', popular: true }],
+      MBBS: [{ name: 'MBBS (English Taught)', months: 'Sep', apply_start: 'Mar', apply_end: 'Jul', popular: true }]
+    }, notes: 'Large number of English-taught MBBS programs approved by MOE.'
+  },
+  {
+    country: 'Italy', flag: '🇮🇹', color: '#16a34a',
+    tracks: {
+      "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'Nov', apply_end: 'Apr', popular: true }],
+      MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Dec', apply_end: 'May', popular: true }],
+      MBBS: [{ name: 'IMAT (English)', months: 'Oct', apply_start: 'Jul', apply_end: 'Sep', popular: true }]
+    }, notes: 'IMAT is required for English-taught medical programs.'
+  },
+  {
+    country: 'Philippines', flag: '🇵🇭', color: '#2563eb',
+    tracks: {
+      "Engineering & Masters": [{ name: 'First Semester', months: 'Aug-Dec', apply_start: 'Jan', apply_end: 'May', popular: true }],
+      MBA: [{ name: 'First Trimester', months: 'Aug', apply_start: 'Feb', apply_end: 'May', popular: true }],
+      MBBS: [{ name: 'BS-MD / MD', months: 'Aug', apply_start: 'Jan', apply_end: 'May', popular: true }]
+    }, notes: 'A top destination for Indian students pursuing medical degrees (BS-MD).'
   }
 ];
 
