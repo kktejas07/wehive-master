@@ -72,7 +72,7 @@ function LiveCurrencyConverter() {
     if (base === target) return setRate(1);
     setLoading(true);
     try {
-      const res = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${base}&to=${target}`);
+      const res = await fetch(`https://api.frankfurter.dev/v1/latest?amount=${amount}&from=${base}&to=${target}`);
       const data = await res.json();
       setRate(data.rates[target]);
     } catch (e) {
