@@ -69,6 +69,7 @@ from routes_n8n import router as n8n_router  # noqa: E402
 from routes_adapters import router as adapters_router  # noqa: E402
 from routes_travel import router as travel_router  # noqa: E402
 from routes_intakes import router as intakes_router  # noqa: E402
+from routes_financials import router as financials_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -155,6 +156,7 @@ api_router.include_router(n8n_router)
 api_router.include_router(adapters_router)
 api_router.include_router(travel_router)
 api_router.include_router(intakes_router)
+api_router.include_router(financials_router)
 
 app.include_router(api_router)
 
