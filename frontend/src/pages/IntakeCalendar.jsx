@@ -41,6 +41,60 @@ const FALLBACK_INTAKES = [
       ]
     },
     notes: 'Apply via UCAS for undergraduate. Postgraduate applications go directly to universities.',
+  },
+  {
+    country: 'USA',
+    flag: '🇺🇸',
+    color: '#0ea5e9',
+    tracks: {
+      "Engineering & Masters": [
+        { name: 'Fall Intake', months: 'Aug-Dec', apply_start: 'Nov', apply_end: 'Jan', popular: true },
+        { name: 'Spring Intake', months: 'Jan-May', apply_start: 'Jun', apply_end: 'Aug', popular: false },
+      ],
+      MBA: [
+        { name: 'Round 1', months: 'Sep', apply_start: 'Sep', apply_end: 'Oct', popular: true },
+        { name: 'Round 2', months: 'Jan', apply_start: 'Jan', apply_end: 'Feb', popular: true },
+      ],
+      MBBS: [
+        { name: 'Pre-Med / MD', months: 'Aug', apply_start: 'May', apply_end: 'Oct', popular: true },
+      ]
+    },
+    notes: 'Most major universities prioritize the Fall intake for scholarships.',
+  },
+  {
+    country: 'Australia',
+    flag: '🇦🇺',
+    color: '#eab308',
+    tracks: {
+      "Engineering & Masters": [
+        { name: 'Semester 1', months: 'Feb-Jun', apply_start: 'Sep', apply_end: 'Dec', popular: true },
+        { name: 'Semester 2', months: 'Jul-Nov', apply_start: 'Mar', apply_end: 'May', popular: false },
+      ],
+      MBA: [
+        { name: 'Term 1', months: 'Feb', apply_start: 'Oct', apply_end: 'Nov', popular: true },
+      ],
+      MBBS: [
+        { name: 'Medicine Intake', months: 'Jan', apply_start: 'Mar', apply_end: 'Jun', popular: true },
+      ]
+    },
+    notes: 'Semester 1 in February is the primary intake for Australia.',
+  },
+  {
+    country: 'New Zealand',
+    flag: '🇳🇿',
+    color: '#14b8a6',
+    tracks: {
+      "Engineering & Masters": [
+        { name: 'Semester 1', months: 'Feb-Jun', apply_start: 'Oct', apply_end: 'Dec', popular: true },
+      ],
+      MBA: [
+        { name: 'Quarter 1', months: 'Feb', apply_start: 'Nov', apply_end: 'Jan', popular: true },
+      ],
+      MBBS: [
+        { name: 'Pre-Med Intake', months: 'Feb', apply_start: 'Aug', apply_end: 'Nov', popular: true },
+      ]
+    },
+    notes: 'Intakes largely mirror Australia due to the southern hemisphere calendar.',
   }
 ];
 
