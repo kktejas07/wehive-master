@@ -27,7 +27,32 @@ async def get_university_recommendations(country: str, track: str):
     
     if not unis:
         # Fallback to AI generation if DB has no matches for this country
-        return {"universities": []}
+        prompt = f"""
+        Provide the top 4 universities in {country} for {track} programs.
+        Format as a JSON array of objects, with each object having a 'name' field.
+        Example:
+        [
+            {{"name": "University Name 1"}},
+            {{"name": "University Name 2"}}
+        ]
+        Return ONLY valid JSON.
+        """
+        try:
+            reply = await marketplace.chat(
+                user_id="system_recommendations",
+                system_prompt="You are an expert university admissions counselor. Output JSON array only.",
+                user_prompt=prompt,
+                max_tokens=400
+            )
+            import re
+            m = re.search(r"\[.*\]", reply.strip(), re.DOTALL)
+            if m:
+                unis = json.loads(m.group(0))
+            else:
+                unis = json.loads(reply.strip())
+        except Exception as e:
+            logger.error(f"Failed to generate AI recommendations: {e}")
+            return {"universities": []}
         
     return {"universities": unis}
 
