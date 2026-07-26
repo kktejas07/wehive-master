@@ -60,7 +60,7 @@ async def track_application(application_id: str):
 @router.get('/events')
 async def public_events(
     tag: Optional[str] = Query(None),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
 ):
     now = datetime.utcnow()
     filt: dict = {'is_published': True}
