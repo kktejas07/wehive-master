@@ -23,8 +23,12 @@ logger = logging.getLogger("wehive.agents_router")
 
 notifications_col = db["notifications"]
 
+import os
+
 SCHEDULE_INTERVAL = 3600  # 1 hour
+DAILY_AGGREGATOR_INTERVAL_SECONDS = int(os.environ.get("DAILY_AGGREGATOR_INTERVAL_SECONDS", 86400))  # 24 hours
 _scheduler_task: Optional[asyncio.Task] = None
+_next_daily_run: Optional[str] = None
 _last_run: Optional[str] = None
 _last_results: dict = {}
 
@@ -112,6 +116,8 @@ async def agent_status(user=Depends(get_current_user)):
     return {
         "scheduler_active": _scheduler_task is not None and not _scheduler_task.done(),
         "daily_aggregator_active": _daily_task is not None and not _daily_task.done(),
+        "daily_interval_hours": DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600,
+        "next_daily_run_utc": _next_daily_run,
         "last_run": _last_run,
         "last_results": _last_results,
         "recent_aggregator_runs": agg_runs,
@@ -156,18 +162,24 @@ async def _scheduler_loop():
 _daily_task: Optional[asyncio.Task] = None
 
 async def _daily_aggregator_loop():
-    """Background loop: run web aggregators (events, news, blogs) every 24 hours.
+    """Background loop: run web aggregators (events, news, blogs, intakes) daily (every 24 hours).
     Each aggregator is isolated — one failure won't block the others.
     Auto-approval runs after each aggregation. Runs immediately on first startup."""
+    global _next_daily_run
     first_run = True
     while True:
         if not first_run:
-            logger.info("Aggregator sleeping for 2 hours (7200 seconds)")
-            await asyncio.sleep(7200)
+            next_dt = datetime.utcnow() + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)
+            _next_daily_run = next_dt.isoformat()
+            logger.info("Daily Aggregator sleeping for %d seconds (%0.1f hours). Next run: %s UTC", 
+                        DAILY_AGGREGATOR_INTERVAL_SECONDS, DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600, _next_daily_run)
+            await asyncio.sleep(DAILY_AGGREGATOR_INTERVAL_SECONDS)
         first_run = False
 
         try:
-            start_ts = datetime.utcnow().isoformat()
+            start_dt = datetime.utcnow()
+            start_ts = start_dt.isoformat()
+            _next_daily_run = (start_dt + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)).isoformat()
             results = {}
 
             async def _run_one(name: str, agg_fn, approve_fn):
@@ -207,7 +219,7 @@ async def _daily_aggregator_loop():
             except Exception as e:
                 logger.warning("Failed to record aggregator run: %s", e)
 
-            logger.info("Daily Aggregator Scheduler: complete — %s", results)
+            logger.info("Daily Aggregator Scheduler: complete — %s. Next scheduled run: %s UTC", results, _next_daily_run)
         except Exception as loop_e:
             logger.exception("Critical error in daily aggregator loop: %s", loop_e)
 
@@ -221,4 +233,5 @@ def start_scheduler():
         logger.info("Agent scheduler started (interval=%ds)", SCHEDULE_INTERVAL)
     if _daily_task is None or _daily_task.done():
         _daily_task = asyncio.create_task(_daily_aggregator_loop())
-        logger.info("Periodic aggregator scheduler started (interval=7200s)")
+        logger.info("Daily aggregator scheduler started (interval=%ds / %0.1fh)", 
+                    DAILY_AGGREGATOR_INTERVAL_SECONDS, DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600)
