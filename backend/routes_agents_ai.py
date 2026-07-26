@@ -166,47 +166,50 @@ async def _daily_aggregator_loop():
             await asyncio.sleep(7200)
         first_run = False
 
-        start_ts = datetime.utcnow().isoformat()
-        results = {}
-
-        async def _run_one(name: str, agg_fn, approve_fn):
-            try:
-                logger.info("Daily Aggregator: running %s...", name)
-                await agg_fn()
-                await approve_fn()
-                logger.info("Daily Aggregator: %s complete", name)
-                return "ok"
-            except Exception as e:
-                logger.exception("Daily Aggregator: %s failed: %s", name, e)
-                return str(e)
-
-        from event_aggregator_agent import run_aggregator as run_events
-        from event_aggregator_agent import run_auto_approval as approve_events
-        from news_aggregator_agent import run_aggregator as run_news
-        from news_aggregator_agent import run_auto_approval as approve_news
-        from blog_aggregator_agent import run_aggregator as run_blogs
-        from blog_aggregator_agent import run_auto_approval as approve_blogs
-        from intake_aggregator_agent import run_aggregator as run_intakes
-
-        async def _noop(): pass
-
-        results["events"] = await _run_one("events", run_events, approve_events)
-        results["news"] = await _run_one("news", run_news, approve_news)
-        results["blogs"] = await _run_one("blogs", run_blogs, approve_blogs)
-        results["intakes"] = await _run_one("intakes", run_intakes, _noop)
-
-        # Record run in DB for monitoring
         try:
-            from db import db
-            await db["aggregator_runs"].insert_one({
-                "ts": start_ts,
-                "finished_at": datetime.utcnow().isoformat(),
-                "results": results,
-            })
-        except Exception as e:
-            logger.warning("Failed to record aggregator run: %s", e)
+            start_ts = datetime.utcnow().isoformat()
+            results = {}
 
-        logger.info("Daily Aggregator Scheduler: complete — %s", results)
+            async def _run_one(name: str, agg_fn, approve_fn):
+                try:
+                    logger.info("Daily Aggregator: running %s...", name)
+                    await agg_fn()
+                    await approve_fn()
+                    logger.info("Daily Aggregator: %s complete", name)
+                    return "ok"
+                except Exception as e:
+                    logger.exception("Daily Aggregator: %s failed: %s", name, e)
+                    return str(e)
+
+            from event_aggregator_agent import run_aggregator as run_events
+            from event_aggregator_agent import run_auto_approval as approve_events
+            from news_aggregator_agent import run_aggregator as run_news
+            from news_aggregator_agent import run_auto_approval as approve_news
+            from blog_aggregator_agent import run_aggregator as run_blogs
+            from blog_aggregator_agent import run_auto_approval as approve_blogs
+            from intake_aggregator_agent import run_aggregator as run_intakes
+
+            async def _noop(): pass
+
+            results["events"] = await _run_one("events", run_events, approve_events)
+            results["news"] = await _run_one("news", run_news, approve_news)
+            results["blogs"] = await _run_one("blogs", run_blogs, approve_blogs)
+            results["intakes"] = await _run_one("intakes", run_intakes, _noop)
+
+            # Record run in DB for monitoring
+            try:
+                from db import db
+                await db["aggregator_runs"].insert_one({
+                    "ts": start_ts,
+                    "finished_at": datetime.utcnow().isoformat(),
+                    "results": results,
+                })
+            except Exception as e:
+                logger.warning("Failed to record aggregator run: %s", e)
+
+            logger.info("Daily Aggregator Scheduler: complete — %s", results)
+        except Exception as loop_e:
+            logger.exception("Critical error in daily aggregator loop: %s", loop_e)
 
 
 
