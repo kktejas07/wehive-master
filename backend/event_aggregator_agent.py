@@ -168,11 +168,13 @@ async def fetch_events_from_url(url: str, country: str, platform: str = None) ->
 async def fetch_events_for_country_fallback(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
     """Fallback LLM generation if scraping fails or isn't triggered via URL."""
     system_prompt = "You are an expert global event aggregator. Always respond with valid JSON only."
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
     user_prompt = f"""
-    Please list 3 major upcoming events, festivals, or conferences in {country}.
+    Please list 3 major upcoming events, festivals, or conferences in {country} scheduled AFTER today's date ({today_str}).
+    All event dates MUST be future dates formatted strictly as YYYY-MM-DD (e.g. between {today_str} and 2027-12-31).
     Format the output strictly as a JSON array of objects with the following keys:
     - "name": string
-    - "date": string (e.g., "2026-10-15")
+    - "date": string (YYYY-MM-DD format, must be >= {today_str})
     - "category": string (e.g., "Music", "Tech", "Culture")
     - "image_url": string (Use a generic placeholder like "https://images.unsplash.com/photo-1506157786151-b8491531f063")
     - "is_high_risk": boolean (True if it's a massive gathering >50k people or politically sensitive, False otherwise)
@@ -316,14 +318,12 @@ async def run_aggregator():
     logger.info(f"Aggregator finished. Inserted {total_added} pending events, skipped {total_skipped} duplicates.")
 
 async def run_auto_approval():
-    """Fallback task that runs periodically to auto-approve safe events older than 2 hours."""
+    """Fallback task that runs periodically to auto-approve safe events."""
     logger.info("Running auto-approval check...")
-    two_hours_ago = datetime.utcnow() - timedelta(hours=2)
     
     query = {
         "status": "pending",
         "is_high_risk": False,
-        "created_at": {"$lt": two_hours_ago}
     }
     
     update = {

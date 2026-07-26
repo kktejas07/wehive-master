@@ -35,6 +35,7 @@ async def public_events(
     date_from: Optional[str] = Query(None, description="ISO date filter start (e.g. 2026-01-01)"),
     date_to: Optional[str] = Query(None, description="ISO date filter end (e.g. 2026-12-31)"),
     period: Optional[str] = Query(None, description="'old' or 'new' relative filter"),
+    upcoming_only: bool = Query(True, description="Filter for upcoming events (date >= today)"),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=200),
     sort: str = Query("created_at", description="Sort field"),
@@ -46,14 +47,22 @@ async def public_events(
     if category:
         filt['category'] = category
     
-    # Date range filter
-    if date_from or date_to:
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+
+    # Date range filter: default to upcoming events (current date onwards into the future)
+    if upcoming_only and period != 'old' and not date_from and not date_to:
+        filt['$or'] = [
+            {'date': {'$gte': today_str}},
+            {'date': None},
+            {'date': ''}
+        ]
+    elif date_from or date_to:
         date_filt = {}
         if date_from:
-            date_filt['$gte'] = datetime.fromisoformat(date_from)
+            date_filt['$gte'] = date_from
         if date_to:
-            date_filt['$lte'] = datetime.fromisoformat(date_to) + timedelta(days=1)
-        filt['created_at'] = date_filt
+            date_filt['$lte'] = date_to
+        filt['date'] = date_filt
     
     # Old/new relative period filter
     if period == 'new':

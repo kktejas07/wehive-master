@@ -305,13 +305,11 @@ async def run_aggregator():
     logger.info(f"Aggregator finished. Inserted {total_added} pending news items, skipped {total_skipped} duplicates.")
 
 async def run_auto_approval():
-    """Fallback task that runs periodically to auto-approve safe news older than 2 hours."""
+    """Fallback task that runs periodically to auto-approve safe news."""
     logger.info("Running auto-approval check for news...")
-    two_hours_ago = datetime.utcnow() - timedelta(hours=2)
     
     query = {
-        "status": "pending",
-        "created_at": {"$lt": two_hours_ago}
+        "status": "pending"
     }
     
     update = {
