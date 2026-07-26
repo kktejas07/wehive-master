@@ -20,7 +20,7 @@ from vector_store import upsert_documents
 try:
     import nest_asyncio
     nest_asyncio.apply()
-except ImportError:
+except Exception:
     pass
 
 try:
