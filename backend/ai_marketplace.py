@@ -507,7 +507,7 @@ PROVIDER_REGISTRY: dict[str, dict] = {
         "docs": "https://docs.api.nvidia.com",
         "powered_by_tagline": "Powered by NVIDIA NIM",
         "pricing_tier": PRICING_TIER_FREE_PAID, "category": "llm",
-        "models": ["llama-3.1-70b", "nemotron-4-340b", "mixtral-8x7b"],
+        "models": ["meta/llama-3.1-70b-instruct", "nvidia/llama-3.1-nemotron-70b-instruct", "mistralai/mixtral-8x7b-instruct-v0.1"],
     },
     "omniroute": {
         "name": "OmniRoute",
@@ -1144,10 +1144,11 @@ def get_provider(provider_id: str, key: str = "", base_url: str = "", model: str
 def get_fallback_providers() -> list[tuple[BaseProvider, str]]:
     pool = []
     ENV_PROVIDER_MAP = {
+        "GROQ_API_KEY": "groq",
+        "NVIDIA_API_KEY": "nvidia_nim",
+        "GEMINI_API_KEY": "google",
         "OPENAI_API_KEY": "openai",
         "ANTHROPIC_API_KEY": "anthropic",
-        "GEMINI_API_KEY": "google",
-        "GROQ_API_KEY": "groq",
         "DEEPSEEK_API_KEY": "deepseek",
         "CEREBRAS_API_KEY": "cerebras",
         "MISTRAL_API_KEY": "mistral",
