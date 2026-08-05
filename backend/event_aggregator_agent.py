@@ -216,8 +216,10 @@ async def run_aggregator():
                 logger.error(f"Scrape failed for {seed['url']}: {e}")
                 continue
             for evt in events:
-                name = evt.get("name")
-                category = evt.get("category")
+                name = evt.get("name") or evt.get("title") or evt.get("event_name") or evt.get("event")
+                if not name:
+                    continue
+                category = evt.get("category", "General")
                 date = evt.get("date")
                 
                 existing = await global_events_col.find_one({
@@ -265,8 +267,10 @@ async def run_aggregator():
                 continue
             
             for evt in events:
-                name = evt.get("name")
-                category = evt.get("category")
+                name = evt.get("name") or evt.get("title") or evt.get("event_name") or evt.get("event")
+                if not name:
+                    continue
+                category = evt.get("category", "General")
                 date = evt.get("date")
                 
                 existing = await global_events_col.find_one({
