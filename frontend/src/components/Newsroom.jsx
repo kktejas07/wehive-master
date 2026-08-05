@@ -191,17 +191,9 @@ const Newsroom = ({ countryId }) => {
               className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
             >
               {news.map((item, idx) => (
-                <motion.a
-                  key={item.id}
-                  href={item.source_url && !item.source_url.includes('example.com') ? item.source_url : '#'}
-                  target={item.source_url && !item.source_url.includes('example.com') ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  onClick={(e) => {
-                    if (!item.source_url || item.source_url.includes('example.com')) {
-                      e.preventDefault();
-                      setSelectedNews(item);
-                    }
-                  }}
+                <motion.div
+                  key={item.id || idx}
+                  onClick={() => setSelectedNews(item)}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
@@ -226,10 +218,10 @@ const Newsroom = ({ countryId }) => {
                   <p className="text-sm text-gray-600 line-clamp-3 mb-6 flex-grow">
                     {item.content}
                   </p>
-                  <div className="flex items-center text-sm font-semibold text-primary mt-auto">
+                  <div className="flex items-center text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform mt-auto">
                     Read full story &rarr;
                   </div>
-                </motion.a>
+                </motion.div>
               ))}
             </motion.div>
           )}
@@ -239,11 +231,15 @@ const Newsroom = ({ countryId }) => {
       {/* News Preview Modal */}
       <AnimatePresence>
         {selectedNews && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm">
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSelectedNews(null)}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col relative"
             >
               {/* Close button */}
@@ -274,11 +270,24 @@ const Newsroom = ({ countryId }) => {
                   {selectedNews.title}
                 </h2>
 
-                <div className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed">
-                  {selectedNews.content?.split('\\n').map((paragraph, i) => (
+                <div className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed mb-8">
+                  {selectedNews.content?.split('\n').map((paragraph, i) => (
                     <p key={i} className="mb-4">{paragraph}</p>
                   ))}
                 </div>
+
+                {selectedNews.source_url && !selectedNews.source_url.includes('example.com') && (
+                  <div className="pt-4 border-t border-gray-100 flex justify-end">
+                    <a
+                      href={selectedNews.source_url.startsWith('http') ? selectedNews.source_url : `https://${selectedNews.source_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-95 transition-opacity shadow-md"
+                    >
+                      Read Original Source &rarr;
+                    </a>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
