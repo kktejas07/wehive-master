@@ -320,6 +320,7 @@ async def run_aggregator():
             logger.error(f"Failed to ingest events into vector DB: {e}")
             
     logger.info(f"Aggregator finished. Inserted {total_added} pending events, skipped {total_skipped} duplicates.")
+    await run_auto_approval()
 
 async def run_auto_approval():
     """Fallback task that runs periodically to auto-approve safe events."""
