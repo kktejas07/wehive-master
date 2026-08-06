@@ -182,12 +182,13 @@ def _generate_static_news_fallback(country: str) -> List[Dict[str, Any]]:
 async def fetch_news_for_country_fallback(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
     """Fallback LLM generation if scraping fails."""
     system_prompt = "You are an expert immigration news reporter. Always respond with valid JSON only."
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
     user_prompt = f"""
     Please write 2 news headlines regarding recent visa or immigration updates in {country}.
     You MUST categorize each news item into exactly ONE of these categories: F1, H1B, O1, EB1, Business, Travel.
     Format the output strictly as a JSON array of objects with the following keys:
     - "title": string
-    - "date": string (e.g., "2026-10-15")
+    - "date": string (current date in YYYY-MM-DD format, e.g. "{today_str}")
     - "category": string (must be one of: F1, H1B, O1, EB1, Business, Travel)
     - "content": string (A brief summary of the news, 2-3 sentences)
     - "source_url": string (A generic url placeholder like "https://example.com/news")
@@ -240,10 +241,15 @@ async def run_aggregator():
                     total_skipped += 1
                     continue
                 
+                today_str = datetime.utcnow().strftime("%Y-%m-%d")
+                news_date = news.get("date")
+                if not news_date or not isinstance(news_date, str) or len(news_date) < 10:
+                    news_date = today_str
+
                 doc = {
                     "title": title,
                     "country_id": country_id,
-                    "date": news.get("date"),
+                    "date": news_date,
                     "category": category,
                     "content": news.get("content"),
                     "source_url": news.get("source_url"),
@@ -286,10 +292,15 @@ async def run_aggregator():
                     total_skipped += 1
                     continue
                 
+                today_str = datetime.utcnow().strftime("%Y-%m-%d")
+                news_date = news.get("date")
+                if not news_date or not isinstance(news_date, str) or len(news_date) < 10:
+                    news_date = today_str
+
                 doc = {
                     "title": title,
                     "country_id": country_id,
-                    "date": news.get("date"),
+                    "date": news_date,
                     "category": category,
                     "content": news.get("content"),
                     "source_url": news.get("source_url"),

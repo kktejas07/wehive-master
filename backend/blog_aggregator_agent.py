@@ -40,10 +40,14 @@ def _parse_agent_response(response_text: str) -> List[Dict[str, Any]]:
         return []
 
 def _generate_static_blog_fallback(country: str) -> List[Dict[str, Any]]:
+    today_dt = datetime.utcnow()
+    month_year = today_dt.strftime("%B %Y")
+    today_str = today_dt.strftime("%Y-%m-%d")
     return [
         {
-            "title": f"Navigating Visa Guidelines and Cultural Etiquette in {country}",
-            "description": f"Planning a journey to {country}? Here is an essential guide covering entry requirements, document checklists, local customs, and top destinations for travelers and students.",
+            "title": f"Navigating Visa Guidelines and Cultural Etiquette in {country} ({month_year})",
+            "date": today_str,
+            "description": f"Planning a journey to {country}? Here is an essential guide covering entry requirements, document checklists, local customs, and top destinations for travelers and students in {month_year}.",
             "readTime": "5 min read",
             "category": "Travel",
             "imageUrl": "https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a",
@@ -51,8 +55,9 @@ def _generate_static_blog_fallback(country: str) -> List[Dict[str, Any]]:
             "author_initials": "WH"
         },
         {
-            "title": f"The Ultimate Checklist for Work & Student Permits in {country}",
-            "description": f"Everything you need to know about preparing application materials, interview preparation, and financial proof for visa approval in {country}.",
+            "title": f"The Ultimate Checklist for Work & Student Permits in {country} ({month_year})",
+            "date": today_str,
+            "description": f"Everything you need to know about preparing application materials, interview preparation, and financial proof for visa approval in {country} for {month_year}.",
             "readTime": "7 min read",
             "category": "F1",
             "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644",
@@ -127,6 +132,7 @@ async def run_aggregator():
             doc = {
                 "title": title,
                 "country_id": country_id,
+                "date": blog.get("date") or datetime.utcnow().strftime("%Y-%m-%d"),
                 "description": blog.get("description"),
                 "readTime": blog.get("readTime", "5 min read"),
                 "category": category,

@@ -216,7 +216,7 @@ export default function Blog() {
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
                       <span>
-                        {selectedBlog.created_at ? new Date(selectedBlog.created_at).toLocaleDateString() : 'Recent'}
+                        {selectedBlog.date || (selectedBlog.created_at ? new Date(selectedBlog.created_at).toLocaleDateString() : 'Recent')}
                       </span>
                     </div>
                   </div>
