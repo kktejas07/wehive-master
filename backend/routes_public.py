@@ -111,3 +111,49 @@ async def public_firebase_config():
         },
     }
 
+
+@router.get('/aggregator-status')
+async def public_aggregator_status():
+    """Public diagnostic endpoint to verify server time, DB counts, LLM key availability, and run logs."""
+    import os
+    from datetime import datetime
+
+    def _has_key(k: str) -> bool:
+        v = os.environ.get(k, '').strip()
+        return bool(v) and len(v) > 5 and not v.startswith('mock')
+
+    db_info = {}
+    for col_name in ['global_blogs', 'global_news', 'global_events']:
+        col = db[col_name]
+        count = await col.count_documents({})
+        latest = await col.find().sort('created_at', -1).limit(1).to_list(1)
+        latest_ts = latest[0].get('created_at') if latest else None
+        if isinstance(latest_ts, datetime):
+            latest_ts = latest_ts.isoformat()
+        db_info[col_name] = {
+            'count': count,
+            'latest_created_at': str(latest_ts) if latest_ts else None
+        }
+
+    recent_runs = []
+    try:
+        cursor = db['aggregator_runs'].find({}, {'_id': 0}).sort('ts', -1).limit(5)
+        recent_runs = [doc async for doc in cursor]
+    except Exception:
+        pass
+
+    return {
+        'server_utc_time': datetime.utcnow().isoformat(),
+        'keys_configured': {
+            'GROQ_API_KEY': _has_key('GROQ_API_KEY'),
+            'NVIDIA_API_KEY': _has_key('NVIDIA_API_KEY'),
+            'GEMINI_API_KEY': _has_key('GEMINI_API_KEY'),
+            'GOOGLE_API_KEY': _has_key('GOOGLE_API_KEY'),
+            'OPENAI_API_KEY': _has_key('OPENAI_API_KEY'),
+            'ANTHROPIC_API_KEY': _has_key('ANTHROPIC_API_KEY'),
+        },
+        'db_status': db_info,
+        'recent_runs': recent_runs
+    }
+
+
