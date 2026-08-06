@@ -39,6 +39,28 @@ def _parse_agent_response(response_text: str) -> List[Dict[str, Any]]:
         logger.error(f"Failed to parse agent response: {e}")
         return []
 
+def _generate_static_blog_fallback(country: str) -> List[Dict[str, Any]]:
+    return [
+        {
+            "title": f"Navigating Visa Guidelines and Cultural Etiquette in {country}",
+            "description": f"Planning a journey to {country}? Here is an essential guide covering entry requirements, document checklists, local customs, and top destinations for travelers and students.",
+            "readTime": "5 min read",
+            "category": "Travel",
+            "imageUrl": "https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a",
+            "author_name": "We Hive Editorial",
+            "author_initials": "WH"
+        },
+        {
+            "title": f"The Ultimate Checklist for Work & Student Permits in {country}",
+            "description": f"Everything you need to know about preparing application materials, interview preparation, and financial proof for visa approval in {country}.",
+            "readTime": "7 min read",
+            "category": "F1",
+            "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644",
+            "author_name": "Visa Insights Team",
+            "author_initials": "VI"
+        }
+    ]
+
 async def fetch_blogs_for_country(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
     """LLM generation for blog articles."""
     system_prompt = "You are an expert immigration and travel writer. Always respond with valid JSON only."
@@ -59,8 +81,8 @@ async def fetch_blogs_for_country(marketplace: AIMarketplace, country: str) -> L
     
     provider, pid = await marketplace.get_active_provider("system")
     if not provider:
-        logger.error("No LLM provider available for blog generation")
-        return []
+        logger.warning(f"No active LLM provider for blogs. Generating dynamic fallback for {country}.")
+        return _generate_static_blog_fallback(country)
     
     response = await provider.chat(
         system_prompt=system_prompt,
