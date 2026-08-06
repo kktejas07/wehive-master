@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Loader2, CheckCircle, XCircle, Globe, ShieldAlert } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Globe, ShieldAlert, Play } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
+import { API } from '../../context/AuthContext';
+import axios from 'axios';
 
 export default function GlobalEventsTab() {
   const [events, setEvents] = useState([]);
@@ -36,12 +38,34 @@ export default function GlobalEventsTab() {
     }
   };
 
+  const [runningAggregator, setRunningAggregator] = useState(false);
+
   return (
     <div className="space-y-6">
       <AdminHeader 
         title="Global Events Hub" 
         subtitle="Review and approve events crawled by the AI aggregator." 
         Icon={Globe} 
+        right={
+          <button
+            onClick={async () => {
+              setRunningAggregator(true);
+              try {
+                await axios.get(`${API}/public/aggregator-trigger`);
+                toast({ title: 'AI Aggregators Triggered', description: 'Scraping News, Blogs & Events in background.' });
+              } catch (e) {
+                toast({ title: 'Trigger failed', variant: 'destructive' });
+              } finally {
+                setRunningAggregator(false);
+              }
+            }}
+            disabled={runningAggregator}
+            className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition-all disabled:opacity-50"
+          >
+            {runningAggregator ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+            Run AI Aggregators Now
+          </button>
+        }
       />
 
       <div className="bg-black/20 p-4 rounded-xl border border-white/10 flex flex-wrap gap-4 items-end">

@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight, History, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight, History, Pencil, Plus, Trash2, Play } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, inr } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
+import { useToast } from '../../hooks/use-toast';
+import { API } from '../../context/AuthContext';
+import axios from 'axios';
 
 function MetricCard({ label, value, sub, Icon, accent = 'bg-[hsl(var(--accent))]', testid }) {
   return (
@@ -78,11 +81,34 @@ export default function OverviewTab() {
 
   const { users, applications, revenue, countries, trend, top_countries, recent_activity } = data;
 
+  const [runningAggregator, setRunningAggregator] = useState(false);
+  const { toast } = useToast();
+
   return (
     <div data-testid="admin-overview">
       <AdminHeader
         title="Overview"
         subtitle="Live platform health — users, visa applications, revenue and infrastructure."
+        right={
+          <button
+            onClick={async () => {
+              setRunningAggregator(true);
+              try {
+                await axios.get(`${API}/public/aggregator-trigger`);
+                toast({ title: 'AI Aggregators Triggered', description: 'Scraping News, Blogs & Events in background.' });
+              } catch (e) {
+                toast({ title: 'Trigger failed', variant: 'destructive' });
+              } finally {
+                setRunningAggregator(false);
+              }
+            }}
+            disabled={runningAggregator}
+            className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition-all disabled:opacity-50"
+          >
+            {runningAggregator ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+            Run AI Aggregators Now
+          </button>
+        }
       />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
