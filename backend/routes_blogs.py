@@ -40,7 +40,7 @@ async def get_blogs(
     date_to: Optional[str] = Query(None, description="ISO date filter end"),
     period: Optional[str] = Query(None, description="'old' or 'new' relative filter"),
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=1000),
     sort: str = Query("created_at"),
     order: str = Query("desc", regex="^(asc|desc)$"),
 ):
@@ -86,7 +86,7 @@ async def get_blogs(
 @router.get("/pending")
 async def get_pending_blogs(
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=1000),
 ):
     try:
         total = await global_blogs_col.count_documents({"status": "pending"})

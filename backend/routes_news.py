@@ -39,7 +39,7 @@ async def get_news(
     date_to: Optional[str] = Query(None, description="ISO date filter end"),
     period: Optional[str] = Query(None, description="'old' or 'new' relative filter"),
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=1000),
     sort: str = Query("created_at"),
     order: str = Query("desc", regex="^(asc|desc)$"),
 ):
@@ -118,7 +118,7 @@ News Items:
 @router.get("/pending")
 async def get_pending_news(
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=1000),
 ):
     try:
         total = await global_news_col.count_documents({"status": "pending"})

@@ -37,7 +37,7 @@ async def public_events(
     period: Optional[str] = Query(None, description="'old' or 'new' relative filter"),
     upcoming_only: bool = Query(True, description="Filter for upcoming events (date >= today)"),
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=1000),
     sort: str = Query("created_at", description="Sort field"),
     order: str = Query("desc", regex="^(asc|desc)$"),
 ):
@@ -137,7 +137,7 @@ class ScrapeTriggerRequest(BaseModel):
 @router.get("/pending")
 async def admin_get_pending_events(
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=1000),
     user=Depends(get_current_admin_flex),
 ):
     skip = (page - 1) * limit
