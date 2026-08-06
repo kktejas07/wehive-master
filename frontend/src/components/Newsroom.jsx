@@ -34,6 +34,17 @@ const Newsroom = ({ countryId }) => {
     return { color: 'bg-gray-600 text-white', label: cid.toUpperCase().substring(0, 3) };
   };
 
+  const getItemDate = (item) => {
+    if (!item) return new Date();
+    const d1 = item.date ? new Date(item.date) : null;
+    const d2 = item.created_at ? new Date(item.created_at) : null;
+    if (d1 && !isNaN(d1.getTime()) && d1.getFullYear() >= 2026) {
+      return d1;
+    }
+    if (d2 && !isNaN(d2.getTime())) return d2;
+    return d1 || new Date();
+  };
+
   const fetchNews = async () => {
     setLoading(true);
     setErrorState(null);
@@ -209,7 +220,7 @@ const Newsroom = ({ countryId }) => {
                       </span>
                     )}
                     <span className="text-xs font-medium text-gray-400 ml-auto">
-                      {new Date(item.date || item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      {getItemDate(item).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors line-clamp-2">
@@ -262,7 +273,7 @@ const Newsroom = ({ countryId }) => {
                     </span>
                   )}
                   <span className="text-sm font-medium text-gray-400 ml-auto">
-                    {new Date(selectedNews.date || selectedNews.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                    {getItemDate(selectedNews).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>
                 

@@ -125,7 +125,7 @@ export default function GlobalEvents() {
                     <div className="mt-4 space-y-2 mb-8">
                       <div className="flex items-center gap-2 text-[14px] text-[hsl(var(--blue-900))]/65">
                         <Calendar className="w-4 h-4 text-[hsl(var(--accent))]" />
-                        {new Date(evt.date).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}
+                        {evt.date && !isNaN(new Date(evt.date).getTime()) ? new Date(evt.date).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }) : 'Upcoming'}
                       </div>
                       <div className="flex items-center gap-2 text-[14px] text-[hsl(var(--blue-900))]/65">
                         <MapPin className="w-4 h-4 text-[hsl(var(--accent))]" />

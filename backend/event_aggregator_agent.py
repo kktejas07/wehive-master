@@ -240,12 +240,15 @@ async def run_aggregator():
                 if not name:
                     continue
                 category = evt.get("category", "General")
-                date = evt.get("date")
+                today_str = datetime.utcnow().strftime("%Y-%m-%d")
+                evt_date = evt.get("date")
+                if not evt_date or not isinstance(evt_date, str) or len(evt_date) < 10 or evt_date < today_str:
+                    evt_date = (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%d")
                 
                 existing = await global_events_col.find_one({
                     "name": name,
                     "country_id": country_id,
-                    "date": date,
+                    "date": evt_date,
                 })
                 if existing:
                     total_skipped += 1
@@ -254,7 +257,7 @@ async def run_aggregator():
                 doc = {
                     "name": name,
                     "country_id": country_id,
-                    "date": date,
+                    "date": evt_date,
                     "category": category,
                     "image_url": evt.get("image_url"),
                     "status": "pending",
@@ -266,7 +269,7 @@ async def run_aggregator():
                 
                 doc_id = str(res.inserted_id)
                 vector_ids.append(doc_id)
-                vector_docs.append(f"{name} {category} {date}")
+                vector_docs.append(f"{name} {category} {evt_date}")
                 vector_metas.append({
                     "type": "event",
                     "country_id": country_id,
@@ -291,12 +294,15 @@ async def run_aggregator():
                 if not name:
                     continue
                 category = evt.get("category", "General")
-                date = evt.get("date")
+                today_str = datetime.utcnow().strftime("%Y-%m-%d")
+                evt_date = evt.get("date")
+                if not evt_date or not isinstance(evt_date, str) or len(evt_date) < 10 or evt_date < today_str:
+                    evt_date = (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%d")
                 
                 existing = await global_events_col.find_one({
                     "name": name,
                     "country_id": country_id,
-                    "date": date,
+                    "date": evt_date,
                 })
                 if existing:
                     total_skipped += 1
@@ -305,7 +311,7 @@ async def run_aggregator():
                 doc = {
                     "name": name,
                     "country_id": country_id,
-                    "date": date,
+                    "date": evt_date,
                     "category": category,
                     "image_url": evt.get("image_url"),
                     "status": "pending",
@@ -317,7 +323,7 @@ async def run_aggregator():
                 
                 doc_id = str(res.inserted_id)
                 vector_ids.append(doc_id)
-                vector_docs.append(f"{name} {category} {date}")
+                vector_docs.append(f"{name} {category} {evt_date}")
                 vector_metas.append({
                     "type": "event",
                     "country_id": country_id,
