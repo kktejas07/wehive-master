@@ -157,3 +157,30 @@ async def public_aggregator_status():
     }
 
 
+@router.get('/aggregator-trigger')
+async def public_aggregator_trigger():
+    """Public trigger to immediately execute a full aggregation pass across events, news, and blogs."""
+    import asyncio
+    from event_aggregator_agent import run_aggregator as run_events, run_auto_approval as approve_events
+    from news_aggregator_agent import run_aggregator as run_news, run_auto_approval as approve_news
+    from blog_aggregator_agent import run_aggregator as run_blogs, run_auto_approval as approve_blogs
+
+    async def _bg_run():
+        try:
+            await run_events()
+            await approve_events()
+            await run_news()
+            await approve_news()
+            await run_blogs()
+            await approve_blogs()
+        except Exception as e:
+            print("Manual trigger error:", e)
+
+    asyncio.create_task(_bg_run())
+    return {
+        "status": "success",
+        "message": "Aggregation pass started in background on server. Check /api/public/aggregator-status in 30 seconds."
+    }
+
+
+
