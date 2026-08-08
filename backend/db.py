@@ -4,7 +4,15 @@ from motor.motor_asyncio import AsyncIOMotorClient
 MONGO_URL = os.environ['MONGO_URL']
 DB_NAME = os.environ.get('DB_NAME', 'wehive')
 
-client = AsyncIOMotorClient(MONGO_URL, serverSelectionTimeoutMS=5000)
+kwargs = {"serverSelectionTimeoutMS": 5000}
+if "mongodb+srv://" in MONGO_URL or "tls=true" in MONGO_URL.lower() or "ssl=true" in MONGO_URL.lower():
+    try:
+        import certifi
+        kwargs["tlsCAFile"] = certifi.where()
+    except ImportError:
+        pass
+
+client = AsyncIOMotorClient(MONGO_URL, **kwargs)
 db = client[DB_NAME]
 
 # Collections

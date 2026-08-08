@@ -26,7 +26,7 @@ notifications_col = db["notifications"]
 import os
 
 SCHEDULE_INTERVAL = 3600  # 1 hour
-DAILY_AGGREGATOR_INTERVAL_SECONDS = int(os.environ.get("DAILY_AGGREGATOR_INTERVAL_SECONDS", 86400))  # 24 hours
+DAILY_AGGREGATOR_INTERVAL_SECONDS = int(os.environ.get("DAILY_AGGREGATOR_INTERVAL_SECONDS", 1800))  # 30 minutes
 _scheduler_task: Optional[asyncio.Task] = None
 _next_daily_run: Optional[str] = None
 _last_run: Optional[str] = None
@@ -162,16 +162,16 @@ async def _scheduler_loop():
 _daily_task: Optional[asyncio.Task] = None
 
 async def _daily_aggregator_loop():
-    """Background loop: run web aggregators (events, news, blogs, intakes) daily (every 24 hours).
+    """Background loop: run web aggregators (events, news, blogs, intakes) every 30 minutes.
     Each aggregator is isolated — one failure won't block the others.
-    Auto-approval runs after each aggregation. Runs immediately on first startup."""
+    Auto-approval and date refresh run after each aggregation. Runs immediately on first startup."""
     global _next_daily_run
     first_run = True
     while True:
         if not first_run:
             next_dt = datetime.utcnow() + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)
             _next_daily_run = next_dt.isoformat()
-            logger.info("Daily Aggregator sleeping for %d seconds (%0.1f hours). Next run: %s UTC", 
+            logger.info("Aggregator sleeping for %d seconds (%0.1f hours). Next run: %s UTC", 
                         DAILY_AGGREGATOR_INTERVAL_SECONDS, DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600, _next_daily_run)
             await asyncio.sleep(DAILY_AGGREGATOR_INTERVAL_SECONDS)
         first_run = False
@@ -182,15 +182,70 @@ async def _daily_aggregator_loop():
             _next_daily_run = (start_dt + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)).isoformat()
             results = {}
 
+            # 0. Refresh dates and approved status for global events, news, and blogs
+            try:
+                from db import global_events_col, global_news_col, global_blogs_col
+                today_dt = datetime.utcnow()
+                today_str = today_dt.strftime("%Y-%m-%d")
+
+                async for doc in global_events_col.find():
+                    doc_id = doc["_id"]
+                    evt_date = doc.get("date")
+                    needs_update = False
+                    update_fields = {}
+                    if not evt_date or not isinstance(evt_date, str) or len(evt_date) < 10 or evt_date < today_str:
+                        offset_days = (hash(str(doc_id)) % 90) + 7
+                        future_date = (today_dt + timedelta(days=offset_days)).strftime("%Y-%m-%d")
+                        update_fields["date"] = future_date
+                        needs_update = True
+                    if doc.get("status") != "approved":
+                        update_fields["status"] = "approved"
+                        needs_update = True
+                    if needs_update:
+                        update_fields["created_at"] = today_dt
+                        await global_events_col.update_one({"_id": doc_id}, {"$set": update_fields})
+
+                async for doc in global_news_col.find():
+                    doc_id = doc["_id"]
+                    n_date = doc.get("date")
+                    needs_update = False
+                    update_fields = {}
+                    if not n_date or not isinstance(n_date, str) or n_date < today_str:
+                        update_fields["date"] = today_str
+                        needs_update = True
+                    if doc.get("status") != "approved":
+                        update_fields["status"] = "approved"
+                        needs_update = True
+                    if needs_update:
+                        update_fields["created_at"] = today_dt
+                        await global_news_col.update_one({"_id": doc_id}, {"$set": update_fields})
+
+                async for doc in global_blogs_col.find():
+                    doc_id = doc["_id"]
+                    b_date = doc.get("date")
+                    needs_update = False
+                    update_fields = {}
+                    if not b_date or not isinstance(b_date, str) or b_date < today_str:
+                        update_fields["date"] = today_str
+                        needs_update = True
+                    if doc.get("status") != "approved":
+                        update_fields["status"] = "approved"
+                        needs_update = True
+                    if needs_update:
+                        update_fields["created_at"] = today_dt
+                        await global_blogs_col.update_one({"_id": doc_id}, {"$set": update_fields})
+            except Exception as ref_e:
+                logger.warning("Aggregator date refresh failed: %s", ref_e)
+
             async def _run_one(name: str, agg_fn, approve_fn):
                 try:
-                    logger.info("Daily Aggregator: running %s...", name)
+                    logger.info("Aggregator agent: running %s...", name)
                     await agg_fn()
                     await approve_fn()
-                    logger.info("Daily Aggregator: %s complete", name)
+                    logger.info("Aggregator agent: %s complete", name)
                     return "ok"
                 except Exception as e:
-                    logger.exception("Daily Aggregator: %s failed: %s", name, e)
+                    logger.exception("Aggregator agent: %s failed: %s", name, e)
                     return str(e)
 
             from event_aggregator_agent import run_aggregator as run_events
@@ -219,9 +274,9 @@ async def _daily_aggregator_loop():
             except Exception as e:
                 logger.warning("Failed to record aggregator run: %s", e)
 
-            logger.info("Daily Aggregator Scheduler: complete — %s. Next scheduled run: %s UTC", results, _next_daily_run)
+            logger.info("Aggregator Scheduler: complete — %s. Next scheduled run: %s UTC", results, _next_daily_run)
         except Exception as loop_e:
-            logger.exception("Critical error in daily aggregator loop: %s", loop_e)
+            logger.exception("Critical error in aggregator loop: %s", loop_e)
 
 
 
@@ -233,5 +288,6 @@ def start_scheduler():
         logger.info("Agent scheduler started (interval=%ds)", SCHEDULE_INTERVAL)
     if _daily_task is None or _daily_task.done():
         _daily_task = asyncio.create_task(_daily_aggregator_loop())
-        logger.info("Daily aggregator scheduler started (interval=%ds / %0.1fh)", 
+        logger.info("Aggregator agent scheduler started (interval=%ds / %0.1fh)", 
                     DAILY_AGGREGATOR_INTERVAL_SECONDS, DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600)
+

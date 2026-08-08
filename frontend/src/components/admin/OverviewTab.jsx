@@ -52,6 +52,8 @@ export default function OverviewTab() {
   const { token } = useAdminAuth();
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
+  const [runningAggregator, setRunningAggregator] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     adminClient(token)
@@ -80,9 +82,6 @@ export default function OverviewTab() {
   }
 
   const { users, applications, revenue, countries, trend, top_countries, recent_activity } = data;
-
-  const [runningAggregator, setRunningAggregator] = useState(false);
-  const { toast } = useToast();
 
   return (
     <div data-testid="admin-overview">
