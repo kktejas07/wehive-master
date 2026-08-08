@@ -8,7 +8,10 @@ ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 
 from dotenv import load_dotenv
-load_dotenv(ROOT / '.env')
+if (ROOT.parent / '.env').exists():
+    load_dotenv(ROOT.parent / '.env')
+else:
+    load_dotenv(ROOT / '.env')
 
 from db import global_news_col, global_blogs_col, global_events_col, db
 from news_aggregator_agent import run_aggregator as run_news_aggregator, run_auto_approval as approve_news
