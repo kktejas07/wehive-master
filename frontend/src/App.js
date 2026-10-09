@@ -16,6 +16,8 @@ import { Toaster } from './components/ui/toaster';
 import { setPricing } from './components/FeeBreakdown';
 import { setCurrency } from './lib/utils';
 import { getPageTitle } from './lib/pageTitles';
+import { AnalyticsRoot } from './analytics/components/AnalyticsRoot';
+import { trackScreen } from './analytics';
 
 // Lazy-loaded route components — each becomes its own JS chunk so the
 // landing page boots fast and other pages stream in only when visited.
@@ -88,6 +90,7 @@ function AnimatedRoutes() {
 
   useEffect(() => {
     document.title = getPageTitle(location.pathname);
+    trackScreen(location.pathname.replace('/', '') || 'home', { path: location.pathname });
   }, [location.pathname]);
 
   return (
@@ -142,25 +145,27 @@ function AnimatedRoutes() {
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <ThemeProvider>
-          <I18nProvider>
-            <AuthProvider>
-              <FirebaseAuthProvider>
-                <PricingLoader />
-                <ScrollToTop />
-                <ErrorBoundary>
-                  <AnimatedRoutes />
-                </ErrorBoundary>
-                <ChatbotWidget />
-                <Toaster />
-              </FirebaseAuthProvider>
-            </AuthProvider>
-          </I18nProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </div>
+    <AnalyticsRoot>
+      <div className="App">
+        <BrowserRouter>
+          <ThemeProvider>
+            <I18nProvider>
+              <AuthProvider>
+                <FirebaseAuthProvider>
+                  <PricingLoader />
+                  <ScrollToTop />
+                  <ErrorBoundary>
+                    <AnimatedRoutes />
+                  </ErrorBoundary>
+                  <ChatbotWidget />
+                  <Toaster />
+                </FirebaseAuthProvider>
+              </AuthProvider>
+            </I18nProvider>
+          </ThemeProvider>
+        </BrowserRouter>
+      </div>
+    </AnalyticsRoot>
   );
 }
 
