@@ -19,7 +19,7 @@ from vector_store import upsert_documents
 logger = logging.getLogger("wehive.blog_aggregator")
 
 TARGET_COUNTRIES = [
-    "India", "USA", "United Kingdom", "Canada", "Australia", 
+    "India", "USA", "United Kingdom", "Canada", "Australia",
     "Germany", "France", "Japan", "Brazil", "UAE"
 ]
 
@@ -39,33 +39,6 @@ def _parse_agent_response(response_text: str) -> List[Dict[str, Any]]:
         logger.error(f"Failed to parse agent response: {e}")
         return []
 
-def _generate_static_blog_fallback(country: str) -> List[Dict[str, Any]]:
-    today_dt = datetime.utcnow()
-    month_year = today_dt.strftime("%B %Y")
-    today_str = today_dt.strftime("%Y-%m-%d")
-    return [
-        {
-            "title": f"Navigating Visa Guidelines and Cultural Etiquette in {country} ({month_year})",
-            "date": today_str,
-            "description": f"Planning a journey to {country}? Here is an essential guide covering entry requirements, document checklists, local customs, and top destinations for travelers and students in {month_year}.",
-            "readTime": "5 min read",
-            "category": "Travel",
-            "imageUrl": "https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a",
-            "author_name": "We Hive Editorial",
-            "author_initials": "WH"
-        },
-        {
-            "title": f"The Ultimate Checklist for Work & Student Permits in {country} ({month_year})",
-            "date": today_str,
-            "description": f"Everything you need to know about preparing application materials, interview preparation, and financial proof for visa approval in {country} for {month_year}.",
-            "readTime": "7 min read",
-            "category": "F1",
-            "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644",
-            "author_name": "Visa Insights Team",
-            "author_initials": "VI"
-        }
-    ]
-
 async def fetch_blogs_for_country(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
     """LLM generation for blog articles."""
     system_prompt = "You are an expert immigration and travel writer. Always respond with valid JSON only."
@@ -80,34 +53,34 @@ async def fetch_blogs_for_country(marketplace: AIMarketplace, country: str) -> L
     - "imageUrl": string (Use a generic placeholder like "https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a")
     - "author_name": string (Mock author name)
     - "author_initials": string (Mock initials)
-    
+
     Return ONLY the JSON array.
     """
-    
+
     provider, pid = await marketplace.get_active_provider("system")
     if not provider:
-        logger.warning(f"No active LLM provider for blogs. Generating dynamic fallback for {country}.")
-        return _generate_static_blog_fallback(country)
-    
+        logger.warning(f"No active LLM provider for blogs in {country}; skipping (no static placeholder blogs).")
+        return []
+
     response = await provider.chat(
         system_prompt=system_prompt,
         user_prompt=user_prompt,
         max_tokens=2000
     )
-    
+
     return _parse_agent_response(response or "")
 
 async def run_aggregator():
     """Main task that runs every 24 hours."""
     logger.info("Starting Global Blogs Aggregator automated loop...")
     marketplace = AIMarketplace()
-    
+
     total_added = 0
     total_skipped = 0
     vector_ids = []
     vector_docs = []
     vector_metas = []
-    
+
     for country in TARGET_COUNTRIES:
         country_id = country.lower().replace(" ", "-")
         logger.info(f"Generating blogs for {country}...")
@@ -116,11 +89,11 @@ async def run_aggregator():
         except Exception as e:
             logger.error(f"Blog generation failed for {country}: {e}")
             continue
-        
+
         for blog in blogs:
             title = blog.get("title")
             category = blog.get("category", "Travel")
-            
+
             existing = await global_blogs_col.find_one({
                 "title": title,
                 "country_id": country_id,
@@ -128,7 +101,7 @@ async def run_aggregator():
             if existing:
                 total_skipped += 1
                 continue
-            
+
             doc = {
                 "title": title,
                 "country_id": country_id,
@@ -146,7 +119,7 @@ async def run_aggregator():
             }
             res = await global_blogs_col.insert_one(doc)
             total_added += 1
-            
+
             doc_id = str(res.inserted_id)
             vector_ids.append(doc_id)
             vector_docs.append(f"{title} {blog.get('description', '')}")
@@ -155,9 +128,9 @@ async def run_aggregator():
                 "country_id": country_id,
                 "category": category
             })
-        
+
         await asyncio.sleep(2)
-        
+
     if vector_ids:
         try:
             from ollama_embeddings import embed_query
@@ -175,16 +148,20 @@ async def run_aggregator():
 
 async def run_auto_approval():
     """Fallback task that runs periodically to auto-approve safe blogs."""
+    if os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() not in ("1", "true", "yes"):
+        logger.info("AGGREGATOR_AUTO_APPROVE disabled; leaving pending blogs for admin review.")
+        return
+
     logger.info("Running auto-approval check for blogs...")
-    
+
     query = {
         "status": "pending"
     }
-    
+
     update = {
         "$set": {"status": "approved"}
     }
-    
+
     result = await global_blogs_col.update_many(query, update)
     if result.modified_count > 0:
         logger.info(f"Auto-approved {result.modified_count} safe blogs.")
@@ -193,9 +170,9 @@ async def run_auto_approval():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     async def main():
         await run_aggregator()
         await run_auto_approval()
-        
+
     asyncio.run(main())

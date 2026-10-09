@@ -110,7 +110,7 @@ export default function HolidayPlanner() {
       
       <main className="max-w-4xl mx-auto px-5 pt-28 pb-20">
         <div className="mb-10">
-          <Link to={`/countries/${id}`} className="text-[13px] font-bold text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))] inline-flex items-center gap-1 mb-4 transition">
+          <Link to={`/destinations/${id}`} className="text-[13px] font-bold text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))] inline-flex items-center gap-1 mb-4 transition">
             <ChevronRight className="w-4 h-4 rotate-180" /> Back to {id}
           </Link>
           <div className="flex flex-wrap items-center justify-between gap-4">

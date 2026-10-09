@@ -42,8 +42,9 @@ export default function LiveTickerMarquee() {
     const fetchNews = async () => {
       try {
         const res = await axios.get(`${API}/news?limit=10`);
-        if (res.data && res.data.length > 0) {
-          const formatted = res.data.map(news => ({
+        const items = Array.isArray(res.data?.items) ? res.data.items : [];
+        if (items.length > 0) {
+          const formatted = items.map(news => ({
             icon: Newspaper,
             text: news.title,
             time: new Date(news.date || news.created_at).toLocaleDateString(),

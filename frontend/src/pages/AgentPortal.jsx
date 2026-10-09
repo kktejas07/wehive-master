@@ -3,15 +3,14 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useAuth, API } from '../context/AuthContext';
+import { API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { avatarUrl } from '../lib/avatars';
 import {
-  LayoutDashboard, Users, DollarSign, BarChart3, Shield,
-  Loader2, ChevronRight, Plus, Pencil, Trash2, X, Save,
-  Star, TrendingUp, CheckCircle, XCircle, Clock, Award,
-  GraduationCap, Globe2, BookOpen, Target, Briefcase,
-  ArrowRight, Check, AlertCircle, FileText, Upload, FolderOpen, Globe,
+  LayoutDashboard, Users, DollarSign, BarChart3,
+  Loader2, Plus, X, Save,
+  TrendingUp, CheckCircle, Clock, Award,
+  GraduationCap, BookOpen,
+  ArrowRight, AlertCircle, FileText, Upload, FolderOpen, Globe,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
@@ -59,73 +58,8 @@ function StatCard({ label, value, sub, Icon, color = '#0a2c8a' }) {
   );
 }
 
-// ─── Registration form ────────────────────────────────────────────────────────
-function RegisterForm({ token, onRegistered }) {
-  const { toast } = useToast();
-  const [form, setForm] = useState({ agency_name: '', city: '', country: 'in', website: '', years_experience: 0 });
-  const [saving, setSaving] = useState(false);
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-
-  const onSubmit = async () => {
-    if (!form.agency_name.trim()) { toast({ title: 'Agency name is required.' }); return; }
-    setSaving(true);
-    try {
-      const { data } = await axios.post(`${API}/agents/register`, { ...form, years_experience: parseInt(form.years_experience) || 0 }, { headers: { Authorization: `Bearer ${token}` } });
-      toast({ title: 'Registration submitted!', description: 'An admin will review and activate your account.' });
-      onRegistered(data);
-    } catch (e) {
-      toast({ title: 'Error', description: e?.response?.data?.detail || 'Could not register.' });
-    } finally { setSaving(false); }
-  };
-
-  return (
-    <div className="max-w-lg mx-auto py-16 px-4">
-      <div className="rounded-3xl bg-white border border-black/5 p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--blue-700))]/10 flex items-center justify-center">
-            <Briefcase className="w-6 h-6 text-[hsl(var(--blue-700))]" />
-          </div>
-          <div>
-            <h1 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))]">Become a Partner Agent</h1>
-            <p className="text-[13px] text-[hsl(var(--blue-900))]/55">Manage students, track commissions, and grow your business</p>
-          </div>
-        </div>
-        <div className="space-y-3">
-          {[
-            { k: 'agency_name', label: 'Agency / Business Name *', placeholder: 'e.g. Global Study Consultants' },
-            { k: 'city', label: 'City', placeholder: 'Mumbai' },
-            { k: 'website', label: 'Website (optional)', placeholder: 'https://youragency.com' },
-          ].map(({ k, label, placeholder }) => (
-            <label key={k} className="block">
-              <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">{label}</span>
-              <input value={form[k]} onChange={set(k)} placeholder={placeholder}
-                className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-medium text-[hsl(var(--blue-900))]" />
-            </label>
-          ))}
-          <label className="block">
-            <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">Years of Experience</span>
-            <input type="number" min="0" value={form.years_experience} onChange={set('years_experience')}
-              className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-medium text-[hsl(var(--blue-900))]" />
-          </label>
-          <Button onClick={onSubmit} disabled={saving} className="w-full mt-2 h-12 rounded-full btn-primary text-white font-bold">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Register as Partner Agent'}
-          </Button>
-        </div>
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          {[['6%–12%', 'Commission Rate'], ['Bronze→Platinum', 'Tier Rewards'], ['Real-time', 'Analytics']].map(([v, l]) => (
-            <div key={l} className="rounded-xl bg-[hsl(var(--soft-bg))] p-3 text-center">
-              <div className="text-[16px] font-display font-extrabold text-[hsl(var(--blue-700))]">{v}</div>
-              <div className="text-[10.5px] text-[hsl(var(--blue-900))]/55 mt-0.5">{l}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Overview tab ─────────────────────────────────────────────────────────────
-function OverviewTab({ agent, summary, token }) {
+function OverviewTab({ agent, summary, stats }) {
   const tier = summary?.tier || 'bronze';
   const tierCfg = TIER_CONFIG[tier];
   const nextThreshold = summary?.next_tier_threshold;
@@ -160,9 +94,9 @@ function OverviewTab({ agent, summary, token }) {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Students" value={agent.total_students || 0} Icon={Users} color="#0a2c8a" />
-        <StatCard label="Applications" value={agent.total_applications || 0} Icon={FileText} color="#7c3aed" />
-        <StatCard label="Success Rate" value={agent.total_applications ? `${Math.round((agent.successful_applications || 0) / agent.total_applications * 100)}%` : '—'} Icon={TrendingUp} color="#059669" />
+        <StatCard label="Total Students" value={stats?.total_students || 0} Icon={Users} color="#0a2c8a" />
+        <StatCard label="Applications" value={stats?.total_applications || 0} Icon={FileText} color="#7c3aed" />
+        <StatCard label="Success Rate" value={stats?.total_applications ? `${Math.round((stats.approved_applications || 0) / stats.total_applications * 100)}%` : '—'} Icon={TrendingUp} color="#059669" />
         <StatCard label="Commission Earned" value={`₹${((summary?.total_earned_inr || 0) / 1000).toFixed(0)}K`} sub={`${summary?.commission_rate_pct || 6}% rate`} Icon={DollarSign} color="#d97706" />
       </div>
 
@@ -201,35 +135,26 @@ function OverviewTab({ agent, summary, token }) {
 }
 
 // ─── Students tab ─────────────────────────────────────────────────────────────
-const BLANK_STUDENT = { name: '', email: '', phone: '', nationality: 'in', target_countries: [], target_courses: [], budget_usd: '', intake: '', ielts_score: '', toefl_score: '', gre_score: '', notes: '' };
+// Backend (POST /api/agent/students) stores: name, email, phone, country, course, education_level, notes.
+const BLANK_STUDENT = { name: '', email: '', phone: '', education_level: '', target_countries: [], target_courses: [], notes: '' };
 const COURSE_OPTIONS = ['engineering', 'business', 'medicine', 'law', 'arts', 'stem', 'social'];
 const COUNTRY_OPTIONS = [['us','USA'],['uk','UK'],['ca','Canada'],['au','Australia'],['de','Germany'],['fr','France'],['nl','Netherlands'],['ie','Ireland'],['sg','Singapore']];
 
-function StudentForm({ initial, onSave, onCancel, busy }) {
-  const [f, setF] = useState({ ...BLANK_STUDENT, ...(initial || {}) });
+function StudentForm({ onSave, onCancel, busy }) {
+  const [f, setF] = useState(BLANK_STUDENT);
   const set = (k) => (val) => setF((p) => ({ ...p, [k]: val }));
   const toggleArr = (k, v) => setF((p) => ({ ...p, [k]: p[k].includes(v) ? p[k].filter(x => x !== v) : [...p[k], v] }));
 
   return (
     <div className="space-y-4 p-5">
       <div className="grid sm:grid-cols-2 gap-3">
-        {[['name','Full Name *','text'],['email','Email','email'],['phone','Phone','tel'],['intake','Target Intake (e.g. Sep 2025)','text']].map(([k,label,type]) => (
+        {[['name','Full Name *','text'],['email','Email','email'],['phone','Phone','tel'],['education_level','Education Level','text']].map(([k,label,type]) => (
           <label key={k}>
             <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">{label}</span>
             <input type={type} value={f[k] || ''} onChange={(e) => set(k)(e.target.value)}
               className="w-full h-10 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[13px] font-medium text-[hsl(var(--blue-900))]" />
           </label>
         ))}
-        <label>
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">Budget (USD)</span>
-          <input type="number" value={f.budget_usd || ''} onChange={(e) => set('budget_usd')(e.target.value)}
-            className="w-full h-10 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[13px] font-medium text-[hsl(var(--blue-900))]" />
-        </label>
-        <label>
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">IELTS Score</span>
-          <input type="number" step="0.5" min="0" max="9" value={f.ielts_score || ''} onChange={(e) => set('ielts_score')(e.target.value)}
-            className="w-full h-10 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[13px] font-medium text-[hsl(var(--blue-900))]" />
-        </label>
       </div>
       <div>
         <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Countries</span>
@@ -272,32 +197,28 @@ function StudentsTab({ token }) {
   const { toast } = useToast();
   const [students, setStudents] = useState(null);
   const [adding, setAdding] = useState(false);
-  const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(false);
-  const hdrs = { Authorization: `Bearer ${token}` };
 
   const load = useCallback(() => {
-    axios.get(`${API}/agents/me/students`, { headers: hdrs }).then(r => setStudents(r.data)).catch(() => setStudents([]));
-  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+    axios.get(`${API}/agent/students`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => setStudents(r.data?.items || []))
+      .catch(() => setStudents([]));
+  }, [token]);
 
   useEffect(() => { load(); }, [load]);
 
-  const save = async (form, id) => {
+  const save = async (form) => {
     setBusy(true);
     try {
-      const payload = { ...form, budget_usd: parseInt(form.budget_usd) || null, ielts_score: parseFloat(form.ielts_score) || null, gre_score: parseInt(form.gre_score) || null };
-      if (id) await axios.put(`${API}/agents/me/students/${id}`, payload, { headers: hdrs });
-      else await axios.post(`${API}/agents/me/students`, payload, { headers: hdrs });
-      toast({ title: id ? 'Student updated' : 'Student added' });
-      setAdding(false); setEditing(null); load();
+      const payload = {
+        name: form.name, email: form.email, phone: form.phone, education_level: form.education_level, notes: form.notes,
+        country: form.target_countries.join(', '), course: form.target_courses.join(', '),
+      };
+      await axios.post(`${API}/agent/students`, payload, { headers: { Authorization: `Bearer ${token}` } });
+      toast({ title: 'Student added' });
+      setAdding(false); load();
     } catch (e) { toast({ title: 'Error', description: e?.response?.data?.detail || 'Please try again.' }); }
     finally { setBusy(false); }
-  };
-
-  const remove = async (id) => {
-    if (!window.confirm('Remove this student?')) return;
-    try { await axios.delete(`${API}/agents/me/students/${id}`, { headers: hdrs }); load(); }
-    catch { toast({ title: 'Could not remove student.' }); }
   };
 
   return (
@@ -307,7 +228,7 @@ function StudentsTab({ token }) {
           <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">Student Roster</h2>
           <p className="text-[13px] text-[hsl(var(--blue-900))]/55">{students?.length || 0} students in your portfolio</p>
         </div>
-        {!adding && !editing && (
+        {!adding && (
           <Button onClick={() => setAdding(true)} className="rounded-full btn-primary text-white h-10 px-5 font-bold text-[13px]">
             <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Student
           </Button>
@@ -317,7 +238,7 @@ function StudentsTab({ token }) {
       {adding && (
         <div className="rounded-2xl bg-white border border-[hsl(var(--blue-700))]/20 overflow-hidden">
           <div className="px-5 py-3 border-b border-black/5 font-bold text-[14px] text-[hsl(var(--blue-900))]">New Student</div>
-          <StudentForm onSave={(f) => save(f, null)} onCancel={() => setAdding(false)} busy={busy} />
+          <StudentForm onSave={save} onCancel={() => setAdding(false)} busy={busy} />
         </div>
       )}
 
@@ -331,37 +252,21 @@ function StudentsTab({ token }) {
       )}
 
       {students?.map((s) => (
-        <div key={s.id} className="rounded-2xl bg-white border border-black/5 overflow-hidden">
-          {editing === s.id ? (
-            <>
-              <div className="px-5 py-3 border-b border-black/5 font-bold text-[14px] text-[hsl(var(--blue-900))]">Edit Student</div>
-              <StudentForm initial={s} onSave={(f) => save(f, s.id)} onCancel={() => setEditing(null)} busy={busy} />
-            </>
-          ) : (
-            <div className="p-5 flex items-start gap-4">
-              <div className="w-11 h-11 rounded-full bg-[hsl(var(--blue-700))]/10 flex items-center justify-center font-bold text-[hsl(var(--blue-700))] text-[16px] shrink-0">
-                {(s.name || '?')[0].toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">{s.name}</div>
-                <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">{s.email || s.phone || '—'}</div>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {(s.target_countries || []).map(c => <span key={c} className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5">{COUNTRY_FLAGS[c] || c.toUpperCase()}</span>)}
-                  {s.intake && <span className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5">{s.intake}</span>}
-                  {s.ielts_score && <span className="text-[11px] font-bold rounded-full bg-blue-50 text-blue-700 px-2 py-0.5">IELTS {s.ielts_score}</span>}
-                  {s.budget_usd && <span className="text-[11px] font-bold rounded-full bg-green-50 text-green-700 px-2 py-0.5">Budget ${s.budget_usd.toLocaleString()}</span>}
-                </div>
-              </div>
-              <div className="flex gap-1 shrink-0">
-                <button onClick={() => setEditing(s.id)} className="w-8 h-8 rounded-lg hover:bg-[hsl(var(--soft-bg))] flex items-center justify-center text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-700))] transition">
-                  <Pencil className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={() => remove(s.id)} className="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center text-[hsl(var(--blue-900))]/40 hover:text-red-500 transition">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+        <div key={s._id || s.id} className="rounded-2xl bg-white border border-black/5 overflow-hidden">
+          <div className="p-5 flex items-start gap-4">
+            <div className="w-11 h-11 rounded-full bg-[hsl(var(--blue-700))]/10 flex items-center justify-center font-bold text-[hsl(var(--blue-700))] text-[16px] shrink-0">
+              {(s.name || '?')[0].toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">{s.name}</div>
+              <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">{s.email || s.phone || '—'}</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {s.country && <span className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5 uppercase">{s.country}</span>}
+                {s.course && <span className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5 capitalize">{s.course}</span>}
+                {s.education_level && <span className="text-[11px] font-bold rounded-full bg-blue-50 text-blue-700 px-2 py-0.5">{s.education_level}</span>}
               </div>
             </div>
-          )}
+          </div>
         </div>
       ))}
     </div>
@@ -381,7 +286,7 @@ function DocumentsTab({ token }) {
 
   useEffect(() => {
     axios.get(`${API}/agent/students`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => setStudents(r.data || []))
+      .then(r => setStudents(r.data?.items || []))
       .catch(() => {});
   }, [token]);
 
@@ -483,43 +388,36 @@ function DocumentsTab({ token }) {
 }
 
 // ─── Commissions tab ──────────────────────────────────────────────────────────
-function CommissionsTab({ token }) {
-  const [commissions, setCommissions] = useState(null);
+function CommissionsTab({ token, stats }) {
   const [summary, setSummary] = useState(null);
 
   useEffect(() => {
-    const hdrs = { Authorization: `Bearer ${token}` };
-    axios.get(`${API}/agents/me/commissions`, { headers: hdrs }).then(r => setCommissions(r.data)).catch(() => setCommissions([]));
-    axios.get(`${API}/agents/me/commissions/summary`, { headers: hdrs }).then(r => setSummary(r.data)).catch(() => {});
+    axios.get(`${API}/agent/ai/commission-summary`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => setSummary(r.data))
+      .catch(() => setSummary({}));
   }, [token]);
-
-  const STATUS_BADGE = {
-    paid: 'bg-green-50 text-green-700',
-    approved: 'bg-blue-50 text-blue-700',
-    pending: 'bg-amber-50 text-amber-700',
-  };
 
   return (
     <div className="space-y-5">
       <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">Commissions & Earnings</h2>
+      {!summary && <Loader2 className="w-5 h-5 animate-spin" />}
       {summary && (
         <>
           <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))] p-6 text-white flex flex-wrap gap-6 items-center">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.16em] text-white/60 mb-1">Total Earned</div>
-              <div className="text-[36px] font-display font-extrabold tracking-[-0.02em]">₹{(summary.total_earned_inr || 0).toLocaleString()}</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-white/60 mb-1">Total Revenue</div>
+              <div className="text-[36px] font-display font-extrabold tracking-[-0.02em]">₹{(stats?.total_revenue || 0).toLocaleString()}</div>
             </div>
             <div className="border-l border-white/20 pl-6">
               <div className="text-[11px] uppercase tracking-[0.16em] text-white/60 mb-1">Pending</div>
-              <div className="text-[28px] font-display font-extrabold">₹{(summary.pending_inr || 0).toLocaleString()}</div>
+              <div className="text-[28px] font-display font-extrabold">₹{(summary.pending || 0).toLocaleString()}</div>
             </div>
             <div className="border-l border-white/20 pl-6 ml-auto">
-              <TierBadge tier={summary.tier} size="lg" />
-              <div className="text-[12px] text-white/60 mt-1">{summary.commission_rate_pct}% commission rate</div>
+              <div className="text-[12px] text-white/60 mt-1">{stats?.commission_rate ?? '—'}% commission rate</div>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            {[['Successful', summary.successful_applications, CheckCircle, '#059669'], ['Rate', `${summary.commission_rate_pct}%`, TrendingUp, '#7c3aed'], ['Next Tier', summary.next_tier ? `${summary.next_tier_threshold - summary.successful_applications} more` : 'Max', Award, '#d97706']].map(([l, v, Icon, c]) => (
+            {[['Approved Apps', stats?.approved_applications || 0, CheckCircle, '#059669'], ['Paid', `₹${(summary.paid || 0).toLocaleString()}`, DollarSign, '#7c3aed'], ['Earned', `₹${(summary.total_earned || 0).toLocaleString()}`, Award, '#d97706']].map(([l, v, Icon, c]) => (
               <div key={l} className="rounded-2xl bg-white border border-black/5 p-4 text-center">
                 <Icon className="w-5 h-5 mx-auto mb-2" style={{ color: c }} />
                 <div className="text-[22px] font-display font-extrabold text-[hsl(var(--blue-900))]">{v}</div>
@@ -529,49 +427,43 @@ function CommissionsTab({ token }) {
           </div>
         </>
       )}
-      {!commissions && <Loader2 className="w-5 h-5 animate-spin" />}
-      {commissions?.length === 0 && <div className="rounded-2xl bg-white border border-dashed border-black/15 p-10 text-center text-[hsl(var(--blue-900))]/55 text-[14px]">No commissions recorded yet. Commissions appear when an admin marks an application successful.</div>}
-      {commissions?.length > 0 && (
-        <div className="rounded-2xl bg-white border border-black/5 overflow-hidden">
-          <div className="divide-y divide-black/5">
-            {commissions.map((c) => (
-              <div key={c.id} className="flex items-center gap-4 px-5 py-4">
-                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0"><DollarSign className="w-5 h-5 text-green-600" /></div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{c.university_name}</div>
-                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{c.commission_type} · {new Date(c.created_at).toLocaleDateString()}</div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">₹{c.amount_inr?.toLocaleString()}</div>
-                  <span className={`text-[11px] font-bold rounded-full px-2 py-0.5 ${STATUS_BADGE[c.status] || 'bg-slate-50 text-slate-500'}`}>{c.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 // ─── Analytics tab ────────────────────────────────────────────────────────────
-function AnalyticsTab({ token }) {
-  const [data, setData] = useState(null);
+function AnalyticsTab({ token, stats }) {
+  const [apps, setApps] = useState(null);
   useEffect(() => {
-    axios.get(`${API}/agents/me/analytics`, { headers: { Authorization: `Bearer ${token}` } }).then(r => setData(r.data)).catch(() => {});
+    axios.get(`${API}/agent/applications`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => setApps(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setApps([]));
   }, [token]);
 
-  if (!data) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" /></div>;
+  if (!apps) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" /></div>;
 
-  const { overview, pipeline, monthly_trend, top_countries } = data;
+  const pipeline = {};
+  const countries = {};
+  apps.forEach((a) => {
+    const status = a.status || 'draft';
+    pipeline[status] = (pipeline[status] || 0) + 1;
+    const country = (a.country_id || a.country_name || '').toLowerCase();
+    if (country) {
+      countries[country] = countries[country] || { country, total: 0, successful: 0 };
+      countries[country].total += 1;
+      if (status === 'approved') countries[country].successful += 1;
+    }
+  });
+  const top_countries = Object.values(countries).sort((x, y) => y.total - x.total).slice(0, 6);
   const pipelineColors = { draft: '#94a3b8', submitted: '#3b82f6', in_review: '#f59e0b', approved: '#10b981', rejected: '#ef4444' };
   const pipelineTotal = Object.values(pipeline).reduce((a, b) => a + b, 0) || 1;
+  const successRate = stats?.total_applications ? Math.round((stats.approved_applications || 0) / stats.total_applications * 100) : 0;
 
   return (
     <div className="space-y-6">
       <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">Analytics</h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[['Total Students', overview.total_students, Users, '#0a2c8a'], ['Applications', overview.total_applications, FileText, '#7c3aed'], ['Success Rate', `${overview.success_rate_pct}%`, TrendingUp, '#059669'], ['Tier', overview.tier, Award, '#d97706']].map(([l, v, Icon, c]) => (
+        {[['Total Students', stats?.total_students || 0, Users, '#0a2c8a'], ['Applications', stats?.total_applications || 0, FileText, '#7c3aed'], ['Success Rate', `${successRate}%`, TrendingUp, '#059669'], ['Upcoming Appts', stats?.upcoming_appointments || 0, Award, '#d97706']].map(([l, v, Icon, c]) => (
           <StatCard key={l} label={l} value={v} Icon={Icon} color={c} />
         ))}
       </div>
@@ -612,27 +504,6 @@ function AnalyticsTab({ token }) {
           )}
         </div>
       </div>
-
-      <div className="rounded-2xl bg-white border border-black/5 p-5">
-        <div className="font-bold text-[14px] text-[hsl(var(--blue-900))] mb-4">Monthly Trend</div>
-        {monthly_trend.length === 0 ? <div className="text-[13px] text-[hsl(var(--blue-900))]/50">No commission data in the last 6 months.</div> : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12.5px]">
-              <thead><tr className="border-b border-black/5">{['Month','Applications','Successful','Commission (₹)'].map(h => <th key={h} className="pb-2 text-left font-bold text-[hsl(var(--blue-900))]/55 pr-4">{h}</th>)}</tr></thead>
-              <tbody>
-                {monthly_trend.map(row => (
-                  <tr key={row.month} className="border-b border-black/5 last:border-0">
-                    <td className="py-2.5 font-bold text-[hsl(var(--blue-900))] pr-4">{row.month}</td>
-                    <td className="py-2.5 text-[hsl(var(--blue-900))]/70 pr-4">{row.applications}</td>
-                    <td className="py-2.5 text-[hsl(var(--blue-900))]/70 pr-4">{row.successful}</td>
-                    <td className="py-2.5 font-bold text-green-700">₹{row.commissions?.toLocaleString() || 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -655,30 +526,39 @@ function TabNav({ value, onChange }) {
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
+// Agents authenticate separately from students (see AgentLogin.jsx), so the
+// portal uses the agent token, not the student useAuth() token.
+const AGENT_TOKEN_KEY = 'agent_token';
+
 export default function AgentPortal() {
-  const { user, token, isAuthed, loading } = useAuth();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const tab = params.get('tab') || 'overview';
 
+  const [token] = useState(() => localStorage.getItem(AGENT_TOKEN_KEY));
   const [agent, setAgent] = useState(null);
-  const [summary, setSummary] = useState(null);
+  const [stats, setStats] = useState(null);
   const [agentLoading, setAgentLoading] = useState(true);
 
-  useEffect(() => { if (!loading && !isAuthed) navigate('/login', { replace: true }); }, [loading, isAuthed, navigate]);
+  const logout = useCallback(() => {
+    localStorage.removeItem(AGENT_TOKEN_KEY);
+    localStorage.removeItem('agent_data');
+    navigate('/agent/login', { replace: true });
+  }, [navigate]);
 
-  const loadAgent = useCallback(() => {
-    if (!token) return;
-    axios.get(`${API}/agents/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => { setAgent(r.data); return axios.get(`${API}/agents/me/commissions/summary`, { headers: { Authorization: `Bearer ${token}` } }); })
-      .then(r => setSummary(r.data))
-      .catch(() => setAgent(null))
+  useEffect(() => {
+    if (!token) { navigate('/agent/login', { replace: true }); return; }
+    const headers = { Authorization: `Bearer ${token}` };
+    Promise.all([
+      axios.get(`${API}/agent/settings`, { headers }),
+      axios.get(`${API}/agent/dashboard`, { headers }),
+    ])
+      .then(([s, d]) => { setAgent(s.data); setStats(d.data?.stats || null); })
+      .catch((e) => { if ([401, 403].includes(e?.response?.status)) logout(); })
       .finally(() => setAgentLoading(false));
-  }, [token]);
+  }, [token, navigate, logout]);
 
-  useEffect(() => { loadAgent(); }, [loadAgent]);
-
-  if (loading || agentLoading) {
+  if (!token || agentLoading) {
     return (
       <div className="bg-white min-h-screen">
         <Navbar />
@@ -693,11 +573,23 @@ export default function AgentPortal() {
     return (
       <div className="bg-[hsl(var(--soft-bg))] min-h-screen">
         <Navbar />
-        <RegisterForm token={token} onRegistered={(data) => { setAgent(data); setAgentLoading(false); }} />
+        <div className="max-w-lg mx-auto py-32 px-4 text-center">
+          <AlertCircle className="w-8 h-8 mx-auto mb-3 text-red-500" />
+          <div className="font-bold text-[18px] text-[hsl(var(--blue-900))]">Could not load the agent portal</div>
+          <p className="text-[13px] text-[hsl(var(--blue-900))]/55 mt-1">Please check your connection and try again.</p>
+          <Button onClick={logout} variant="outline" className="mt-5 rounded-full">Sign in again</Button>
+        </div>
         <Footer />
       </div>
     );
   }
+
+  const summary = {
+    tier: agent.tier || 'bronze',
+    total_earned_inr: stats?.total_revenue || 0,
+    commission_rate_pct: stats?.commission_rate ?? agent.commission_rate,
+    successful_applications: stats?.approved_applications || 0,
+  };
 
   return (
     <div className="bg-white">
@@ -708,23 +600,24 @@ export default function AgentPortal() {
             <div className="rounded-2xl bg-white border border-black/5 p-4 mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full bg-[hsl(var(--blue-700))]/10 flex items-center justify-center font-bold text-[hsl(var(--blue-700))] text-[16px]">
-                  {(agent.agency_name || 'A')[0]}
+                  {(agent.agency_name || agent.name || 'A')[0]}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[13px] font-bold truncate text-[hsl(var(--blue-900))]">{agent.agency_name}</div>
-                  <TierBadge tier={summary?.tier || agent.tier || 'bronze'} />
+                  <div className="text-[13px] font-bold truncate text-[hsl(var(--blue-900))]">{agent.agency_name || agent.name}</div>
+                  <TierBadge tier={summary.tier} />
                 </div>
               </div>
+              <button onClick={logout} className="mt-3 text-[12px] font-bold text-[hsl(var(--blue-900))]/55 hover:text-[hsl(var(--blue-700))]">Sign out</button>
             </div>
             <TabNav value={tab} onChange={(t) => setParams({ tab: t })} />
           </aside>
           <section className="lg:col-span-9">
             <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8 min-h-[420px]">
-              {tab === 'overview'    && <OverviewTab agent={agent} summary={summary} token={token} />}
+              {tab === 'overview'    && <OverviewTab agent={agent} summary={summary} stats={stats} />}
               {tab === 'students'   && <StudentsTab token={token} />}
               {tab === 'documents'  && <DocumentsTab token={token} />}
-              {tab === 'commissions'&& <CommissionsTab token={token} />}
-              {tab === 'analytics'  && <AnalyticsTab token={token} />}
+              {tab === 'commissions'&& <CommissionsTab token={token} stats={stats} />}
+              {tab === 'analytics'  && <AnalyticsTab token={token} stats={stats} />}
             </div>
           </section>
         </div>

@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-
-const API_BASE = process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in';
+import { API } from '../../lib/apiBase';
 
 export default function BlobImage({ filename, onR2, alt = '', className = '' }) {
   const [src, setSrc] = useState(null);
@@ -20,7 +19,10 @@ export default function BlobImage({ filename, onR2, alt = '', className = '' }) 
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/admin/destinations/blob/${filename}`);
+        const token = localStorage.getItem('wehive_admin_token');
+        const res = await fetch(`${API}/admin/destinations/blob/${filename}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         if (!res.ok) throw new Error('Failed');
         const blob = await res.blob();
         if (cancelled) return;

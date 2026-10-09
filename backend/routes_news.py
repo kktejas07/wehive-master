@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Header
 from typing import List, Optional
 from pydantic import BaseModel
 from bson import ObjectId
@@ -9,6 +9,7 @@ from db import global_news_col
 from news_aggregator_agent import run_aggregator
 from ai_marketplace import marketplace
 from auth_utils import get_current_user
+from admin_auth import get_current_admin_flex
 
 router = APIRouter(prefix="/news", tags=["News"])
 logger = logging.getLogger("wehive.routes_news")
@@ -42,7 +43,10 @@ async def get_news(
     limit: int = Query(20, ge=1, le=1000),
     sort: str = Query("created_at"),
     order: str = Query("desc", regex="^(asc|desc)$"),
+    authorization: Optional[str] = Header(default=None),
 ):
+    if status and status != "approved":
+        await get_current_admin_flex(authorization)
     filt = {"status": status or "approved"}
     if country_id:
         filt["country_id"] = country_id
@@ -119,6 +123,7 @@ News Items:
 async def get_pending_news(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=1000),
+    _admin=Depends(get_current_admin_flex),
 ):
     try:
         total = await global_news_col.count_documents({"status": "pending"})
@@ -137,7 +142,7 @@ async def get_pending_news(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/{news_id}/approve")
-async def approve_news(news_id: str):
+async def approve_news(news_id: str, _admin=Depends(get_current_admin_flex)):
     try:
         query = {"_id": ObjectId(news_id)}
         res = await global_news_col.update_one(query, {"$set": {"status": "approved"}})
@@ -149,7 +154,7 @@ async def approve_news(news_id: str):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/{news_id}/reject")
-async def reject_news(news_id: str):
+async def reject_news(news_id: str, _admin=Depends(get_current_admin_flex)):
     try:
         query = {"_id": ObjectId(news_id)}
         res = await global_news_col.update_one(query, {"$set": {"status": "rejected"}})
@@ -161,7 +166,7 @@ async def reject_news(news_id: str):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/run_aggregator")
-async def trigger_aggregator():
+async def trigger_aggregator(_admin=Depends(get_current_admin_flex)):
     """Trigger the news aggregator manually (admin only)."""
     import asyncio
     asyncio.create_task(run_aggregator())

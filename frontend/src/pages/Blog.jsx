@@ -30,7 +30,7 @@ export default function Blog() {
       return "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop";
     }
     if (c.includes('travel') || c.includes('tourism')) {
-      return "https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a?q=80&w=2070&auto=format&fit=crop";
+      return "https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=2070&auto=format&fit=crop";
     }
     return "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop";
   };

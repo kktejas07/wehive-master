@@ -171,6 +171,10 @@ _exact_origins: list[str] = []
 _wildcard_regexes: list[str] = []
 if _raw_origins:
     for o in [x.strip() for x in _raw_origins.split(',') if x.strip()]:
+        if o == '*':
+            _exact_origins = ['*']
+            _wildcard_regexes = []
+            break
         if '*' in o:
             pattern = re.escape(o).replace(r'\*', '[^/]*')
             _wildcard_regexes.append(f'^{pattern}$')
@@ -192,7 +196,8 @@ else:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
+    # Never combine a wildcard origin with credentials.
+    allow_credentials='*' not in _allow_origins,
     allow_origins=_allow_origins,
     allow_origin_regex=_origin_regex,
     allow_methods=['*'],

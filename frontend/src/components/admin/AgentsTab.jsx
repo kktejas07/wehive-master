@@ -31,7 +31,7 @@ function CommissionModal({ agent, token, onClose, onDone }) {
     if (!form.university_name || !form.amount_inr) { toast({ title: 'Fill university name and amount.' }); return; }
     setBusy(true);
     try {
-      await axios.post(`${API}/admin/agents/${agent._id || agent.id}/commissions`,
+      await axios.post(`${API}/agent/admin/agents/${agent._id || agent.id}/commissions`,
         { ...form, agent_id: agent._id || agent.id, amount_inr: parseInt(form.amount_inr) },
         { headers: { Authorization: `Bearer ${token}` } });
       toast({ title: 'Commission recorded', description: `₹${parseInt(form.amount_inr).toLocaleString()} added to ${agent.name || agent.agency_name}` });
@@ -85,7 +85,7 @@ function AgentCard({ agent, token, onRefresh }) {
   const patch = async (update) => {
     setBusy(true);
     try {
-      await axios.patch(`${API}/admin/agents/${agent._id || agent.id}`, update, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.patch(`${API}/agent/admin/agents/${agent._id || agent.id}`, update, { headers: { Authorization: `Bearer ${token}` } });
       toast({ title: 'Agent updated' });
       onRefresh();
     } catch (e) { toast({ title: 'Error', description: e?.response?.data?.detail || 'Could not update.' }); }
@@ -196,7 +196,7 @@ export default function AgentsTab() {
     if (statusFilter) params.set('status', statusFilter);
     params.set('limit', pageSize);
     params.set('skip', skip);
-    axios.get(`${API}/admin/agents?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } })
+    axios.get(`${API}/agent/admin/agents?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => {
         setItems(r.data.items || r.data);
         setTotal(r.data.total || (r.data.items || r.data || []).length);

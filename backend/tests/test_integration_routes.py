@@ -4,8 +4,8 @@
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-os.environ["MONGO_URL"] = "mongodb://localhost:27017"
-os.environ["DB_NAME"] = "wehive_test"
+os.environ.setdefault("MONGO_URL", "mongodb://localhost:27017")
+os.environ.setdefault("DB_NAME", "wehive_test")  # don't clobber live-suite DB
 os.environ["JWT_SECRET"] = "testkey_testkey_testkey_testkey_testkey_12345"
 os.environ["JWT_ALG"] = "HS256"
 os.environ["APP_ENV"] = "test"
@@ -98,12 +98,12 @@ class TestLeadsRoutes:
 class TestI18nRoutes:
     @pytest.fixture(autouse=True)
     def setup(self):
-        with patch("routes_i18n.translations_col") as col, \
-             patch("routes_i18n.get_current_admin_flex") as auth:
+        with patch("routes_i18n.translations_col") as col:
             col.find_one = AsyncMock(return_value=None)
             col.update_one = AsyncMock()
-            auth.return_value = {"_id": "a1"}
-            import routes_i18n; app = FastAPI(); app.include_router(routes_i18n.router); self.client = TestClient(app)
+            import routes_i18n; app = FastAPI(); app.include_router(routes_i18n.router)
+            app.dependency_overrides[routes_i18n.get_current_admin_flex] = lambda: {"_id": "a1"}
+            self.client = TestClient(app)
             yield
     def test_get(self):
         assert self.client.get("/i18n/universities/u1").status_code == 200
@@ -120,12 +120,13 @@ class TestI18nRoutes:
 class TestCountriesRoutes:
     @pytest.fixture(autouse=True)
     def setup(self):
-        with patch("routes_countries.db") as db:
-            c = col_mock(
-                find_one=AsyncMock(return_value={"id": "ca", "name": "Canada", "categories": [], "delivery": {}}),
-                distinct=AsyncMock(return_value=["Tourist"]),
-            )
-            db.__getitem__.return_value = c
+        c = col_mock(
+            find_one=AsyncMock(return_value={"id": "ca", "name": "Canada", "categories": [], "delivery": {}}),
+            distinct=AsyncMock(return_value=["Tourist"]),
+            estimated_document_count=AsyncMock(return_value=100),
+        )
+        # Patch the module-level collection (bound at import), not `db`.
+        with patch("routes_countries.countries_col", c):
             import routes_countries
             app = FastAPI(); app.include_router(routes_countries.router); self.client = TestClient(app)
             yield
@@ -151,7 +152,7 @@ class TestNotificationsRoutes:
     def test_list(self):
         assert self.client.get("/notifications").status_code == 200
     def test_mark_read(self):
-        assert self.client.post("/notifications/mark-read", json={"ids": ["n1"]}).status_code == 200
+        assert self.client.post("/notifications/mark-read?notif_id=n1").status_code == 200
     def test_mark_all(self):
         assert self.client.post("/notifications/mark-all-read").status_code == 200
     def test_delete(self):
@@ -162,12 +163,11 @@ class TestNotificationsRoutes:
 class TestProgramsRoutes:
     @pytest.fixture(autouse=True)
     def setup(self):
-        with patch("routes_programs.db") as db:
-            c = col_mock(
-                find=MagicMock(return_value=AsyncIter([{"_id": "p1"}])),
-                find_one=AsyncMock(return_value={"_id": "p1", "name": "CS", "requirements": []}),
-            )
-            db.__getitem__.return_value = c
+        c = col_mock(
+            find=MagicMock(return_value=AsyncIter([{"_id": "p1"}])),
+            find_one=AsyncMock(return_value={"_id": "p1", "name": "CS", "requirements": []}),
+        )
+        with patch("routes_programs.programs_col", c):
             import routes_programs
             app = FastAPI(); app.include_router(routes_programs.router); self.client = TestClient(app)
             yield
@@ -216,7 +216,7 @@ class TestChatbotRoutes:
     def setup(self):
         with patch("routes_chatbot.chat_sessions") as s, \
              patch("routes_chatbot.chat_messages") as m, \
-             patch("routes_chatbot.notifications_col") as n:
+             patch("db.notifications_col") as n:
             s.insert_one = AsyncMock()
             s.find_one = AsyncMock(return_value={"_id": "s1", "user_id": "u1"})
             m.insert_one = AsyncMock()
@@ -247,6 +247,8 @@ class TestUsersRoutes:
             apps.find = MagicMock(return_value=AsyncIter([]))
             plans.insert_one = AsyncMock()
             plans.find = MagicMock(return_value=AsyncIter([]))
+            db.agents.find.return_value.to_list = AsyncMock(return_value=[])
+            db.applications.count_documents = AsyncMock(return_value=0)
             from auth_utils import get_current_user
             import routes_users
             app = FastAPI(); app.include_router(routes_users.router)

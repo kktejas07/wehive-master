@@ -112,7 +112,7 @@ export default function AuthModal() {
     try {
       const formData = form.getValues();
       if (channel === 'phone') {
-        await verifyPhoneOtpCode(otp);
+        await verifyPhoneOtpCode(otp, { name: isSignup ? formData.name : undefined });
       } else {
         await verifyOtp({
           identifier: formData.identifier,

@@ -181,6 +181,3 @@ async def public_aggregator_trigger():
         "status": "success",
         "message": "Aggregation pass started in background on server. Check /api/public/aggregator-status in 30 seconds."
     }
-
-
-

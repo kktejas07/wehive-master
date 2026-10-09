@@ -1,11 +1,18 @@
-import paramiko
+"""Upload backend files (repo-relative paths) to the deploy host.
 
-client = paramiko.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect('65.21.196.49', username='root', password='Omsairam@4522!!')
+Usage: python sync_file.py backend/routes_agents_ai.py [more files...]
+Env: see deploy_ssh_common.py, plus DEPLOY_BACKEND_ROOT (remote checkout root,
+e.g. /etc/dokploy/applications/<app>/code).
+"""
+import os
+import sys
 
-sftp = client.open_sftp()
-sftp.put('/Users/avks/Desktop/Projects /wehive/wehive-master/backend/routes_agents_ai.py', '/etc/dokploy/applications/wehive-backend-dtdyul/code/backend/routes_agents_ai.py')
-sftp.close()
-client.close()
-print("Uploaded successfully")
+from deploy_ssh_common import upload
+
+if __name__ == '__main__':
+    files = sys.argv[1:] or ['backend/routes_agents_ai.py']
+    root = os.environ.get('DEPLOY_BACKEND_ROOT')
+    if not root:
+        sys.exit('Missing required environment variable: DEPLOY_BACKEND_ROOT')
+    upload(files, root)
+    print("Uploaded successfully")

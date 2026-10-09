@@ -68,7 +68,7 @@ async def _send_via_smtp(
     smtp_cfg = await _get_settings('smtp')
 
     host = cfg.get('smtp_host') or smtp_cfg.get('host') or os.environ.get('SMTP_HOST', '')
-    port = int(cfg.get('smtp_port') or smtp_cfg.get('port') or os.environ.get('SMTP_PORT', '587'))
+    port = int(cfg.get('smtp_port') or smtp_cfg.get('port') or os.environ.get('SMTP_PORT') or '587')
     user = cfg.get('smtp_user') or smtp_cfg.get('user') or os.environ.get('SMTP_USER', '')
     password = cfg.get('smtp_password') or smtp_cfg.get('password') or os.environ.get('SMTP_PASSWORD', '')
     from_addr = cfg.get('from_address') or smtp_cfg.get('from') or os.environ.get('SMTP_FROM', user or 'noreply@wehive.co.in')

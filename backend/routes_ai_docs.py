@@ -298,7 +298,7 @@ Applicant profile:
 - Email: {user_profile.get('email', 'Not provided')}
 
 Form data provided:
-{chr(10).join(f"  - {k}: {v}" for k, v in (form_data.items() if form_data else []) )}
+{chr(10).join(f"  - {k}: {v}" for k, v in (form_data.items() if form_data else []))}
 
 Documents uploaded ({len(docs)}):
 {chr(10).join(doc_summary) if doc_summary else "  No documents uploaded yet."}

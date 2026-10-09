@@ -16,6 +16,8 @@ import { Toaster } from './components/ui/toaster';
 import { setPricing } from './components/FeeBreakdown';
 import { setCurrency } from './lib/utils';
 import { getPageTitle } from './lib/pageTitles';
+import { AnalyticsRoot } from './analytics/components/AnalyticsRoot';
+import { trackScreen } from './analytics';
 
 // Lazy-loaded route components — each becomes its own JS chunk so the
 // landing page boots fast and other pages stream in only when visited.
@@ -43,9 +45,6 @@ const UniversityDetail = lazy(() => import('./pages/UniversityDetail'));
 const ProgramList = lazy(() => import('./pages/ProgramList'));
 const MapView = lazy(() => import('./pages/MapView'));
 const AgentLogin = lazy(() => import('./pages/AgentLogin'));
-const AgentDashboard = lazy(() => import('./pages/AgentDashboard'));
-const AgentApplications = lazy(() => import('./pages/AgentApplications'));
-const AgentStudents = lazy(() => import('./pages/AgentStudents'));
 const VisaScheduling = lazy(() => import('./pages/VisaScheduling'));
 const AgentPortal = lazy(() => import('./pages/AgentPortal'));
 const StudentResources = lazy(() => import('./pages/StudentResources'));
@@ -88,6 +87,7 @@ function AnimatedRoutes() {
 
   useEffect(() => {
     document.title = getPageTitle(location.pathname);
+    trackScreen(location.pathname.replace('/', '') || 'home', { path: location.pathname });
   }, [location.pathname]);
 
   return (
@@ -131,6 +131,7 @@ function AnimatedRoutes() {
           <Route path="/hive" element={<PageTransition><Hive /></PageTransition>} />
           <Route path="/us-visa-slots" element={<PageTransition><USVisaSlots /></PageTransition>} />
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
+          <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
@@ -142,25 +143,27 @@ function AnimatedRoutes() {
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <ThemeProvider>
-          <I18nProvider>
-            <AuthProvider>
-              <FirebaseAuthProvider>
-                <PricingLoader />
-                <ScrollToTop />
-                <ErrorBoundary>
-                  <AnimatedRoutes />
-                </ErrorBoundary>
-                <ChatbotWidget />
-                <Toaster />
-              </FirebaseAuthProvider>
-            </AuthProvider>
-          </I18nProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </div>
+    <AnalyticsRoot>
+      <div className="App">
+        <BrowserRouter>
+          <ThemeProvider>
+            <I18nProvider>
+              <AuthProvider>
+                <FirebaseAuthProvider>
+                  <PricingLoader />
+                  <ScrollToTop />
+                  <ErrorBoundary>
+                    <AnimatedRoutes />
+                  </ErrorBoundary>
+                  <ChatbotWidget />
+                  <Toaster />
+                </FirebaseAuthProvider>
+              </AuthProvider>
+            </I18nProvider>
+          </ThemeProvider>
+        </BrowserRouter>
+      </div>
+    </AnalyticsRoot>
   );
 }
 

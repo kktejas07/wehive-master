@@ -3,7 +3,8 @@ import { test, expect } from '@playwright/test';
 // Throwaway test account for this validation run — mailinator is a public inbox,
 // no signup needed, viewable at https://www.mailinator.com/v4/public/inboxes.jsp?to=<name>
 const TEST_EMAIL = `wehive-qa-${Date.now()}@mailinator.com`;
-const TEST_PASSWORD = 'QaTest!2026Xy';
+// Supply via env; tests that need a password are skipped when it is unset.
+const TEST_PASSWORD = process.env.E2E_TEST_PASSWORD || '';
 const TEST_NAME = 'WeHive QA Bot';
 
 test.describe('WS7 — protected route redirect', () => {
@@ -27,6 +28,7 @@ test.describe('WS2 — signup negative paths', () => {
   });
 
   test('invalid email format is rejected', async ({ page }) => {
+    test.skip(!TEST_PASSWORD, 'E2E_TEST_PASSWORD not set');
     await page.goto('/signup');
     await page.getByRole('button', { name: /email/i }).first().click();
     await page.locator('input[placeholder="e.g. Priya Sharma"]').fill(TEST_NAME);
@@ -41,6 +43,7 @@ test.describe('WS2 — signup negative paths', () => {
 
 test.describe('WS2 — signup happy path + Firebase/AuthContext sync check', () => {
   test('email+password signup, and whether isAuthed reflects without a manual reload', async ({ page }) => {
+    test.skip(!TEST_PASSWORD, 'E2E_TEST_PASSWORD not set');
     await page.goto('/signup');
     await page.getByRole('button', { name: /email/i }).first().click();
     await page.locator('input[placeholder="e.g. Priya Sharma"]').fill(TEST_NAME);

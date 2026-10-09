@@ -150,15 +150,14 @@ def _load_yaml_dir(path: str) -> list[Prompt]:
         return out
     for f in sorted(p.glob("*.yaml")):
         try:
-            data = yaml.safe_load(f.read_text(encoding="utf-8"))
-            if not data:
-                continue
-            if isinstance(data, list):
-                for item in data:
+            # A file may hold several `---`-separated documents (one per version).
+            for data in yaml.safe_load_all(f.read_text(encoding="utf-8")):
+                if not data:
+                    continue
+                items = data if isinstance(data, list) else [data]
+                for item in items:
                     if isinstance(item, dict):
                         out.append(_parse_prompt_doc(item, "yaml"))
-            elif isinstance(data, dict):
-                out.append(_parse_prompt_doc(data, "yaml"))
         except Exception as e:
             logger.warning("Failed to load prompt file %s: %s", f, e)
     return out

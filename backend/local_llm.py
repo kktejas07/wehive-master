@@ -19,7 +19,7 @@ from typing import Optional
 
 import httpx
 
-from agents.orchestrator import detect_intent
+from agents.orchestrator import detect_intent_regex
 from eva_tools import lookup_country, search_countries, search_universities, get_application_fee, get_visa_requirements
 from tool_registry import list_tools, get_tool
 
@@ -113,6 +113,7 @@ def _semantic_classify(query: str) -> str:
         _init_semantic()
     if not _SEMANTIC_AVAILABLE or _SEMANTIC_MODEL is None:
         return ""
+    from sentence_transformers import util
     query_emb = _SEMANTIC_MODEL.encode(query.lower(), convert_to_tensor=True)
     best_intent = "fallback"
     best_score = 0.0
@@ -484,13 +485,13 @@ def _classify_intent(query: str) -> str:
     if re.search(r"\b(help|what can you do|how (do|can) you (work|help)|guide|commands|capabilities)\b", q):
         return "help"
     if re.search(r"\b(holiday|vacation|trip|travel|visit|tour|destination|best time|weather|attraction|itinerary|plan)", q):
-        result = detect_intent(query)
+        result = detect_intent_regex(query)
         if "visa" in result.agent.lower() or "qa" in result.agent.lower():
             return "holiday"
         return result.agent
 
     # Tier C — Orchestrator regex scoring
-    return detect_intent(query).agent
+    return detect_intent_regex(query).agent
 
 
 # ── Main Engine ──────────────────────────────────────────────────────────────

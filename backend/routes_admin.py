@@ -1281,9 +1281,14 @@ async def admin_destination_signed_url(filename: str = Query(...), _=Depends(get
 
 
 @router.get('/destinations/blob/{filename:path}')
-async def admin_destination_blob(filename: str):
+async def admin_destination_blob(filename: str, _=Depends(get_current_admin)):
     """Serve a destination image from R2 as a blob — hides the R2 public URL."""
+    import re
     from fastapi.responses import StreamingResponse
+
+    # Single flat filename only: no path separators, traversal or header-breaking chars.
+    if '..' in filename or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._ -]*', filename):
+        raise HTTPException(400, 'Invalid filename')
 
     cfg = await _get_r2_settings()
     client, bucket, _ = _r2_client_from_cfg(cfg)
@@ -1604,4 +1609,3 @@ async def admin_re_seed_universities(admin=Depends(get_current_admin_flex)):
         return {'ok': True, 'result': result}
     except Exception as e:
         raise HTTPException(500, f'Re-seed failed: {e}')
-

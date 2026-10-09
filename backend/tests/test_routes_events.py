@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from server import api_router
 from fastapi import FastAPI
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 from admin_auth import get_current_admin_flex
 from routes_events import router
 
@@ -17,18 +17,18 @@ app.dependency_overrides[get_current_admin_flex] = override_get_current_admin
 
 client = TestClient(app)
 
-@patch('routes_events.global_events_col.find')
-def test_public_events(mock_find):
-    # Mocking a mongo async cursor is tricky in sync TestClient without deep mocking, 
-    # but we can do a simple mock to ensure the route exists and processes args.
-    mock_cursor = AsyncMock()
+@patch('routes_events.global_events_col')
+def test_public_events(mock_col):
+    # Patch the whole collection: count_documents is awaited too, and an unpatched
+    # Motor call would hit the shared client bound to a closed TestClient loop.
+    mock_cursor = MagicMock()
     mock_cursor.sort.return_value = mock_cursor
+    mock_cursor.skip.return_value = mock_cursor
     mock_cursor.limit.return_value = mock_cursor
-    
-    # Let's just mock __aiter__ to return an empty list for simplicity
     mock_cursor.__aiter__.return_value = []
-    mock_find.return_value = mock_cursor
-    
+    mock_col.find.return_value = mock_cursor
+    mock_col.count_documents = AsyncMock(return_value=0)
+
     response = client.get("/events/")
     assert response.status_code == 200
     assert response.json()["total"] == 0

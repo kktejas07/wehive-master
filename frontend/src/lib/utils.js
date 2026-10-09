@@ -140,7 +140,7 @@ const UNI_DOMAIN_MAP = {
   adelaide: 'adelaide.edu.au', uwa: 'uwa.edu.au', rmit: 'rmit.edu.au',
   qut: 'qut.edu.au', deakin: 'deakin.edu.au', curtin: 'curtin.edu.au',
   auckland: 'auckland.ac.nz', otago: 'otago.ac.nz', vic: 'vuw.ac.nz',
-  canterbury: 'canterbury.ac.nz', massey: 'massey.ac.nz', aut: 'aut.ac.nz',
+  'canterbury-nz': 'canterbury.ac.nz', massey: 'massey.ac.nz', aut: 'aut.ac.nz',
   waikato: 'waikato.ac.nz', nus: 'nus.edu.sg', ntu: 'ntu.edu.sg',
   smu: 'smu.edu.sg', tokyo: 'u-tokyo.ac.jp', kyoto: 'kyoto-u.ac.jp',
   osaka: 'osaka-u.ac.jp', tohoku: 'tohoku.ac.jp', nagoya: 'nagoya-u.ac.jp',
@@ -200,7 +200,8 @@ export function universityLogo(universityId, shortName, country) {
   if (!universityId) return '';
   const id = universityId.toLowerCase().replace(/\s+/g, '-');
   
-  let domain = UNI_DOMAIN_MAP[id] || UNI_DOMAIN_MAP[shortName?.toLowerCase()];
+  // Country-suffixed keys (e.g. 'canterbury-nz') disambiguate same-named universities.
+  let domain = (country && UNI_DOMAIN_MAP[`${id}-${country}`]) || UNI_DOMAIN_MAP[id] || UNI_DOMAIN_MAP[shortName?.toLowerCase()];
   
   if (!domain && country) {
     const suffix = COUNTRY_DOMAINS[country];

@@ -22,7 +22,7 @@ if not BASE_URL:
                     BASE_URL = line.split('=', 1)[1].strip().strip('"').rstrip('/')
                     break
 if not BASE_URL or not BASE_URL.startswith('http'):
-    BASE_URL = 'https://premium-collab-6.preview.emergentagent.com'
+    BASE_URL = 'http://localhost:8000'
 
 ADMIN_EMAIL = 'admin@wehive.co.in'
 MOCK_OTP = '123456'
@@ -274,7 +274,7 @@ class TestIntegrations:
             details = svc.get('details') or {}
             for v in details.values():
                 # masked: must not reveal full creds (no '$' raw secret leak length)
-                assert v is None or isinstance(v, str)
+                assert v is None or isinstance(v, (str, int, list))  # counts/model lists are non-secret
 
     def test_patch_otp_channel_persists_and_affects_send(self, admin_session):
         s, _ = admin_session

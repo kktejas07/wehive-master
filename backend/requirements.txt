@@ -633,6 +633,10 @@ pyproject-hooks==1.2.0
     # via build
 pytest==9.0.3
     # via -r backend/requirements.txt
+pytest-asyncio==1.4.0
+    # via -r backend/requirements.txt (dev/test)
+pytest-timeout==2.4.0
+    # via -r backend/requirements.txt (dev/test)
 python-dateutil==2.9.0.post0
     # via
     #   -r backend/requirements.txt

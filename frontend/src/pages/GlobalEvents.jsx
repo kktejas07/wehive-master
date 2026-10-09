@@ -12,6 +12,7 @@ export default function GlobalEvents() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [digest, setDigest] = useState(null);
+  const [error, setError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function GlobalEvents() {
           setEvents(r.data.items || []);
         }
       })
-      .catch(err => console.error(err))
+      .catch(() => { if (mounted) setError(true); })
       .finally(() => {
         if (mounted) setLoading(false);
       });
@@ -33,7 +34,7 @@ export default function GlobalEvents() {
           setDigest(r.data.digest);
         }
       })
-      .catch(e => console.warn("No AI digest available yet."));
+      .catch(() => {});
       
     return () => { mounted = false; };
   }, []);
@@ -93,6 +94,10 @@ export default function GlobalEvents() {
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--blue-700))]" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-20 text-[hsl(var(--blue-900))]/60">
+              We couldn't load events right now. Please refresh the page or try again later.
             </div>
           ) : events.length === 0 ? (
             <div className="text-center py-20 text-[hsl(var(--blue-900))]/50">

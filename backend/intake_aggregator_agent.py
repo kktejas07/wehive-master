@@ -13,7 +13,7 @@ logger = logging.getLogger("wehive.intake_aggregator")
 global_intakes_col = db["global_intakes"]
 
 TARGET_COUNTRIES = [
-    "USA", "United Kingdom", "Canada", "Australia", 
+    "USA", "United Kingdom", "Canada", "Australia",
     "Germany", "France", "Ireland", "New Zealand", "Netherlands",
     "Singapore", "Russia", "China", "Italy", "Philippines"
 ]
@@ -21,7 +21,7 @@ TARGET_COUNTRIES = [
 async def run_aggregator():
     """Runs the LLM aggregator to extract real-time intake data globally (excluding India)."""
     logger.info("Starting intake aggregator agent...")
-    
+
     # We ask the LLM to output a JSON list of countries with intakes broken down by track
     prompt = f"""
 You are an expert global education admissions counselor.
@@ -65,7 +65,7 @@ Return only the raw JSON. No markdown fences. No prose.
             user_prompt=prompt,
             max_tokens=4000
         )
-        
+
         reply = reply.strip()
         import re
         m = re.search(r"\[.*\]", reply, re.DOTALL)
@@ -73,10 +73,10 @@ Return only the raw JSON. No markdown fences. No prose.
             data = json.loads(m.group(0))
         else:
             data = json.loads(reply)
-            
+
         if not isinstance(data, list):
             raise ValueError("Expected a JSON list")
-            
+
         # Store in DB
         batch_id = str(uuid.uuid4())
         docs = []
@@ -85,15 +85,15 @@ Return only the raw JSON. No markdown fences. No prose.
             c["batch_id"] = batch_id
             c["fetched_at"] = datetime.utcnow()
             docs.append(c)
-            
+
         if docs:
             # Clear old and insert new (for simplicity, we just keep the latest)
             await global_intakes_col.delete_many({})
             await global_intakes_col.insert_many(docs)
             logger.info(f"Successfully aggregated {len(docs)} countries' intake data.")
-            
+
         return {"status": "ok", "countries_processed": len(docs)}
-        
+
     except Exception as e:
         logger.error(f"Failed to run intake aggregator: {e}")
         return {"status": "error", "message": str(e)}

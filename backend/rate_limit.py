@@ -11,8 +11,7 @@ Usage (FastAPI dependency):
     async def send_otp(req: Request, _=Depends(otp_limiter)):
         ...
 """
-from __future__ import annotations
-
+import os
 import time
 import threading
 from collections import defaultdict, deque
@@ -38,6 +37,9 @@ class RateLimit:
         return 'global'
 
     def __call__(self, request: Request) -> None:
+        # Explicit opt-out for local integration test servers only; never set in prod.
+        if os.environ.get('RATE_LIMIT_DISABLED') == '1':
+            return
         key = self._key(request)
         now = time.monotonic()
         cutoff = now - self.window

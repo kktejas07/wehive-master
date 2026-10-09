@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { 
   Users, Gift, Landmark, CreditCard, ChevronRight, CheckCircle2, 
-  Send, RefreshCw, Sparkles, UserPlus, FileText, ArrowUpRight 
+  Send, RefreshCw, Sparkles, UserPlus, FileText, ArrowUpRight, Coins
 } from "lucide-react";
 
 interface AgentTabProps {

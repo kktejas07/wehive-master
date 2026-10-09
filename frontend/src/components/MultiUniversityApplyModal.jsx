@@ -36,7 +36,7 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
       const r = await axios.post(
         `${API}/users/me/applications/universities`,
         {
-          university_ids: universities.map(u => u.id),
+          universities: universities.map(u => (u.program_id ? { university_id: u.id, program_id: u.program_id } : { university_id: u.id })),
           country_id: primaryCountry,
           visa_type: VISA_TYPE,
         },

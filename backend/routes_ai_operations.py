@@ -348,6 +348,7 @@ async def list_ai_providers():
 async def vision_ocr(
     file: UploadFile = File(...),
     language: Optional[str] = Form("en"),
+    user=Depends(get_current_user),
 ):
     contents = await file.read()
     image_b64 = base64.b64encode(contents).decode("utf-8")
@@ -371,6 +372,7 @@ async def vision_ocr(
 async def vision_classify(
     file: UploadFile = File(...),
     labels: Optional[str] = Form(None),
+    user=Depends(get_current_user),
 ):
     contents = await file.read()
     image_b64 = base64.b64encode(contents).decode("utf-8")
@@ -404,6 +406,7 @@ async def vision_classify(
 @router.post("/vision/parse-resume")
 async def vision_parse_resume(
     file: UploadFile = File(...),
+    user=Depends(get_current_user),
 ):
     contents = await file.read()
 
@@ -452,6 +455,7 @@ async def vision_parse_resume(
 async def speech_transcribe(
     file: UploadFile = File(...),
     language: Optional[str] = Form("en"),
+    user=Depends(get_current_user),
 ):
     if not OPENAI_API_KEY:
         raise HTTPException(status_code=503, detail="Set OPENAI_API_KEY for transcription")
@@ -475,7 +479,7 @@ async def speech_transcribe(
 
 
 @router.post("/translate")
-async def translate(req: TranslateRequest):
+async def translate(req: TranslateRequest, user=Depends(get_current_user)):
     try:
         from ai_marketplace import marketplace
         response = await marketplace.chat(

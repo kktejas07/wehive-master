@@ -9,6 +9,7 @@ import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import Pagination from './Pagination';
 import BlobImage from './BlobImage';
+import { API } from '../../lib/apiBase';
 
 function PreviewModal({ item, onClose, onRefresh }) {
   const { toast } = useToast();
@@ -208,8 +209,7 @@ export default function DestinationsTab() {
 
     try {
       const token = adminClient().defaults?.headers?.Authorization?.split(' ')[1] || '';
-      const baseUrl = process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in';
-      const response = await fetch(`${baseUrl}/api/admin/destinations/sync-to-r2-stream`, {
+      const response = await fetch(`${API}/admin/destinations/sync-to-r2-stream`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' },
       });

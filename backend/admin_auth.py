@@ -134,7 +134,7 @@ def _build_reset_email_html(reset_link: str, reset_code: str) -> str:
 
 
 async def send_reset_email_or_log(to_email: str, raw_token: str, frontend_url: str) -> dict:
-    """Try unified email service. If not configured, return the token in the response (dev mode)."""
+    """Send the reset email via the unified email service. Never returns the token."""
     from email_service import send_email
     reset_link = f'{frontend_url.rstrip("/")}/admin/reset-password?token={raw_token}'
     html = _build_reset_email_html(reset_link, raw_token)
@@ -144,11 +144,7 @@ async def send_reset_email_or_log(to_email: str, raw_token: str, frontend_url: s
         html_body=html,
         text_body=f'Use this code to reset your password: {raw_token}\nOr click: {reset_link}',
     )
-    return {
-        'sent': sent,
-        'dev_token': None if sent else raw_token,
-        'dev_link': None if sent else reset_link,
-    }
+    return {'sent': sent}
 
 
 # ---------- dependency ----------

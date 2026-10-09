@@ -5,6 +5,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from pydantic import BaseModel
 from auth_utils import get_current_user, get_current_user_optional
+from admin_auth import get_current_admin_flex
 from db import db
 
 router = APIRouter(prefix='/visa-scheduling', tags=['visa-scheduling'])
@@ -34,7 +35,7 @@ async def get_available_slots(country_id: str, date: Optional[str] = None):
 
 
 @router.post('/slots/generate')
-async def generate_slots(data: dict = Body(...)):
+async def generate_slots(data: dict = Body(...), _admin=Depends(get_current_admin_flex)):
     country_id = data.get('country_id')
     start_date = data.get('start_date')
     end_date = data.get('end_date')

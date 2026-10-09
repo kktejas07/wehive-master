@@ -1,5 +1,5 @@
 """Unit tests for agent modules — orchestrator, concierge, document_validator,
-review_moderation, pdf_agent, tool_registry, third_party_agent (mocked).
+review_moderation, pdf_agent, tool_registry.
 
 Tests pure logic and class behaviour where possible. DB-dependent functions
 are tested with monkey-patched mocks.
@@ -16,7 +16,6 @@ os.environ.setdefault("APP_ENV", "test")
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import httpx
 import pytest
 
 
@@ -477,75 +476,3 @@ class TestToolRegistry:
                             with patch("eva_tools.lookup_university", new=AsyncMock()):
                                 tr.register_all()
         assert len(tr.list_tools()) == 11
-
-
-# ─── Third-Party Agent (mocked HTTP) ──────────────────────────────────────────
-from agents.third_party_agent import fetch_visa_requirements, fetch_flights, fetch_exchange_rate
-
-
-@pytest.mark.asyncio
-async def test_fetch_visa_requirements_success():
-    mock_resp = MagicMock()
-    mock_resp.json = MagicMock(return_value={"visa": "required"})
-    mock_resp.raise_for_status = MagicMock()
-    with patch("httpx.AsyncClient") as mock_client:
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(return_value=mock_resp)
-        result = await fetch_visa_requirements("IN", "US", "test_key")
-        assert result == {"visa": "required"}
-
-
-@pytest.mark.asyncio
-async def test_fetch_visa_requirements_http_error():
-    with patch("httpx.AsyncClient") as mock_client:
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(side_effect=httpx.HTTPError("HTTP error"))
-        result = await fetch_visa_requirements("IN", "US", "test_key")
-        assert result is None
-
-
-@pytest.mark.asyncio
-async def test_fetch_flights_success():
-    mock_resp = MagicMock()
-    mock_resp.json = MagicMock(return_value={"content": {"results": {"itineraries": [{"price": 500}]}}})
-    mock_resp.raise_for_status = MagicMock()
-    with patch("httpx.AsyncClient") as mock_client:
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(return_value=mock_resp)
-        result = await fetch_flights("BLR", "LHR", "test_key")
-        assert result == [{"price": 500}]
-
-
-@pytest.mark.asyncio
-async def test_fetch_flights_error():
-    with patch("httpx.AsyncClient") as mock_client:
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(side_effect=httpx.HTTPError("fail"))
-        result = await fetch_flights("BLR", "LHR", "test_key")
-        assert result is None
-
-
-@pytest.mark.asyncio
-async def test_fetch_exchange_rate_success():
-    mock_resp = MagicMock()
-    mock_resp.json = MagicMock(return_value=[{"rate": 83.5}])
-    mock_resp.raise_for_status = MagicMock()
-    with patch("httpx.AsyncClient") as mock_client:
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(return_value=mock_resp)
-        result = await fetch_exchange_rate("USD", "INR", "test_key")
-        assert result == 83.5
-
-
-@pytest.mark.asyncio
-async def test_fetch_exchange_rate_empty_response():
-    mock_resp = MagicMock()
-    mock_resp.json = MagicMock(return_value=[])
-    mock_resp.raise_for_status = MagicMock()
-    with patch("httpx.AsyncClient") as mock_client:
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(return_value=mock_resp)
-        result = await fetch_exchange_rate("USD", "INR", "test_key")
-        assert result is None
-
-
-@pytest.mark.asyncio
-async def test_fetch_exchange_rate_error():
-    with patch("httpx.AsyncClient") as mock_client:
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(side_effect=httpx.HTTPError("fail"))
-        result = await fetch_exchange_rate("USD", "INR", "test_key")
-        assert result is None

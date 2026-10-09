@@ -18,7 +18,7 @@ from constants import REFERRAL_REWARD_INR
 from rate_limit import RateLimit
 import uuid
 
-from config import ADMIN_EMAILS, OTP_TTL_MIN
+from config import ADMIN_EMAILS, OTP_TTL_MIN, IS_DEV
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -124,6 +124,11 @@ async def send_otp(req: SendOtpRequest, request: Request, _=Depends(_otp_limiter
     kind = req.channel or classify_identifier(req.identifier)
     identifier = normalize_phone(req.identifier) if kind == 'phone' else req.identifier.lower()
 
+    # Mock OTP (fixed code echoed back) is only allowed in development/test.
+    channel_mode = os.environ.get('OTP_CHANNEL', 'mock' if IS_DEV else '')
+    if not channel_mode or (channel_mode == 'mock' and not IS_DEV):
+        raise HTTPException(status_code=503, detail='OTP service not configured')
+
     rate_limit_error = await check_rate_limit(identifier)
     if rate_limit_error:
         raise HTTPException(status_code=429, detail=rate_limit_error)
@@ -135,7 +140,6 @@ async def send_otp(req: SendOtpRequest, request: Request, _=Depends(_otp_limiter
     delivered = False
     channel_used = kind
 
-    channel_mode = os.environ.get('OTP_CHANNEL', 'mock')
     dev_code = None
     if channel_mode == 'mock':
         delivered = True

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from auth_utils import get_current_user
 from ai_marketplace import marketplace
 from pydantic import BaseModel
 import logging
@@ -11,7 +12,7 @@ class FinancialQuery(BaseModel):
     context: str = ""
 
 @router.post("/insights")
-async def get_financial_insights(req: FinancialQuery):
+async def get_financial_insights(req: FinancialQuery, user=Depends(get_current_user)):
     """Uses LLM to dynamically generate financial advice and insights."""
     prompt = f"User Question: {req.query}\nContext: {req.context}\nProvide actionable, brief financial advice for studying abroad."
     

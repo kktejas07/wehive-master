@@ -31,6 +31,7 @@ const EXACT_TITLES = {
   '/hive': `The Hive | ${SITE_NAME}`,
   '/us-visa-slots': `US Visa Slot Tracker | ${SITE_NAME}`,
   '/agent-portal/login': `Agent Portal Login | ${SITE_NAME}`,
+  '/agent/login': `Agent Portal Login | ${SITE_NAME}`,
 };
 
 // Path prefix -> title, for dynamic/nested routes (checked if no exact match).

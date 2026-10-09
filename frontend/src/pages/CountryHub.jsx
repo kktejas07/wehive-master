@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, GraduationCap, ShieldCheck, Briefcase, FileText, Compass, Clock, Coins, ArrowRight, Checklist, CheckCircle2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import NotFound from './NotFound';
 
 const COUNTRY_DATA = {
   ca: {
@@ -295,8 +296,10 @@ const COUNTRY_DATA = {
 
 export default function CountryHub() {
   const { countryId } = useParams();
-  const country = COUNTRY_DATA[countryId] || COUNTRY_DATA.ca;
+  const country = COUNTRY_DATA[countryId];
   const [activeVisa, setActiveVisa] = useState('pr');
+
+  if (!country) return <NotFound />;
 
   const renderRegularIcon = (key, className = "w-5 h-5") => {
     switch (key) {

@@ -34,6 +34,8 @@ export default function VisaDetail() {
   const { isAuthed } = useAuth();
   const [country, setCountry] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [type, setType] = useState('Tourist');
   const [applicants, setApplicants] = useState(1);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -42,6 +44,7 @@ export default function VisaDetail() {
     let mounted = true;
     setCountry(null);
     setNotFound(false);
+    setLoadError(false);
     axios
       .get(`${API}/countries/${id}`)
       .then((r) => {
@@ -50,15 +53,37 @@ export default function VisaDetail() {
         const types = Object.keys(r.data.categories || {});
         if (types.length) setType(types[0]);
       })
-      .catch(() => {
+      .catch((e) => {
         if (!mounted) return;
         setCountry(null);
-        setNotFound(true);
+        if (e?.response?.status === 404) setNotFound(true);
+        else setLoadError(true);
       });
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, reloadKey]);
+
+  if (loadError) {
+    return (
+      <div className="bg-white">
+        <Navbar />
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-5 text-center">
+          <AlertTriangle className="w-10 h-10 text-[hsl(var(--accent))]" />
+          <h1 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">
+            Something went wrong loading this page
+          </h1>
+          <p className="text-[hsl(var(--blue-900))]/60 max-w-md">
+            Please check your connection and try again.
+          </p>
+          <Button onClick={() => setReloadKey((k) => k + 1)} className="rounded-full btn-accent text-white h-11 px-6 font-bold">
+            Try again
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (notFound) {
     return (

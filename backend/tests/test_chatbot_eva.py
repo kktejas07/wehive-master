@@ -5,7 +5,7 @@ import requests
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL or not BASE_URL.startswith('http'):
-    BASE_URL = 'https://premium-collab-6.preview.emergentagent.com'
+    BASE_URL = 'http://localhost:8000'
 API = f"{BASE_URL}/api"
 
 

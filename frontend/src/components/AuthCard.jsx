@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './ui/button';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, API } from '../context/AuthContext';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useToast } from '../hooks/use-toast';
 
@@ -124,8 +124,7 @@ export default function AuthCard({ mode, referralCode }) {
   }));
 
   useEffect(() => {
-    const api = process.env.REACT_APP_BACKEND_URL || 'https://api.wehive.co.in';
-    axios.get(`${api}/api/public/auth-config`).then((r) => {
+    axios.get(`${API}/public/auth-config`).then((r) => {
       setAuthConfig(r.data);
       const firstEnabled = ALL_TABS.find((t) => {
         if (t.configKey === 'google_enabled') return r.data.google_enabled !== false;
@@ -271,7 +270,7 @@ export default function AuthCard({ mode, referralCode }) {
     setVerifying(true);
     try {
       if (otpChannel === 'phone') {
-        await verifyPhoneOtpCode(otp);
+        await verifyPhoneOtpCode(otp, { name: isSignup ? name : undefined, referralCode });
       } else {
         const channel = otpChannel === 'whatsapp' ? 'whatsapp' : 'email';
         await verifyOtp({
