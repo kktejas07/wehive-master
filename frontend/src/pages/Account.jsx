@@ -429,7 +429,13 @@ function SettingsTab({ user, token, onUpdated }) {
     try {
       await axios.put(
         `${API}/users/me`,
-        { name, gender, avatar_seed: seed, avatar_style: style },
+        // Backend accepts gender ∈ male|female|other only; 'hero' is a local avatar-style choice.
+        {
+          name,
+          ...(['male', 'female', 'other'].includes(gender) ? { gender } : {}),
+          avatar_seed: seed,
+          avatar_style: style,
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast({ title: 'Saved', description: 'Profile updated.' });

@@ -42,11 +42,20 @@ cd "$ROOT_DIR"
 
 # 5. Security scan
 echo ""
-echo "── [5/7] Security Scan ──────────────────────"
-if ! grep -rE 'sk-[a-zA-Z0-9]{20,}|(api_key|API_KEY|secret|password)[a-zA-Z0-9_-]*\s*=\s*['\''"][a-zA-Z0-9_/@$#%-]{10,}['\''"]' backend/ --include='*.py' 2>/dev/null | grep -v 'test_'; then
-  pass "No leaked secrets (grep)"
+echo "── [5/6] Security Scan ──────────────────────"
+# Scan every git-tracked file (not just backend/*.py) for private keys and
+# hard-coded credentials. Example/placeholder files and frontend *.test.* fixtures
+# are excluded; append `verify:allow-secret` to a line to whitelist a known fake.
+SECRET_PATTERN='-----BEGIN ([A-Z]+ )?PRIVATE KEY-----|"private_key"[[:space:]]*:|sk-[a-zA-Z0-9]{20,}|AKIA[0-9A-Z]{16}|eyJ[a-zA-Z0-9_-]{20,}\.eyJ[a-zA-Z0-9_-]{20,}|(api_key|secret|password|passwd|pwd|token)["'\'']?[[:space:]]*[:=][[:space:]]*["'\''][^"'\''[:space:]$<{]{3,}[0-9!@#%^&*+][^"'\''[:space:]]{2,}["'\'']'
+SECRET_HITS="$(git ls-files -z \
+  | grep -zvE '(\.env\.example|package-lock\.json|yarn\.lock|\.test\.(js|jsx|ts|tsx)|\.(png|jpe?g|gif|webp|ico|svg|pdf|woff2?|ttf|lottie))$' \
+  | xargs -0 grep -IEin -e "$SECRET_PATTERN" 2>/dev/null \
+  | grep -vE '(os\.environ|os\.getenv|process\.env|import\.meta\.env|placeholder|example|changeme|change_me|change-me|your_|<[A-Z_]+>|verify:allow-secret)' || true)"
+if [ -z "$SECRET_HITS" ]; then
+  pass "No leaked secrets in tracked files (grep)"
 else
-  fail "Potential secrets found!"
+  echo "$SECRET_HITS" | cut -c1-160 | sed -E 's/([:=][[:space:]]*["'\''])[^"'\'']{4}[^"'\'']*/\1****/'
+  fail "Potential secrets found in tracked files!"
 fi
 if cd frontend && npm audit --audit-level=critical 2>/dev/null; then pass "npm audit"; else fail "npm audit"; fi
 cd "$ROOT_DIR"

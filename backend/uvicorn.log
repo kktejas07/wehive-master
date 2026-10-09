@@ -1,1 +1,0 @@
-chromadb not installed — using in-memory vector store. No module named 'chromadb'

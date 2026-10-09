@@ -10,9 +10,12 @@ Endpoints (all mounted under /api/admin-auth):
 """
 from __future__ import annotations
 
+import hmac
+import logging
 import os
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks
 from pydantic import BaseModel, EmailStr, Field
@@ -30,6 +33,7 @@ from config import ADMIN_EMAILS
 from db import users, db
 
 router = APIRouter(prefix='/admin-auth', tags=['admin-auth'])
+logger = logging.getLogger('wehive.admin_auth')
 
 login_attempts = db['login_attempts']
 password_reset_tokens = db['password_reset_tokens']
@@ -140,6 +144,7 @@ class SignupRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
     name: str = Field(..., min_length=2)
+    bootstrap_token: Optional[str] = None
 
 
 class LoginRequest(BaseModel):
@@ -163,7 +168,19 @@ class ChangePasswordRequest(BaseModel):
 
 # ---------- signup ----------
 @router.post('/signup')
-async def admin_signup(req: SignupRequest, bg: BackgroundTasks = None):
+async def admin_signup(req: SignupRequest, bg: BackgroundTasks = None,
+                       authorization: Optional[str] = Header(default=None)):
+    # Signup requires an authenticated admin, or a one-time bootstrap when no
+    # password-holding admin exists yet and ADMIN_BOOTSTRAP_TOKEN matches.
+    if authorization:
+        await get_current_admin_flex(authorization)
+    else:
+        bootstrap = os.environ.get('ADMIN_BOOTSTRAP_TOKEN', '')
+        if not (bootstrap and req.bootstrap_token
+                and hmac.compare_digest(bootstrap, req.bootstrap_token)
+                and await users.count_documents({'is_admin': True, 'password_hash': {'$nin': [None, '']}}) == 0):
+            raise HTTPException(403, 'Admin signup requires an existing admin.')
+
     email = req.email.lower().strip()
     if email not in ADMIN_EMAILS:
         raise HTTPException(403, 'This email is not authorised for admin signup. Contact your super admin.')
@@ -288,17 +305,8 @@ async def admin_forgot(req: ForgotRequest):
     # Best-effort frontend URL for the reset link
     front = FRONTEND_URL or 'https://wehive.co.in'
     result = await send_reset_email_or_log(email, raw, front)
-
-    # In dev mode (SMTP not configured) we surface the token so the admin
-    # can continue without email — never do this when SMTP is active.
     if not result['sent']:
-        return {
-            **ok_response,
-            'dev_mode': True,
-            'dev_token': result['dev_token'],
-            'dev_link': result['dev_link'],
-            'note': 'SMTP is not configured — returning the token directly. In production this token is only emailed.',
-        }
+        logger.warning('Admin password reset email could not be sent (email service unavailable)')
     return ok_response
 
 

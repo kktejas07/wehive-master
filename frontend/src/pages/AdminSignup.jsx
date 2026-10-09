@@ -17,6 +17,7 @@ export default function AdminSignup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [bootstrapToken, setBootstrapToken] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
@@ -29,7 +30,7 @@ export default function AdminSignup() {
     setErr('');
     setBusy(true);
     try {
-      await signup({ email: email.trim(), password, name: name.trim() });
+      await signup({ email: email.trim(), password, name: name.trim(), bootstrapToken: bootstrapToken.trim() });
       navigate('/admin', { replace: true });
     } catch (ex) {
       setErr(formatDetail(ex?.response?.data?.detail) || ex.message);
@@ -41,7 +42,7 @@ export default function AdminSignup() {
   return (
     <AdminAuthShell
       title="Create admin account"
-      subtitle="Your email must already be on the ADMIN_EMAILS allow-list. Ask your super-admin if unsure."
+      subtitle="For the first admin only: your email must be on the ADMIN_EMAILS allow-list and you need the server's ADMIN_BOOTSTRAP_TOKEN. Later admins are added by an existing admin."
       footer={
         <>
           Already have an account?{' '}
@@ -58,8 +59,9 @@ export default function AdminSignup() {
           <Field label="Password" testid="admin-signup-password" type="password" value={password} onChange={setPassword} placeholder="At least 8 chars + a number" autoComplete="new-password" />
           {password && <PasswordStrength password={password} />}
         </div>
+        <Field label="Setup token" testid="admin-signup-bootstrap" type="password" value={bootstrapToken} onChange={setBootstrapToken} placeholder="ADMIN_BOOTSTRAP_TOKEN" autoComplete="off" />
         <ErrorMessage text={err} />
-        <PrimaryButton type="submit" disabled={busy || !name || !email || !password} testid="admin-signup-submit">
+        <PrimaryButton type="submit" disabled={busy || !name || !email || !password || !bootstrapToken} testid="admin-signup-submit">
           {busy ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Create admin account'}
         </PrimaryButton>
       </form>

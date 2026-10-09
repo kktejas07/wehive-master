@@ -18,12 +18,6 @@ from ai_marketplace import AIMarketplace
 from vector_store import upsert_documents
 
 try:
-    import nest_asyncio
-    nest_asyncio.apply()
-except Exception:
-    pass
-
-try:
     from scrapegraphai.graphs import SmartScraperGraph
     SCRAPEGRAPH_AVAILABLE = True
 except ImportError:
@@ -33,7 +27,7 @@ except ImportError:
 logger = logging.getLogger("wehive.news_aggregator")
 
 TARGET_COUNTRIES = [
-    "India", "USA", "United Kingdom", "Canada", "Australia", 
+    "India", "USA", "United Kingdom", "Canada", "Australia",
     "Germany", "France", "Japan", "Brazil", "UAE"
 ]
 
@@ -72,17 +66,17 @@ def _route_social_media_url(url: str, platform: str = None) -> str:
     """Rewrite social media URLs to use public proxy viewers to avoid login walls."""
     if not url:
         return url
-        
+
     url_lower = url.lower()
-    
+
     if platform == "twitter" or "x.com" in url_lower or "twitter.com" in url_lower:
         username = url.rstrip('/').split('/')[-1]
         return f"https://nitter.net/{username}"
-        
+
     if platform == "instagram" or "instagram.com" in url_lower:
         username = url.rstrip('/').split('/')[-1]
         return f"https://www.picuki.com/profile/{username}"
-        
+
     return url
 
 async def _openai_available() -> bool:
@@ -104,11 +98,11 @@ async def _openai_available() -> bool:
 async def fetch_news_from_url(url: str, country: str, platform: str = None) -> List[Dict[str, Any]]:
     """Use ScrapeGraphAI to extract news from a specific URL or social media handle."""
     if not SCRAPEGRAPH_AVAILABLE:
-        logger.warning("ScrapeGraphAI is not installed. Falling back to LLM hallucination.")
+        logger.warning("ScrapeGraphAI is not installed. Skipping (no fabricated fallback).")
         return await fetch_news_for_country_fallback(AIMarketplace(), country)
 
     if not await _openai_available():
-        logger.warning("OpenAI unavailable (quota/rate-limit). Skipping ScrapeGraphAI, using LLM fallback.")
+        logger.warning("OpenAI unavailable (quota/rate-limit). Skipping ScrapeGraphAI.")
         return await fetch_news_for_country_fallback(AIMarketplace(), country)
 
     target_url = _route_social_media_url(url, platform)
@@ -143,9 +137,9 @@ async def fetch_news_from_url(url: str, country: str, platform: str = None) -> L
                 config=graph_config
             )
             return smart_scraper_graph.run()
-            
+
         result = await asyncio.to_thread(run_scraper)
-        
+
         if isinstance(result, list):
             return result
         elif isinstance(result, dict) and "news" in result:
@@ -159,61 +153,18 @@ async def fetch_news_from_url(url: str, country: str, platform: str = None) -> L
         logger.error(f"ScrapeGraphAI failed for {url}: {e}")
         return await fetch_news_for_country_fallback(AIMarketplace(), country)
 
-def _generate_static_news_fallback(country: str) -> List[Dict[str, Any]]:
-    today_dt = datetime.utcnow()
-    today_str = today_dt.strftime("%Y-%m-%d")
-    return [
-        {
-            "title": f"{country} Policy Updates: International Student & Visitor Entry ({today_dt.strftime('%B %Y')})",
-            "date": today_str,
-            "category": "F1",
-            "content": f"{country} immigration authorities have updated procedural guidelines for international student visas and travel documentation, streamlining processing windows for the upcoming academic season.",
-            "source_url": "https://www.gov.uk/browse/visas-immigration" if country == "United Kingdom" else "https://www.uscis.gov/newsroom"
-        },
-        {
-            "title": f"{country} Introduces New Skilled Talent & Business Visa Framework",
-            "date": today_str,
-            "category": "H1B",
-            "content": f"New official immigration measures in {country} aim to expand opportunities for tech, research, and business professionals seeking multi-year employment authorization.",
-            "source_url": "https://www.gov.uk/browse/visas-immigration" if country == "United Kingdom" else "https://www.uscis.gov/newsroom"
-        }
-    ]
-
 async def fetch_news_for_country_fallback(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
-    """Fallback LLM generation if scraping fails."""
-    system_prompt = "You are an expert immigration news reporter. Always respond with valid JSON only."
-    today_str = datetime.utcnow().strftime("%Y-%m-%d")
-    user_prompt = f"""
-    Please write 2 news headlines regarding recent visa or immigration updates in {country}.
-    You MUST categorize each news item into exactly ONE of these categories: F1, H1B, O1, EB1, Business, Travel.
-    Format the output strictly as a JSON array of objects with the following keys:
-    - "title": string
-    - "date": string (current date in YYYY-MM-DD format, e.g. "{today_str}")
-    - "category": string (must be one of: F1, H1B, O1, EB1, Business, Travel)
-    - "content": string (A brief summary of the news, 2-3 sentences)
-    - "source_url": string (A generic url placeholder like "https://example.com/news")
-    
-    Return ONLY the JSON array.
-    """
-    
-    provider, pid = await marketplace.get_active_provider("system")
-    if not provider:
-        logger.warning(f"No active LLM provider for news. Generating dynamic fallback for {country}.")
-        return _generate_static_news_fallback(country)
-    
-    response = await provider.chat(
-        system_prompt=system_prompt,
-        user_prompt=user_prompt,
-        max_tokens=2000
-    )
-    
-    return _parse_agent_response(response or "")
+    """Scrape-failure fallback: returns nothing rather than LLM-fabricated news."""
+    # Never let an LLM invent news: without a real scraped source, return nothing.
+    logger.warning(f"No scraped source for news in {country}; skipping (no LLM-generated news).")
+    return []
+
 
 async def run_aggregator():
     """Main task that runs every 24 hours."""
     logger.info("Starting Global News Aggregator automated scraping loop...")
     marketplace = AIMarketplace()
-    
+
     total_added = 0
     total_skipped = 0
     vector_ids = []
@@ -232,7 +183,7 @@ async def run_aggregator():
             for news in news_items:
                 title = news.get("title")
                 category = news.get("category", "Travel")
-                
+
                 existing = await global_news_col.find_one({
                     "title": title,
                     "country_id": country_id,
@@ -240,7 +191,7 @@ async def run_aggregator():
                 if existing:
                     total_skipped += 1
                     continue
-                
+
                 today_str = datetime.utcnow().strftime("%Y-%m-%d")
                 news_date = news.get("date")
                 if not news_date or not isinstance(news_date, str) or len(news_date) < 10:
@@ -258,7 +209,7 @@ async def run_aggregator():
                 }
                 res = await global_news_col.insert_one(doc)
                 total_added += 1
-                
+
                 doc_id = str(res.inserted_id)
                 vector_ids.append(doc_id)
                 vector_docs.append(f"{title} {news.get('content', '')}")
@@ -268,7 +219,7 @@ async def run_aggregator():
                     "category": category
                 })
             await asyncio.sleep(2)
-            
+
     # 2. Fallback LLM generation for countries without seeds
     for country in TARGET_COUNTRIES:
         country_id = country.lower().replace(" ", "-")
@@ -279,11 +230,11 @@ async def run_aggregator():
             except Exception as e:
                 logger.error(f"LLM fallback failed for {country}: {e}")
                 continue
-            
+
             for news in news_items:
                 title = news.get("title")
                 category = news.get("category", "Travel")
-                
+
                 existing = await global_news_col.find_one({
                     "title": title,
                     "country_id": country_id,
@@ -291,7 +242,7 @@ async def run_aggregator():
                 if existing:
                     total_skipped += 1
                     continue
-                
+
                 today_str = datetime.utcnow().strftime("%Y-%m-%d")
                 news_date = news.get("date")
                 if not news_date or not isinstance(news_date, str) or len(news_date) < 10:
@@ -309,7 +260,7 @@ async def run_aggregator():
                 }
                 res = await global_news_col.insert_one(doc)
                 total_added += 1
-                
+
                 doc_id = str(res.inserted_id)
                 vector_ids.append(doc_id)
                 vector_docs.append(f"{title} {news.get('content', '')}")
@@ -318,9 +269,9 @@ async def run_aggregator():
                     "country_id": country_id,
                     "category": category
                 })
-            
+
             await asyncio.sleep(2)
-            
+
     if vector_ids:
         try:
             from ollama_embeddings import embed_query
@@ -332,22 +283,26 @@ async def run_aggregator():
             logger.info(f"Ingested {len(vector_ids)} news items into Vector DB.")
         except Exception as e:
             logger.error(f"Failed to ingest news into vector DB: {e}")
-        
+
     logger.info(f"Aggregator finished. Inserted {total_added} pending news items, skipped {total_skipped} duplicates.")
     await run_auto_approval()
 
 async def run_auto_approval():
     """Fallback task that runs periodically to auto-approve safe news."""
+    if os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() not in ("1", "true", "yes"):
+        logger.info("AGGREGATOR_AUTO_APPROVE disabled; leaving pending news for admin review.")
+        return
+
     logger.info("Running auto-approval check for news...")
-    
+
     query = {
         "status": "pending"
     }
-    
+
     update = {
         "$set": {"status": "approved"}
     }
-    
+
     result = await global_news_col.update_many(query, update)
     if result.modified_count > 0:
         logger.info(f"Auto-approved {result.modified_count} safe news items.")
@@ -356,9 +311,9 @@ async def run_auto_approval():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     async def main():
         await run_aggregator()
         await run_auto_approval()
-        
+
     asyncio.run(main())

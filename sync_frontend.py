@@ -1,14 +1,25 @@
-import paramiko
+"""Upload frontend files (repo-relative paths) to the deploy host.
 
-client = paramiko.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect('65.21.196.49', username='root', password='Omsairam@4522!!')
+Usage: python sync_frontend.py frontend/src/pages/Blog.jsx [more files...]
+Env: see deploy_ssh_common.py, plus DEPLOY_FRONTEND_ROOT (remote checkout root,
+e.g. /etc/dokploy/applications/<app>/code).
+"""
+import os
+import sys
 
-sftp = client.open_sftp()
-sftp.put('/Users/avks/Desktop/Projects /wehive/wehive-master/frontend/src/components/ui/ContentCard.tsx', '/etc/dokploy/applications/wehive-frontend-5bnblw/code/frontend/src/components/ui/ContentCard.tsx')
-sftp.put('/Users/avks/Desktop/Projects /wehive/wehive-master/frontend/src/pages/Blog.jsx', '/etc/dokploy/applications/wehive-frontend-5bnblw/code/frontend/src/pages/Blog.jsx')
-sftp.put('/Users/avks/Desktop/Projects /wehive/wehive-master/frontend/src/components/Newsroom.jsx', '/etc/dokploy/applications/wehive-frontend-5bnblw/code/frontend/src/components/Newsroom.jsx')
-sftp.put('/Users/avks/Desktop/Projects /wehive/wehive-master/frontend/src/components/admin/OverviewTab.jsx', '/etc/dokploy/applications/wehive-frontend-5bnblw/code/frontend/src/components/admin/OverviewTab.jsx')
-sftp.close()
-client.close()
-print("Frontend files uploaded successfully")
+from deploy_ssh_common import upload
+
+DEFAULT_FILES = [
+    'frontend/src/components/ui/ContentCard.tsx',
+    'frontend/src/pages/Blog.jsx',
+    'frontend/src/components/Newsroom.jsx',
+    'frontend/src/components/admin/OverviewTab.jsx',
+]
+
+if __name__ == '__main__':
+    files = sys.argv[1:] or DEFAULT_FILES
+    root = os.environ.get('DEPLOY_FRONTEND_ROOT')
+    if not root:
+        sys.exit('Missing required environment variable: DEPLOY_FRONTEND_ROOT')
+    upload(files, root)
+    print("Frontend files uploaded successfully")

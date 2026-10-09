@@ -1,4 +1,5 @@
 """Agent portal routes — authentication, dashboard, student management."""
+import secrets
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
@@ -88,7 +89,11 @@ async def agent_login(req: AgentLoginRequest):
 
 @router.post('/send-otp')
 async def agent_send_otp(req: AgentSendOTPRequest):
-    otp = ''.join([str(uuid.uuid4().int)[:6]])
+    from config import IS_DEV
+    if not IS_DEV:
+        # No SMS provider is wired for agents; never hand the code back in production.
+        raise HTTPException(503, 'OTP service not configured')
+    otp = f'{secrets.randbelow(10**6):06d}'
     await db.agent_otps.update_one(
         {'phone': req.phone},
         {'$set': {'otp': otp, 'expires_at': datetime.utcnow() + timedelta(minutes=5)}},

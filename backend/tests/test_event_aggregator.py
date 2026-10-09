@@ -26,8 +26,9 @@ async def test_fetch_events_from_url_no_scraper(mock_fallback):
 
 @pytest.mark.asyncio
 @patch('event_aggregator_agent.SCRAPEGRAPH_AVAILABLE', True)
+@patch('event_aggregator_agent._openai_available', new_callable=AsyncMock, return_value=True)
 @patch('event_aggregator_agent.asyncio.to_thread', new_callable=AsyncMock)
-async def test_fetch_events_from_url_with_scraper(mock_to_thread):
+async def test_fetch_events_from_url_with_scraper(mock_to_thread, _mock_openai):
     # Mock ScrapeGraphAI returning valid list
     mock_to_thread.return_value = [{"name": "Scraped Event", "date": "2026-10-15"}]
     events = await fetch_events_from_url("https://example.com", "united-kingdom")
@@ -35,12 +36,10 @@ async def test_fetch_events_from_url_with_scraper(mock_to_thread):
     assert events[0]["name"] == "Scraped Event"
 
 @pytest.mark.asyncio
-@patch('event_aggregator_agent.AIMarketplace.chat', new_callable=AsyncMock)
-async def test_fetch_events_for_country_fallback(mock_chat):
-    mock_chat.return_value = '[{"name": "Hallucinated Event", "category": "Tech"}]'
+async def test_fetch_events_for_country_fallback_never_fabricates():
+    # Scrape-failure fallback must not ask an LLM to invent events.
     marketplace = MagicMock()
-    marketplace.chat = mock_chat
-    
+    marketplace.get_active_provider = AsyncMock()
     events = await fetch_events_for_country_fallback(marketplace, "Japan")
-    assert len(events) == 1
-    assert events[0]["name"] == "Hallucinated Event"
+    assert events == []
+    marketplace.get_active_provider.assert_not_called()

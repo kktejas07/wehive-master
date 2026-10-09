@@ -29,7 +29,7 @@ if os.path.exists(backend_env):
 # Use env var if present and not empty, otherwise default to the preview URL
 base_url_env = os.environ.get('REACT_APP_BACKEND_URL', '')
 if not base_url_env:
-    BASE_URL = "https://premium-collab-6.preview.emergentagent.com"
+    BASE_URL = "http://localhost:8000"
 else:
     BASE_URL = base_url_env.rstrip('/')
 
@@ -210,7 +210,7 @@ class TestRegression:
     def test_admin_login_still_works(self):
         r = requests.post(f"{BASE_URL}/api/admin-auth/login", json={
             "email": "admin@wehive.co.in",
-            "password": "Wehive@Admin2026",
+            "password": os.environ.get("TEST_ADMIN_PASSWORD", ""),
         })
         assert r.status_code == 200, r.text
         body = r.json()

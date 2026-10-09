@@ -20,17 +20,13 @@ import { motion } from 'framer-motion';
 import { Globe, ArrowRight, Sparkles, Plane, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ContentCard, ContentCardGrid } from '../components/ui/ContentCard';
-import { trackPageView } from '../lib/analytics';
 import { updateSEO } from '../lib/seo';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   useEffect(() => {
-    // 1. Initialize Page Analytics
-    trackPageView('home_page', { section: 'hero_schengen_portal' });
-
-    // 2. Initialize Dynamic SEO
+    // Screen views are tracked centrally in App.js (trackScreen) — don't double-count here.
     updateSEO({
       title: 'We Hive — One Visa to Access 29 Schengen Countries | Study Abroad & Visas',
       description: 'Explore 29 Schengen countries on one visa. Compare top European universities, discover AI visa services, and step into wonder with We Hive.',

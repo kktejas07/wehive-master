@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Plane, Eye } from 'lucide-react';
 import { landmarkFor } from '../lib/landmarks';
-import { trackCountrySelect, trackEvent, EVENT_NAMES, EVENT_CATEGORIES } from '../lib/analytics';
+import { track, trackClick, EVENTS } from '../analytics';
 
 // Assets for Airplane Window & World background
-const PORTAL_BG = 'https://soft-zoom-63098134.figma.site/_assets/v11/4f01f62fc1cd17604f3668ae151c0cdeb0a61f93.png';
+const PORTAL_BG = '/images/schengen-portal-bg.webp';
 
 const SCHENGEN_COUNTRIES = [
   { id: 'at', name: 'AUSTRIA', img: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&w=1200&q=85' },
@@ -24,10 +24,10 @@ const SCHENGEN_COUNTRIES = [
   { id: 'it', name: 'ITALY', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1200&q=85' },
   { id: 'lv', name: 'LATVIA', img: 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=1200&q=85' },
   { id: 'li', name: 'LIECHTENSTEIN', img: 'https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?auto=format&fit=crop&w=1200&q=85' },
-  { id: 'lt', name: 'LITHUANIA', img: 'https://images.unsplash.com/photo-1569668623727-46e382d56a2a?auto=format&fit=crop&w=1200&q=85' },
-  { id: 'lu', name: 'LUXEMBOURG', img: 'https://images.unsplash.com/photo-1579600161204-acd0f5a72d47?auto=format&fit=crop&w=1200&q=85' },
+  { id: 'lt', name: 'LITHUANIA', img: 'https://images.unsplash.com/photo-1549891472-991e6bc75d1e?auto=format&fit=crop&w=1200&q=85' },
+  { id: 'lu', name: 'LUXEMBOURG', img: 'https://images.unsplash.com/photo-1588336899284-950764f07147?auto=format&fit=crop&w=1200&q=85' },
   { id: 'mt', name: 'MALTA', img: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1200&q=85' },
-  { id: 'nl', name: 'NETHERLANDS', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96c5017?auto=format&fit=crop&w=1200&q=85' },
+  { id: 'nl', name: 'NETHERLANDS', img: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?auto=format&fit=crop&w=1200&q=85' },
   { id: 'no', name: 'NORWAY', img: 'https://images.unsplash.com/photo-1502790671504-542ad42d5189?auto=format&fit=crop&w=1200&q=85' },
   { id: 'pl', name: 'POLAND', img: 'https://images.unsplash.com/photo-1519197924294-4ba991a11128?auto=format&fit=crop&w=1200&q=85' },
   { id: 'pt', name: 'PORTUGAL', img: 'https://images.unsplash.com/photo-1518733057094-95b53143d2a7?auto=format&fit=crop&w=1200&q=85' },
@@ -115,12 +115,8 @@ export default function SchengenCarousel() {
     setActive(prev => {
       const nextIdx = (prev + dir + N) % N;
       const targetCountry = SCHENGEN_COUNTRIES[nextIdx];
-      trackCountrySelect(targetCountry.id, targetCountry.name, nextIdx, N, 'carousel_arrow');
-      trackEvent(
-        EVENT_NAMES.CAROUSEL_NAV,
-        { direction: dir > 0 ? 'next' : 'prev', target_country: targetCountry.name },
-        EVENT_CATEGORIES.CAROUSEL
-      );
+      trackClick('schengen_carousel_arrow', { direction: dir > 0 ? 'next' : 'prev', target_country: targetCountry.name });
+      track(EVENTS.COUNTRY_SELECT, { country_id: targetCountry.id, country_name: targetCountry.name, active_index: nextIdx, source_component: 'carousel_arrow' });
       return nextIdx;
     });
   };
@@ -128,7 +124,7 @@ export default function SchengenCarousel() {
   const handleSelectCountry = (idx) => {
     setActive(idx);
     const targetCountry = SCHENGEN_COUNTRIES[idx];
-    trackCountrySelect(targetCountry.id, targetCountry.name, idx, N, 'carousel_card_click');
+    track(EVENTS.COUNTRY_SELECT, { country_id: targetCountry.id, country_name: targetCountry.name, active_index: idx, source_component: 'carousel_card_click' });
   };
 
   // Card transform math tuned for full section view

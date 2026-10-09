@@ -56,7 +56,7 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
     {
       target: '.tour-step-upload',
       content: 'Upload your missing documents here. We use AI to instantly scan and verify them.',
-      disableBeacon: true,
+      skipBeacon: true,
     },
     {
       target: '.tour-step-categories',
@@ -112,8 +112,10 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
         body: ocrFormData
       });
       const data = await response.json();
-      if (data.extractedText) {
+      if (response.ok && data.extractedText) {
         setOcrResult(data.extractedText);
+      } else if (data.error) {
+        console.warn("OCR unavailable:", data.error);
       }
     } catch (e) {
       console.error("OCR Failed", e);
@@ -228,11 +230,12 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
         steps={tourSteps}
         run={runTour}
         continuous
-        showSkipButton
-        styles={{
-          options: { primaryColor: '#0f172a', zIndex: 1000 }
+        options={{
+          primaryColor: '#0f172a',
+          zIndex: 1000,
+          buttons: ['back', 'close', 'primary', 'skip'],
         }}
-        callback={(data) => {
+        onEvent={(data) => {
           if (data.status === "finished" || data.status === "skipped") {
             setRunTour(false);
           }

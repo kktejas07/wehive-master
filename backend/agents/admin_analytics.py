@@ -40,7 +40,7 @@ async def get_revenue_summary(db, days: int = 30) -> dict:
     plan_breakdown = {'lite': 0, 'standard': 0, 'concierge': 0}
     count = 0
     async for p in cursor:
-        amt = p.get('amount_usd', 0)
+        amt = p.get('amount_inr', p.get('amount_usd', 0))
         total_revenue += amt
         pid = p.get('plan_id', '')
         if pid in plan_breakdown:

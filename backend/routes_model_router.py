@@ -5,6 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
 
 router = APIRouter(prefix="/models", tags=["models"])
@@ -53,7 +54,7 @@ async def get_model_profile(profile_id: str):
 
 
 @router.post("/chat")
-async def chat_with_profile(req: ChatWithProfileRequest):
+async def chat_with_profile(req: ChatWithProfileRequest, user=Depends(get_current_user)):
     from model_router import chat_with_profile as cwp
     result = await cwp(req.profile_id, req.messages, req.max_tokens, req.temperature)
     if "error" in result:
@@ -97,7 +98,7 @@ async def byok_delete_key(provider_id: str, user=Depends(get_current_user)):
 
 
 @router.post("/mcp/handle")
-async def mcp_handle(request: dict):
+async def mcp_handle(request: dict, _admin=Depends(get_current_admin_flex)):
     """Handle a JSON-RPC 2.0 MCP request."""
     from mcp.runtime import handle_mcp_request
 

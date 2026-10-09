@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2, CheckCircle, XCircle, Globe, ShieldAlert, Play } from 'lucide-react';
-import { adminClient } from '../../lib/admin';
+import { apiClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import { API } from '../../context/AuthContext';
@@ -18,9 +18,14 @@ export default function GlobalEventsTab() {
 
   const fetchEvents = () => {
     setLoading(true);
-    adminClient.get(`/events${statusFilter === 'pending' ? '/pending' : `?status=${statusFilter}`}`)
+    apiClient().get(statusFilter === 'pending' ? '/events/pending' : '/events', {
+      params: statusFilter === 'pending' ? undefined : { status: statusFilter, upcoming_only: false },
+    })
       .then(r => setEvents(r.data.items || r.data))
-      .catch(e => console.error(e))
+      .catch(() => {
+        setEvents([]);
+        toast({ title: 'Failed to load events', variant: 'destructive' });
+      })
       .finally(() => setLoading(false));
   };
 
@@ -30,7 +35,7 @@ export default function GlobalEventsTab() {
 
   const handleAction = async (eventId, action) => {
     try {
-      await adminClient.post(`/events/${eventId}/action`, { action });
+      await apiClient().post(`/events/${eventId}/action`, { action });
       toast({ title: `Event ${action}d successfully` });
       fetchEvents();
     } catch (e) {
@@ -106,7 +111,7 @@ export default function GlobalEventsTab() {
             if (!scrapeUrl) return;
             setScraping(true);
             try {
-              const res = await adminClient.post('/events/scrape/trigger', { 
+              const res = await apiClient().post('/events/scrape/trigger', { 
                 url: scrapeUrl, 
                 country_id: scrapeCountry,
                 platform: scrapePlatform || undefined
@@ -168,7 +173,7 @@ export default function GlobalEventsTab() {
                       )}
                     </div>
                     <div className="text-xs text-slate-400 mt-1 capitalize">
-                      {evt.date} • {evt.country_id.replace('-', ' ')} • {evt.category}
+                      {evt.date} • {(evt.country_id || '').replace('-', ' ')} • {evt.category}
                     </div>
                   </div>
                 </div>

@@ -6,7 +6,12 @@ ADMIN_EMAILS = {
     if e.strip()
 }
 
+APP_ENV = os.environ.get('APP_ENV', 'production').lower()
+IS_DEV = APP_ENV in ('development', 'dev', 'test', 'local')
+
 JWT_SECRET = os.environ.get('JWT_SECRET', 'change_me')
+if JWT_SECRET in ('change_me', '') and not IS_DEV:
+    raise RuntimeError('FATAL: JWT_SECRET is unset or insecure; set a strong JWT_SECRET outside development/test.')
 JWT_ALG = os.environ.get('JWT_ALG', 'HS256')
 JWT_EXPIRES_HOURS = int(os.environ.get('JWT_EXPIRES_HOURS', '720'))
 

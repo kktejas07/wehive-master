@@ -171,7 +171,7 @@ async def _daily_aggregator_loop():
         if not first_run:
             next_dt = datetime.utcnow() + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)
             _next_daily_run = next_dt.isoformat()
-            logger.info("Aggregator sleeping for %d seconds (%0.1f hours). Next run: %s UTC", 
+            logger.info("Aggregator sleeping for %d seconds (%0.1f hours). Next run: %s UTC",
                         DAILY_AGGREGATOR_INTERVAL_SECONDS, DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600, _next_daily_run)
             await asyncio.sleep(DAILY_AGGREGATOR_INTERVAL_SECONDS)
         first_run = False
@@ -182,60 +182,18 @@ async def _daily_aggregator_loop():
             _next_daily_run = (start_dt + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)).isoformat()
             results = {}
 
-            # 0. Refresh dates and approved status for global events, news, and blogs
+            # 0. Mark past events as past. Never re-date or auto-approve items here:
+            #    approval is admin-driven unless AGGREGATOR_AUTO_APPROVE is set
+            #    (enforced inside each agent's run_auto_approval).
             try:
-                from db import global_events_col, global_news_col, global_blogs_col
-                today_dt = datetime.utcnow()
-                today_str = today_dt.strftime("%Y-%m-%d")
-
-                async for doc in global_events_col.find():
-                    doc_id = doc["_id"]
-                    evt_date = doc.get("date")
-                    needs_update = False
-                    update_fields = {}
-                    if not evt_date or not isinstance(evt_date, str) or len(evt_date) < 10 or evt_date < today_str:
-                        offset_days = (hash(str(doc_id)) % 90) + 7
-                        future_date = (today_dt + timedelta(days=offset_days)).strftime("%Y-%m-%d")
-                        update_fields["date"] = future_date
-                        needs_update = True
-                    if doc.get("status") != "approved":
-                        update_fields["status"] = "approved"
-                        needs_update = True
-                    if needs_update:
-                        update_fields["created_at"] = today_dt
-                        await global_events_col.update_one({"_id": doc_id}, {"$set": update_fields})
-
-                async for doc in global_news_col.find():
-                    doc_id = doc["_id"]
-                    n_date = doc.get("date")
-                    needs_update = False
-                    update_fields = {}
-                    if not n_date or not isinstance(n_date, str) or n_date < today_str:
-                        update_fields["date"] = today_str
-                        needs_update = True
-                    if doc.get("status") != "approved":
-                        update_fields["status"] = "approved"
-                        needs_update = True
-                    if needs_update:
-                        update_fields["created_at"] = today_dt
-                        await global_news_col.update_one({"_id": doc_id}, {"$set": update_fields})
-
-                async for doc in global_blogs_col.find():
-                    doc_id = doc["_id"]
-                    b_date = doc.get("date")
-                    needs_update = False
-                    update_fields = {}
-                    if not b_date or not isinstance(b_date, str) or b_date < today_str:
-                        update_fields["date"] = today_str
-                        needs_update = True
-                    if doc.get("status") != "approved":
-                        update_fields["status"] = "approved"
-                        needs_update = True
-                    if needs_update:
-                        update_fields["created_at"] = today_dt
-                        await global_blogs_col.update_one({"_id": doc_id}, {"$set": update_fields})
+                from db import global_events_col
+                today_str = datetime.utcnow().strftime("%Y-%m-%d")
+                await global_events_col.update_many(
+                    {"date": {"$type": "string", "$lt": today_str}, "is_past": {"$ne": True}},
+                    {"$set": {"is_past": True}},
+                )
             except Exception as ref_e:
-                logger.warning("Aggregator date refresh failed: %s", ref_e)
+                logger.warning("Aggregator past-event marking failed: %s", ref_e)
 
             async def _run_one(name: str, agg_fn, approve_fn):
                 try:
@@ -279,7 +237,6 @@ async def _daily_aggregator_loop():
             logger.exception("Critical error in aggregator loop: %s", loop_e)
 
 
-
 def start_scheduler():
     """Start the background scheduler (called from server.py on startup)."""
     global _scheduler_task, _daily_task
@@ -288,6 +245,5 @@ def start_scheduler():
         logger.info("Agent scheduler started (interval=%ds)", SCHEDULE_INTERVAL)
     if _daily_task is None or _daily_task.done():
         _daily_task = asyncio.create_task(_daily_aggregator_loop())
-        logger.info("Aggregator agent scheduler started (interval=%ds / %0.1fh)", 
+        logger.info("Aggregator agent scheduler started (interval=%ds / %0.1fh)",
                     DAILY_AGGREGATOR_INTERVAL_SECONDS, DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600)
-

@@ -53,8 +53,8 @@ export function AdminAuthProvider({ children }) {
     return data;
   }, []);
 
-  const signup = useCallback(async ({ email, password, name }) => {
-    const { data } = await axios.post(`${ADMIN_API}/signup`, { email, password, name });
+  const signup = useCallback(async ({ email, password, name, bootstrapToken }) => {
+    const { data } = await axios.post(`${ADMIN_API}/signup`, { email, password, name, bootstrap_token: bootstrapToken || undefined });
     localStorage.setItem(TOKEN_KEY, data.access_token);
     setToken(data.access_token);
     setAdmin(data.user);

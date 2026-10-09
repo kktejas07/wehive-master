@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, CheckCircle2, Award, ClipboardCheck, Users, HelpCircle, FileText, Sparkles, Send, ShieldCheck, GraduationCap } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
+import { useToast } from '../hooks/use-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -15,6 +16,7 @@ const COUNTRIES = [
 ];
 
 export default function VisaAssessment() {
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [pathway, setPathway] = useState(''); // 'pr' or 'student'
   
@@ -131,9 +133,7 @@ Phone: ${phone}`;
       });
       setSubmitted(true);
     } catch (err) {
-      console.error('Lead submission failed', err);
-      // Fallback to simulation to preserve user experience
-      setSubmitted(true);
+      toast({ title: 'Submission failed', description: typeof err?.response?.data?.detail === 'string' ? err.response.data.detail : 'Please check your details and try again.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }

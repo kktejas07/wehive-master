@@ -432,7 +432,7 @@ export default function TrackingTab() {
     setOcrLoading(true);
     setOcrError(null);
     try {
-      const response = await fetch("/api/ocr", {
+      const response = await fetch("/api/ocr-base64", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -442,7 +442,8 @@ export default function TrackingTab() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to process OCR request on server.");
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error || "Failed to process OCR request on server.");
       }
 
       const data = await response.json();

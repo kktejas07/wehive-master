@@ -23,16 +23,25 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from auth_utils import get_current_user, get_current_user_optional
+from rate_limit import RateLimit
 
 router = APIRouter(prefix="/agentic", tags=["agentic-ai"])
 logger = logging.getLogger("wehive.agentic")
+_hive_limiter = RateLimit(max_calls=30, window_seconds=60)
 
 STARK_ENABLED = os.environ.get("STARK_ENABLED", "1") == "1"
 HIVE_MODEL = os.environ.get("HIVE_MODEL", "")
 
 
+def _user_id(user) -> str:
+    """Mongo user docs use `_id`; tolerate `id`, objects, and anonymous callers."""
+    if isinstance(user, dict):
+        return str(user.get("id") or user.get("_id") or "system")
+    return str(getattr(user, "id", None) or "system")
+
+
 class HiveAskRequest(BaseModel):
-    question: str = Field(..., min_length=1, max_length=2000)
+    question: str = Field(..., min_length=1, max_length=8000)
     use_stark: bool = Field(True, description="Auto-delegate to Stark for external data")
     max_stark_sources: int = Field(3, ge=1, le=6)
     session_id: Optional[str] = None
@@ -107,6 +116,7 @@ def _should_delegate_to_stark(question: str, intents: list[dict]) -> bool:
 async def hive_ask(
     req: HiveAskRequest,
     user=Depends(get_current_user_optional),
+    _rl=Depends(_hive_limiter),
 ):
     """Hive answers questions. Auto-delegates external research to Stark when needed."""
 
@@ -143,11 +153,12 @@ async def hive_ask(
             )
 
         response = await marketplace.chat(
-            user_id=user["id"] if isinstance(user, dict) else getattr(user, "id", "system"),
+            user_id=_user_id(user),
             system_prompt=system_prompt,
             user_prompt=req.question,
         )
-        answer = response if isinstance(response, str) else str(response)
+        answer = response[0] if isinstance(response, tuple) else response
+        answer = answer if isinstance(answer, str) else str(answer)
 
         return {
             "ok": True,
@@ -158,12 +169,13 @@ async def hive_ask(
             "model": HIVE_MODEL or "default",
         }
 
-    except Exception:
+    except Exception as e:
+        logger.warning("Hive marketplace chat failed, using local fallback: %s", e)
         from local_llm import local_chat_with_info
-        response = await local_chat_with_info(req.question, "")
+        answer, _info = await local_chat_with_info(req.question, "")
         return {
             "ok": True,
-            "answer": response.get("content", "") if isinstance(response, dict) else str(response),
+            "answer": answer or "",
             "intents_detected": intents,
             "stark_delegated": delegate_to_stark,
             "fallback": "local_llm",
@@ -171,7 +183,7 @@ async def hive_ask(
 
 
 @router.post("/stark/search")
-async def stark_search(req: StarkSearchRequest):
+async def stark_search(req: StarkSearchRequest, user=Depends(get_current_user)):
     """Direct call to Stark for external open-source data search."""
 
     if not STARK_ENABLED:
@@ -189,7 +201,7 @@ async def stark_search(req: StarkSearchRequest):
 
 
 @router.post("/stark/research")
-async def stark_research_endpoint(req: StarkSearchRequest):
+async def stark_research_endpoint(req: StarkSearchRequest, user=Depends(get_current_user)):
     """Deep research: enriches search with Wikipedia summaries and Knowledge Graph."""
 
     if not STARK_ENABLED:
@@ -210,7 +222,7 @@ async def stark_research_endpoint(req: StarkSearchRequest):
 
 
 @router.get("/stark/context")
-async def get_stark_context(q: str):
+async def get_stark_context(q: str, user=Depends(get_current_user)):
     """Get Stark-generated context suitable for RAG injection."""
 
     if not STARK_ENABLED:
@@ -258,7 +270,7 @@ async def run_workflow(
                     f"Provide a detailed analysis covering key facts, considerations, and actionable insights."
                 )
                 resp = await marketplace.chat(
-                    user_id=user["id"] if isinstance(user, dict) else getattr(user, "id", "system"),
+                    user_id=_user_id(user),
                     system_prompt="You are an analytical AI agent. Be thorough and structured.",
                     user_prompt=analysis_prompt,
                 )
@@ -282,7 +294,7 @@ async def run_workflow(
                     f"Provide a concise, helpful final answer to the user."
                 )
                 resp = await marketplace.chat(
-                    user_id=user["id"] if isinstance(user, dict) else getattr(user, "id", "system"),
+                    user_id=_user_id(user),
                     system_prompt="You are Hive, a helpful visa and travel assistant. Be concise.",
                     user_prompt=answer_prompt,
                 )

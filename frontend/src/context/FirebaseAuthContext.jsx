@@ -3,8 +3,8 @@ import { auth, sendPhoneOtp, verifyPhoneOtp, getRecaptchaVerifier } from '../lib
 import { firebaseAuth, getFirebaseIdToken } from '../lib/firebase-auth';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
+import { API } from '../lib/apiBase';
 
-const API = `${(process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001').replace(/\/api\/?$/i, '')}/api`;
 const FIREBASE_TOKEN_KEY = 'wehive_firebase_token';
 
 const FirebaseAuthCtx = createContext(null);
@@ -96,11 +96,19 @@ export function FirebaseAuthProvider({ children }) {
     return { sent: true, masked: phoneNumber.slice(0, 3) + '****' + phoneNumber.slice(-2) };
   }, []);
 
-  const verifyPhoneOtpCode = useCallback(async (code) => {
+  const verifyPhoneOtpCode = useCallback(async (code, { name, referralCode } = {}) => {
     if (!phoneConfirmation) throw new Error('No OTP sent');
     const { user, idToken } = await verifyPhoneOtp(phoneConfirmation, code);
     setPhoneConfirmation(null);
-    const res = await axios.post(`${API}/auth/firebase-sync`, { id_token: idToken });
+    // Phone-only Firebase users have no email, which /auth/firebase-sync rejects;
+    // /auth/firebase-phone-sync keys the account on the verified phone number.
+    const res = user?.email
+      ? await axios.post(`${API}/auth/firebase-sync`, { id_token: idToken })
+      : await axios.post(`${API}/auth/firebase-phone-sync`, {
+        id_token: idToken,
+        name: name || user?.displayName || undefined,
+        referral_code: referralCode || undefined,
+      });
     const { access_token, user: backendUser } = res.data;
     setAuthToken(access_token);
     return { access_token, user: backendUser };

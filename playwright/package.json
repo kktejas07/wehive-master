@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
-    "ws1": "playwright test tests/ws1-route-discovery.spec.ts",
-    "report": "node scripts/assemble-report.js"
+    "ws1": "playwright test tests/ws1-route-discovery.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",

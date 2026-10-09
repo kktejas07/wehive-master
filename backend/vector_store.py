@@ -160,10 +160,12 @@ def upsert_documents(
     """Upsert documents into a collection. Returns the number of items written."""
     if not ids:
         return 0
-    if metadatas is None:
-        metadatas = [{} for _ in ids]
-    if len(documents) != len(ids) or len(embeddings) != len(ids) or len(metadatas) != len(ids):
+    if len(documents) != len(ids) or len(embeddings) != len(ids) or (metadatas is not None and len(metadatas) != len(ids)):
         raise ValueError("ids, documents, embeddings, metadatas must have equal length")
+    # chromadb 0.5.x rejects empty metadata dicts: omit them entirely, or give
+    # empty entries a minimal non-empty value when only some are populated.
+    if metadatas is not None:
+        metadatas = [m or {"collection": collection} for m in metadatas] if any(metadatas) else None
     coll = get_collection(collection)
     coll.upsert(ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas)
     return len(ids)

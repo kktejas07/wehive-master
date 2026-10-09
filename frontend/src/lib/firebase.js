@@ -4,8 +4,8 @@ import {
   signInWithPhoneNumber,
   RecaptchaVerifier,
 } from 'firebase/auth';
+import { API } from './apiBase';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 
 let app = null;
 let auth = null;
@@ -19,7 +19,7 @@ async function loadFirebaseConfig() {
 
   _configLoading = (async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/public/firebase-config`);
+      const res = await fetch(`${API}/public/firebase-config`);
       const data = await res.json();
       if (data.configured && data.config.apiKey) {
         _firebaseConfig = data.config;

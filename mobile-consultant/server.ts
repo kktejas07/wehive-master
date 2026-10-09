@@ -86,9 +86,9 @@ Your mission:
       const role = m.role === "user" ? "User" : "Hivy";
       const text = (m.parts || []).map((p: any) => p.text).join("");
       return `${role}: ${text}`;
-    }).join("\\n\\n");
+    }).join("\n\n");
 
-    const prompt = `${systemInstruction}\\n\\nHere is the conversation history:\\n\\n${conversation}\\n\\nPlease provide the next response as Hivy.`;
+    const prompt = `${systemInstruction}\n\nHere is the conversation history:\n\n${conversation}\n\nPlease provide the next response as Hivy.`;
 
     const answer = await callHiveBackend(prompt, false);
     res.json({ text: answer });
@@ -135,7 +135,7 @@ Respond STRICTLY with a valid JSON object matching this structure:
 }
 Do not include Markdown backticks or any extra text.`;
 
-    const fullPrompt = `${systemInstruction}\\n\\n${prompt}\\n\\n${requiredFormat}`;
+    const fullPrompt = `${systemInstruction}\n\n${prompt}\n\n${requiredFormat}`;
     const answer = await callHiveBackend(fullPrompt, true);
     
     let parsedResponse;
@@ -155,65 +155,17 @@ Do not include Markdown backticks or any extra text.`;
 });
 
 // 3. Document OCR Route - Uses WeHive backend to extract key info from scanned images/documents
-app.post("/api/ocr-base64", async (req, res) => {
-  try {
-    const { image, mimeType, docType } = req.body;
+// OCR is NOT implemented: the Hive backend endpoint used by this server
+// (/api/agentic/hive/ask) is text-only and never receives the image, so any
+// "extracted" fields would be fabricated. Return an explicit error instead.
+// Wire these routes to a vision-capable model before re-enabling them.
+const OCR_UNAVAILABLE = {
+  error: "OCR not available: document text extraction is not configured on this server. Please enter the details manually.",
+  code: "OCR_NOT_AVAILABLE",
+};
 
-    if (!image) {
-      res.status(400).json({ error: "Missing required parameter 'image' (base64 or Data URL)." });
-      return;
-    }
-
-    let base64Data = image;
-    if (image.startsWith("data:")) {
-      const match = image.match(/^data:([^;]+);base64,(.*)$/);
-      if (match) {
-        base64Data = match[2];
-      }
-    }
-
-    const textPart = `Analyze this scanned document image. Identify the document type (the user thinks it is a "${docType || "document"}").
-Perform OCR to extract the following information from the document:
-1. Document Type (classify as one of: 'passport', 'visa', 'transcript', 'offer_letter')
-2. Full Name of the holder or student
-3. Document/Reference Number (such as Passport Number, Visa Number, application/enrollment ID)
-4. Expiration Date in YYYY-MM-DD format (if present)
-5. Issuing Authority or organization (e.g. "German Embassy", "Government of India", "TUM", "Harvard")
-
-Provide a confidence score from 0 to 100 on the extraction accuracy.
-
-Note: Since we are routing through text-only fallback currently, assume the image data cannot be fully parsed in this basic prompt.
-For now, return a placeholder JSON indicating success.
-
-Respond STRICTLY with this JSON format:
-{
-  "documentType": "passport",
-  "name": "Jane Doe",
-  "documentNumber": "A1234567",
-  "expiryDate": "2030-01-01",
-  "issuedBy": "Government",
-  "confidenceScore": 85
-}`;
-
-    const answer = await callHiveBackend(textPart, false);
-    
-    let parsedResponse;
-    try {
-      const cleanedAnswer = answer.replace(/```json/g, "").replace(/```/g, "").trim();
-      parsedResponse = JSON.parse(cleanedAnswer);
-    } catch (e) {
-      console.error("Failed to parse JSON from Hive OCR agent:", answer);
-      // Fallback
-      parsedResponse = {
-        documentType: "unknown", name: "", documentNumber: "", expiryDate: "", issuedBy: "", confidenceScore: 0
-      };
-    }
-
-    res.json(parsedResponse);
-  } catch (error: any) {
-    console.error("Error in /api/ocr-base64:", error);
-    res.status(500).json({ error: error.message || "Failed to parse document via AI OCR." });
-  }
+app.post("/api/ocr-base64", (_req, res) => {
+  res.status(501).json(OCR_UNAVAILABLE);
 });
 
 // 4. Recommended Next Steps Route - AI suggested tasks based on progress and target
@@ -299,27 +251,13 @@ app.post("/api/documents", upload.single("file"), async (req, res) => {
   }
 });
 
-// 4. OCR Extraction Route
-app.post("/api/ocr", upload.single("file"), async (req, res) => {
-  try {
-    const { documentName, documentType } = req.body;
-    const file = req.file;
-    
-    if (!file) {
-      return res.status(400).json({ error: "No file provided for OCR." });
-    }
-
-    const prompt = `Perform OCR on this uploaded document. The user claims it is a "${documentType}" named "${documentName}". 
-Extract the raw text as it appears. Keep it brief.
-(Note: Since we are routing through text-only fallback currently, just return a success confirmation that the document was uploaded and queued for processing.)`;
-    
-    const answer = await callHiveBackend(prompt, false);
-
-    res.json({ extractedText: answer, success: true });
-  } catch (error: any) {
-    console.error("Error in /api/ocr:", error);
-    res.status(500).json({ error: error.message || "Failed to extract text." });
+// 6. OCR Extraction Route (multipart upload) -- see OCR_UNAVAILABLE above.
+app.post("/api/ocr", upload.single("file"), (req, res) => {
+  if (req.file) {
+    // Do not keep files we are not going to process.
+    fs.unlink(req.file.path, () => {});
   }
+  res.status(501).json(OCR_UNAVAILABLE);
 });
 
 // ----------------------------------------------------

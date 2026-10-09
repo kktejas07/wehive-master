@@ -7,7 +7,7 @@ If a scrape fails, it falls back to the AI Marketplace/Agent framework.
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import List, Dict, Any
 import json
 import os
@@ -16,12 +16,6 @@ import httpx
 from db import db, global_events_col
 from ai_marketplace import AIMarketplace
 from vector_store import upsert_documents
-
-try:
-    import nest_asyncio
-    nest_asyncio.apply()
-except Exception:
-    pass
 
 try:
     from scrapegraphai.graphs import SmartScraperGraph
@@ -34,7 +28,7 @@ logger = logging.getLogger("wehive.event_aggregator")
 
 # Mock list of target countries for the MVP
 TARGET_COUNTRIES = [
-    "India", "USA", "United Kingdom", "Canada", "Australia", 
+    "India", "USA", "United Kingdom", "Canada", "Australia",
     "Germany", "France", "Japan", "Brazil", "UAE"
 ]
 
@@ -71,20 +65,20 @@ def _route_social_media_url(url: str, platform: str = None) -> str:
     """Rewrite social media URLs to use public proxy viewers to avoid login walls."""
     if not url:
         return url
-        
+
     url_lower = url.lower()
-    
+
     # Force platform routing if provided, otherwise infer from URL
     if platform == "twitter" or "x.com" in url_lower or "twitter.com" in url_lower:
         # Nitter proxy
         username = url.rstrip('/').split('/')[-1]
         return f"https://nitter.net/{username}"
-        
+
     if platform == "instagram" or "instagram.com" in url_lower:
         # Picuki proxy
         username = url.rstrip('/').split('/')[-1]
         return f"https://www.picuki.com/profile/{username}"
-        
+
     return url
 
 async def _openai_available() -> bool:
@@ -106,11 +100,11 @@ async def _openai_available() -> bool:
 async def fetch_events_from_url(url: str, country: str, platform: str = None) -> List[Dict[str, Any]]:
     """Use ScrapeGraphAI to extract events from a specific URL or social media handle."""
     if not SCRAPEGRAPH_AVAILABLE:
-        logger.warning("ScrapeGraphAI is not installed. Falling back to LLM hallucination.")
+        logger.warning("ScrapeGraphAI is not installed. Skipping (no fabricated fallback).")
         return await fetch_events_for_country_fallback(AIMarketplace(), country)
 
     if not await _openai_available():
-        logger.warning("OpenAI unavailable (quota/rate-limit). Skipping ScrapeGraphAI, using LLM fallback.")
+        logger.warning("OpenAI unavailable (quota/rate-limit). Skipping ScrapeGraphAI.")
         return await fetch_events_for_country_fallback(AIMarketplace(), country)
 
     # Route URL through proxy if it's social media
@@ -146,9 +140,9 @@ async def fetch_events_from_url(url: str, country: str, platform: str = None) ->
                 config=graph_config
             )
             return smart_scraper_graph.run()
-            
+
         result = await asyncio.to_thread(run_scraper)
-        
+
         # Result should be a dict if ScrapeGraphAI correctly parsed it.
         # Ensure it conforms to our list.
         if isinstance(result, list):
@@ -165,61 +159,18 @@ async def fetch_events_from_url(url: str, country: str, platform: str = None) ->
         logger.error(f"ScrapeGraphAI failed for {url}: {e}")
         return await fetch_events_for_country_fallback(AIMarketplace(), country)
 
-def _generate_static_event_fallback(country: str) -> List[Dict[str, Any]]:
-    today_dt = datetime.utcnow()
-    next_month_dt = today_dt + timedelta(days=30)
-    return [
-        {
-            "name": f"{country} Global Tech & Innovation Summit",
-            "date": next_month_dt.strftime("%Y-%m-%d"),
-            "category": "Tech",
-            "image_url": "https://images.unsplash.com/photo-1506157786151-b8491531f063",
-            "is_high_risk": False
-        },
-        {
-            "name": f"{country} Higher Education & International Expo",
-            "date": (today_dt + timedelta(days=45)).strftime("%Y-%m-%d"),
-            "category": "Culture",
-            "image_url": "https://images.unsplash.com/photo-1511578314322-379afb476865",
-            "is_high_risk": False
-        }
-    ]
-
 async def fetch_events_for_country_fallback(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
-    """Fallback LLM generation if scraping fails or isn't triggered via URL."""
-    system_prompt = "You are an expert global event aggregator. Always respond with valid JSON only."
-    today_str = datetime.utcnow().strftime("%Y-%m-%d")
-    user_prompt = f"""
-    Please list 3 major upcoming events, festivals, or conferences in {country} scheduled AFTER today's date ({today_str}).
-    All event dates MUST be future dates formatted strictly as YYYY-MM-DD (e.g. between {today_str} and 2027-12-31).
-    Format the output strictly as a JSON array of objects with the following keys:
-    - "name": string
-    - "date": string (YYYY-MM-DD format, must be >= {today_str})
-    - "category": string (e.g., "Music", "Tech", "Culture")
-    - "image_url": string (Use a generic placeholder like "https://images.unsplash.com/photo-1506157786151-b8491531f063")
-    - "is_high_risk": boolean (True if it's a massive gathering >50k people or politically sensitive, False otherwise)
-    
-    Return ONLY the JSON array.
-    """
-    
-    provider, pid = await marketplace.get_active_provider("system")
-    if not provider:
-        logger.warning(f"No active LLM provider for events. Generating dynamic fallback for {country}.")
-        return _generate_static_event_fallback(country)
-    
-    response = await provider.chat(
-        system_prompt=system_prompt,
-        user_prompt=user_prompt,
-        max_tokens=2000
-    )
-    
-    return _parse_agent_response(response or "")
+    """Scrape-failure fallback: returns nothing rather than LLM-fabricated events."""
+    # Never let an LLM invent events: without a real scraped source, return nothing.
+    logger.warning(f"No scraped source for events in {country}; skipping (no LLM-generated events).")
+    return []
+
 
 async def run_aggregator():
     """Main task that runs every 24 hours."""
     logger.info("Starting Global Event Aggregator automated scraping loop...")
     marketplace = AIMarketplace()
-    
+
     total_added = 0
     total_skipped = 0
     vector_ids = []
@@ -242,9 +193,12 @@ async def run_aggregator():
                 category = evt.get("category", "General")
                 today_str = datetime.utcnow().strftime("%Y-%m-%d")
                 evt_date = evt.get("date")
-                if not evt_date or not isinstance(evt_date, str) or len(evt_date) < 10 or evt_date < today_str:
-                    evt_date = (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%d")
-                
+                if not isinstance(evt_date, str) or len(evt_date) < 10:
+                    evt_date = None  # unknown date: keep it unknown rather than invent one
+                elif evt_date[:10] < today_str:
+                    total_skipped += 1  # past event: drop, never re-date
+                    continue
+
                 existing = await global_events_col.find_one({
                     "name": name,
                     "country_id": country_id,
@@ -253,7 +207,7 @@ async def run_aggregator():
                 if existing:
                     total_skipped += 1
                     continue
-                
+
                 doc = {
                     "name": name,
                     "country_id": country_id,
@@ -266,7 +220,7 @@ async def run_aggregator():
                 }
                 res = await global_events_col.insert_one(doc)
                 total_added += 1
-                
+
                 doc_id = str(res.inserted_id)
                 vector_ids.append(doc_id)
                 vector_docs.append(f"{name} {category} {evt_date}")
@@ -277,7 +231,7 @@ async def run_aggregator():
                     "is_high_risk": evt.get("is_high_risk", False)
                 })
             await asyncio.sleep(2)
-            
+
     # 2. Fallback LLM generation for countries without seeds
     for country in TARGET_COUNTRIES:
         country_id = country.lower().replace(" ", "-")
@@ -288,7 +242,7 @@ async def run_aggregator():
             except Exception as e:
                 logger.error(f"LLM fallback failed for {country}: {e}")
                 continue
-            
+
             for evt in events:
                 name = evt.get("name") or evt.get("title") or evt.get("event_name") or evt.get("event")
                 if not name:
@@ -296,9 +250,12 @@ async def run_aggregator():
                 category = evt.get("category", "General")
                 today_str = datetime.utcnow().strftime("%Y-%m-%d")
                 evt_date = evt.get("date")
-                if not evt_date or not isinstance(evt_date, str) or len(evt_date) < 10 or evt_date < today_str:
-                    evt_date = (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%d")
-                
+                if not isinstance(evt_date, str) or len(evt_date) < 10:
+                    evt_date = None  # unknown date: keep it unknown rather than invent one
+                elif evt_date[:10] < today_str:
+                    total_skipped += 1  # past event: drop, never re-date
+                    continue
+
                 existing = await global_events_col.find_one({
                     "name": name,
                     "country_id": country_id,
@@ -307,7 +264,7 @@ async def run_aggregator():
                 if existing:
                     total_skipped += 1
                     continue
-                
+
                 doc = {
                     "name": name,
                     "country_id": country_id,
@@ -320,7 +277,7 @@ async def run_aggregator():
                 }
                 res = await global_events_col.insert_one(doc)
                 total_added += 1
-                
+
                 doc_id = str(res.inserted_id)
                 vector_ids.append(doc_id)
                 vector_docs.append(f"{name} {category} {evt_date}")
@@ -330,9 +287,9 @@ async def run_aggregator():
                     "category": category,
                     "is_high_risk": evt.get("is_high_risk", False)
                 })
-            
+
             await asyncio.sleep(2)
-        
+
     if vector_ids:
         try:
             from ollama_embeddings import embed_query
@@ -344,23 +301,27 @@ async def run_aggregator():
             logger.info(f"Ingested {len(vector_ids)} events into Vector DB.")
         except Exception as e:
             logger.error(f"Failed to ingest events into vector DB: {e}")
-            
+
     logger.info(f"Aggregator finished. Inserted {total_added} pending events, skipped {total_skipped} duplicates.")
     await run_auto_approval()
 
 async def run_auto_approval():
     """Fallback task that runs periodically to auto-approve safe events."""
+    if os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() not in ("1", "true", "yes"):
+        logger.info("AGGREGATOR_AUTO_APPROVE disabled; leaving pending events for admin review.")
+        return
+
     logger.info("Running auto-approval check...")
-    
+
     query = {
         "status": "pending",
         "is_high_risk": False,
     }
-    
+
     update = {
         "$set": {"status": "approved"}
     }
-    
+
     result = await global_events_col.update_many(query, update)
     if result.modified_count > 0:
         logger.info(f"Auto-approved {result.modified_count} safe events.")
@@ -369,9 +330,9 @@ async def run_auto_approval():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
     async def main():
         await run_aggregator()
         await run_auto_approval()
-        
+
     asyncio.run(main())

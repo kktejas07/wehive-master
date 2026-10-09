@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Header
 from typing import List, Optional
 from pydantic import BaseModel
 from bson import ObjectId
@@ -9,6 +9,7 @@ from db import global_blogs_col
 from blog_aggregator_agent import run_aggregator
 from ai_marketplace import marketplace
 from auth_utils import get_current_user
+from admin_auth import get_current_admin_flex
 
 router = APIRouter(prefix="/blogs", tags=["Blogs"])
 logger = logging.getLogger("wehive.routes_blogs")
@@ -43,7 +44,10 @@ async def get_blogs(
     limit: int = Query(20, ge=1, le=1000),
     sort: str = Query("created_at"),
     order: str = Query("desc", regex="^(asc|desc)$"),
+    authorization: Optional[str] = Header(default=None),
 ):
+    if status and status != "approved":
+        await get_current_admin_flex(authorization)
     filt = {"status": status or "approved"}
     if country_id:
         filt["country_id"] = country_id
@@ -87,6 +91,7 @@ async def get_blogs(
 async def get_pending_blogs(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=1000),
+    _admin=Depends(get_current_admin_flex),
 ):
     try:
         total = await global_blogs_col.count_documents({"status": "pending"})
@@ -105,7 +110,7 @@ async def get_pending_blogs(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/{blog_id}/approve")
-async def approve_blog(blog_id: str):
+async def approve_blog(blog_id: str, _admin=Depends(get_current_admin_flex)):
     try:
         query = {"_id": ObjectId(blog_id)}
         res = await global_blogs_col.update_one(query, {"$set": {"status": "approved"}})
@@ -117,7 +122,7 @@ async def approve_blog(blog_id: str):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/{blog_id}/reject")
-async def reject_blog(blog_id: str):
+async def reject_blog(blog_id: str, _admin=Depends(get_current_admin_flex)):
     try:
         query = {"_id": ObjectId(blog_id)}
         res = await global_blogs_col.update_one(query, {"$set": {"status": "rejected"}})
@@ -165,7 +170,7 @@ Blog Content:
         raise HTTPException(status_code=502, detail="AI Service is busy")
 
 @router.post("/run_aggregator")
-async def trigger_aggregator():
+async def trigger_aggregator(_admin=Depends(get_current_admin_flex)):
     """Trigger the blogs aggregator manually (admin only)."""
     import asyncio
     asyncio.create_task(run_aggregator())

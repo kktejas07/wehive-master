@@ -19,7 +19,9 @@ from db import db
 
 logger = logging.getLogger("wehive.byok_vault")
 
-VAULT_SECRET = os.environ.get("BYOK_VAULT_SECRET", os.environ.get("JWT_SECRET", "wehive-byok-vault-default"))
+VAULT_SECRET = os.environ.get("BYOK_VAULT_SECRET") or os.environ.get("JWT_SECRET")
+if not VAULT_SECRET:
+    raise RuntimeError("BYOK_VAULT_SECRET or JWT_SECRET must be set")
 
 PROVIDER_KEY_MAP = {
     "openai": "OPENAI_API_KEY",

@@ -15,7 +15,12 @@ import { CONFIG } from '../config';
 import { AnalyticsEventPayload, UserTraits } from '../types';
 
 class AnalyticsDispatcher {
-  private providers: AnalyticsProvider[] = [firebaseProvider, posthogProvider, consoleProvider];
+  // Console debug provider only in development so production consoles stay clean.
+  private providers: AnalyticsProvider[] = [
+    firebaseProvider,
+    posthogProvider,
+    ...(process.env.NODE_ENV !== 'production' ? [consoleProvider] : []),
+  ];
   private queue: AnalyticsEventPayload[] = [];
   private flushTimer: any = null;
 

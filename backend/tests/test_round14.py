@@ -19,9 +19,9 @@ import requests
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL or not BASE_URL.startswith('http'):
-    BASE_URL = 'https://premium-collab-6.preview.emergentagent.com'
-OLD_ADMIN_PASSWORD = 'Wehive@Admin2026'
-NEW_ADMIN_PASSWORD = 'Wh-mboWnbYhZ0S_gqyqRxM'
+    BASE_URL = 'http://localhost:8000'
+OLD_ADMIN_PASSWORD = os.environ.get('TEST_ADMIN_OLD_PASSWORD', '')
+NEW_ADMIN_PASSWORD = os.environ.get('TEST_ADMIN_PASSWORD', '')
 ADMIN_EMAIL = 'admin@wehive.co.in'
 
 

@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from third_party_services import SERVICE_CATEGORIES
 from auth_utils import get_current_user
+from admin_auth import get_current_admin_flex
 from db import db
 
 router = APIRouter(prefix="/third-party", tags=["third-party"])
@@ -197,13 +198,13 @@ async def services_status(_=Depends(get_current_user)):
 # ---------------------------------------------------------------------------
 
 @router.get("/admin/categories")
-async def admin_list_categories(_=Depends(get_current_user)):
+async def admin_list_categories(_=Depends(get_current_admin_flex)):
     """Admin: same as /categories — list all services."""
     return await list_categories(_)
 
 
 @router.get("/admin/my-services")
-async def admin_get_services(_=Depends(get_current_user)):
+async def admin_get_services(_=Depends(get_current_admin_flex)):
     """Admin: return platform-level connected services."""
     doc = await _get_platform_doc()
     return {
@@ -213,7 +214,7 @@ async def admin_get_services(_=Depends(get_current_user)):
 
 
 @router.post("/admin/connect")
-async def admin_connect_service(req: ConnectServiceRequest, user=Depends(get_current_user)):
+async def admin_connect_service(req: ConnectServiceRequest, user=Depends(get_current_admin_flex)):
     """Admin: connect (or update) a platform-level third-party service."""
     svc = _resolve_service(req.service_id)
     if svc["requires_key"] and not req.api_key:
@@ -247,7 +248,7 @@ async def admin_connect_service(req: ConnectServiceRequest, user=Depends(get_cur
 
 
 @router.post("/admin/set-default")
-async def admin_set_default(req: SetDefaultRequest, user=Depends(get_current_user)):
+async def admin_set_default(req: SetDefaultRequest, user=Depends(get_current_admin_flex)):
     """Admin: set the default service for the platform."""
     svc = _resolve_service(req.service_id)
     doc = await _get_platform_doc()
@@ -261,7 +262,7 @@ async def admin_set_default(req: SetDefaultRequest, user=Depends(get_current_use
 
 
 @router.delete("/admin/disconnect/{service_id}")
-async def admin_disconnect_service(service_id: str, user=Depends(get_current_user)):
+async def admin_disconnect_service(service_id: str, user=Depends(get_current_admin_flex)):
     """Admin: disconnect a platform-level service."""
     svc = _resolve_service(service_id)
     doc = await _get_platform_doc()
@@ -276,7 +277,7 @@ async def admin_disconnect_service(service_id: str, user=Depends(get_current_use
 
 
 @router.post("/admin/test")
-async def admin_test_service(req: TestServiceRequest, user=Depends(get_current_user)):
+async def admin_test_service(req: TestServiceRequest, user=Depends(get_current_admin_flex)):
     """Admin: test a service connection."""
     svc = _resolve_service(req.service_id)
     if svc["requires_key"] and not req.api_key:

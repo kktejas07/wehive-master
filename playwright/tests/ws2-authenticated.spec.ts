@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-// Reused token from the throwaway wehive-qa-probe-* account created earlier in this
-// validation run (see REPORT.md auth-desync finding). No new account is created here.
-const REUSED_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YzM3MjgyZS00N2FlLTQ0M2ItYmYxMC1hNzZlMTBjOTJlMTMiLCJleHAiOjE3ODQxMjE2ODEsImlhdCI6MTc4NDAzNTI4MX0.Elus3KAD8R_8XYyDR4oY52fk5jDE1A1lFERqxMzV2lI';
+// Auth token for an existing (throwaway) test account. Never hard-code tokens here.
+const REUSED_TOKEN = process.env.E2E_AUTH_TOKEN || '';
 
 test.describe('WS2 — authenticated areas (reused throwaway session)', () => {
+  test.skip(!REUSED_TOKEN, 'E2E_AUTH_TOKEN not set');
+
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((token) => {
       window.localStorage.setItem('wehive_token', token);

@@ -64,7 +64,7 @@ function HiveChat({ token }) {
 
   useEffect(() => {
     if (!token) return;
-    axios.post(`${API}/chatbot/start`, { title: 'Help center chat' }, { headers: { Authorization: `Bearer ${token}` } })
+    axios.post(`${API}/chatbot/sessions`, { title: 'Help center chat' }, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => setSessionId(r.data.session_id))
       .catch(() => {});
   }, [token]);
@@ -80,8 +80,8 @@ function HiveChat({ token }) {
     setLoading(true);
     setMessages((m) => [...m, { role: 'user', text }]);
     try {
-      const r = await axios.post(`${API}/chatbot/chat`, { session_id: sessionId, text }, { headers: { Authorization: `Bearer ${token}` } });
-      setMessages((m) => [...m, { role: 'assistant', text: r.data.assistant_message.content }]);
+      const r = await axios.post(`${API}/chatbot/sessions/${sessionId}/messages`, { text }, { headers: { Authorization: `Bearer ${token}` } });
+      setMessages((m) => [...m, { role: 'assistant', text: r.data.assistant_message?.text || '' }]);
     } catch {
       setMessages((m) => [...m, { role: 'assistant', text: 'Sorry, I ran into a glitch. Please try again or contact us at +91 91132 56726.' }]);
     } finally {

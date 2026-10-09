@@ -21,13 +21,13 @@ async def travel_planner(
 ):
     """Generates a day-by-day travel itinerary using an AI Agent."""
     cache_key = f"{country.lower()}_{days}_{preferences.lower()}"
-    
+
     if not refresh:
         cached = await travel_cache.find_one({"_id": cache_key})
         if cached:
             return {"itinerary": cached["itinerary"], "cached": True}
-            
-    prompt = f"""You are an elite AI Travel Agent. 
+
+    prompt = f"""You are an elite AI Travel Agent.
 Create a detailed, day-by-day itinerary for a {days}-day trip to {country}.
 The traveler's preferences are: {preferences}.
 
@@ -50,7 +50,7 @@ Return ONLY valid JSON (no markdown fences, no prose)."""
             user_prompt=prompt,
             max_tokens=2000
         )
-        
+
         # Super simple parse logic (assuming AI follows JSON-only rule)
         import json
         import re
@@ -58,17 +58,17 @@ Return ONLY valid JSON (no markdown fences, no prose)."""
         m = re.search(r"\[.*\]", t, re.DOTALL)
         if not m:
             raise ValueError("No JSON array found in reply")
-            
+
         itinerary = json.loads(m.group(0))
-        
+
         await travel_cache.update_one(
             {"_id": cache_key},
             {"$set": {"itinerary": itinerary}},
             upsert=True
         )
-        
+
         return {"itinerary": itinerary, "cached": False}
-        
+
     except Exception as e:
         logger.error(f"Error generating travel plan: {e}")
         raise HTTPException(status_code=502, detail="AI Service is busy or returned invalid JSON.")

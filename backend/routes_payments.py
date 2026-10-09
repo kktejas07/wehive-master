@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -24,9 +24,9 @@ logger = logging.getLogger('wehive.payments')
 PAYMENT_BYPASS_ENABLED = os.environ.get('PAYMENT_BYPASS_ENABLED', '').lower() in ('1', 'true', 'yes')
 
 PLANS = {
-    'lite': {'name': 'Lite', 'amount_usd': 399, 'description': 'One visa application with expert review'},
-    'standard': {'name': 'Standard', 'amount_usd': 799, 'description': 'Most popular — priority support, on-time guarantee'},
-    'concierge': {'name': 'Concierge', 'amount_usd': 1099, 'description': 'Dedicated specialist, 24/7 phone support'},
+    'lite': {'name': 'Lite', 'amount_inr': 399, 'description': 'One visa application with expert review'},
+    'standard': {'name': 'Standard', 'amount_inr': 799, 'description': 'Most popular — priority support, on-time guarantee'},
+    'concierge': {'name': 'Concierge', 'amount_inr': 1099, 'description': 'Dedicated specialist, 24/7 phone support'},
 }
 
 
@@ -78,7 +78,7 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
             'plan_id': req.plan_id,
             'razorpay_order_id': mock_order_id,
             'razorpay_payment_id': None,
-            'amount_usd': plan['amount_usd'],
+            'amount_inr': plan['amount_inr'],
             'status': 'mock',
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow(),
@@ -86,8 +86,8 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
         await payments.insert_one(payment_doc)
         return {
             'order_id': mock_order_id,
-            'amount': plan['amount_usd'],
-            'currency': 'USD',
+            'amount': plan['amount_inr'] * 100,
+            'currency': 'INR',
             'plan_id': req.plan_id,
             'razorpay_key': 'mock',
         }
@@ -100,13 +100,13 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
     if not client:
         raise HTTPException(503, 'Payment gateway unavailable')
 
-    amount_cents = plan['amount_usd']
+    amount_paise = plan['amount_inr'] * 100
     receipt = f"wehive-{user['_id']}-{req.plan_id}-{uuid.uuid4().hex[:8]}"
 
     try:
         order = client.order.create({
-            'amount': amount_cents,
-            'currency': 'USD',
+            'amount': amount_paise,
+            'currency': 'INR',
             'receipt': receipt,
             'notes': {
                 'user_id': user['_id'],
@@ -123,7 +123,7 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
         'plan_id': req.plan_id,
         'razorpay_order_id': order.get('id'),
         'razorpay_payment_id': None,
-        'amount_usd': plan['amount_usd'],
+        'amount_inr': plan['amount_inr'],
         'status': 'created',
         'created_at': datetime.utcnow(),
         'updated_at': datetime.utcnow(),
@@ -132,8 +132,8 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
 
     return {
         'order_id': order.get('id'),
-        'amount': plan['amount_usd'],
-        'currency': 'USD',
+        'amount': amount_paise,
+        'currency': 'INR',
         'plan_id': req.plan_id,
         'razorpay_key': key_id,
     }
@@ -239,22 +239,23 @@ async def _send_payment_email(user: dict, plan: dict, payment_doc: dict, success
                 invoice_id=invoice_id,
                 customer_name=user_name or 'Customer',
                 customer_email=user_email,
-                items=[{'name': plan['name'], 'amount': payment_doc.get('amount_usd', 0)}],
-                amount_paid=payment_doc.get('amount_usd', 0),
+                items=[{'name': plan['name'], 'amount': payment_doc.get('amount_inr', 0)}],
+                amount_paid=payment_doc.get('amount_inr', 0),
+                currency='INR',
             )
 
             html = build_payment_success_html(
                 name=user_name,
                 plan_name=plan['name'],
-                amount=payment_doc.get('amount_usd', 0),
-                currency='USD',
+                amount=payment_doc.get('amount_inr', 0),
+                currency='INR',
                 invoice_id=invoice_id,
             )
             await send_email(
                 to_email=user_email,
                 subject=f'Payment Confirmed — We Hive {plan["name"]}',
                 html_body=html,
-                text_body=f'Your payment of USD {payment_doc.get("amount_usd", 0):,} for {plan["name"]} was successful. Invoice #{invoice_id} is attached.',
+                text_body=f'Your payment of INR {payment_doc.get("amount_inr", 0):,} for {plan["name"]} was successful. Invoice #{invoice_id} is attached.',
                 pdf_bytes=pdf_bytes,
                 pdf_filename=f'WeHive-Invoice-{invoice_id}.pdf',
             )
@@ -274,46 +275,51 @@ async def _send_payment_email(user: dict, plan: dict, payment_doc: dict, success
             html = build_payment_failed_html(
                 name=user_name,
                 plan_name=plan['name'],
-                amount=payment_doc.get('amount_usd', 0),
-                currency='USD',
+                amount=payment_doc.get('amount_inr', 0),
+                currency='INR',
             )
             await send_email(
                 to_email=user_email,
                 subject=f'Payment Failed — We Hive {plan["name"]}',
                 html_body=html,
-                text_body=f'Your payment of USD {payment_doc.get("amount_usd", 0):,} for {plan["name"]} could not be completed.',
+                text_body=f'Your payment of INR {payment_doc.get("amount_inr", 0):,} for {plan["name"]} could not be completed.',
             )
     except Exception as e:
         logger.exception('Failed to send payment email to user %s: %s', user.get('_id'), e)
 
 
 @router.post('/webhook')
-async def razorpay_webhook(payload: dict, x_razorpay_signature: str = Header(None), bg: BackgroundTasks = None):
+async def razorpay_webhook(request: Request, x_razorpay_signature: str = Header(None), bg: BackgroundTasks = None):
     """Razorpay sends this when a payment succeeds or fails."""
+    import json
     from settings_service import get_razorpay_keys
 
     _, _, webhook_secret = await get_razorpay_keys()
-    if not webhook_secret:
-        raise HTTPException(503, 'Webhook not configured')
+    if not webhook_secret or not x_razorpay_signature:
+        raise HTTPException(400, 'Invalid webhook signature')
 
-    if x_razorpay_signature:
-        digest = hmac.new(
-            webhook_secret.encode(),
-            str(payload).encode(),
-            hashlib.sha256
-        ).hexdigest()
-        if not hmac.compare_digest(digest, x_razorpay_signature):
-            raise HTTPException(400, 'Invalid webhook signature')
+    raw = await request.body()
+    digest = hmac.new(webhook_secret.encode(), raw, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(digest, x_razorpay_signature):
+        raise HTTPException(400, 'Invalid webhook signature')
+
+    try:
+        payload = json.loads(raw)
+    except ValueError:
+        raise HTTPException(400, 'Invalid JSON')
 
     event = payload.get('event', '')
     payload_data = payload.get('payload', {})
-    order = payload_data.get('order', {})
-    order_id = order.get('entity', {}).get('receipt') or ''
-    payment_id = payload_data.get('payment', {}).get('entity', {}).get('id')
+    payment_entity = payload_data.get('payment', {}).get('entity', {})
+    order_id = payment_entity.get('order_id') or payload_data.get('order', {}).get('entity', {}).get('id') or ''
+    payment_id = payment_entity.get('id')
+    if not order_id:
+        return {'ok': True}
 
-    if event in ('payment.success', 'order.paid'):
+    if event in ('payment.success', 'payment.captured', 'order.paid'):
+        # Only transition non-paid orders, so retries never double-grant.
         doc = await payments.find_one_and_update(
-            {'razorpay_order_id': order_id},
+            {'razorpay_order_id': order_id, 'status': {'$ne': 'paid'}},
             {'$set': {
                 'razorpay_payment_id': payment_id,
                 'status': 'paid',
@@ -335,7 +341,7 @@ async def razorpay_webhook(payload: dict, x_razorpay_signature: str = Header(Non
                 bg.add_task(_send_payment_email, fresh_user, plan, doc, True)
     elif event == 'payment.failed':
         doc = await payments.find_one_and_update(
-            {'razorpay_order_id': order_id},
+            {'razorpay_order_id': order_id, 'status': {'$ne': 'paid'}},
             {'$set': {'status': 'failed', 'updated_at': datetime.utcnow()}},
             return_document=True,
         )
@@ -352,10 +358,10 @@ async def razorpay_webhook(payload: dict, x_razorpay_signature: str = Header(Non
 async def get_plans():
     return {
         'plans': [
-            {'id': k, 'name': v['name'], 'amount_usd': v['amount_usd'], 'description': v['description']}
+            {'id': k, 'name': v['name'], 'amount_inr': v['amount_inr'], 'description': v['description']}
             for k, v in PLANS.items()
         ],
-        'currency': 'USD',
+        'currency': 'INR',
     }
 
 
@@ -366,7 +372,7 @@ async def my_subscription(user=Depends(get_current_user)):
         payments_list.append({
             'id': p['_id'],
             'plan_id': p.get('plan_id'),
-            'amount_usd': p.get('amount_usd'),
+            'amount_inr': p.get('amount_inr', p.get('amount_usd')),
             'status': p.get('status'),
             'created_at': p.get('created_at').isoformat() if p.get('created_at') else None,
         })
@@ -395,8 +401,9 @@ async def invoice_pdf(payment_id: str, user=Depends(get_current_user)):
         invoice_id=payment_id[:8].upper(),
         customer_name=user.get('name', 'Customer'),
         customer_email=user.get('email', ''),
-        items=[{'name': plan.get('name', 'Service'), 'amount': payment.get('amount_usd', 0)}],
-        amount_paid=payment.get('amount_usd', 0),
+        items=[{'name': plan.get('name', 'Service'), 'amount': payment.get('amount_inr', 0)}],
+        amount_paid=payment.get('amount_inr', 0),
+        currency='INR',
         payment_method='Razorpay',
     )
     return StreamingResponse(

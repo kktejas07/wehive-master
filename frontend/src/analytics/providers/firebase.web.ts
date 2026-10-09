@@ -48,9 +48,10 @@ class FirebaseWebProvider implements AnalyticsProvider {
   }
 
   setUserId(hashedUserId: string) {
-    if (typeof window !== 'undefined' && (window as any).gtag) {
+    const measurementId = process.env.REACT_APP_FIREBASE_MEASUREMENT_ID;
+    if (measurementId && typeof window !== 'undefined' && (window as any).gtag) {
       try {
-        (window as any).gtag('config', 'GA_MEASUREMENT_ID', {
+        (window as any).gtag('config', measurementId, {
           user_id: hashedUserId,
         });
       } catch (e) {}

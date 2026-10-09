@@ -1321,8 +1321,8 @@ class AIMarketplace:
         # 3. Tier 2: Local LLM Fallback
         try:
             from local_llm import local_chat_with_info
-            reply_dict = await local_chat_with_info(user_prompt, context=system_prompt)
-            content = reply_dict.get("content", "").strip()
+            content, _info = await local_chat_with_info(user_prompt, context=system_prompt)
+            content = (content or "").strip()
             if content:
                 return content
         except Exception as e:
@@ -1369,8 +1369,8 @@ class AIMarketplace:
         # 3. Tier 2: Local LLM Fallback
         try:
             from local_llm import local_chat_with_info
-            reply_dict = await local_chat_with_info(user_prompt, context=system_prompt)
-            content = reply_dict.get("content", "").strip()
+            content, _info = await local_chat_with_info(user_prompt, context=system_prompt)
+            content = (content or "").strip()
             if content:
                 provider_info = {
                     "id": "local",

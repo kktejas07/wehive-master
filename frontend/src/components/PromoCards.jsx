@@ -24,7 +24,7 @@ const FALLBACK_CARDS = [
     cta_link: '/pricing',
     bg_color: '#7c3aed',
     accent_color: '#f59e0b',
-    image_url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600&q=70',
+    image_url: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=70',
   },
   {
     id: 'fallback-3',
@@ -35,7 +35,7 @@ const FALLBACK_CARDS = [
     cta_link: '/',
     bg_color: '#065f46',
     accent_color: '#34d399',
-    image_url: 'https://images.unsplash.com/photo-1488085061387-4b4d2b2a5a5a?auto=format&fit=crop&w=600&q=70',
+    image_url: 'https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=600&q=70',
   },
 ];
 

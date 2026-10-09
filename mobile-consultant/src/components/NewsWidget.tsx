@@ -22,7 +22,9 @@ export default function NewsWidget() {
         const res = await fetch(`${apiUrl}/api/news?limit=3`);
         if (res.ok) {
           const data = await res.json();
-          setNews(data);
+          // Backend returns a paginated envelope: { items, total, page, limit, pages }
+          const items: NewsItem[] = Array.isArray(data?.items) ? data.items : [];
+          setNews(items);
         }
       } catch (err) {
         console.error("Failed to fetch mobile news:", err);

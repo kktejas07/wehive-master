@@ -1,5 +1,5 @@
 """Unit tests for DB-dependent modules — admin_analytics, portal_ai, reminder_agent,
-audit, eva_tools, agent_loop, storage, ai_marketplace, admin_auth, firebase_utils.
+audit, eva_tools, storage, ai_marketplace, admin_auth, firebase_utils.
 
 All database/HTTP calls are mocked. Pure logic is tested directly.
 """
@@ -463,97 +463,6 @@ class TestEvaTools:
         with patch("eva_tools.lookup_country", new=AsyncMock(return_value=None)):
             result = await get_application_fee("xx")
             assert result is None
-
-
-# ─── Agent Loop ───────────────────────────────────────────────────────────────
-from agent_loop import (
-    react_chat, _build_system_prompt, _format_tool_descriptions
-)
-from agent_loop import _parse_tool_call_legacy as _parse_tool_call
-from tool_registry import Tool
-
-
-class TestAgentLoop:
-    @pytest.mark.asyncio
-    async def test_react_chat_no_tool_call(self):
-        marketplace_call = AsyncMock(return_value="Final answer")
-        result = await react_chat("Hello", "", "", marketplace_call)
-        assert result == "Final answer"
-
-    @pytest.mark.asyncio
-    async def test_react_chat_with_tool_call(self):
-        async def dummy_handler(**kwargs):
-            return "tool result"
-        tool = Tool("lookup_country", "desc", {"properties": {"country_id": {}}}, dummy_handler)
-        with patch("agent_loop.get_tool", return_value=tool):
-            with patch("agent_loop.list_tools", return_value=[tool]):
-                responses = iter([
-                    "TOOL: lookup_country(country_id=ca)",
-                    "Final answer with data",
-                ])
-                marketplace_call = AsyncMock(side_effect=lambda x: next(responses))
-                result = await react_chat("Canada info", "", "", marketplace_call)
-                assert "Final answer" in result
-
-    @pytest.mark.asyncio
-    async def test_react_chat_tool_not_found(self):
-        with patch("agent_loop.get_tool", return_value=None):
-            marketplace_call = AsyncMock(return_value="TOOL: nonexistent(param=1)")
-            result = await react_chat("test", "", "", marketplace_call)
-            assert "not found" in result
-
-    @pytest.mark.asyncio
-    async def test_react_chat_tool_error(self):
-        async def failing_handler(**kwargs):
-            raise ValueError("Tool failed")
-        tool = Tool("failing_tool", "desc", {}, failing_handler)
-        with patch("agent_loop.get_tool", return_value=tool):
-            marketplace_call = AsyncMock(return_value="TOOL: failing_tool()")
-            result = await react_chat("test", "", "", marketplace_call)
-            # Should not crash — error is caught
-            assert isinstance(result, str)
-
-    def test_build_system_prompt_with_context(self):
-        result = _build_system_prompt("Country data", "Previous conversation")
-        assert "Country data" in result
-        assert "Previous conversation" in result
-
-    def test_build_system_prompt_empty(self):
-        result = _build_system_prompt("", "")
-        assert "Hive" in result
-
-    def test_format_tool_descriptions(self):
-        async def h(**kw):
-            return ""
-        tool = Tool("test_tool", "A test tool", {"properties": {"p1": {"description": "Param 1"}}}, h)
-        with patch("agent_loop.list_tools", return_value=[tool]):
-            with patch("tool_registry.get_tool", return_value=tool):
-                result = _format_tool_descriptions()
-                assert "test_tool" in result
-                assert "Param 1" in result
-
-    def test_format_tool_descriptions_empty(self):
-        with patch("agent_loop.list_tools", return_value=[]):
-            assert "no tools available" in _format_tool_descriptions()
-
-    def test_parse_tool_call_valid(self):
-        result = _parse_tool_call("TOOL: lookup_country(country_id=ca)")
-        assert result is not None
-        assert result[0] == "lookup_country"
-        assert result[1] == {"country_id": "ca"}
-
-    def test_parse_tool_call_no_match(self):
-        assert _parse_tool_call("Just a regular response") is None
-
-    def test_parse_tool_call_with_quotes(self):
-        result = _parse_tool_call('TOOL: search(param="hello world")')
-        assert result is not None
-        assert result[1] == {"param": "hello world"}
-
-    def test_parse_tool_call_multiple_params(self):
-        result = _parse_tool_call("TOOL: test(a=1, b=2, c=3)")
-        assert result is not None
-        assert result[1] == {"a": "1", "b": "2", "c": "3"}
 
 
 # ─── Storage ──────────────────────────────────────────────────────────────────

@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001')).replace(/\/api\/?$/i, '');
-export const API = `${BACKEND_URL}/api`;
+import { API } from '../lib/apiBase';
+
+export { API };
 
 const TOKEN_KEY = 'wehive_token';
 
@@ -25,10 +26,15 @@ export function AuthProvider({ children }) {
         headers: { Authorization: `Bearer ${t}` },
       });
       setUser(res.data);
-    } catch (_e) {
-      localStorage.removeItem(TOKEN_KEY);
-      setToken(null);
-      setUser(null);
+    } catch (e) {
+      // Only an auth rejection invalidates the session; keep the token on
+      // network / 5xx errors so a transient outage doesn't log the user out.
+      const status = e?.response?.status;
+      if (status === 401 || status === 403) {
+        localStorage.removeItem(TOKEN_KEY);
+        setToken(null);
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }

@@ -313,7 +313,7 @@ class TestModels:
 
     def test_auth_tokens(self):
         u = PublicUser(id="u1", created_at=datetime.utcnow())
-        tokens = AuthTokens(access_token="token123", user=u)
+        tokens = AuthTokens(access_token="token123", user=u)  # verify:allow-secret (dummy)
         assert tokens.token_type == "bearer"
 
 

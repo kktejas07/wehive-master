@@ -24,10 +24,10 @@ if not BASE_URL:
                     BASE_URL = line.split('=', 1)[1].strip().strip('"').rstrip('/')
                     break
 if not BASE_URL or not BASE_URL.startswith('http'):
-    BASE_URL = 'https://premium-collab-6.preview.emergentagent.com'
+    BASE_URL = 'http://localhost:8000'
 
 ADMIN_EMAIL = 'admin@wehive.co.in'
-ADMIN_PASS = 'Wehive@Admin2026'
+ADMIN_PASS = os.environ.get('TEST_ADMIN_PASSWORD', '')
 ALLOWED_SIGNUP_EMAIL = 'krishnakranthiteja@gmail.com'
 
 
@@ -79,50 +79,34 @@ class TestAdminLogin:
                               json={'email': ADMIN_EMAIL, 'password': f'wrong-pwd-{i}'})
             statuses.append(r.status_code)
         assert 429 in statuses, f'expected lockout 429 in {statuses}'
-        # Reset lockout via password reset (issued via dev fallback) so other
-        # tests in the module can still log in.
-        r = requests.post(f'{BASE_URL}/api/admin-auth/forgot-password',
-                          json={'email': ADMIN_EMAIL})
-        assert r.status_code == 200
-        body = r.json()
-        if body.get('dev_token'):
-            r2 = requests.post(f'{BASE_URL}/api/admin-auth/reset-password',
-                               json={'token': body['dev_token'], 'new_password': ADMIN_PASS})
-            assert r2.status_code == 200
 
 
 # ---------- /admin-auth/signup ----------
 class TestAdminSignup:
-    def test_signup_email_not_in_allowlist(self):
+    def test_signup_without_admin_auth_is_forbidden(self):
         r = requests.post(f'{BASE_URL}/api/admin-auth/signup', json={
+            'email': ALLOWED_SIGNUP_EMAIL,
+            'password': 'Password1!',
+            'name': 'Anonymous',
+        })
+        assert r.status_code == 403
+
+    def test_signup_email_not_in_allowlist(self, admin_token):
+        r = requests.post(f'{BASE_URL}/api/admin-auth/signup', headers=_admin_headers(admin_token), json={
             'email': f'TEST_outsider_{uuid.uuid4().hex[:8]}@example.com',
             'password': 'Password1!',
             'name': 'Outside Person',
         })
         assert r.status_code == 403
 
-    def test_signup_when_admin_already_has_password(self):
-        # Seeded admin already has password -> 409
-        r = requests.post(f'{BASE_URL}/api/admin-auth/signup', json={
+    def test_signup_when_admin_already_has_password(self, admin_token):
+        # Seeded admin already has password -> 409 (never overwritten)
+        r = requests.post(f'{BASE_URL}/api/admin-auth/signup', headers=_admin_headers(admin_token), json={
             'email': ADMIN_EMAIL,
             'password': 'Password1!',
             'name': 'Dupe',
         })
         assert r.status_code == 409
-
-    def test_signup_allowed_email_creates_or_promotes(self):
-        # Use the alt allow-listed email. We don't know if it has a password
-        # already from previous runs; either way we expect 200 OR 409.
-        r = requests.post(f'{BASE_URL}/api/admin-auth/signup', json={
-            'email': ALLOWED_SIGNUP_EMAIL,
-            'password': 'AltAdmin#2026',
-            'name': 'Krishna Admin',
-        })
-        assert r.status_code in (200, 409), f'unexpected: {r.status_code} {r.text}'
-        if r.status_code == 200:
-            data = r.json()
-            assert data['user']['is_admin'] is True
-            assert data['user']['email'] == ALLOWED_SIGNUP_EMAIL
 
 
 # ---------- forgot/reset ----------
@@ -136,34 +120,18 @@ class TestForgotResetPassword:
         # Should NOT include dev_token for unknown emails
         assert 'dev_token' not in body or body.get('dev_token') is None
 
-    def test_forgot_known_admin_returns_dev_token(self):
+    def test_forgot_known_admin_never_leaks_token(self):
         r = requests.post(f'{BASE_URL}/api/admin-auth/forgot-password',
                           json={'email': ADMIN_EMAIL})
         assert r.status_code == 200
         body = r.json()
-        assert body.get('dev_mode') is True
-        assert body.get('dev_token')
-
-    def test_reset_password_happy_path_then_reuse_blocked(self):
-        # Issue token
-        r = requests.post(f'{BASE_URL}/api/admin-auth/forgot-password',
-                          json={'email': ADMIN_EMAIL})
-        body = r.json()
-        token = body.get('dev_token')
-        assert token, 'expected dev_token in dev mode'
-
-        # Use it
-        r2 = requests.post(f'{BASE_URL}/api/admin-auth/reset-password',
-                           json={'token': token, 'new_password': ADMIN_PASS})
-        assert r2.status_code == 200, r2.text
-        data = r2.json()
-        assert data.get('access_token')
-
-        # Reuse should fail
-        r3 = requests.post(f'{BASE_URL}/api/admin-auth/reset-password',
-                           json={'token': token, 'new_password': ADMIN_PASS})
-        assert r3.status_code == 400
-        assert 'already' in r3.json().get('detail', '').lower() or 'invalid' in r3.json().get('detail', '').lower()
+        assert body.get('ok') is True
+        for leak in ('dev_token', 'dev_link', 'dev_mode'):
+            assert leak not in body
+        # Same generic response as for unknown emails (no enumeration)
+        r2 = requests.post(f'{BASE_URL}/api/admin-auth/forgot-password',
+                           json={'email': f'TEST_nobody_{uuid.uuid4().hex[:8]}@example.com'})
+        assert r2.json() == body
 
     def test_reset_password_invalid_token(self):
         r = requests.post(f'{BASE_URL}/api/admin-auth/reset-password',
@@ -185,7 +153,7 @@ class TestAdminMe:
         r = requests.post(f'{BASE_URL}/api/admin-auth/change-password',
                           headers=_admin_headers(admin_token),
                           json={'current_password': 'definitely-not-it',
-                                'new_password': 'AnotherPass2026!'})
+                                'new_password': 'AnotherPass2026!'})  # verify:allow-secret (dummy)
         assert r.status_code == 401
 
     def test_change_password_round_trip(self, admin_token):

@@ -15,7 +15,7 @@ const COMPARISON_ITEMS = [
     title: 'We verify everything. Not just forward it.',
     others: 'Collect your documents and forward as-is.',
     atlys: 'We check every document. Because one weak document can undo everything.',
-    img: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca55?auto=format&fit=crop&w=600&q=80',
+    img: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=600&q=80',
   },
   {
     icon: BarChart2,

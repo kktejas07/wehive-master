@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL or not BASE_URL.startswith('http'):
-    BASE_URL = 'https://premium-collab-6.preview.emergentagent.com'
+    BASE_URL = 'http://localhost:8000'
 API = f"{BASE_URL}/api"
 
 
@@ -40,8 +40,11 @@ def passport_jpg_bytes():
     img = Image.new('RGB', (900, 600), (10, 30, 80))
     d = ImageDraw.Draw(img)
     d.rectangle([(50, 50), (850, 550)], fill=(240, 235, 220))
-    font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSansBold.ttf', 28)
-    small = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSans.ttf', 20)
+    try:
+        font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSansBold.ttf', 28)
+        small = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSans.ttf', 20)
+    except OSError:  # font path is Linux-only; fall back on macOS/CI images without it
+        font = small = ImageFont.load_default()
     d.text((80, 70), 'REPUBLIC OF INDIA', fill=(10, 30, 80), font=font)
     d.text((80, 180), 'Surname: SHARMA', fill=(10, 10, 10), font=small)
     d.text((80, 210), 'Given Names: ANIL KUMAR', fill=(10, 10, 10), font=small)
@@ -204,8 +207,11 @@ class TestScan:
         # Build a simple text-bearing image
         img = Image.new('RGB', (800, 500), (255, 255, 255))
         d = ImageDraw.Draw(img)
-        font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSansBold.ttf', 24)
-        small = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSans.ttf', 18)
+        try:
+            font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSansBold.ttf', 24)
+            small = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSans.ttf', 18)
+        except OSError:  # Linux-only font path
+            font = small = ImageFont.load_default()
         d.text((40, 40), 'GLOBAL TRUST BANK', fill=(0, 0, 100), font=font)
         d.text((40, 100), 'Statement of Account', fill=(0, 0, 0), font=small)
         d.text((40, 140), 'Account Holder: ANIL KUMAR SHARMA', fill=(0, 0, 0), font=small)
@@ -290,16 +296,17 @@ class TestApplications:
 
 # ---------- Flight suggestions (Gemini-powered) ----------
 class TestFlightSuggestions:
-    def test_unknown_country_404(self, session):
-        r = session.get(f"{API}/flights/suggest", params={"country": "zzz", "origin": "BLR"})
+    # /flights/suggest requires an authenticated user.
+    def test_unknown_country_404(self, session, auth_headers):
+        r = session.get(f"{API}/flights/suggest", params={"country": "zzz", "origin": "BLR"}, headers=auth_headers)
         assert r.status_code == 404
 
-    def test_invalid_country_400(self, session):
-        r = session.get(f"{API}/flights/suggest", params={"country": "x", "origin": "BLR"})
+    def test_invalid_country_400(self, session, auth_headers):
+        r = session.get(f"{API}/flights/suggest", params={"country": "x", "origin": "BLR"}, headers=auth_headers)
         assert r.status_code == 400
 
-    def test_us_blr_returns_three_routes(self, session):
-        r = session.get(f"{API}/flights/suggest", params={"country": "us", "origin": "BLR"}, timeout=120)
+    def test_us_blr_returns_three_routes(self, session, auth_headers):
+        r = session.get(f"{API}/flights/suggest", params={"country": "us", "origin": "BLR"}, headers=auth_headers, timeout=120)
         assert r.status_code == 200, r.text[:500]
         body = r.json()
         assert body.get("country", {}).get("id") == "us"
@@ -313,9 +320,9 @@ class TestFlightSuggestions:
             assert isinstance(r_["price_inr"], int) and r_["price_inr"] > 0
             assert r_["duration_h"] > 0
 
-    def test_cache_is_used(self, session):
+    def test_cache_is_used(self, session, auth_headers):
         # First call may have cached from previous test; second call should be cached.
-        session.get(f"{API}/flights/suggest", params={"country": "ae", "origin": "BLR"}, timeout=120)
-        r2 = session.get(f"{API}/flights/suggest", params={"country": "ae", "origin": "BLR"})
+        session.get(f"{API}/flights/suggest", params={"country": "ae", "origin": "BLR"}, headers=auth_headers, timeout=120)
+        r2 = session.get(f"{API}/flights/suggest", params={"country": "ae", "origin": "BLR"}, headers=auth_headers)
         assert r2.status_code == 200
         assert r2.json().get("cached") is True

@@ -49,12 +49,11 @@ export default function Contact() {
     }
     setSending(true);
     try {
-      await axios.post(`${API}/public/contact`, {
+      // Contact messages are stored as leads (backend POST /api/leads: name, surname, email, message).
+      await axios.post(`${API}/leads`, {
         name: form.name,
         email: form.email,
-        phone: form.phone || undefined,
-        subject: form.subject,
-        message: form.message,
+        message: `[Contact form] Subject: ${selectedSubject?.label || form.subject}${form.phone ? `\nPhone: ${form.phone}` : ''}\n\n${form.message}`,
       });
       toast({ title: 'Message sent!', description: "We'll get back to you within 24 hours." });
       setForm({ name: '', email: '', phone: '', subject: '', message: '' });

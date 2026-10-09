@@ -287,7 +287,7 @@ export default function ThirdPartySettings() {
     try {
       const [catRes, svcRes] = await Promise.all([
         axios.get(`${API}/third-party/categories`, { headers }),
-        axios.get(`${API}/third-party/my-services`, { headers }),
+        axios.get(`${API}/third-party/admin/my-services`, { headers }),
       ]);
       setCategories(catRes.data.categories || []);
       setConnectedServices(svcRes.data.services || []);
@@ -306,7 +306,7 @@ export default function ThirdPartySettings() {
   const handleConnect = async (serviceId, apiKey, baseUrl) => {
     setConnecting(true);
     try {
-      await axios.post(`${API}/third-party/connect`, { service_id: serviceId, api_key: apiKey, base_url: baseUrl }, { headers });
+      await axios.post(`${API}/third-party/admin/connect`, { service_id: serviceId, api_key: apiKey, base_url: baseUrl }, { headers });
       toast({ title: 'Service connected' });
       await fetchData();
     } catch (e) {
@@ -318,7 +318,7 @@ export default function ThirdPartySettings() {
 
   const handleDisconnect = async (serviceId) => {
     try {
-      await axios.delete(`${API}/third-party/disconnect/${serviceId}`, { headers });
+      await axios.delete(`${API}/third-party/admin/disconnect/${serviceId}`, { headers });
       toast({ title: 'Service disconnected' });
       await fetchData();
     } catch {
@@ -329,7 +329,7 @@ export default function ThirdPartySettings() {
   const handleTest = async (serviceId, apiKey, baseUrl) => {
     setTesting(true);
     try {
-      const res = await axios.post(`${API}/third-party/test`, { service_id: serviceId, api_key: apiKey, base_url: baseUrl }, { headers });
+      const res = await axios.post(`${API}/third-party/admin/test`, { service_id: serviceId, api_key: apiKey, base_url: baseUrl }, { headers });
       return res.data;
     } catch (e) {
       return { ok: false, error: e?.response?.data?.detail || 'Unknown error' };
@@ -340,7 +340,7 @@ export default function ThirdPartySettings() {
 
   const handleSetDefault = async (serviceId) => {
     try {
-      await axios.post(`${API}/third-party/set-default`, { service_id: serviceId }, { headers });
+      await axios.post(`${API}/third-party/admin/set-default`, { service_id: serviceId }, { headers });
       toast({ title: 'Default service updated' });
       await fetchData();
     } catch {

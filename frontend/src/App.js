@@ -45,9 +45,6 @@ const UniversityDetail = lazy(() => import('./pages/UniversityDetail'));
 const ProgramList = lazy(() => import('./pages/ProgramList'));
 const MapView = lazy(() => import('./pages/MapView'));
 const AgentLogin = lazy(() => import('./pages/AgentLogin'));
-const AgentDashboard = lazy(() => import('./pages/AgentDashboard'));
-const AgentApplications = lazy(() => import('./pages/AgentApplications'));
-const AgentStudents = lazy(() => import('./pages/AgentStudents'));
 const VisaScheduling = lazy(() => import('./pages/VisaScheduling'));
 const AgentPortal = lazy(() => import('./pages/AgentPortal'));
 const StudentResources = lazy(() => import('./pages/StudentResources'));
@@ -134,6 +131,7 @@ function AnimatedRoutes() {
           <Route path="/hive" element={<PageTransition><Hive /></PageTransition>} />
           <Route path="/us-visa-slots" element={<PageTransition><USVisaSlots /></PageTransition>} />
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
+          <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

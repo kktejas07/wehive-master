@@ -8,8 +8,8 @@ export const DEFAULT_SEO = {
   description: 'Step into wonder with We Hive. Apply for Schengen visas, explore 29 European countries, compare university programs, and manage document AI all in one platform.',
   keywords: 'Schengen Visa, 29 Schengen Countries, Study in Europe, Student Alumni, Overseas Education, Visa AI, We Hive, European Travel',
   ogImage: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80',
-  ogUrl: 'https://wehive.com',
-  canonicalUrl: 'https://wehive.com',
+  ogUrl: 'https://wehive.co.in',
+  canonicalUrl: 'https://wehive.co.in',
   siteName: 'We Hive',
 };
 
@@ -76,7 +76,7 @@ export function updateSEO(customSEO = {}) {
     description: seo.description,
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://wehive.com/search?q={search_term_string}',
+      target: 'https://wehive.co.in/search?q={search_term_string}',
       'query-input': 'required name=search_term_string',
     },
   });
