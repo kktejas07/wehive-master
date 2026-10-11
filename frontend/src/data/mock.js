@@ -8,6 +8,8 @@ export const BRAND = {
   logoWhite: '/brand/wehive-logo.png',
   phone: '+91 90007 34326',
   phoneRaw: '+919000734326',
+  consultantPhone: '+91 91132 56726',
+  consultantPhoneRaw: '+919113256726',
   email: 'info@wehive.co.in',
   address: 'WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049, India',
   ballariAddress: 'Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103, India',
@@ -538,11 +540,21 @@ export const COUNTRIES = [
   },
 ];
 
+// Single source for the headline numbers quoted across the site.
+// (StatsStrip.tsx animates numeric copies — keep it in step.)
+export const KEY_STATS = {
+  visasProcessed: '12,000+',
+  countries: '60+',
+  approvalRate: '98.6%',
+  onTimeRate: '98.6%',
+  rating: '4.9',
+};
+
 export const STATS = [
   { id: 'visas', value: '12K+', label: 'Visas processed' },
-  { id: 'countries', value: '60+', label: 'Countries supported' },
-  { id: 'approval', value: '98.6%', label: 'Approval rate' },
-  { id: 'rating', value: '4.9 / 5', label: 'Customer rating' },
+  { id: 'countries', value: KEY_STATS.countries, label: 'Countries supported' },
+  { id: 'approval', value: KEY_STATS.approvalRate, label: 'Approval rate' },
+  { id: 'rating', value: `${KEY_STATS.rating} / 5`, label: 'Customer rating' },
 ];
 
 export const STEPS = [

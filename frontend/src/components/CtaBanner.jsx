@@ -1,13 +1,13 @@
 import { ArrowRight, Phone, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
-import { BRAND } from '../data/mock';
+import { BRAND, KEY_STATS } from '../data/mock';
 import { useAuth } from '../context/AuthContext';
 import Reveal from './Reveal';
 
 const METRICS = [
   { id: 'm1', k: 'Avg. processing', v: '7.2 days' },
-  { id: 'm2', k: 'On‑time rate', v: '99.4%' },
+  { id: 'm2', k: 'On‑time rate', v: KEY_STATS.onTimeRate },
   { id: 'm3', k: 'Refund cases', v: '<0.6%' },
 ];
 

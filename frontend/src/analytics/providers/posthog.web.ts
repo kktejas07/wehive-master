@@ -13,6 +13,7 @@ class PostHogWebProvider implements AnalyticsProvider {
   init() {
     if (this.initialized) return;
     this.initialized = true;
+    if (!CONFIG.POSTHOG_KEY) return; // set REACT_APP_POSTHOG_KEY to enable
 
     if (typeof window !== 'undefined' && (window as any).posthog) {
       try {

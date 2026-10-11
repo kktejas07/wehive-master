@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Sparkles, Loader2, Send, MessageSquare, Trash2, Info } from 'lucide-react';
 import { useAuth, API } from '../context/AuthContext';
+import { BRAND } from '../data/mock';
 
 const SUGGESTIONS = [
   'What documents do I need for a US tourist visa?',
@@ -184,7 +185,7 @@ export default function OpenMarketAI({ onClose }) {
 
       <div className="flex items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/40">
         <MessageSquare className="w-3.5 h-3.5" />
-        <span>Eva is an AI assistant — for critical decisions, please verify with official sources or consult our team at info@wehive.in</span>
+        <span>Eva is an AI assistant — for critical decisions, please verify with official sources or consult our team at {BRAND.email}</span>
       </div>
     </div>
   );

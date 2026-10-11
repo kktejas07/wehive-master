@@ -5,6 +5,7 @@ import { Loader2, CheckCircle2, XCircle, ArrowRight, ShieldCheck, Lock, Building
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API, useAuth } from '../context/AuthContext';
+import { BRAND } from '../data/mock';
 
 function loadRazorpayCDN() {
   return new Promise((resolve) => {
@@ -95,6 +96,14 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
   );
 }
 
+// Prices and plan names come from GET /payments/plans; only the feature
+// bullets live here.
+const PLAN_FEATURES = {
+  lite: ['One visa application', 'Document review by expert', 'Email support', '7–10 day processing'],
+  standard: ['Everything in Lite', 'Priority chat support', 'On-time guarantee', 'Up to 4 applicants', 'Real-time tracking'],
+  concierge: ['Everything in Standard', 'Dedicated visa specialist', 'Same-day rush eligible', 'Up to 8 applicants', '24/7 phone support'],
+};
+
 export default function Pricing() {
   const { user, token, isAuthed, refreshUser } = useAuth();
   const [searchParams] = useSearchParams();
@@ -107,11 +116,6 @@ export default function Pricing() {
 
   const isPremium = user?.is_premium;
 
-  const FALLBACK_PLANS = [
-    { id: 'lite', name: 'Lite', price: 399, tag: 'One visa application with expert review', highlighted: false, features: ['One visa application', 'Document review by expert', 'Email support', '7–10 day processing'] },
-    { id: 'standard', name: 'Standard', price: 799, tag: 'Most popular — priority support, on-time guarantee', highlighted: true, features: ['Everything in Lite', 'Priority chat support', 'On-time guarantee', 'Up to 4 applicants', 'Real-time tracking'] },
-    { id: 'concierge', name: 'Concierge', price: 1099, tag: 'Dedicated specialist, 24/7 phone support', highlighted: false, features: ['Everything in Standard', 'Dedicated visa specialist', 'Same-day rush eligible', 'Up to 8 applicants', '24/7 phone support'] },
-  ];
 
   useEffect(() => {
     axios.get(`${API}/payments/plans`).then((r) => {
@@ -123,15 +127,11 @@ export default function Pricing() {
         price: p.amount_inr,
         tag: p.description,
         highlighted: p.id === 'standard',
-        features: p.id === 'lite'
-          ? ['One visa application', 'Document review by expert', 'Email support', '7–10 day processing']
-          : p.id === 'standard'
-          ? ['Everything in Lite', 'Priority chat support', 'On-time guarantee', 'Up to 4 applicants', 'Real-time tracking']
-          : ['Everything in Standard', 'Dedicated visa specialist', 'Same-day rush eligible', 'Up to 8 applicants', '24/7 phone support'],
+        features: PLAN_FEATURES[p.id] || [],
       })));
       setLoading(false);
     }).catch(() => {
-      setPlans(FALLBACK_PLANS);
+      setPlans([]);
       setLoading(false);
     });
   }, []);
@@ -252,7 +252,7 @@ export default function Pricing() {
               Try again <ArrowRight className="w-4 h-4" />
             </button>
             <a
-              href="https://wa.me/919113256726"
+              href={`https://wa.me/${BRAND.consultantPhoneRaw.slice(1)}`}
               className="inline-flex items-center gap-2 rounded-xl bg-white border border-[hsl(var(--border))] h-12 px-6 font-semibold text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))] transition-colors"
             >
               Contact support
@@ -291,6 +291,14 @@ export default function Pricing() {
           {loading ? (
             <div className="flex items-center justify-center py-20" role="status" aria-label="Loading plans">
               <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" aria-hidden="true" />
+            </div>
+          ) : plans.length === 0 ? (
+            <div className="card-surface max-w-lg mx-auto px-6 py-10 text-center" role="status">
+              <p className="text-[15px] text-[hsl(var(--blue-900))] font-semibold">Plans couldn&rsquo;t load right now.</p>
+              <p className="mt-2 text-[14px] text-muted-foreground">
+                Please refresh, or call us on{' '}
+                <a href={`tel:${BRAND.phoneRaw}`} className="link-primary font-semibold">{BRAND.phone}</a>.
+              </p>
             </div>
           ) : (
             <div className="grid md:grid-cols-3 gap-6 md:gap-5 lg:gap-6 items-stretch pt-3">

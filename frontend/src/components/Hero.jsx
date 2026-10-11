@@ -3,7 +3,7 @@ import { Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import FilterBar, { DEFAULT_FILTERS } from './FilterBar';
-import { COUNTRIES, BRAND } from '../data/mock';
+import { COUNTRIES, BRAND, KEY_STATS } from '../data/mock';
 import { useI18n } from '../context/I18nContext';
 import HeroSearchLive from './HeroSearchLive';
 import TextFlipAnimation from './ui/TextFlipAnimation';
@@ -14,9 +14,9 @@ function TrustPill() {
   return (
     <div className="inline-flex items-center gap-2 rounded-full bg-white border border-[hsl(var(--border))] shadow-sm px-3.5 py-1.5 text-[13px]">
       <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-      <span className="text-[hsl(var(--blue-900))] font-semibold">12,000+ visas processed</span>
+      <span className="text-[hsl(var(--blue-900))] font-semibold">{KEY_STATS.visasProcessed} visas processed</span>
       <span className="text-muted-foreground" aria-hidden="true">·</span>
-      <span className="text-muted-foreground">98.6% approval</span>
+      <span className="text-muted-foreground">{KEY_STATS.approvalRate} approval</span>
     </div>
   );
 }

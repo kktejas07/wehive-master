@@ -1,5 +1,5 @@
 import { Quote, Star } from 'lucide-react';
-import { TESTIMONIALS } from '../data/mock';
+import { TESTIMONIALS, KEY_STATS } from '../data/mock';
 import Reveal from './Reveal';
 
 function TestimonialCard({ t, instance }) {
@@ -61,7 +61,7 @@ export default function Testimonials() {
             Loved by travelers
           </div>
           <h2 className="mt-3 text-[30px] sm:text-[48px] leading-[1.05] font-display font-extrabold tracking-[-0.03em]">
-            <span className="gradient-text-hover">4.9 stars across 12,000+ visas.</span>{' '}
+            <span className="gradient-text-hover">{KEY_STATS.rating} stars across {KEY_STATS.visasProcessed} visas.</span>{' '}
             <span className="gradient-text">And counting.</span>
           </h2>
         </Reveal>

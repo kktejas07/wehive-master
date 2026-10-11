@@ -45,8 +45,9 @@ interface StatItem {
 
 const STATS: StatItem[] = [
   { id: 'visas',    Icon: ShieldCheck, value: 5847, label: 'Visas approved this month', suffix: '+' },
-  { id: 'rate',     Icon: TrendingUp,  value: 99,   label: 'Success rate',               suffix: '.2%' },
-  { id: 'countries',Icon: Globe2,      value: 250,  label: 'Countries supported',        suffix: '' },
+  // Keep in step with KEY_STATS in data/mock.js.
+  { id: 'rate',     Icon: TrendingUp,  value: 98,   label: 'Success rate',               suffix: '.6%' },
+  { id: 'countries',Icon: Globe2,      value: 60,   label: 'Countries supported',        suffix: '+' },
   { id: 'sla',      Icon: Clock,       value: 12,   label: 'Average minutes to apply',   suffix: 'm' },
   { id: 'happy',    Icon: Award,       value: 92,   label: 'Net promoter score',         suffix: '' },
 ];

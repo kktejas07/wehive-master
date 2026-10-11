@@ -491,7 +491,7 @@ Phone: ${phone}`;
                             <input id="visaassessment-phone-number" 
                               required 
                               type="tel" 
-                              placeholder="+91 90007 34326" 
+                              placeholder="+91 98765 43210" 
                               value={phone} 
                               onChange={(e) => setPhone(e.target.value)}
                               className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"

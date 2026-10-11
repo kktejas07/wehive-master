@@ -24,6 +24,7 @@ import {
   PhoneCall,
   Calendar,
 } from 'lucide-react';
+import { BRAND } from '../data/mock';
 
 const COUNTRY_META = {
   usa: { flag: '🇺🇸', label: 'USA', adj: 'US' },
@@ -645,7 +646,7 @@ export default function USVisaSlots() {
         axios.get(`${API}/usvisa/status`),
       ]);
       setSummary(summaryRes.data);
-      setWhatsappNumber('+91 9000734326');
+      setWhatsappNumber(BRAND.phone);
       setStatus(statusRes.data);
 
       if (statusRes.data.last_slot_detected_at) {
@@ -670,7 +671,7 @@ export default function USVisaSlots() {
         consulates: fb,
         overall: { total_slots: totalSlots, consulates_with_slots: Object.keys(fb).length, visa_type_counts: vtCounts },
       });
-      setWhatsappNumber('+91 9000734326');
+      setWhatsappNumber(BRAND.phone);
       setStatus({ check_interval_seconds: 7200, mode: 'wait_time_estimates' });
     } finally {
       setLoading(false);
@@ -754,6 +755,8 @@ export default function USVisaSlots() {
   };
 
   const meta = COUNTRY_META[selectedCountry] || COUNTRY_META['usa'];
+  // No live source configured: the backend (or the offline fallback) serves published estimates.
+  const estimatesOnly = summary?.source === 'wait_time_estimates' || status?.mode === 'wait_time_estimates';
   const consulateOrder = getConsulatesForCountry(selectedCountry);
 
   if (loading) {
@@ -791,7 +794,7 @@ export default function USVisaSlots() {
 
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
-              <RefreshCw className="w-3.5 h-3.5" /> Live Wait Times
+              <RefreshCw className="w-3.5 h-3.5" /> {estimatesOnly ? 'Published Wait Times' : 'Live Wait Times'}
             </div>
             <h1 className="font-display font-bold text-[32px] sm:text-[44px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               {meta.label} Visa Appointment Slots
@@ -805,11 +808,11 @@ export default function USVisaSlots() {
           <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-4 mb-8 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Live</span>
+                <div className={`w-2.5 h-2.5 rounded-full ${estimatesOnly ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{estimatesOnly ? 'Estimates' : 'Live'}</span>
               </div>
               <div className="text-[12px] text-muted-foreground">
-                Wait times refreshed regularly
+                {estimatesOnly ? 'Published consulate estimates, not live availability' : 'Wait times refreshed regularly'}
               </div>
             </div>
             <Button
@@ -886,7 +889,7 @@ export default function USVisaSlots() {
                 </Button>
                 <span className="text-white/60 text-[13px] hidden sm:inline">or</span>
                 <a
-                  href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '') || '919000734326'}?text=Hi%2C%20I%20need%20help%20with%20a%20${meta.adj}%20visa%20appointment.`}
+                  href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '') || BRAND.phoneRaw.slice(1)}?text=Hi%2C%20I%20need%20help%20with%20a%20${meta.adj}%20visa%20appointment.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 h-12 px-6 rounded-xl border border-white/30 text-white hover:bg-white/10 font-semibold text-[15px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
@@ -899,8 +902,8 @@ export default function USVisaSlots() {
               <div className="mt-4 flex items-center justify-center gap-2 text-[13px] text-white/70">
                 <PhoneCall className="w-4 h-4" />
                 <span>Call us: </span>
-                <a href={`tel:${(whatsappNumber || '+91 9000734326').replace(/[\s+]/g, '')}`} className="font-bold text-white hover:underline">
-                  {whatsappNumber || '+91 9000734326'}
+                <a href={`tel:${(whatsappNumber || BRAND.phone).replace(/[\s+]/g, '')}`} className="font-bold text-white hover:underline">
+                  {whatsappNumber || BRAND.phone}
                 </a>
               </div>
 
@@ -920,6 +923,8 @@ export default function USVisaSlots() {
               const data = summary?.consulates?.[cid];
               if (!data) return null;
               const available = data.total_slots > 0;
+              // Without a live data source the backend serves published estimates.
+              const isEstimate = data.is_estimate || data.source === 'estimate' || estimatesOnly;
               const bookingUrl = data.booking_url || FALLBACK_COUNTRIES[selectedCountry]?.[cid]?.booking_url || '#';
               return (
                 <div
@@ -933,6 +938,7 @@ export default function USVisaSlots() {
                       <div className="flex items-center gap-2">
                         <Building2 className="w-4 h-4 text-[hsl(var(--blue-700))]" />
                         <h3 className="font-bold text-[15px] text-[hsl(var(--blue-900))]">{data.city}</h3>
+                        {isEstimate && <span className="px-2 py-0.5 rounded-full text-[12px] font-semibold bg-amber-50 text-amber-800 border border-amber-200" title="Published wait-time estimate, not live availability">Estimated</span>}
                       </div>
                       <p className="text-[12px] text-muted-foreground mt-0.5">{data.jurisdiction || data.name}</p>
                     </div>
@@ -1054,11 +1060,11 @@ export default function USVisaSlots() {
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
               <a
-                href={`tel:${(whatsappNumber || '+91 9000734326').replace(/[\s+]/g, '')}`}
+                href={`tel:${(whatsappNumber || BRAND.phone).replace(/[\s+]/g, '')}`}
                 className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white font-bold text-[13px] transition"
               >
                 <Phone className="w-4 h-4" />
-                Call {whatsappNumber || '+91 9000734326'}
+                Call {whatsappNumber || BRAND.phone}
               </a>
               <a
                 href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '')}?text=Hi%2C%20I%20need%20help%20with%20a%20${meta.adj}%20visa%20appointment.`}
@@ -1104,9 +1110,12 @@ export default function USVisaSlots() {
                             <p className="text-[12px] text-muted-foreground">{slot.consulate_name || slot.consulate}</p>
                           </div>
                         </div>
+<div className="flex flex-col items-end gap-1">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-bold bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))]">
                           {slot.visa_name}
                         </span>
+                        {(slot.is_estimate || slot.source === 'estimate') && <span className="px-2 py-0.5 rounded-full text-[12px] font-semibold bg-amber-50 text-amber-800 border border-amber-200" title="Published wait-time estimate, not live availability">Estimated</span>}
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-3 mb-3">

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Link } from 'react-router-dom';
+import { BRAND } from '../data/mock';
 
 const SAMPLE_ALUMNI = [
   { id: 'a1', name: 'Priya Sharma', university: 'MIT', country: 'us', course: 'Computer Science', graduation_year: 2022, current_role: 'Software Engineer at Google', avatar: 'PS', rating: 4.8, reviews: 12, available: true, languages: ['English', 'Hindi'], bio: 'Former international student from India. Happy to help with MIT applications and US F-1 visa process.' },
@@ -22,7 +23,7 @@ const COUNTRY_LABELS = { us: 'United States', uk: 'United Kingdom', de: 'Germany
 
 const WHATSAPP_LINK = process.env.REACT_APP_COMMUNITY_WHATSAPP_LINK || 'https://chat.whatsapp.com/F0R1TYMOr8dLwIbr5jLRau';
 const TELEGRAM_LINK = process.env.REACT_APP_COMMUNITY_TELEGRAM_LINK || 'https://t.me/wehivecommunity';
-const PHONE_NUMBER = process.env.REACT_APP_COMMUNITY_PHONE_NUMBER || '+919000734326';
+const PHONE_NUMBER = process.env.REACT_APP_COMMUNITY_PHONE_NUMBER || BRAND.phoneRaw;
 
 export default function AlumniMentor({ compact = false }) {
   const [search, setSearch] = useState('');
