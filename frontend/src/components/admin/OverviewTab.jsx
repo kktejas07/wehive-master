@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight, History, Pencil, Plus, Trash2, Play } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, inr } from '../../lib/admin';
+import { adminClient, inr, runAggregators } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
-import { API } from '../../context/AuthContext';
-import axios from 'axios';
 
 // `accent` is accepted for API compatibility; all stat cards share one icon style.
 function MetricCard({ label, value, sub, Icon, accent, testid }) {
@@ -93,14 +91,8 @@ export default function OverviewTab() {
           <button
             onClick={async () => {
               setRunningAggregator(true);
-              try {
-                await axios.get(`${API}/public/aggregator-trigger`);
-                toast({ title: 'AI Aggregators Triggered', description: 'Scraping News, Blogs & Events in background.' });
-              } catch (e) {
-                toast({ title: 'Trigger failed', variant: 'destructive' });
-              } finally {
-                setRunningAggregator(false);
-              }
+              toast(await runAggregators(token));
+              setRunningAggregator(false);
             }}
             disabled={runningAggregator}
             className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[13px] font-semibold text-white inline-flex items-center gap-1.5 transition-colors disabled:opacity-50"

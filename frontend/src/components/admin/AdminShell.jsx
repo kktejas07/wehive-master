@@ -6,7 +6,7 @@ import { adminClient } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
-  Key, User, Building2, BookOpen, Database, FileText, Bot, Brain,
+  Key, User, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
@@ -19,6 +19,7 @@ const TABS = [
   { id: 'pricing',      to: '/admin/pricing',       label: 'Pricing',      Icon: Banknote,        testid: 'admin-nav-pricing' },
   { id: 'events',       to: '/admin/events',        label: 'Hero Events',  Icon: Megaphone,       testid: 'admin-nav-events' },
   { id: 'global-events',to: '/admin/global-events', label: 'Global Events',Icon: Globe,           testid: 'admin-nav-global-events' },
+  { id: 'moderation',   to: '/admin/moderation',    label: 'News & Blogs', Icon: Newspaper,       testid: 'admin-nav-moderation' },
   { id: 'requests',    to: '/admin/requests',      label: 'Requests',     Icon: ClipboardList,   testid: 'admin-nav-requests' },
   { id: 'promotions',  to: '/admin/promotions',    label: 'Promotions',   Icon: Tag,             testid: 'admin-nav-promotions' },
   { id: 'promocodes',  to: '/admin/promocodes',    label: 'Promo Codes',   Icon: Tag,             testid: 'admin-nav-promocodes' },

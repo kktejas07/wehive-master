@@ -29,6 +29,18 @@ export function apiClient(passedToken) {
   });
 }
 
+// Starts the news/blog/events aggregators. Resolves to a toast payload; a 409
+// means a run is already in progress.
+export async function runAggregators(passedToken) {
+  try {
+    await apiClient(passedToken).post('/agents/aggregators/run');
+    return { title: 'AI Aggregators Triggered', description: 'Fetching News, Blogs & Events in background.' };
+  } catch (e) {
+    if (e.response?.status === 409) return { title: 'Already running', description: 'An aggregator run is in progress.' };
+    return { title: 'Trigger failed', variant: 'destructive' };
+  }
+}
+
 export function downloadCsv(passedToken, kind) {
   const token = passedToken || preferredAdminToken();
   const url = `${API}/admin/export/${kind}.csv`;

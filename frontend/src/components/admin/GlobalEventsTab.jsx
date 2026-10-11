@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Loader2, CheckCircle, XCircle, Globe, ShieldAlert, Play } from 'lucide-react';
-import { apiClient } from '../../lib/admin';
+import { apiClient, runAggregators } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
-import { API } from '../../context/AuthContext';
-import axios from 'axios';
 
 export default function GlobalEventsTab() {
   const [events, setEvents] = useState([]);
@@ -55,14 +53,8 @@ export default function GlobalEventsTab() {
           <button
             onClick={async () => {
               setRunningAggregator(true);
-              try {
-                await axios.get(`${API}/public/aggregator-trigger`);
-                toast({ title: 'AI Aggregators Triggered', description: 'Scraping News, Blogs & Events in background.' });
-              } catch (e) {
-                toast({ title: 'Trigger failed', variant: 'destructive' });
-              } finally {
-                setRunningAggregator(false);
-              }
+              toast(await runAggregators());
+              setRunningAggregator(false);
             }}
             disabled={runningAggregator}
             className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white inline-flex items-center gap-1.5 transition disabled:opacity-50"

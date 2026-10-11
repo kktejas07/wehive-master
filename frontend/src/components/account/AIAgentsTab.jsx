@@ -22,7 +22,9 @@ const SEVERITY_COLORS = {
 };
 
 export default function AIAgentsTab() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  // /agents/run scans every user's data, so the backend only allows admins.
+  const isAdmin = !!user?.is_admin;
   const { toast } = useToast();
   const headers = { Authorization: `Bearer ${token}` };
   const [status, setStatus] = useState(null);
@@ -73,6 +75,7 @@ export default function AIAgentsTab() {
             Proactive agents that monitor your applications, documents, and deadlines.
           </p>
         </div>
+        {isAdmin && (
         <button
           onClick={runAgents} disabled={running}
           className="inline-flex items-center gap-1.5 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[14px] font-semibold hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 transition"
@@ -80,6 +83,7 @@ export default function AIAgentsTab() {
           {running ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
           {running ? 'Running...' : 'Run All Agents'}
         </button>
+        )}
       </div>
 
       {/* Status bar */}
@@ -158,7 +162,7 @@ export default function AIAgentsTab() {
             <div className="mt-1 text-[12px] text-muted-foreground space-y-1">
               <p>• Agents run automatically every hour and check for issues</p>
               <p>• Alerts appear in your <strong>notification bell</strong> (🔔 top-right)</p>
-              <p>• Click <strong>"Run All Agents"</strong> to trigger an immediate check</p>
+              {isAdmin && <p>• Click <strong>"Run All Agents"</strong> to trigger an immediate check</p>}
               <p>• Each alert includes a severity level and actionable message</p>
             </div>
           </div>
