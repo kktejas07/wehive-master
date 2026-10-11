@@ -40,24 +40,9 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
 
   if (isMobileScreen) {
     return (
+      // Real phone: the OS draws its own status bar, so no simulated one here.
+      // Height and safe-area padding come from #wehive-app-root in index.css.
       <div id="wehive-app-root" className="w-full h-screen bg-slate-50 dark:bg-slate-950 flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
-        {/* Safe Area Status Bar with WeHive Branding */}
-        <div className="bg-blue-950 text-white px-5 pt-3 pb-2.5 flex justify-between items-center select-none shrink-0 z-50">
-          <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded bg-red-600 flex items-center justify-center font-black text-white text-xs shadow-md">
-              W
-            </div>
-            <span className="text-sm font-black tracking-wider text-blue-100 font-mono">WEHIVE</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-blue-200 font-medium">
-            <span>{currentTime}</span>
-            <span className="opacity-40">|</span>
-            <div className="flex items-center gap-1">
-              <Signal className="w-3.5 h-3.5" />
-              <Wifi className="w-3.5 h-3.5" />
-            </div>
-          </div>
-        </div>
         <div className="flex-1 flex flex-col overflow-hidden relative">
           {children}
         </div>

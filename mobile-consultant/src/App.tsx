@@ -447,7 +447,7 @@ function AppContent() {
         </div>
 
         {/* Unified Bottom Tab Navigation bar */}
-        <div className={`shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 px-4 flex justify-around items-center z-40 shadow-lg select-none transition-colors duration-300 ${
+        <div className={`app-tab-bar shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 px-4 flex justify-around items-center z-40 shadow-lg select-none transition-colors duration-300 ${
           platform === "ios" ? "h-20 pb-5" : "h-16"
         }`}>
           {/* Tab Button: Home */}

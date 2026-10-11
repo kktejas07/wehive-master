@@ -93,3 +93,18 @@
 }
 
 
+
+/* Real-phone shell (DeviceFrame mobile branch). 100vh is the *largest* mobile viewport,
+   which pushed the bottom tab bar behind Safari's toolbar; dvh tracks the visible area.
+   viewport-fit=cover (index.html) lets us pad by the device's real safe areas. */
+#wehive-app-root {
+  height: 100vh;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+/* Use the real home-indicator inset instead of the simulator's fixed iOS/Android padding. */
+#wehive-app-root .app-tab-bar {
+  height: auto;
+  min-height: 4rem;
+  padding-bottom: env(safe-area-inset-bottom);
+}
