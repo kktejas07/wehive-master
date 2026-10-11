@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API, useAuth } from '../context/AuthContext';
-import { FAQS } from '../data/mock';
+import { FAQS, BRAND } from '../data/mock';
 
 const CATEGORIES = [
   { id: 'getting-started', label: 'Getting started', icon: Rocket },
@@ -90,7 +90,7 @@ function HiveChat({ token }) {
       const r = await axios.post(`${API}/chatbot/sessions/${sessionId}/messages`, { text }, { headers: { Authorization: `Bearer ${token}` } });
       setMessages((m) => [...m, { role: 'assistant', text: r.data.assistant_message?.text || '' }]);
     } catch {
-      setMessages((m) => [...m, { role: 'assistant', text: 'Sorry, I ran into a glitch. Please try again or contact us at +91 91132 56726.' }]);
+      setMessages((m) => [...m, { role: 'assistant', text: 'Sorry, I ran into a glitch. Please try again or contact us at ' + BRAND.consultantPhone + '.' }]);
     } finally {
       setLoading(false);
     }
@@ -234,13 +234,13 @@ export default function Help() {
                 <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Chat with Hive, our AI visa assistant, available 24/7 — or reach a counsellor directly.</p>
                 <div className="mt-5 grid grid-cols-2 gap-2">
                   <a
-                    href="https://wa.me/919113256726"
+                    href={`https://wa.me/${BRAND.consultantPhoneRaw.slice(1)}`}
                     className="inline-flex items-center justify-center gap-2 rounded-xl h-11 px-4 btn-accent text-[14px] font-semibold"
                   >
                     WhatsApp
                   </a>
                   <a
-                    href="tel:+919113256726"
+                    href={`tel:${BRAND.consultantPhoneRaw}`}
                     className="inline-flex items-center justify-center gap-2 rounded-xl h-11 px-4 btn-outline text-[14px] font-semibold"
                   >
                     Call us

@@ -7,6 +7,7 @@ import SuccessRibbon from '../components/SuccessRibbon';
 import { API } from '../context/AuthContext';
 import { Loader2, CheckCircle2, Clock, XCircle, AlertCircle, ChevronRight, ShieldCheck, Upload, Bell, Calendar, FileText, ListChecks, BellRing } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { BRAND } from '../data/mock';
 
 const STATUS_CONFIG = {
   draft: { color: 'slate', bg: 'bg-[hsl(var(--soft-bg))]', text: 'text-slate-700', icon: Clock, label: 'Draft', desc: 'Application started but not yet submitted' },
@@ -303,7 +304,7 @@ export default function TrackStatus() {
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
               <a
-                href="https://wa.me/919113256726"
+                href={`https://wa.me/${BRAND.consultantPhoneRaw.slice(1)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-xl bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] h-11 px-5 text-[14px] font-semibold hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] transition-colors"
@@ -311,10 +312,10 @@ export default function TrackStatus() {
                 <span>WhatsApp Us</span>
               </a>
               <a
-                href="tel:+919113256726"
+                href={`tel:${BRAND.consultantPhoneRaw}`}
                 className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--blue-700))] text-white h-11 px-5 text-[14px] font-semibold hover:bg-[hsl(var(--blue-800))] transition-colors"
               >
-                Call +91 91132 56726
+                Call {BRAND.consultantPhone}
               </a>
             </div>
           </motion.div>

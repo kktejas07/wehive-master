@@ -17,6 +17,7 @@ import {
   Sparkles,
   Globe,
 } from 'lucide-react';
+import { BRAND } from '../data/mock';
 
 const POPULAR_VISAS = [
   {
@@ -273,7 +274,7 @@ export default function MapView() {
                 AI Visa Finder
               </Link>
               <a
-                href="tel:+919113256726"
+                href={`tel:${BRAND.consultantPhoneRaw}`}
                 className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] text-white h-12 px-6 text-[15px] font-semibold hover:bg-[hsl(var(--accent-hover))] transition-colors"
               >
                 Call Now

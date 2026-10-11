@@ -1,7 +1,7 @@
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { ShieldCheck, Globe2, Heart, Compass, Phone, Mail, MapPin } from 'lucide-react';
-import { STATS, BRAND } from '../data/mock';
+import { STATS, BRAND, KEY_STATS } from '../data/mock';
 
 const VALUES = [
   { id: 'v1', icon: ShieldCheck, t: 'Honesty over hype', d: 'If a visa takes 14 days, we say 14 days. We do not promise instant approvals we cannot deliver.' },
@@ -76,7 +76,7 @@ export default function About() {
             <p className="lead mt-6 max-w-2xl">
               {BRAND.name} Immigration Services was founded with a simple
               promise — bridging dreams and connecting continents. From a small
-              office in Hyderabad we now process visas across 60+ countries, with
+              office in Hyderabad we now process visas across {KEY_STATS.countries} countries, with
               transparent fees, honest timelines, and real human counsellors who
               stay with you long after the stamp.
             </p>

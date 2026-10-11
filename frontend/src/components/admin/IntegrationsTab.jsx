@@ -299,7 +299,7 @@ export default function IntegrationsTab() {
       <Panel className="mb-4">
         <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Active OTP channel</div>
         <div className="mt-1 text-[22px] font-display font-bold text-white capitalize">
-          {(otpData?.otp_channel || 'unknown').replace('_', ' ')}
+          {!otpData ? 'Unknown' : otpData.otp_channel ? otpData.otp_channel.replace('_', ' ') : 'Not configured'}
         </div>
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {CHANNELS.map((c) => {

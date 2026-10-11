@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Shield, Clock, RefreshCw, CheckCircle2, AlertTriangle, ArrowRight, Phone } from 'lucide-react';
 import Reveal from './Reveal';
-import { BRAND } from '../data/mock';
+import { BRAND, KEY_STATS } from '../data/mock';
 
 const MISSED_CASES = [
   { name: 'Priya Sharma', missed_by: '2 days', reason: 'Singapore Passport Pickup Delay', avatar: 'PS' },
@@ -116,10 +116,10 @@ export default function OnTimeGuarantee() {
           <div className="inline-flex flex-col items-center gap-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[13px] font-semibold">
               <CheckCircle2 className="w-4 h-4" />
-              On-time delivery rate: 98.6%
+              On-time delivery rate: {KEY_STATS.onTimeRate}
             </div>
             <p className="text-muted-foreground text-[15px] max-w-md">
-              We process visas across 120+ destinations. Our PRO team monitors every application to ensure it reaches you on time.
+              We process visas across {KEY_STATS.countries} countries. Our PRO team monitors every application to ensure it reaches you on time.
             </p>
             <a
               href={`tel:${BRAND.phoneRaw}`}

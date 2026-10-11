@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Phone, Mail, ChevronDown, AlertTriangle, Stethoscope, Heart, Briefcase, Clock, Luggage, MessageCircle, MapPin, Pencil, ShieldCheck } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { BRAND } from '../data/mock';
 
 const COVERED = [
   { icon: Stethoscope, title: 'Medical Emergencies', desc: 'Urgent treatment or care for an ailing family member.' },
@@ -58,12 +59,12 @@ export default function EmergencyCare() {
                   Crisis doesn't wait for paperwork. Talk to a visa specialist now and get your application moving.
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                  <a href="tel:+919000734326" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent-hover))] text-white h-12 px-7 text-[15px] font-semibold transition-colors">
+                  <a href={`tel:${BRAND.phoneRaw}`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent-hover))] text-white h-12 px-7 text-[15px] font-semibold transition-colors">
                     <Phone className="w-4 h-4" />
                     Get emergency visa help
                   </a>
-                  <a href="tel:+919000734326" className="inline-flex items-center justify-center gap-2 rounded-xl bg-transparent hover:bg-white/10 text-white h-12 px-7 text-[15px] font-semibold transition-colors border border-white/30">
-                    +91 90007 34326
+                  <a href={`tel:${BRAND.phoneRaw}`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-transparent hover:bg-white/10 text-white h-12 px-7 text-[15px] font-semibold transition-colors border border-white/30">
+                    {BRAND.phone}
                   </a>
                 </div>
               </FadeIn>
@@ -151,13 +152,13 @@ export default function EmergencyCare() {
                 Call our emergency helpline or send us an email. We'll respond within minutes.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="tel:+919000734326" className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent-hover))] text-white h-12 px-7 text-[15px] font-semibold transition-colors">
+                <a href={`tel:${BRAND.phoneRaw}`} className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent-hover))] text-white h-12 px-7 text-[15px] font-semibold transition-colors">
                   <Phone className="w-4 h-4" />
-                  +91 90007 34326
+                  {BRAND.phone}
                 </a>
-                <a href="mailto:info@wehive.co.in" className="inline-flex items-center gap-2 rounded-xl bg-white border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] text-[hsl(var(--blue-900))] h-12 px-7 text-[15px] font-semibold transition-colors">
+                <a href={`mailto:${BRAND.email}`} className="inline-flex items-center gap-2 rounded-xl bg-white border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] text-[hsl(var(--blue-900))] h-12 px-7 text-[15px] font-semibold transition-colors">
                   <Mail className="w-4 h-4" />
-                  info@wehive.co.in
+                  {BRAND.email}
                 </a>
               </div>
               <p className="mt-4 text-[13px] text-muted-foreground">

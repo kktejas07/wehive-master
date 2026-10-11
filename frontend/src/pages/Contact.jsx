@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import { useToast } from '../hooks/use-toast';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
+import { BRAND } from '../data/mock';
 
 const SUBJECTS = [
   { id: 'general', label: 'General inquiry' },
@@ -195,15 +196,15 @@ export default function Contact() {
                 <h2 className="h-card">Other ways to reach us</h2>
                 <ul className="mt-4 space-y-3">
                   <li>
-                    <a href="tel:+919000734326" className="flex items-center gap-3 text-[15px] text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
+                    <a href={`tel:${BRAND.phoneRaw}`} className="flex items-center gap-3 text-[15px] text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
                       <span className="icon-tile h-9 w-9 rounded-lg"><Phone className="w-4 h-4" aria-hidden="true" /></span>
-                      +91 90007 34326
+                      {BRAND.phone}
                     </a>
                   </li>
                   <li>
-                    <a href="mailto:info@wehive.co.in" className="flex items-center gap-3 text-[15px] text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
+                    <a href={`mailto:${BRAND.email}`} className="flex items-center gap-3 text-[15px] text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
                       <span className="icon-tile h-9 w-9 rounded-lg"><Mail className="w-4 h-4" aria-hidden="true" /></span>
-                      info@wehive.co.in
+                      {BRAND.email}
                     </a>
                   </li>
                 </ul>
@@ -237,7 +238,7 @@ export default function Contact() {
                 <h2 className="h-card">Chat with Hive</h2>
                 <p className="mt-1.5 text-[15px] text-muted-foreground">Our AI visa assistant is available 24/7 to answer your questions instantly.</p>
                 <a
-                  href="https://wa.me/919000734326"
+                  href={`https://wa.me/${BRAND.phoneRaw.slice(1)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-4 inline-flex items-center justify-center h-11 px-4 rounded-xl btn-outline text-[14px] font-semibold"

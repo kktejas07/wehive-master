@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Star, Quote, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { KEY_STATS } from '../../data/mock';
 
 const TESTIMONIALS = [
   {
@@ -237,9 +238,9 @@ export default function AnimatedTestimonials() {
           className="mt-10 flex flex-wrap items-center justify-center gap-6"
         >
           {[
-            { label: '12,000+', sub: 'Visas Processed' },
-            { label: '98.6%', sub: 'Success Rate' },
-            { label: '4.9/5', sub: 'Customer Rating' },
+            { label: KEY_STATS.visasProcessed, sub: 'Visas Processed' },
+            { label: KEY_STATS.approvalRate, sub: 'Success Rate' },
+            { label: `${KEY_STATS.rating}/5`, sub: 'Customer Rating' },
           ].map((stat, i) => (
             <div key={i} className="text-center">
               <div className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">
