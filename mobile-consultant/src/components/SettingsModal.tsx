@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useColorScheme } from "../hooks/useColorScheme";
 import { SecurityLog, BiometricAnimationStyle } from "../types";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -231,6 +232,8 @@ export default function SettingsModal({
     }
   };
 
+  const dialog = useDialogA11y(isOpen, onClose);
+  const callDialog = useDialogA11y(!!activeDialContact, () => setActiveDialContact(null));
   if (!isOpen) return null;
 
   return (
@@ -241,32 +244,32 @@ export default function SettingsModal({
 
         {/* Settings Panel Bottom Sheet */}
         <motion.div
-          id="settings-panel-modal"
+          {...dialog} id="settings-panel-modal"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 220 }}
-          className="bg-white dark:bg-slate-900 rounded-t-[32px] shadow-2xl z-46 flex flex-col max-h-[90%] relative border-t border-slate-100 dark:border-slate-800"
+          className="bg-white rounded-t-[32px] shadow-2xl z-46 flex flex-col max-h-[90%] relative border-t border-slate-100"
         >
           {/* Handle bar for bottom sheet */}
           <div className="mx-auto w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mt-3 mb-1 shrink-0" />
 
           {/* Header */}
-          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+          <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <div className={`p-1.5 rounded-lg ${
-                colorScheme === "forced-navy" ? "bg-blue-100 text-blue-900" : "bg-red-100 text-red-900"
+                colorScheme === "forced-navy" ? "bg-blue-100 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300" : "bg-red-100 dark:bg-red-950/40 text-red-900 dark:text-red-300"
               }`}>
                 <Settings className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-800 dark:text-slate-100 tracking-tight">App Settings</h3>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono font-medium">Config & Preferences</p>
+                <h3 className="text-base font-black text-slate-800 tracking-tight">App Settings</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono font-medium">Config & Preferences</p>
               </div>
             </div>
-            <button
+            <button aria-label="Close settings"
               onClick={onClose}
-              className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+              className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
             >
               <X className="w-4.5 h-4.5" />
             </button>
@@ -277,7 +280,7 @@ export default function SettingsModal({
             
             {/* 0. More Tools & Services */}
             <div className="space-y-2.5">
-              <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block px-1">
+              <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block px-1">
                 More Tools & Services
               </span>
               <div className="grid grid-cols-2 gap-3">
@@ -302,7 +305,7 @@ export default function SettingsModal({
                       </div>
                       <div className="mt-2.5">
                         <div className="text-[12px] font-extrabold text-slate-800 dark:text-slate-200">{tool.label}</div>
-                        <p className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">{tool.desc}</p>
+                        <p className="text-[9.5px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{tool.desc}</p>
                       </div>
                     </button>
                   );
@@ -317,7 +320,7 @@ export default function SettingsModal({
                   <Shield className="w-4.5 h-4.5 text-blue-950 dark:text-blue-400 mt-0.5 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Biometric Protection</h4>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500">Lock application on startup or idle reload.</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Lock application on startup or idle reload.</p>
                   </div>
                 </div>
                 {/* Switch Button */}
@@ -338,7 +341,7 @@ export default function SettingsModal({
               {/* Configure Preferred Biometric Method (only shown if biometrics enabled) */}
               {biometricEnabled && (
                 <div className="pt-3 border-t border-slate-200/50 space-y-2.5 animate-fade-in">
-                  <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider font-mono block px-1">
+                  <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block px-1">
                     Preferred Biometric Method
                   </span>
                   <div className="grid grid-cols-3 gap-1.5">
@@ -352,11 +355,11 @@ export default function SettingsModal({
                             : colorScheme === "forced-red"
                             ? "bg-red-600 border-red-600 text-white shadow-sm shadow-red-500/10"
                             : "bg-blue-950 border-blue-950 text-white shadow-sm"
-                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
                       }`}
                     >
                       <Smartphone className="w-4 h-4" />
-                      <span className="text-[9px] font-bold">Auto ({platform === "ios" ? "Face" : "Finger"})</span>
+                      <span className="text-[11px] font-bold">Auto ({platform === "ios" ? "Face" : "Finger"})</span>
                     </button>
 
                     {/* Face ID */}
@@ -369,11 +372,11 @@ export default function SettingsModal({
                             : colorScheme === "forced-red"
                             ? "bg-red-600 border-red-600 text-white shadow-sm shadow-red-500/10"
                             : "bg-blue-950 border-blue-950 text-white shadow-sm"
-                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
                       }`}
                     >
                       <ScanFace className="w-4 h-4" />
-                      <span className="text-[9px] font-bold">Face ID</span>
+                      <span className="text-[11px] font-bold">Face ID</span>
                     </button>
 
                     {/* Fingerprint */}
@@ -386,17 +389,17 @@ export default function SettingsModal({
                             : colorScheme === "forced-red"
                             ? "bg-red-600 border-red-600 text-white shadow-sm shadow-red-500/10"
                             : "bg-blue-950 border-blue-950 text-white shadow-sm"
-                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
                       }`}
                     >
                       <Fingerprint className="w-4 h-4" />
-                      <span className="text-[9px] font-bold">Fingerprint</span>
+                      <span className="text-[11px] font-bold">Fingerprint</span>
                     </button>
                   </div>
 
                   {/* Interactive Biometric Animation Preview Tool */}
                   <div className="pt-3 border-t border-slate-200/50 space-y-2.5">
-                    <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider font-mono block px-1">
+                    <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block px-1">
                       Biometric Animation Style
                     </span>
 
@@ -419,27 +422,27 @@ export default function SettingsModal({
                             className={`p-2.5 rounded-xl border flex flex-col items-start gap-1 text-left transition-all cursor-pointer relative ${
                               isSelected
                                 ? colorScheme === "forced-navy"
-                                  ? "bg-blue-50/70 border-blue-500 ring-1 ring-blue-500 text-blue-900 shadow-sm"
+                                  ? "bg-blue-50/70 dark:bg-blue-950/40 border-blue-500 ring-1 ring-blue-500 text-blue-900 dark:text-blue-300 shadow-sm"
                                   : colorScheme === "forced-red"
-                                  ? "bg-red-50/70 border-red-500 ring-1 ring-red-500 text-red-900 shadow-sm"
+                                  ? "bg-red-50/70 dark:bg-red-950/40 border-red-500 ring-1 ring-red-500 text-red-900 dark:text-red-300 shadow-sm"
                                   : "bg-slate-900 border-slate-900 text-white shadow-sm"
-                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
                             }`}
                           >
                             <div className="flex items-center gap-1.5 w-full">
                               <div className={`p-1 rounded-lg ${
                                 isSelected 
-                                  ? colorScheme === "forced-navy" ? "bg-blue-600 text-white" : colorScheme === "forced-red" ? "bg-red-600 text-white" : "bg-white/10 text-white"
+                                  ? colorScheme === "forced-navy" ? "bg-blue-600 text-white" : colorScheme === "forced-red" ? "bg-red-600 text-white" : "bg-white/10 dark:bg-slate-900 text-white"
                                   : "bg-slate-100 text-slate-500"
                               }`}>
                                 <Icon className="w-3.5 h-3.5" />
                               </div>
-                              <span className="text-[10px] font-bold truncate">{style.label}</span>
+                              <span className="text-[11px] font-bold truncate">{style.label}</span>
                             </div>
-                            <span className={`text-[8px] mt-0.5 leading-tight ${
+                            <span className={`text-[11px] mt-0.5 leading-tight ${
                               isSelected 
                                 ? colorScheme === "forced-navy" ? "text-blue-700/85" : colorScheme === "forced-red" ? "text-red-700/85" : "text-slate-300"
-                                : "text-slate-400"
+                                : "text-slate-500 dark:text-slate-400"
                             }`}>
                               {style.desc}
                             </span>
@@ -455,10 +458,10 @@ export default function SettingsModal({
 
                       {/* Top indicator bar */}
                       <div className="absolute top-2 left-3 right-3 flex justify-between items-center z-10">
-                        <span className="text-[7px] font-mono font-black tracking-widest text-blue-400/80 uppercase">
+                        <span className="text-[11px] font-mono font-black tracking-widest text-blue-400/80 uppercase">
                           PREVIEW: {biometricAnimationStyle}
                         </span>
-                        <span className="text-[7px] font-mono font-bold text-slate-500">
+                        <span className="text-[11px] font-mono font-bold text-slate-400">
                           {previewState === "testing" ? `${previewProgress}%` : previewState === "success" ? "VERIFIED" : "IDLE"}
                         </span>
                       </div>
@@ -619,14 +622,14 @@ export default function SettingsModal({
                       <button
                         onClick={() => setPreviewState("testing")}
                         disabled={previewState !== "idle"}
-                        className="absolute bottom-2 right-2 px-2 py-1 bg-white/5 hover:bg-white/10 active:bg-white/20 disabled:opacity-40 rounded-lg text-[8px] font-bold text-slate-300 hover:text-white font-mono flex items-center gap-1 border border-white/5 transition-all cursor-pointer"
+                        className="absolute bottom-2 right-2 px-2 py-1 bg-white/5 dark:bg-slate-900 hover:bg-white/10 active:bg-white/20 disabled:opacity-40 rounded-lg text-[11px] font-bold text-slate-300 hover:text-white font-mono flex items-center gap-1 border border-white/5 transition-all cursor-pointer"
                       >
                         <Play className="w-2.5 h-2.5 text-blue-400 fill-blue-400" />
                         SIMULATE
                       </button>
 
                       {/* Live feedback status message */}
-                      <span className="absolute bottom-2 left-3 text-[8px] font-mono text-slate-500">
+                      <span className="absolute bottom-2 left-3 text-[11px] font-mono text-slate-400">
                         {previewState === "testing" 
                           ? previewProgress < 50 ? "Analyzing biometric features..." : "Validating secure token..."
                           : previewState === "success" ? "Authorized successfully!" : "Click simulate to test style"
@@ -641,7 +644,7 @@ export default function SettingsModal({
                           onClose();
                           onLockApp();
                         }}
-                        className="w-full py-2 px-3 rounded-xl bg-slate-800 text-white font-mono text-[10px] font-bold hover:bg-slate-900 transition-colors flex items-center justify-center gap-1.5 shadow-sm shadow-slate-950/10 cursor-pointer"
+                        className="w-full py-2 px-3 rounded-xl bg-slate-800 text-white font-mono text-[11px] font-bold hover:bg-slate-900 transition-colors flex items-center justify-center gap-1.5 shadow-sm shadow-slate-950/10 cursor-pointer"
                       >
                         <Lock className="w-3.5 h-3.5" />
                         TEST BIOMETRIC LOCK NOW
@@ -661,13 +664,13 @@ export default function SettingsModal({
                     <ShieldAlert className="w-5 h-5 animate-pulse" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                    <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
                       Emergency Security Hub
-                      <span className="px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-[8px] font-mono font-bold tracking-widest uppercase">
+                      <span className="px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-[11px] font-mono font-bold tracking-widest uppercase">
                         Active Support
                       </span>
                     </h4>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium mt-0.5">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium mt-0.5">
                       Destination country first-response lines & customized speed dials.
                     </p>
                   </div>
@@ -677,14 +680,14 @@ export default function SettingsModal({
               {/* Destination Country Speed Dial Selector */}
               <div className="bg-white dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono flex items-center gap-1">
+                  <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono flex items-center gap-1">
                     <Globe className="w-3 h-3 text-slate-400" />
                     Destination Helpline
                   </span>
                   <select
                     value={securityActiveCountry}
                     onChange={(e) => setSecurityActiveCountry(e.target.value)}
-                    className="text-[10px] font-bold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
+                    className="text-[11px] font-bold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
                   >
                     <option value="germany">Germany 🇩🇪</option>
                     <option value="canada">Canada 🇨🇦</option>
@@ -704,21 +707,21 @@ export default function SettingsModal({
                     >
                       <div className="flex-1 min-w-0 pr-2">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 truncate">
+                          <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 truncate">
                             {contact.label}
                           </span>
-                          <span className="px-1.5 py-0.2 bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 text-[8px] font-bold rounded">
+                          <span className="px-1.5 py-0.2 bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 text-[11px] font-bold rounded">
                             {contact.number}
                           </span>
                         </div>
-                        <p className="text-[9px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                           {contact.description}
                         </p>
                       </div>
 
                       <button
                         onClick={() => handleTriggerDial(contact.label, contact.number)}
-                        className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[9px] font-bold flex items-center gap-1 shadow-sm hover:shadow shadow-rose-500/15 cursor-pointer transition-all active:scale-95 shrink-0 animate-fade-in"
+                        className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 shadow-sm hover:shadow shadow-rose-500/15 cursor-pointer transition-all active:scale-95 shrink-0 animate-fade-in"
                         title={`One-Touch Speed Dial ${contact.label}`}
                       >
                         <PhoneCall className="w-3 h-3" />
@@ -732,14 +735,14 @@ export default function SettingsModal({
               {/* Custom Student Personal Speed Dials */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-1">
-                  <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono flex items-center gap-1">
+                  <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono flex items-center gap-1">
                     <UserPlus className="w-3 h-3 text-slate-400" />
                     My Speed Dials ({customContacts.filter(c => c.countryId === securityActiveCountry).length})
                   </span>
                   
                   <button
                     onClick={() => setIsCustomFormOpen(!isCustomFormOpen)}
-                    className="text-[9px] font-black text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-0.5 cursor-pointer"
+                    className="text-[11px] font-black text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-0.5 cursor-pointer"
                   >
                     <Plus className="w-2.5 h-2.5" />
                     {isCustomFormOpen ? "CANCEL" : "ADD CONTACT"}
@@ -756,43 +759,43 @@ export default function SettingsModal({
                       onSubmit={handleAddContact}
                       className="bg-white dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 space-y-2.5 overflow-hidden"
                     >
-                      <span className="text-[8px] font-black uppercase text-slate-400 dark:text-slate-500 font-mono block">
+                      <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-500 font-mono block">
                         Add New Speed Dial ({getCountryName(securityActiveCountry)})
                       </span>
                       
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-1">
-                          <label className="text-[8px] font-bold text-slate-500 dark:text-slate-400">CONTACT NAME</label>
+                          <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">CONTACT NAME</label>
                           <input
                             type="text"
                             required
                             placeholder="e.g. Local Guardian"
                             value={newContactName}
                             onChange={(e) => setNewContactName(e.target.value)}
-                            className="w-full text-[10px] bg-slate-50 dark:bg-slate-800 px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-rose-500"
+                            className="w-full text-[11px] bg-slate-50 dark:bg-slate-800 px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-rose-500"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[8px] font-bold text-slate-500 dark:text-slate-400">PHONE NUMBER</label>
+                          <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">PHONE NUMBER</label>
                           <input
                             type="tel"
                             required
                             placeholder="e.g. +49 152 123456"
                             value={newContactNumber}
                             onChange={(e) => setNewContactNumber(e.target.value)}
-                            className="w-full text-[10px] bg-slate-50 dark:bg-slate-800 px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-rose-500"
+                            className="w-full text-[11px] bg-slate-50 dark:bg-slate-800 px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-rose-500"
                           />
                         </div>
                       </div>
 
                       <div className="flex gap-2 items-end pt-1">
                         <div className="flex-1 space-y-1">
-                          <label className="text-[8px] font-bold text-slate-500 dark:text-slate-400">RELATIONSHIP TYPE</label>
+                          <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">RELATIONSHIP TYPE</label>
                           <select
                             value={newContactRelationship}
                             onChange={(e) => setNewContactRelationship(e.target.value)}
-                            className="w-full text-[10px] bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none"
+                            className="w-full text-[11px] bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none"
                           >
                             <option value="Guardian">Local Guardian</option>
                             <option value="Host Family">Host Family</option>
@@ -806,7 +809,7 @@ export default function SettingsModal({
 
                         <button
                           type="submit"
-                          className="px-4 py-1.5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-bold rounded-lg text-[10px] flex items-center gap-1 shrink-0 h-8 cursor-pointer"
+                          className="px-4 py-1.5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-bold rounded-lg text-[11px] flex items-center gap-1 shrink-0 h-8 cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           Save Contact
@@ -819,7 +822,7 @@ export default function SettingsModal({
                 {/* Custom Contacts for Selected Country */}
                 <div className="space-y-1.5 animate-fade-in">
                   {customContacts.filter(c => c.countryId === securityActiveCountry).length === 0 ? (
-                    <div className="text-center py-4 bg-white/40 dark:bg-slate-900/30 rounded-xl border border-slate-150 dark:border-slate-800/40 text-[9px] text-slate-400 font-medium">
+                    <div className="text-center py-4 bg-white/40 dark:bg-slate-900/30 rounded-xl border border-slate-150 dark:border-slate-800/40 text-[11px] text-slate-400 font-medium">
                       No custom contacts added for {getCountryName(securityActiveCountry)} yet.
                     </div>
                   ) : (
@@ -830,14 +833,14 @@ export default function SettingsModal({
                       >
                         <div className="flex-1 min-w-0 pr-2">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-bold text-slate-800 dark:text-slate-100 truncate">
+                            <span className="text-[11px] font-bold text-slate-800 truncate">
                               {contact.name}
                             </span>
-                            <span className="px-1 py-0.1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[7px] font-mono rounded">
+                            <span className="px-1 py-0.1 bg-slate-100 text-slate-600 dark:text-slate-400 text-[11px] font-mono rounded">
                               {contact.relationship}
                             </span>
                           </div>
-                          <p className="text-[9px] text-slate-400 font-mono tracking-tight mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono tracking-tight mt-0.5">
                             {contact.number}
                           </p>
                         </div>
@@ -872,16 +875,16 @@ export default function SettingsModal({
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
-                  <History className="w-4.5 h-4.5 text-blue-950 mt-0.5 shrink-0" />
+                  <History className="w-4.5 h-4.5 text-blue-950 dark:text-blue-300 mt-0.5 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-slate-800">Security Audit Logs</h4>
-                    <p className="text-[10px] text-slate-400 font-sans">Validation attempt timestamps & statuses.</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans">Validation attempt timestamps & statuses.</p>
                   </div>
                 </div>
                 {securityLogs.length > 0 && onClearLogs && (
                   <button
                     onClick={onClearLogs}
-                    className="text-[9px] font-black text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 font-mono transition-colors cursor-pointer"
+                    className="text-[11px] font-black text-red-600 dark:text-red-300 hover:text-red-700 hover:underline flex items-center gap-1 font-mono transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3 h-3" />
                     CLEAR LOGS
@@ -892,9 +895,9 @@ export default function SettingsModal({
               {/* Logs Content Scroll Container */}
               <div className="max-h-44 overflow-y-auto pr-1 space-y-1.5 scrollbar-thin">
                 {securityLogs.length === 0 ? (
-                  <div className="text-center py-6 px-4 bg-white rounded-xl border border-slate-200/40 text-slate-400">
-                    <p className="text-[10px] font-bold">No security events logged.</p>
-                    <p className="text-[8px] mt-0.5 leading-relaxed font-sans">Unlocking, failing validations, or manual bypass operations will register audit trails here.</p>
+                  <div className="text-center py-6 px-4 bg-white rounded-xl border border-slate-200/40 dark:border-slate-800 text-slate-400">
+                    <p className="text-[11px] font-bold">No security events logged.</p>
+                    <p className="text-[11px] mt-0.5 leading-relaxed font-sans">Unlocking, failing validations, or manual bypass operations will register audit trails here.</p>
                   </div>
                 ) : (
                   securityLogs.map((log) => {
@@ -902,20 +905,20 @@ export default function SettingsModal({
                     return (
                       <div 
                         key={log.id} 
-                        className="p-2.5 bg-white rounded-xl border border-slate-100 flex flex-col gap-1 text-[10px] font-mono hover:bg-slate-50/50 transition-colors"
+                        className="p-2.5 bg-white rounded-xl border border-slate-100 flex flex-col gap-1 text-[11px] font-mono hover:bg-slate-50/50 transition-colors"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
                             <span className={`w-1.5 h-1.5 rounded-full ${isSuccess ? "bg-emerald-500 shadow-sm shadow-emerald-500/50" : "bg-red-500 shadow-sm shadow-red-500/50"}`} />
-                            <span className={`font-black tracking-wide ${isSuccess ? "text-emerald-600" : "text-red-600"}`}>
+                            <span className={`font-black tracking-wide ${isSuccess ? "text-emerald-600 dark:text-emerald-300" : "text-red-600 dark:text-red-300"}`}>
                               {log.status.toUpperCase()}
                             </span>
                           </div>
-                          <span className="text-slate-400 text-[8px] font-medium">{formatLogTime(log.timestamp)}</span>
+                          <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">{formatLogTime(log.timestamp)}</span>
                         </div>
 
-                        <div className="flex items-center justify-between text-slate-500 text-[9px] mt-0.5">
-                          <span className="flex items-center gap-1 font-sans font-medium text-slate-500">
+                        <div className="flex items-center justify-between text-slate-500 text-[11px] mt-0.5">
+                          <span className="flex items-center gap-1 font-sans font-medium text-slate-500 dark:text-slate-400">
                             {log.method === "face" ? (
                               <ScanFace className="w-3 h-3 text-slate-400" />
                             ) : log.method === "fingerprint" ? (
@@ -925,7 +928,7 @@ export default function SettingsModal({
                             )}
                             {log.method === "system" ? "Auto / System" : log.method === "face" ? "Face ID" : "Fingerprint"}
                           </span>
-                          <span className="text-[9px] font-bold text-slate-600 font-sans truncate max-w-[140px]" title={log.failReason}>
+                          <span className="text-[11px] font-bold text-slate-600 font-sans truncate max-w-[140px]" title={log.failReason}>
                             {log.failReason || "Authorized Successfully"}
                           </span>
                         </div>
@@ -943,7 +946,7 @@ export default function SettingsModal({
                   <Palette className="w-4.5 h-4.5 text-blue-950 dark:text-blue-400 mt-0.5 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Visual Theme Preference</h4>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500">Choose the global accent colors & background feel.</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Choose the global accent colors & background feel.</p>
                   </div>
                 </div>
 
@@ -953,12 +956,12 @@ export default function SettingsModal({
                     onClick={() => setColorScheme("system")}
                     className={`p-2.5 rounded-xl border flex flex-col items-center gap-1.5 transition-all text-center cursor-pointer ${
                       colorScheme === "system"
-                        ? "bg-white dark:bg-slate-800 border-blue-950 dark:border-slate-100 ring-2 ring-blue-950/20 dark:ring-white/20 text-slate-800 dark:text-slate-100 font-extrabold shadow-sm"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        ? "bg-white dark:bg-slate-800 border-blue-950 dark:border-slate-100 ring-2 ring-blue-950/20 dark:ring-white/20 text-slate-800 font-extrabold shadow-sm"
+                        : "bg-white border-slate-200 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
                     }`}
                   >
                     <div className="w-6 h-3 rounded bg-blue-950 dark:bg-blue-400" />
-                    <span className="text-[10px]">System Blue</span>
+                    <span className="text-[11px]">System Blue</span>
                   </button>
 
                   {/* Navy Theme */}
@@ -966,12 +969,12 @@ export default function SettingsModal({
                     onClick={() => setColorScheme("forced-navy")}
                     className={`p-2.5 rounded-xl border flex flex-col items-center gap-1.5 transition-all text-center cursor-pointer ${
                       colorScheme === "forced-navy"
-                        ? "bg-white dark:bg-slate-800 border-blue-600 ring-2 ring-blue-600/20 text-slate-800 dark:text-slate-100 font-extrabold shadow-sm"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        ? "bg-white dark:bg-slate-800 border-blue-600 ring-2 ring-blue-600/20 text-slate-800 font-extrabold shadow-sm"
+                        : "bg-white border-slate-200 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
                     }`}
                   >
                     <div className="w-6 h-3 rounded bg-blue-600" />
-                    <span className="text-[10px]">Cool Navy</span>
+                    <span className="text-[11px]">Cool Navy</span>
                   </button>
 
                   {/* Red Theme */}
@@ -979,19 +982,19 @@ export default function SettingsModal({
                     onClick={() => setColorScheme("forced-red")}
                     className={`p-2.5 rounded-xl border flex flex-col items-center gap-1.5 transition-all text-center cursor-pointer ${
                       colorScheme === "forced-red"
-                        ? "bg-white dark:bg-slate-800 border-red-600 ring-2 ring-red-600/20 text-slate-800 dark:text-slate-100 font-extrabold shadow-sm"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        ? "bg-white dark:bg-slate-800 border-red-600 ring-2 ring-red-600/20 text-slate-800 font-extrabold shadow-sm"
+                        : "bg-white border-slate-200 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
                     }`}
                   >
                     <div className="w-6 h-3 rounded bg-red-600" />
-                    <span className="text-[10px]">Stone Red</span>
+                    <span className="text-[11px]">Stone Red</span>
                   </button>
                 </div>
               </div>
 
               {/* Dark Mode Toggle */}
               <div className="pt-3 border-t border-slate-200/50 dark:border-slate-800/60 space-y-2.5">
-                <span className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block px-1">
+                <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block px-1">
                   Dark Mode Theme
                 </span>
                 <div className="grid grid-cols-3 gap-2">
@@ -1000,12 +1003,12 @@ export default function SettingsModal({
                     onClick={() => setDarkMode("light")}
                     className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-center cursor-pointer ${
                       darkMode === "light"
-                        ? "bg-white dark:bg-slate-800 border-amber-500 ring-2 ring-amber-500/20 text-slate-800 dark:text-slate-100 font-extrabold shadow-sm"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        ? "bg-white dark:bg-slate-800 border-amber-500 ring-2 ring-amber-500/20 text-slate-800 font-extrabold shadow-sm"
+                        : "bg-white border-slate-200 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
                     }`}
                   >
                     <Sun className="w-4 h-4 text-amber-500" />
-                    <span className="text-[10px]">Light</span>
+                    <span className="text-[11px]">Light</span>
                   </button>
 
                   {/* Dark */}
@@ -1013,12 +1016,12 @@ export default function SettingsModal({
                     onClick={() => setDarkMode("dark")}
                     className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-center cursor-pointer ${
                       darkMode === "dark"
-                        ? "bg-white dark:bg-slate-800 border-indigo-500 ring-2 ring-indigo-500/20 text-slate-800 dark:text-slate-100 font-extrabold shadow-sm"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        ? "bg-white dark:bg-slate-800 border-indigo-500 ring-2 ring-indigo-500/20 text-slate-800 font-extrabold shadow-sm"
+                        : "bg-white border-slate-200 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
                     }`}
                   >
                     <Moon className="w-4 h-4 text-indigo-500" />
-                    <span className="text-[10px]">Dark</span>
+                    <span className="text-[11px]">Dark</span>
                   </button>
 
                   {/* System */}
@@ -1026,12 +1029,12 @@ export default function SettingsModal({
                     onClick={() => setDarkMode("system")}
                     className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all text-center cursor-pointer ${
                       darkMode === "system"
-                        ? "bg-white dark:bg-slate-800 border-emerald-500 ring-2 ring-emerald-500/20 text-slate-800 dark:text-slate-100 font-extrabold shadow-sm"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        ? "bg-white dark:bg-slate-800 border-emerald-500 ring-2 ring-emerald-500/20 text-slate-800 font-extrabold shadow-sm"
+                        : "bg-white border-slate-200 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
                     }`}
                   >
                     <Monitor className="w-4 h-4 text-emerald-500" />
-                    <span className="text-[10px]">System</span>
+                    <span className="text-[11px]">System</span>
                   </button>
                 </div>
               </div>
@@ -1041,10 +1044,10 @@ export default function SettingsModal({
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="flex gap-2">
-                  <WifiOff className="w-4.5 h-4.5 text-blue-950 mt-0.5 shrink-0" />
+                  <WifiOff className="w-4.5 h-4.5 text-blue-950 dark:text-blue-300 mt-0.5 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-slate-800">Low Connectivity Simulator</h4>
-                    <p className="text-[10px] text-slate-400">Forces the app to load cached guides & evaluate profiles offline.</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Forces the app to load cached guides & evaluate profiles offline.</p>
                   </div>
                 </div>
                 {/* Switch Button */}
@@ -1067,10 +1070,10 @@ export default function SettingsModal({
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="flex gap-2">
-                  <Wifi className="w-4.5 h-4.5 text-emerald-600 mt-0.5 shrink-0" />
+                  <Wifi className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-300 mt-0.5 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-slate-800">Auto Offline Sync</h4>
-                    <p className="text-[10px] text-slate-400">Pushes cached local profile evaluations to WeHive cloud automatically when a stable connection returns.</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Pushes cached local profile evaluations to WeHive cloud automatically when a stable connection returns.</p>
                   </div>
                 </div>
                 {/* Switch Button */}
@@ -1090,15 +1093,15 @@ export default function SettingsModal({
             </div>
 
             {/* 4. Safe Storage Audit & Status */}
-            <div className="p-4 bg-slate-100/50 rounded-2xl border border-slate-200/40 text-[10px] text-slate-500 font-mono space-y-1.5">
-              <span className="font-bold text-slate-700 block text-[9px] uppercase tracking-wide">Client Environment Verification</span>
+            <div className="p-4 bg-slate-100/50 dark:bg-slate-800 rounded-2xl border border-slate-200/40 dark:border-slate-800 text-[11px] text-slate-500 font-mono space-y-1.5">
+              <span className="font-bold text-slate-700 block text-[11px] uppercase tracking-wide">Client Environment Verification</span>
               <div className="flex justify-between">
                 <span>Local Platform Sim:</span>
                 <span className="text-slate-800 font-bold uppercase">{platform}</span>
               </div>
               <div className="flex justify-between">
                 <span>Database Vault State:</span>
-                <span className="text-emerald-600 font-bold">ACTIVE & LOCAL</span>
+                <span className="text-emerald-600 dark:text-emerald-300 font-bold">ACTIVE & LOCAL</span>
               </div>
               <div className="flex justify-between">
                 <span>Offline Cache Status:</span>
@@ -1125,11 +1128,11 @@ export default function SettingsModal({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl z-50 flex flex-col justify-between p-6 select-none rounded-t-[32px] overflow-hidden"
+                {...callDialog} className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl z-50 flex flex-col justify-between p-6 select-none rounded-t-[32px] overflow-hidden"
               >
                 {/* Call Status & Country */}
                 <div className="flex flex-col items-center mt-12 text-center space-y-1">
-                  <span className="text-[8px] font-black uppercase text-emerald-400 tracking-widest font-mono bg-emerald-500/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="text-[11px] font-black uppercase text-emerald-400 tracking-widest font-mono bg-emerald-500/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                     Secure Student Line Connected
                   </span>
@@ -1142,7 +1145,7 @@ export default function SettingsModal({
                     {activeDialContact.number}
                   </p>
 
-                  <p className="text-[10px] text-rose-400 font-bold tracking-tight animate-pulse pt-2 uppercase">
+                  <p className="text-[11px] text-rose-400 font-bold tracking-tight animate-pulse pt-2 uppercase">
                     SIMULATING ONE-TOUCH EMERGENCY CALL...
                   </p>
                 </div>
@@ -1179,7 +1182,7 @@ export default function SettingsModal({
                     <span className="text-2xl font-mono font-bold text-white tracking-widest">
                       {formatCallTime(callingDuration)}
                     </span>
-                    <span className="text-[9px] text-slate-500 block font-mono mt-1">
+                    <span className="text-[11px] text-slate-500 block font-mono mt-1">
                       AUDIO SIMULATED CHANNELS READY
                     </span>
                   </div>
@@ -1194,7 +1197,7 @@ export default function SettingsModal({
                       }`}
                     >
                       {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
-                      <span className="text-[7px] font-mono font-bold">MUTE</span>
+                      <span className="text-[11px] font-mono font-bold">MUTE</span>
                     </button>
 
                     {/* Speaker button */}
@@ -1205,13 +1208,13 @@ export default function SettingsModal({
                       }`}
                     >
                       <Volume2 className={`w-4 h-4 ${isSpeakerOn ? "text-emerald-400" : ""}`} />
-                      <span className="text-[7px] font-mono font-bold">SPEAKER</span>
+                      <span className="text-[11px] font-mono font-bold">SPEAKER</span>
                     </button>
 
                     {/* Info button */}
                     <div className="p-3.5 rounded-full border bg-slate-900 border-slate-800 flex flex-col items-center gap-1 text-slate-400">
                       <Shield className="w-4 h-4 text-blue-400" />
-                      <span className="text-[7px] font-mono font-bold">SECURE</span>
+                      <span className="text-[11px] font-mono font-bold">SECURE</span>
                     </div>
                   </div>
 

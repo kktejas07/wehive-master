@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* dark: utilities follow the in-app theme (useColorScheme toggles .dark on <html>),
+   not only the OS setting - Tailwind 4 defaults to prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
@@ -63,7 +67,8 @@
 }
 
 .dark .text-slate-500 {
-  color: #64748b !important;
+  /* was #64748b (~3.7:1 on dark cards); slate-400 meets 4.5:1 */
+  color: #94a3b8 !important;
 }
 
 .dark .border-slate-100 {
@@ -93,3 +98,41 @@
 }
 
 
+
+/* Real-phone shell (DeviceFrame mobile branch). 100vh is the *largest* mobile viewport,
+   which pushed the bottom tab bar behind Safari's toolbar; dvh tracks the visible area.
+   viewport-fit=cover (index.html) lets us pad by the device's real safe areas. */
+#wehive-app-root {
+  height: 100vh;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+/* Use the real home-indicator inset instead of the simulator's fixed iOS/Android padding. */
+#wehive-app-root .app-tab-bar {
+  height: auto;
+  min-height: 4rem;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Honour the OS "reduce motion" setting for CSS animations/transitions
+   (motion/react is handled by <MotionConfig reducedMotion="user"> in main.tsx,
+   Lottie by LottiePlayer). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus for controls that strip the outline without adding their own
+   focus style (WCAG 2.4.7). Elements with focus:ring / focus:outline-* / focus:border /
+   focus-visible: classes keep their own styling. */
+:root { --focus-ring: #1d4ed8; }
+.dark { --focus-ring: #93c5fd; }
+:is(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible:not([class*="focus:ring"]):not([class*="focus:outline-"]):not([class*="focus:border"]):not([class*="focus-visible:"]) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+[role="dialog"][tabindex="-1"]:focus { outline: none; }

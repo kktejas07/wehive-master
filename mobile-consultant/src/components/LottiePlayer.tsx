@@ -38,11 +38,13 @@ export default function LottiePlayer({
           containerRef.current.innerHTML = "";
         }
 
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         anim = lottie.loadAnimation({
           container: containerRef.current,
           renderer: "svg",
-          loop,
-          autoplay,
+          // Honour the OS "reduce motion" setting: show a still first frame instead.
+          loop: loop && !reduceMotion,
+          autoplay: autoplay && !reduceMotion,
           animationData: data,
         });
         setIsLoading(false);

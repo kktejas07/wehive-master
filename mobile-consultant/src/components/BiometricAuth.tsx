@@ -4,6 +4,7 @@ import { Fingerprint, ScanFace, Check, RefreshCw, Lock, ShieldCheck, HelpCircle 
 import LottiePlayer from "./LottiePlayer";
 import { BiometricAnimationStyle } from "../types";
 import WeHiveLogo from "./WeHiveLogo";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface BiometricAuthProps {
   platform: "ios" | "android";
@@ -26,6 +27,7 @@ export default function BiometricAuth({
   const [progress, setProgress] = useState(0);
   const [failCount, setFailCount] = useState(0);
   const hasTriggeredSuccess = useRef(false);
+  const dialog = useDialogA11y(true);
 
   // Auto start scanning on mount
   useEffect(() => {
@@ -80,7 +82,12 @@ export default function BiometricAuth({
     }, 1600);
   };
 
-  // Trigger onSuccess and onLogAttempt when authentication is successful
+  // Trigger onSuccess and onLogAttempt when authentication is successful.
+  // onSuccess is read through a ref: the parent passes a new inline callback on every
+  // render (onLogAttempt itself re-renders it), and depending on it cancelled the timer
+  // while hasTriggeredSuccess blocked rescheduling - the app stayed on "Identity Confirmed!".
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
   useEffect(() => {
     if (authState === "success" && !hasTriggeredSuccess.current) {
       hasTriggeredSuccess.current = true;
@@ -88,11 +95,11 @@ export default function BiometricAuth({
         onLogAttempt("success", biometricMethod);
       }
       const timer = setTimeout(() => {
-        onSuccess();
+        onSuccessRef.current();
       }, 1200); // Wait for the success animation to be enjoyed
       return () => clearTimeout(timer);
     }
-  }, [authState, onLogAttempt, biometricMethod, onSuccess]);
+  }, [authState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const triggerManualFail = () => {
     setAuthState("failed");
@@ -148,7 +155,7 @@ export default function BiometricAuth({
 
   return (
     <motion.div
-      id="biometric-auth-overlay"
+      {...dialog} id="biometric-auth-overlay"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -161,10 +168,10 @@ export default function BiometricAuth({
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center gap-2 mb-3 bg-white/5 px-4 py-2 rounded-full border border-white/10"
+          className="flex items-center gap-2 mb-3 bg-white/5 dark:bg-slate-900 px-4 py-2 rounded-full border border-white/10"
         >
           <WeHiveLogo size="sm" theme="white" showTagline={false} />
-          <span className="text-[10px] font-bold tracking-widest text-slate-300 font-mono border-l border-white/25 pl-2">SECURE</span>
+          <span className="text-[11px] font-bold tracking-widest text-slate-300 font-mono border-l border-white/25 pl-2">SECURE</span>
         </motion.div>
         <motion.h2 
           initial={{ opacity: 0 }}
@@ -421,7 +428,7 @@ export default function BiometricAuth({
             </motion.p>
           </AnimatePresence>
           {authState === "scanning" && (
-            <span className="text-[10px] text-slate-500 font-mono">{progress}%</span>
+            <span className="text-[11px] text-slate-500 font-mono">{progress}%</span>
           )}
         </div>
       </div>
@@ -436,7 +443,8 @@ export default function BiometricAuth({
             <RefreshCw className="w-4 h-4 animate-spin-reverse" />
             RETRY SECURE AUTHENTICATION
           </button>
-        ) : (
+        ) : import.meta.env.DEV && (
+          // Dev-only: real users never see simulator controls.
           <button
             onClick={triggerManualFail}
             disabled={authState === "success" || authState === "verifying"}
@@ -446,7 +454,8 @@ export default function BiometricAuth({
           </button>
         )}
 
-        {/* Secure Skip Option */}
+        {/* Secure Skip Option (dev-only) */}
+        {import.meta.env.DEV && (
         <button
           onClick={() => {
             if (onLogAttempt) {
@@ -454,13 +463,14 @@ export default function BiometricAuth({
             }
             onSuccess();
           }}
-          className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 px-4 rounded-xl text-xs font-mono transition-all border border-white/10 flex items-center justify-center gap-1.5 cursor-pointer"
+          className="w-full bg-white/5 dark:bg-slate-900 hover:bg-white/10 text-white font-bold py-3 px-4 rounded-xl text-xs font-mono transition-all border border-white/10 flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           BYPASS WITH ADMIN KEY
         </button>
+        )}
 
-        <div className="flex items-center justify-center gap-1 text-[10px] text-slate-500 mt-2 font-mono">
+        <div className="flex items-center justify-center gap-1 text-[11px] text-slate-500 mt-2 font-mono">
           <HelpCircle className="w-3.5 h-3.5" />
           <span>Need help? Contact WeHive Support</span>
         </div>

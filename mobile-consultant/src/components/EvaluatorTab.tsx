@@ -8,6 +8,7 @@ import { Profile, EvaluationResult } from "../types";
 import { isAppOffline, computeOfflineEligibility, saveEvaluationToCache } from "../utils/offlineCache";
 import { useColorScheme } from "../hooks/useColorScheme";
 import { useNotifications } from "./NotificationContext";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 const CONFETTI_COLORS = ["#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899"];
 const CONFETTI_PARTICLES = Array.from({ length: 45 }).map((_, i) => ({
@@ -25,6 +26,7 @@ export default function EvaluatorTab() {
   const { triggerNotification } = useNotifications();
 
   const [showCelebration, setShowCelebration] = useState(false);
+  const celebrationDialog = useDialogA11y(showCelebration, () => setShowCelebration(false));
 
   const [profile, setProfile] = useState<Profile>({
     name: "",
@@ -244,7 +246,7 @@ export default function EvaluatorTab() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-hidden"
+            {...celebrationDialog} className="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-hidden"
           >
             {/* Confetti rain */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -322,7 +324,7 @@ export default function EvaluatorTab() {
                     rotate: [0, 5, -5, 0]
                   }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className={`absolute inset-0 rounded-full ${isNavy ? "bg-blue-100/70" : "bg-red-50"} blur-xl`}
+                  className={`absolute inset-0 rounded-full ${isNavy ? "bg-blue-100/70 dark:bg-blue-950/40" : "bg-red-50 dark:bg-red-950/40"} blur-xl`}
                 />
                 <motion.div
                   initial={{ scale: 0 }}
@@ -367,22 +369,22 @@ export default function EvaluatorTab() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className={`p-4 rounded-2xl ${isNavy ? "bg-blue-50/70" : "bg-red-50/50"} border border-slate-100 flex items-center justify-around gap-2`}
+                className={`p-4 rounded-2xl ${isNavy ? "bg-blue-50/70 dark:bg-blue-950/40" : "bg-red-50/50 dark:bg-red-950/40"} border border-slate-100 flex items-center justify-around gap-2`}
               >
                 <div className="text-center">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Overall Score</span>
-                  <span className={`text-xl font-black font-mono ${isNavy ? "text-blue-600" : "text-red-600"}`}>{result.overallScore}</span>
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide block">Overall Score</span>
+                  <span className={`text-xl font-black font-mono ${isNavy ? "text-blue-600 dark:text-blue-300" : "text-red-600 dark:text-red-300"}`}>{result.overallScore}</span>
                 </div>
-                <div className="w-px h-8 bg-slate-200" />
+                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
                 <div className="text-center">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Visa Chance</span>
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide block">Visa Chance</span>
                   <span className={`text-xs font-black uppercase ${
-                    result.visaProbability === "High" ? "text-emerald-600" : result.visaProbability === "Medium" ? "text-blue-600" : "text-amber-600"
+                    result.visaProbability === "High" ? "text-emerald-600 dark:text-emerald-300" : result.visaProbability === "Medium" ? "text-blue-600 dark:text-blue-300" : "text-amber-600 dark:text-amber-300"
                   }`}>{result.visaProbability}</span>
                 </div>
-                <div className="w-px h-8 bg-slate-200" />
+                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
                 <div className="text-center">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Colleges Matched</span>
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide block">Colleges Matched</span>
                   <span className="text-xs font-black text-slate-800">{result.topUniversities.length}</span>
                 </div>
               </motion.div>
@@ -413,7 +415,7 @@ export default function EvaluatorTab() {
         {/* WeHive small brand tag */}
         <div className="flex items-center gap-1.5 mb-2.5 opacity-90">
           <div className={`w-4.5 h-4.5 rounded ${isNavy ? "bg-blue-600" : "bg-red-600"} flex items-center justify-center font-bold text-white text-[10px] shadow`}>W</div>
-          <span className="text-[10px] font-bold tracking-wider text-blue-100 font-mono">WEHIVE SMART ENGINE</span>
+          <span className="text-[11px] font-bold tracking-wider text-blue-100 font-mono">WEHIVE SMART ENGINE</span>
         </div>
         <h1 className="text-xl font-black">AI Eligibility Evaluator</h1>
         <p className="text-xs text-slate-300 mt-1">Get an instant, data-backed study visa and college compatibility report</p>
@@ -434,7 +436,7 @@ export default function EvaluatorTab() {
                 {loadingStep}
               </p>
             </div>
-            <span className={`text-[9px] ${isNavy ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"} font-bold px-2.5 py-1 rounded-md uppercase font-mono tracking-wider animate-bounce`}>
+            <span className={`text-[11px] ${isNavy ? "bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300" : "bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300"} font-bold px-2.5 py-1 rounded-md uppercase font-mono tracking-wider animate-bounce`}>
               Securing Report
             </span>
           </div>
@@ -442,11 +444,11 @@ export default function EvaluatorTab() {
           /* Report Dashboard Output view */
           <div className="space-y-5 animate-slide-up">
             {isOfflineReport && (
-              <div className="bg-amber-50 border border-amber-200/55 rounded-2xl p-3.5 flex items-start gap-3 shadow-xs">
-                <WifiOff className="w-5 h-5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
+              <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200/55 dark:border-amber-900/50 rounded-2xl p-3.5 flex items-start gap-3 shadow-xs">
+                <WifiOff className="w-5 h-5 text-amber-600 dark:text-amber-300 shrink-0 mt-0.5 animate-pulse" />
                 <div>
-                  <h4 className="text-xs font-bold text-amber-950">Offline Assessment Active</h4>
-                  <p className="text-[10px] text-amber-800 leading-normal mt-0.5 font-medium">
+                  <h4 className="text-xs font-bold text-amber-950 dark:text-amber-300">Offline Assessment Active</h4>
+                  <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-normal mt-0.5 font-medium">
                     This profile evaluation was calculated client-side using cached local rules to ensure complete utility under low-connectivity environments.
                   </p>
                 </div>
@@ -457,14 +459,14 @@ export default function EvaluatorTab() {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={handleDownloadReport}
-                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-bold rounded-xl shadow-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-bold rounded-xl shadow-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Save PDF</span>
               </button>
               <button
                 onClick={handleShareReport}
-                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-bold rounded-xl shadow-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-[11px] font-bold rounded-xl shadow-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 <span>Share link</span>
@@ -484,7 +486,7 @@ export default function EvaluatorTab() {
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
                   <path
-                    className={`${isNavy ? "text-blue-600" : "text-red-600"} transition-all duration-500`}
+                    className={`${isNavy ? "text-blue-600 dark:text-blue-300" : "text-red-600 dark:text-red-300"} transition-all duration-500`}
                     strokeDasharray={`${result.overallScore}, 100`}
                     strokeWidth="3.5"
                     strokeLinecap="round"
@@ -495,24 +497,24 @@ export default function EvaluatorTab() {
                 </svg>
                 <div className="absolute text-center">
                   <span className="text-base font-black text-slate-800 font-mono">{result.overallScore}</span>
-                  <p className="text-[8px] text-slate-400 font-extrabold -mt-1 uppercase">Score</p>
+                  <p className="text-[11px] text-slate-400 font-extrabold -mt-1 uppercase">Score</p>
                 </div>
               </div>
 
               <div className="flex-1 min-w-0">
-                <span className="text-[9px] font-mono font-bold text-slate-400 uppercase">Assessment Summary</span>
+                <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase">Assessment Summary</span>
                 <h3 className="text-sm font-black text-slate-800 mt-0.5 truncate">WeHive Profile Rating</h3>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded uppercase ${
                     result.visaProbability === "High"
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-green-100 dark:bg-green-950/40 text-green-800 dark:text-green-300"
                       : result.visaProbability === "Medium"
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-red-100 text-red-800"
+                      ? "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300"
+                      : "bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300"
                   }`}>
                     Visa Chance: {result.visaProbability}
                   </span>
-                  <span className="text-[9px] bg-slate-100 text-slate-800 border border-slate-200 font-bold px-2 py-0.5 rounded font-mono">
+                  <span className="text-[11px] bg-slate-100 text-slate-800 border border-slate-200 font-bold px-2 py-0.5 rounded font-mono">
                     Intake: {result.recommendedIntake}
                   </span>
                 </div>
@@ -532,7 +534,7 @@ export default function EvaluatorTab() {
                     style={{ width: `${result.profileCompleteness}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 leading-normal font-sans">
+                <p className="text-[11px] text-slate-500 leading-normal font-sans">
                   {result.profileCompleteness < 90 
                     ? "Completing missing documentation in the checklist below will boost your profile assessment value." 
                     : "Excellent! Your documentation is highly complete. You are ready for formal consultant file submission."}
@@ -543,7 +545,7 @@ export default function EvaluatorTab() {
             {/* Match University Panel */}
             <div className="bg-white rounded-3xl p-4 border border-slate-200/50 shadow-xs space-y-3">
               <div className="flex items-center gap-1.5">
-                <Landmark className="w-4 h-4 text-blue-900" />
+                <Landmark className="w-4 h-4 text-blue-900 dark:text-blue-300" />
                 <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest font-mono">Matched Universities</h3>
               </div>
               <div className="space-y-2.5">
@@ -552,25 +554,25 @@ export default function EvaluatorTab() {
                     <div className="flex justify-between items-start gap-2">
                       <div className="truncate">
                         <h4 className="text-xs font-bold text-slate-800 truncate">{uni.name}</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5 font-medium">QS Rank Estimate: {uni.rank}</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5 font-medium">QS Rank Estimate: {uni.rank}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <span className={`text-[8px] font-bold px-2 py-0.5 rounded uppercase font-mono tracking-wide ${
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded uppercase font-mono tracking-wide ${
                           uni.matchType === "Safe"
-                            ? "bg-green-100 text-green-800"
+                            ? "bg-green-100 dark:bg-green-950/40 text-green-800 dark:text-green-300"
                             : uni.matchType === "Dream"
-                            ? "bg-purple-100 text-purple-800"
-                            : "bg-blue-100 text-blue-800"
+                            ? "bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300"
+                            : "bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300"
                         }`}>
                           {uni.matchType} Match
                         </span>
-                        <p className="text-[9px] text-slate-500 font-extrabold mt-1">{uni.estFees}</p>
+                        <p className="text-[11px] text-slate-500 font-extrabold mt-1">{uni.estFees}</p>
                       </div>
                     </div>
                     {uni.courseMatch && (
-                      <div className="border-t border-slate-100 pt-1.5 flex items-center justify-between text-[9px]">
+                      <div className="border-t border-slate-100 pt-1.5 flex items-center justify-between text-[11px]">
                         <span className="text-slate-400">Match Accuracy</span>
-                        <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 font-mono">
+                        <span className="text-emerald-700 dark:text-emerald-300 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/50 font-mono">
                           {uni.courseMatch}
                         </span>
                       </div>
@@ -583,28 +585,28 @@ export default function EvaluatorTab() {
             {/* Cost Breakdowns */}
             <div className="bg-white rounded-3xl p-4 border border-slate-200/50 shadow-xs space-y-3">
               <div className="flex items-center gap-1.5">
-                <Coins className="w-4 h-4 text-blue-900" />
+                <Coins className="w-4 h-4 text-blue-900 dark:text-blue-300" />
                 <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest font-mono">Cost Breakdown Estimates</h3>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase">Avg Tuition / Yr</p>
+                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Avg Tuition / Yr</p>
                   <p className="text-xs font-bold text-slate-700 mt-0.5">{result.estimatedCost.tuition}</p>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase">Est Living Costs</p>
+                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Est Living Costs</p>
                   <p className="text-xs font-bold text-slate-700 mt-0.5">{result.estimatedCost.living}</p>
                 </div>
               </div>
             </div>
 
             {/* AI Analytical Feedback */}
-            <div className={`${isNavy ? "bg-blue-950/20 border-blue-900/30" : "bg-blue-50 border-blue-100"} border rounded-3xl p-4 shadow-xs space-y-2.5`}>
-              <div className="flex items-center gap-1.5 text-blue-950 font-bold text-xs">
-                <Award className={`w-4 h-4 ${isNavy ? "text-blue-400" : "text-blue-900"}`} />
+            <div className={`${isNavy ? "bg-blue-950/20 border-blue-900/30" : "bg-blue-50 dark:bg-blue-950/40 border-blue-100 dark:border-blue-900/50"} border rounded-3xl p-4 shadow-xs space-y-2.5`}>
+              <div className="flex items-center gap-1.5 text-blue-950 dark:text-blue-300 font-bold text-xs">
+                <Award className={`w-4 h-4 ${isNavy ? "text-blue-400" : "text-blue-900 dark:text-blue-300"}`} />
                 <span className={isNavy ? "text-blue-300" : "text-blue-950"}>WeHive Senior Counseling Memo</span>
               </div>
-              <p className={`text-xs ${isNavy ? "text-blue-100" : "text-blue-950"} leading-relaxed font-medium`}>
+              <p className={`text-xs ${isNavy ? "text-blue-100" : "text-blue-950 dark:text-blue-300"} leading-relaxed font-medium`}>
                 {result.eligibilityFeedback}
               </p>
             </div>
@@ -613,7 +615,7 @@ export default function EvaluatorTab() {
             {checklist.length > 0 && (
               <div className="bg-white rounded-3xl p-4 border border-slate-200/50 shadow-xs space-y-3">
                 <div className="flex items-center gap-1.5">
-                  <CheckSquare className={`w-4 h-4 ${isNavy ? "text-blue-500" : "text-red-600"}`} />
+                  <CheckSquare className={`w-4 h-4 ${isNavy ? "text-blue-500" : "text-red-600 dark:text-red-300"}`} />
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest font-mono">Document Checklist Tracker</h3>
                 </div>
                 <div className="space-y-2">
@@ -625,7 +627,7 @@ export default function EvaluatorTab() {
                     >
                       <button className="mt-0.5 focus:outline-none cursor-pointer">
                         {doc.status === "Ready" ? (
-                          <CheckCircle2 className={`w-4 h-4 ${isNavy ? "text-blue-600" : "text-red-600"}`} />
+                          <CheckCircle2 className={`w-4 h-4 ${isNavy ? "text-blue-600 dark:text-blue-300" : "text-red-600 dark:text-red-300"}`} />
                         ) : (
                           <div className="w-4 h-4 rounded-full border border-slate-300 bg-white" />
                         )}
@@ -633,13 +635,13 @@ export default function EvaluatorTab() {
                       <div className="flex-1">
                         <div className="flex justify-between items-center">
                           <span className="text-xs font-bold text-slate-800">{doc.name}</span>
-                          <span className={`text-[8px] px-1.5 py-0.5 rounded font-mono font-bold ${
-                            doc.status === "Ready" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
+                          <span className={`text-[11px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                            doc.status === "Ready" ? "bg-green-100 dark:bg-green-950/40 text-green-800 dark:text-green-300" : "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300"
                           }`}>
                             {doc.status}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-0.5">{doc.desc}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{doc.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -652,7 +654,7 @@ export default function EvaluatorTab() {
               {/* Scholarships */}
               <div className="bg-white rounded-3xl p-4 border border-slate-200/50 shadow-xs space-y-2.5">
                 <div className="flex items-center gap-1.5">
-                  <GraduationCap className={`w-4 h-4 ${isNavy ? "text-blue-500" : "text-red-600"}`} />
+                  <GraduationCap className={`w-4 h-4 ${isNavy ? "text-blue-500" : "text-red-600 dark:text-red-300"}`} />
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest font-mono">Suggested Scholarships</h3>
                 </div>
                 <div className="space-y-1.5">
@@ -668,13 +670,13 @@ export default function EvaluatorTab() {
               {/* Action Plan */}
               <div className="bg-white rounded-3xl p-4 border border-slate-200/50 shadow-xs space-y-2.5">
                 <div className="flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4 text-blue-900" />
+                  <BookOpen className="w-4 h-4 text-blue-900 dark:text-blue-300" />
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest font-mono">Next Steps Action Plan</h3>
                 </div>
                 <div className="space-y-1.5">
                   {result.actionPlan.map((act, idx) => (
                     <div key={idx} className="flex items-start gap-1.5 text-[11px] text-slate-600 font-medium leading-relaxed">
-                      <span className="text-blue-900 font-bold">{idx + 1}.</span>
+                      <span className="text-blue-900 dark:text-blue-300 font-bold">{idx + 1}.</span>
                       <span>{act}</span>
                     </div>
                   ))}
@@ -685,18 +687,18 @@ export default function EvaluatorTab() {
             {/* Book Slot with WeHive Advisor */}
             <div className="bg-white rounded-3xl p-5 border border-slate-200/60 shadow-md space-y-4">
               <div className="flex items-center gap-2">
-                <Calendar className={`w-5 h-5 ${isNavy ? "text-blue-500" : "text-red-600"}`} />
+                <Calendar className={`w-5 h-5 ${isNavy ? "text-blue-500" : "text-red-600 dark:text-red-300"}`} />
                 <div>
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest font-mono">Book Free Advisory Slot</h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Choose your slot below to reserve a premium one-on-one session</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Choose your slot below to reserve a premium one-on-one session</p>
                 </div>
               </div>
 
               {isBooked ? (
-                <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center space-y-2 animate-fade-in">
-                  <UserCheck className="w-8 h-8 text-green-600 mx-auto" />
-                  <h4 className="text-xs font-bold text-green-950">Consultation Scheduled!</h4>
-                  <p className="text-[10px] text-green-800 leading-normal">
+                <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900/50 rounded-2xl p-4 text-center space-y-2 animate-fade-in">
+                  <UserCheck className="w-8 h-8 text-green-600 dark:text-green-300 mx-auto" />
+                  <h4 className="text-xs font-bold text-green-950 dark:text-green-300">Consultation Scheduled!</h4>
+                  <p className="text-[11px] text-green-800 dark:text-green-300 leading-normal">
                     WeHive Senior Counselor has reserved your slot on <strong>{bookingDate}</strong> at <strong>{bookingTime}</strong>. A video session invite link has been pushed to your active inbox.
                   </p>
                 </div>
@@ -704,7 +706,7 @@ export default function EvaluatorTab() {
                 <form onSubmit={handleBookConsultation} className="space-y-3">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Select Date</label>
+                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Select Date</label>
                       <input 
                         type="date" 
                         required
@@ -714,7 +716,7 @@ export default function EvaluatorTab() {
                       />
                     </div>
                     <div>
-                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Select Time</label>
+                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Select Time</label>
                       <select 
                         required
                         value={bookingTime}
@@ -732,15 +734,15 @@ export default function EvaluatorTab() {
                   </div>
 
                   <div>
-                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Consultation Mode</label>
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Consultation Mode</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setBookingMode("Video")}
                         className={`py-2 text-[11px] font-bold rounded-xl border transition-colors cursor-pointer ${
                           bookingMode === "Video" 
-                            ? isNavy ? "bg-blue-50 text-blue-600 border-blue-500" : "bg-red-50 text-red-600 border-red-500" 
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                            ? isNavy ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 border-blue-500" : "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300 border-red-500" 
+                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                         }`}
                       >
                         Video Interview
@@ -750,8 +752,8 @@ export default function EvaluatorTab() {
                         onClick={() => setBookingMode("Voice")}
                         className={`py-2 text-[11px] font-bold rounded-xl border transition-colors cursor-pointer ${
                           bookingMode === "Voice" 
-                            ? isNavy ? "bg-blue-50 text-blue-600 border-blue-500" : "bg-red-50 text-red-600 border-red-500" 
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                            ? isNavy ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 border-blue-500" : "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300 border-red-500" 
+                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                         }`}
                       >
                         Voice Call
@@ -773,7 +775,7 @@ export default function EvaluatorTab() {
             {/* Reset / Redo button */}
             <button
               onClick={handleReset}
-              className="w-full bg-slate-200 text-slate-800 font-bold text-xs py-3.5 rounded-2xl hover:bg-slate-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full bg-slate-200 dark:bg-slate-800 text-slate-800 font-bold text-xs py-3.5 rounded-2xl hover:bg-slate-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Analyze a Different Profile</span>
@@ -783,7 +785,7 @@ export default function EvaluatorTab() {
           /* Parameter Input Form view */
           <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-5 border border-slate-200/60 shadow-md space-y-4">
             <div>
-              <span className={`text-[9px] font-mono font-bold ${isNavy ? "text-blue-800 bg-blue-50" : "text-red-800 bg-red-50"} px-2 py-0.5 rounded-full uppercase`}>
+              <span className={`text-[11px] font-mono font-bold ${isNavy ? "text-blue-800 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40" : "text-red-800 dark:text-red-300 bg-red-50 dark:bg-red-950/40"} px-2 py-0.5 rounded-full uppercase`}>
                 Admissions Engine v2
               </span>
               <h2 className="text-sm font-black text-slate-800 mt-1">Check study visa & college matching</h2>
@@ -791,7 +793,7 @@ export default function EvaluatorTab() {
 
             <div className="space-y-3.5">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Your Full Name
                 </label>
                 <input
@@ -806,7 +808,7 @@ export default function EvaluatorTab() {
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     Target Country
                   </label>
                   <select
@@ -824,7 +826,7 @@ export default function EvaluatorTab() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     Target Degree
                   </label>
                   <select
@@ -842,7 +844,7 @@ export default function EvaluatorTab() {
 
               {/* Added Field: Intended major / course selection */}
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Intended Major / Course
                 </label>
                 <select
@@ -860,7 +862,7 @@ export default function EvaluatorTab() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Academic Standing (GPA / CGPA / %)
                 </label>
                 <input
@@ -875,7 +877,7 @@ export default function EvaluatorTab() {
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     English Test (e.g. IELTS / PTE)
                   </label>
                   <input
@@ -888,7 +890,7 @@ export default function EvaluatorTab() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     Work Exp (optional)
                   </label>
                   <input
@@ -904,7 +906,7 @@ export default function EvaluatorTab() {
               {/* Added Field: Standardized tests status */}
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     Standardized Test
                   </label>
                   <select
@@ -921,7 +923,7 @@ export default function EvaluatorTab() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     Estimated Tuition Budget
                   </label>
                   <select
@@ -938,7 +940,7 @@ export default function EvaluatorTab() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-xl flex items-start gap-2 text-xs">
+              <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 p-3 rounded-xl flex items-start gap-2 text-xs">
                 <AlertCircle className="w-4.5 h-4.5 text-red-500 shrink-0 mt-0.5" />
                 <p>{error}</p>
               </div>

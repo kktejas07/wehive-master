@@ -4,12 +4,13 @@ import {
   MessageSquare, Users, Search, Share2, GraduationCap, Filter,
   PlusCircle, Compass, Heart, MapPin, Check, ChevronRight, 
   ArrowLeft, ArrowUpRight, HelpCircle, ThumbsUp, MessageCircle,
-  Mic, MicOff, Volume2, VolumeX, Square, Play
+  Mic, MicOff, Volume2, VolumeX, Square, Play, School, CircleCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Markdown from "react-markdown";
 import { Message } from "../types";
 import { useNotifications } from "./NotificationContext";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 const SUGGESTIONS = [
   "🇬🇧 Tell me about the UK Graduate Route.",
@@ -77,6 +78,7 @@ export default function ChatTab() {
   const [speechRecognitionSupported, setSpeechRecognitionSupported] = useState(true);
   const [speakingMessageIndex, setSpeakingMessageIndex] = useState<number | null>(null);
   const [isListeningModeSimulated, setIsListeningModeSimulated] = useState(false);
+  const listeningDialog = useDialogA11y(isListening, () => stopListening(false));
   const [isAutoSpeakEnabled, setIsAutoSpeakEnabled] = useState(false);
   const [speechRecognitionInstance, setSpeechRecognitionInstance] = useState<any>(null);
 
@@ -788,11 +790,11 @@ export default function ChatTab() {
               </div>
             ) : viewMode === "assistant" ? (
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-600 to-red-500 border-2 border-rose-400 flex items-center justify-center font-bold text-white text-base animate-pulse">
-                🎙️
+                <Mic className="w-5 h-5" aria-hidden="true" />
               </div>
             ) : (
               <div className="w-10 h-10 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center font-bold text-white text-base">
-                👥
+                <Users className="w-5 h-5" aria-hidden="true" />
               </div>
             )}
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-400 border border-blue-950" />
@@ -800,17 +802,17 @@ export default function ChatTab() {
           <div>
             <div className="flex items-center gap-1 opacity-75 mb-0.5">
               <div className="w-3.5 h-3.5 rounded bg-red-600 flex items-center justify-center font-bold text-white text-[8px] scale-90">W</div>
-              <span className="text-[9px] font-bold tracking-wider text-blue-100 font-mono">WEHIVE NETWORK</span>
+              <span className="text-[11px] font-bold tracking-wider text-blue-100 font-mono">WEHIVE NETWORK</span>
             </div>
             <h1 className="text-xs font-black tracking-wider uppercase text-blue-100">
               {viewMode === "counselor" ? "Hive AI" : viewMode === "assistant" ? "Voice Assistant" : "WeHive Circles"}
             </h1>
-            <p className="text-[10px] text-red-300 font-bold">
+            <p className="text-[11px] text-red-300 font-bold">
               {viewMode === "counselor" ? "Senior Admissions Advisor" : viewMode === "assistant" ? "Immersive Voice Studio" : "Peer Student Hub"}
             </p>
           </div>
         </div>
-        <span className="text-[9px] bg-blue-900 border border-blue-800 text-red-300 font-bold px-2 py-0.5 rounded font-mono">
+        <span className="text-[11px] bg-blue-900 border border-blue-800 text-red-300 font-bold px-2 py-0.5 rounded font-mono">
           {viewMode === "counselor" ? "24/7 Counselor" : viewMode === "assistant" ? "Live Connected" : `${peers.filter(p => p.isOnline).length} Peers Online`}
         </span>
       </div>
@@ -819,10 +821,10 @@ export default function ChatTab() {
       <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center gap-2 shrink-0">
         <button
           onClick={() => setViewMode("counselor")}
-          className={`flex-1 py-1.5 px-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             viewMode === "counselor"
               ? "bg-blue-950 text-white shadow-sm"
-              : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100"
+              : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
           <Bot className="w-3.5 h-3.5" />
@@ -830,10 +832,10 @@ export default function ChatTab() {
         </button>
         <button
           onClick={() => setViewMode("assistant")}
-          className={`flex-1 py-1.5 px-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             viewMode === "assistant"
               ? "bg-blue-950 text-white shadow-sm"
-              : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100"
+              : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
           <Mic className="w-3.5 h-3.5" />
@@ -841,10 +843,10 @@ export default function ChatTab() {
         </button>
         <button
           onClick={() => setViewMode("community")}
-          className={`flex-1 py-1.5 px-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer relative ${
+          className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer relative ${
             viewMode === "community"
               ? "bg-blue-950 text-white shadow-sm"
-              : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100"
+              : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
           <Users className="w-3.5 h-3.5" />
@@ -862,7 +864,7 @@ export default function ChatTab() {
           <div className="bg-slate-50 border-b border-slate-200/60 px-4 py-2.5 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider font-mono">
+              <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono">
                 Advisor Channel Connected
               </span>
             </div>
@@ -877,10 +879,10 @@ export default function ChatTab() {
                   "system"
                 );
               }}
-              className={`px-2.5 py-1 rounded-lg border text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg border text-[11px] font-black uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer ${
                 isAutoSpeakEnabled
-                  ? "bg-rose-50 border-rose-200 text-rose-600"
-                  : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                  ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-300"
+                  : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
               title="Automatically read incoming AI messages aloud"
             >
@@ -895,8 +897,8 @@ export default function ChatTab() {
               const isUser = m.role === "user";
               return (
                 <div key={idx} className={`flex items-start gap-2.5 max-w-[85%] ${isUser ? "ml-auto flex-row-reverse" : ""}`}>
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isUser ? "bg-red-100" : "bg-blue-900 text-white"}`}>
-                    {isUser ? <User className="w-4 h-4 text-red-800" /> : <Bot className="w-4 h-4 text-blue-100" />}
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isUser ? "bg-red-100 dark:bg-red-950/40" : "bg-blue-900 text-white"}`}>
+                    {isUser ? <User className="w-4 h-4 text-red-800 dark:text-red-300" /> : <Bot className="w-4 h-4 text-blue-100" />}
                   </div>
  
                   <div
@@ -917,10 +919,10 @@ export default function ChatTab() {
                           <button
                             type="button"
                             onClick={() => speakMessage(m.text, idx)}
-                            className={`p-1.5 rounded-lg flex items-center gap-1 text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                            className={`p-1.5 rounded-lg flex items-center gap-1 text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                               speakingMessageIndex === idx
-                                ? "bg-rose-50 text-rose-600 border border-rose-200 animate-pulse"
-                                : "bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200"
+                                ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50 animate-pulse"
+                                : "bg-slate-50 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200"
                             }`}
                             title={speakingMessageIndex === idx ? "Stop speaking" : "Speak message out loud"}
                           >
@@ -951,7 +953,7 @@ export default function ChatTab() {
                                   }}
                                 />
                               ))}
-                              <span className="text-[8px] font-mono font-bold text-rose-500 uppercase tracking-widest pl-1">
+                              <span className="text-[11px] font-mono font-bold text-rose-500 uppercase tracking-widest pl-1">
                                 Reading...
                               </span>
                             </div>
@@ -978,11 +980,11 @@ export default function ChatTab() {
             )}
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-xl flex items-start gap-2 text-xs">
+              <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 p-3 rounded-xl flex items-start gap-2 text-xs">
                 <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold">Error connecting to counselor</p>
-                  <p className="text-[10px] text-red-600">{error}</p>
+                  <p className="text-[11px] text-red-600 dark:text-red-300">{error}</p>
                 </div>
               </div>
             )}
@@ -993,13 +995,13 @@ export default function ChatTab() {
           {/* Suggestion Chips Panel */}
           {!loading && messages.length <= 3 && (
             <div className="px-4 py-2 bg-slate-100 shrink-0 border-t border-slate-200/50">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5 font-mono">Suggested Questions</p>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider mb-1.5 font-mono">Suggested Questions</p>
               <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none snap-x">
                 {SUGGESTIONS.map((s, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSuggestion(s)}
-                    className="bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-900 text-[10px] font-bold px-3 py-1.5 rounded-full shrink-0 shadow-xs transition-all cursor-pointer snap-start"
+                    className="bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-900 text-[11px] font-bold px-3 py-1.5 rounded-full shrink-0 shadow-xs transition-all cursor-pointer snap-start"
                   >
                     {s}
                   </button>
@@ -1009,16 +1011,16 @@ export default function ChatTab() {
           )}
 
           {/* Input panel bar */}
-          <form onSubmit={handleSend} className="p-3.5 bg-white border-t border-slate-200/80 shrink-0 flex items-center gap-2 relative z-10">
+          <form onSubmit={handleSend} className="p-3.5 bg-white border-t border-slate-200/80 dark:border-slate-800 shrink-0 flex items-center gap-2 relative z-10">
             {/* NEW: Voice Prompt / Mic Button */}
             <button
               type="button"
               onClick={() => startListening()}
-              className="p-3 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-2xl border border-rose-100 transition-all cursor-pointer shrink-0 flex items-center justify-center relative group"
+              className="p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 hover:bg-rose-100 rounded-2xl border border-rose-100 dark:border-rose-900/50 transition-all cursor-pointer shrink-0 flex items-center justify-center relative group"
               title="Speak your question (Voice Prompt)"
             >
               <Mic className="w-4 h-4 animate-pulse" />
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 bg-slate-950 text-white text-[8px] font-bold py-1 px-1.5 rounded uppercase tracking-wider font-mono transition-all whitespace-nowrap z-30">
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 bg-slate-950 text-white text-[11px] font-bold py-1 px-1.5 rounded uppercase tracking-wider font-mono transition-all whitespace-nowrap z-30">
                 Voice Dictation
               </span>
             </button>
@@ -1031,7 +1033,7 @@ export default function ChatTab() {
               placeholder="Ask about visas, top colleges, or scholarships..."
               className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs focus:outline-blue-900 disabled:opacity-50 font-medium"
             />
-            <button
+            <button aria-label="Send message"
               type="submit"
               disabled={loading || !input.trim()}
               className="p-3 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all shadow-md shadow-red-500/10 hover:shadow-red-500/25 disabled:opacity-50 cursor-pointer shrink-0"
@@ -1076,7 +1078,7 @@ export default function ChatTab() {
               <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${isListening ? "bg-emerald-500 animate-pulse" : "bg-red-500 animate-ping"}`} />
               
               {/* Tooltip hint */}
-              <div className="absolute -left-20 top-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 bg-slate-900 text-white text-[9px] font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider font-mono whitespace-nowrap transition-all shadow-md">
+              <div className="absolute -left-20 top-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 bg-slate-900 text-white text-[11px] font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider font-mono whitespace-nowrap transition-all shadow-md">
                 {isListening ? "Stop & Send" : "Talk with AI"}
               </div>
             </motion.button>
@@ -1089,11 +1091,11 @@ export default function ChatTab() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 15 }}
-                className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl z-50 flex flex-col justify-between p-6 select-none rounded-b-2xl overflow-hidden animate-fade-in"
+                {...listeningDialog} className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl z-50 flex flex-col justify-between p-6 select-none rounded-b-2xl overflow-hidden animate-fade-in"
               >
                 {/* Header status */}
                 <div className="flex flex-col items-center mt-6 text-center space-y-1.5">
-                  <span className="text-[9px] font-black uppercase text-emerald-400 tracking-widest font-mono bg-emerald-500/10 px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <span className="text-[11px] font-black uppercase text-emerald-400 tracking-widest font-mono bg-emerald-500/10 px-3 py-1 rounded-full flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                     {isListeningModeSimulated ? "Simulated Demo Channel Active" : "Secure Audio Stream Active"}
                   </span>
@@ -1103,7 +1105,7 @@ export default function ChatTab() {
                     WeHive Advisor Voice Mode
                   </h3>
                   
-                  <p className="text-[10px] text-slate-400 max-w-xs leading-relaxed">
+                  <p className="text-[11px] text-slate-400 max-w-xs leading-relaxed">
                     Speak your question naturally. We will convert your voice to structured queries for Hive AI.
                   </p>
                 </div>
@@ -1164,7 +1166,7 @@ export default function ChatTab() {
                   </div>
 
                   {/* Dynamic Transcription text with live kinetic updates */}
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 max-h-32 overflow-y-auto max-w-sm mx-auto text-center scrollbar-none">
+                  <div className="bg-white/5 dark:bg-slate-900 border border-white/10 rounded-2xl p-4 max-h-32 overflow-y-auto max-w-sm mx-auto text-center scrollbar-none">
                     <p className="text-xs text-white leading-relaxed font-sans font-semibold">
                       {recognitionTranscript ? (
                         <span className="text-white">{recognitionTranscript}</span>
@@ -1184,7 +1186,7 @@ export default function ChatTab() {
                     <button
                       type="button"
                       onClick={() => stopListening(false)}
-                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white rounded-2xl font-bold text-[10px] uppercase tracking-wider transition-all border border-white/10 cursor-pointer active:scale-95"
+                      className="flex-1 py-3 bg-white/5 dark:bg-slate-900 hover:bg-white/10 text-slate-300 hover:text-white rounded-2xl font-bold text-[11px] uppercase tracking-wider transition-all border border-white/10 cursor-pointer active:scale-95"
                     >
                       CANCEL
                     </button>
@@ -1194,14 +1196,14 @@ export default function ChatTab() {
                       type="button"
                       onClick={() => stopListening(true)}
                       disabled={!recognitionTranscript.trim()}
-                      className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white rounded-2xl font-bold text-[10px] uppercase tracking-wider transition-all shadow-lg shadow-rose-500/20 active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white rounded-2xl font-bold text-[11px] uppercase tracking-wider transition-all shadow-lg shadow-rose-500/20 active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Send className="w-3 h-3" />
                       SEND QUESTION
                     </button>
                   </div>
                   
-                  <span className="text-[8px] font-mono font-bold text-slate-500 uppercase tracking-widest text-center">
+                  <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-widest text-center">
                     Tap SEND to process, or CANCEL to clear.
                   </span>
                 </div>
@@ -1220,7 +1222,7 @@ export default function ChatTab() {
           <div className="flex items-center justify-between shrink-0 mb-4 z-10">
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isListening ? "bg-rose-500 animate-ping" : speakingMessageIndex !== null ? "bg-blue-500 animate-pulse" : "bg-slate-600"} shrink-0`} />
-              <span className="text-[10px] font-black uppercase tracking-wider font-mono text-slate-400">
+              <span className="text-[11px] font-black uppercase tracking-wider font-mono text-slate-400">
                 {isListening 
                   ? "Live Streaming Mic..." 
                   : speakingMessageIndex !== null 
@@ -1242,7 +1244,7 @@ export default function ChatTab() {
                 ]);
                 triggerNotification("Voice Reset", "Conversation history cleared for the voice assistant.", "system");
               }}
-              className="px-2.5 py-1 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer text-slate-300"
+              className="px-2.5 py-1 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 dark:bg-slate-900 hover:bg-white/10 text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer text-slate-300"
             >
               Clear History
             </button>
@@ -1271,7 +1273,7 @@ export default function ChatTab() {
                           : "bg-slate-900 border border-white/5 text-slate-100 rounded-tl-none shadow-xl"
                       }`}
                     >
-                      <span className="text-[8px] font-bold tracking-widest uppercase text-slate-400/80 font-mono block mb-1">
+                      <span className="text-[11px] font-bold tracking-widest uppercase text-slate-400/80 font-mono block mb-1">
                         {isUser ? "You" : "WeHive Assistant"}
                       </span>
                       <div className="prose prose-invert prose-sm max-w-none text-white font-medium whitespace-pre-line">
@@ -1283,10 +1285,10 @@ export default function ChatTab() {
                           <button
                             type="button"
                             onClick={() => speakMessage(m.text, messages.length - 4 + idx)}
-                            className={`p-1 px-2 rounded flex items-center gap-1 text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                            className={`p-1 px-2 rounded flex items-center gap-1 text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                               speakingMessageIndex === (messages.length - 4 + idx)
                                 ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                                : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10"
+                                : "bg-white/5 dark:bg-slate-900 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10"
                             }`}
                           >
                             {speakingMessageIndex === (messages.length - 4 + idx) ? (
@@ -1315,8 +1317,8 @@ export default function ChatTab() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex justify-end"
                 >
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 max-w-[85%] text-xs text-right leading-relaxed shadow-lg">
-                    <span className="text-[8px] font-bold tracking-widest uppercase text-emerald-400 font-mono block mb-1 flex items-center justify-end gap-1">
+                  <div className="p-4 rounded-2xl bg-white/5 dark:bg-slate-900 border border-white/10 max-w-[85%] text-xs text-right leading-relaxed shadow-lg">
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-emerald-400 font-mono block mb-1 flex items-center justify-end gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                       Live Dictation
                     </span>
@@ -1339,7 +1341,7 @@ export default function ChatTab() {
                       <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                       <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                     </div>
-                    <span className="text-[10px] font-mono text-slate-400">Hive AI is typing...</span>
+                    <span className="text-[11px] font-mono text-slate-400">Hive AI is typing...</span>
                   </div>
                 </motion.div>
               )}
@@ -1421,7 +1423,7 @@ export default function ChatTab() {
                   transition={{ duration: 1.2, repeat: Infinity }}
                 />
                 <Mic className={`w-8 h-8 text-white relative z-10 ${isListening ? "animate-bounce" : ""}`} />
-                <span className="text-[8px] font-black uppercase tracking-wider text-white/90 relative z-10 mt-1 font-mono">
+                <span className="text-[11px] font-black uppercase tracking-wider text-white/90 relative z-10 mt-1 font-mono">
                   {isListening ? "TAP TO SEND" : "TAP TO TALK"}
                 </span>
               </motion.button>
@@ -1460,14 +1462,14 @@ export default function ChatTab() {
 
           {/* Bottom Guidance controls & quick indicators */}
           <div className="mt-4 flex flex-col items-center space-y-2 shrink-0 z-10">
-            <div className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2 max-w-xs justify-center">
+            <div className="bg-white/5 dark:bg-slate-900 border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2 max-w-xs justify-center">
               <Sparkles className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
-              <span className="text-[9px] font-bold font-mono uppercase tracking-wider text-slate-300">
+              <span className="text-[11px] font-bold font-mono uppercase tracking-wider text-slate-300">
                 Mode: IELTS & Visa Voice Engine
               </span>
             </div>
             
-            <p className="text-[9px] text-slate-500 font-medium text-center max-w-xs">
+            <p className="text-[11px] text-slate-500 font-medium text-center max-w-xs">
               No need to type. Start dictation, speak, and tap again to send. Hive AI will speak back dynamically.
             </p>
           </div>
@@ -1485,11 +1487,11 @@ export default function ChatTab() {
             <div className="flex-1 flex flex-col overflow-hidden bg-slate-50 animate-fade-in">
               
               {/* Peer chat header bar */}
-              <div className="bg-slate-100 border-b border-slate-200/80 px-4 py-3 flex items-center justify-between">
+              <div className="bg-slate-100 border-b border-slate-200/80 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2.5 text-left">
                   <button 
                     onClick={() => setSelectedPeerId(null)}
-                    className="p-1.5 -ml-1 hover:bg-slate-200 rounded-xl transition-all text-slate-600 cursor-pointer"
+                    className="p-1.5 -ml-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-all text-slate-600 cursor-pointer"
                   >
                     <ArrowLeft className="w-4 h-4" />
                   </button>
@@ -1503,27 +1505,27 @@ export default function ChatTab() {
                     <h3 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
                       {activePeer.name}
                       {activePeer.academicLevel === userAcademicLevel && (
-                        <span className="text-[8px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded font-mono">
+                        <span className="text-[11px] bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold px-1.5 py-0.5 rounded font-mono">
                           Same Goal Match
                         </span>
                       )}
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-mono">
+                    <p className="text-[11px] text-slate-400 font-mono">
                       {activePeer.targetUniversity}  •  {activePeer.intake}
                     </p>
                   </div>
                 </div>
 
                 {/* Status Indicator */}
-                <span className="text-[9px] bg-white border border-slate-200 text-slate-600 font-bold px-2.5 py-1 rounded-lg">
+                <span className="text-[11px] bg-white border border-slate-200 text-slate-600 font-bold px-2.5 py-1 rounded-lg">
                   {activePeer.status}
                 </span>
               </div>
 
               {/* Private Peer-to-Peer Chat Messages Scroll */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
-                <div className="mx-auto max-w-md bg-amber-50 border border-amber-200 rounded-xl p-3 text-center text-[10px] text-amber-900 leading-normal flex items-start gap-2">
-                  <HelpCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-700" />
+                <div className="mx-auto max-w-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-xl p-3 text-center text-[11px] text-amber-900 dark:text-amber-300 leading-normal flex items-start gap-2">
+                  <HelpCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-700 dark:text-amber-300" />
                   <p>
                     <strong>Peer Safety Circle:</strong> This is a secure student sandbox chat. You can ask this peer regarding university prerequisites, blocked accounts, exam preps, or accommodation hunt!
                   </p>
@@ -1533,8 +1535,8 @@ export default function ChatTab() {
                   const isUser = ch.sender === "user";
                   return (
                     <div key={idx} className={`flex items-start gap-2 max-w-[80%] ${isUser ? "ml-auto flex-row-reverse" : ""}`}>
-                      <div className={`w-6 h-6 rounded-lg text-[9px] font-bold flex items-center justify-center shrink-0 ${
-                        isUser ? "bg-red-100 text-red-800" : "bg-slate-800 text-slate-100"
+                      <div className={`w-6 h-6 rounded-lg text-[11px] font-bold flex items-center justify-center shrink-0 ${
+                        isUser ? "bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300" : "bg-slate-800 text-slate-100"
                       }`}>
                         {isUser ? "You" : activePeer.avatar}
                       </div>
@@ -1545,7 +1547,7 @@ export default function ChatTab() {
                           : "bg-white text-slate-800 rounded-tl-none border border-slate-200/50"
                       }`}>
                         <p className="font-medium">{ch.text}</p>
-                        <span className={`text-[8px] block text-right mt-1 font-mono ${isUser ? "text-red-200" : "text-slate-400"}`}>
+                        <span className={`text-[11px] block text-right mt-1 font-mono ${isUser ? "text-red-200" : "text-slate-400"}`}>
                           {ch.timestamp}
                         </span>
                       </div>
@@ -1555,7 +1557,7 @@ export default function ChatTab() {
 
                 {peerTyping && (
                   <div className="flex items-start gap-2 max-w-[80%]">
-                    <div className="w-6 h-6 rounded-lg bg-slate-800 text-white font-bold text-[9px] flex items-center justify-center shrink-0">
+                    <div className="w-6 h-6 rounded-lg bg-slate-800 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
                       {activePeer.avatar}
                     </div>
                     <div className="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200/50 shadow-xs flex items-center gap-1">
@@ -1578,7 +1580,7 @@ export default function ChatTab() {
                   placeholder={`Write a question to ${activePeer.name}...`}
                   className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-blue-900"
                 />
-                <button
+                <button aria-label="Send message"
                   type="submit"
                   disabled={!peerInput.trim()}
                   className="p-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all disabled:opacity-50 cursor-pointer shrink-0"
@@ -1597,26 +1599,26 @@ export default function ChatTab() {
               {/* Dynamic User Profile Context Header Card */}
               <div className="bg-gradient-to-r from-blue-950 to-slate-900 px-4 py-3.5 text-white flex items-center justify-between shrink-0">
                 <div className="text-left">
-                  <p className="text-[9px] text-slate-300 font-bold uppercase tracking-wider font-mono">My Academic Scope Matcher</p>
+                  <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider font-mono">My Academic Scope Matcher</p>
                   <h4 className="text-xs font-black text-emerald-400 flex items-center gap-1.5">
                     <GraduationCap className="w-4 h-4" />
                     {userAcademicLevel} Goal Matches
                   </h4>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/15 text-right">
-                  <span className="text-[10px] font-mono text-slate-200 block">WeHive Network</span>
-                  <span className="text-[8px] font-black text-amber-300 font-mono">STUDENT VERIFIED</span>
+                <div className="bg-white/10 dark:bg-slate-900 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/15 text-right">
+                  <span className="text-[11px] font-mono text-slate-200 block">WeHive Network</span>
+                  <span className="text-[11px] font-black text-amber-300 font-mono">STUDENT VERIFIED</span>
                 </div>
               </div>
 
               {/* Sub-Layout: Top suggester for Peers applying to same schools */}
               <div className="bg-slate-100 border-b border-slate-200 p-3 shrink-0 text-left">
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-wider font-mono flex items-center gap-1">
-                    <Compass className="w-3.5 h-3.5 text-red-600" />
+                  <h3 className="text-[11px] font-black uppercase text-slate-500 tracking-wider font-mono flex items-center gap-1">
+                    <Compass className="w-3.5 h-3.5 text-red-600 dark:text-red-300" />
                     Active Aspirants Directory
                   </h3>
-                  <span className="text-[9px] font-bold text-slate-400 font-mono">{filteredPeers.length} Students nearby</span>
+                  <span className="text-[11px] font-bold text-slate-400 font-mono">{filteredPeers.length} Students nearby</span>
                 </div>
 
                 {/* Horizontal Quick filters */}
@@ -1625,10 +1627,10 @@ export default function ChatTab() {
                     <button
                       key={uni}
                       onClick={() => setFilterUniversity(uni)}
-                      className={`text-[9px] font-black px-2.5 py-1 rounded-lg transition-all cursor-pointer border ${
+                      className={`text-[11px] font-black px-2.5 py-1 rounded-lg transition-all cursor-pointer border ${
                         filterUniversity === uni 
                           ? "bg-red-600 text-white border-red-600 shadow-xs" 
-                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                       }`}
                     >
                       {uni}
@@ -1644,7 +1646,7 @@ export default function ChatTab() {
                       <div 
                         key={peer.id}
                         onClick={() => setSelectedPeerId(peer.id)}
-                        className="bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 shrink-0 w-44 shadow-xs hover:shadow-sm cursor-pointer snap-start transition-all relative group"
+                        className="bg-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 rounded-xl p-2.5 shrink-0 w-44 shadow-xs hover:shadow-sm cursor-pointer snap-start transition-all relative group"
                       >
                         {isSameLevel && (
                           <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
@@ -1657,25 +1659,25 @@ export default function ChatTab() {
                             )}
                           </div>
                           <div className="text-left overflow-hidden">
-                            <h4 className="text-[10px] font-bold text-slate-800 truncate group-hover:text-red-600 transition-colors">
+                            <h4 className="text-[11px] font-bold text-slate-800 truncate group-hover:text-red-600 transition-colors">
                               {peer.name}
                             </h4>
-                            <p className="text-[8px] text-slate-400 font-mono truncate">
+                            <p className="text-[11px] text-slate-400 font-mono truncate">
                               {peer.targetUniversity}
                             </p>
                           </div>
                         </div>
 
-                        <div className="text-[9px] text-left text-slate-600 space-y-0.5 bg-slate-50 p-1.5 rounded-lg border border-slate-100">
-                          <p className="truncate font-medium">🏫 {peer.fieldOfStudy}</p>
-                          <p className="font-mono text-[8px] text-slate-500">🎓 Intake: {peer.intake}</p>
+                        <div className="text-[11px] text-left text-slate-600 space-y-0.5 bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                          <p className="truncate font-medium"><School className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />{peer.fieldOfStudy}</p>
+                          <p className="font-mono text-[11px] text-slate-500"><GraduationCap className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Intake: {peer.intake}</p>
                         </div>
 
                         <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-[7.5px] bg-amber-50 text-amber-800 font-black px-1 py-0.5 rounded max-w-[90px] truncate">
+                          <span className="text-[7.5px] bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-black px-1 py-0.5 rounded max-w-[90px] truncate">
                             {peer.status.replace(/[^a-zA-Z ]/g, "")}
                           </span>
-                          <span className="text-[8px] font-black text-red-600 uppercase flex items-center gap-0.5">
+                          <span className="text-[11px] font-black text-red-600 dark:text-red-300 uppercase flex items-center gap-0.5">
                             Chat <ArrowUpRight className="w-3 h-3" />
                           </span>
                         </div>
@@ -1691,7 +1693,7 @@ export default function ChatTab() {
                 {/* Board Left Rail: Circles Selector */}
                 <div className="w-full md:w-56 bg-slate-50 border-r border-slate-200 overflow-y-auto flex md:flex-col shrink-0">
                   <div className="p-3 border-b border-slate-200 hidden md:block">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider font-mono text-left">University Circles</p>
+                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-wider font-mono text-left">University Circles</p>
                   </div>
                   
                   <div className="flex md:flex-col gap-1 p-2 md:p-1.5 w-full overflow-x-auto md:overflow-x-visible shrink-0">
@@ -1709,10 +1711,10 @@ export default function ChatTab() {
                         >
                           <span className="text-sm shrink-0">{circle.logo}</span>
                           <div className="overflow-hidden">
-                            <h4 className="text-[10px] font-bold truncate md:max-w-[140px]">
+                            <h4 className="text-[11px] font-bold truncate md:max-w-[140px]">
                               {circle.name.replace(" Admissions", "").replace(" Engineering Circle", "")}
                             </h4>
-                            <p className={`text-[8px] font-mono ${isSelected ? "text-blue-200" : "text-slate-400"}`}>
+                            <p className={`text-[11px] font-mono ${isSelected ? "text-blue-200" : "text-slate-400"}`}>
                               {circle.membersCount} active peers
                             </p>
                           </div>
@@ -1735,13 +1737,13 @@ export default function ChatTab() {
                         </h3>
                         <div className="flex flex-wrap items-center gap-1 mt-1">
                           {activeCircle.topics.map(t => (
-                            <span key={t} className="text-[8px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded font-mono">
+                            <span key={t} className="text-[11px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded font-mono">
                               #{t}
                             </span>
                           ))}
                         </div>
                       </div>
-                      <span className="text-[9px] font-mono text-slate-400 shrink-0">
+                      <span className="text-[11px] font-mono text-slate-400 shrink-0">
                         {activeCircle.membersCount} students in board
                       </span>
                     </div>
@@ -1752,31 +1754,31 @@ export default function ChatTab() {
                     {activeCircle && activeCircle.messages.map(msg => {
                       const isCurrentUser = msg.senderName === "You";
                       return (
-                        <div key={msg.id} className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs relative group hover:border-slate-300 transition-all">
+                        <div key={msg.id} className="bg-white border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3.5 shadow-xs relative group hover:border-slate-300 transition-all">
                           
                           {/* Thread message header */}
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                               <div className={`w-7 h-7 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 ${
-                                isCurrentUser ? "bg-red-100 text-red-800" : "bg-slate-800 text-slate-100"
+                                isCurrentUser ? "bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300" : "bg-slate-800 text-slate-100"
                               }`}>
                                 {msg.senderAvatar}
                               </div>
                               <div>
-                                <h4 className="text-[10px] font-bold text-slate-800 flex items-center gap-1.5">
+                                <h4 className="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
                                   {msg.senderName}
                                   {msg.senderRole.includes("Same Goal") && (
-                                    <span className="text-[8px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded font-mono">
+                                    <span className="text-[11px] bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold px-1.5 py-0.5 rounded font-mono">
                                       Goal Match
                                     </span>
                                   )}
                                 </h4>
-                                <p className="text-[8px] text-slate-400 font-mono">
+                                <p className="text-[11px] text-slate-400 font-mono">
                                   {msg.senderRole}
                                 </p>
                               </div>
                             </div>
-                            <span className="text-[8px] text-slate-400 font-mono">
+                            <span className="text-[11px] text-slate-400 font-mono">
                               {msg.timestamp}
                             </span>
                           </div>
@@ -1787,11 +1789,11 @@ export default function ChatTab() {
                           </p>
 
                           {/* Action Bar (Like/Quote) */}
-                          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-500 pl-9 font-bold">
+                          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 pl-9 font-bold">
                             <button 
                               onClick={() => handleLikeMessage(selectedCircleId, msg.id)}
                               className={`flex items-center gap-1 cursor-pointer transition-colors ${
-                                msg.hasLiked ? "text-red-600" : "hover:text-red-600"
+                                msg.hasLiked ? "text-red-600 dark:text-red-300" : "hover:text-red-600"
                               }`}
                             >
                               <ThumbsUp className={`w-3.5 h-3.5 ${msg.hasLiked ? "fill-current" : ""}`} />
@@ -1799,7 +1801,7 @@ export default function ChatTab() {
                             </button>
 
                             <span className="text-slate-400 font-normal">
-                              Community Double-Entry Verified ✔
+                              Community Double-Entry Verified<CircleCheck className="inline w-3 h-3 ml-1 align-[-2px] text-emerald-500" aria-hidden="true" />
                             </span>
                           </div>
                         </div>
@@ -1818,7 +1820,7 @@ export default function ChatTab() {
                       placeholder={`Post a question/advice in ${activeCircle?.name.split(" ")[0]} Circle...`}
                       className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-blue-900 font-medium"
                     />
-                    <button
+                    <button aria-label="Send message"
                       type="submit"
                       disabled={!groupInput.trim()}
                       className="p-2.5 bg-blue-950 text-white rounded-xl hover:bg-black transition-all disabled:opacity-50 cursor-pointer shrink-0"

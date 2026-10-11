@@ -43,9 +43,9 @@ export default function MobileAuthScreen({ onSuccess, colorScheme }: MobileAuthS
 
       {/* Header Logo & Brand Tagline */}
       <div className="flex flex-col items-center text-center pt-8 relative z-10">
-        <WeHiveLogo className="w-16 h-16 filter drop-shadow-md" />
+        <WeHiveLogo size="lg" theme="white" className="drop-shadow-md" />
         <h1 className="text-2xl font-black tracking-tight mt-3 text-slate-100">WeHive Consultant</h1>
-        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-rose-500 mt-2 max-w-xs leading-relaxed">
+        <p className="text-[11px] uppercase tracking-[0.2em] font-black text-rose-500 mt-2 max-w-xs leading-relaxed">
           Our Ambition. Our Guidance. No Frontiers
         </p>
       </div>
@@ -68,7 +68,7 @@ export default function MobileAuthScreen({ onSuccess, colorScheme }: MobileAuthS
           {/* Name Field (Signup only) */}
           {!isLogin && (
             <div className="space-y-1">
-              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Full Name</label>
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Full Name</label>
               <div className="relative">
                 <User className="absolute left-3 top-3.5 w-4.5 h-4.5 text-slate-500" />
                 <input
@@ -85,7 +85,7 @@ export default function MobileAuthScreen({ onSuccess, colorScheme }: MobileAuthS
 
           {/* Email Field */}
           <div className="space-y-1">
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Email Address</label>
+            <label className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">Email Address</label>
             <div className="relative">
               <Mail className="absolute left-3 top-3.5 w-4.5 h-4.5 text-slate-500" />
               <input
@@ -101,7 +101,7 @@ export default function MobileAuthScreen({ onSuccess, colorScheme }: MobileAuthS
 
           {/* Password Field */}
           <div className="space-y-1">
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Security Password</label>
+            <label className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">Security Password</label>
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 w-4.5 h-4.5 text-slate-500" />
               <input
@@ -140,7 +140,7 @@ export default function MobileAuthScreen({ onSuccess, colorScheme }: MobileAuthS
               setIsLogin(!isLogin);
               setError("");
             }}
-            className="text-[10px] text-slate-400 hover:text-slate-200 font-bold transition-colors cursor-pointer"
+            className="text-[11px] text-slate-400 hover:text-slate-200 font-bold transition-colors cursor-pointer"
           >
             {isLogin ? "New to WeHive? Create an Account" : "Already registered? Sign In instead"}
           </button>
@@ -149,7 +149,7 @@ export default function MobileAuthScreen({ onSuccess, colorScheme }: MobileAuthS
       </div>
 
       {/* Footer Info */}
-      <div className="flex flex-col items-center gap-1.5 pb-4 relative z-10 text-[9px] text-slate-600 font-mono font-medium">
+      <div className="flex flex-col items-center gap-1.5 pb-4 relative z-10 text-[11px] text-slate-600 font-mono font-medium">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500/70" />
           <span>Biometric Secure Sandbox</span>

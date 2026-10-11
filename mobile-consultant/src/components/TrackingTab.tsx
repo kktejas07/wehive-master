@@ -4,12 +4,13 @@ import {
   ArrowRight, ShieldCheck, Lock, Eye, Plus, Download, RefreshCw, 
   Info, Shield, Sparkles, FileCheck, FileSignature, QrCode,
   Share2, Copy, ExternalLink, Send, Mail, MessageSquare, CheckSquare,
-  Camera, Crop, Calendar, AlertTriangle, Folder, FolderCheck, FolderOpen, Clock
+  Camera, Crop, Calendar, AlertTriangle, Folder, FolderCheck, FolderOpen, Clock, TriangleAlert, CircleCheck, ScrollText, X
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { DEFAULT_JOURNEY_MILESTONES } from "../data";
 import { JourneyMilestone } from "../types";
 import { useNotifications } from "./NotificationContext";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface VaultDocument {
   id: string;
@@ -410,6 +411,7 @@ export default function TrackingTab() {
   const [selectedViewerDoc, setSelectedViewerDoc] = useState<VaultDocument | null>(null);
   const [viewerTab, setViewerTab] = useState<"scan" | "cert">("scan");
   const [isNewUploadOpen, setIsNewUploadOpen] = useState(false);
+  const uploadDialog = useDialogA11y(!!activeUploadMilestone || isNewUploadOpen, () => handleCloseUpload());
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   // Gemini AI OCR Extraction States
@@ -488,6 +490,10 @@ export default function TrackingTab() {
 
   // Sharing Document States
   const [selectedShareDoc, setSelectedShareDoc] = useState<VaultDocument | null>(null);
+  const viewerDialog = useDialogA11y(!!selectedViewerDoc, () => setSelectedViewerDoc(null));
+  const scannerDialog = useDialogA11y(isScanning, () => stopScanning());
+  const previewDialog = useDialogA11y(isPreviewModalOpen, () => setIsPreviewModalOpen(false));
+  const shareDialog = useDialogA11y(!!selectedShareDoc, () => setSelectedShareDoc(null));
   const [copiedLink, setCopiedLink] = useState(false);
   const [shareDestination, setShareDestination] = useState<string | null>(null);
   const [isSharingInProcess, setIsSharingInProcess] = useState(false);
@@ -1063,7 +1069,7 @@ export default function TrackingTab() {
     pdf.text((doc.securityHash || "SHA256: NULL").toUpperCase(), 90, 253);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(6.5);
-    pdf.text("CRYPTO-LEDGER SHIELD PROTOCOL SECURED STATUS: COMPLIANT ✔", 90, 258);
+    pdf.text("CRYPTO-LEDGER SHIELD PROTOCOL SECURED STATUS: COMPLIANT", 90, 258);
 
     // Watermark footer
     pdf.setTextColor(140, 145, 155);
@@ -1231,10 +1237,10 @@ export default function TrackingTab() {
       pdf.setFont("helvetica", "bold");
       if (isAllCompliant) {
         pdf.setTextColor(16, 124, 65);
-        pdf.text("FULLY COMPLIANT ✔", 152, 68);
+        pdf.text("FULLY COMPLIANT", 152, 68);
       } else {
         pdf.setTextColor(217, 119, 6);
-        pdf.text("PENDING METRICS ⚠️", 152, 68);
+        pdf.text("PENDING METRICS", 152, 68);
       }
       pdf.setTextColor(60, 64, 75);
 
@@ -1461,7 +1467,7 @@ export default function TrackingTab() {
           pdf.setFont("helvetica", "normal");
           pdf.text("Registry Check:", 110, cardY + 21.5);
           pdf.setFont("helvetica", "bold");
-          pdf.text("Double-Entry Match ✔", 132, cardY + 21.5);
+          pdf.text("Double-Entry Match", 132, cardY + 21.5);
 
           // Hash seal footer
           pdf.setFillColor(255, 255, 255);
@@ -1544,7 +1550,7 @@ export default function TrackingTab() {
       pdf.text(finalHash, 90, 264);
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(6.5);
-      pdf.text(`CRYPTO-LEDGER SHIELD PROTOCOL SUMMARY STATUS: ${isAllCompliant ? "FULLY COMPLIANT ✔" : "PENDING SECURE LOADS ⚠️"}`, 90, 269);
+      pdf.text(`CRYPTO-LEDGER SHIELD PROTOCOL SUMMARY STATUS: ${isAllCompliant ? "FULLY COMPLIANT" : "PENDING SECURE LOADS"}`, 90, 269);
 
       // Watermark footer (Page 2)
       pdf.setTextColor(148, 163, 184);
@@ -1627,20 +1633,20 @@ export default function TrackingTab() {
       <div className="bg-blue-950 px-5 pt-8 pb-6 rounded-b-[24px] shadow-sm text-white shrink-0">
         <div className="flex items-center gap-1.5 mb-2.5 opacity-90">
           <div className="w-4.5 h-4.5 rounded bg-red-600 flex items-center justify-center font-bold text-white text-[10px] shadow">W</div>
-          <span className="text-[10px] font-bold tracking-wider text-blue-100 font-mono">WEHIVE TRACKER</span>
+          <span className="text-[11px] font-bold tracking-wider text-blue-100 font-mono">WEHIVE TRACKER</span>
         </div>
         <h1 className="text-xl font-black">My Study Journey</h1>
         <p className="text-xs text-red-300 mt-1">Check progress milestones and upload secure files to your storage</p>
       </div>
 
       {/* Sub-Tabs Sliding Segment Control */}
-      <div className="flex bg-slate-200/80 p-1 rounded-2xl mx-4 mt-4 border border-slate-300/30 shrink-0">
+      <div className="flex bg-slate-200/80 dark:bg-slate-800 p-1 rounded-2xl mx-4 mt-4 border border-slate-300/30 shrink-0">
         <button
           onClick={() => setSubTab("milestones")}
           className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             subTab === "milestones" 
-              ? "bg-white text-blue-950 shadow-sm" 
-              : "text-slate-500 hover:text-slate-800"
+              ? "bg-white text-blue-950 dark:text-blue-300 shadow-sm" 
+              : "text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           Checklist
@@ -1649,13 +1655,13 @@ export default function TrackingTab() {
           onClick={() => setSubTab("vault")}
           className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1 ${
             subTab === "vault" 
-              ? "bg-white text-blue-950 shadow-sm" 
-              : "text-slate-500 hover:text-slate-800"
+              ? "bg-white text-blue-950 dark:text-blue-300 shadow-sm" 
+              : "text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
-          <Lock className="w-3 h-3 text-red-600" />
+          <Lock className="w-3 h-3 text-red-600 dark:text-red-300" />
           Document Vault
-          <span className="ml-1.5 bg-slate-900 text-white font-mono text-[8px] px-1.5 py-0.5 rounded-full leading-none shrink-0">
+          <span className="ml-1.5 bg-slate-900 text-white font-mono text-[11px] px-1.5 py-0.5 rounded-full leading-none shrink-0">
             {vaultDocs.length}/4
           </span>
         </button>
@@ -1665,18 +1671,18 @@ export default function TrackingTab() {
       <div className="mx-4 mt-4 bg-white rounded-2xl p-4 border border-slate-200/60 shadow-sm space-y-3 shrink-0">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-[8px] font-mono font-black text-slate-400 uppercase tracking-widest block">Live Verification HUD</span>
+            <span className="text-[11px] font-mono font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Live Verification HUD</span>
             <h3 className="text-xs font-black text-slate-800 mt-0.5 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
               Document Compliance Ledger
             </h3>
           </div>
           <div className="text-right">
-            <span className="text-[10px] font-mono font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+            <span className="text-[11px] font-mono font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
               {vaultDocs.length}/4 Assets Secured
             </span>
-            <div className="text-[8px] text-emerald-600 font-bold mt-1 font-mono">
-              {vaultDocs.length === 4 ? "🛡️ FULLY COMPLIANT" : "⚠️ ACTIONS REQUIRED"}
+            <div className="text-[11px] text-emerald-600 dark:text-emerald-300 font-bold mt-1 font-mono">
+              {vaultDocs.length === 4 ? <><ShieldCheck className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />FULLY COMPLIANT</> : <><TriangleAlert className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />ACTIONS REQUIRED</>}
             </div>
           </div>
         </div>
@@ -1691,9 +1697,9 @@ export default function TrackingTab() {
 
         {/* Proactive Expiry Warning Ledger */}
         {vaultDocs.some(d => (d.type === "passport" || d.type === "visa") && d.expiryDate && (isExpired(d.expiryDate) || isNearExpiry(d.expiryDate))) && (
-          <div className="bg-red-50/70 border border-red-100 rounded-xl p-3 space-y-2 text-left animate-fade-in">
-            <div className="flex items-center gap-1.5 text-[9px] font-mono font-black text-red-700 uppercase tracking-wider">
-              <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+          <div className="bg-red-50/70 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 rounded-xl p-3 space-y-2 text-left animate-fade-in">
+            <div className="flex items-center gap-1.5 text-[11px] font-mono font-black text-red-700 dark:text-red-300 uppercase tracking-wider">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-600 dark:text-red-300 shrink-0" />
               <span>Document Expiration Alerts</span>
             </div>
             <div className="space-y-1.5">
@@ -1701,15 +1707,15 @@ export default function TrackingTab() {
                 const expired = isExpired(doc.expiryDate);
                 const daysLeft = doc.expiryDate ? Math.ceil((new Date(doc.expiryDate).getTime() - new Date("2026-07-04").getTime()) / (1000 * 60 * 60 * 24)) : 0;
                 return (
-                  <div key={doc.id} className="flex justify-between items-center text-[10px] bg-white border border-red-100 p-2 rounded-lg text-slate-800">
+                  <div key={doc.id} className="flex justify-between items-center text-[11px] bg-white border border-red-100 dark:border-red-900/50 p-2 rounded-lg text-slate-800">
                     <div className="flex items-center gap-1.5">
                       <span className={`w-1.5 h-1.5 rounded-full ${expired ? "bg-red-600 animate-ping" : "bg-amber-500 animate-pulse"}`} />
                       <span className="font-extrabold capitalize text-slate-700">{doc.type}:</span>
-                      <span className="text-slate-500 font-medium text-[9px]">
+                      <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">
                         {expired ? "Expired Copy" : `Expiring soon (${daysLeft} days left)`}
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-[9px] bg-red-50 text-red-700 px-2 py-0.5 rounded border border-red-200">
+                    <span className="font-mono font-bold text-[11px] bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-2 py-0.5 rounded border border-red-200 dark:border-red-900/50">
                       {doc.expiryDate}
                     </span>
                   </div>
@@ -1737,18 +1743,18 @@ export default function TrackingTab() {
               <div 
                 key={type} 
                 className={`p-2 rounded-xl border text-center transition-all flex flex-col justify-between h-[78px] ${
-                  isVerified ? "bg-emerald-50/45 border-emerald-200" :
-                  isUnderReview ? "bg-amber-50/45 border-amber-200 animate-pulse" :
-                  "bg-slate-50/50 border-slate-200 border-dashed"
+                  isVerified ? "bg-emerald-50/45 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50" :
+                  isUnderReview ? "bg-amber-50/45 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/50 animate-pulse" :
+                  "bg-slate-50/50 dark:bg-slate-900/60 border-slate-200 border-dashed"
                 }`}
               >
                 <div>
                   <div className="flex justify-center mb-1">
-                    {isVerified && <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />}
+                    {isVerified && <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-300" />}
                     {isUnderReview && <AlertCircle className="w-3.5 h-3.5 text-amber-500" />}
                     {isMissing && <Circle className="w-3.5 h-3.5 text-slate-300" />}
                   </div>
-                  <span className="text-[9px] font-extrabold text-slate-700 block truncate leading-tight">
+                  <span className="text-[11px] font-extrabold text-slate-700 block truncate leading-tight">
                     {label}
                   </span>
                 </div>
@@ -1757,14 +1763,14 @@ export default function TrackingTab() {
                   {doc ? (
                     <button
                       onClick={() => setSelectedViewerDoc(doc)}
-                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[8px] py-1 rounded-md cursor-pointer uppercase transition-colors"
+                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px] py-1 rounded-md cursor-pointer uppercase transition-colors"
                     >
                       View
                     </button>
                   ) : (
                     <button
                       onClick={() => startScanning(type as VaultDocument["type"])}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold text-[8px] py-1 rounded-md cursor-pointer uppercase transition-colors"
+                      className="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold text-[11px] py-1 rounded-md cursor-pointer uppercase transition-colors"
                     >
                       Scan
                     </button>
@@ -1777,12 +1783,12 @@ export default function TrackingTab() {
 
         {/* Divider & Export Summary PDF Button */}
         <div className="border-t border-slate-100 pt-3 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="text-[10px] text-slate-500 font-medium text-left leading-tight">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium text-left leading-tight">
             Need a certified copy of your study abroad progress? Export your compiled application milestones and document vault index into a single summary report.
           </div>
           <button
             onClick={handleExportSummaryPDF}
-            className="w-full sm:w-auto shrink-0 bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            className="w-full sm:w-auto shrink-0 bg-red-600 hover:bg-red-700 text-white font-black text-[11px] uppercase tracking-wider px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
           >
             <FileCheck className="w-4 h-4" />
             Export Summary PDF
@@ -1793,13 +1799,13 @@ export default function TrackingTab() {
       {subTab === "milestones" && isLoading && (
         <div className="p-4 space-y-4 animate-pulse" id="milestones-skeleton-loader">
             {/* Journey Progress Ring Card Skeleton */}
-            <div className="bg-white rounded-2xl p-4 border border-slate-200/40 shadow-xs flex items-center justify-between">
+            <div className="bg-white rounded-2xl p-4 border border-slate-200/40 dark:border-slate-800 shadow-xs flex items-center justify-between">
               <div className="space-y-2">
-                <div className="h-2.5 w-20 bg-slate-200 rounded" />
+                <div className="h-2.5 w-20 bg-slate-200 dark:bg-slate-800 rounded" />
                 <div className="h-4 w-36 bg-slate-300 rounded" />
-                <div className="h-2.5 w-28 bg-slate-200 rounded" />
+                <div className="h-2.5 w-28 bg-slate-200 dark:bg-slate-800 rounded" />
               </div>
-              <div className="w-14 h-14 rounded-full bg-slate-200/80" />
+              <div className="w-14 h-14 rounded-full bg-slate-200/80 dark:bg-slate-800" />
             </div>
 
             {/* Checklist Milestones Feed Skeletons */}
@@ -1809,15 +1815,15 @@ export default function TrackingTab() {
                   key={idx}
                   className="bg-white rounded-2xl border border-slate-200/50 p-4 shadow-xs flex items-start gap-3"
                 >
-                  <div className="w-5 h-5 rounded-full bg-slate-200 shrink-0 mt-0.5" />
+                  <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0 mt-0.5" />
                   <div className="flex-1 space-y-2.5">
                     <div className="flex justify-between items-center">
-                      <div className="h-2.5 w-14 bg-slate-200 rounded" />
+                      <div className="h-2.5 w-14 bg-slate-200 dark:bg-slate-800 rounded" />
                       <div className="h-4.5 w-16 bg-slate-100 rounded-md" />
                     </div>
                     <div className="h-3.5 w-48 bg-slate-300 rounded" />
-                    <div className="h-3 w-full bg-slate-200 rounded" />
-                    <div className="h-3 w-4/5 bg-slate-200 rounded" />
+                    <div className="h-3 w-full bg-slate-200 dark:bg-slate-800 rounded" />
+                    <div className="h-3 w-4/5 bg-slate-200 dark:bg-slate-800 rounded" />
                   </div>
                 </div>
               ))}
@@ -1830,9 +1836,9 @@ export default function TrackingTab() {
           {/* Dynamic Journey Progress Ring */}
           <div className="bg-white rounded-2xl p-4 border border-slate-200/50 shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Live Journey Stat</span>
+              <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase">Live Journey Stat</span>
               <h2 className="text-sm font-extrabold text-slate-800 mt-0.5">Application Milestone</h2>
-              <p className="text-[11px] text-slate-500 mt-1">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                 Completed {completedCount} of {totalCount} steps
               </p>
             </div>
@@ -1846,7 +1852,7 @@ export default function TrackingTab() {
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
                 <path
-                  className="text-red-600 transition-all duration-500"
+                  className="text-red-600 dark:text-red-300 transition-all duration-500"
                   strokeDasharray={`${progressPercent}, 100`}
                   strokeWidth="3.5"
                   strokeLinecap="round"
@@ -1862,9 +1868,9 @@ export default function TrackingTab() {
           {/* Individual Stage Progress Grid */}
           <div className="bg-white rounded-[24px] p-4.5 border border-slate-200/50 shadow-sm space-y-3">
             <div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">Stage-by-Stage Tracker</span>
+              <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Stage-by-Stage Tracker</span>
               <h3 className="text-xs font-black text-slate-800 mt-0.5">Application Stage Progress</h3>
-              <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Visualize and monitor key phases of your study permit journey</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-none mt-1">Visualize and monitor key phases of your study permit journey</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -1872,16 +1878,16 @@ export default function TrackingTab() {
                 <div 
                   key={stage.key} 
                   id={`stage-card-${stage.key}`}
-                  className="p-3.5 rounded-2xl border border-slate-100 flex items-center justify-between gap-2.5 transition-all bg-slate-50/50 hover:bg-slate-50"
+                  className="p-3.5 rounded-2xl border border-slate-100 flex items-center justify-between gap-2.5 transition-all bg-slate-50/50 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   <div className="min-w-0 flex-1">
                     <span className="text-[11px] font-extrabold text-slate-800 leading-tight block truncate">
                       {stage.label}
                     </span>
-                    <span className="text-[8px] font-mono font-bold text-slate-400 uppercase tracking-wide block mt-0.5">
+                    <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide block mt-0.5">
                       {stage.description}
                     </span>
-                    <span className="text-[9px] text-slate-500 font-bold font-mono mt-2 block">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold font-mono mt-2 block">
                       {stage.completed}/{stage.total} Done
                     </span>
                   </div>
@@ -1905,7 +1911,7 @@ export default function TrackingTab() {
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       />
                     </svg>
-                    <span className="absolute text-[9px] font-black font-mono text-slate-700">{stage.percent}%</span>
+                    <span className="absolute text-[11px] font-black font-mono text-slate-700">{stage.percent}%</span>
                   </div>
                 </div>
               ))}
@@ -1920,11 +1926,11 @@ export default function TrackingTab() {
                 <div
                   key={m.id}
                   className={`bg-white rounded-2xl border border-slate-200/60 p-4 shadow-xs transition-all relative ${
-                    isCompleted ? "border-blue-100 bg-blue-50/10" : ""
+                    isCompleted ? "border-blue-100 dark:border-blue-900/50 bg-blue-50/10 dark:bg-blue-950/40" : ""
                   }`}
                 >
                   {idx < milestones.length - 1 && (
-                    <div className="absolute left-7 top-14 bottom-[-16px] w-0.5 bg-slate-200 z-0" />
+                    <div className="absolute left-7 top-14 bottom-[-16px] w-0.5 bg-slate-200 dark:bg-slate-800 z-0" />
                   )}
 
                   <div className="flex items-start gap-3 relative z-10">
@@ -1933,7 +1939,7 @@ export default function TrackingTab() {
                       className="mt-0.5 text-slate-400 hover:text-blue-900 cursor-pointer shrink-0 transition-colors"
                     >
                       {isCompleted ? (
-                        <CheckCircle2 className="w-5 h-5 text-red-600 fill-red-100" />
+                        <CheckCircle2 className="w-5 h-5 text-red-600 dark:text-red-300 fill-red-100" />
                       ) : (
                         <Circle className="w-5 h-5 text-slate-300" />
                       )}
@@ -1941,19 +1947,19 @@ export default function TrackingTab() {
 
                     <div className="flex-1">
                       <div className="flex items-center justify-between gap-1.5">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide font-mono">
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide font-mono">
                           {m.category}
                         </span>
                         {isCompleted && (
-                          <span className="text-[8px] bg-blue-50 text-blue-900 font-bold px-1.5 py-0.5 rounded uppercase font-mono">
+                          <span className="text-[11px] bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 font-bold px-1.5 py-0.5 rounded uppercase font-mono">
                             Completed
                           </span>
                         )}
                       </div>
-                      <h3 className={`text-xs font-bold mt-1 text-slate-800 ${isCompleted ? "line-through text-slate-400" : ""}`}>
+                      <h3 className={`text-xs font-bold mt-1 text-slate-700 dark:text-slate-200 ${isCompleted ? "line-through text-slate-400" : ""}`}>
                         {m.title}
                       </h3>
-                      <p className="text-[11px] text-slate-500 mt-1 leading-relaxed font-medium">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed font-medium">
                         {m.description}
                       </p>
 
@@ -1961,9 +1967,9 @@ export default function TrackingTab() {
                       {m.documentName && (
                         <div className="mt-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between gap-2.5 animate-fade-in">
                           <div className="flex items-center gap-1.5 truncate">
-                            <FileText className="w-4 h-4 text-blue-900 shrink-0" />
+                            <FileText className="w-4 h-4 text-blue-900 dark:text-blue-300 shrink-0" />
                             <div className="truncate text-left">
-                              <p className="text-[10px] text-slate-400 leading-tight">Document Slot</p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">Document Slot</p>
                               <p className="text-[11px] font-bold text-slate-600 truncate">{m.documentUploaded ? m.documentName : "Empty file"}</p>
                             </div>
                           </div>
@@ -1979,7 +1985,7 @@ export default function TrackingTab() {
                           ) : (
                             <button
                               onClick={() => handleOpenUpload(m)}
-                              className="bg-blue-50 text-blue-900 hover:bg-blue-900 hover:text-white border border-blue-100 font-bold text-[9px] px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
+                              className="bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 hover:bg-blue-900 hover:text-white border border-blue-100 dark:border-blue-900/50 font-bold text-[11px] px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
                             >
                               Upload Draft
                             </button>
@@ -2015,19 +2021,19 @@ export default function TrackingTab() {
               {[1, 2].map((idx) => (
                 <div key={idx} className="bg-white rounded-2xl border border-slate-200/50 p-4 shadow-xs">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-200 shrink-0" />
+                    <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 shrink-0" />
                     <div className="flex-1 space-y-2.5">
                       <div className="flex justify-between items-center">
                         <div className="h-4 w-40 bg-slate-300 rounded" />
                         <div className="h-4.5 w-16 bg-slate-100 rounded-md" />
                       </div>
-                      <div className="h-3 w-52 bg-slate-200/80 rounded" />
+                      <div className="h-3 w-52 bg-slate-200/80 dark:bg-slate-800 rounded" />
                       
                       {/* Document File details simulator */}
                       <div className="mt-3 bg-slate-50 rounded-xl p-2.5 border border-slate-100 space-y-2">
                         <div className="flex justify-between">
-                          <div className="h-3 w-32 bg-slate-200 rounded" />
-                          <div className="h-3 w-10 bg-slate-200 rounded" />
+                          <div className="h-3 w-32 bg-slate-200 dark:bg-slate-800 rounded" />
+                          <div className="h-3 w-10 bg-slate-200 dark:bg-slate-800 rounded" />
                         </div>
                         <div className="h-2.5 w-48 bg-slate-100 rounded" />
                       </div>
@@ -2046,15 +2052,15 @@ export default function TrackingTab() {
           <div className="bg-slate-900 text-white rounded-2xl p-4 border border-white/10 shadow-md relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-red-600/10 rounded-full blur-xl" />
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-white/5 rounded-xl text-red-500 border border-white/10 shrink-0">
+              <div className="p-2 bg-white/5 dark:bg-slate-900 rounded-xl text-red-500 border border-white/10 shrink-0">
                 <Shield className="w-5 h-5 animate-pulse" />
               </div>
               <div>
                 <div className="flex items-center gap-1">
-                  <span className="text-[9px] bg-red-600 text-white font-black px-1.5 py-0.5 rounded font-mono uppercase tracking-widest scale-90">
+                  <span className="text-[11px] bg-red-600 text-white font-black px-1.5 py-0.5 rounded font-mono uppercase tracking-widest scale-90">
                     AES-256
                   </span>
-                  <span className="text-[10px] font-mono font-bold text-slate-400">Military Cryptography</span>
+                  <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400">Military Cryptography</span>
                 </div>
                 <h3 className="text-xs font-black text-white mt-1.5">Enterprise Encrypted Vault</h3>
                 <p className="text-[11px] text-slate-300 mt-1 leading-normal font-medium">
@@ -2068,25 +2074,25 @@ export default function TrackingTab() {
           <div className="flex items-center justify-between p-1.5 bg-slate-100 rounded-xl" id="vault-layout-switcher">
             <div className="flex items-center gap-2 pl-2">
               <FolderCheck className="w-4 h-4 text-slate-600" />
-              <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider font-mono">Vault View</span>
+              <span className="text-[11px] font-black uppercase text-slate-600 tracking-wider font-mono">Vault View</span>
             </div>
-            <div className="flex bg-slate-200/60 p-0.5 rounded-lg border border-slate-300/10">
+            <div className="flex bg-slate-200/60 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-300/10">
               <button
                 onClick={() => setIsSmartView(true)}
-                className={`text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                className={`text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-md transition-all cursor-pointer ${
                   isSmartView 
                     ? "bg-white text-slate-800 shadow-sm font-extrabold" 
-                    : "text-slate-500 hover:text-slate-800"
+                    : "text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
                 Smart Folders
               </button>
               <button
                 onClick={() => setIsSmartView(false)}
-                className={`text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                className={`text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-md transition-all cursor-pointer ${
                   !isSmartView 
                     ? "bg-white text-slate-800 shadow-sm font-extrabold" 
-                    : "text-slate-500 hover:text-slate-800"
+                    : "text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
                 Classic List
@@ -2123,7 +2129,7 @@ export default function TrackingTab() {
                   className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl border shrink-0 bg-blue-50 border-blue-100 text-blue-900">
+                    <div className="p-2.5 rounded-xl border shrink-0 bg-blue-50 dark:bg-blue-950/40 border-blue-100 dark:border-blue-900/50 text-blue-900 dark:text-blue-300">
                       <FileText className="w-5 h-5" />
                     </div>
 
@@ -2132,12 +2138,12 @@ export default function TrackingTab() {
                         <h4 className="text-xs font-extrabold text-slate-800 truncate">
                           {label}
                         </h4>
-                        <span className={`text-[9px] font-bold font-mono px-2 py-0.5 rounded-md flex items-center gap-1 uppercase ${
+                        <span className={`text-[11px] font-bold font-mono px-2 py-0.5 rounded-md flex items-center gap-1 uppercase ${
                           docExpired
-                            ? "bg-red-50 text-red-700 border border-red-100 animate-pulse"
+                            ? "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-100 dark:border-red-900/50 animate-pulse"
                             : doc.status === "verified" 
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-100" 
-                              : "bg-amber-50 text-amber-700 border border-amber-100"
+                              ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/50" 
+                              : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-900/50"
                         }`}>
                           <span className={`w-1 h-1 rounded-full ${
                             docExpired 
@@ -2149,49 +2155,49 @@ export default function TrackingTab() {
                           {docExpired ? "Expired" : doc.status}
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">
+                      <p className="text-[11px] text-slate-400 mt-0.5 leading-normal">
                         {description}
                       </p>
 
                       <div className="mt-3 bg-slate-50 rounded-xl p-2.5 border border-slate-100">
-                        <div className="flex justify-between items-center text-[10px] text-slate-500 font-mono">
+                        <div className="flex justify-between items-center text-[11px] text-slate-500 font-mono">
                           <span className="truncate font-semibold text-slate-700 max-w-[180px]">{doc.fileName}</span>
                           <span>{doc.fileSize}</span>
                         </div>
-                        <div className="mt-1 flex items-center justify-between text-[9px] text-slate-400 font-mono border-t border-slate-200/50 pt-1.5">
+                        <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400 font-mono border-t border-slate-200/50 pt-1.5">
                           <span>Uploaded {doc.uploadedAt}</span>
                           <span className="text-slate-500 font-bold">{doc.securityHash.substr(0, 16)}...</span>
                         </div>
 
                         {doc.expiryDate && (
-                          <div className={`mt-1.5 flex items-center gap-1.5 text-[9px] font-mono border-t border-slate-200/50 pt-1.5 ${docExpired ? "text-red-600 font-bold animate-pulse" : docNearExpiry ? "text-amber-600 font-bold" : "text-slate-500"}`}>
+                          <div className={`mt-1.5 flex items-center gap-1.5 text-[11px] font-mono border-t border-slate-200/50 pt-1.5 ${docExpired ? "text-red-600 dark:text-red-300 font-bold animate-pulse" : docNearExpiry ? "text-amber-600 dark:text-amber-300 font-bold" : "text-slate-500"}`}>
                             <Calendar className="w-3.5 h-3.5" />
                             <span>{docExpired ? "Document Expired:" : "Expiration Compliance Date:"}</span>
-                            <span className={`ml-auto font-bold px-1.5 py-0.5 rounded border ${docExpired ? "bg-red-50 border-red-200 text-red-700" : docNearExpiry ? "bg-amber-50 border-amber-200 text-amber-700 animate-pulse" : "bg-slate-100 border-slate-200 text-slate-700"}`}>{doc.expiryDate}</span>
+                            <span className={`ml-auto font-bold px-1.5 py-0.5 rounded border ${docExpired ? "bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300" : docNearExpiry ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-300 animate-pulse" : "bg-slate-100 border-slate-200 text-slate-700"}`}>{doc.expiryDate}</span>
                           </div>
                         )}
 
-                        <div className="flex gap-2 mt-3.5 pt-1 border-t border-slate-200/30">
+                        <div className="flex gap-2 mt-3.5 pt-1 border-t border-slate-200/30 dark:border-slate-800">
                           <button
                             onClick={() => setSelectedViewerDoc(doc)}
-                            className="flex-1 bg-blue-950 hover:bg-blue-900 text-white font-bold py-1.5 px-3 rounded-lg text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+                            className="flex-1 bg-blue-950 hover:bg-blue-900 text-white font-bold py-1.5 px-3 rounded-lg text-[11px] transition-all cursor-pointer flex items-center justify-center gap-1 shadow-sm"
                           >
                             <Eye className="w-3.5 h-3.5" />
                             View Document
                           </button>
                           <button
                             onClick={() => handleDownloadPDF(doc)}
-                            className="p-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-600 transition-all cursor-pointer"
+                            className="p-1.5 bg-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 rounded-lg text-slate-600 transition-all cursor-pointer"
                             title="Download certified PDF"
                           >
-                            <Download className="w-3.5 h-3.5 text-blue-950" />
+                            <Download className="w-3.5 h-3.5 text-blue-950 dark:text-blue-300" />
                           </button>
                           <button
                             onClick={() => handleSharePDF(doc)}
-                            className="p-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-600 transition-all cursor-pointer"
+                            className="p-1.5 bg-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 rounded-lg text-slate-600 transition-all cursor-pointer"
                             title="Share certified document"
                           >
-                            <Share2 className="w-3.5 h-3.5 text-red-600" />
+                            <Share2 className="w-3.5 h-3.5 text-red-600 dark:text-red-300" />
                           </button>
                           <button
                             onClick={() => handleDeleteVaultDoc(doc.id, doc.name)}
@@ -2224,7 +2230,7 @@ export default function TrackingTab() {
               return (
                 <div 
                   key={type}
-                  className="bg-slate-50/40 rounded-2xl border border-dashed border-slate-300 p-4 shadow-xs transition-all"
+                  className="bg-slate-50/40 dark:bg-slate-900/60 rounded-2xl border border-dashed border-slate-300 p-4 shadow-xs transition-all"
                 >
                   <div className="flex items-start gap-3">
                     <div className="p-2.5 rounded-xl border shrink-0 bg-slate-100 border-slate-200 text-slate-400">
@@ -2235,15 +2241,15 @@ export default function TrackingTab() {
                       <h4 className="text-xs font-extrabold text-slate-800 truncate">
                         {label}
                       </h4>
-                      <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">
+                      <p className="text-[11px] text-slate-400 mt-0.5 leading-normal">
                         {description}
                       </p>
                       
                       <button
                         onClick={() => handleOpenVaultUpload(type)}
-                        className="mt-3 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 py-2 px-3.5 rounded-xl text-[10px] font-bold text-slate-700 flex items-center gap-1.5 shadow-xs transition-all cursor-pointer leading-none"
+                        className="mt-3 bg-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 hover:border-slate-300 py-2 px-3.5 rounded-xl text-[11px] font-bold text-slate-700 flex items-center gap-1.5 shadow-xs transition-all cursor-pointer leading-none"
                       >
-                        <Plus className="w-3.5 h-3.5 text-red-600" />
+                        <Plus className="w-3.5 h-3.5 text-red-600 dark:text-red-300" />
                         <span>Secure Upload</span>
                       </button>
                     </div>
@@ -2268,18 +2274,18 @@ export default function TrackingTab() {
                       }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`p-2 rounded-xl ${vaultFolderFilter === "all" ? "bg-blue-100 text-blue-800" : "bg-slate-100 text-slate-600"}`}>
+                        <div className={`p-2 rounded-xl ${vaultFolderFilter === "all" ? "bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300" : "bg-slate-100 text-slate-600"}`}>
                           <FolderOpen className="w-5 h-5" />
                         </div>
                         <span className={`text-[11px] font-black font-mono px-2 py-0.5 rounded-full ${
-                          vaultFolderFilter === "all" ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-700"
+                          vaultFolderFilter === "all" ? "bg-blue-600 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-700"
                         }`}>
                           {vaultDocs.length}
                         </span>
                       </div>
                       <div className="mt-2">
                         <h5 className="text-[11px] font-black text-slate-800 leading-none">All Assets</h5>
-                        <p className="text-[9px] text-slate-400 font-medium mt-1 leading-none font-sans">Full digital archive</p>
+                        <p className="text-[11px] text-slate-400 font-medium mt-1 leading-none font-sans">Full digital archive</p>
                       </div>
                     </button>
 
@@ -2293,18 +2299,18 @@ export default function TrackingTab() {
                       }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`p-2 rounded-xl ${vaultFolderFilter === "verified" ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}>
+                        <div className={`p-2 rounded-xl ${vaultFolderFilter === "verified" ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300" : "bg-slate-100 text-slate-600"}`}>
                           <FolderCheck className="w-5 h-5" />
                         </div>
                         <span className={`text-[11px] font-black font-mono px-2 py-0.5 rounded-full ${
-                          vaultFolderFilter === "verified" ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-700"
+                          vaultFolderFilter === "verified" ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-700"
                         }`}>
                           {verifiedDocs.length}
                         </span>
                       </div>
                       <div className="mt-2">
                         <h5 className="text-[11px] font-black text-slate-800 leading-none">Verified Folder</h5>
-                        <p className="text-[9px] text-slate-400 font-medium mt-1 leading-none font-sans">Approved compliances</p>
+                        <p className="text-[11px] text-slate-400 font-medium mt-1 leading-none font-sans">Approved compliances</p>
                       </div>
                     </button>
 
@@ -2318,18 +2324,18 @@ export default function TrackingTab() {
                       }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`p-2 rounded-xl ${vaultFolderFilter === "pending" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"}`}>
+                        <div className={`p-2 rounded-xl ${vaultFolderFilter === "pending" ? "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300" : "bg-slate-100 text-slate-600"}`}>
                           <Clock className="w-5 h-5" />
                         </div>
                         <span className={`text-[11px] font-black font-mono px-2 py-0.5 rounded-full ${
-                          vaultFolderFilter === "pending" ? "bg-amber-600 text-white" : "bg-slate-200 text-slate-700"
+                          vaultFolderFilter === "pending" ? "bg-amber-600 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-700"
                         }`}>
                           {pendingDocs.length}
                         </span>
                       </div>
                       <div className="mt-2">
                         <h5 className="text-[11px] font-black text-slate-800 leading-none">Pending Review</h5>
-                        <p className="text-[9px] text-slate-400 font-medium mt-1 leading-none font-sans">Embassy seals queue</p>
+                        <p className="text-[11px] text-slate-400 font-medium mt-1 leading-none font-sans">Embassy seals queue</p>
                       </div>
                     </button>
 
@@ -2343,18 +2349,18 @@ export default function TrackingTab() {
                       }`}
                     >
                       <div className="flex items-start justify-between w-full">
-                        <div className={`p-2 rounded-xl ${vaultFolderFilter === "expired" ? "bg-rose-100 text-rose-800" : "bg-slate-100 text-slate-600"}`}>
+                        <div className={`p-2 rounded-xl ${vaultFolderFilter === "expired" ? "bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300" : "bg-slate-100 text-slate-600"}`}>
                           <AlertTriangle className="w-5 h-5" />
                         </div>
                         <span className={`text-[11px] font-black font-mono px-2 py-0.5 rounded-full ${
-                          vaultFolderFilter === "expired" ? "bg-rose-600 text-white" : "bg-slate-200 text-slate-700"
+                          vaultFolderFilter === "expired" ? "bg-rose-600 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-700"
                         }`}>
                           {expiredDocs.length}
                         </span>
                       </div>
                       <div className="mt-2">
                         <h5 className="text-[11px] font-black text-slate-800 leading-none">Expired Folder</h5>
-                        <p className="text-[9px] text-slate-400 font-medium mt-1 leading-none font-sans">Requires renewal</p>
+                        <p className="text-[11px] text-slate-400 font-medium mt-1 leading-none font-sans">Requires renewal</p>
                       </div>
                     </button>
 
@@ -2372,7 +2378,7 @@ export default function TrackingTab() {
                       onClick={() => {
                         startScanning("passport");
                       }}
-                      className="bg-red-600 hover:bg-red-700 text-white font-extrabold text-[9px] px-2.5 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-xs uppercase tracking-wide"
+                      className="bg-red-600 hover:bg-red-700 text-white font-extrabold text-[11px] px-2.5 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-xs uppercase tracking-wide"
                     >
                       <Camera className="w-3.5 h-3.5" />
                       Scan Passport
@@ -2394,7 +2400,7 @@ export default function TrackingTab() {
                             {/* Expired Section if any */}
                             {expiredDocs.length > 0 && (
                               <div className="space-y-2">
-                                <span className="text-[9px] font-black font-mono text-rose-600 uppercase tracking-widest block bg-rose-50 border border-rose-100 px-2 py-1 rounded-md w-max">⚠️ Expired Compliances ({expiredDocs.length})</span>
+                                <span className="text-[11px] font-black font-mono text-rose-600 dark:text-rose-300 uppercase tracking-widest block bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 px-2 py-1 rounded-md w-max"><TriangleAlert className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Expired Compliances ({expiredDocs.length})</span>
                                 <div className="space-y-2">
                                   {expiredDocs.map(renderDocItem)}
                                 </div>
@@ -2404,7 +2410,7 @@ export default function TrackingTab() {
                             {/* Pending Section if any */}
                             {pendingDocs.length > 0 && (
                               <div className="space-y-2">
-                                <span className="text-[9px] font-black font-mono text-amber-600 uppercase tracking-widest block bg-amber-50 border border-amber-100 px-2 py-1 rounded-md w-max">⏳ Pending Verification ({pendingDocs.length})</span>
+                                <span className="text-[11px] font-black font-mono text-amber-600 dark:text-amber-300 uppercase tracking-widest block bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/50 px-2 py-1 rounded-md w-max">⏳ Pending Verification ({pendingDocs.length})</span>
                                 <div className="space-y-2">
                                   {pendingDocs.map(renderDocItem)}
                                 </div>
@@ -2414,7 +2420,7 @@ export default function TrackingTab() {
                             {/* Verified Section if any */}
                             {verifiedDocs.length > 0 && (
                               <div className="space-y-2">
-                                <span className="text-[9px] font-black font-mono text-emerald-600 uppercase tracking-widest block bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-md w-max">✅ Approved Assets ({verifiedDocs.length})</span>
+                                <span className="text-[11px] font-black font-mono text-emerald-600 dark:text-emerald-300 uppercase tracking-widest block bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 px-2 py-1 rounded-md w-max"><CircleCheck className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Approved Assets ({verifiedDocs.length})</span>
                                 <div className="space-y-2">
                                   {verifiedDocs.map(renderDocItem)}
                                 </div>
@@ -2432,7 +2438,7 @@ export default function TrackingTab() {
                               <div className="mt-4 bg-slate-50 border border-slate-200/60 p-4 rounded-2xl space-y-3">
                                 <div className="flex items-center gap-1.5 pl-0.5">
                                   <AlertCircle className="w-4 h-4 text-slate-500" />
-                                  <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider font-mono">Missing Comps Checklist</span>
+                                  <span className="text-[11px] font-black uppercase text-slate-600 tracking-wider font-mono">Missing Comps Checklist</span>
                                 </div>
                                 <div className="grid grid-cols-1 gap-2">
                                   {missingTypes.map((type) => {
@@ -2449,7 +2455,7 @@ export default function TrackingTab() {
                                         </div>
                                         <button
                                           onClick={() => handleOpenVaultUpload(type)}
-                                          className="text-[9px] font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
+                                          className="text-[11px] font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
                                         >
                                           Upload
                                         </button>
@@ -2471,7 +2477,7 @@ export default function TrackingTab() {
                         <div className="py-8 text-center text-slate-400 text-xs bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
                           <FolderCheck className="w-8 h-8 mx-auto text-slate-300 mb-2" />
                           No verified documents in this folder.
-                          <p className="text-[10px] text-slate-400 mt-1">Uploaded files undergo security scans before approval.</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Uploaded files undergo security scans before approval.</p>
                         </div>
                       ) : (
                         verifiedDocs.map(renderDocItem)
@@ -2484,7 +2490,7 @@ export default function TrackingTab() {
                         <div className="py-8 text-center text-slate-400 text-xs bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
                           <Clock className="w-8 h-8 mx-auto text-slate-300 mb-2 animate-pulse" />
                           No pending verification queue.
-                          <p className="text-[10px] text-slate-400 mt-1">All uploaded visa credentials and passports are verified!</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">All uploaded visa credentials and passports are verified!</p>
                         </div>
                       ) : (
                         pendingDocs.map(renderDocItem)
@@ -2497,7 +2503,7 @@ export default function TrackingTab() {
                         <div className="py-8 text-center text-slate-400 text-xs bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
                           <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 mb-2" />
                           No expired documents.
-                          <p className="text-[10px] text-slate-400 mt-1">All compliance and expiration dates are active & healthy!</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">All compliance and expiration dates are active & healthy!</p>
                         </div>
                       ) : (
                         expiredDocs.map(renderDocItem)
@@ -2518,7 +2524,7 @@ export default function TrackingTab() {
                   </h4>
                   <button
                     onClick={() => startScanning("visa")}
-                    className="bg-red-600 hover:bg-red-700 text-white font-extrabold text-[9px] px-2.5 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-xs uppercase tracking-wide"
+                    className="bg-red-600 hover:bg-red-700 text-white font-extrabold text-[11px] px-2.5 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-xs uppercase tracking-wide"
                   >
                     <Camera className="w-3.5 h-3.5" />
                     Scan Document
@@ -2533,9 +2539,9 @@ export default function TrackingTab() {
             );
           })()}
 
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-blue-900 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-blue-900 leading-normal">
+          <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-2xl p-4 flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-blue-900 dark:text-blue-300 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-blue-900 dark:text-blue-300 leading-normal">
               Need a physical certification? Request certified hard copies directly from the **Hive AI chat** console at any time.
             </p>
           </div>
@@ -2545,15 +2551,16 @@ export default function TrackingTab() {
       {/* ================= SIMULATED FILE UPLOAD DRAWER OVERLAY ================= */}
       {(activeUploadMilestone || isNewUploadOpen) && (
         <div className="absolute inset-0 bg-black/60 flex items-end justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-t-3xl rounded-b-xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none">
+          <div {...uploadDialog} className="bg-white rounded-t-3xl rounded-b-xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none">
             <button
+              aria-label="Close"
               onClick={handleCloseUpload}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
             >
-              ✕
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
 
-            <span className="text-[9px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full uppercase font-mono flex items-center gap-1 w-max">
+            <span className="text-[11px] font-bold text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full uppercase font-mono flex items-center gap-1 w-max">
               <Shield className="w-2.5 h-2.5" />
               Secure AES-256 Upload
             </span>
@@ -2567,7 +2574,7 @@ export default function TrackingTab() {
             {/* Expiry Date input field for manual upload */}
             {!activeUploadMilestone && (vaultUploadType === "passport" || vaultUploadType === "visa") && !uploading && !uploadSuccess && (
               <div className="mb-4 bg-slate-50 rounded-xl p-3 border border-slate-200/60 font-sans space-y-1">
-                <span className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-wider block">Set Document Expiry Date</span>
+                <span className="text-[11px] font-mono font-black text-slate-400 uppercase tracking-wider block">Set Document Expiry Date</span>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-slate-500 shrink-0" />
                   <input
@@ -2587,42 +2594,42 @@ export default function TrackingTab() {
               onDrop={handleDrop}
               className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
                 isDragging
-                  ? "border-red-600 bg-red-50/10"
+                  ? "border-red-600 bg-red-50/10 dark:bg-red-950/40"
                   : uploading
                   ? "border-blue-300 bg-slate-50"
-                  : "border-slate-200 bg-slate-50/50 hover:bg-slate-50"
+                  : "border-slate-200 bg-slate-50/50 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
             >
               {uploading ? (
                 <div className="space-y-3">
-                  <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mx-auto animate-pulse">
-                    <Upload className="w-5 h-5 text-blue-950" />
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                    <Upload className="w-5 h-5 text-blue-950 dark:text-blue-300" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-bold text-slate-700">Hashing & Securing File...</p>
-                    <p className="text-[10px] text-slate-400 truncate">{selectedFileName}</p>
+                    <p className="text-[11px] text-slate-400 truncate">{selectedFileName}</p>
                   </div>
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
                     <div
                       className="bg-red-600 h-full transition-all duration-300 rounded-full"
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-red-600">{uploadProgress}% Secure Transfer</span>
+                  <span className="text-[11px] font-mono font-bold text-red-600 dark:text-red-300">{uploadProgress}% Secure Transfer</span>
                 </div>
               ) : uploadSuccess ? (
                 <div className="space-y-2">
-                  <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mx-auto">
-                    <Check className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 bg-green-50 dark:bg-green-950/40 rounded-full flex items-center justify-center mx-auto">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-300" />
                   </div>
                   <p className="text-xs font-bold text-slate-800">File Safely Secured!</p>
-                  <p className="text-[10px] text-slate-400 truncate">{selectedFileName}</p>
-                  <div className="text-[9px] bg-slate-100 text-slate-500 font-mono py-1 px-2.5 rounded border border-slate-200 inline-block">
+                  <p className="text-[11px] text-slate-400 truncate">{selectedFileName}</p>
+                  <div className="text-[11px] bg-slate-100 text-slate-500 font-mono py-1 px-2.5 rounded border border-slate-200 inline-block">
                     SHA256 Checksum Verified
                   </div>
                   <button
                     onClick={handleCloseUpload}
-                    className="mt-3 bg-blue-950 text-white text-[10px] font-bold px-4 py-2 rounded-xl hover:bg-blue-900 cursor-pointer w-full"
+                    className="mt-3 bg-blue-950 text-white text-[11px] font-bold px-4 py-2 rounded-xl hover:bg-blue-900 cursor-pointer w-full"
                   >
                     Done
                   </button>
@@ -2634,7 +2641,7 @@ export default function TrackingTab() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-700">Drag & drop your files here</p>
-                    <p className="text-[10px] text-slate-400 font-medium">Supports PDF, DOCX or JPEG up to 10MB</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Supports PDF, DOCX or JPEG up to 10MB</p>
                   </div>
                   <div className="relative flex flex-col items-center gap-2">
                     <input
@@ -2647,7 +2654,7 @@ export default function TrackingTab() {
                     <div className="flex gap-2">
                       <label
                         htmlFor="file-selector"
-                        className="bg-white hover:bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-[10px] font-bold text-slate-600 inline-block shadow-xs cursor-pointer"
+                        className="bg-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300 rounded-xl px-4 py-2 text-[11px] font-bold text-slate-600 inline-block shadow-xs cursor-pointer"
                       >
                         Browse Files
                       </label>
@@ -2656,7 +2663,7 @@ export default function TrackingTab() {
                           handleCloseUpload();
                           startScanning(vaultUploadType || "visa");
                         }}
-                        className="bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 rounded-xl px-4 py-2 text-[10px] font-bold inline-flex items-center gap-1 shadow-xs cursor-pointer"
+                        className="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-300 rounded-xl px-4 py-2 text-[11px] font-bold inline-flex items-center gap-1 shadow-xs cursor-pointer"
                       >
                         <Camera className="w-3.5 h-3.5" />
                         Scan with Camera
@@ -2672,7 +2679,7 @@ export default function TrackingTab() {
 
       {/* ================= HIGH FIDELITY SECURE DOCUMENT VIEWER MODAL ================= */}
       {selectedViewerDoc && (
-        <div className="absolute inset-0 bg-slate-950/98 z-55 flex flex-col justify-between animate-fade-in p-5 text-left select-none">
+        <div {...viewerDialog} className="absolute inset-0 bg-slate-950/98 z-55 flex flex-col justify-between animate-fade-in p-5 text-left select-none">
           {/* Header */}
           <div className="flex justify-between items-center border-b border-white/10 pb-3 shrink-0">
             <div className="flex items-center gap-2">
@@ -2680,7 +2687,7 @@ export default function TrackingTab() {
                 W
               </div>
               <div>
-                <span className="text-[8px] font-mono text-slate-400 block tracking-widest uppercase">Safe-Vault Encrypted View</span>
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 block tracking-widest uppercase">Safe-Vault Encrypted View</span>
                 <h3 className="text-xs font-bold text-white leading-tight">
                   {selectedViewerDoc.name}
                 </h3>
@@ -2689,7 +2696,7 @@ export default function TrackingTab() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleDownloadPDF(selectedViewerDoc)}
-                className="flex items-center gap-1 text-[10px] font-bold text-white bg-blue-950 hover:bg-blue-900 px-2.5 py-1.5 rounded-lg border border-blue-800 transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1 text-[11px] font-bold text-white bg-blue-950 hover:bg-blue-900 px-2.5 py-1.5 rounded-lg border border-blue-800 transition-all cursor-pointer shadow-sm"
                 title="Download certified PDF"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -2697,7 +2704,7 @@ export default function TrackingTab() {
               </button>
               <button
                 onClick={() => handleSharePDF(selectedViewerDoc)}
-                className="flex items-center gap-1 text-[10px] font-bold text-white bg-red-600 hover:bg-red-500 px-2.5 py-1.5 rounded-lg border border-red-500 transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1 text-[11px] font-bold text-white bg-red-600 hover:bg-red-500 px-2.5 py-1.5 rounded-lg border border-red-500 transition-all cursor-pointer shadow-sm"
                 title="Share PDF link"
               >
                 <Share2 className="w-3.5 h-3.5" />
@@ -2705,7 +2712,7 @@ export default function TrackingTab() {
               </button>
               <button
                 onClick={() => setSelectedViewerDoc(null)}
-                className="text-slate-400 hover:text-white font-bold text-xs bg-white/5 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-white/10"
+                className="text-slate-400 hover:text-white font-bold text-xs bg-white/5 dark:bg-slate-900 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-white/10"
               >
                 Close
               </button>
@@ -2718,26 +2725,26 @@ export default function TrackingTab() {
             <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.7)_1px,transparent_1px)] bg-[size:100%_4px] opacity-10 pointer-events-none" />
 
             {selectedViewerDoc.scannedImage && (
-              <div className="mb-4 flex gap-1 bg-slate-200/50 p-1 rounded-xl self-center shrink-0 border border-slate-300/20 z-10">
+              <div className="mb-4 flex gap-1 bg-slate-200/50 dark:bg-slate-800 p-1 rounded-xl self-center shrink-0 border border-slate-300/20 z-10">
                 <button
                   onClick={() => setViewerTab("scan")}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
                     viewerTab === "scan"
                       ? "bg-slate-900 text-white shadow-sm"
                       : "text-slate-600 hover:text-slate-950"
                   }`}
                 >
-                  📸 Camera Scan
+                  <Camera className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Camera Scan
                 </button>
                 <button
                   onClick={() => setViewerTab("cert")}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
                     viewerTab === "cert"
                       ? "bg-slate-900 text-white shadow-sm"
                       : "text-slate-600 hover:text-slate-950"
                   }`}
                 >
-                  📜 Compliance Cert
+                  <ScrollText className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Compliance Cert
                 </button>
               </div>
             )}
@@ -2750,14 +2757,14 @@ export default function TrackingTab() {
                     src={selectedViewerDoc.scannedImage}
                     alt="Scanned Document"
                     referrerPolicy="no-referrer"
-                    className="max-h-[380px] w-auto object-contain rounded-xl shadow-md border border-slate-200/80"
+                    className="max-h-[380px] w-auto object-contain rounded-xl shadow-md border border-slate-200/80 dark:border-slate-800"
                   />
                   <div className="mt-4">
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 font-extrabold border border-emerald-100 px-3 py-1 rounded-xl uppercase font-mono inline-flex items-center gap-1 leading-none shadow-xs">
+                    <span className="text-[11px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-extrabold border border-emerald-100 dark:border-emerald-900/50 px-3 py-1 rounded-xl uppercase font-mono inline-flex items-center gap-1 leading-none shadow-xs">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Auto-Cropped (Scan Active)
                     </span>
-                    <p className="text-[10px] text-slate-500 mt-1.5 font-medium leading-relaxed max-w-xs">
+                    <p className="text-[11px] text-slate-500 mt-1.5 font-medium leading-relaxed max-w-xs">
                       This file is encrypted and safely archived in the local browser cache storage.
                     </p>
                   </div>
@@ -2769,28 +2776,28 @@ export default function TrackingTab() {
               /* --- HIGH FIDELITY PASSPORT CANVAS --- */
               <div className="bg-[#f0e6d2] rounded-xl p-4 border-4 border-double border-slate-700 text-slate-800 flex flex-col justify-between flex-1 relative overflow-hidden font-serif min-h-[360px] shadow-md">
                 {/* Official seal overlay */}
-                <div className="absolute right-3 top-3 opacity-15 text-slate-900 pointer-events-none">
+                <div className="absolute right-3 top-3 opacity-15 text-slate-900 dark:text-slate-100 pointer-events-none">
                   <Shield className="w-24 h-24 stroke-1" />
                 </div>
 
                 <div className="flex justify-between items-start border-b border-slate-500 pb-2">
                   <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-wider font-sans text-slate-900">REPUBLIC OF WEHIVE</h4>
-                    <p className="text-[7px] uppercase font-sans tracking-wide">PASSPORT / PASSEPORT</p>
+                    <h4 className="text-[11px] font-black uppercase tracking-wider font-sans text-slate-900 dark:text-slate-100">REPUBLIC OF WEHIVE</h4>
+                    <p className="text-[11px] uppercase font-sans tracking-wide">PASSPORT / PASSEPORT</p>
                   </div>
-                  <span className="text-[9px] font-sans font-black text-red-600">P&lt;WEHIVE&lt;KUMAR&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+                  <span className="text-[11px] font-sans font-black text-red-600 dark:text-red-300">P&lt;WEHIVE&lt;KUMAR&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
                 </div>
 
                 {/* Passport Bio info grid */}
-                <div className="grid grid-cols-3 gap-3 my-4 font-sans text-[9px]">
+                <div className="grid grid-cols-3 gap-3 my-4 font-sans text-[11px]">
                   {/* Photo area */}
                   <div className="col-span-1 bg-slate-300 rounded border border-slate-400 flex flex-col items-center justify-center h-28 relative overflow-hidden shadow-inner">
                     <div className="w-12 h-16 bg-slate-400 rounded-full mt-2 relative">
                       <div className="absolute top-4 left-2 w-2 h-2 rounded-full bg-slate-500" />
                       <div className="absolute top-4 right-2 w-2 h-2 rounded-full bg-slate-500" />
                     </div>
-                    <span className="text-[7px] text-slate-600 font-extrabold mt-2 font-mono">KRISHNA K.</span>
-                    <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 text-[6px]">
+                    <span className="text-[11px] text-slate-600 font-extrabold mt-2 font-mono">KRISHNA K.</span>
+                    <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-300 text-[6px]">
                       VERIFIED
                     </div>
                   </div>
@@ -2799,52 +2806,52 @@ export default function TrackingTab() {
                   <div className="col-span-2 space-y-1.5 font-sans leading-tight pl-1">
                     <div>
                       <span className="text-[6px] text-slate-500 uppercase block font-mono">Surname / Nom</span>
-                      <span className="font-bold text-slate-950 uppercase text-xs">
+                      <span className="font-bold text-slate-950 dark:text-slate-100 uppercase text-xs">
                         {selectedViewerDoc.holderName ? (selectedViewerDoc.holderName.trim().split(" ").pop() || "").toUpperCase() : "KUMAR"}
                       </span>
                     </div>
                     <div>
                       <span className="text-[6px] text-slate-500 block font-mono">Given Names / Prénoms</span>
-                      <span className="font-bold text-slate-900 text-[10px]">
+                      <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">
                         {selectedViewerDoc.holderName ? (selectedViewerDoc.holderName.trim().split(" ").slice(0, -1).join(" ") || "").toUpperCase() : "KRISHNA KRANTHI TEJA"}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-1">
                       <div>
                         <span className="text-[6px] text-slate-500 block font-mono">Nationality</span>
-                        <span className="font-semibold text-slate-900">INDIAN</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">INDIAN</span>
                       </div>
                       <div>
                         <span className="text-[6px] text-slate-500 block font-mono">Date of Birth</span>
-                        <span className="font-semibold text-slate-900">12 NOV 2001</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">12 NOV 2001</span>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-1">
                       <div>
                         <span className="text-[6px] text-slate-500 block font-mono">Passport No</span>
-                        <span className="font-bold text-red-700 font-mono">{selectedViewerDoc.documentNumber || "Z8392109"}</span>
+                        <span className="font-bold text-red-700 dark:text-red-300 font-mono">{selectedViewerDoc.documentNumber || "Z8392109"}</span>
                       </div>
                       <div>
                         <span className="text-[6px] text-slate-500 block font-mono">Sex / Sexe</span>
-                        <span className="font-semibold text-slate-900">M</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">M</span>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-1">
                       <div>
                         <span className="text-[6px] text-slate-500 block font-mono">Expiry Date</span>
-                        <span className="font-bold text-red-600 font-mono">{selectedViewerDoc.expiryDate || "2031-08-15"}</span>
+                        <span className="font-bold text-red-600 dark:text-red-300 font-mono">{selectedViewerDoc.expiryDate || "2031-08-15"}</span>
                       </div>
                       <div>
                         <span className="text-[6px] text-slate-500 block font-mono">Authority / Autorité</span>
-                        <span className="font-semibold text-slate-900">{selectedViewerDoc.issuedBy || "Passport Office"}</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">{selectedViewerDoc.issuedBy || "Passport Office"}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Machine Readable Zone */}
-                <div className="border-t border-dashed border-slate-500 pt-3 mt-auto font-mono text-[8px] text-slate-900 tracking-wider leading-relaxed">
-                  <p className="bg-white/60 p-1.5 rounded text-center select-all border border-slate-300">
+                <div className="border-t border-dashed border-slate-500 pt-3 mt-auto font-mono text-[11px] text-slate-900 dark:text-slate-100 tracking-wider leading-relaxed">
+                  <p className="bg-white/60 dark:bg-slate-900 p-1.5 rounded text-center select-all border border-slate-300">
                     P&lt;IND&lt;&lt;{selectedViewerDoc.holderName ? (selectedViewerDoc.holderName.trim().split(" ").pop() || "").toUpperCase() : "KUMAR"}&lt;&lt;{selectedViewerDoc.holderName ? (selectedViewerDoc.holderName.trim().split(" ").slice(0, -1).join("<") || "").toUpperCase() : "KRISHNA<KRANTHI<TEJA"}&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
                     <br />
                     {(selectedViewerDoc.documentNumber || "Z8392109").toUpperCase()}&lt;1IND0111124M{selectedViewerDoc.expiryDate ? selectedViewerDoc.expiryDate.replace(/-/g, "").substring(2) : "310815"}&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;02
@@ -2859,55 +2866,55 @@ export default function TrackingTab() {
                 {/* Letterhead */}
                 <div className="flex justify-between items-start border-b border-slate-200 pb-3">
                   <div>
-                    <h4 className="text-xs font-extrabold uppercase font-sans text-blue-900 leading-tight">Technical University of Munich</h4>
-                    <p className="text-[8px] font-sans text-slate-500">Arcisstraße 21, 80333 München, Germany</p>
+                    <h4 className="text-xs font-extrabold uppercase font-sans text-blue-900 dark:text-blue-300 leading-tight">Technical University of Munich</h4>
+                    <p className="text-[11px] font-sans text-slate-500">Arcisstraße 21, 80333 München, Germany</p>
                   </div>
-                  <div className="w-8 h-8 rounded bg-blue-950 flex items-center justify-center text-white text-[10px] font-black font-sans shrink-0">
+                  <div className="w-8 h-8 rounded bg-blue-950 flex items-center justify-center text-white text-[11px] font-black font-sans shrink-0">
                     TUM
                   </div>
                 </div>
 
                 {/* Contents */}
-                <div className="my-4 text-left font-sans text-[10px] leading-relaxed space-y-3">
-                  <div className="text-right text-[8px] text-slate-500 font-mono">
+                <div className="my-4 text-left font-sans text-[11px] leading-relaxed space-y-3">
+                  <div className="text-right text-[11px] text-slate-500 font-mono">
                     Ref ID: TUM-2026-AE-4991A
                     <br />
                     Date: June 25, 2026
                   </div>
 
                   <div>
-                    <p className="font-bold text-slate-950">To: {selectedViewerDoc.holderName || "Krishna Kranthi Teja Kumar"}</p>
-                    <p className="text-slate-500 text-[8px]">Applicant ID: {selectedViewerDoc.documentNumber || "29310842"}</p>
+                    <p className="font-bold text-slate-950 dark:text-slate-100">To: {selectedViewerDoc.holderName || "Krishna Kranthi Teja Kumar"}</p>
+                    <p className="text-slate-500 text-[11px]">Applicant ID: {selectedViewerDoc.documentNumber || "29310842"}</p>
                   </div>
 
-                  <h5 className="font-black text-slate-900 uppercase tracking-tight text-center border-y border-slate-100 py-1 font-sans text-[10px]">
+                  <h5 className="font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight text-center border-y border-slate-100 py-1 font-sans text-[11px]">
                     OFFER OF ADMISSION - WINTER SEMESTER 2026
                   </h5>
 
-                  <p className="text-[10px]">
+                  <p className="text-[11px]">
                     Dear Mr. {selectedViewerDoc.holderName ? (selectedViewerDoc.holderName.trim().split(" ").pop() || "") : "Kumar"},
                     <br />
                     We are pleased to inform you that the Admissions Board has selected you for the **M.Sc. Aerospace Engineering** program at our Garching campus, starting **October 2026**.
                   </p>
 
-                  <ul className="list-disc list-inside space-y-1 bg-slate-50 p-2 rounded-lg border border-slate-100 text-[9px]">
-                    <li><strong className="text-slate-900">Course Level:</strong> Graduate Studies (Master of Science)</li>
-                    <li><strong className="text-slate-900">Duration:</strong> 4 Semesters (Full-time)</li>
-                    <li><strong className="text-slate-900">Language:</strong> English</li>
+                  <ul className="list-disc list-inside space-y-1 bg-slate-50 p-2 rounded-lg border border-slate-100 text-[11px]">
+                    <li><strong className="text-slate-900 dark:text-slate-100">Course Level:</strong> Graduate Studies (Master of Science)</li>
+                    <li><strong className="text-slate-900 dark:text-slate-100">Duration:</strong> 4 Semesters (Full-time)</li>
+                    <li><strong className="text-slate-900 dark:text-slate-100">Language:</strong> English</li>
                   </ul>
                 </div>
 
                 {/* Sign-offs / Seal */}
                 <div className="border-t border-slate-100 pt-3 mt-auto flex justify-between items-end font-sans">
                   <div className="space-y-1">
-                    <p className="font-bold text-slate-900 text-[8px]">Dr. Hans-Joachim Altrock</p>
-                    <p className="text-slate-400 text-[7px] leading-none">Dean of International Admissions Office</p>
+                    <p className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">Dr. Hans-Joachim Altrock</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-none">Dean of International Admissions Office</p>
                     <div className="w-16 h-4 bg-[#0a2342]/10 rounded border border-[#0a2342]/20 flex items-center justify-center font-mono text-[7px] text-[#0a2342]">
                       CERTIFIED SIGN
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="w-12 h-12 rounded-full border border-blue-900 flex items-center justify-center text-[8px] font-mono text-blue-900 font-bold tracking-tight text-center leading-none opacity-80 mx-auto">
+                    <div className="w-12 h-12 rounded-full border border-blue-900 flex items-center justify-center text-[11px] font-mono text-blue-900 dark:text-blue-300 font-bold tracking-tight text-center leading-none opacity-80 mx-auto">
                       TUM
                       <br />
                       SEAL
@@ -2921,48 +2928,48 @@ export default function TrackingTab() {
               /* --- HIGH FIDELITY SCHENGEN VISA STICKER --- */
               <div className="bg-[#fcf8e3] rounded-xl p-4 border-2 border-slate-400 text-slate-800 flex flex-col justify-between flex-1 relative font-sans min-h-[350px] shadow-md">
                 <div className="absolute top-2 right-2 flex items-center gap-1 opacity-15">
-                  <Shield className="w-16 h-16 text-slate-900" />
+                  <Shield className="w-16 h-16 text-slate-900 dark:text-slate-100" />
                 </div>
 
                 <div className="border-b border-slate-300 pb-2">
-                  <h4 className="text-[9px] font-black uppercase tracking-wider text-slate-900 font-mono">DEUTSCHLAND / SCHENGEN STAATEN</h4>
-                  <div className="flex justify-between items-center text-[7px] text-slate-500 uppercase font-mono mt-0.5">
+                  <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-900 dark:text-slate-100 font-mono">DEUTSCHLAND / SCHENGEN STAATEN</h4>
+                  <div className="flex justify-between items-center text-[11px] text-slate-500 uppercase font-mono mt-0.5">
                     <span>Visum / Visa Category D</span>
-                    <span className="text-red-700 font-black">{selectedViewerDoc.documentNumber || "ST-DE9128394"}</span>
+                    <span className="text-red-700 dark:text-red-300 font-black">{selectedViewerDoc.documentNumber || "ST-DE9128394"}</span>
                   </div>
                 </div>
 
-                <div className="my-3 space-y-2 text-[10px] leading-tight">
+                <div className="my-3 space-y-2 text-[11px] leading-tight">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <span className="text-[7px] text-slate-400 block uppercase font-mono">Valid From / Vom</span>
-                      <strong className="text-slate-900">15 SEP 2026</strong>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 block uppercase font-mono">Valid From / Vom</span>
+                      <strong className="text-slate-900 dark:text-slate-100">15 SEP 2026</strong>
                     </div>
                     <div>
-                      <span className="text-[7px] text-slate-400 block uppercase font-mono">Until / Bis</span>
-                      <strong className="text-slate-900">{selectedViewerDoc.expiryDate || "14 MAR 2027"}</strong>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 block uppercase font-mono">Until / Bis</span>
+                      <strong className="text-slate-900 dark:text-slate-100">{selectedViewerDoc.expiryDate || "14 MAR 2027"}</strong>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <span className="text-[7px] text-slate-400 block uppercase font-mono">Type / Art</span>
-                      <strong className="text-slate-900">MULTIPLE ENTRY - STUDY (D)</strong>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 block uppercase font-mono">Type / Art</span>
+                      <strong className="text-slate-900 dark:text-slate-100">MULTIPLE ENTRY - STUDY (D)</strong>
                     </div>
                     <div>
-                      <span className="text-[7px] text-slate-400 block uppercase font-mono">Passport No</span>
-                      <strong className="text-slate-900">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 block uppercase font-mono">Passport No</span>
+                      <strong className="text-slate-900 dark:text-slate-100">
                         {vaultDocs.find(d => d.type === "passport")?.documentNumber || "Z8392109"}
                       </strong>
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-[7px] text-slate-400 block uppercase font-mono">Name / Name</span>
-                    <strong className="text-slate-950 uppercase text-[11px]">{selectedViewerDoc.holderName || "KUMAR, KRISHNA KRANTHI TEJA"}</strong>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 block uppercase font-mono">Name / Name</span>
+                    <strong className="text-slate-950 dark:text-slate-100 uppercase text-[11px]">{selectedViewerDoc.holderName || "KUMAR, KRISHNA KRANTHI TEJA"}</strong>
                   </div>
 
-                  <div className="bg-yellow-500/10 p-2 rounded-lg border border-yellow-500/20 text-[8px] leading-relaxed text-amber-900">
+                  <div className="bg-yellow-500/10 p-2 rounded-lg border border-yellow-500/20 text-[11px] leading-relaxed text-amber-900 dark:text-amber-300">
                     <strong>Remarks:</strong> Student permit under TUM Munich registration. Employment restricted to 120 full days per calendar year.
                   </div>
                 </div>
@@ -2971,13 +2978,13 @@ export default function TrackingTab() {
                 <div className="border-t border-slate-300 pt-3 mt-auto flex justify-between items-center">
                   <div className="flex items-center gap-1.5">
                     <QrCode className="w-10 h-10 text-slate-800" />
-                    <div className="text-[7px] text-slate-400 font-mono">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                       <span>Secure digital passport ID</span>
                       <br />
                       <span>Validated: EMBASSY BUNDES</span>
                     </div>
                   </div>
-                  <div className="w-12 h-12 rounded-full border-2 border-double border-yellow-600/50 flex items-center justify-center font-bold text-[8px] text-yellow-700 uppercase tracking-tight text-center leading-none">
+                  <div className="w-12 h-12 rounded-full border-2 border-double border-yellow-600/50 flex items-center justify-center font-bold text-[11px] text-yellow-700 dark:text-yellow-300 uppercase tracking-tight text-center leading-none">
                     Embassy
                     <br />
                     München
@@ -2991,23 +2998,23 @@ export default function TrackingTab() {
               <div className="bg-white rounded-xl p-5 border border-slate-300 text-slate-800 flex flex-col justify-between flex-1 relative font-serif min-h-[380px] shadow-md">
                 <div className="flex justify-between items-start border-b border-slate-200 pb-2">
                   <div>
-                    <h4 className="text-[10px] font-extrabold uppercase font-sans text-slate-900 leading-tight">Board of Technical Education</h4>
-                    <p className="text-[7px] font-sans text-slate-500">Degree & marks transcript archival registry</p>
+                    <h4 className="text-[11px] font-extrabold uppercase font-sans text-slate-900 dark:text-slate-100 leading-tight">Board of Technical Education</h4>
+                    <p className="text-[11px] font-sans text-slate-500">Degree & marks transcript archival registry</p>
                   </div>
-                  <span className="text-[9px] font-bold text-slate-400 font-mono">PAGE 1 OF 1</span>
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono">PAGE 1 OF 1</span>
                 </div>
 
                 <div className="my-3 space-y-2.5 font-sans">
-                  <div className="text-[8px] text-slate-500 font-mono text-right">
+                  <div className="text-[11px] text-slate-500 font-mono text-right">
                     ID: TRAN-29381-IN
                   </div>
 
-                  <div className="text-[9px] leading-tight space-y-0.5">
+                  <div className="text-[11px] leading-tight space-y-0.5">
                     <p><strong>Candidate Name:</strong> Krishna Kranthi Teja Kumar</p>
                     <p className="text-slate-500"><strong>Enrollment Year:</strong> 2022 - 2026 Bachelor of Technology</p>
                   </div>
 
-                  <table className="w-full text-[9px] border-collapse my-2">
+                  <table className="w-full text-[11px] border-collapse my-2">
                     <thead>
                       <tr className="bg-slate-100 border-b border-slate-300 font-bold text-slate-700 font-mono">
                         <th className="p-1 text-left">Subject / Course</th>
@@ -3019,37 +3026,37 @@ export default function TrackingTab() {
                       <tr>
                         <td className="p-1 text-left text-slate-800">Advanced Mathematics III</td>
                         <td className="p-1 text-center font-mono">92 / 100</td>
-                        <td className="p-1 text-center text-emerald-600 font-bold">A+</td>
+                        <td className="p-1 text-center text-emerald-600 dark:text-emerald-300 font-bold">A+</td>
                       </tr>
                       <tr>
                         <td className="p-1 text-left text-slate-800">Fluid Mechanics & Dynamics</td>
                         <td className="p-1 text-center font-mono">88 / 100</td>
-                        <td className="p-1 text-center text-emerald-600 font-bold">A</td>
+                        <td className="p-1 text-center text-emerald-600 dark:text-emerald-300 font-bold">A</td>
                       </tr>
                       <tr>
                         <td className="p-1 text-left text-slate-800">Thermodynamics & Heat Labs</td>
                         <td className="p-1 text-center font-mono">94 / 100</td>
-                        <td className="p-1 text-center text-emerald-600 font-bold">A+</td>
+                        <td className="p-1 text-center text-emerald-600 dark:text-emerald-300 font-bold">A+</td>
                       </tr>
                       <tr>
                         <td className="p-1 text-left text-slate-800">Computational Aerodynamics</td>
                         <td className="p-1 text-center font-mono">90 / 100</td>
-                        <td className="p-1 text-center text-emerald-600 font-bold">A+</td>
+                        <td className="p-1 text-center text-emerald-600 dark:text-emerald-300 font-bold">A+</td>
                       </tr>
                     </tbody>
                   </table>
 
-                  <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 text-[8px] font-mono text-center">
+                  <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 text-[11px] font-mono text-center">
                     <span>Cumulative GPA: <strong>9.32 / 10.00</strong> (Class Rank #1)</span>
                   </div>
                 </div>
 
                 <div className="border-t border-slate-100 pt-3 mt-auto flex justify-between items-end font-sans">
                   <div className="space-y-0.5">
-                    <p className="font-bold text-slate-900 text-[8px]">Prof. Ravinder Sen</p>
-                    <p className="text-slate-400 text-[7px] leading-none">Registrar & Academic Dean</p>
+                    <p className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">Prof. Ravinder Sen</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-none">Registrar & Academic Dean</p>
                   </div>
-                  <div className="w-14 h-6 bg-slate-100 rounded border border-slate-300 flex items-center justify-center text-[7px] font-mono font-bold text-slate-500">
+                  <div className="w-14 h-6 bg-slate-100 rounded border border-slate-300 flex items-center justify-center text-[11px] font-mono font-bold text-slate-500">
                     APPROVED
                   </div>
                 </div>
@@ -3060,22 +3067,22 @@ export default function TrackingTab() {
       </div>
 
       {/* Secure Audit Log bottom panel */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shrink-0 font-mono">
-            <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
+          <div className="bg-white/5 dark:bg-slate-900 border border-white/10 rounded-2xl p-4 shrink-0 font-mono">
+            <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-bold">
               <ShieldCheck className="w-4 h-4" />
               <span>CRYPTOGRAPHIC AUDIT PASS</span>
             </div>
-            <div className="grid grid-cols-2 gap-4 mt-3 text-[9px] text-slate-400">
+            <div className="grid grid-cols-2 gap-4 mt-3 text-[11px] text-slate-400">
               <div>
-                <span className="block text-slate-500 text-[8px]">ISSUING AUTHORITY</span>
+                <span className="block text-slate-500 text-[11px]">ISSUING AUTHORITY</span>
                 <span className="font-bold text-white block mt-0.5">{selectedViewerDoc.issuedBy || "Official Registry"}</span>
               </div>
               <div>
-                <span className="block text-slate-500 text-[8px]">INTEGRITY SIGNATURE</span>
+                <span className="block text-slate-500 text-[11px]">INTEGRITY SIGNATURE</span>
                 <span className="font-bold text-white block mt-0.5 truncate">{selectedViewerDoc.securityHash}</span>
               </div>
             </div>
-            <div className="mt-2.5 pt-2 border-t border-white/5 text-[9px] text-slate-500 leading-normal">
+            <div className="mt-2.5 pt-2 border-t border-white/5 text-[11px] text-slate-500 leading-normal">
               Notes: {selectedViewerDoc.notes || "No security remarks listed for archived item."}
             </div>
           </div>
@@ -3085,19 +3092,20 @@ export default function TrackingTab() {
       {/* ================= HIGH FIDELITY SECURE DOCUMENT SHARING OVERLAY ================= */}
       {selectedShareDoc && (
         <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-55 p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none overflow-hidden text-left border border-slate-200">
+          <div {...shareDialog} className="bg-white rounded-3xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none overflow-hidden text-left border border-slate-200">
             {/* Security shield accent glow */}
             <div className="absolute -top-12 -right-12 w-28 h-28 bg-[#EA1C24]/5 rounded-full blur-xl animate-pulse" />
             
             <button
+              aria-label="Close"
               onClick={() => setSelectedShareDoc(null)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
             >
-              ✕
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
 
             <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-[8px] font-black tracking-widest text-[#EA1C24] uppercase font-mono bg-red-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span className="text-[11px] font-black tracking-widest text-[#EA1C24] uppercase font-mono bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full flex items-center gap-1">
                 <Shield className="w-2.5 h-2.5" />
                 SECURE DISPATCH
               </span>
@@ -3106,20 +3114,20 @@ export default function TrackingTab() {
             <h3 className="text-sm font-black text-slate-800">
               Share Certified Document
             </h3>
-            <p className="text-[10px] text-slate-500 leading-normal mt-1 mb-4">
+            <p className="text-[11px] text-slate-500 leading-normal mt-1 mb-4">
               Export and dispatch cryptographically-sealed PDF files. WeHive registers all downloads on our audit-integrity servers.
             </p>
 
             {/* Document Details Row */}
             <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200/60 mb-4 flex items-center gap-2.5">
-              <div className="p-2 bg-blue-50 border border-blue-100 text-blue-900 rounded-xl shrink-0">
-                <FileCheck className="w-4 h-4 text-blue-900" />
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-blue-900 dark:text-blue-300 rounded-xl shrink-0">
+                <FileCheck className="w-4 h-4 text-blue-900 dark:text-blue-300" />
               </div>
               <div className="min-w-0 flex-1">
                 <h4 className="text-[11px] font-extrabold text-slate-800 truncate">
                   {selectedShareDoc.name}
                 </h4>
-                <p className="text-[9px] text-slate-400 font-mono mt-0.5">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                   {selectedShareDoc.fileName} • {selectedShareDoc.fileSize}
                 </p>
               </div>
@@ -3127,7 +3135,7 @@ export default function TrackingTab() {
 
             {/* Copy Secure Shareable Link Input */}
             <div className="space-y-1.5 mb-4">
-              <label className="text-[9px] font-bold text-slate-400 uppercase font-mono block tracking-wider">
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block tracking-wider">
                 Generate Share Link
               </label>
               <div className="flex gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
@@ -3135,11 +3143,11 @@ export default function TrackingTab() {
                   type="text"
                   readOnly
                   value={`https://wehive.co.in/share/doc-${selectedShareDoc.id}-${selectedShareDoc.securityHash.substr(8, 6)}`}
-                  className="flex-1 bg-transparent border-none text-[10px] text-slate-600 font-mono px-2 select-all focus:outline-none focus:ring-0 truncate"
+                  className="flex-1 bg-transparent border-none text-[11px] text-slate-600 font-mono px-2 select-all focus:outline-none focus:ring-0 truncate"
                 />
                 <button
                   onClick={handleCopyShareLink}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
                     copiedLink
                       ? "bg-green-600 text-white"
                       : "bg-blue-950 hover:bg-blue-900 text-white"
@@ -3162,21 +3170,21 @@ export default function TrackingTab() {
 
             {/* Sharing Methods Grid */}
             <div className="space-y-2">
-              <label className="text-[9px] font-bold text-slate-400 uppercase font-mono block tracking-wider">
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block tracking-wider">
                 Select Recipient Channel
               </label>
               
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handlePerformShare("Hive Consultant Chat")}
-                  className="flex items-center gap-2 p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer text-left w-full"
+                  className="flex items-center gap-2 p-2.5 bg-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 rounded-xl transition-all cursor-pointer text-left w-full"
                 >
-                  <div className="w-7 h-7 bg-blue-50 text-blue-900 rounded-lg flex items-center justify-center border border-blue-100 shrink-0">
+                  <div className="w-7 h-7 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 rounded-lg flex items-center justify-center border border-blue-100 dark:border-blue-900/50 shrink-0">
                     <MessageSquare className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-[10px] font-bold text-slate-800 leading-none truncate">HiveChat</span>
-                    <span className="text-[8px] text-slate-400 block mt-0.5 truncate">Instant partner chat</span>
+                    <span className="block text-[11px] font-bold text-slate-800 leading-none truncate">HiveChat</span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5 truncate">Instant partner chat</span>
                   </div>
                 </button>
 
@@ -3191,27 +3199,27 @@ export default function TrackingTab() {
                       "system"
                     );
                   }}
-                  className="flex items-center gap-2 p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer text-left w-full"
+                  className="flex items-center gap-2 p-2.5 bg-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 rounded-xl transition-all cursor-pointer text-left w-full"
                 >
-                  <div className="w-7 h-7 bg-red-50 text-red-600 rounded-lg flex items-center justify-center border border-red-100 shrink-0">
+                  <div className="w-7 h-7 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300 rounded-lg flex items-center justify-center border border-red-100 dark:border-red-900/50 shrink-0">
                     <Mail className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-[10px] font-bold text-slate-800 leading-none truncate">TUM Registry</span>
-                    <span className="text-[8px] text-slate-400 block mt-0.5 truncate">Email admissions</span>
+                    <span className="block text-[11px] font-bold text-slate-800 leading-none truncate">TUM Registry</span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5 truncate">Email admissions</span>
                   </div>
                 </button>
 
                 <button
                   onClick={() => handlePerformShare("Embassy Compliance Portal")}
-                  className="flex items-center gap-2 p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer text-left w-full"
+                  className="flex items-center gap-2 p-2.5 bg-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 rounded-xl transition-all cursor-pointer text-left w-full"
                 >
-                  <div className="w-7 h-7 bg-amber-50 text-amber-700 rounded-lg flex items-center justify-center border border-amber-100 shrink-0">
+                  <div className="w-7 h-7 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 rounded-lg flex items-center justify-center border border-amber-100 dark:border-amber-900/50 shrink-0">
                     <ExternalLink className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-[10px] font-bold text-slate-800 leading-none truncate">Embassy Desk</span>
-                    <span className="text-[8px] text-slate-400 block mt-0.5 truncate">Visa agency link</span>
+                    <span className="block text-[11px] font-bold text-slate-800 leading-none truncate">Embassy Desk</span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5 truncate">Visa agency link</span>
                   </div>
                 </button>
 
@@ -3220,14 +3228,14 @@ export default function TrackingTab() {
                     handleDownloadPDF(selectedShareDoc);
                     setSelectedShareDoc(null);
                   }}
-                  className="flex items-center gap-2 p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer text-left w-full"
+                  className="flex items-center gap-2 p-2.5 bg-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 rounded-xl transition-all cursor-pointer text-left w-full"
                 >
-                  <div className="w-7 h-7 bg-emerald-50 text-emerald-700 rounded-lg flex items-center justify-center border border-emerald-100 shrink-0">
+                  <div className="w-7 h-7 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 rounded-lg flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50 shrink-0">
                     <Download className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-[10px] font-bold text-slate-800 leading-none truncate">Direct PDF</span>
-                    <span className="text-[8px] text-slate-400 block mt-0.5 truncate">Save to disk</span>
+                    <span className="block text-[11px] font-bold text-slate-800 leading-none truncate">Direct PDF</span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5 truncate">Save to disk</span>
                   </div>
                 </button>
               </div>
@@ -3235,12 +3243,12 @@ export default function TrackingTab() {
 
             {/* Sharing Process Loading Overlay */}
             {isSharingInProcess && (
-              <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center text-center p-5 z-20">
-                <RefreshCw className="w-8 h-8 text-blue-950 animate-spin mb-3" />
+              <div className="absolute inset-0 bg-white/95 dark:bg-slate-900 flex flex-col items-center justify-center text-center p-5 z-20">
+                <RefreshCw className="w-8 h-8 text-blue-950 dark:text-blue-300 animate-spin mb-3" />
                 <h4 className="text-xs font-black text-slate-800">
                   Cryptographically Sealing...
                 </h4>
-                <p className="text-[10px] text-slate-400 mt-1 max-w-[220px]">
+                <p className="text-[11px] text-slate-400 mt-1 max-w-[220px]">
                   Generating compliance certificate packet and transferring to <b>{shareDestination}</b> via secure pipes.
                 </p>
               </div>
@@ -3251,7 +3259,7 @@ export default function TrackingTab() {
 
       {/* ================= HIGH FIDELITY DOCUMENT SCANNER MODAL ================= */}
       {isScanning && (
-        <div className="absolute inset-0 bg-slate-950/98 z-55 flex flex-col justify-between animate-fade-in p-5 text-left select-none text-white">
+        <div {...scannerDialog} className="absolute inset-0 bg-slate-950/98 z-55 flex flex-col justify-between animate-fade-in p-5 text-left select-none text-white">
           {/* Header */}
           <div className="flex justify-between items-center border-b border-white/10 pb-3 shrink-0">
             <div className="flex items-center gap-2">
@@ -3259,7 +3267,7 @@ export default function TrackingTab() {
                 <Camera className="w-3 h-3" />
               </div>
               <div>
-                <span className="text-[8px] font-mono text-red-500 block tracking-widest uppercase">Live Document Capture</span>
+                <span className="text-[11px] font-mono text-red-500 block tracking-widest uppercase">Live Document Capture</span>
                 <h3 className="text-xs font-bold text-white leading-tight">
                   Secure Scanner • {scannerType.toUpperCase()}
                 </h3>
@@ -3267,7 +3275,7 @@ export default function TrackingTab() {
             </div>
             <button
               onClick={stopScanning}
-              className="text-slate-400 hover:text-white font-bold text-xs bg-white/5 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-white/10"
+              className="text-slate-400 hover:text-white font-bold text-xs bg-white/5 dark:bg-slate-900 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-white/10"
             >
               Cancel
             </button>
@@ -3284,13 +3292,13 @@ export default function TrackingTab() {
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs font-bold text-slate-200">Camera Inaccessible</p>
-                      <p className="text-[10px] text-slate-400 leading-normal">
+                      <p className="text-[11px] text-slate-400 leading-normal">
                         {cameraError}
                       </p>
                     </div>
                     <button
                       onClick={() => startScanning(scannerType)}
-                      className="bg-white text-slate-950 text-[10px] font-black px-4 py-2 rounded-xl hover:bg-slate-100 transition-all cursor-pointer inline-flex items-center gap-1"
+                      className="bg-white text-slate-950 dark:text-slate-100 text-[11px] font-black px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer inline-flex items-center gap-1"
                     >
                       Retry Camera Request
                     </button>
@@ -3329,7 +3337,7 @@ export default function TrackingTab() {
                         </div>
                         
                         {/* HUD Guidelines */}
-                        <div className="absolute bottom-6 bg-slate-950/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[9px] font-mono font-bold tracking-wider text-red-400 uppercase">
+                        <div className="absolute bottom-6 bg-slate-950/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[11px] font-mono font-bold tracking-wider text-red-400 uppercase">
                           Align Document within frame boundaries
                         </div>
                       </div>
@@ -3348,7 +3356,7 @@ export default function TrackingTab() {
                       referrerPolicy="no-referrer"
                       className="max-h-[280px] w-auto object-contain rounded-xl shadow-2xl border-2 border-white/20"
                     />
-                    <div className="mt-3.5 flex items-center gap-1.5 bg-slate-950/80 px-3 py-1 rounded-full border border-white/10 text-[9px] font-mono text-emerald-400">
+                    <div className="mt-3.5 flex items-center gap-1.5 bg-slate-950/80 px-3 py-1 rounded-full border border-white/10 text-[11px] font-mono text-emerald-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       AUTO-CROPPED & FILTERED OK
                     </div>
@@ -3356,7 +3364,7 @@ export default function TrackingTab() {
                 ) : (
                   <div className="flex flex-col items-center gap-2">
                     <RefreshCw className="w-6 h-6 text-red-500 animate-spin" />
-                    <span className="text-[10px] text-slate-400">Processing image matrix...</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Processing image matrix...</span>
                   </div>
                 )}
               </div>
@@ -3368,15 +3376,15 @@ export default function TrackingTab() {
             {/* Filter Selection Panel */}
             <div className="flex items-center justify-between gap-4">
               <div>
-                <span className="text-[8px] font-mono text-slate-400 uppercase tracking-wider block">Image Enhancement Filter</span>
-                <span className="text-[10px] text-slate-300 font-bold">Smart Scan Adjustments</span>
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Image Enhancement Filter</span>
+                <span className="text-[11px] text-slate-300 font-bold">Smart Scan Adjustments</span>
               </div>
               <div className="flex gap-1 bg-slate-950/80 p-1 rounded-xl border border-white/10">
                 <button
                   onClick={() => setScannerFilter("original")}
-                  className={`px-2.5 py-1.5 rounded-lg text-[9px] font-extrabold uppercase font-mono transition-all cursor-pointer ${
+                  className={`px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold uppercase font-mono transition-all cursor-pointer ${
                     scannerFilter === "original"
-                      ? "bg-white text-slate-950 shadow-sm"
+                      ? "bg-white text-slate-950 dark:text-slate-100 shadow-sm"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -3384,9 +3392,9 @@ export default function TrackingTab() {
                 </button>
                 <button
                   onClick={() => setScannerFilter("document")}
-                  className={`px-2.5 py-1.5 rounded-lg text-[9px] font-extrabold uppercase font-mono transition-all cursor-pointer ${
+                  className={`px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold uppercase font-mono transition-all cursor-pointer ${
                     scannerFilter === "document"
-                      ? "bg-white text-slate-950 shadow-sm"
+                      ? "bg-white text-slate-950 dark:text-slate-100 shadow-sm"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -3394,9 +3402,9 @@ export default function TrackingTab() {
                 </button>
                 <button
                   onClick={() => setScannerFilter("mono")}
-                  className={`px-2.5 py-1.5 rounded-lg text-[9px] font-extrabold uppercase font-mono transition-all cursor-pointer ${
+                  className={`px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold uppercase font-mono transition-all cursor-pointer ${
                     scannerFilter === "mono"
-                      ? "bg-white text-slate-950 shadow-sm"
+                      ? "bg-white text-slate-950 dark:text-slate-100 shadow-sm"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -3410,8 +3418,8 @@ export default function TrackingTab() {
               <div className="flex items-center gap-2">
                 <Crop className="w-4 h-4 text-red-500" />
                 <div>
-                  <span className="text-[10px] font-black text-white block">Auto-Crop Edge Alignment</span>
-                  <span className="text-[8px] text-slate-400 block mt-0.5">Detect flat document margins to automatically clip desk backgrounds</span>
+                  <span className="text-[11px] font-black text-white block">Auto-Crop Edge Alignment</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Detect flat document margins to automatically clip desk backgrounds</span>
                 </div>
               </div>
               <button
@@ -3443,7 +3451,7 @@ export default function TrackingTab() {
                 <>
                   <button
                     onClick={() => setScannerStep("camera")}
-                    className="flex-1 bg-white/5 hover:bg-white/10 text-white font-extrabold text-xs py-3 rounded-xl border border-white/10 transition-all cursor-pointer flex items-center justify-center gap-1.5 uppercase tracking-wide"
+                    className="flex-1 bg-white/5 dark:bg-slate-900 hover:bg-white/10 text-white font-extrabold text-xs py-3 rounded-xl border border-white/10 transition-all cursor-pointer flex items-center justify-center gap-1.5 uppercase tracking-wide"
                   >
                     Retake Scan
                   </button>
@@ -3463,7 +3471,7 @@ export default function TrackingTab() {
 
       {/* ================= SECURE COMPLIANCE PREVIEW MODAL BEFORE SUBMISSION ================= */}
       {isPreviewModalOpen && (
-        <div className="absolute inset-0 bg-slate-950/98 z-60 flex flex-col justify-between animate-fade-in p-5 text-left select-none text-white">
+        <div {...previewDialog} className="absolute inset-0 bg-slate-950/98 z-60 flex flex-col justify-between animate-fade-in p-5 text-left select-none text-white">
           {/* Header */}
           <div className="flex justify-between items-center border-b border-white/10 pb-3 shrink-0">
             <div className="flex items-center gap-2">
@@ -3471,7 +3479,7 @@ export default function TrackingTab() {
                 <ShieldCheck className="w-3.5 h-3.5" />
               </div>
               <div>
-                <span className="text-[8px] font-mono text-emerald-400 block tracking-widest uppercase">Smart Vision Analysis</span>
+                <span className="text-[11px] font-mono text-emerald-400 block tracking-widest uppercase">Smart Vision Analysis</span>
                 <h3 className="text-xs font-bold text-white leading-tight">
                   Secure Submission Audit Preview
                 </h3>
@@ -3479,7 +3487,7 @@ export default function TrackingTab() {
             </div>
             <button
               onClick={() => setIsPreviewModalOpen(false)}
-              className="text-slate-400 hover:text-white font-bold text-xs bg-white/5 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-white/10"
+              className="text-slate-400 hover:text-white font-bold text-xs bg-white/5 dark:bg-slate-900 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-white/10"
             >
               Back to Edit
             </button>
@@ -3498,25 +3506,25 @@ export default function TrackingTab() {
                     referrerPolicy="no-referrer"
                     className="max-h-[220px] w-auto object-contain rounded-xl shadow-2xl border border-white/15"
                   />
-                  <div className="absolute top-2 right-2 bg-emerald-950/90 backdrop-blur-xs border border-emerald-500/30 text-emerald-400 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded uppercase">
+                  <div className="absolute top-2 right-2 bg-emerald-950/90 backdrop-blur-xs border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-bold px-1.5 py-0.5 rounded uppercase">
                     {scannerFilter.toUpperCase()} FILTERED
                   </div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-1 text-slate-400 py-12">
                   <RefreshCw className="w-5 h-5 animate-spin text-slate-500" />
-                  <span className="text-[9px] font-mono">Loading cropped asset...</span>
+                  <span className="text-[11px] font-mono">Loading cropped asset...</span>
                 </div>
               )}
             </div>
 
             {/* Diagnostics Report */}
             <div className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 space-y-2.5 font-mono">
-              <span className="text-[8px] text-slate-400 uppercase tracking-wider block font-black leading-none">
+              <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-black leading-none">
                 Compliance AI Diagnostic Report
               </span>
               
-              <div className="space-y-2 text-[9px] leading-relaxed">
+              <div className="space-y-2 text-[11px] leading-relaxed">
                 <div className="flex items-center justify-between border-b border-white/5 pb-1.5">
                   <span className="text-slate-400">Target Folder:</span>
                   <span className="text-white font-bold uppercase">{scannerType.toUpperCase()} SECURE VAULT</span>
@@ -3554,23 +3562,23 @@ export default function TrackingTab() {
             {/* AI OCR Metadata panel */}
             <div className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 space-y-2.5 font-mono text-left">
               <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                <span className="text-[8px] text-slate-400 uppercase tracking-wider block font-black leading-none">
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-black leading-none">
                   AI OCR Metadata Extraction
                 </span>
                 {ocrLoading ? (
-                  <span className="text-[8px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 animate-pulse">
+                  <span className="text-[11px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 animate-pulse">
                     <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Analyzing...
                   </span>
                 ) : ocrResult ? (
-                  <span className="text-[8px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-bold">
+                  <span className="text-[11px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-bold">
                     Completed ({ocrResult.confidenceScore}% Acc)
                   </span>
                 ) : ocrError ? (
-                  <span className="text-[8px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded font-bold">
+                  <span className="text-[11px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded font-bold">
                     Extraction Error
                   </span>
                 ) : (
-                  <span className="text-[8px] bg-slate-500/10 text-slate-400 px-1.5 py-0.5 rounded font-bold">
+                  <span className="text-[11px] bg-slate-500/10 text-slate-400 px-1.5 py-0.5 rounded font-bold">
                     Ready
                   </span>
                 )}
@@ -3579,22 +3587,22 @@ export default function TrackingTab() {
               {ocrLoading ? (
                 <div className="py-4 flex flex-col items-center justify-center gap-2">
                   <RefreshCw className="w-5 h-5 text-red-500 animate-spin" />
-                  <span className="text-[9px] text-slate-400 text-center font-sans">
+                  <span className="text-[11px] text-slate-400 text-center font-sans">
                     Gemini API is reading the document...
                   </span>
                 </div>
               ) : (
                 <div className="space-y-3 font-sans">
                   {ocrError && (
-                    <div className="bg-red-950/30 border border-red-500/20 p-2 rounded-lg text-[9px] text-red-200 font-sans">
-                      ⚠️ {ocrError}
+                    <div className="bg-red-950/30 border border-red-500/20 p-2 rounded-lg text-[11px] text-red-200 font-sans">
+                      <TriangleAlert className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />{ocrError}
                     </div>
                   )}
 
                   {!ocrResult && !ocrError && (
                     <button
                       onClick={() => capturedImg && runOCR(capturedImg)}
-                      className="w-full bg-red-600/20 hover:bg-red-600/30 text-red-200 border border-red-500/30 font-bold text-[10px] py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 uppercase cursor-pointer"
+                      className="w-full bg-red-600/20 hover:bg-red-600/30 text-red-200 border border-red-500/30 font-bold text-[11px] py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 uppercase cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       Trigger Instant OCR Scan
@@ -3604,7 +3612,7 @@ export default function TrackingTab() {
                   {(ocrResult || ocrError === null) && (
                     <div className="space-y-2.5 text-xs text-white">
                       <div>
-                        <label className="text-[9px] text-slate-400 block font-mono uppercase mb-1">
+                        <label className="text-[11px] text-slate-400 block font-mono uppercase mb-1">
                           Holder/Student Name
                         </label>
                         <input
@@ -3617,7 +3625,7 @@ export default function TrackingTab() {
                       </div>
 
                       <div>
-                        <label className="text-[9px] text-slate-400 block font-mono uppercase mb-1">
+                        <label className="text-[11px] text-slate-400 block font-mono uppercase mb-1">
                           Document Number (Passport / Visa / Ref No)
                         </label>
                         <input
@@ -3631,7 +3639,7 @@ export default function TrackingTab() {
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="text-[9px] text-slate-400 block font-mono uppercase mb-1">
+                          <label className="text-[11px] text-slate-400 block font-mono uppercase mb-1">
                             Issued By / Authority
                           </label>
                           <input
@@ -3645,7 +3653,7 @@ export default function TrackingTab() {
 
                         {(scannerType === "passport" || scannerType === "visa") && (
                           <div>
-                            <label className="text-[9px] text-slate-400 block font-mono uppercase mb-1">
+                            <label className="text-[11px] text-slate-400 block font-mono uppercase mb-1">
                               Expiry Date
                             </label>
                             <input
@@ -3664,8 +3672,8 @@ export default function TrackingTab() {
             </div>
 
             {/* Bottom Alert text */}
-            <div className="bg-red-950/20 border border-red-900/30 rounded-xl p-3 text-[10px] text-red-200 leading-normal font-medium">
-              ⚠️ By clicking "Confirm & Archive", you authorize WeHive to store this copy in your local browser storage cache and certify the legal validity of this study permit document.
+            <div className="bg-red-950/20 border border-red-900/30 rounded-xl p-3 text-[11px] text-red-200 leading-normal font-medium">
+              <TriangleAlert className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />By clicking "Confirm & Archive", you authorize WeHive to store this copy in your local browser storage cache and certify the legal validity of this study permit document.
             </div>
           </div>
 
@@ -3673,7 +3681,7 @@ export default function TrackingTab() {
           <div className="bg-slate-900 border border-white/5 rounded-2xl p-4 shrink-0 flex gap-2.5">
             <button
               onClick={() => setIsPreviewModalOpen(false)}
-              className="flex-1 bg-white/5 hover:bg-white/10 text-white font-extrabold text-xs py-3 rounded-xl border border-white/10 transition-all cursor-pointer flex items-center justify-center gap-1 uppercase tracking-wide"
+              className="flex-1 bg-white/5 dark:bg-slate-900 hover:bg-white/10 text-white font-extrabold text-xs py-3 rounded-xl border border-white/10 transition-all cursor-pointer flex items-center justify-center gap-1 uppercase tracking-wide"
             >
               Back to Edit
             </button>
