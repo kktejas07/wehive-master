@@ -70,7 +70,7 @@ function AIToolCard({ tool, index }) {
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => tool.href && navigate(tool.href)}
-      className={`group relative flex-1 min-w-[180px] max-w-[260px] rounded-2xl border border-black/8 bg-white p-4 sm:p-5 transition-all ${tool.href ? 'cursor-pointer hover:shadow-md' : ''}`}
+      className={`group relative flex-1 min-w-[180px] max-w-[260px] rounded-2xl border border-black/8 bg-white p-4 sm:p-5 transition ${tool.href ? 'cursor-pointer hover:shadow-md' : ''}`}
     >
       <GlowingEffect
         blur={30}
@@ -82,7 +82,7 @@ function AIToolCard({ tool, index }) {
         inactiveZone={0.01}
       />
       {tool.badge && (
-        <span className={`absolute top-3 right-3 text-[10px] uppercase tracking-[0.14em] font-bold px-2 py-0.5 rounded-full ${
+        <span className={`absolute top-3 right-3 text-[12px] uppercase tracking-[0.14em] font-bold px-2 py-0.5 rounded-full ${
           tool.badge === 'New' ? 'bg-emerald-100 text-emerald-700' : 'bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))]'
         }`}>
           {tool.badge}
@@ -122,7 +122,7 @@ export default function AIServices() {
     <section className="py-16 sm:py-24 lg:py-28 bg-[hsl(var(--soft-bg))]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <Reveal className="text-center mb-10 sm:mb-14">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
             <Sparkles className="w-3.5 h-3.5" />
             Powered by AI
           </div>

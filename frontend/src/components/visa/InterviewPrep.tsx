@@ -30,7 +30,7 @@ export default function InterviewPrep({ countryName }) {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <MessageSquare className="w-3.5 h-3.5" />
             Interview Preparation
           </div>

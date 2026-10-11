@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
-
 html,
 body {
   margin: 0;
@@ -581,4 +579,38 @@ div[class*="emergent" i][style*="position: fixed"] { display: none !important; }
 .admin-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.12) rgba(255, 255, 255, 0.03);
+}
+
+/* Visible keyboard focus for controls that strip the outline without adding
+   their own focus style (WCAG 2.4.7). Elements with focus:ring / focus-visible: /
+   focus:border classes keep their own styling. */
+:root { --focus-ring: hsl(var(--ring)); }
+.admin-theme { --focus-ring: hsl(var(--blue-100)); }
+:is(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible:not([class*="focus:ring"]):not([class*="focus-visible:"]):not([class*="focus:border"]):not(label[class*="focus-within:"] *) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+label[class*="focus-within:"]:has(:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+[role="dialog"][tabindex="-1"]:focus { outline: none; }
+
+/* Honour the OS "reduce motion" setting for CSS animations/transitions
+   (framer-motion is handled by <MotionConfig reducedMotion="user"> in index.js). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile viewport units: 100vh is the *largest* viewport on mobile, so full-height
+   sections sit partly behind the browser toolbar. Use the stable small viewport for
+   min-heights and the dynamic one for fixed-height app shells; vh stays as fallback. */
+@supports (height: 100svh) {
+  .min-h-screen { min-height: 100svh; }
+  .h-screen { height: 100dvh; }
 }

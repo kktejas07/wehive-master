@@ -37,7 +37,7 @@ function ContactCard() {
     <div className="rounded-3xl bg-[hsl(var(--blue-900))] text-white p-8 sm:p-10 relative overflow-hidden">
       <div className="absolute -top-20 -right-20 h-[260px] w-[260px] rounded-full bg-[hsl(var(--accent))]/25 blur-3xl" />
       <div className="relative">
-        <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/70">Visit us</div>
+        <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-white/70">Visit us</div>
         <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">
           Fly with WeHive
         </h3>
@@ -64,7 +64,7 @@ export default function About() {
       <Navbar />
       <section className="pt-32 pb-16 bg-[hsl(var(--soft-bg))] border-b border-black/5">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             About {BRAND.name}
           </div>
           <h1 className="mt-3 font-display font-extrabold text-[44px] sm:text-[72px] leading-[1.02] tracking-[-0.035em] text-[hsl(var(--blue-900))]">

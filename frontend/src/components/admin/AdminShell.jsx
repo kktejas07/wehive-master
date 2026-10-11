@@ -9,6 +9,7 @@ import {
   Key, User, Building2, BookOpen, Database, FileText, Bot, Brain,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const TABS = [
   { id: 'overview',     to: '/admin',               label: 'Overview',     Icon: LayoutDashboard, testid: 'admin-nav-overview' },
@@ -40,6 +41,7 @@ export default function AdminShell({ children }) {
   const { pathname } = useLocation();
   const [profileOpen, setProfileOpen] = useState(false);
   const [pwModal, setPwModal] = useState(false);
+  const dialogProps = useDialogA11y(pwModal, () => setPwModal(false));
   const [pwForm, setPwForm] = useState({ current: '', new: '', confirm: '' });
   const [pwSaving, setPwSaving] = useState(false);
   const [pwError, setPwError] = useState('');
@@ -60,7 +62,7 @@ export default function AdminShell({ children }) {
   };
 
   return (
-    <div className="h-screen bg-[#0b1020] text-slate-100" data-testid="admin-shell">
+    <div className="admin-theme h-screen bg-[#0b1020] text-slate-100" data-testid="admin-shell">
       <div className="grid lg:grid-cols-[260px_1fr] h-screen">
         <aside className="hidden lg:flex flex-col bg-[#0a0e1e] border-r border-white/5 p-5 overflow-y-auto admin-scrollbar">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-200 hover:text-white">
@@ -165,7 +167,7 @@ export default function AdminShell({ children }) {
       {/* Password Change Modal */}
       {pwModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setPwModal(false)}>
-          <div className="rounded-2xl bg-[#111632] border border-white/10 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div {...dialogProps} className="rounded-2xl bg-[#111632] border border-white/10 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
               <h3 className="text-[16px] font-bold text-white mb-4">Change Password</h3>
               <div className="space-y-3">

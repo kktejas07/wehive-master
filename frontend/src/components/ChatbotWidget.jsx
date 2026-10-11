@@ -1,11 +1,13 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X } from 'lucide-react';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
 const Hive = lazy(() => import('../pages/Hive'));
 
 export default function ChatbotWidget() {
   const [open, setOpen] = useState(false);
+  const dialogProps = useDialogA11y(open, () => setOpen(false));
 
   useEffect(() => {
     const handler = () => setOpen(true);
@@ -55,7 +57,7 @@ export default function ChatbotWidget() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[90] flex flex-col bg-white"
+            {...dialogProps} className="fixed inset-0 z-[90] flex flex-col bg-white"
           >
             {/* Close bar */}
             <div className="flex items-center justify-end px-4 py-2 border-b border-black/5 bg-white/80 backdrop-blur-md shrink-0">

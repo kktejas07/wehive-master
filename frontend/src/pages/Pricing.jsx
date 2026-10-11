@@ -33,7 +33,7 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
   };
 
   return (
-    <div className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 hover:shadow-[0_30px_70px_-20px_rgba(99,102,241,0.4)] transition-all duration-300 hover:-translate-y-1">
+    <div className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 hover:shadow-[0_30px_70px_-20px_rgba(99,102,241,0.4)] transition duration-300 hover:-translate-y-1">
       <div
         className={`relative rounded-[22px] p-8 h-full ${
           plan.highlighted
@@ -42,11 +42,11 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
         }`}
       >
         {plan.highlighted && (
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[11px] uppercase tracking-[0.16em] font-bold px-3 py-1">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[12px] uppercase tracking-[0.16em] font-bold px-3 py-1">
             Most popular
           </div>
         )}
-        <div className={`text-[11px] uppercase tracking-[0.16em] font-bold ${plan.highlighted ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/65'}`}>
+        <div className={`text-[12px] uppercase tracking-[0.16em] font-bold ${plan.highlighted ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/65'}`}>
           {plan.tag}
         </div>
         <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">{plan.name}</h3>
@@ -270,7 +270,7 @@ export default function Pricing() {
       <Navbar />
       <section className="pt-32 pb-12 bg-[hsl(var(--soft-bg))] border-b border-black/5">
         <div className="max-w-5xl mx-auto px-5 sm:px-8 text-center">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             Pricing
           </div>
           <h1 className="mt-3 font-display font-extrabold text-[44px] sm:text-[68px] leading-[1.02] tracking-[-0.035em] text-[hsl(var(--blue-900))]">
@@ -330,7 +330,7 @@ export default function Pricing() {
                 </div>
                 <div>
                   <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{label}</div>
-                  <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">{sub}</div>
+                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{sub}</div>
                 </div>
               </div>
             ))}

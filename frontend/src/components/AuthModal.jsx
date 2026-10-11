@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useToast } from '../hooks/use-toast';
 import { getAuthSchema } from '../lib/schemas';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
 function useCountdown(seconds, restartKey) {
   const [t, setT] = useState(seconds);
@@ -52,6 +53,7 @@ function OtpDigits({ value, onChange, length = 6 }) {
 export default function AuthModal() {
   const navigate = useNavigate();
   const { authOpen, authMode, closeAuth, sendOtp, verifyOtp, setAuthMode } = useAuth();
+  const dialogProps = useDialogA11y(authOpen, closeAuth);
   const { phoneOtp, verifyPhoneOtpCode } = useFirebaseAuth();
   const { toast } = useToast();
   const [channel, setChannel] = useState('email');
@@ -141,13 +143,13 @@ export default function AuthModal() {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[hsl(var(--blue-900))]/45 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={closeAuth}>
       <div onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md rounded-3xl bg-white shadow-[0_30px_70px_-30px_rgba(10,44,138,0.6)] overflow-hidden">
-        <button onClick={closeAuth}
+        {...dialogProps} className="relative w-full max-w-md rounded-3xl bg-white shadow-[0_30px_70px_-30px_rgba(10,44,138,0.6)] overflow-hidden">
+        <button aria-label="Close" onClick={closeAuth}
           className="absolute top-4 right-4 h-9 w-9 rounded-full hover:bg-black/5 inline-flex items-center justify-center text-[hsl(var(--blue-900))]/55">
           <X className="w-4 h-4" />
         </button>
         <div className="p-7 sm:p-9">
-          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             <ShieldCheck className="w-3.5 h-3.5" /> Secure access
           </div>
           <h2 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
@@ -162,17 +164,17 @@ export default function AuthModal() {
             <form onSubmit={onSend} className="mt-6 space-y-5">
               {isSignup && (
                 <div>
-                  <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
-                  <input {...register('name')} placeholder="e.g. Priya Sharma"
+                  <label htmlFor="authmodal-your-name" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
+                  <input id="authmodal-your-name" {...register('name')} placeholder="e.g. Priya Sharma"
                     className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
                   {errors.name && <p className="mt-1 text-[12px] text-red-500">{errors.name.message}</p>}
                 </div>
               )}
               <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
+                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5" htmlFor="authmodal-identifier">
                   {channel === 'email' ? 'Email address' : 'Mobile number'}
                 </label>
-                <input {...register('identifier')} placeholder={channel === 'email' ? 'you@example.com' : '+91 98765 43210'}
+                <input id="authmodal-identifier" {...register('identifier')} placeholder={channel === 'email' ? 'you@example.com' : '+91 98765 43210'}
                   inputMode={channel === 'email' ? 'email' : 'tel'}
                   className={`w-full h-12 rounded-xl border ${errors.identifier ? 'border-red-500' : 'border-black/10'} focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white`} />
                 {errors.identifier && <p className="mt-1 text-[12px] text-red-500">{errors.identifier.message}</p>}
@@ -227,7 +229,7 @@ export default function AuthModal() {
               Agent? Sign in to your dashboard →
             </Link>
           </div>
-          <p className="mt-4 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
+          <p className="mt-4 text-[12px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
             By continuing you agree to our Terms and acknowledge our Privacy Policy.
           </p>
         </div>

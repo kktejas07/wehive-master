@@ -43,7 +43,7 @@ function FloatingBadge({ icon, text, delay }) {
     >
       <div className="flex items-center gap-2">
         <span className="text-[hsl(var(--accent))]">{icon}</span>
-        <span className="text-[11px] font-bold text-[hsl(var(--blue-900))]">{text}</span>
+        <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{text}</span>
       </div>
     </motion.div>
   );
@@ -56,7 +56,7 @@ function HeroSearch({ query, setQuery }) {
 function CountrySuggestions({ items, label }) {
   return (
     <div className="mt-5">
-      <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/50 mb-3 text-center">
+      <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/50 mb-3 text-center">
         {label}
       </div>
       <div className="flex flex-wrap justify-center gap-2">

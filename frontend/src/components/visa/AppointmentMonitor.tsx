@@ -38,7 +38,7 @@ export default function AppointmentMonitor({ countryName }) {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <Calendar className="w-3.5 h-3.5" />
             What&apos;s included with the cost
           </div>
@@ -64,7 +64,7 @@ export default function AppointmentMonitor({ countryName }) {
             </div>
             <div className="grid grid-cols-7 gap-1 mb-2">
               {dayNames.map((d) => (
-                <div key={d} className="text-center text-[10px] font-bold text-[hsl(var(--blue-900))]/40 uppercase py-2">
+                <div key={d} className="text-center text-[12px] font-bold text-[hsl(var(--blue-900))]/40 uppercase py-2">
                   {d}
                 </div>
               ))}
@@ -94,7 +94,7 @@ export default function AppointmentMonitor({ countryName }) {
                 );
               })}
             </div>
-            <div className="mt-4 flex items-center justify-center gap-4 text-[11px] text-[hsl(var(--blue-900))]/60">
+            <div className="mt-4 flex items-center justify-center gap-4 text-[12px] text-[hsl(var(--blue-900))]/60">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-[hsl(var(--accent))]" />
                 <span>Detected with WeHive</span>

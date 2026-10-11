@@ -43,15 +43,15 @@ export default function ProgramCard({ universityId, limit = 6 }) {
       </div>
       <div className="space-y-3">
         {displayed.map(p => (
-          <div key={p.id} className="rounded-xl bg-[hsl(var(--blue-50))] p-4 border border-black/5 hover:border-[hsl(var(--blue-700))]/20 transition-all">
+          <div key={p.id} className="rounded-xl bg-[hsl(var(--blue-50))] p-4 border border-black/5 hover:border-[hsl(var(--blue-700))]/20 transition">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-[14px] text-[hsl(var(--blue-900))] truncate">{p.name}</h4>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${DEGREE_COLORS[p.degree_type] || 'bg-slate-100 text-slate-600'}`}>
+                  <span className={`text-[12px] font-bold px-2 py-0.5 rounded-full border ${DEGREE_COLORS[p.degree_type] || 'bg-slate-100 text-slate-600'}`}>
                     {p.degree_type?.charAt(0).toUpperCase() + p.degree_type?.slice(1) || 'N/A'}
                   </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${DEGREE_COLORS[p.degree_type] || 'bg-slate-100 text-slate-600'}`}>
+                  <span className={`text-[12px] font-bold px-2 py-0.5 rounded-full border ${DEGREE_COLORS[p.degree_type] || 'bg-slate-100 text-slate-600'}`}>
                     {p.degree_type?.charAt(0).toUpperCase() + p.degree_type?.slice(1) || 'N/A'}
                   </span>
                 </div>
@@ -64,10 +64,10 @@ export default function ProgramCard({ universityId, limit = 6 }) {
               </div>
             </div>
             {p.entry_requirements && (
-              <div className="mt-2 text-[11px] text-[hsl(var(--blue-900))]/50 line-clamp-1">{p.entry_requirements}</div>
+              <div className="mt-2 text-[12px] text-[hsl(var(--blue-900))]/50 line-clamp-1">{p.entry_requirements}</div>
             )}
             {p.url && (
-              <a href={p.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[hsl(var(--blue-700))] hover:underline">
+              <a href={p.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline">
                 Program page <ExternalLink className="w-3 h-3" />
               </a>
             )}

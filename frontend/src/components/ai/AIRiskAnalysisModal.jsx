@@ -5,6 +5,7 @@ import { Sparkles, Loader2, X, ShieldAlert, CheckCircle2, AlertTriangle, XCircle
 import { Button } from '../ui/button';
 import { useAuth, API } from '../../context/AuthContext';
 import { useToast } from '../../hooks/use-toast';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const RISK_CONFIG = {
   low: { color: 'emerald', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: CheckCircle2, label: 'Low Risk' },
@@ -52,7 +53,7 @@ function FactorCard({ factor }) {
   return (
     <div className={`rounded-2xl border p-4 ${severityColors[factor.severity] || severityColors.note}`}>
       <div className="flex items-start gap-2">
-        <span className={`mt-0.5 text-[11px] font-bold uppercase tracking-[0.1em] rounded-full px-2 py-0.5 shrink-0 ${
+        <span className={`mt-0.5 text-[12px] font-bold uppercase tracking-[0.1em] rounded-full px-2 py-0.5 shrink-0 ${
           factor.severity === 'critical' ? 'bg-red-100 text-red-700' :
           factor.severity === 'major' ? 'bg-amber-100 text-amber-700' :
           factor.severity === 'minor' ? 'bg-blue-100 text-blue-700' :
@@ -63,7 +64,7 @@ function FactorCard({ factor }) {
           <div className="text-[12px] text-[hsl(var(--blue-900))]/65 mt-1 leading-relaxed">{factor.description}</div>
           {factor.fixable && factor.fix_suggestion && (
             <div className="mt-2 rounded-xl bg-white/70 border border-black/8 px-3 py-2">
-              <div className="text-[10px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--accent))] mb-1">Fix suggestion</div>
+              <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--accent))] mb-1">Fix suggestion</div>
               <div className="text-[12px] text-[hsl(var(--blue-900))]/80">{factor.fix_suggestion}</div>
             </div>
           )}
@@ -82,6 +83,7 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
   const [result, setResult] = useState(null);
 
   const handleClose = () => { setResult(null); onClose?.(); };
+  const dialogProps = useDialogA11y(open, handleClose);
 
   const onAnalyse = async () => {
     setAnalysing(true);
@@ -122,7 +124,7 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
         >
           <div className="absolute inset-0 bg-[hsl(var(--blue-900))]/40 backdrop-blur-sm" onClick={handleClose} />
           <motion.div
-            className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[88vh] flex flex-col"
+            {...dialogProps} className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[88vh] flex flex-col"
             initial={{ y: 24, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 16, opacity: 0, scale: 0.98 }}
@@ -134,7 +136,7 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
                   <ShieldAlert className="w-4 h-4 text-[hsl(var(--accent))]" />
                 </span>
                 <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">AI Review</div>
+                  <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">AI Review</div>
                   <h2 className="font-display text-[18px] font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
                     Rejection Risk Analyser
                   </h2>
@@ -153,8 +155,8 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
                   </div>
 
                   <div>
-                    <label className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-2">Focus areas (optional)</label>
-                    <div className="flex flex-wrap gap-2">
+                    <label id="airiskanalysismodal-focus-areas-optional" className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-2">Focus areas (optional)</label>
+                    <div role="group" aria-labelledby="airiskanalysismodal-focus-areas-optional" className="flex flex-wrap gap-2">
                       {[
                         ['financial_proof', 'Financial proof'],
                         ['travel_history', 'Travel history'],
@@ -196,12 +198,12 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
                     <div className="flex items-center gap-3">
                       <RiskIcon className={`w-7 h-7 shrink-0 ${riskCfg.text}`} />
                       <div className="flex-1">
-                        <div className="text-[11px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--accent))]">Risk Level</div>
+                        <div className="text-[12px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--accent))]">Risk Level</div>
                         <div className={`text-[22px] font-extrabold ${riskCfg.text}`}>{riskCfg.label}</div>
                       </div>
                     </div>
                     <div className="mt-4">
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/50 mb-2">Risk Score: {result.risk_score || 0}/100</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/50 mb-2">Risk Score: {result.risk_score || 0}/100</div>
                       <ScoreBar score={result.risk_score || 0} />
                     </div>
                     {result.summary && (
@@ -211,7 +213,7 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
 
                   {result.checks && (
                     <div>
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50 mb-3">Quick checks</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50 mb-3">Quick checks</div>
                       <div className="grid grid-cols-2 gap-2">
                         {Object.entries(result.checks).map(([key, check]) => {
                           const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -225,7 +227,7 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
 
                   {sortedFactors.length > 0 && (
                     <div>
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50 mb-3">Risk factors & recommendations</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50 mb-3">Risk factors & recommendations</div>
                       <div className="space-y-2">
                         {sortedFactors.map((f, i) => (
                           <FactorCard key={i} factor={f} />
@@ -236,14 +238,14 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
 
                   {result.overall_advice && (
                     <div className="rounded-2xl border border-[hsl(var(--accent))]/20 bg-[hsl(var(--accent))]/5 p-4">
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--accent))] mb-2">Overall advice</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--accent))] mb-2">Overall advice</div>
                       <div className="text-[13px] text-[hsl(var(--blue-900))]/80 leading-relaxed">{result.overall_advice}</div>
                     </div>
                   )}
 
                   {result.approvals_needed?.length > 0 && (
                     <div>
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50 mb-2">Approvals needed before submission</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/50 mb-2">Approvals needed before submission</div>
                       <ul className="space-y-1.5">
                         {result.approvals_needed.map((a, i) => (
                           <li key={i} className="flex items-start gap-2 text-[13px] text-[hsl(var(--blue-900))]/80">

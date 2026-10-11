@@ -151,7 +151,7 @@ function AssistantBlock({ m, onSpeak, speaking, ttsEnabled, checkedAt }) {
         </div>
       )}
 
-      <div className="mt-4 pt-3 border-t border-black/5 flex flex-wrap items-center gap-2 text-[11.5px] text-[hsl(var(--blue-900))]/65">
+      <div className="mt-4 pt-3 border-t border-black/5 flex flex-wrap items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/65">
         <span className="font-semibold">Sources</span>
         {sources.length > 0 ? (
           sources.map((s) => (
@@ -426,7 +426,7 @@ export default function Hive({ inOverlay }) {
 
         {/* ── Prompt kit ──────────────────────────────────────────────── */}
         <section className="mt-6">
-          <div className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[hsl(var(--blue-900))]/55 mb-2.5">
+          <div className="text-[12px] font-extrabold uppercase tracking-[0.18em] text-[hsl(var(--blue-900))]/55 mb-2.5">
             Prompt kit
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -590,7 +590,7 @@ export default function Hive({ inOverlay }) {
                 <Volume2 className="w-4 h-4" />
               </button>
             </div>
-            <div className="text-[11px] text-[hsl(var(--blue-900))]/45 mt-2 px-2 flex items-center gap-1.5">
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/45 mt-2 px-2 flex items-center gap-1.5">
               <ShieldCheck className="w-3 h-3" />
               {activeAgent === 'hive_visa' && 'Visa answers are date-stamped. Always confirm with the official embassy.'}
               {activeAgent === 'hive_travel' && 'Trip prices come from live tools. Confirm before booking.'}

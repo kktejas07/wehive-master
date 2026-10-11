@@ -790,7 +790,7 @@ export default function USVisaSlots() {
           </div>
 
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
               <RefreshCw className="w-3.5 h-3.5" /> Live Wait Times
             </div>
             <h1 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
@@ -998,14 +998,14 @@ export default function USVisaSlots() {
                   <Button
                     onClick={() => setShowSubscribeForm(true)}
                     variant="outline"
-                    className="h-8 rounded-full text-[11px] font-bold"
+                    className="h-8 rounded-full text-[12px] font-bold"
                   >
                     Update Preferences
                   </Button>
                   <Button
                     onClick={handleUnsubscribe}
                     variant="outline"
-                    className="h-8 rounded-full text-[11px] font-bold text-red-600 border-red-200 hover:bg-red-50"
+                    className="h-8 rounded-full text-[12px] font-bold text-red-600 border-red-200 hover:bg-red-50"
                   >
                     Unsubscribe
                   </Button>
@@ -1098,10 +1098,10 @@ export default function USVisaSlots() {
                           </div>
                           <div>
                             <p className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{slot.city || slot.consulate_name}</p>
-                            <p className="text-[11px] text-[hsl(var(--blue-900))]/40">{slot.consulate_name || slot.consulate}</p>
+                            <p className="text-[12px] text-[hsl(var(--blue-900))]/40">{slot.consulate_name || slot.consulate}</p>
                           </div>
                         </div>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))]">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-bold bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))]">
                           {slot.visa_name}
                         </span>
                       </div>
@@ -1110,7 +1110,7 @@ export default function USVisaSlots() {
                         <div className={`flex-1 rounded-xl p-3 ${hasDate ? 'bg-white border border-emerald-100' : 'bg-white/50 border border-black/5'}`}>
                           <div className="flex items-center gap-1.5 mb-1">
                             <Calendar className={`w-3.5 h-3.5 ${hasDate ? 'text-emerald-600' : 'text-[hsl(var(--blue-900))]/30'}`} />
-                            <span className="text-[10px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40">Date</span>
+                            <span className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40">Date</span>
                           </div>
                           <p className={`text-[15px] font-display font-extrabold ${hasDate ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/30'}`}>
                             {formatSlotDate(slot.date, 'Not available')}
@@ -1118,7 +1118,7 @@ export default function USVisaSlots() {
                         </div>
                         {slot.time && (
                           <div className="flex-1 rounded-xl bg-white p-3 border border-black/5">
-                            <span className="text-[10px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40 block mb-1">Time</span>
+                            <span className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40 block mb-1">Time</span>
                             <p className="text-[15px] font-display font-extrabold text-[hsl(var(--blue-900))] font-mono">{slot.time}</p>
                           </div>
                         )}
@@ -1128,7 +1128,7 @@ export default function USVisaSlots() {
                         {slot.day_of_week && (
                           <span className="text-[12px] font-medium text-[hsl(var(--blue-900))]/50">{slot.day_of_week}</span>
                         )}
-                        <span className="text-[11px] font-medium text-[hsl(var(--blue-900))]/40">
+                        <span className="text-[12px] font-medium text-[hsl(var(--blue-900))]/40">
                           {formatDetectedAt(slot.detected_at)}
                         </span>
                       </div>
@@ -1186,10 +1186,10 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
   return (
     <div className="space-y-5">
       <div>
-        <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">
+        <label id="usvisaslots-visa-types" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">
           Visa Types
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div role="group" aria-labelledby="usvisaslots-visa-types" className="flex flex-wrap gap-2">
           {visaTypes.map(vt => (
             <button
               key={vt.id}
@@ -1207,10 +1207,10 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
       </div>
 
       <div>
-        <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">
+        <label id="usvisaslots-consulates" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">
           Consulates
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div role="group" aria-labelledby="usvisaslots-consulates" className="flex flex-wrap gap-2">
           {consulateLabels.map(c => (
             <button
               key={c.id}

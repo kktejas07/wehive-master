@@ -65,7 +65,7 @@ export default function ApplicationHero({
               </div>
             )}
             <div>
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
                 Application #{app.id.slice(0, 8).toUpperCase()}
               </div>
               <h1 className="mt-1 font-display font-extrabold text-[34px] sm:text-[48px] leading-[1.0] tracking-[-0.03em] text-[hsl(var(--blue-900))]">

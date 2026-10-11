@@ -125,19 +125,19 @@ export default function HeroSearchLive({ query, setQuery }) {
                   <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">
                     {c.name}
                   </div>
-                  <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">
+                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
                     {c.no_visa
                       ? 'Visa-free for Indians'
                       : (c.visa_types || []).slice(0, 3).join(' · ') || 'Visa required'}
                   </div>
                 </div>
-                <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/40">
+                <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/40">
                   {c.iso2 || c.id?.toUpperCase()}
                 </span>
               </li>
             ))}
           </ul>
-          <div className="px-4 py-2 text-[11px] text-[hsl(var(--blue-900))]/45 border-t border-black/5 flex items-center justify-between">
+          <div className="px-4 py-2 text-[12px] text-[hsl(var(--blue-900))]/45 border-t border-black/5 flex items-center justify-between">
             <span>{t('hero.searchKeys')}</span>
             <span>{t('hero.searchSource')}</span>
           </div>

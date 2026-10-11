@@ -88,7 +88,7 @@ export default function ApplicationFormCard({ application, onUpdated }) {
             <Sparkles className="w-4 h-4 text-emerald-700" />
           </span>
           <div className="min-w-0">
-            <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-emerald-700">
+            <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-emerald-700">
               {isEmpty ? 'Application form' : 'AI auto-filled'}
             </div>
             <div className="text-[13px] text-[hsl(var(--blue-900))]/70 truncate">
@@ -151,7 +151,7 @@ export default function ApplicationFormCard({ application, onUpdated }) {
                 key={f.key}
                 className={`block ${f.wide ? 'sm:col-span-2' : ''} rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 px-4 py-2.5 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/35 transition`}
               >
-                <div className="text-[10.5px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
+                <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
                   {f.label}
                 </div>
                 <input

@@ -115,7 +115,7 @@ export default function HolidayPlanner() {
           </Link>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] flex items-center gap-2 mb-2">
+              <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] flex items-center gap-2 mb-2">
                 <Sparkles className="w-3.5 h-3.5" /> AI Agent Planner
               </div>
               <h1 className="font-display font-extrabold text-[38px] sm:text-[48px] tracking-tight leading-none capitalize">
@@ -123,7 +123,7 @@ export default function HolidayPlanner() {
               </h1>
             </div>
             {isCached && data && (
-              <div className="text-[11px] font-bold text-emerald-500 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1.5 rounded-full border border-emerald-100">
+              <div className="text-[12px] font-bold text-emerald-500 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1.5 rounded-full border border-emerald-100">
                 <RefreshCw className="w-3.5 h-3.5" /> Loaded from Cache
               </div>
             )}
@@ -134,8 +134,8 @@ export default function HolidayPlanner() {
         <div className="bg-white rounded-3xl border border-black/5 p-6 mb-8 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-[13px] font-bold text-[hsl(var(--blue-900))]/70 mb-2">Duration (Days)</label>
-              <input 
+              <label htmlFor="holidayplanner-duration-days" className="block text-[13px] font-bold text-[hsl(var(--blue-900))]/70 mb-2">Duration (Days)</label>
+              <input id="holidayplanner-duration-days" 
                 type="number" 
                 min="1" 
                 max="14" 
@@ -145,8 +145,8 @@ export default function HolidayPlanner() {
               />
             </div>
             <div>
-              <label className="block text-[13px] font-bold text-[hsl(var(--blue-900))]/70 mb-2">Travel Preferences</label>
-              <input 
+              <label htmlFor="holidayplanner-travel-preferences" className="block text-[13px] font-bold text-[hsl(var(--blue-900))]/70 mb-2">Travel Preferences</label>
+              <input id="holidayplanner-travel-preferences" 
                 type="text" 
                 value={preferences} 
                 onChange={e => setPreferences(e.target.value)}

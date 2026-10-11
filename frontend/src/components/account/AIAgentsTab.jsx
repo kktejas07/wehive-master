@@ -117,11 +117,11 @@ export default function AIAgentsTab() {
                   </div>
                   <div>
                     <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{agent.name}</div>
-                    <div className="text-[11px] text-[hsl(var(--blue-900))]/50 mt-0.5">{agent.description}</div>
+                    <div className="text-[12px] text-[hsl(var(--blue-900))]/50 mt-0.5">{agent.description}</div>
                   </div>
                 </div>
                 {count > 0 && (
-                  <span className="text-[11px] font-bold text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] px-2.5 py-1 rounded-full">
+                  <span className="text-[12px] font-bold text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] px-2.5 py-1 rounded-full">
                     {count} alert{count !== 1 ? 's' : ''}
                   </span>
                 )}

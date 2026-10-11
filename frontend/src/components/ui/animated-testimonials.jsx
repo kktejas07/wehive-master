@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { Star, Quote, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 
 const TESTIMONIALS = [
   {
@@ -97,7 +97,7 @@ function TestimonialCard({ testimonial, isActive, index }) {
               <h4 className="font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">
                 {testimonial.name}
               </h4>
-              <p className="text-[11px] text-[hsl(var(--blue-900))]/60">
+              <p className="text-[12px] text-[hsl(var(--blue-900))]/60">
                 {testimonial.location} · {testimonial.visaType}
               </p>
             </div>
@@ -139,6 +139,8 @@ function TestimonialIndicators({ total, active, onClick }) {
 export default function AnimatedTestimonials() {
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState(0);
+  const reduce = useReducedMotion();
+  const [userPaused, setUserPaused] = useState(false);
 
   const handlePrev = () => {
     setDirection(-1);
@@ -151,12 +153,13 @@ export default function AnimatedTestimonials() {
   };
 
   useEffect(() => {
+    if (reduce || userPaused) return undefined;
     const interval = setInterval(() => {
       setDirection(1);
       setActive((prev) => (prev === TESTIMONIALS.length - 1 ? 0 : prev + 1));
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [reduce, userPaused]);
 
   return (
     <section className="relative py-16 sm:py-20 bg-[hsl(var(--soft-bg))] overflow-hidden">
@@ -167,7 +170,7 @@ export default function AnimatedTestimonials() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <Star className="w-3.5 h-3.5" />
             Testimonials
           </div>
@@ -194,19 +197,32 @@ export default function AnimatedTestimonials() {
           <div className="flex items-center justify-between mt-6">
             <button
               onClick={handlePrev}
+              aria-label="Previous testimonial"
               className="w-10 h-10 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-[hsl(var(--blue-700))] hover:text-white hover:border-transparent transition-colors group"
             >
               <ChevronLeft className="w-5 h-5 text-[hsl(var(--blue-900))] group-hover:text-white" />
             </button>
 
-            <TestimonialIndicators
-              total={TESTIMONIALS.length}
-              active={active}
-              onClick={setActive}
-            />
+            <div className="flex items-center gap-3">
+              <TestimonialIndicators
+                total={TESTIMONIALS.length}
+                active={active}
+                onClick={setActive}
+              />
+              {!reduce && (
+                <button
+                  onClick={() => setUserPaused((v) => !v)}
+                  className="w-8 h-8 rounded-full bg-white border border-black/10 flex items-center justify-center text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))]"
+                  aria-label={userPaused ? 'Resume testimonials' : 'Pause testimonials'}
+                >
+                  {userPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+                </button>
+              )}
+            </div>
 
             <button
               onClick={handleNext}
+              aria-label="Next testimonial"
               className="w-10 h-10 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-[hsl(var(--blue-700))] hover:text-white hover:border-transparent transition-colors group"
             >
               <ChevronRight className="w-5 h-5 text-[hsl(var(--blue-900))] group-hover:text-white" />
@@ -229,7 +245,7 @@ export default function AnimatedTestimonials() {
               <div className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">
                 {stat.label}
               </div>
-              <div className="text-[11px] text-[hsl(var(--blue-900))]/60 font-semibold">
+              <div className="text-[12px] text-[hsl(var(--blue-900))]/60 font-semibold">
                 {stat.sub}
               </div>
             </div>

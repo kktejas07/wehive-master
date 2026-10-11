@@ -68,7 +68,7 @@ export default function ConsultantChat({ applicationId, token }) {
         <span className="h-10 w-10 rounded-full bg-[hsl(var(--blue-700))] text-white inline-flex items-center justify-center font-bold">K</span>
         <div className="flex-1">
           <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">Kiran · Senior consultant</div>
-          <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 inline-flex items-center gap-1">
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/55 inline-flex items-center gap-1">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Online · replies within 4 hours
           </div>
@@ -177,10 +177,10 @@ export default function ConsultantChat({ applicationId, token }) {
                   }`}
                 >
                   {!me && m.name && (
-                    <div className="text-[11px] font-bold text-[hsl(var(--accent))] mb-0.5">{m.name}</div>
+                    <div className="text-[12px] font-bold text-[hsl(var(--accent))] mb-0.5">{m.name}</div>
                   )}
                   <div className="text-[14px] leading-snug">{m.text}</div>
-                  <div className={`text-[10.5px] mt-1 ${me ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/45'}`}>
+                  <div className={`text-[12px] mt-1 ${me ? 'text-white/65' : 'text-[hsl(var(--blue-900))]/45'}`}>
                     {new Date(m.at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
@@ -204,7 +204,7 @@ export default function ConsultantChat({ applicationId, token }) {
             placeholder="Type your question…"
             className="flex-1 h-11 rounded-full border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] text-[hsl(var(--blue-900))] transition"
           />
-          <button
+          <button aria-label="Send message"
             onClick={onSend}
             disabled={sending || !text.trim()}
             className="h-11 w-11 rounded-full btn-accent text-white inline-flex items-center justify-center disabled:opacity-50"

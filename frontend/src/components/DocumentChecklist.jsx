@@ -14,7 +14,7 @@ const STATUS_COLORS = {
 function StatusBadge({ status }) {
   const cfg = STATUS_COLORS[status] || STATUS_COLORS.uploaded;
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${cfg.bg} ${cfg.text}`}>
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-bold ${cfg.bg} ${cfg.text}`}>
       {cfg.label}
     </span>
   );
@@ -210,7 +210,7 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
     <section className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">Document checklist</div>
+          <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">Document checklist</div>
           <h2 className="mt-1 font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
             {completed} of {total} documents ready
           </h2>

@@ -114,7 +114,7 @@ export default function HowItWorks() {
     <section id="services" className="relative py-20 sm:py-28 bg-[hsl(var(--soft-bg))] border-y border-black/5">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <Reveal className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             How We Hive works
           </div>
           <h2 className="mt-3 text-[32px] sm:text-[52px] leading-[1.05] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
@@ -137,7 +137,7 @@ export default function HowItWorks() {
         <div className="mt-16 sm:mt-20">
           <Reveal className="flex items-end justify-between flex-wrap gap-4 mb-8">
             <div>
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
                 Service in every detail
               </div>
               <h3 className="mt-2 text-[26px] sm:text-[40px] font-display font-extrabold tracking-[-0.025em] text-[hsl(var(--blue-900))]">

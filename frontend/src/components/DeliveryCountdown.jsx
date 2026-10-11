@@ -30,7 +30,7 @@ export default function DeliveryCountdown({ cutoffHour = 18, label = 'Apply toda
         <Clock className="w-3.5 h-3.5 text-white" />
       </span>
       <span className="leading-tight">
-        <span className="block text-[10px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
+        <span className="block text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
           {label}
         </span>
         <span className="block text-[13px] font-bold text-[hsl(var(--blue-900))]">

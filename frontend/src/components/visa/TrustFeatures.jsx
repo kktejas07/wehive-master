@@ -36,9 +36,9 @@ export default function TrustFeatures({ countryName }) {
           {/* Table header */}
           <FadeIn delay={0.1}>
             <div className="grid grid-cols-[1fr_100px_100px] sm:grid-cols-[1fr_140px_140px] gap-4 items-center px-4 sm:px-6 pb-4 border-b border-black/10">
-              <span className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]" />
-              <span className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/40 text-center">Others</span>
-              <span className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] text-center">We Hive</span>
+              <span className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]" />
+              <span className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/40 text-center">Others</span>
+              <span className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] text-center">We Hive</span>
             </div>
           </FadeIn>
 

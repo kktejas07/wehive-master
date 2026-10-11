@@ -10,6 +10,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '../ui/alert-dialog';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 type ScanKind = 'passport' | 'document';
 
@@ -53,7 +54,7 @@ function Field({ label, value }: FieldProps) {
   if (value == null || value === '') return null;
   return (
     <div className="min-w-0">
-      <dt className="text-[10.5px] uppercase tracking-[0.16em] text-[hsl(var(--blue-900))]/55 font-bold">{label}</dt>
+      <dt className="text-[12px] uppercase tracking-[0.16em] text-[hsl(var(--blue-900))]/55 font-bold">{label}</dt>
       <dd className="mt-0.5 text-[13px] text-[hsl(var(--blue-900))] font-medium truncate">{String(value)}</dd>
     </div>
   );
@@ -92,7 +93,7 @@ function ScanCard({ scan, onDelete, onOpenRaw }: ScanCardProps) {
             <div className="text-[14.5px] font-bold text-[hsl(var(--blue-900))]">
               {isPassport ? 'Passport scan' : (e.document_kind || e.title || 'Document scan').toString().replace(/_/g, ' ')}
             </div>
-            <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
               {when.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} ·{' '}
               {when.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
             </div>
@@ -100,7 +101,7 @@ function ScanCard({ scan, onDelete, onOpenRaw }: ScanCardProps) {
         </div>
         <div className="flex items-center gap-2">
           {confidence != null && (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] uppercase tracking-[0.12em] font-bold ${confidenceColor}`}>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] uppercase tracking-[0.12em] font-bold ${confidenceColor}`}>
               {confidence}% confidence
             </span>
           )}
@@ -108,7 +109,7 @@ function ScanCard({ scan, onDelete, onOpenRaw }: ScanCardProps) {
             <Link
               to={`/account/applications/${scan.application_id}`}
               data-testid={`scan-open-app-${scan.id}`}
-              className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] px-2.5 py-1 text-[11.5px] font-bold text-[hsl(var(--blue-700))]"
+              className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] px-2.5 py-1 text-[12px] font-bold text-[hsl(var(--blue-700))]"
             >
               <ExternalLink className="w-3 h-3" />
               Open app
@@ -117,7 +118,7 @@ function ScanCard({ scan, onDelete, onOpenRaw }: ScanCardProps) {
           <button
             data-testid={`scan-delete-${scan.id}`}
             onClick={() => onDelete(scan)}
-            className="inline-flex items-center gap-1 rounded-lg bg-red-50 hover:bg-red-100 px-2 py-1 text-[11.5px] font-bold text-red-600"
+            className="inline-flex items-center gap-1 rounded-lg bg-red-50 hover:bg-red-100 px-2 py-1 text-[12px] font-bold text-red-600"
           >
             <Trash2 className="w-3 h-3" />
           </button>
@@ -177,16 +178,17 @@ interface RawScanModalProps {
 }
 
 function RawScanModal({ scan, onClose }: RawScanModalProps) {
+  const dialogProps = useDialogA11y(!!scan, onClose);
   if (!scan) return null;
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="max-w-2xl w-full rounded-3xl bg-white p-6 max-h-[80vh] overflow-y-auto"
+        {...dialogProps} className="max-w-2xl w-full rounded-3xl bg-white p-6 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">Scan details</div>
+            <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">Scan details</div>
             <h3 className="font-display font-extrabold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
               {scan.kind === 'passport' ? 'Passport' : 'Document'} scan
             </h3>
@@ -284,7 +286,7 @@ export default function ScansTab({ user, token }: ScansTabProps) {
     <div data-testid="scans-tab">
       <div className="flex items-center justify-between gap-3 flex-wrap mb-6">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             My AI scans
           </div>
           <h2 className="mt-1 font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">

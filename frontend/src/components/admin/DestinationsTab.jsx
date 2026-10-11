@@ -10,8 +10,10 @@ import { useToast } from '../../hooks/use-toast';
 import Pagination from './Pagination';
 import BlobImage from './BlobImage';
 import { API } from '../../lib/apiBase';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 function PreviewModal({ item, onClose, onRefresh }) {
+  const dialogProps = useDialogA11y(true, onClose);
   const { toast } = useToast();
   const [regenerating, setRegenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -66,8 +68,8 @@ function PreviewModal({ item, onClose, onRefresh }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="relative max-w-lg w-full rounded-2xl bg-[#111632] border border-white/10 overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition">
+      <div {...dialogProps} className="relative max-w-lg w-full rounded-2xl bg-[#111632] border border-white/10 overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <button aria-label="Close" onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition">
           <X className="w-4 h-4" />
         </button>
         <div className="aspect-[2/3] bg-black/50">

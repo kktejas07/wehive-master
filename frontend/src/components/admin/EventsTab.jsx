@@ -258,7 +258,7 @@ export default function EventsTab() {
                 style={{ background: `linear-gradient(135deg, ${ev.accent_color || '#e1212c'}, #0a2c8a)` }}
               >
                 {ev.image_url && (
-                  <img src={ev.image_url} alt={ev.title} className="absolute inset-0 h-full w-full object-cover opacity-70" />
+                  <img loading="lazy" decoding="async" src={ev.image_url} alt={ev.title} className="absolute inset-0 h-full w-full object-cover opacity-70" />
                 )}
                 <div className="absolute top-2 right-2 flex gap-1.5">
                   {!ev.is_published && (

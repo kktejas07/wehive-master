@@ -134,7 +134,7 @@ function ApplicantsStepper({ value, onChange }) {
         <Users className="w-4 h-4 text-[hsl(var(--blue-700))]" />
         <div>
           <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{t('fee.applicants')}</div>
-          <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">{t('fee.applicantsSub')}</div>
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{t('fee.applicantsSub')}</div>
         </div>
       </div>
       <div className="flex items-center gap-1.5">
@@ -212,10 +212,10 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
 
       <div className="rounded-2xl bg-white border border-black/8 overflow-hidden">
         <div className="px-5 py-3 border-b border-black/5 flex items-center justify-between">
-          <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             {t('fee.heading')}
           </div>
-          <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{t('fee.currencyNote')}</div>
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{t('fee.currencyNote')}</div>
         </div>
 
         {fees.isVisaFree && (
@@ -247,7 +247,7 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
             <div className="text-[15px] font-display font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
               {t('fee.total')}
             </div>
-            <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-0.5">
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">
               {t('fee.totalSub').replace('{n}', nStr).replace('{s}', sPlural)}
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
       </div>
 
       {!fees.requiresAppointment && !fees.isVisaFree && (
-        <div className="flex items-start gap-2 text-[11.5px] text-[hsl(var(--blue-900))]/55 px-1">
+        <div className="flex items-start gap-2 text-[12px] text-[hsl(var(--blue-900))]/55 px-1">
           <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
           <span>{t('fee.noAppointment')}</span>
         </div>

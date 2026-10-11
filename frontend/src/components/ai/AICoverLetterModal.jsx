@@ -5,6 +5,7 @@ import { Sparkles, Loader2, X, FileText, Copy, Check, AlertTriangle, ChevronDown
 import { Button } from '../ui/button';
 import { useAuth, API } from '../../context/AuthContext';
 import { useToast } from '../../hooks/use-toast';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const DESTINATIONS = {
   'us': 'United States', 'uk': 'United Kingdom', 'jp': 'Japan',
@@ -33,6 +34,7 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
   };
 
   const handleClose = () => { reset(); onClose?.(); };
+  const dialogProps = useDialogA11y(open, handleClose);
 
   const onGenerate = async () => {
     if (!purpose.trim()) {
@@ -82,7 +84,7 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
         >
           <div className="absolute inset-0 bg-[hsl(var(--blue-900))]/40 backdrop-blur-sm" onClick={handleClose} />
           <motion.div
-            className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
+            {...dialogProps} className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
             initial={{ y: 24, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 16, opacity: 0, scale: 0.98 }}
@@ -94,7 +96,7 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
                   <FileText className="w-4 h-4 text-[hsl(var(--accent))]" />
                 </span>
                 <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">AI Writing</div>
+                  <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">AI Writing</div>
                   <h2 className="font-display text-[18px] font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
                     Cover Letter / SOP Writer
                   </h2>
@@ -114,8 +116,8 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
-                      <label className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Purpose of travel *</label>
-                      <textarea
+                      <label htmlFor="aicoverlettermodal-purpose-of-travel" className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Purpose of travel *</label>
+                      <textarea id="aicoverlettermodal-purpose-of-travel"
                         value={purpose}
                         onChange={e => setPurpose(e.target.value)}
                         rows={3}
@@ -125,8 +127,8 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
                     </div>
 
                     <div>
-                      <label className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Travel date (if known)</label>
-                      <input
+                      <label htmlFor="aicoverlettermodal-travel-date-if-known" className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Travel date (if known)</label>
+                      <input id="aicoverlettermodal-travel-date-if-known"
                         type="date"
                         value={travelDate}
                         onChange={e => setTravelDate(e.target.value)}
@@ -135,8 +137,8 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
                     </div>
 
                     <div>
-                      <label className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Sponsorship / funds</label>
-                      <input
+                      <label htmlFor="aicoverlettermodal-sponsorship-funds" className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Sponsorship / funds</label>
+                      <input id="aicoverlettermodal-sponsorship-funds"
                         value={sponsors}
                         onChange={e => setSponsors(e.target.value)}
                         placeholder="e.g. Self-funded, parents sponsoring..."
@@ -145,8 +147,8 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Additional context (optional)</label>
-                      <textarea
+                      <label htmlFor="aicoverlettermodal-additional-context-optional" className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Additional context (optional)</label>
+                      <textarea id="aicoverlettermodal-additional-context-optional"
                         value={additional}
                         onChange={e => setAdditional(e.target.value)}
                         rows={2}
@@ -175,7 +177,7 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
                     <span className="font-bold">Cover letter generated successfully</span>
                     <button
                       onClick={() => setLetter('')}
-                      className="ml-auto text-[11px] underline hover:no-underline"
+                      className="ml-auto text-[12px] underline hover:no-underline"
                     >Regenerate</button>
                   </div>
 

@@ -116,7 +116,7 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
   if (compact) {
     return (
       <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200 p-5">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-bold text-amber-700 mb-2">
+        <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-amber-700 mb-2">
           <Sparkles className="w-3.5 h-3.5" /> Scholarship Matcher
         </div>
         <p className="text-[13px] text-amber-800/70 mb-3">
@@ -139,7 +139,7 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
       viewport={{ once: true }}
       className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8"
     >
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
         <Award className="w-3.5 h-3.5" /> Scholarship Matcher
       </div>
       <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))] mb-2">
@@ -155,8 +155,8 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
             <h3 className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Your Profile</h3>
             <div className="space-y-3">
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">GPA (4.0 scale)</label>
-                <input
+                <label htmlFor="scholarshipmatcher-gpa-4-0-scale" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">GPA (4.0 scale)</label>
+                <input id="scholarshipmatcher-gpa-4-0-scale"
                   type="range"
                   min="0"
                   max="4.0"
@@ -168,8 +168,8 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                 <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] mt-1">{profile.gpa.toFixed(1)}</div>
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">IELTS Score</label>
-                <input
+                <label htmlFor="scholarshipmatcher-ielts-score" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">IELTS Score</label>
+                <input id="scholarshipmatcher-ielts-score"
                   type="range"
                   min="0"
                   max="9"
@@ -181,8 +181,8 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                 <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] mt-1">{profile.ielts.toFixed(1)}</div>
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Work Experience</label>
-                <input
+                <label htmlFor="scholarshipmatcher-work-experience" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Work Experience</label>
+                <input id="scholarshipmatcher-work-experience"
                   type="range"
                   min="0"
                   max="10"
@@ -247,7 +247,7 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
           ) : (
             <div className="space-y-3">
               {filtered.slice(0, 10).map((uni) => (
-                <div key={uni.id} className="rounded-2xl border border-black/5 p-4 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition-all">
+                <div key={uni.id} className="rounded-2xl border border-black/5 p-4 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-sm font-bold text-white shrink-0">
@@ -264,12 +264,12 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                       <div className={`text-[20px] font-display font-extrabold ${uni.eligibility?.score >= 75 ? 'text-emerald-600' : 'text-amber-600'}`}>
                         {uni.eligibility?.score}%
                       </div>
-                      <div className="text-[10px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40">Match</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40">Match</div>
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {(uni.eligibility?.reasons || []).slice(0, 3).map(r => (
-                      <span key={r} className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                      <span key={r} className="inline-flex items-center gap-1 text-[12px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
                         <CheckCircle2 className="w-3 h-3" />
                         {r}
                       </span>
@@ -285,7 +285,7 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                         </div>
                       ))}
                       {uni.scholarships.length > 2 && (
-                        <div className="text-[11px] text-[hsl(var(--blue-900))]/40 pl-5">+{uni.scholarships.length - 2} more</div>
+                        <div className="text-[12px] text-[hsl(var(--blue-900))]/40 pl-5">+{uni.scholarships.length - 2} more</div>
                       )}
                     </div>
                   )}

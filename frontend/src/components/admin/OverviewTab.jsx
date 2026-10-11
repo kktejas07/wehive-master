@@ -102,7 +102,7 @@ export default function OverviewTab() {
               }
             }}
             disabled={runningAggregator}
-            className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition-all disabled:opacity-50"
+            className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition disabled:opacity-50"
           >
             {runningAggregator ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
             Run AI Aggregators Now

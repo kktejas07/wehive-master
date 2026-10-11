@@ -39,7 +39,7 @@ function getFacilityIcon(name) {
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
-    <div className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 transition-all">
+    <div className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 transition">
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color || 'bg-[hsl(var(--accent))]/10'}`}>
         <Icon className={`w-5 h-5 ${color ? 'text-white' : 'text-[hsl(var(--accent))]'}`} />
       </div>
@@ -60,7 +60,7 @@ function IntakeCalendar({ intakes, country_name }) {
           return (
             <div
               key={m}
-              className={`rounded-xl p-3 text-center text-[12px] font-bold transition-all ${
+              className={`rounded-xl p-3 text-center text-[12px] font-bold transition ${
                 active
                   ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
                   : 'bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/40'
@@ -85,7 +85,7 @@ function ProgramDetailsCard({ uni }) {
       <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-4">Program Details</h3>
       <div className="space-y-4">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))] mb-2">Popular Courses</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))] mb-2">Popular Courses</div>
           <div className="flex flex-wrap gap-2">
             {(uni.popular_courses || []).slice(0, 6).map(c => (
               <span key={c} className="text-[12px] px-3 py-1.5 rounded-full bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] font-medium">
@@ -96,19 +96,19 @@ function ProgramDetailsCard({ uni }) {
         </div>
         <div className="grid grid-cols-2 gap-4 pt-2 border-t border-black/5">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">IELTS Min</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">IELTS Min</div>
             <div className="mt-1 text-[16px] font-bold text-[hsl(var(--blue-900))]">{uni.ielts_min || '—'}</div>
           </div>
           <div>
-            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">TOEFL Min</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">TOEFL Min</div>
             <div className="mt-1 text-[16px] font-bold text-[hsl(var(--blue-900))]">{uni.toefl_min || '—'}</div>
           </div>
           <div>
-            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">GRE</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">GRE</div>
             <div className="mt-1 text-[16px] font-bold text-[hsl(var(--blue-900))]">{uni.gre_required ? 'Required' : 'Not required'}</div>
           </div>
           <div>
-            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">GMAT</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">GMAT</div>
             <div className="mt-1 text-[16px] font-bold text-[hsl(var(--blue-900))]">{uni.gmat_required ? 'Required' : 'Not required'}</div>
           </div>
         </div>
@@ -214,7 +214,7 @@ export default function UniversityDetail() {
               <LanguageSwitcher universityId={id} fields={uni} onTranslated={setTranslated} />
             </div>
               <div>
-                <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] bg-white/10 rounded-full px-3 py-1">
+                <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] bg-white/10 rounded-full px-3 py-1">
                   <GraduationCap className="w-3.5 h-3.5" /> {uni.type}
                 </div>
                 <h1 className="mt-3 font-display font-extrabold text-[36px] sm:text-[48px] leading-[1.0] tracking-[-0.035em]">
@@ -312,7 +312,7 @@ export default function UniversityDetail() {
             <ReviewsCard universityId={id} />
 
             <div className="rounded-2xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-8">
-              <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+              <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
                 <Sparkles className="w-3.5 h-3.5" /> Ready to apply?
               </div>
               <h3 className="mt-2 font-display font-extrabold text-[24px] tracking-[-0.025em]">
@@ -367,11 +367,11 @@ export default function UniversityDetail() {
 
             {uni.website && (
               <a href={uni.website.startsWith('http') ? uni.website : `https://${uni.website}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 transition-all group">
+                className="flex items-center gap-2 rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 transition group">
                 <ExternalLink className="w-5 h-5 text-[hsl(var(--blue-700))]" />
                 <div>
                   <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))]">Visit official website</div>
-                  <div className="text-[11px] text-[hsl(var(--blue-900))]/50 truncate max-w-[200px]">{uni.website}</div>
+                  <div className="text-[12px] text-[hsl(var(--blue-900))]/50 truncate max-w-[200px]">{uni.website}</div>
                 </div>
               </a>
             )}

@@ -31,7 +31,7 @@ function ProofOfFundsCalculator() {
       </div>
       
       <div className="rounded-xl bg-white border border-black/10 p-5">
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">{scheme.name}</div>
+        <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">{scheme.name}</div>
         <div className="text-[32px] font-extrabold text-[hsl(var(--blue-900))] mb-2">
           {scheme.amount.toLocaleString()} <span className="text-[16px] text-[hsl(var(--blue-900))]/50">{scheme.currency}</span>
         </div>
@@ -40,7 +40,7 @@ function ProofOfFundsCalculator() {
 
       {country === 'Canada' && (
         <div className="space-y-2 mt-6">
-          <div className="text-[10.5px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Popular GIC Banks (Estimated Rates)</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Popular GIC Banks (Estimated Rates)</div>
           {[
             { name: 'CIBC', rate: 4.15, fee: 150 },
             { name: 'ICICI Bank Canada', rate: 4.50, fee: 0 },
@@ -49,7 +49,7 @@ function ProofOfFundsCalculator() {
              <div key={b.name} className="flex items-center justify-between gap-4 rounded-xl bg-[hsl(var(--soft-bg))] border border-black/5 px-4 py-3">
                <div>
                  <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{b.name}</div>
-                 <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">{b.rate}% p.a. · {b.fee === 0 ? 'No fee' : `$${b.fee} fee`}</div>
+                 <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{b.rate}% p.a. · {b.fee === 0 ? 'No fee' : `$${b.fee} fee`}</div>
                </div>
              </div>
           ))}
@@ -99,7 +99,7 @@ function LiveCurrencyConverter() {
           <input type="number" value={amount} onChange={e => setAmount(+e.target.value)} className="w-full h-11 rounded-xl bg-white border border-black/10 px-4 text-[15px] font-bold text-right outline-none" />
         </div>
         
-        <button onClick={fetchRate} className="w-10 h-10 rounded-full bg-[hsl(var(--soft-bg))] flex items-center justify-center hover:bg-black/5 transition">
+        <button aria-label="Refresh exchange rate" onClick={fetchRate} className="w-10 h-10 rounded-full bg-[hsl(var(--soft-bg))] flex items-center justify-center hover:bg-black/5 transition">
           <RefreshCw className={`w-4 h-4 text-[hsl(var(--blue-900))]/50 ${loading ? 'animate-spin' : ''}`} />
         </button>
 
@@ -174,7 +174,7 @@ function AIFinancialAdvisor() {
           placeholder="Ask a financial question..."
           className="w-full h-12 rounded-xl bg-white border border-black/10 pl-4 pr-12 text-[14px] outline-none focus:border-[hsl(var(--accent))]/50"
         />
-        <button type="submit" disabled={loading} className="absolute right-2 top-2 w-8 h-8 rounded-lg bg-[hsl(var(--accent))] text-white flex items-center justify-center disabled:opacity-50">
+        <button aria-label="Ask question" type="submit" disabled={loading} className="absolute right-2 top-2 w-8 h-8 rounded-lg bg-[hsl(var(--accent))] text-white flex items-center justify-center disabled:opacity-50">
           <Send className="w-3.5 h-3.5" />
         </button>
       </form>
@@ -228,7 +228,7 @@ function BudgetPlanner() {
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-black/10">
-                <th className="text-left text-[hsl(var(--blue-900))]/55 font-bold text-[10.5px] uppercase tracking-[0.12em] py-2 pr-4">Expense</th>
+                <th className="text-left text-[hsl(var(--blue-900))]/55 font-bold text-[12px] uppercase tracking-[0.12em] py-2 pr-4">Expense</th>
                 {comparison.map(c => (
                   <th key={c.city} className="text-right text-[hsl(var(--blue-900))] font-bold py-2 px-3">
             {c.flag || <Globe className="w-4 h-4 inline" />} {c.city}
@@ -252,7 +252,7 @@ function BudgetPlanner() {
                 ))}
               </tr>
               <tr>
-                <td className="text-[hsl(var(--blue-900))]/50 text-[11px] py-2 pr-4">Annual total</td>
+                <td className="text-[hsl(var(--blue-900))]/50 text-[12px] py-2 pr-4">Annual total</td>
                 {comparison.map(c => (
                   <td key={c.city} className="text-right text-[hsl(var(--blue-900))]/55 text-[12px] py-2 px-3">
                     ${((c.rent + c.food + c.transport + c.misc) * 12).toLocaleString()}
@@ -285,7 +285,7 @@ function LoanEligibility() {
     <div className="space-y-5">
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">GPA / Percentage</span>
+          <span className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">GPA / Percentage</span>
           <input type="text" value={gpa} onChange={e => setGpa(e.target.value)} placeholder="e.g. 3.5 or 75%"
             className="w-full h-11 rounded-xl bg-white border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--blue-700))]/30 focus:shadow-sm" />
         </label>
@@ -301,18 +301,18 @@ function LoanEligibility() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{l.name}</div>
-                <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-0.5">{l.bank}</div>
+                <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">{l.bank}</div>
               </div>
               {l.max_inr && (
                 <div className="text-right">
                   <div className="font-bold text-[13px] text-[hsl(var(--blue-900))]">₹{(l.max_inr / 100000).toFixed(0)}L max</div>
-                  <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{l.rate}% p.a.</div>
+                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{l.rate}% p.a.</div>
                 </div>
               )}
             </div>
             <p className="mt-2 text-[12.5px] text-[hsl(var(--blue-900))]/70 leading-relaxed">{l.notes}</p>
             {admission && (
-              <div className="mt-2 text-[11.5px] font-bold text-emerald-600 flex items-center gap-1">
+              <div className="mt-2 text-[12px] font-bold text-emerald-600 flex items-center gap-1">
                 <Check className="w-3.5 h-3.5" /> You may be eligible — contact the bank with your admission letter
               </div>
             )}
@@ -342,7 +342,7 @@ export default function FinancialTools() {
       <Navbar />
       <div className="max-w-4xl mx-auto px-5 pt-28 pb-20">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-          <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
+          <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
             <DollarSign className="w-3.5 h-3.5" /> Financial Planning
           </div>
           <h1 className="font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
@@ -360,7 +360,7 @@ export default function FinancialTools() {
               return (
                 <motion.button key={t.id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                   onClick={() => setActive(t.id)}
-                  className="group text-left rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all">
+                  className="group text-left rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: `${t.color}18` }}>
                     <Icon className="w-6 h-6" style={{ color: t.color }} />
                   </div>

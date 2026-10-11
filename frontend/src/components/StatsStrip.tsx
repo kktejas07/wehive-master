@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { TrendingUp, Globe2, ShieldCheck, Clock, Sparkles, Award, LucideIcon } from 'lucide-react';
 
 interface CountUpProps {
@@ -13,9 +13,11 @@ function CountUp({ to, suffix = '', prefix = '', duration = 1.6 }: CountUpProps)
   const ref = useRef<HTMLSpanElement | null>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [v, setV] = useState(0);
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     if (!inView) return;
+    if (reduce) { setV(to); return; }
     let raf: number;
     const start = performance.now();
     const tick = (t: number) => {
@@ -27,7 +29,7 @@ function CountUp({ to, suffix = '', prefix = '', duration = 1.6 }: CountUpProps)
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, to, duration]);
+  }, [inView, to, duration, reduce]);
 
   const formatted = v.toLocaleString('en-IN');
   return <span ref={ref}>{prefix}{formatted}{suffix}</span>;
@@ -62,7 +64,7 @@ export default function StatsStrip() {
         <div className="rounded-[28px] glass-tint-navy aurora-grain p-5 sm:p-7 relative">
           <div className="flex items-center gap-2 justify-center mb-5">
             <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
-            <span className="text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--blue-900))]/65">
+            <span className="text-[12px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--blue-900))]/65">
               The We Hive scoreboard · live
             </span>
             <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
@@ -85,7 +87,7 @@ export default function StatsStrip() {
                   <div className="font-display font-extrabold text-[26px] sm:text-[30px] tracking-[-0.03em] leading-none text-[hsl(var(--blue-900))]">
                     <CountUp to={s.value} suffix={s.suffix} />
                   </div>
-                  <div className="mt-1 text-[11.5px] leading-snug text-[hsl(var(--blue-900))]/65 font-bold">
+                  <div className="mt-1 text-[12px] leading-snug text-[hsl(var(--blue-900))]/65 font-bold">
                     {s.label}
                   </div>
                 </motion.div>

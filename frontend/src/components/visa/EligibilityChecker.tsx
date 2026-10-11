@@ -72,7 +72,7 @@ export default function EligibilityChecker({ countryName }) {
               className="bg-white rounded-3xl p-8"
             >
               <div className="mb-6">
-                <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--accent))] mb-2">
+                <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--accent))] mb-2">
                   Question {currentQuestion + 1} of {ELIGIBILITY_QUESTIONS.length}
                 </div>
                 <div className="h-1.5 rounded-full bg-[hsl(var(--soft-bg))]">
@@ -140,7 +140,7 @@ export default function EligibilityChecker({ countryName }) {
               {isEligible && (
                 <div className="mt-6 flex flex-wrap justify-center gap-4">
                   {['No Interview Required', 'Faster Processing', 'Guaranteed Renewal'].map((badge) => (
-                    <div key={badge} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-[11px] font-bold text-emerald-700">
+                    <div key={badge} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-[12px] font-bold text-emerald-700">
                       <CheckCircle className="w-3.5 h-3.5" />
                       {badge}
                     </div>

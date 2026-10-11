@@ -43,7 +43,7 @@ function ComparisonCard({ item, index }) {
       className="bg-white rounded-2xl border border-black/5 overflow-hidden"
     >
       <div className="relative aspect-[16/9] overflow-hidden">
-        <img src={item.img} alt={item.title} className="absolute inset-0 h-full w-full object-cover" />
+        <img loading="lazy" decoding="async" src={item.img} alt={item.title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-4 left-4">
           <item.icon className="w-6 h-6 text-white" />

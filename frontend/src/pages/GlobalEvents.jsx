@@ -72,7 +72,7 @@ export default function GlobalEvents() {
                 <Sparkles className="w-48 h-48 text-emerald-600" />
               </div>
               <div className="relative z-10 max-w-4xl">
-                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-600 mb-3 flex items-center gap-2">
+                <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-emerald-600 mb-3 flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5" /> AI Monthly Events Briefing
                 </div>
                 <h3 className="text-2xl font-black text-gray-900 mb-4">{digest.title || "Global Events Summary"}</h3>
@@ -106,10 +106,10 @@ export default function GlobalEvents() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {events.map((evt) => (
-                <div key={evt.id} className="group bg-white rounded-3xl overflow-hidden border border-black/5 hover:border-black/10 hover:shadow-xl transition-all duration-300 flex flex-col">
+                <div key={evt.id} className="group bg-white rounded-3xl overflow-hidden border border-black/5 hover:border-black/10 hover:shadow-xl transition duration-300 flex flex-col">
                   {/* Image Area */}
                   <div className="relative h-56 bg-black/5 overflow-hidden">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={evt.image_url || "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&q=80"} 
                       alt={evt.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

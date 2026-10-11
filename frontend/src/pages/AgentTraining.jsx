@@ -87,7 +87,7 @@ function TopicCard({ topic }) {
     <div className="rounded-xl bg-white/5 border border-white/8 overflow-hidden">
       <button onClick={() => setOpen(v => !v)} className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-white/5 transition">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-[9px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 shrink-0"
+          <span className="text-[12px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 shrink-0"
             style={{ background: `${TYPE_COLORS[topic.type]}18`, color: TYPE_COLORS[topic.type] }}>
             {TYPE_LABELS[topic.type]}
           </span>
@@ -138,7 +138,7 @@ function CountrySection({ guide }) {
           <div className="text-[12px] text-slate-400">{guide.topics.length} topics</div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold rounded-full px-3 py-1" style={{ background: `${guide.color}18`, color: guide.color }}>
+          <span className="text-[12px] font-bold rounded-full px-3 py-1" style={{ background: `${guide.color}18`, color: guide.color }}>
             {guide.id === 'compliance' ? 'All markets' : 'Country guide'}
           </span>
           {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -159,7 +159,7 @@ export default function AgentTraining() {
       <Navbar />
       <div className="max-w-4xl mx-auto px-5 pt-28 pb-20">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-          <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
+          <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
             <BookOpen className="w-3.5 h-3.5" /> Agent Knowledge Base
           </div>
           <h1 className="font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-white">

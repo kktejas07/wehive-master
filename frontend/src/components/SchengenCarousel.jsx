@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plane, Eye } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Plane, Eye, Pause, Play } from 'lucide-react';
 import { landmarkFor } from '../lib/landmarks';
 import { track, trackClick, EVENTS } from '../analytics';
 
@@ -44,6 +44,8 @@ const N = SCHENGEN_COUNTRIES.length;
 export default function SchengenCarousel() {
   const [active, setActive] = useState(8); // Default to France
   const [paused, setPaused] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
+  const reduce = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
   const touchStart = useRef(0);
 
@@ -63,6 +65,7 @@ export default function SchengenCarousel() {
 
   // Mouse Parallax Loop within stage bounds
   useEffect(() => {
+    if (reduce) return undefined;
     const handleMouseMove = (e) => {
       if (!windowStageRef.current) return;
       const rect = windowStageRef.current.getBoundingClientRect();
@@ -100,16 +103,16 @@ export default function SchengenCarousel() {
       window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(animId);
     };
-  }, []);
+  }, [reduce]);
 
   // Auto-slide carousel
   useEffect(() => {
-    if (paused) return;
+    if (paused || userPaused || reduce) return;
     const timer = setInterval(() => {
       setActive(prev => (prev + 1) % N);
     }, 4500);
     return () => clearInterval(timer);
-  }, [paused]);
+  }, [paused, userPaused, reduce]);
 
   const go = (dir) => {
     setActive(prev => {
@@ -236,6 +239,8 @@ export default function SchengenCarousel() {
         style={{ height: isMobile ? 260 : 320, width: '100%', maxWidth: isMobile ? 320 : 540 }}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
         onTouchStart={(e) => (touchStart.current = e.touches[0].clientX)}
         onTouchEnd={(e) => {
           const diff = touchStart.current - e.changedTouches[0].clientX;
@@ -279,13 +284,13 @@ export default function SchengenCarousel() {
                 onClick={() => handleSelectCountry(idx)}
               >
                 <div
-                  className={`relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 ${
+                  className={`relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden transition duration-300 ${
                     isCenter
                       ? 'shadow-[0_22px_50px_-10px_rgba(0,0,0,0.9),0_0_30px_rgba(56,189,248,0.6)] ring-2 ring-sky-400'
                       : 'shadow-lg opacity-90 hover:opacity-100'
                   }`}
                 >
-                  <img
+                  <img decoding="async"
                     src={cardImg}
                     alt={country.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
@@ -297,7 +302,7 @@ export default function SchengenCarousel() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
 
                   <div className="absolute bottom-3 sm:bottom-4 inset-x-0 text-center px-2">
-                    <span className="text-[10px] sm:text-[12px] tracking-[0.22em] font-extrabold text-white drop-shadow-lg uppercase">
+                    <span className="text-[12px] sm:text-[12px] tracking-[0.22em] font-extrabold text-white drop-shadow-lg uppercase">
                       {country.name}
                     </span>
                   </div>
@@ -310,7 +315,7 @@ export default function SchengenCarousel() {
         {/* Nav Arrows */}
         <button
           onClick={() => go(-1)}
-          className="absolute -left-3 sm:-left-12 top-1/2 -translate-y-1/2 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 hover:bg-white/35 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all duration-200 outline-none shadow-lg"
+          className="absolute -left-3 sm:-left-12 top-1/2 -translate-y-1/2 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 hover:bg-white/35 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition duration-200 outline-none shadow-lg"
           aria-label="Previous country"
         >
           <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.5]" />
@@ -318,7 +323,7 @@ export default function SchengenCarousel() {
 
         <button
           onClick={() => go(1)}
-          className="absolute -right-3 sm:-right-12 top-1/2 -translate-y-1/2 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 hover:bg-white/35 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all duration-200 outline-none shadow-lg"
+          className="absolute -right-3 sm:-right-12 top-1/2 -translate-y-1/2 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 hover:bg-white/35 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition duration-200 outline-none shadow-lg"
           aria-label="Next country"
         >
           <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.5]" />
@@ -328,6 +333,15 @@ export default function SchengenCarousel() {
       {/* Bottom Bar: Dots & Caption */}
       <div className="relative z-20 text-center pb-2">
         <div className="flex justify-center items-center gap-1.5 flex-wrap px-6 max-w-xl mx-auto mb-2.5">
+          {!reduce && (
+            <button
+              onClick={() => setUserPaused((v) => !v)}
+              className="mr-1 w-6 h-6 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center text-white"
+              aria-label={userPaused ? 'Resume slideshow' : 'Pause slideshow'}
+            >
+              {userPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+            </button>
+          )}
           {SCHENGEN_COUNTRIES.map((c, idx) => (
             <button
               key={c.id}

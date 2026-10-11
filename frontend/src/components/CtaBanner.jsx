@@ -15,7 +15,7 @@ const METRICS = [
 function MetricCard({ k, v }) {
   return (
     <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-      <div className="text-[11px] uppercase tracking-[0.16em] text-white/55 font-bold">{k}</div>
+      <div className="text-[12px] uppercase tracking-[0.16em] text-white/55 font-bold">{k}</div>
       <div className="mt-1 text-[15px] font-bold">{v}</div>
     </div>
   );
@@ -54,7 +54,7 @@ export default function CtaBanner() {
 
           <div className="relative grid lg:grid-cols-12 gap-8 sm:gap-10 items-center">
             <Reveal direction="right" className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-white/70">
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-white/70">
                 Ready when you are
               </div>
               <h2 className="mt-3 font-display font-extrabold text-[30px] sm:text-[44px] lg:text-[58px] leading-[1.05] tracking-[-0.035em]">
@@ -92,7 +92,7 @@ export default function CtaBanner() {
             </Reveal>
             <Reveal direction="left" delay={0.12} className="lg:col-span-5">
               <div className="rounded-2xl bg-white/8 border border-white/12 backdrop-blur p-5 sm:p-6">
-                <div className="text-[11px] uppercase tracking-[0.16em] text-white/55 font-bold">Live</div>
+                <div className="text-[12px] uppercase tracking-[0.16em] text-white/55 font-bold">Live</div>
                 <div className="mt-2 font-display font-extrabold text-[26px] sm:text-[32px] leading-tight">
                   “Visa for Tokyo approved.”
                 </div>

@@ -114,7 +114,7 @@ export default function VisaInterviewSandbox() {
         <div className="max-w-4xl mx-auto px-5">
           
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
+            <span className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
               <Award className="w-3.5 h-3.5" /> Interview Sandbox
             </span>
             <h1 className="font-display font-extrabold text-[36px] sm:text-[48px] tracking-[-0.03em] text-[hsl(var(--blue-900))] leading-tight">
@@ -161,7 +161,7 @@ export default function VisaInterviewSandbox() {
               {/* User Voice Input Area */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <button
+                  <button aria-label={isListening ? 'Stop recording' : 'Start recording'}
                     onClick={isListening ? stopListening : startListening}
                     className={`h-12 w-12 rounded-full inline-flex items-center justify-center transition shadow-md ${
                       isListening 
@@ -224,7 +224,7 @@ export default function VisaInterviewSandbox() {
                   >
                     <div className="text-center border-b border-black/5 pb-4">
                       <div className="text-5xl font-black text-[hsl(var(--blue-900))]">{scores.overall}%</div>
-                      <div className="text-[11px] uppercase tracking-wider font-bold text-[hsl(var(--blue-900))]/40 mt-1">
+                      <div className="text-[12px] uppercase tracking-wider font-bold text-[hsl(var(--blue-900))]/40 mt-1">
                         Overall Score
                       </div>
                     </div>
@@ -270,7 +270,7 @@ export default function VisaInterviewSandbox() {
                     {history.map((h, i) => (
                       <div key={i} className="flex justify-between items-center p-2.5 rounded-xl bg-[hsl(var(--soft-bg))]/50 border border-black/5">
                         <span className="text-[12px] truncate max-w-[150px] font-medium">{h.q}</span>
-                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <span className="text-[12px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                           {h.score}%
                         </span>
                       </div>
@@ -293,7 +293,7 @@ export default function VisaInterviewSandbox() {
 function ScoreBar({ label, score }) {
   return (
     <div className="space-y-1.5">
-      <div className="flex justify-between text-[11px] font-bold text-[hsl(var(--blue-900))]/75">
+      <div className="flex justify-between text-[12px] font-bold text-[hsl(var(--blue-900))]/75">
         <span>{label}</span>
         <span>{score}%</span>
       </div>

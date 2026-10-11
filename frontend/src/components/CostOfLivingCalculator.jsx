@@ -63,14 +63,14 @@ export default function CostOfLivingCalculator({ university }) {
       viewport={{ once: true }}
       className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8"
     >
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">
         <Calculator className="w-3.5 h-3.5" /> Cost of Living Calculator
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
         <div>
-          <label className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">City</label>
-          <select
+          <label htmlFor="costoflivingcalculator-city" className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">City</label>
+          <select id="costoflivingcalculator-city"
             value={city}
             onChange={(e) => setCity(e.target.value)}
             className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[14px] text-[hsl(var(--blue-900))] bg-white"
@@ -82,8 +82,8 @@ export default function CostOfLivingCalculator({ university }) {
           </select>
         </div>
         <div>
-          <label className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Currency</label>
-          <div className="inline-flex rounded-full bg-[hsl(var(--soft-bg))] p-1">
+          <label id="costoflivingcalculator-currency" className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Currency</label>
+          <div role="group" aria-labelledby="costoflivingcalculator-currency" className="inline-flex rounded-full bg-[hsl(var(--soft-bg))] p-1">
             {['USD', 'INR', 'EUR', 'GBP'].map(c => (
               <button
                 key={c}
@@ -98,8 +98,8 @@ export default function CostOfLivingCalculator({ university }) {
           </div>
         </div>
         <div>
-          <label className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Tuition (per year)</label>
-          <input
+          <label htmlFor="costoflivingcalculator-tuition-per-year" className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Tuition (per year)</label>
+          <input id="costoflivingcalculator-tuition-per-year"
             type="number"
             value={tuition}
             onChange={(e) => setTuition(Number(e.target.value))}
@@ -117,14 +117,14 @@ export default function CostOfLivingCalculator({ university }) {
 
       <div className="mt-4 rounded-2xl bg-gradient-to-r from-[hsl(var(--blue-900))] to-[hsl(var(--blue-700))] text-white p-5 flex items-center justify-between">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-white/70">Total per year</div>
+          <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-white/70">Total per year</div>
           <div className="text-[28px] font-display font-extrabold tracking-[-0.02em]">
             {sym}{convert(total).toLocaleString()}
           </div>
         </div>
         <Info className="w-5 h-5 text-white/50" />
       </div>
-      <div className="mt-3 text-[11.5px] text-[hsl(var(--blue-900))]/45">
+      <div className="mt-3 text-[12px] text-[hsl(var(--blue-900))]/45">
         Estimates based on average student living costs. Actual expenses vary by lifestyle.
       </div>
     </motion.div>

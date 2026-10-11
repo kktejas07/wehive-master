@@ -146,7 +146,7 @@ Phone: ${phone}`;
         <div className="max-w-3xl mx-auto px-5">
           {/* Header */}
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
+            <span className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
               <ClipboardCheck className="w-3.5 h-3.5" /> Eligibility Calculator
             </span>
             <h1 className="font-display font-extrabold text-[36px] sm:text-[48px] tracking-[-0.03em] text-[hsl(var(--blue-900))] leading-tight">
@@ -192,7 +192,7 @@ Phone: ${phone}`;
                         <button
                           type="button"
                           onClick={() => { setPathway('pr'); handleNext(); }}
-                          className={`flex flex-col text-left p-6 rounded-2xl border-2 transition-all group ${
+                          className={`flex flex-col text-left p-6 rounded-2xl border-2 transition group ${
                             pathway === 'pr' ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 shadow-sm' : 'border-black/5 hover:border-black/10'
                           }`}
                         >
@@ -205,7 +205,7 @@ Phone: ${phone}`;
                         <button
                           type="button"
                           onClick={() => { setPathway('student'); handleNext(); }}
-                          className={`flex flex-col text-left p-6 rounded-2xl border-2 transition-all group ${
+                          className={`flex flex-col text-left p-6 rounded-2xl border-2 transition group ${
                             pathway === 'student' ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 shadow-sm' : 'border-black/5 hover:border-black/10'
                           }`}
                         >
@@ -232,8 +232,8 @@ Phone: ${phone}`;
                       
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Age Group</label>
-                          <select 
+                          <label htmlFor="visaassessment-age-group" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Age Group</label>
+                          <select id="visaassessment-age-group" 
                             value={prAge} 
                             onChange={(e) => setPrAge(e.target.value)}
                             className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
@@ -247,8 +247,8 @@ Phone: ${phone}`;
                         </div>
 
                         <div>
-                          <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Highest Education Level</label>
-                          <select 
+                          <label htmlFor="visaassessment-highest-education-level" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Highest Education Level</label>
+                          <select id="visaassessment-highest-education-level" 
                             value={prEdu} 
                             onChange={(e) => setPrEdu(e.target.value)}
                             className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
@@ -284,8 +284,8 @@ Phone: ${phone}`;
 
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">English Proficiency (IELTS Equivalent)</label>
-                          <select 
+                          <label htmlFor="visaassessment-english-proficiency-ielts-equi" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">English Proficiency (IELTS Equivalent)</label>
+                          <select id="visaassessment-english-proficiency-ielts-equi" 
                             value={prLanguage} 
                             onChange={(e) => setPrLanguage(e.target.value)}
                             className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
@@ -298,8 +298,8 @@ Phone: ${phone}`;
                         </div>
 
                         <div>
-                          <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Skilled Work Experience (Outside Canada)</label>
-                          <select 
+                          <label htmlFor="visaassessment-skilled-work-experience-outsid" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Skilled Work Experience (Outside Canada)</label>
+                          <select id="visaassessment-skilled-work-experience-outsid" 
                             value={prExp} 
                             onChange={(e) => setPrExp(e.target.value)}
                             className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
@@ -336,8 +336,8 @@ Phone: ${phone}`;
 
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Target Destination</label>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          <label id="visaassessment-target-destination" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Target Destination</label>
+                          <div role="group" aria-labelledby="visaassessment-target-destination" className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {COUNTRIES.map((c) => (
                               <button
                                 key={c.id}
@@ -355,8 +355,8 @@ Phone: ${phone}`;
                         </div>
 
                         <div>
-                          <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Current Education Level</label>
-                          <select 
+                          <label htmlFor="visaassessment-current-education-level" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Current Education Level</label>
+                          <select id="visaassessment-current-education-level" 
                             value={studentEdu} 
                             onChange={(e) => setStudentEdu(e.target.value)}
                             className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
@@ -391,11 +391,11 @@ Phone: ${phone}`;
 
                       <div className="space-y-4">
                         <div>
-                          <label className="block justify-between flex text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">
+                          <label htmlFor="visaassessment-gpa-academic-score" className="block justify-between flex text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">
                             <span>GPA / Academic Score (%)</span>
                             <span className="text-[hsl(var(--accent))]">{studentGpa}%</span>
                           </label>
-                          <input 
+                          <input id="visaassessment-gpa-academic-score" 
                             type="range" 
                             min="50" 
                             max="100" 
@@ -403,15 +403,15 @@ Phone: ${phone}`;
                             onChange={(e) => setStudentGpa(e.target.value)}
                             className="w-full accent-[hsl(var(--accent))]"
                           />
-                          <div className="flex justify-between text-[11px] text-[hsl(var(--blue-900))]/40 mt-1 font-mono">
+                          <div className="flex justify-between text-[12px] text-[hsl(var(--blue-900))]/40 mt-1 font-mono">
                             <span>50% (Minimum)</span>
                             <span>100% (Perfect)</span>
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Yearly Tuition Budget</label>
-                          <div className="grid grid-cols-3 gap-2">
+                          <label id="visaassessment-yearly-tuition-budget" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Yearly Tuition Budget</label>
+                          <div role="group" aria-labelledby="visaassessment-yearly-tuition-budget" className="grid grid-cols-3 gap-2">
                             {[
                               { id: 'low', label: 'Under ₹15 Lakh' },
                               { id: 'mid', label: '₹15 - ₹30 Lakh' },
@@ -464,8 +464,8 @@ Phone: ${phone}`;
 
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                          <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Full Name</label>
-                          <input 
+                          <label htmlFor="visaassessment-full-name" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Full Name</label>
+                          <input id="visaassessment-full-name" 
                             required 
                             type="text" 
                             placeholder="Priya Sharma" 
@@ -477,8 +477,8 @@ Phone: ${phone}`;
 
                         <div className="grid sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Email Address</label>
-                            <input 
+                            <label htmlFor="visaassessment-email-address" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Email Address</label>
+                            <input id="visaassessment-email-address" 
                               required 
                               type="email" 
                               placeholder="priya@example.com" 
@@ -488,8 +488,8 @@ Phone: ${phone}`;
                             />
                           </div>
                           <div>
-                            <label className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Phone Number</label>
-                            <input 
+                            <label htmlFor="visaassessment-phone-number" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Phone Number</label>
+                            <input id="visaassessment-phone-number" 
                               required 
                               type="tel" 
                               placeholder="+91 90007 34326" 

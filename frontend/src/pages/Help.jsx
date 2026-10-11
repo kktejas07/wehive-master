@@ -97,7 +97,7 @@ function HiveChat({ token }) {
         </div>
         <div>
           <div className="text-[13px] font-bold text-white">Ask Hive — visa assistant</div>
-          <div className="text-[11px] text-white/60">Powered by AI · We Hive</div>
+          <div className="text-[12px] text-white/60">Powered by AI · We Hive</div>
         </div>
       </div>
       <div className="h-72 overflow-y-auto p-4 space-y-3 bg-[hsl(var(--soft-bg))]">
@@ -135,7 +135,7 @@ function HiveChat({ token }) {
           placeholder="Ask about visas, documents, fees…"
           className="flex-1 h-10 rounded-full border border-black/10 px-4 text-[13px] outline-none focus:border-[hsl(var(--blue-700))]"
         />
-        <button
+        <button aria-label="Send message"
           onClick={send}
           disabled={loading || !input.trim()}
           className="h-10 w-10 rounded-full bg-[hsl(var(--blue-700))] text-white inline-flex items-center justify-center disabled:opacity-40 hover:bg-[hsl(var(--blue-800))] transition"
@@ -167,7 +167,7 @@ export default function Help() {
       <div className="min-h-[calc(100vh-72px)] pt-28 pb-20 bg-[hsl(var(--soft-bg))]">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
               Help center
             </div>
             <h1 className="mt-3 font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">

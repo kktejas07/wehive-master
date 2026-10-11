@@ -102,7 +102,7 @@ function SuccessRibbon({ isVisible, onClose, applicationId, applicantName }) {
                   </motion.p>
                 </div>
               </div>
-              <motion.button
+              <motion.button aria-label="Dismiss"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}

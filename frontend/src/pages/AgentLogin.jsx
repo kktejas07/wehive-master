@@ -72,27 +72,27 @@ export default function AgentLogin() {
             {mode === 'signup' && (
               <>
                 <div>
-                  <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Full Name</label>
-                  <input value={name} onChange={e => setName(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your name" />
+                  <label htmlFor="agentlogin-full-name" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Full Name</label>
+                  <input id="agentlogin-full-name" value={name} onChange={e => setName(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your name" />
                 </div>
                 <div>
-                  <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Phone</label>
-                  <input value={phone} onChange={e => setPhone(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="+91 98765 43210" />
+                  <label htmlFor="agentlogin-phone" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Phone</label>
+                  <input id="agentlogin-phone" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="+91 98765 43210" />
                 </div>
                 <div>
-                  <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Agency Name (Optional)</label>
-                  <input value={agency} onChange={e => setAgency(e.target.value)} className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your agency" />
+                  <label htmlFor="agentlogin-agency-name-optional" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Agency Name (Optional)</label>
+                  <input id="agentlogin-agency-name-optional" value={agency} onChange={e => setAgency(e.target.value)} className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your agency" />
                 </div>
               </>
             )}
             <div>
-              <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="agent@example.com" />
+              <label htmlFor="agentlogin-email" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Email</label>
+              <input id="agentlogin-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="agent@example.com" />
             </div>
             <div>
-              <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Password</label>
+              <label htmlFor="agentlogin-password" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Password</label>
               <div className="relative">
-                <input type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[14px]" placeholder="••••••••" />
+                <input id="agentlogin-password" type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[14px]" placeholder="••••••••" />
                 <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--blue-900))]/40">
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>

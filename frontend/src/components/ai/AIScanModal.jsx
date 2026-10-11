@@ -5,6 +5,7 @@ import { Sparkles, Upload, Loader2, X, Check, AlertTriangle, Crown } from 'lucid
 import { Button } from '../ui/button';
 import { useAuth, API } from '../../context/AuthContext';
 import { useToast } from '../../hooks/use-toast';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const FIELD_LABELS = {
   full_name: 'Full name',
@@ -60,7 +61,7 @@ function PremiumGate({ onUpgrade, upgrading }) {
           </span>
         )}
       </Button>
-      <div className="mt-2 text-[11px] text-[hsl(var(--blue-900))]/50">
+      <div className="mt-2 text-[12px] text-[hsl(var(--blue-900))]/50">
         Demo mode — no payment required
       </div>
     </div>
@@ -80,7 +81,7 @@ function ExtractionView({ data, onConfirm, onRetry }) {
         <div className="flex items-center gap-2 text-emerald-700 text-[13px] font-bold">
           <Check className="w-4 h-4" /> Extraction complete
           {typeof data.confidence === 'number' && (
-            <span className="ml-auto text-[11px] font-semibold bg-white border border-emerald-200 px-2 py-0.5 rounded-full">
+            <span className="ml-auto text-[12px] font-semibold bg-white border border-emerald-200 px-2 py-0.5 rounded-full">
               {data.confidence}% confidence
             </span>
           )}
@@ -88,7 +89,7 @@ function ExtractionView({ data, onConfirm, onRetry }) {
       </div>
 
       <div className="rounded-2xl border border-black/5 bg-white">
-        <div className="px-4 py-3 border-b border-black/5 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+        <div className="px-4 py-3 border-b border-black/5 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
           Extracted fields
         </div>
         <dl className="divide-y divide-black/5">
@@ -152,6 +153,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
     reset();
     onClose?.();
   };
+  const dialogProps = useDialogA11y(open, handleClose);
 
   const onUpgrade = async () => {
     setUpgrading(true);
@@ -236,7 +238,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
             onClick={handleClose}
           />
           <motion.div
-            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+            {...dialogProps} className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
             initial={{ y: 24, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 16, opacity: 0, scale: 0.98 }}
@@ -248,7 +250,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                   <Sparkles className="w-4.5 h-4.5 text-[hsl(var(--accent))]" />
                 </span>
                 <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+                  <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
                     AI Document Scan
                   </div>
                   <h2 className="font-display text-[18px] font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
@@ -307,7 +309,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                     <div className="mt-2 text-[13.5px] font-bold text-[hsl(var(--blue-900))]">
                       {file ? file.name : 'Click to choose an image'}
                     </div>
-                    <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">
+                    <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
                       JPG, PNG or WEBP · max 8MB
                     </div>
                   </label>
@@ -341,7 +343,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                     </div>
                   )}
 
-                  <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 leading-relaxed">
+                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55 leading-relaxed">
                     Your image is processed by AI and not stored permanently.
                     Keep lighting even, avoid glare, and crop to the data page.
                   </div>

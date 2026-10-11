@@ -150,7 +150,7 @@ export default function VisaDetail() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-7">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
               <FileText className="w-3.5 h-3.5" /> Required for {type}
             </div>
             <h2 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">

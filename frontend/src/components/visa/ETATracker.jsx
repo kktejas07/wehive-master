@@ -38,7 +38,7 @@ export default function ETATracker({ country }) {
     <section className="py-16 bg-[hsl(var(--soft-bg))] border-y border-black/5">
       <div className="max-w-3xl mx-auto px-5 sm:px-8 text-center">
         <FadeIn>
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[11px] uppercase tracking-[0.14em] font-bold mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[12px] uppercase tracking-[0.14em] font-bold mb-6">
             <ShieldCheck className="w-3.5 h-3.5" />
             Guaranteed delivery
           </div>

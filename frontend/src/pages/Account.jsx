@@ -145,7 +145,7 @@ function ProfileTab({ user, token, onUpdated }) {
             { id: 'verified', label: 'Verified channel', value: user.email_verified ? 'Email' : user.phone_verified ? 'Mobile (OTP)' : 'None' },
           ].map((i) => (
             <div key={i.id} className="rounded-2xl bg-white border border-black/5 p-5" data-testid={`profile-row-${i.id}`}>
-              <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
+              <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
                 {i.label}
               </div>
               <div className="mt-1 text-[15px] font-bold text-[hsl(var(--blue-900))]">{i.value}</div>
@@ -177,7 +177,7 @@ function ProfileTab({ user, token, onUpdated }) {
 function EditField({ label, value, onChange, placeholder, type = 'text', testid }) {
   return (
     <label className="block rounded-2xl bg-white border border-black/8 px-5 py-3 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/40 transition">
-      <span className="block text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">{label}</span>
+      <span className="block text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">{label}</span>
       <input
         data-testid={testid}
         type={type}
@@ -193,7 +193,7 @@ function EditField({ label, value, onChange, placeholder, type = 'text', testid 
 function EditSelect({ label, value, onChange, children, testid }) {
   return (
     <label className="block rounded-2xl bg-white border border-black/8 px-5 py-3 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/40 transition">
-      <span className="block text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">{label}</span>
+      <span className="block text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">{label}</span>
       <select
         data-testid={testid}
         value={value}
@@ -238,7 +238,7 @@ function ApplicationsTab({ token }) {
                 <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
                   {a.country_id.toUpperCase()} · {a.visa_type}
                 </span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold capitalize ${statusColor(a.status)}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold capitalize ${statusColor(a.status)}`}>
                   {(a.status || 'draft').replace('_', ' ')}
                 </span>
               </div>
@@ -354,7 +354,7 @@ function AIToolsTab({ token, isPremium }) {
                   <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
                     {a.country_id?.toUpperCase()} · {a.visa_type}
                   </span>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold capitalize ${statusColor(a.status)}`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold capitalize ${statusColor(a.status)}`}>
                     {(a.status || 'draft').replace('_', ' ')}
                   </span>
                 </div>
@@ -383,7 +383,7 @@ function AIToolsTab({ token, isPremium }) {
               <Icon className="w-5 h-5" style={{ color }} />
             </div>
             <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{label}</div>
-            <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-0.5">{desc}</div>
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">{desc}</div>
           </button>
         ))}
       </div>
@@ -457,9 +457,9 @@ function SettingsTab({ user, token, onUpdated }) {
       <div className="mt-6 flex flex-col sm:flex-row gap-6 items-start">
         <div className="flex flex-col items-center gap-2">
           <span className="h-28 w-28 rounded-3xl overflow-hidden bg-[hsl(var(--blue-50))] ring-2 ring-white shadow-[0_20px_40px_-20px_rgba(10,44,138,0.4)]">
-            <img src={avatarUrl({ seed, gender, style })} alt="avatar preview" className="h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={avatarUrl({ seed, gender, style })} alt="avatar preview" className="h-full w-full object-cover" />
           </span>
-          <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Preview</span>
+          <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Preview</span>
         </div>
         <div className="flex-1 w-full">
           <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-2">
@@ -480,9 +480,9 @@ function SettingsTab({ user, token, onUpdated }) {
                   }`}
                 >
                   <span className="block aspect-square rounded-xl overflow-hidden bg-[hsl(var(--blue-50))]">
-                    <img src={avatarUrl({ seed: p.seed, style: p.style })} alt={p.label} className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async" src={avatarUrl({ seed: p.seed, style: p.style })} alt={p.label} className="h-full w-full object-cover" />
                   </span>
-                  <span className="block text-[11px] font-bold mt-1 text-[hsl(var(--blue-900))]/75 truncate">
+                  <span className="block text-[12px] font-bold mt-1 text-[hsl(var(--blue-900))]/75 truncate">
                     {p.label}
                   </span>
                   {active && (
@@ -650,7 +650,7 @@ function ReferralsTab({ token }) {
           ].map((s) => (
             <div key={s.label} className="rounded-2xl bg-white border border-black/5 p-5 text-center">
               <div className="text-[24px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.value}</div>
-              <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-1">{s.label}</div>
+              <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-1">{s.label}</div>
             </div>
           ))}
         </div>
@@ -757,10 +757,10 @@ function RequestsTab({ user, token }) {
           <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">New Request</div>
 
           <div>
-            <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
+            <label htmlFor="account-request-type" className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
               Request type
             </label>
-            <select
+            <select id="account-request-type"
               value={form.request_type}
               onChange={(e) => setForm((f) => ({ ...f, request_type: e.target.value }))}
               className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-bold text-[hsl(var(--blue-900))] bg-white"
@@ -779,10 +779,11 @@ function RequestsTab({ user, token }) {
                 { key: 'phone', label: 'New Phone', placeholder: user.phone || '+91 9XXXX XXXXX', type: 'tel' },
               ].map(({ key, label, placeholder, type = 'text' }) => (
                 <div key={key}>
-                  <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
+                  <label htmlFor={`account-${key}`} className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
                     {label}
                   </label>
                   <input
+                    id={`account-${key}`}
                     type={type}
                     value={form[key]}
                     onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
@@ -792,10 +793,10 @@ function RequestsTab({ user, token }) {
                 </div>
               ))}
               <div>
-                <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
+                <label htmlFor="account-gender" className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
                   Gender
                 </label>
-                <select
+                <select id="account-gender"
                   value={form.gender}
                   onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value }))}
                   className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-bold text-[hsl(var(--blue-900))] bg-white"
@@ -810,10 +811,10 @@ function RequestsTab({ user, token }) {
           )}
 
           <div>
-            <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
+            <label htmlFor="account-message-to-admin-optional" className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
               Message to admin (optional)
             </label>
-            <textarea
+            <textarea id="account-message-to-admin-optional"
               value={form.message}
               onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
               placeholder="Describe what you need or why you're making this request…"
@@ -867,7 +868,7 @@ function RequestsTab({ user, token }) {
                       <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
                         {REQUEST_TYPE_LABELS[r.request_type] || r.request_type}
                       </span>
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${badge.cls}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-bold ${badge.cls}`}>
                         <BadgeIcon className="w-3 h-3" />
                         {badge.label}
                       </span>
@@ -882,7 +883,7 @@ function RequestsTab({ user, token }) {
                   <div className="mt-3 grid sm:grid-cols-2 gap-2">
                     {Object.entries(r.requested_fields).map(([k, v]) => (
                       <div key={k} className="rounded-xl bg-[hsl(var(--soft-bg))] px-4 py-2">
-                        <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/45">{k}</div>
+                        <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/45">{k}</div>
                         <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{v}</div>
                       </div>
                     ))}
@@ -955,7 +956,7 @@ export default function Account() {
             <div className="rounded-2xl bg-white border border-black/5 p-5 mb-4">
               <div className="flex items-center gap-3">
                 <span className="h-12 w-12 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-1 ring-black/5">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={avatarUrl({
                       seed: user.avatar_seed || user.email || user.phone || user.id,
                       gender: user.gender || 'hero',
@@ -980,7 +981,7 @@ export default function Account() {
               <Briefcase className="w-4 h-4 text-[hsl(var(--blue-700))]" />
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Agent Portal</div>
-                <div className="text-[11px] text-[hsl(var(--blue-900))]/50">Manage students & commissions</div>
+                <div className="text-[12px] text-[hsl(var(--blue-900))]/50">Manage students & commissions</div>
               </div>
               <ChevronRight className="w-3.5 h-3.5 text-[hsl(var(--blue-900))]/30 group-hover:text-[hsl(var(--blue-700))]" />
             </Link>

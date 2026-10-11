@@ -18,12 +18,12 @@ const SUBJECTS = [
 
 function FormField({ label, icon: Icon, children, required }) {
   return (
-    <div>
-      <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
+    <label className="block">
+      <span className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
         {label} {required && <span className="text-[hsl(var(--accent))]">*</span>}
-      </label>
+      </span>
       <div className="relative">{children}</div>
-    </div>
+    </label>
   );
 }
 
@@ -75,7 +75,7 @@ export default function Contact() {
             transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
             className="text-center mb-12"
           >
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
               Fly with WeHive
             </div>
             <h1 className="mt-3 font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">

@@ -23,7 +23,7 @@ export default function SharedShortlist() {
       <Navbar />
       <div className="max-w-4xl mx-auto px-5 pt-28 pb-20">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
+          <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
             <Share2 className="w-3.5 h-3.5" /> Shared with you
           </div>
           <h1 className="font-display font-extrabold text-[36px] sm:text-[48px] tracking-[-0.03em] text-white">

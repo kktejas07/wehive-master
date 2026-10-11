@@ -82,7 +82,7 @@ export default function VisaScheduling() {
           </div>
 
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
               <Calendar className="w-3.5 h-3.5" /> Schedule Appointment
             </div>
             <h1 className="font-display font-extrabold text-[32px] sm:text-[40px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
@@ -104,7 +104,7 @@ export default function VisaScheduling() {
             {[1, 2, 3, 4].map(s => (
               <div key={s} className={`flex items-center gap-2 ${s > 1 ? 'ml-2' : ''}`}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold ${step >= s ? 'bg-[hsl(var(--accent))] text-white' : 'bg-white border border-black/10 text-[hsl(var(--blue-900))]/40'}`}>{s}</div>
-                <div className={`text-[11px] font-bold hidden sm:block ${step >= s ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/40'}`}>
+                <div className={`text-[12px] font-bold hidden sm:block ${step >= s ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/40'}`}>
                   {['Select', 'Location', 'Time', 'Confirm'][s - 1]}
                 </div>
                 {s < 4 && <div className={`w-8 h-px ${step > s ? 'bg-[hsl(var(--accent))]' : 'bg-black/10'}`} />}
@@ -161,7 +161,7 @@ export default function VisaScheduling() {
                           <Building2 className="w-5 h-5 text-[hsl(var(--blue-700))]" />
                           <div>
                             <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{c.name}</div>
-                            <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{country?.toUpperCase()} Embassy</div>
+                            <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{country?.toUpperCase()} Embassy</div>
                           </div>
                         </div>
                       </button>
@@ -178,12 +178,12 @@ export default function VisaScheduling() {
                   <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))]">Select Date & Time</h2>
                   <p className="text-[13px] text-[hsl(var(--blue-900))]/60">Available slots at {city} for {country?.toUpperCase()}.</p>
                   <div>
-                    <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Date</label>
-                    <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" min={new Date().toISOString().split('T')[0]} />
+                    <label htmlFor="visascheduling-date" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Date</label>
+                    <input id="visascheduling-date" type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" min={new Date().toISOString().split('T')[0]} />
                   </div>
                   {date && (
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">Available Time Slots</label>
+                      <label className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">Available Time Slots</label>
                       {loading ? (
                         <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" />
                       ) : slots.length > 0 ? (

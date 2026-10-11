@@ -88,7 +88,7 @@ export default function UniversityAppsTab({ token }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${STATUS_COLORS[app.status] || 'bg-slate-100 text-slate-600'}`}>
+                    <span className={`text-[12px] font-bold px-2.5 py-1 rounded-full border ${STATUS_COLORS[app.status] || 'bg-slate-100 text-slate-600'}`}>
                       {app.status}
                     </span>
                     {expanded === app._id ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -115,7 +115,7 @@ export default function UniversityAppsTab({ token }) {
                               </div>
                             </div>
                             <div className="text-right shrink-0">
-                              <div className={`text-[11px] font-bold px-2.5 py-1 rounded-full border inline-block ${STATUS_COLORS[sel.status] || 'bg-slate-100 text-slate-600'}`}>
+                              <div className={`text-[12px] font-bold px-2.5 py-1 rounded-full border inline-block ${STATUS_COLORS[sel.status] || 'bg-slate-100 text-slate-600'}`}>
                                 {sel.status?.replace(/_/g, ' ')}
                               </div>
                             </div>
@@ -124,31 +124,31 @@ export default function UniversityAppsTab({ token }) {
                           <div className="mt-3 flex flex-wrap gap-1.5">
                             {(sel.status === 'draft' || sel.status === 'submitted') && (
                               <button onClick={() => updateStatus(app._id, sel.university_id, 'submitted')} disabled={isUpdating}
-                                className="inline-flex items-center gap-1 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1.5 text-[11px] font-bold">
+                                className="inline-flex items-center gap-1 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1.5 text-[12px] font-bold">
                                 {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} Mark submitted
                               </button>
                             )}
                             {sel.status === 'under_review' && (
                               <button onClick={() => updateStatus(app._id, sel.university_id, 'offered')} disabled={isUpdating}
-                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white px-3 py-1.5 text-[11px] font-bold">
+                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white px-3 py-1.5 text-[12px] font-bold">
                                 {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Got offer
                               </button>
                             )}
                             {(sel.status === 'offered') && (
                               <>
                                 <button onClick={() => updateStatus(app._id, sel.university_id, 'accepted')} disabled={isUpdating}
-                                  className="inline-flex items-center gap-1 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white px-3 py-1.5 text-[11px] font-bold">
+                                  className="inline-flex items-center gap-1 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white px-3 py-1.5 text-[12px] font-bold">
                                   {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Accept offer
                                 </button>
                                 <button onClick={() => updateStatus(app._id, sel.university_id, 'rejected')} disabled={isUpdating}
-                                  className="inline-flex items-center gap-1 rounded-lg bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white px-3 py-1.5 text-[11px] font-bold">
+                                  className="inline-flex items-center gap-1 rounded-lg bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white px-3 py-1.5 text-[12px] font-bold">
                                   {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />} Decline
                                 </button>
                               </>
                             )}
                             {sel.status === 'accepted' && (
                               <button onClick={() => updateStatus(app._id, sel.university_id, 'enrolled')} disabled={isUpdating}
-                                className="inline-flex items-center gap-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-3 py-1.5 text-[11px] font-bold">
+                                className="inline-flex items-center gap-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-3 py-1.5 text-[12px] font-bold">
                                 {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <GraduationCap className="w-3 h-3" />} Confirm enrollment
                               </button>
                             )}
@@ -172,7 +172,7 @@ export default function UniversityAppsTab({ token }) {
                             </div>
                           )}
                           {sel.deadline && (
-                            <div className="mt-2 text-[11px] text-amber-600 flex items-center gap-1">
+                            <div className="mt-2 text-[12px] text-amber-600 flex items-center gap-1">
                               <Clock className="w-3 h-3" /> Deadline: {new Date(sel.deadline).toLocaleDateString()}
                             </div>
                           )}
@@ -197,9 +197,9 @@ export default function UniversityAppsTab({ token }) {
               <div key={v._id} className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center justify-between">
                 <div>
                   <div className="text-[13px] font-bold text-emerald-800">{v.university_name || 'Student visa'}</div>
-                  <div className="text-[11px] text-emerald-600">{v.status} · Created {new Date(v.created_at).toLocaleDateString()}</div>
+                  <div className="text-[12px] text-emerald-600">{v.status} · Created {new Date(v.created_at).toLocaleDateString()}</div>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-700">{v.status}</span>
+                <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-700">{v.status}</span>
               </div>
             ))}
           </div>

@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { inr } from '../lib/utils';
 import axios from 'axios';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
 function computeFee(count) {
   const n = Math.max(1, count);
@@ -19,6 +20,7 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
   const { isAuthed, token } = useAuth();
   const [step, setStep] = useState('review');
   const [submitting, setSubmitting] = useState(false);
+  const dialogProps = useDialogA11y(true, () => { if (!submitting) onClose(); });
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
 
@@ -53,7 +55,7 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => { if (e.target === e.currentTarget && !submitting) onClose(); }}>
-      <div className="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div {...dialogProps} className="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="p-6 border-b border-black/5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <GraduationCap className="w-5 h-5 text-[hsl(var(--blue-700))]" />
@@ -76,9 +78,9 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] truncate">{u.short_name}</div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/60 truncate">{u.name}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/60 truncate">{u.name}</div>
                     </div>
-                    <div className="text-[11px] font-bold text-[hsl(var(--blue-700))] bg-white px-2 py-1 rounded-md">#{u.rank}</div>
+                    <div className="text-[12px] font-bold text-[hsl(var(--blue-700))] bg-white px-2 py-1 rounded-md">#{u.rank}</div>
                   </div>
                 ))}
               </div>

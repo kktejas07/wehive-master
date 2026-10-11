@@ -1,16 +1,17 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 export default function TextFlipAnimation({ words, className = '', interval = 3000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const reduce = useReducedMotion();
 
+  // Play through the words once and rest on the last one (no endless motion, WCAG 2.2.2).
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % words.length);
-    }, interval);
-    return () => clearInterval(timer);
-  }, [words.length, interval]);
+    if (reduce || currentIndex >= words.length - 1) return undefined;
+    const timer = setTimeout(() => setCurrentIndex((i) => i + 1), interval);
+    return () => clearTimeout(timer);
+  }, [currentIndex, words.length, interval, reduce]);
 
   return (
     <span className={`inline-block relative ${className}`} style={{ WebkitTextFillColor: 'initial' }}>

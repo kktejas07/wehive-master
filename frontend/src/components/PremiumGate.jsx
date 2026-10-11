@@ -1,13 +1,15 @@
 import { Loader2, Lock, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
 export default function PremiumGate({ open, onClose, feature }) {
   const navigate = useNavigate();
+  const dialogProps = useDialogA11y(open, onClose);
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-3xl max-w-md w-full p-8 text-center shadow-2xl">
+      <div {...dialogProps} className="bg-white rounded-3xl max-w-md w-full p-8 text-center shadow-2xl">
         <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent))]/10 flex items-center justify-center mx-auto mb-5">
           <Lock className="w-8 h-8 text-[hsl(var(--accent))]" />
         </div>

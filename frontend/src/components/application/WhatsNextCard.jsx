@@ -10,7 +10,7 @@ export default function WhatsNextCard() {
     <section className="rounded-3xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-7 relative overflow-hidden">
       <div className="absolute -top-16 -right-16 h-[180px] w-[180px] rounded-full bg-[hsl(var(--accent))]/25 blur-3xl" />
       <div className="relative">
-        <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/70 inline-flex items-center gap-2">
+        <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-white/70 inline-flex items-center gap-2">
           <Map className="w-3.5 h-3.5 text-[hsl(var(--accent))]" /> What happens next
         </div>
         <h3 className="mt-2 font-display font-extrabold text-[22px] tracking-[-0.025em]">

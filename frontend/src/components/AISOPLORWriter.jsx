@@ -67,7 +67,7 @@ export default function AISOPLORWriter({ university, compact = false }) {
   if (compact) {
     return (
       <div className="rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100/50 border border-purple-200 p-5">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-bold text-purple-700 mb-2">
+        <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-purple-700 mb-2">
           <FileText className="w-3.5 h-3.5" /> AI SOP / LOR Writer
         </div>
         <p className="text-[13px] text-purple-800/70 mb-3">
@@ -88,7 +88,7 @@ export default function AISOPLORWriter({ university, compact = false }) {
       viewport={{ once: true }}
       className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8"
     >
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
         <Sparkles className="w-3.5 h-3.5" /> AI Writer
       </div>
       <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))] mb-2">
@@ -121,35 +121,35 @@ export default function AISOPLORWriter({ university, compact = false }) {
           {mode === 'sop' ? (
             <>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Target Country</label>
-                <select value={country} onChange={(e) => setCountry(e.target.value)} className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[14px] text-[hsl(var(--blue-900))]">
+                <label htmlFor="aisoplorwriter-target-country" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Target Country</label>
+                <select id="aisoplorwriter-target-country" value={country} onChange={(e) => setCountry(e.target.value)} className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[14px] text-[hsl(var(--blue-900))]">
                   {Object.entries(SOP_TEMPLATES).map(([k, v]) => (
                     <option key={k} value={k}>{v.country} — {v.type}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Program / Course</label>
-                <input value={program} onChange={(e) => setProgram(e.target.value)} placeholder="e.g. MSc Computer Science" className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[14px] text-[hsl(var(--blue-900))]" />
+                <label htmlFor="aisoplorwriter-program-course" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Program / Course</label>
+                <input id="aisoplorwriter-program-course" value={program} onChange={(e) => setProgram(e.target.value)} placeholder="e.g. MSc Computer Science" className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[14px] text-[hsl(var(--blue-900))]" />
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Academic Background</label>
-                <textarea value={background} onChange={(e) => setBackground(e.target.value)} placeholder="Your previous education, GPA, relevant coursework..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
+                <label htmlFor="aisoplorwriter-academic-background" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Academic Background</label>
+                <textarea id="aisoplorwriter-academic-background" value={background} onChange={(e) => setBackground(e.target.value)} placeholder="Your previous education, GPA, relevant coursework..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Achievements</label>
-                <textarea value={achievements} onChange={(e) => setAchievements(e.target.value)} placeholder="Research, publications, awards, projects..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
+                <label htmlFor="aisoplorwriter-achievements" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Achievements</label>
+                <textarea id="aisoplorwriter-achievements" value={achievements} onChange={(e) => setAchievements(e.target.value)} placeholder="Research, publications, awards, projects..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Career Goals</label>
-                <textarea value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Short and long-term career objectives..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
+                <label htmlFor="aisoplorwriter-career-goals" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Career Goals</label>
+                <textarea id="aisoplorwriter-career-goals" value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Short and long-term career objectives..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
               </div>
             </>
           ) : (
             <>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Reference Type</label>
-                <div className="space-y-2">
+                <label id="aisoplorwriter-reference-type" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Reference Type</label>
+                <div role="group" aria-labelledby="aisoplorwriter-reference-type" className="space-y-2">
                   {Object.entries(LOR_TEMPLATES).map(([k, v]) => (
                     <button
                       key={k}
@@ -165,16 +165,16 @@ export default function AISOPLORWriter({ university, compact = false }) {
                 </div>
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Relationship with Applicant</label>
-                <input value={background} onChange={(e) => setBackground(e.target.value)} placeholder="e.g. Professor, Manager, Research Supervisor" className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[14px] text-[hsl(var(--blue-900))]" />
+                <label htmlFor="aisoplorwriter-relationship-with-applicant" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Relationship with Applicant</label>
+                <input id="aisoplorwriter-relationship-with-applicant" value={background} onChange={(e) => setBackground(e.target.value)} placeholder="e.g. Professor, Manager, Research Supervisor" className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[14px] text-[hsl(var(--blue-900))]" />
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Key Strengths</label>
-                <textarea value={strength} onChange={(e) => setStrength(e.target.value)} placeholder="Academic abilities, leadership, research skills..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
+                <label htmlFor="aisoplorwriter-key-strengths" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Key Strengths</label>
+                <textarea id="aisoplorwriter-key-strengths" value={strength} onChange={(e) => setStrength(e.target.value)} placeholder="Academic abilities, leadership, research skills..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Notable Achievements</label>
-                <textarea value={achievements} onChange={(e) => setAchievements(e.target.value)} placeholder="Projects, publications, awards..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
+                <label htmlFor="aisoplorwriter-notable-achievements" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Notable Achievements</label>
+                <textarea id="aisoplorwriter-notable-achievements" value={achievements} onChange={(e) => setAchievements(e.target.value)} placeholder="Projects, publications, awards..." className="w-full min-h-[80px] rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-3 text-[14px] text-[hsl(var(--blue-900))] resize-none" />
               </div>
             </>
           )}
@@ -199,7 +199,7 @@ export default function AISOPLORWriter({ university, compact = false }) {
           {result ? (
             <div className="rounded-2xl border border-black/5 bg-[hsl(var(--soft-bg))] p-6 min-h-[400px]">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))]">
+                <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))]">
                   {mode === 'sop' ? 'Statement of Purpose' : 'Letter of Recommendation'}
                 </span>
                 <Button

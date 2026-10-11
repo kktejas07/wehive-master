@@ -5,6 +5,7 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API } from '../context/AuthContext';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
 const FALLBACK_INTAKES = [
   {
@@ -178,7 +179,7 @@ function MonthBar({ applyStart, applyEnd, months, color }) {
 
   return (
     <div className="mt-2">
-      <div className="text-[10px] text-[hsl(var(--blue-900))]/50 font-bold uppercase tracking-[0.12em] mb-1">Application window</div>
+      <div className="text-[12px] text-[hsl(var(--blue-900))]/50 font-bold uppercase tracking-[0.12em] mb-1">Application window</div>
       <div className="grid grid-cols-12 gap-0.5">
         {MONTHS.map((m, i) => {
           const inWindow = startIdx !== -1 && endIdx !== -1
@@ -232,7 +233,7 @@ function CountryCard({ data, activeTrack, setInsightsUni }) {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] font-bold rounded-full px-2.5 py-0.5" style={{ background: `${data.color || '#3b82f6'}15`, color: data.color || '#3b82f6' }}>
+          <span className="text-[12px] font-bold rounded-full px-2.5 py-0.5" style={{ background: `${data.color || '#3b82f6'}15`, color: data.color || '#3b82f6' }}>
             {intakes.filter(i => i.popular).length > 0 ? 'Active intakes' : (intakes.length > 0 ? 'Annual' : 'No Data')}
           </span>
           {open ? <ChevronUp className="w-4 h-4 text-[hsl(var(--blue-900))]/40" /> : <ChevronDown className="w-4 h-4 text-[hsl(var(--blue-900))]/40" />}
@@ -248,7 +249,7 @@ function CountryCard({ data, activeTrack, setInsightsUni }) {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{intake.name}</span>
                 {intake.popular && (
-                  <span className="text-[10px] font-bold rounded-full px-2 py-0.5 bg-emerald-100 text-emerald-700">Most popular</span>
+                  <span className="text-[12px] font-bold rounded-full px-2 py-0.5 bg-emerald-100 text-emerald-700">Most popular</span>
                 )}
               </div>
               <div className="mt-2 flex flex-wrap gap-4 text-[12.5px]">
@@ -266,7 +267,7 @@ function CountryCard({ data, activeTrack, setInsightsUni }) {
               <Sparkles className="w-3.5 h-3.5 text-emerald-500" /> Top {activeTrack} Universities in {data.country}
             </h4>
             {loadingUnis ? (
-              <div className="flex items-center gap-2 text-[13px] text-slate-400"><Loader2 className="w-4 h-4 animate-spin" /> Finding recommendations...</div>
+              <div className="flex items-center gap-2 text-[13px] text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Finding recommendations...</div>
             ) : unis.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {unis.map((u, idx) => (
@@ -276,11 +277,11 @@ function CountryCard({ data, activeTrack, setInsightsUni }) {
                     className="flex items-center gap-3 p-3 rounded-xl bg-white border border-black/5 shadow-sm hover:shadow-md hover:border-black/10 transition text-left"
                   >
                     <div className="w-10 h-10 rounded-full bg-[hsl(var(--soft-bg))] flex items-center justify-center shrink-0 overflow-hidden">
-                      {u.logo ? <img src={u.logo} alt={u.name} className="w-full h-full object-cover" /> : <GraduationCap className="w-5 h-5 text-[hsl(var(--blue-900))]/30" />}
+                      {u.logo ? <img loading="lazy" decoding="async" src={u.logo} alt={u.name} className="w-full h-full object-cover" /> : <GraduationCap className="w-5 h-5 text-[hsl(var(--blue-900))]/30" />}
                     </div>
                     <div>
                       <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] truncate">{u.name || u}</div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/50 flex items-center gap-1 mt-0.5">
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/50 flex items-center gap-1 mt-0.5">
                         <Sparkles className="w-3 h-3 text-emerald-500" /> Click for AI Insights
                       </div>
                     </div>
@@ -288,7 +289,7 @@ function CountryCard({ data, activeTrack, setInsightsUni }) {
                 ))}
               </div>
             ) : (
-              <div className="text-[13px] text-slate-400">No specific recommendations found. Ask Hive for more options!</div>
+              <div className="text-[13px] text-muted-foreground">No specific recommendations found. Ask Hive for more options!</div>
             )}
           </div>
           
@@ -305,6 +306,7 @@ function CountryCard({ data, activeTrack, setInsightsUni }) {
 }
 
 function InsightsModal({ uni, onClose }) {
+  const dialogProps = useDialogA11y(true, onClose);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -320,7 +322,7 @@ function InsightsModal({ uni, onClose }) {
     <AnimatePresence>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+          {...dialogProps} className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
           
           <div className="flex items-center justify-between p-5 border-b border-black/5 bg-[hsl(var(--soft-bg))]">
             <div className="flex items-center gap-3">
@@ -332,7 +334,7 @@ function InsightsModal({ uni, onClose }) {
                 <p className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.track} Admissions in {uni.country}</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 rounded-full hover:bg-black/5 text-slate-500 transition"><X className="w-5 h-5" /></button>
+            <button aria-label="Close" onClick={onClose} className="p-2 rounded-full hover:bg-black/5 text-slate-500 transition"><X className="w-5 h-5" /></button>
           </div>
 
           <div className="p-6 overflow-y-auto">
@@ -380,7 +382,7 @@ function InsightsModal({ uni, onClose }) {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-10 text-slate-400 text-sm">Failed to generate insights. Please try again.</div>
+              <div className="text-center py-10 text-muted-foreground text-sm">Failed to generate insights. Please try again.</div>
             )}
           </div>
         </motion.div>
@@ -418,15 +420,15 @@ export default function IntakeCalendar() {
       <div className="max-w-4xl mx-auto px-5 pt-28 pb-20">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] flex items-center gap-2">
+            <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5" /> Live Intake Guide
             </div>
             {loading ? (
-              <div className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5">
+              <div className="text-[12px] font-bold text-muted-foreground flex items-center gap-1.5">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" /> Syncing...
               </div>
             ) : (
-              <div className="text-[11px] font-bold text-emerald-500 flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-full">
+              <div className="text-[12px] font-bold text-emerald-500 flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-full">
                 <RefreshCw className="w-3 h-3" /> Live Synced
               </div>
             )}
@@ -450,7 +452,7 @@ export default function IntakeCalendar() {
             <button
               key={track}
               onClick={() => setActiveTrack(track)}
-              className={`px-5 py-2.5 rounded-full text-[13.5px] font-bold whitespace-nowrap transition-all ${
+              className={`px-5 py-2.5 rounded-full text-[13.5px] font-bold whitespace-nowrap transition ${
                 activeTrack === track 
                   ? 'bg-[hsl(var(--blue-900))] text-white shadow-md' 
                   : 'bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/60 hover:bg-black/5 hover:text-[hsl(var(--blue-900))]'

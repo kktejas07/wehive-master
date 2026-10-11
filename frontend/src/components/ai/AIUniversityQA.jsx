@@ -49,7 +49,7 @@ export default function AIUniversityQA({ universityId, universityName }) {
           <div className="p-4 border-b border-purple-200 flex items-center gap-2">
             <Bot className="w-4 h-4 text-purple-600" />
             <span className="font-bold text-[13px] text-purple-800">AI University Assistant</span>
-            <span className="text-[10px] text-purple-500 ml-auto">Powered by AI</span>
+            <span className="text-[12px] text-purple-500 ml-auto">Powered by AI</span>
           </div>
 
           <div className="p-4 space-y-3 max-h-64 overflow-y-auto">
@@ -90,7 +90,7 @@ export default function AIUniversityQA({ universityId, universityName }) {
               placeholder="Ask a question..."
               className="flex-1 h-10 px-4 rounded-xl bg-purple-50 border border-purple-200 text-[13px] text-[hsl(var(--blue-900))] placeholder:text-purple-300 outline-none focus:border-purple-500"
             />
-            <button onClick={ask} disabled={busy || !question.trim()}
+            <button aria-label="Ask question" onClick={ask} disabled={busy || !question.trim()}
               className="h-10 w-10 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 flex items-center justify-center"
             >
               {busy ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Send className="w-4 h-4 text-white" />}

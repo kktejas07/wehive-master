@@ -58,7 +58,7 @@ export default function AIInsightsPanel({ profileData }) {
           <h3 className="font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">
             AI Insights & Smart Suggestions
           </h3>
-          <p className="text-[11.5px] text-[hsl(var(--blue-900))]/50">
+          <p className="text-[12px] text-[hsl(var(--blue-900))]/50">
             Personalized recommendations based on your applications and documents
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function AIInsightsPanel({ profileData }) {
             return (
               <div
                 key={insight.id}
-                className={`p-4.5 rounded-2xl border transition-all ${
+                className={`p-4.5 rounded-2xl border transition ${
                   isRose
                     ? 'bg-rose-50/40 border-rose-100/60'
                     : isAmber
@@ -110,7 +110,7 @@ export default function AIInsightsPanel({ profileData }) {
                     <div className="pt-2">
                       <Link
                         to={insight.to}
-                        className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider ${
+                        className={`inline-flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider ${
                           isRose
                             ? 'text-rose-700 hover:text-rose-800'
                             : isAmber

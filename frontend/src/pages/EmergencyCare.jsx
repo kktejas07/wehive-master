@@ -48,7 +48,7 @@ export default function EmergencyCare() {
           <div className="relative max-w-6xl mx-auto px-5 sm:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <FadeIn>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white/80 text-[11px] uppercase tracking-[0.18em] font-bold mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white/80 text-[12px] uppercase tracking-[0.18em] font-bold mb-6">
                   <AlertTriangle className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                   Emergency Support
                 </div>
@@ -78,7 +78,7 @@ export default function EmergencyCare() {
                   ].map((s, i) => (
                     <div key={i} className="rounded-2xl bg-white/5 border border-white/10 p-5 text-center backdrop-blur-sm">
                       <div className="font-display font-extrabold text-[28px] sm:text-[32px] text-white">{s.value}</div>
-                      <div className="text-[11px] text-white/50 uppercase tracking-[0.12em] font-bold mt-1">{s.label}</div>
+                      <div className="text-[12px] text-white/50 uppercase tracking-[0.12em] font-bold mt-1">{s.label}</div>
                     </div>
                   ))}
                 </div>
@@ -91,13 +91,13 @@ export default function EmergencyCare() {
         <section className="py-20 sm:py-28 bg-white">
           <div className="max-w-6xl mx-auto px-5 sm:px-8">
             <FadeIn className="text-center mb-14">
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">What's covered</div>
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">What's covered</div>
               <h2 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">Situations we handle urgently</h2>
             </FadeIn>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {COVERED.map((item, i) => (
                 <FadeIn key={i} delay={i * 0.08}>
-                  <div className="group rounded-3xl bg-[hsl(var(--soft-bg))] p-6 sm:p-7 h-full border border-black/5 hover:border-[hsl(var(--accent))]/30 hover:shadow-lg transition-all duration-300">
+                  <div className="group rounded-3xl bg-[hsl(var(--soft-bg))] p-6 sm:p-7 h-full border border-black/5 hover:border-[hsl(var(--accent))]/30 hover:shadow-lg transition duration-300">
                     <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--accent))]/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                       <item.icon className="w-5 h-5 text-[hsl(var(--accent))]" />
                     </div>
@@ -114,7 +114,7 @@ export default function EmergencyCare() {
         <section className="py-20 sm:py-28 bg-[hsl(var(--soft-bg))]">
           <div className="max-w-6xl mx-auto px-5 sm:px-8">
             <FadeIn className="text-center mb-14">
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/40 mb-4">What's not covered</div>
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/40 mb-4">What's not covered</div>
               <h2 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">For standard needs, use our app</h2>
             </FadeIn>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -145,7 +145,7 @@ export default function EmergencyCare() {
         <section className="py-20 sm:py-28 bg-white">
           <div className="max-w-3xl mx-auto px-5 sm:px-8 text-center">
             <FadeIn>
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">Need help now?</div>
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">Need help now?</div>
               <h2 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))] leading-[1.1]">
                 We're here for you, <span className="text-[hsl(var(--accent))]">24/7</span>
               </h2>
@@ -173,7 +173,7 @@ export default function EmergencyCare() {
         <section className="py-20 sm:py-28 bg-[hsl(var(--soft-bg))]">
           <div className="max-w-3xl mx-auto px-5 sm:px-8">
             <FadeIn className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">FAQ</div>
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">FAQ</div>
               <h2 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">Frequently Asked Questions</h2>
             </FadeIn>
             <div className="space-y-3">

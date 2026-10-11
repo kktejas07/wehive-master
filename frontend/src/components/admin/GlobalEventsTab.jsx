@@ -65,7 +65,7 @@ export default function GlobalEventsTab() {
               }
             }}
             disabled={runningAggregator}
-            className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition-all disabled:opacity-50"
+            className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition disabled:opacity-50"
           >
             {runningAggregator ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
             Run AI Aggregators Now
@@ -157,7 +157,7 @@ export default function GlobalEventsTab() {
               <div key={evt.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
                 <div className="flex items-center gap-4">
                   {evt.image_url ? (
-                    <img src={evt.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-black/40" />
+                    <img loading="lazy" decoding="async" src={evt.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-black/40" />
                   ) : (
                     <div className="w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center">
                       <Globe className="w-5 h-5 text-slate-600" />

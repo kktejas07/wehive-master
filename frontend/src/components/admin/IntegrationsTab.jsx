@@ -101,7 +101,7 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
               <label className="block text-[11px] font-bold text-slate-400 mb-1">{svc.key_label}</label>
               <div className="relative">
                 <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder={svc.key_placeholder}
+                <input aria-label={svc.key_label} type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder={svc.key_placeholder}
                   className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 focus:border-[hsl(var(--accent))]/50 outline-none" />
               </div>
             </div>
@@ -351,8 +351,8 @@ export default function IntegrationsTab() {
             </select>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 mb-1">Model</label>
-            <select value={llmModel} onChange={e => setLlmModel(e.target.value)}
+            <label htmlFor="integrationstab-model" className="block text-[11px] font-bold text-slate-400 mb-1">Model</label>
+            <select id="integrationstab-model" value={llmModel} onChange={e => setLlmModel(e.target.value)}
               className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--accent))]/50">
               {(!llmModel || !(providers.find(p => p.id === llmProvider)?.models || []).includes(llmModel)) && llmModel && (
                 <option value={llmModel}>{llmModel}</option>
@@ -364,10 +364,10 @@ export default function IntegrationsTab() {
           </div>
         </div>
         <div className="mt-2">
-          <label className="block text-[11px] font-bold text-slate-400 mb-1">API Key</label>
+          <label htmlFor="integrationstab-api-key" className="block text-[11px] font-bold text-slate-400 mb-1">API Key</label>
           <div className="relative">
             <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-            <input type="password" value={llmKey} onChange={e => setLlmKey(e.target.value)} placeholder={llmConfig?.key ? '(key saved — enter new value to replace)' : 'gsk_...'}
+            <input id="integrationstab-api-key" type="password" value={llmKey} onChange={e => setLlmKey(e.target.value)} placeholder={llmConfig?.key ? '(key saved — enter new value to replace)' : 'gsk_...'}
               className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 outline-none focus:border-[hsl(var(--accent))]/50" />
           </div>
         </div>

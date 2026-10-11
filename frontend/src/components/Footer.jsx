@@ -5,7 +5,7 @@ import { BRAND, FOOTER_COLS } from '../data/mock';
 function FooterColumn({ col }) {
   return (
     <div>
-      <div className="text-[11px] uppercase tracking-[0.16em] text-white/55 font-bold mb-4">
+      <div className="text-[12px] uppercase tracking-[0.16em] text-white/55 font-bold mb-4">
         {col.title}
       </div>
       <ul className="space-y-3">
@@ -69,7 +69,7 @@ function FooterContact() {
   ];
   return (
     <div>
-      <div className="text-[11px] uppercase tracking-[0.16em] text-white/55 font-bold mb-4">Get in touch</div>
+      <div className="text-[12px] uppercase tracking-[0.16em] text-white/55 font-bold mb-4">Get in touch</div>
       <ul className="space-y-3">
         {items.map(({ id, Icon, label, href }) => (
           <li key={id} className="flex items-start gap-3 text-[14px] text-white/80">

@@ -17,7 +17,7 @@ export default function GuidedFormSection({ countryName }) {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <FileText className="w-3.5 h-3.5" />
             Guided Application
           </div>
@@ -39,7 +39,7 @@ export default function GuidedFormSection({ countryName }) {
             <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
               <Clock className="w-8 h-8 text-red-500" />
             </div>
-            <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-red-500 mb-2">
+            <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-red-500 mb-2">
               Government Website
             </div>
             <div className="font-display font-extrabold text-[32px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
@@ -59,7 +59,7 @@ export default function GuidedFormSection({ countryName }) {
             <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
               <Zap className="w-8 h-8 text-white" />
             </div>
-            <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-white/70 mb-2">
+            <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-white/70 mb-2">
               With We Hive
             </div>
             <div className="font-display font-extrabold text-[32px] tracking-[-0.03em]">

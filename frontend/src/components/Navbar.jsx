@@ -144,7 +144,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
                             <div>{t('nav.' + child.id, child.label)}</div>
                           </div>
                           {child.badge && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                            <span className="px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[12px] font-extrabold text-white tracking-[0.05em] animate-pulse">
                               {t('badge.' + child.badge.toLowerCase(), child.badge)}
                             </span>
                           )}
@@ -185,7 +185,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
           return (
             <div key={item.id}>
               <div className={cn(
-                'px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em]',
+                'px-3 py-2 text-[12px] font-bold uppercase tracking-[0.12em]',
                 light ? 'text-white/50' : 'text-[hsl(var(--blue-400))]'
               )}>
                 {t('nav.' + item.id, item.label)}
@@ -206,7 +206,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
                     <ChildIcon className="w-4 h-4" />
                     {t('nav.' + child.id, child.label)}
                     {child.badge && (
-                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[12px] font-extrabold text-white tracking-[0.05em] animate-pulse">
                         {t('badge.' + child.badge.toLowerCase(), child.badge)}
                       </span>
                     )}
@@ -230,7 +230,7 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
             {Icon ? <Icon className="w-4 h-4" /> : null}
             {t('nav.' + item.id, item.label)}
             {item.badge && (
-              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[9px] font-extrabold text-white tracking-[0.05em] animate-pulse">
+              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[hsl(var(--accent))] text-[12px] font-extrabold text-white tracking-[0.05em] animate-pulse">
                 {t('badge.' + item.badge.toLowerCase(), item.badge)}
               </span>
             )}
@@ -252,7 +252,7 @@ function PhoneBlock() {
         <Phone className="w-3.5 h-3.5" />
       </span>
       <div className="leading-tight text-left">
-        <div className="text-[9px] uppercase tracking-[0.14em] text-white/80 font-bold">{t('cta.callUs')}</div>
+        <div className="text-[12px] uppercase tracking-[0.14em] text-white/80 font-bold">{t('cta.callUs')}</div>
         <div className="text-[12.5px] font-bold tracking-tight">{BRAND.phone}</div>
       </div>
     </a>
@@ -334,7 +334,7 @@ export default function Navbar({ variant = 'default' }) {
   return (
     <header
       className={cn(
-        'fixed top-0 inset-x-0 z-50 transition-all duration-300',
+        'fixed top-0 inset-x-0 z-50 transition duration-300',
         hidden ? '-translate-y-full' : 'translate-y-0',
         scrolled
           ? 'bg-white/85 backdrop-blur-xl border-b border-black/5 shadow-[0_4px_30px_-20px_rgba(10,44,138,0.18)]'
@@ -369,7 +369,7 @@ export default function Navbar({ variant = 'default' }) {
             href="https://chat.whatsapp.com/F0R1TYMOr8dLwIbr5jLRau"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-600 hover:text-white ring-1 ring-green-200 hover:ring-green-600 transition-all duration-200"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 hover:bg-green-600 hover:text-white ring-1 ring-green-200 hover:ring-green-600 transition duration-200"
             title="Join WhatsApp Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -380,7 +380,7 @@ export default function Navbar({ variant = 'default' }) {
             href="https://t.me/wehivecommunity"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white ring-1 ring-blue-200 hover:ring-blue-600 transition-all duration-200"
+            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white ring-1 ring-blue-200 hover:ring-blue-600 transition duration-200"
             title="Join Telegram Community"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

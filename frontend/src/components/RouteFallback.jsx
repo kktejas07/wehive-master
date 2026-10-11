@@ -98,7 +98,7 @@ export default function RouteFallback() {
 
         <div className="w-48 space-y-2">
           <ProgressBar progress={progress} />
-          <div className="flex justify-between text-[10px] text-[hsl(var(--blue-900))]/40">
+          <div className="flex justify-between text-[12px] text-[hsl(var(--blue-900))]/40">
             <span>Started</span>
             <span>{Math.round(progress)}%</span>
             <span>Complete</span>
@@ -125,7 +125,7 @@ export default function RouteFallback() {
                 i === 0 ? 'bg-emerald-500' : i === 1 ? 'bg-blue-500' : 'bg-[hsl(var(--accent))]'
               }`}
             />
-            <span className="text-[11px] font-semibold text-[hsl(var(--blue-900))]/60">{text}</span>
+            <span className="text-[12px] font-semibold text-[hsl(var(--blue-900))]/60">{text}</span>
           </motion.div>
         ))}
       </motion.div>

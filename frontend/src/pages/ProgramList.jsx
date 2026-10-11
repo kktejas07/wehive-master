@@ -66,9 +66,9 @@ export default function ProgramList() {
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           {degreeTypes.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-8">
-              <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all ${filter === 'all' ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-100))]'}`}>All</button>
+              <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-xl text-[12px] font-bold transition ${filter === 'all' ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-100))]'}`}>All</button>
               {degreeTypes.map(dt => (
-                <button key={dt} onClick={() => setFilter(dt)} className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all ${filter === dt ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-100))]'}`}>
+                <button key={dt} onClick={() => setFilter(dt)} className={`px-4 py-2 rounded-xl text-[12px] font-bold transition ${filter === dt ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-100))]'}`}>
                   {dt.charAt(0).toUpperCase() + dt.slice(1)}
                 </button>
               ))}
@@ -85,12 +85,12 @@ export default function ProgramList() {
               {filtered.map(p => {
                 const dc = DEGREE_COLORS[p.degree_type] || { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' };
                 return (
-                  <div key={p.id} className="rounded-2xl border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all">
+                  <div key={p.id} className="rounded-2xl border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))]">{p.name}</h3>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${dc.bg} ${dc.text} ${dc.border}`}>
+                          <span className={`text-[12px] font-bold px-2 py-0.5 rounded-full border ${dc.bg} ${dc.text} ${dc.border}`}>
                             {p.degree_type?.charAt(0).toUpperCase() + p.degree_type?.slice(1)}
                           </span>
                         </div>
@@ -104,13 +104,13 @@ export default function ProgramList() {
                         </div>
                         {p.entry_requirements && (
                           <div className="mt-3 p-3 rounded-lg bg-[hsl(var(--blue-50))]">
-                            <div className="text-[11px] font-bold text-[hsl(var(--blue-900))] uppercase tracking-wider mb-1">Entry Requirements</div>
+                            <div className="text-[12px] font-bold text-[hsl(var(--blue-900))] uppercase tracking-wider mb-1">Entry Requirements</div>
                             <p className="text-[12px] text-[hsl(var(--blue-900))]/70">{p.entry_requirements}</p>
                           </div>
                         )}
                         <div className="mt-3 flex flex-wrap gap-1.5">
                           {(p.intake_months || []).map(m => (
-                            <span key={m} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">{m}</span>
+                            <span key={m} className="text-[12px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">{m}</span>
                           ))}
                         </div>
                       </div>

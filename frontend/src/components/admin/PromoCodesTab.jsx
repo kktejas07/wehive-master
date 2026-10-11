@@ -116,9 +116,9 @@ export default function PromoCodesTab() {
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Code</label>
+                <label htmlFor="promocodestab-code" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Code</label>
                 <div className="flex gap-2">
-                  <input value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))} className="flex-1 h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--accent))]/50 font-mono uppercase" placeholder="SUMMER2025" />
+                  <input id="promocodestab-code" value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))} className="flex-1 h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--accent))]/50 font-mono uppercase" placeholder="SUMMER2025" />
                   <button onClick={generateCode} className="h-10 px-3 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 transition" title="Generate"><RefreshCw className="w-4 h-4" /></button>
                 </div>
               </div>
@@ -129,33 +129,33 @@ export default function PromoCodesTab() {
                 </select>
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Discount %</label>
-                <input type="number" value={form.discount_percent} onChange={e => setForm(p => ({ ...p, discount_percent: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" max="100" />
+                <label htmlFor="promocodestab-discount" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Discount %</label>
+                <input id="promocodestab-discount" type="number" value={form.discount_percent} onChange={e => setForm(p => ({ ...p, discount_percent: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" max="100" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Fixed Discount (₹)</label>
-                <input type="number" value={form.discount_fixed} onChange={e => setForm(p => ({ ...p, discount_fixed: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" />
+                <label htmlFor="promocodestab-fixed-discount" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Fixed Discount (₹)</label>
+                <input id="promocodestab-fixed-discount" type="number" value={form.discount_fixed} onChange={e => setForm(p => ({ ...p, discount_fixed: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Max Uses</label>
-                <input type="number" value={form.max_uses} onChange={e => setForm(p => ({ ...p, max_uses: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="1" />
+                <label htmlFor="promocodestab-max-uses" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Max Uses</label>
+                <input id="promocodestab-max-uses" type="number" value={form.max_uses} onChange={e => setForm(p => ({ ...p, max_uses: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="1" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Min Cart Value (₹)</label>
-                <input type="number" value={form.min_cart_value} onChange={e => setForm(p => ({ ...p, min_cart_value: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" />
+                <label htmlFor="promocodestab-min-cart-value" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Min Cart Value (₹)</label>
+                <input id="promocodestab-min-cart-value" type="number" value={form.min_cart_value} onChange={e => setForm(p => ({ ...p, min_cart_value: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Expires At</label>
-                <input type="date" value={form.expires_at} onChange={e => setForm(p => ({ ...p, expires_at: e.target.value }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+                <label htmlFor="promocodestab-expires-at" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Expires At</label>
+                <input id="promocodestab-expires-at" type="date" value={form.expires_at} onChange={e => setForm(p => ({ ...p, expires_at: e.target.value }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Description</label>
-                <input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" placeholder="Summer discount 2025" />
+                <label htmlFor="promocodestab-description" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Description</label>
+                <input id="promocodestab-description" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" placeholder="Summer discount 2025" />
               </div>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-2">Applicable Visa Types</label>
-              <div className="flex flex-wrap gap-2">
+              <label id="promocodestab-applicable-visa-types" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-2">Applicable Visa Types</label>
+              <div role="group" aria-labelledby="promocodestab-applicable-visa-types" className="flex flex-wrap gap-2">
                 {VISA_TYPES.map(t => (
                   <button key={t} onClick={() => toggleVisaType(t)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition ${form.applicable_visa_types.includes(t) ? 'bg-[hsl(var(--accent))] text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}>{t}</button>
                 ))}

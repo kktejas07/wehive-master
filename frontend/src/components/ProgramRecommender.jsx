@@ -84,7 +84,7 @@ function UniCard({ uni, rank }) {
       </div>
       <div className="flex items-center gap-2 shrink-0">
         {uni.match_score && (
-          <div className="flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-0.5 text-[11px] font-bold">
+          <div className="flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-0.5 text-[12px] font-bold">
             <Star className="w-3 h-3" /> {uni.match_score}%
           </div>
         )}
@@ -181,7 +181,7 @@ export default function ProgramRecommender() {
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Study Level</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Study Level</div>
           <div className="flex flex-wrap gap-2">
             {['Diploma', 'Bachelor', 'Masters', 'PhD'].map(l => (
               <ToggleChip key={l} label={l} selected={form.level === l} onClick={() => setForm(f => ({ ...f, level: l }))} />
@@ -190,7 +190,7 @@ export default function ProgramRecommender() {
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Course / Field (pick up to 3)</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Course / Field (pick up to 3)</div>
           <div className="flex flex-wrap gap-2">
             {COURSES.map(c => (
               <ToggleChip key={c.value} label={c.label} selected={form.courses.includes(c.value)}
@@ -200,7 +200,7 @@ export default function ProgramRecommender() {
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Countries (pick up to 3)</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Countries (pick up to 3)</div>
           <div className="flex flex-wrap gap-2">
             {COUNTRIES.map(c => (
               <ToggleChip key={c.value} label={c.label} selected={form.countries.includes(c.value)}
@@ -211,7 +211,7 @@ export default function ProgramRecommender() {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Annual Budget</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Annual Budget</div>
             <div className="flex flex-wrap gap-2">
               {BUDGET_OPTIONS.map(b => (
                 <ToggleChip key={b.value} label={b.label} selected={form.budget === b.value}
@@ -220,7 +220,7 @@ export default function ProgramRecommender() {
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">IELTS Score</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">IELTS Score</div>
             <div className="flex flex-wrap gap-2">
               {IELTS_OPTIONS.map(s => (
                 <ToggleChip key={s} label={s} selected={form.ielts === s} onClick={() => setForm(f => ({ ...f, ielts: s }))} />
@@ -239,7 +239,7 @@ export default function ProgramRecommender() {
       <AnimatePresence>
         {searched && !loading && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-3">
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-3">
               {results?.length ? `${results.length} matches found` : 'No matches — try adjusting filters'}
             </div>
             <div className="space-y-2">

@@ -61,7 +61,7 @@ export default function LanguageSwitcher({ universityId, fields, onTranslated })
               }`}>
               <span className="w-5 text-center text-[14px]">{locale === l.code ? <Check className="w-4 h-4 mx-auto" /> : ''}</span>
               <span>{l.native}</span>
-              <span className="ml-auto text-[10px] text-slate-400">{l.code.toUpperCase()}</span>
+              <span className="ml-auto text-[12px] text-muted-foreground">{l.code.toUpperCase()}</span>
             </button>
           ))}
         </div>

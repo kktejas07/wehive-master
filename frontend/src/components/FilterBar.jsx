@@ -61,7 +61,7 @@ function Pop({ Icon, label, value, color, children }) {
           <Icon className="w-4 h-4 text-white" />
         </span>
         <span className="flex min-w-0 flex-col items-start leading-tight">
-          <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
+          <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
             {label}
           </span>
           <span className="text-[13.5px] font-bold text-[hsl(var(--blue-900))] inline-flex min-w-0 items-center gap-1 truncate">
@@ -131,7 +131,7 @@ function TabsBar({ value, onChange }) {
             >
               <Icon className="w-5 h-5" />
             </span>
-            <span className="text-[11px] uppercase tracking-[0.14em] font-bold">{t.label}</span>
+            <span className="text-[12px] uppercase tracking-[0.14em] font-bold">{t.label}</span>
             {active && <span className="absolute -bottom-1 h-[3px] w-8 bg-[hsl(var(--accent))] rounded-full" />}
           </button>
         );

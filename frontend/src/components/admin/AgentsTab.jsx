@@ -6,6 +6,7 @@ import { useToast } from '../../hooks/use-toast';
 import { API } from '../../context/AuthContext';
 import axios from 'axios';
 import Pagination from './Pagination';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const STATUS_FILTERS = [
   { value: '', label: 'All' },
@@ -23,6 +24,7 @@ const STATUS_BADGE = {
 };
 
 function CommissionModal({ agent, token, onClose, onDone }) {
+  const dialogProps = useDialogA11y(true, onClose);
   const { toast } = useToast();
   const [form, setForm] = useState({ university_name: '', amount_inr: '', commission_type: 'enrollment', note: '' });
   const [busy, setBusy] = useState(false);
@@ -43,7 +45,7 @@ function CommissionModal({ agent, token, onClose, onDone }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-[#111632] rounded-2xl border border-white/10 w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+      <div {...dialogProps} className="bg-[#111632] rounded-2xl border border-white/10 w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
         <div className="font-bold text-white text-[16px]">Record Commission Payment</div>
         <div className="text-[12px] text-slate-400">Agent: <span className="text-white font-bold">{agent.agency_name || agent.name}</span></div>
         {[

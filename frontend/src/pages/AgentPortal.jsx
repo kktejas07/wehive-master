@@ -35,7 +35,7 @@ const COUNTRY_FLAGS = { us: 'US', uk: 'UK', ca: 'CA', au: 'AU', de: 'DE', fr: 'F
 function TierBadge({ tier, size = 'sm' }) {
   const cfg = TIER_CONFIG[tier] || TIER_CONFIG.bronze;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 font-bold ${cfg.bg} ${cfg.text} ${size === 'lg' ? 'text-[14px]' : 'text-[11px]'}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 font-bold ${cfg.bg} ${cfg.text} ${size === 'lg' ? 'text-[14px]' : 'text-[12px]'}`}>
       <Award className={size === 'lg' ? 'w-4 h-4' : 'w-3 h-3'} />
       {cfg.label}
     </span>
@@ -47,7 +47,7 @@ function StatCard({ label, value, sub, Icon, color = '#0a2c8a' }) {
   return (
     <div className="rounded-2xl bg-white border border-black/5 p-5">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">{label}</span>
+        <span className="text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">{label}</span>
         <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${color}15` }}>
           <Icon className="w-4 h-4" style={{ color }} />
         </div>
@@ -73,7 +73,7 @@ function OverviewTab({ agent, summary, stats }) {
         <div className="relative z-10">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/60 mb-1">Partner Agency</div>
+              <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-white/60 mb-1">Partner Agency</div>
               <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em]">{agent.agency_name}</h2>
               <p className="text-[13px] text-white/65 mt-1">{agent.city}{agent.city && agent.country ? ' · ' : ''}{(agent.country || '').toUpperCase()}</p>
             </div>
@@ -150,14 +150,14 @@ function StudentForm({ onSave, onCancel, busy }) {
       <div className="grid sm:grid-cols-2 gap-3">
         {[['name','Full Name *','text'],['email','Email','email'],['phone','Phone','tel'],['education_level','Education Level','text']].map(([k,label,type]) => (
           <label key={k}>
-            <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">{label}</span>
+            <span className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">{label}</span>
             <input type={type} value={f[k] || ''} onChange={(e) => set(k)(e.target.value)}
               className="w-full h-10 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 text-[13px] font-medium text-[hsl(var(--blue-900))]" />
           </label>
         ))}
       </div>
       <div>
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Countries</span>
+        <span className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Countries</span>
         <div className="flex flex-wrap gap-2">
           {COUNTRY_OPTIONS.map(([code, name]) => (
             <button key={code} type="button" onClick={() => toggleArr('target_countries', code)}
@@ -168,7 +168,7 @@ function StudentForm({ onSave, onCancel, busy }) {
         </div>
       </div>
       <div>
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Courses</span>
+        <span className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Courses</span>
         <div className="flex flex-wrap gap-2">
           {COURSE_OPTIONS.map((c) => (
             <button key={c} type="button" onClick={() => toggleArr('target_courses', c)}
@@ -179,7 +179,7 @@ function StudentForm({ onSave, onCancel, busy }) {
         </div>
       </div>
       <label>
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">Notes</span>
+        <span className="block text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1">Notes</span>
         <textarea value={f.notes || ''} onChange={(e) => set('notes')(e.target.value)} rows={2}
           className="w-full rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-3 py-2 text-[13px] resize-none text-[hsl(var(--blue-900))]" />
       </label>
@@ -261,9 +261,9 @@ function StudentsTab({ token }) {
               <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">{s.name}</div>
               <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">{s.email || s.phone || '—'}</div>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {s.country && <span className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5 uppercase">{s.country}</span>}
-                {s.course && <span className="text-[11px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5 capitalize">{s.course}</span>}
-                {s.education_level && <span className="text-[11px] font-bold rounded-full bg-blue-50 text-blue-700 px-2 py-0.5">{s.education_level}</span>}
+                {s.country && <span className="text-[12px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5 uppercase">{s.country}</span>}
+                {s.course && <span className="text-[12px] font-bold rounded-full bg-[hsl(var(--soft-bg))] px-2 py-0.5 capitalize">{s.course}</span>}
+                {s.education_level && <span className="text-[12px] font-bold rounded-full bg-blue-50 text-blue-700 px-2 py-0.5">{s.education_level}</span>}
               </div>
             </div>
           </div>
@@ -325,7 +325,7 @@ function DocumentsTab({ token }) {
       </div>
 
       <div>
-        <label className="block text-[11px] uppercase tracking-[0.12em] font-bold text-slate-500 mb-1.5">Select Student</label>
+        <label className="block text-[12px] uppercase tracking-[0.12em] font-bold text-slate-500 mb-1.5">Select Student</label>
         <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)}
           className="w-full sm:w-72 h-10 rounded-xl border border-black/10 bg-white px-3 text-[13.5px] text-slate-800 outline-none">
           <option value="">— Choose student —</option>
@@ -338,14 +338,14 @@ function DocumentsTab({ token }) {
           <div className="text-[12px] font-bold uppercase tracking-[0.12em] text-slate-500">Upload Document</div>
           <div className="flex flex-wrap gap-3 items-end">
             <div>
-              <div className="text-[10.5px] font-bold text-slate-500 mb-1">Document Type</div>
+              <div className="text-[12px] font-bold text-slate-500 mb-1">Document Type</div>
               <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
                 className="h-9 rounded-xl border border-black/10 bg-white px-3 text-[13px] text-slate-800 outline-none">
                 {DOC_TYPES.map(t => <option key={t}>{t}</option>)}
               </select>
             </div>
             <div className="flex-1 min-w-[160px]">
-              <div className="text-[10.5px] font-bold text-slate-500 mb-1">Note (optional)</div>
+              <div className="text-[12px] font-bold text-slate-500 mb-1">Note (optional)</div>
               <input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. Band score 7.0"
                 className="w-full h-9 rounded-xl border border-black/10 px-3 text-[13px] text-slate-800 outline-none" />
             </div>
@@ -357,15 +357,15 @@ function DocumentsTab({ token }) {
           </div>
 
           {docs.length === 0 && (
-            <div className="py-8 text-center text-slate-400 text-[14px]">No documents yet for this student.</div>
+            <div className="py-8 text-center text-muted-foreground text-[14px]">No documents yet for this student.</div>
           )}
           {docs.length > 0 && (
             <table className="w-full text-[13px]">
               <thead><tr className="border-b border-black/8">
-                <th className="text-left text-[10.5px] uppercase tracking-[0.12em] font-bold text-slate-400 py-2 pr-3">Type</th>
-                <th className="text-left py-2 pr-3 text-slate-400 font-bold text-[10.5px] uppercase tracking-[0.12em]">File</th>
-                <th className="text-left py-2 pr-3 text-slate-400 font-bold text-[10.5px] uppercase tracking-[0.12em]">Status</th>
-                <th className="text-left py-2 text-slate-400 font-bold text-[10.5px] uppercase tracking-[0.12em]">Uploaded</th>
+                <th className="text-left text-[12px] uppercase tracking-[0.12em] font-bold text-muted-foreground py-2 pr-3">Type</th>
+                <th className="text-left py-2 pr-3 text-muted-foreground font-bold text-[12px] uppercase tracking-[0.12em]">File</th>
+                <th className="text-left py-2 pr-3 text-muted-foreground font-bold text-[12px] uppercase tracking-[0.12em]">Status</th>
+                <th className="text-left py-2 text-muted-foreground font-bold text-[12px] uppercase tracking-[0.12em]">Uploaded</th>
               </tr></thead>
               <tbody>
                 {docs.map((d, i) => (
@@ -375,7 +375,7 @@ function DocumentsTab({ token }) {
                       {d.url ? <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--accent))] font-bold hover:underline flex items-center gap-1"><FileText className="w-3.5 h-3.5" />{d.filename || 'View'}</a> : <span className="text-slate-400">{d.filename || 'File'}</span>}
                     </td>
                     <td className={`py-2.5 pr-3 font-bold capitalize ${STATUS_COLOR[d.status] || 'text-slate-500'}`}>{d.status || 'pending'}</td>
-                    <td className="py-2.5 text-slate-400 text-[11.5px]">{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString() : '—'}</td>
+                    <td className="py-2.5 text-muted-foreground text-[12px]">{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString() : '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -405,11 +405,11 @@ function CommissionsTab({ token, stats }) {
         <>
           <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))] p-6 text-white flex flex-wrap gap-6 items-center">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.16em] text-white/60 mb-1">Total Revenue</div>
+              <div className="text-[12px] uppercase tracking-[0.16em] text-white/60 mb-1">Total Revenue</div>
               <div className="text-[36px] font-display font-extrabold tracking-[-0.02em]">₹{(stats?.total_revenue || 0).toLocaleString()}</div>
             </div>
             <div className="border-l border-white/20 pl-6">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-white/60 mb-1">Pending</div>
+              <div className="text-[12px] uppercase tracking-[0.16em] text-white/60 mb-1">Pending</div>
               <div className="text-[28px] font-display font-extrabold">₹{(summary.pending || 0).toLocaleString()}</div>
             </div>
             <div className="border-l border-white/20 pl-6 ml-auto">
@@ -421,7 +421,7 @@ function CommissionsTab({ token, stats }) {
               <div key={l} className="rounded-2xl bg-white border border-black/5 p-4 text-center">
                 <Icon className="w-5 h-5 mx-auto mb-2" style={{ color: c }} />
                 <div className="text-[22px] font-display font-extrabold text-[hsl(var(--blue-900))]">{v}</div>
-                <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{l}</div>
+                <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{l}</div>
               </div>
             ))}
           </div>
@@ -495,7 +495,7 @@ function AnalyticsTab({ token, stats }) {
                   <span className="text-xl shrink-0">{COUNTRY_FLAGS[country] || <Globe className="w-5 h-5 text-slate-400" />}</span>
                   <div className="flex-1">
                     <div className="text-[12px] font-bold text-[hsl(var(--blue-900))] capitalize">{country.toUpperCase()}</div>
-                    <div className="text-[11px] text-[hsl(var(--blue-900))]/50">{successful}/{total} successful</div>
+                    <div className="text-[12px] text-[hsl(var(--blue-900))]/50">{successful}/{total} successful</div>
                   </div>
                   <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{total ? Math.round(successful / total * 100) : 0}%</div>
                 </div>

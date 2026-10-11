@@ -37,7 +37,7 @@ export default function AlumniMentor({ compact = false }) {
   if (compact) {
     return (
       <div className="rounded-2xl bg-gradient-to-br from-violet-50 to-violet-100/50 border border-violet-200 p-5">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-bold text-violet-700 mb-2">
+        <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-violet-700 mb-2">
           <Users className="w-3.5 h-3.5" /> Alumni Mentor Network
         </div>
         <p className="text-[13px] text-violet-800/70 mb-3">
@@ -57,7 +57,7 @@ export default function AlumniMentor({ compact = false }) {
       viewport={{ once: true }}
       className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8"
     >
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
         <Users className="w-3.5 h-3.5" /> Alumni Mentor Network
       </div>
       <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))] mb-2">
@@ -121,7 +121,7 @@ export default function AlumniMentor({ compact = false }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.05 }}
-            className="rounded-2xl border border-black/5 bg-white hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all overflow-hidden"
+            className="rounded-2xl border border-black/5 bg-white hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition overflow-hidden"
           >
             <div className="bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] p-5 text-white">
               <div className="flex items-center gap-4">
@@ -146,28 +146,28 @@ export default function AlumniMentor({ compact = false }) {
                 </div>
               </div>
               <div className="mt-1 flex items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/55">
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[hsl(var(--soft-bg))]">{COUNTRY_LABELS[alum.country] || alum.country.toUpperCase()}</span>
+                <span className="text-[12px] px-2 py-0.5 rounded-full bg-[hsl(var(--soft-bg))]">{COUNTRY_LABELS[alum.country] || alum.country.toUpperCase()}</span>
               </div>
               <div className="mt-2 text-[12.5px] text-[hsl(var(--blue-900))]/65 line-clamp-2">{alum.bio}</div>
               <div className="mt-1 text-[12px] text-[hsl(var(--blue-900))]/55">{alum.current_role}</div>
               <div className="mt-2 flex flex-wrap gap-1">
                 {alum.languages.map(l => (
-                  <span key={l} className="text-[10px] px-2 py-0.5 rounded-full bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/60">{l}</span>
+                  <span key={l} className="text-[12px] px-2 py-0.5 rounded-full bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/60">{l}</span>
                 ))}
               </div>
               <div className="mt-3 pt-3 border-t border-black/5">
-                <div className="text-[11px] font-bold text-[hsl(var(--blue-900))]/50 mb-2">Connect via:</div>
+                <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]/50 mb-2">Connect via:</div>
                 <div className="flex gap-2">
                   <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-green-600 text-white text-[11px] font-bold h-9 hover:bg-green-700 transition">
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-green-600 text-white text-[12px] font-bold h-9 hover:bg-green-700 transition">
                     <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
                   </a>
                   <a href={TELEGRAM_LINK} target="_blank" rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-blue-600 text-white text-[11px] font-bold h-9 hover:bg-blue-700 transition">
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-blue-600 text-white text-[12px] font-bold h-9 hover:bg-blue-700 transition">
                     <Send className="w-3.5 h-3.5" /> Telegram
                   </a>
                   <a href={`tel:${PHONE_NUMBER}`}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[hsl(var(--blue-700))] text-white text-[11px] font-bold h-9 hover:bg-[hsl(var(--blue-500))] transition">
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold h-9 hover:bg-[hsl(var(--blue-500))] transition">
                     <Phone className="w-3.5 h-3.5" /> Call
                   </a>
                 </div>

@@ -27,7 +27,7 @@ function Bubble({ m, onDelete }) {
       >
         <div className="text-[13.5px] leading-relaxed whitespace-pre-wrap">{m.text}</div>
         <div className={`flex items-center justify-between gap-3 mt-1.5 ${me ? 'text-white/60' : 'text-[hsl(var(--blue-900))]/40'}`}>
-          <span className="text-[10.5px]">{new Date(m.at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          <span className="text-[12px]">{new Date(m.at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           {me && (
             <button onClick={() => onDelete(m.id)} className="opacity-0 group-hover:opacity-100 transition-opacity">
               <Trash2 className="w-3 h-3" />
@@ -182,7 +182,7 @@ export default function OpenMarketAI({ onClose }) {
         </button>
       </div>
 
-      <div className="flex items-center gap-2 text-[11px] text-[hsl(var(--blue-900))]/40">
+      <div className="flex items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/40">
         <MessageSquare className="w-3.5 h-3.5" />
         <span>Eva is an AI assistant — for critical decisions, please verify with official sources or consult our team at info@wehive.in</span>
       </div>

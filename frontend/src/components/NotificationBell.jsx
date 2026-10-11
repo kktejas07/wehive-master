@@ -30,7 +30,7 @@ function NotifItem({ n, onMarkRead, onDelete }) {
       <div className="flex-1 min-w-0">
         <div className="text-[13.5px] font-bold text-[hsl(var(--blue-900))]">{n.title}</div>
         {n.body && <div className="text-[12.5px] text-[hsl(var(--blue-900))]/55 mt-0.5 line-clamp-2">{n.body}</div>}
-        <div className="text-[11px] text-[hsl(var(--blue-900))]/40 mt-1">
+        <div className="text-[12px] text-[hsl(var(--blue-900))]/40 mt-1">
           {new Date(n.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>
@@ -162,7 +162,7 @@ export default function NotificationBell() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-black/5">
             <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Notifications</span>
             {unread > 0 && (
-              <button onClick={markAllRead} className="inline-flex items-center gap-1 text-[11px] font-bold text-[hsl(var(--accent))] hover:underline">
+              <button onClick={markAllRead} className="inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] hover:underline">
                 <CheckCheck className="w-3.5 h-3.5" /> Mark all read
               </button>
             )}

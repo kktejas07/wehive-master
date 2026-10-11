@@ -37,7 +37,7 @@ function TimelineStep({ step, currentStatus, isLast }) {
         )}
       </div>
       <div className="pb-6 flex-1">
-        <div className={`text-[14px] font-bold ${isDone ? 'text-[hsl(var(--blue-900))]' : 'text-slate-400'}`}>
+        <div className={`text-[14px] font-bold ${isDone ? 'text-[hsl(var(--blue-900))]' : 'text-muted-foreground'}`}>
           {step.label}
         </div>
         {isCurrent && (
@@ -49,7 +49,7 @@ function TimelineStep({ step, currentStatus, isLast }) {
           </div>
         )}
         {step.at && (
-          <div className="text-[11px] text-[hsl(var(--blue-900))]/40 mt-1">
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/40 mt-1">
             {new Date(step.at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </div>
         )}
@@ -148,7 +148,7 @@ export default function TrackStatus() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8"
           >
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
               <ShieldCheck className="w-3.5 h-3.5" />
               Visa Application Tracker
             </div>
@@ -213,7 +213,7 @@ export default function TrackStatus() {
                   <div className={`text-[24px] font-display font-extrabold ${urgent ? 'text-red-600' : 'text-[hsl(var(--blue-900))]'}`}>
                     {d.days}d
                   </div>
-                  <div className="text-[11px] text-[hsl(var(--blue-900))]/55 mt-0.5">{d.label}</div>
+                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">{d.label}</div>
                   {urgent && <AlertCircle className="w-3.5 h-3.5 text-red-500 mx-auto mt-1" />}
                 </div>
               );
@@ -241,7 +241,7 @@ export default function TrackStatus() {
                   {!doc.uploaded && (
                     <button
                       onClick={() => setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, uploaded: true } : d))}
-                      className="text-[11px] px-3 py-1 rounded-full bg-[hsl(var(--blue-700))] text-white font-bold"
+                      className="text-[12px] px-3 py-1 rounded-full bg-[hsl(var(--blue-700))] text-white font-bold"
                     >
                       <Upload className="w-3 h-3 mr-1 inline" /> Upload
                     </button>

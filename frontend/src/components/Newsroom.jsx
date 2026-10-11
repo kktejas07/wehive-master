@@ -3,6 +3,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Newspaper, AlertCircle, RefreshCw, AlertTriangle, X, Sparkles } from 'lucide-react';
 import { API } from '../context/AuthContext';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
 const Newsroom = ({ countryId }) => {
   const [news, setNews] = useState([]);
@@ -11,6 +12,7 @@ const Newsroom = ({ countryId }) => {
   const [errorState, setErrorState] = useState(null); // { status, message }
   const [category, setCategory] = useState('All');
   const [selectedNews, setSelectedNews] = useState(null);
+  const dialogProps = useDialogA11y(!!selectedNews, () => setSelectedNews(null));
 
   const CATEGORIES = ["All", "F1", "H1B", "O1", "EB1", "Business", "Travel"];
 
@@ -103,7 +105,7 @@ const Newsroom = ({ countryId }) => {
             <Sparkles className="w-48 h-48 text-blue-600" />
           </div>
           <div className="relative z-10 max-w-4xl">
-            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-600 mb-3 flex items-center gap-2">
+            <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-blue-600 mb-3 flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5" /> AI Daily Briefing
             </div>
             <h3 className="text-2xl font-black text-gray-900 mb-4">{digest.title || "Global Immigration Update"}</h3>
@@ -135,7 +137,7 @@ const Newsroom = ({ countryId }) => {
             <button
               key={cat}
               onClick={() => setCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${category === cat || (cat === 'All' && !category) ? 'bg-primary text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${category === cat || (cat === 'All' && !category) ? 'bg-primary text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
               {cat}
             </button>
@@ -151,7 +153,7 @@ const Newsroom = ({ countryId }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-20 text-gray-400"
+              className="flex flex-col items-center justify-center py-20 text-muted-foreground"
             >
               <RefreshCw className="w-8 h-8 animate-spin mb-4" />
               <p>Fetching latest updates...</p>
@@ -208,7 +210,7 @@ const Newsroom = ({ countryId }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="group block p-6 bg-white rounded-2xl hover:bg-gray-50 border border-gray-100 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col h-full"
+                  className="group block p-6 bg-white rounded-2xl hover:bg-gray-50 border border-gray-100 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition duration-300 cursor-pointer relative overflow-hidden flex flex-col h-full"
                 >
                   <div className="flex items-center gap-2 mb-4 flex-wrap">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getCategoryColor(item.category)}`}>
@@ -219,7 +221,7 @@ const Newsroom = ({ countryId }) => {
                         {getCountryInfo(item.country_id)?.label || item.country_id.substring(0,3)}
                       </span>
                     )}
-                    <span className="text-xs font-medium text-gray-400 ml-auto">
+                    <span className="text-xs font-medium text-muted-foreground ml-auto">
                       {getItemDate(item).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                   </div>
@@ -251,7 +253,7 @@ const Newsroom = ({ countryId }) => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col relative"
+              {...dialogProps} className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col relative"
             >
               {/* Close button */}
               <button
@@ -272,7 +274,7 @@ const Newsroom = ({ countryId }) => {
                       {getCountryInfo(selectedNews.country_id)?.label || selectedNews.country_id.substring(0,3)}
                     </span>
                   )}
-                  <span className="text-sm font-medium text-gray-400 ml-auto">
+                  <span className="text-sm font-medium text-muted-foreground ml-auto">
                     {getItemDate(selectedNews).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>

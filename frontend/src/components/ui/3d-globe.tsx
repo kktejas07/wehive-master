@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate, useReducedMotion } from 'framer-motion';
 import { Globe, MapPin, Plane, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -68,7 +68,7 @@ function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
         animate={isHovered ? { scale: 1.2 } : { scale: 1 }}
         whileHover={{ scale: 1.3 }}
       >
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-all duration-300 ${isHovered ? 'bg-[hsl(var(--accent))]' : 'bg-[hsl(var(--blue-700))]'}`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-white transition duration-300 ${isHovered ? 'bg-[hsl(var(--accent))]' : 'bg-[hsl(var(--blue-700))]'}`}>
           <MapPin className="w-4 h-4 text-white" />
         </div>
         {isHovered && (
@@ -79,7 +79,7 @@ function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
           >
             <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{marker.label}</div>
             {marker.visaType && (
-              <div className="text-[10px] text-[hsl(var(--blue-900))]/60">{marker.visaType}</div>
+              <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{marker.visaType}</div>
             )}
             <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-white transform rotate-45" />
           </motion.div>
@@ -98,6 +98,7 @@ export function Globe3D({
 }: Globe3DProps) {
   const [hoveredMarker, setHoveredMarker] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const reduce = useReducedMotion();
   const [radius, setRadius] = useState(160); // Default for w-80
   const containerRef = useRef(null);
   const globeRef = useRef(null);
@@ -120,7 +121,7 @@ export function Globe3D({
 
   // Auto-rotation
   useEffect(() => {
-    if (!isDragging) {
+    if (!isDragging && !reduce) {
       const controls = animate(rotationY, rotationY.get() + 360, {
         duration: 60 / autoRotateSpeed,
         ease: 'linear',
@@ -128,7 +129,7 @@ export function Globe3D({
       });
       return controls.stop;
     }
-  }, [isDragging, autoRotateSpeed, rotationY]);
+  }, [isDragging, autoRotateSpeed, rotationY, reduce]);
 
   const handleMouseDown = (e) => {
     setIsDragging(true);
@@ -233,7 +234,7 @@ export function Globe3D({
           />
         </div>
       </div>
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-white/50 flex items-center gap-1">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[12px] text-white/50 flex items-center gap-1">
         <span>Drag to rotate</span>
         <span>·</span>
         <span>Click markers for details</span>

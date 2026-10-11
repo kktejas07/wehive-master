@@ -30,7 +30,7 @@ export default function StudentHousing({ country, compact = false }) {
   if (compact) {
     return (
       <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 p-5">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-bold text-emerald-700 mb-2">
+        <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-emerald-700 mb-2">
           <Home className="w-3.5 h-3.5" /> Student Housing
         </div>
         <p className="text-[13px] text-emerald-800/70 mb-3">
@@ -50,7 +50,7 @@ export default function StudentHousing({ country, compact = false }) {
       viewport={{ once: true }}
       className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8"
     >
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
         <Home className="w-3.5 h-3.5" /> Student Housing
       </div>
       <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))] mb-2">
@@ -62,9 +62,9 @@ export default function StudentHousing({ country, compact = false }) {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <div>
-          <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Max Rent</label>
+          <label htmlFor="studenthousing-max-rent" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Max Rent</label>
           <div className="flex items-center gap-2">
-            <input
+            <input id="studenthousing-max-rent"
               type="range"
               min="200"
               max="2500"
@@ -77,8 +77,8 @@ export default function StudentHousing({ country, compact = false }) {
           </div>
         </div>
         <div>
-          <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Type</label>
-          <div className="inline-flex rounded-full bg-[hsl(var(--soft-bg))] p-1">
+          <label id="studenthousing-type" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Type</label>
+          <div role="group" aria-labelledby="studenthousing-type" className="inline-flex rounded-full bg-[hsl(var(--soft-bg))] p-1">
             {[
               { id: 'any', label: 'Any' },
               { id: 'shared', label: 'Shared' },
@@ -87,7 +87,7 @@ export default function StudentHousing({ country, compact = false }) {
               <button
                 key={t.id}
                 onClick={() => setShared(t.id)}
-                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition ${
+                className={`px-3 py-1.5 rounded-full text-[12px] font-bold transition ${
                   shared === t.id ? 'bg-white text-[hsl(var(--blue-900))] shadow-sm' : 'text-[hsl(var(--blue-900))]/50'
                 }`}
               >
@@ -97,10 +97,10 @@ export default function StudentHousing({ country, compact = false }) {
           </div>
         </div>
         <div className="sm:col-span-2">
-          <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Search</label>
+          <label htmlFor="studenthousing-search" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Search</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/40" />
-            <input
+            <input id="studenthousing-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="City or property name..."
@@ -124,7 +124,7 @@ export default function StudentHousing({ country, compact = false }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              className="rounded-2xl border border-black/5 bg-white hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all overflow-hidden"
+              className="rounded-2xl border border-black/5 bg-white hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition overflow-hidden"
             >
               <div className="bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] p-5 text-center">
                 <div className="text-white/80 text-2xl font-bold">{l.type?.charAt(0) || 'H'}</div>
@@ -148,17 +148,17 @@ export default function StudentHousing({ country, compact = false }) {
                     <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">
                       ${l.monthly_rent}
                     </div>
-                    <div className="text-[11px] text-[hsl(var(--blue-900))]/55">/month</div>
+                    <div className="text-[12px] text-[hsl(var(--blue-900))]/55">/month</div>
                   </div>
                   <div className="text-right">
                     <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">${l.deposit} deposit</div>
-                    <div className="text-[11px] text-[hsl(var(--blue-900))]/55">Available {l.available_from}</div>
+                    <div className="text-[12px] text-[hsl(var(--blue-900))]/55">Available {l.available_from}</div>
                   </div>
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {l.amenities.slice(0, 4).map(a => (
-                    <span key={a} className="text-[10px] px-2 py-0.5 rounded-full bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/60 font-medium">
+                    <span key={a} className="text-[12px] px-2 py-0.5 rounded-full bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/60 font-medium">
                       {a}
                     </span>
                   ))}

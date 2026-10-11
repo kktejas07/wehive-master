@@ -19,6 +19,7 @@ import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { computeFees } from './FeeBreakdown';
 import { inr } from '../lib/utils';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
 const todayPlus = (days) => {
   const d = new Date();
@@ -35,6 +36,7 @@ export default function ApplicationReviewModal({
   applicants,
 }) {
   const { user, token, isAuthed } = useAuth();
+  const dialogProps = useDialogA11y(open, onClose);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -132,7 +134,7 @@ export default function ApplicationReviewModal({
             onClick={onClose}
           />
           <motion.div
-            className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden"
+            {...dialogProps} className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden"
             initial={{ y: 28, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 16, opacity: 0, scale: 0.98 }}
@@ -222,7 +224,7 @@ export default function ApplicationReviewModal({
 
               {/* Compact fee summary */}
               <div className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 p-4">
-                <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-2">
+                <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-2">
                   Estimate
                 </div>
                 <Row k="Application fee" v={inr(fees.application)} />
@@ -240,7 +242,7 @@ export default function ApplicationReviewModal({
                 </div>
               </div>
 
-              <div className="flex items-start gap-2 text-[11.5px] text-[hsl(var(--blue-900))]/60 px-1">
+              <div className="flex items-start gap-2 text-[12px] text-[hsl(var(--blue-900))]/60 px-1">
                 <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-600" />
                 <span>
                   Reviewing now creates a draft application. You&rsquo;ll upload
@@ -284,7 +286,7 @@ function Field({ label, Icon, children }) {
     <label className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 px-4 py-2.5 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/35 transition">
       {Icon && <Icon className="w-4 h-4 text-[hsl(var(--blue-900))]/55 shrink-0" />}
       <div className="flex-1 min-w-0">
-        <div className="text-[10.5px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
+        <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
           {label}
         </div>
         <div className="-mt-0.5">{children}</div>
@@ -318,7 +320,7 @@ function ProgressTrail({ current = 1 }) {
           <div key={s.id} className="flex items-center gap-1.5">
             <span
               data-testid={`apply-review-step-${s.id}`}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-[0.12em] transition ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-bold uppercase tracking-[0.12em] transition ${
                 active
                   ? 'bg-[hsl(var(--accent))] text-white'
                   : done

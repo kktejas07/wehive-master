@@ -23,7 +23,7 @@ export default function OtherCountries({ list }: OtherCountriesProps) {
           {list.map((c) => (
             <Link key={c.id} to={`/visa/${c.id}`} className="group block">
               <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                   src={c.image}
                   alt={c.name}
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"

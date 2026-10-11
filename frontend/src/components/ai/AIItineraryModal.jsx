@@ -5,6 +5,7 @@ import { Sparkles, Loader2, X, Calendar, MapPin, DollarSign, ChevronDown } from 
 import { Button } from '../ui/button';
 import { useAuth, API } from '../../context/AuthContext';
 import { useToast } from '../../hooks/use-toast';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const STYLES = [
   { value: 'balanced', label: 'Balanced' },
@@ -24,28 +25,28 @@ function DayView({ day }) {
       <div className="bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--accent))] px-4 py-2.5 flex items-center justify-between">
         <span className="text-white text-[13px] font-bold">Day {day.day}</span>
         {day.theme && (
-          <span className="text-white/80 text-[11px]">{day.theme}</span>
+          <span className="text-white/80 text-[12px]">{day.theme}</span>
         )}
       </div>
       <div className="p-4 space-y-3">
         {(day.activities || []).map((a, i) => (
           <div key={i} className="flex items-start gap-2.5">
-            <span className="text-[11px] font-mono text-[hsl(var(--accent))] mt-0.5 w-10 shrink-0">{a.time || ''}</span>
+            <span className="text-[12px] font-mono text-[hsl(var(--accent))] mt-0.5 w-10 shrink-0">{a.time || ''}</span>
             <div>
               <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{a.activity}</div>
               {a.location && (
-                <div className="flex items-center gap-1 text-[11px] text-[hsl(var(--blue-900))]/55 mt-0.5">
+                <div className="flex items-center gap-1 text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">
                   <MapPin className="w-3 h-3" /> {a.location}
                 </div>
               )}
-              {a.note && <div className="text-[11px] text-[hsl(var(--blue-900))]/50 mt-0.5 italic">{a.note}</div>}
+              {a.note && <div className="text-[12px] text-[hsl(var(--blue-900))]/50 mt-0.5 italic">{a.note}</div>}
             </div>
           </div>
         ))}
         {day.meals && (
           <div className="mt-3 pt-3 border-t border-black/5">
-            <div className="text-[10px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]/40 mb-2">Meals</div>
-            <div className="grid grid-cols-3 gap-2 text-[11.5px]">
+            <div className="text-[12px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]/40 mb-2">Meals</div>
+            <div className="grid grid-cols-3 gap-2 text-[12px]">
               {[
                 ['breakfast', 'B'],
                 ['lunch', 'L'],
@@ -60,7 +61,7 @@ function DayView({ day }) {
           </div>
         )}
         {day.travel_tip && (
-          <div className="mt-2 text-[11px] text-[hsl(var(--blue-900))]/50 flex items-center gap-1.5">
+          <div className="mt-2 text-[12px] text-[hsl(var(--blue-900))]/50 flex items-center gap-1.5">
             <span className="font-bold">Tip:</span> {day.travel_tip}
           </div>
         )}
@@ -80,6 +81,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
   const [itinerary, setItinerary] = useState(null);
 
   const handleClose = () => { setItinerary(null); onClose?.(); };
+  const dialogProps = useDialogA11y(open, handleClose);
 
   const onGenerate = async () => {
     setGenerating(true);
@@ -108,7 +110,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
         >
           <div className="absolute inset-0 bg-[hsl(var(--blue-900))]/40 backdrop-blur-sm" onClick={handleClose} />
           <motion.div
-            className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[88vh] flex flex-col"
+            {...dialogProps} className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[88vh] flex flex-col"
             initial={{ y: 24, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 16, opacity: 0, scale: 0.98 }}
@@ -120,7 +122,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                   <Calendar className="w-4 h-4 text-[hsl(var(--accent))]" />
                 </span>
                 <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">AI Planner</div>
+                  <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">AI Planner</div>
                   <h2 className="font-display text-[18px] font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
                     AI Itinerary Generator
                   </h2>
@@ -140,8 +142,8 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Number of days</label>
-                      <input
+                      <label htmlFor="aiitinerarymodal-number-of-days" className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Number of days</label>
+                      <input id="aiitinerarymodal-number-of-days"
                         type="number"
                         min={3}
                         max={30}
@@ -151,9 +153,9 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                       />
                     </div>
                     <div>
-                      <label className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Style</label>
+                      <label htmlFor="aiitinerarymodal-style" className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Style</label>
                       <div className="relative">
-                        <select
+                        <select id="aiitinerarymodal-style"
                           value={style}
                           onChange={e => setStyle(e.target.value)}
                           className="w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[13.5px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]/40 appearance-none bg-white"
@@ -164,9 +166,9 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Budget</label>
+                      <label htmlFor="aiitinerarymodal-budget" className="block text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--blue-900))]/60 mb-1.5">Budget</label>
                       <div className="relative">
-                        <select
+                        <select id="aiitinerarymodal-budget"
                           value={budget}
                           onChange={e => setBudget(e.target.value)}
                           className="w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[13.5px] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]/40 appearance-none bg-white"
@@ -190,7 +192,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                           ['High', itinerary.budget_estimate.high],
                         ].map(([label, val]) => (
                           <div key={label} className="rounded-xl bg-[hsl(var(--soft-bg))] p-3">
-                            <div className="text-[11px] text-[hsl(var(--blue-900))]/50">{label}</div>
+                            <div className="text-[12px] text-[hsl(var(--blue-900))]/50">{label}</div>
                             <div className="text-[16px] font-extrabold text-[hsl(var(--blue-900))]">₹{(val || 0).toLocaleString('en-IN')}</div>
                           </div>
                         ))}
@@ -214,7 +216,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                 <div className="space-y-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--accent))]">Your Itinerary</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--accent))]">Your Itinerary</div>
                       <div className="text-[15px] font-extrabold text-[hsl(var(--blue-900))]">{itinerary.days?.length || 0} days</div>
                     </div>
                     <button
@@ -226,7 +228,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                   {(itinerary.highlights || []).length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {itinerary.highlights.map((h, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--accent))]/10 text-[11px] font-bold text-[hsl(var(--accent))] px-3 py-1">
+                        <span key={i} className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--accent))]/10 text-[12px] font-bold text-[hsl(var(--accent))] px-3 py-1">
                           <Sparkles className="w-3 h-3" /> {h}
                         </span>
                       ))}
@@ -235,7 +237,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
 
                   {(itinerary.packing_tips || []).length > 0 && (
                     <div className="rounded-2xl border border-[hsl(var(--accent))]/20 bg-[hsl(var(--soft-bg))] p-4">
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--accent))] mb-2">Packing tips</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--accent))] mb-2">Packing tips</div>
                       <ul className="space-y-1">
                         {itinerary.packing_tips.map((t, i) => (
                           <li key={i} className="text-[12.5px] text-[hsl(var(--blue-900))]/70 flex items-start gap-2">
@@ -264,7 +266,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                           ['High', itinerary.budget_estimate.high],
                         ].map(([label, val]) => (
                           <div key={label} className="rounded-xl bg-[hsl(var(--soft-bg))] p-3">
-                            <div className="text-[11px] text-[hsl(var(--blue-900))]/50">{label}</div>
+                            <div className="text-[12px] text-[hsl(var(--blue-900))]/50">{label}</div>
                             <div className="text-[16px] font-extrabold text-[hsl(var(--blue-900))]">₹{(val || 0).toLocaleString('en-IN')}</div>
                           </div>
                         ))}

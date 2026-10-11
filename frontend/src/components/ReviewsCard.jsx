@@ -101,29 +101,29 @@ export default function ReviewsCard({ universityId }) {
             <div key={r.id} className="rounded-xl bg-[hsl(var(--blue-50))] p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[hsl(var(--blue-700))] flex items-center justify-center text-white text-[11px] font-bold overflow-hidden">
-                    {r.user_avatar ? <img src={r.user_avatar} alt="" className="w-full h-full object-cover" /> : <User className="w-4 h-4" />}
+                  <div className="w-8 h-8 rounded-full bg-[hsl(var(--blue-700))] flex items-center justify-center text-white text-[12px] font-bold overflow-hidden">
+                    {r.user_avatar ? <img loading="lazy" decoding="async" src={r.user_avatar} alt="" className="w-full h-full object-cover" /> : <User className="w-4 h-4" />}
                   </div>
                   <div>
                     <div className="font-bold text-[13px] text-[hsl(var(--blue-900))]">{r.user_name}</div>
-                    <div className="flex items-center gap-1 text-[11px] text-[hsl(var(--blue-900))]/50">
+                    <div className="flex items-center gap-1 text-[12px] text-[hsl(var(--blue-900))]/50">
                       {[1,2,3,4,5].map(n => (
                         <Star key={n} className={`w-3 h-3 ${n <= r.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />
                       ))}
                     </div>
                   </div>
                 </div>
-                {r.verified && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">Verified</span>}
+                {r.verified && <span className="text-[12px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">Verified</span>}
               </div>
               {r.title && <div className="mt-2 font-bold text-[13px] text-[hsl(var(--blue-900))]">{r.title}</div>}
               <p className="mt-1 text-[12.5px] text-[hsl(var(--blue-900))]/70 leading-relaxed">{r.review_text}</p>
               {(r.pros || r.cons) && (
-                <div className="mt-2 flex gap-4 text-[11px]">
+                <div className="mt-2 flex gap-4 text-[12px]">
                   {r.pros && <span className="text-emerald-600"><ThumbsUp className="w-3 h-3 inline mr-0.5" /> {r.pros}</span>}
                   {r.cons && <span className="text-red-500"><ThumbsUp className="w-3 h-3 inline mr-0.5 rotate-180" /> {r.cons}</span>}
                 </div>
               )}
-              <div className="mt-1 text-[10px] text-[hsl(var(--blue-900))]/40 flex items-center gap-2">
+              <div className="mt-1 text-[12px] text-[hsl(var(--blue-900))]/40 flex items-center gap-2">
                 <Clock className="w-3 h-3" />
                 {new Date(r.created_at).toLocaleDateString()}
                 {r.program_name && <span>· {r.program_name}</span>}

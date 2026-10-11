@@ -8,7 +8,7 @@ export default function AssistCard() {
   ];
   return (
     <div className="rounded-3xl bg-[hsl(var(--soft-bg))] border border-black/5 p-7 sticky top-28">
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--accent))]">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--accent))]">
         <Sparkles className="w-3.5 h-3.5" /> Document AI
       </div>
       <h3 className="mt-2 font-display font-extrabold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">

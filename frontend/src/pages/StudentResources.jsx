@@ -87,7 +87,7 @@ export default function StudentResources() {
       <Navbar />
       <div className="max-w-6xl mx-auto px-5 pt-28 pb-20">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-          <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
             Student Tools
           </div>
           <h1 className="font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))] leading-[1.05]">
@@ -114,7 +114,7 @@ export default function StudentResources() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.07 }}
                     onClick={() => setActive(s.id)}
-                    className="group relative text-left rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all card-lift"
+                    className="group relative text-left rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition card-lift"
                   >
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: s.bg }}>
                       <Icon className="w-6 h-6" style={{ color: s.color }} />
@@ -131,7 +131,7 @@ export default function StudentResources() {
 
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
               className="mt-8 border-t border-black/5 pt-8">
-              <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/40 mb-4">Also useful</div>
+              <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/40 mb-4">Also useful</div>
               <div className="flex flex-wrap gap-3">
                 {[
                   { to: '/intake-calendar', Icon: Calendar, label: 'Intake Calendar', desc: 'When to apply by country' },
@@ -147,7 +147,7 @@ export default function StudentResources() {
                     <Icon className="w-5 h-5 shrink-0 text-[hsl(var(--blue-900))]/40" />
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-[13px] text-[hsl(var(--blue-900))]">{label}</div>
-                      <div className="text-[11.5px] text-[hsl(var(--blue-900))]/50 truncate">{desc}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/50 truncate">{desc}</div>
                     </div>
                     <ChevronRight className="w-4 h-4 shrink-0 text-[hsl(var(--blue-900))]/30" />
                   </Link>

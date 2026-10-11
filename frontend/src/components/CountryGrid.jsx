@@ -96,7 +96,7 @@ function CountryCard({ c, index = 0 }) {
           className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]"
         >
           {cardImage ? (
-            <img
+            <img decoding="async"
               src={cardImage}
               alt={c.name}
               loading="lazy"
@@ -113,20 +113,20 @@ function CountryCard({ c, index = 0 }) {
             {types.slice(0, 3).map((t) => (
               <span
                 key={`${c.id}-${t}`}
-                className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/90 backdrop-blur text-[10px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]"
+                className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/90 backdrop-blur text-[12px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]"
               >
                 {t}
               </span>
             ))}
             {types.length > 3 && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/90 backdrop-blur text-[10px] font-bold text-[hsl(var(--blue-900))]/60">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/90 backdrop-blur text-[12px] font-bold text-[hsl(var(--blue-900))]/60">
                 +{types.length - 3}
               </span>
             )}
           </div>
         )}
         {isNoVisa && (
-          <div className="absolute top-3 left-3 inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] uppercase tracking-[0.14em] font-bold">
+          <div className="absolute top-3 left-3 inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[12px] uppercase tracking-[0.14em] font-bold">
             Visa-free
           </div>
         )}
@@ -140,38 +140,38 @@ function CountryCard({ c, index = 0 }) {
           </div>
 
           {isNoVisa ? (
-            <div className="text-[10px] uppercase tracking-[0.14em] text-white/80 font-bold">
+            <div className="text-[12px] uppercase tracking-[0.14em] text-white/80 font-bold">
               No Visa Required
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-3 gap-2 mt-2 text-[9px] sm:text-[10px] uppercase tracking-[0.08em] text-white/60 font-bold">
+              <div className="grid grid-cols-3 gap-2 mt-2 text-[12px] sm:text-[12px] uppercase tracking-[0.08em] text-white/60 font-bold">
                 <div>
                   <div>Type</div>
-                  <div className="text-white text-[11px] sm:text-[12px] font-bold mt-0.5 truncate">
+                  <div className="text-white text-[12px] sm:text-[12px] font-bold mt-0.5 truncate">
                     {types[0] || 'E-VISA'}
                   </div>
                 </div>
                 <div className="text-center">
                   <div>Valid</div>
-                  <div className="text-white text-[11px] sm:text-[12px] font-bold mt-0.5 truncate">
+                  <div className="text-white text-[12px] sm:text-[12px] font-bold mt-0.5 truncate">
                     {validity}
                   </div>
                 </div>
                 <div className="text-right">
                   <div>Fees</div>
-                  <div className="text-white text-[11px] sm:text-[12px] font-bold mt-0.5 truncate">
+                  <div className="text-white text-[12px] sm:text-[12px] font-bold mt-0.5 truncate">
                     ${fees_usd || c.fees}
                   </div>
                 </div>
               </div>
               <div className="mt-2 pt-2 border-t border-white/10">
-                <div className="text-[9px] uppercase tracking-[0.08em] text-white/50 mb-1">Documents:</div>
-                <div className="text-[10px] text-white/80 truncate">
+                <div className="text-[12px] uppercase tracking-[0.08em] text-white/50 mb-1">Documents:</div>
+                <div className="text-[12px] text-white/80 truncate">
                   {Array.isArray(documents) ? documents.slice(0, 3).join(', ') : documents}
                 </div>
               </div>
-              <div className="mt-2 text-[10px] text-[hsl(var(--accent))] font-bold cursor-pointer hover:underline">
+              <div className="mt-2 text-[12px] text-[hsl(var(--accent))] font-bold cursor-pointer hover:underline">
                 Get emergency assistance →
               </div>
             </>
@@ -205,7 +205,7 @@ function CountryCard({ c, index = 0 }) {
                 navigate(`/holiday/${c.id}`);
               }
             }}
-            className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[11.5px] font-bold transition cursor-pointer"
+            className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[12px] font-bold transition cursor-pointer"
           >
             <Compass className="w-3 h-3" />
             Plan
@@ -220,7 +220,7 @@ function CountryCard({ c, index = 0 }) {
 function MapPlaceholder({ items }) {
   return (
     <div className="relative aspect-[16/9] rounded-3xl overflow-hidden border border-black/5 bg-[hsl(var(--blue-50))]">
-      <img
+      <img loading="lazy" decoding="async"
         src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1600&q=80"
         alt="World map"
         className="absolute inset-0 h-full w-full object-cover opacity-90"
@@ -341,7 +341,7 @@ export default function CountryGrid({ filters }) {
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <Reveal className="flex items-end justify-between flex-wrap gap-6 mb-8 sm:mb-10">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
               <Sparkle className="w-3.5 h-3.5" />
               {showEvents ? 'Events & festivals' : showHolidays ? 'Visa-free holidays' : 'Popular destinations'}
             </div>
@@ -496,14 +496,14 @@ function EventsBoard() {
       {events.map((e) => (
         <article key={e.id} className="group rounded-2xl overflow-hidden bg-white border border-black/5 card-lift">
           <div className="relative aspect-[16/10] overflow-hidden">
-            <img src={e.img} alt={e.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
-            <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-[hsl(var(--blue-900))]">
+            <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[12px] font-bold text-[hsl(var(--blue-900))]">
               <span>{e.country.slice(0,2).toUpperCase()}</span> {e.city}
             </div>
           </div>
           <div className="p-5">
-            <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--accent))]">{e.date}</div>
+            <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--accent))]">{e.date}</div>
             <div className="mt-1 text-[18px] font-display font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
               {e.title}
             </div>

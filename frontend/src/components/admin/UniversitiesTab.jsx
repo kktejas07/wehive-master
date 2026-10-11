@@ -4,6 +4,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, apiClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const FIELDS = [
   { key: 'id', label: 'ID', editable: false, type: 'text' },
@@ -119,6 +120,7 @@ export default function UniversitiesTab() {
   };
 
   const closeEditor = () => { setEditing(null); setEditDraft({}); };
+  const dialogProps = useDialogA11y(!!editing, closeEditor);
 
   const updateDraft = (key, value) => {
     setEditDraft(prev => ({ ...prev, [key]: value }));
@@ -373,10 +375,10 @@ export default function UniversitiesTab() {
       {/* ── Edit Modal ── */}
       {editing && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={closeEditor}>
-          <div className="rounded-2xl bg-[#111632] border border-white/10 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div {...dialogProps} className="rounded-2xl bg-[#111632] border border-white/10 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-[#111632] z-10 flex items-center justify-between p-5 border-b border-white/5">
               <h3 className="text-[16px] font-bold text-white truncate max-w-[400px]">{editDraft.name || 'Edit University'}</h3>
-              <button onClick={closeEditor} className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"><X className="w-4 h-4 text-slate-400" /></button>
+              <button aria-label="Close" onClick={closeEditor} className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"><X className="w-4 h-4 text-slate-400" /></button>
             </div>
 
             <div className="p-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -397,7 +399,7 @@ export default function UniversitiesTab() {
                     <div className="space-y-2">
                       <input type="text" value={editDraft[f.key] || ''} onChange={e => updateDraft(f.key, e.target.value)} placeholder="https://..." className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
                       {editDraft.image_url && (
-                        <img src={editDraft.image_url} alt="" className="w-full h-24 rounded-lg object-cover bg-black/50" onError={e => { e.target.style.display = 'none' }} />
+                        <img loading="lazy" decoding="async" src={editDraft.image_url} alt="" className="w-full h-24 rounded-lg object-cover bg-black/50" onError={e => { e.target.style.display = 'none' }} />
                       )}
                     </div>
                   ) : (
@@ -410,8 +412,8 @@ export default function UniversitiesTab() {
             {/* List fields (courses, intakes, accreditation, facilities) */}
             {['courses', 'popular_courses', 'intakes', 'accreditation', 'facilities'].map(listKey => (
               <div key={listKey} className="px-5 mb-3">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">{listKey.replace(/_/g, ' ')}</label>
-                <div className="flex flex-wrap gap-1.5">
+                <label id={`uni-${listKey}`} className="block text-[11px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">{listKey.replace(/_/g, ' ')}</label>
+                <div role="group" aria-labelledby={`uni-${listKey}`} className="flex flex-wrap gap-1.5">
                   {(editDraft[listKey] || []).map((item, i) => (
                     <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-2 py-0.5 text-[11px] text-slate-300">
                       {item}

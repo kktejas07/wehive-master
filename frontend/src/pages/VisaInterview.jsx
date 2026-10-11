@@ -165,7 +165,7 @@ export default function VisaInterview() {
           </div>
 
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
               <Shield className="w-3.5 h-3.5" /> Mock Interview
             </div>
             <h1 className="font-display font-extrabold text-[36px] sm:text-[44px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
@@ -186,7 +186,7 @@ export default function VisaInterview() {
                     <button
                       key={c.id}
                       onClick={() => setCountry(c.id)}
-                      className={`relative text-left p-5 rounded-2xl border-2 transition-all ${
+                      className={`relative text-left p-5 rounded-2xl border-2 transition ${
                         country === c.id
                           ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
                           : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white'
@@ -246,7 +246,7 @@ export default function VisaInterview() {
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-3xl">{COUNTRY_LIST.find(c => c.id === country)?.flag || <Flag className="w-7 h-7 text-[hsl(var(--blue-700))]" />}</span>
                   <div>
-                    <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))]">{INTERVIEW_QUESTIONS[country]?.name}</div>
+                    <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))]">{INTERVIEW_QUESTIONS[country]?.name}</div>
                     <div className="text-[13px] text-[hsl(var(--blue-900))]/60">Consular Officer</div>
                   </div>
                 </div>
@@ -268,10 +268,11 @@ export default function VisaInterview() {
 
               <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Your answer</label>
+                  <label htmlFor="visainterview-answer" className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Your answer</label>
                   <span className="text-[12px] text-[hsl(var(--blue-900))]/40">{answer.length} characters</span>
                 </div>
                 <textarea
+                  id="visainterview-answer"
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   placeholder="Type or speak your answer here..."
@@ -324,7 +325,7 @@ export default function VisaInterview() {
                       <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">
                         {Math.min(100, Math.floor(totalScore * (0.8 + Math.random() * 0.4)))}
                       </div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/55 uppercase tracking-[0.1em]">{c.label}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/55 uppercase tracking-[0.1em]">{c.label}</div>
                     </div>
                   ))}
                 </div>

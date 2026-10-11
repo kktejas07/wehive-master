@@ -20,7 +20,7 @@ function LiveBadge() {
         <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
       </span>
-      <span className="text-[10px] uppercase tracking-[0.15em] font-bold text-emerald-600">Live</span>
+      <span className="text-[12px] uppercase tracking-[0.15em] font-bold text-emerald-600">Live</span>
     </div>
   );
 }
@@ -30,7 +30,7 @@ function UpdateItem({ icon: Icon, text, time, color }) {
     <div className="flex items-center gap-3 px-6 py-2">
       <Icon className={`w-4 h-4 ${color} flex-shrink-0`} />
       <span className="text-[13px] font-semibold text-[hsl(var(--blue-900))] whitespace-nowrap">{text}</span>
-      <span className="text-[11px] text-[hsl(var(--blue-900))]/40 whitespace-nowrap">{time}</span>
+      <span className="text-[12px] text-[hsl(var(--blue-900))]/40 whitespace-nowrap">{time}</span>
     </div>
   );
 }
@@ -88,7 +88,7 @@ export default function LiveTickerMarquee() {
               <div key={i} className="flex items-center gap-3">
                 <ItemIcon className={`w-4 h-4 ${update.color} flex-shrink-0`} />
                 <span className="text-[13px] font-semibold text-white whitespace-nowrap">{update.text}</span>
-                <span className="text-[11px] text-white/40 whitespace-nowrap">{update.time}</span>
+                <span className="text-[12px] text-white/40 whitespace-nowrap">{update.time}</span>
               </div>
             );
           })}

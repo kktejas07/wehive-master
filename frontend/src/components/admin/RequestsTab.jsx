@@ -121,10 +121,10 @@ function RequestCard({ req, token, onReviewed }) {
           {req.status === 'pending' && (
             <div className="space-y-3 pt-1">
               <div>
-                <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
+                <label htmlFor="requeststab-note-to-user-optional" className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
                   Note to user (optional)
                 </label>
-                <textarea
+                <textarea id="requeststab-note-to-user-optional"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Add a note explaining your decision…"

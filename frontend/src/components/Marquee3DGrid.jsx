@@ -63,7 +63,7 @@ function CountryCard3D({ country, index }) {
           <h3 className="font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">
             {country.name}
           </h3>
-          <p className="text-[11px] text-[hsl(var(--blue-900))]/60 mt-1">
+          <p className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">
             {country.visa} · {country.processing}
           </p>
           <div className="mt-3 flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] group-hover:gap-2 transition-all">
@@ -109,7 +109,7 @@ export default function Marquee3DGrid() {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <Globe className="w-3.5 h-3.5" />
             Popular Destinations
           </div>

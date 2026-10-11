@@ -45,7 +45,7 @@ export default function TrackPortal() {
           <div className="grid md:grid-cols-12 gap-8 items-center">
             {/* Search Panel */}
             <div className="md:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))]">
+              <div className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))]">
                 <Clock className="w-3.5 h-3.5" /> 24/7 File Tracking
               </div>
               <h1 className="font-display font-extrabold text-[36px] sm:text-[48px] tracking-[-0.03em] leading-none text-[hsl(var(--blue-900))]">

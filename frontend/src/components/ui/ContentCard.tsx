@@ -81,12 +81,12 @@ export function ContentCard({
         {/* Top Section - Badges */}
         <div className="mb-auto flex gap-2 flex-wrap">
           {category && (
-            <span className={`inline-block px-3 py-1 rounded-full backdrop-blur-md text-white text-[10px] uppercase tracking-[0.14em] font-bold border ${getCategoryColor(category)}`}>
+            <span className={`inline-block px-3 py-1 rounded-full backdrop-blur-md text-white text-[12px] uppercase tracking-[0.14em] font-bold border ${getCategoryColor(category)}`}>
               {category}
             </span>
           )}
           {countryInfo && (
-            <span className={`inline-block px-3 py-1 rounded-full text-white text-[10px] uppercase tracking-[0.1em] font-bold shadow-sm ${countryInfo.color}`}>
+            <span className={`inline-block px-3 py-1 rounded-full text-white text-[12px] uppercase tracking-[0.1em] font-bold shadow-sm ${countryInfo.color}`}>
               {countryInfo.label}
             </span>
           )}
@@ -98,7 +98,7 @@ export function ContentCard({
           {author && (
             <div className="flex items-center gap-3">
               {author.avatar ? (
-                <img
+                <img loading="lazy" decoding="async"
                   src={author.avatar}
                   alt={author.name}
                   className="h-10 w-10 rounded-full border-2 border-white/30 object-cover"
@@ -115,7 +115,7 @@ export function ContentCard({
               <div>
                 <p className="text-[13px] font-semibold text-white">{author.name}</p>
                 {readTime && (
-                  <div className="flex items-center gap-1 text-[11px] text-white/70">
+                  <div className="flex items-center gap-1 text-[12px] text-white/70">
                     <Clock className="w-3 h-3" />
                     <span>{readTime}</span>
                   </div>

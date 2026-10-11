@@ -57,7 +57,7 @@ function EventCard({ ev }: { ev: EventItem }) {
     <Link
       to={ev.cta_url || '#'}
       data-testid={`event-banner-${ev.id}`}
-      className="group relative block aspect-[16/9] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-[0_30px_70px_-30px_rgba(10,44,138,0.4)] hover:shadow-[0_30px_70px_-20px_rgba(225,33,44,0.4)] transition-all duration-500"
+      className="group relative block aspect-[16/9] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-[0_30px_70px_-30px_rgba(10,44,138,0.4)] hover:shadow-[0_30px_70px_-20px_rgba(225,33,44,0.4)] transition duration-500"
     >
       {/* Background gradient or image */}
       <div
@@ -67,7 +67,7 @@ function EventCard({ ev }: { ev: EventItem }) {
       
       {/* Background image if available */}
       {ev.image_url && (
-        <img
+        <img loading="lazy" decoding="async"
           src={ev.image_url}
           alt={ev.title}
           className="absolute inset-0 z-0 h-full w-full object-cover opacity-60 mix-blend-overlay transition-transform duration-700 group-hover:scale-105"
@@ -83,12 +83,12 @@ function EventCard({ ev }: { ev: EventItem }) {
         <div className="flex items-start justify-between">
           <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${tagColorClass} backdrop-blur-sm`}>
             <Sparkles className="w-3 h-3" />
-            <span className="text-[10.5px] uppercase tracking-[0.14em] font-bold">{tagLabel}</span>
+            <span className="text-[12px] uppercase tracking-[0.14em] font-bold">{tagLabel}</span>
           </div>
           
           {ev.highlight && (
             <div className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/20">
-              <span className="text-[10.5px] font-bold text-white">🔥 Popular</span>
+              <span className="text-[12px] font-bold text-white">🔥 Popular</span>
             </div>
           )}
         </div>
@@ -109,7 +109,7 @@ function EventCard({ ev }: { ev: EventItem }) {
               <MapPin className="w-4 h-4 text-white/60" />
               <div className="flex flex-wrap gap-1.5">
                 {ev.countries.slice(0, 3).map((c, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2 py-0.5 text-[11px] text-white/90">
+                  <span key={i} className="inline-flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2 py-0.5 text-[12px] text-white/90">
                     <span>{c.flag}</span>
                     <span>{c.name}</span>
                     <span className="text-white/60">·</span>
@@ -117,7 +117,7 @@ function EventCard({ ev }: { ev: EventItem }) {
                   </span>
                 ))}
                 {ev.countries.length > 3 && (
-                  <span className="text-[11px] text-white/60">+{ev.countries.length - 3} more</span>
+                  <span className="text-[12px] text-white/60">+{ev.countries.length - 3} more</span>
                 )}
               </div>
             </div>
@@ -213,7 +213,7 @@ export default function EventsBanner({
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
             <div>
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] animate-pulse">
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] animate-pulse">
                 Live now
               </div>
               <div className="h-8 w-48 bg-[hsl(var(--soft-bg))] rounded mt-1 animate-pulse" />
@@ -234,7 +234,7 @@ export default function EventsBanner({
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-2">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-2">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-60" />
                 <span className="relative rounded-full h-2 w-2 bg-emerald-500" />

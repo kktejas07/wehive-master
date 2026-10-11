@@ -61,7 +61,7 @@ function DealCard({ deal, category, onCall }) {
     >
       {discount >= 20 && (
         <div className="absolute top-3 right-3 z-20">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-white text-[10px] font-bold uppercase tracking-wider">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-white text-[12px] font-bold uppercase tracking-wider">
             {discount}% OFF
           </span>
         </div>
@@ -74,16 +74,16 @@ function DealCard({ deal, category, onCall }) {
               <div className="flex items-center gap-2">
                 <span className="text-[18px] font-bold text-[hsl(var(--blue-900))]">{deal.from} → {deal.to}</span>
               </div>
-              <span className="text-[11px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.airline}</span>
+              <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.airline}</span>
             </div>
-            <div className="flex items-center gap-4 text-[11px] text-[hsl(var(--blue-900))]/60 mb-3">
+            <div className="flex items-center gap-4 text-[12px] text-[hsl(var(--blue-900))]/60 mb-3">
               <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {deal.time}</span>
               <span>{deal.stops}</span>
               <span className="text-[hsl(var(--accent))] font-bold">{deal.seats} seats left</span>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}</span>
+                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}</span>
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
               </div>
               <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
@@ -97,12 +97,12 @@ function DealCard({ deal, category, onCall }) {
           <>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{deal.from} → {deal.to}</span>
-              <span className="text-[10px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.operator}</span>
+              <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.operator}</span>
             </div>
-            <div className="text-[11px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.type} · {deal.departure} → {deal.arrival}</div>
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.type} · {deal.departure} → {deal.arrival}</div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}</span>
+                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}</span>
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
               </div>
               <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
@@ -116,12 +116,12 @@ function DealCard({ deal, category, onCall }) {
           <>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{deal.company}</span>
-              <span className="text-[10px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.location}</span>
+              <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.location}</span>
             </div>
-            <div className="text-[11px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.vehicle} · {deal.type} · {deal.seats} Seats{deal.fuelType}</div>
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.vehicle} · {deal.type} · {deal.seats} Seats{deal.fuelType}</div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/day</span>
+                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/day</span>
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/day</span></div>
               </div>
               <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
@@ -135,13 +135,13 @@ function DealCard({ deal, category, onCall }) {
           <>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{deal.name}</span>
-              <span className="text-[10px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.category}</span>
+              <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.category}</span>
             </div>
-            <div className="text-[11px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.location} · {deal.rooms}</div>
-            <div className="text-[10px] text-[hsl(var(--blue-900))]/50 mb-2">{deal.amenities}</div>
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.location} · {deal.rooms}</div>
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/50 mb-2">{deal.amenities}</div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/night</span>
+                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/night</span>
                 <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/night</span></div>
               </div>
               <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
@@ -195,7 +195,7 @@ export default function DealsSection() {
     <section className="relative py-12 sm:py-16 bg-[hsl(var(--soft-bg))]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <Reveal className="mb-8">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             <Sparkle className="w-3.5 h-3.5" />
             Exclusive deals
           </div>
@@ -214,7 +214,7 @@ export default function DealsSection() {
               <button
                 key={cat.id}
                 onClick={() => setActiveTab(cat.id)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-bold transition whitespace-nowrap ${
                   activeTab === cat.id
                     ? 'bg-[hsl(var(--blue-700))] text-white'
                     : 'bg-white text-[hsl(var(--blue-900))]/60 border border-black/10 hover:border-black/20'

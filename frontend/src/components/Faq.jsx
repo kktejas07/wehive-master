@@ -40,7 +40,7 @@ export default function Faq() {
     <section className="relative py-16 sm:py-24 lg:py-28 bg-[hsl(var(--soft-bg))] border-y border-black/5">
       <div className="max-w-5xl mx-auto px-5 sm:px-8">
         <Reveal className="text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
             FAQ
           </div>
           <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[44px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">

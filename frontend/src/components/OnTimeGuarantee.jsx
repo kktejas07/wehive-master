@@ -37,7 +37,7 @@ export default function OnTimeGuarantee() {
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
         <Reveal className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">
             <Shield className="w-4 h-4" />
             Our promise
           </div>
@@ -109,7 +109,7 @@ export default function OnTimeGuarantee() {
                     </div>
                     <div>
                       <div className="text-[14px] font-bold text-white">{c.name}</div>
-                      <div className="text-[11px] text-red-400 font-medium">Missed by {c.missed_by}</div>
+                      <div className="text-[12px] text-red-400 font-medium">Missed by {c.missed_by}</div>
                     </div>
                   </div>
                   <div className="text-[12px] text-white/50">{c.reason}</div>

@@ -368,7 +368,7 @@ export default function SettingsTab() {
             <button
               key={n}
               onClick={() => setActiveTab(n)}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-bold transition-all ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-bold transition ${
                 activeTab === n
                   ? 'bg-[hsl(var(--accent))] text-white shadow-[0_4px_20px_-6px_hsl(var(--accent))]'
                   : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
@@ -481,7 +481,7 @@ export default function SettingsTab() {
                           />
                         </label>
                         {brandingAssets[field.key]?.url && (
-                          <img src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-auto max-w-[120px] rounded-lg object-contain border border-white/10 bg-white/5" />
+                          <img loading="lazy" decoding="async" src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-auto max-w-[120px] rounded-lg object-contain border border-white/10 bg-white/5" />
                         )}
                       </div>
                       {brandingAssets[field.key] && (

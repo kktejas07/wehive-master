@@ -42,7 +42,7 @@ export default function VoiceWaveform({ isActive, isSpeaking, color = 'hsl(var(-
         );
       })}
       
-      <span className="ml-3 text-[11px] font-mono font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/50">
+      <span className="ml-3 text-[12px] font-mono font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/50">
         {isActive ? 'Listening...' : isSpeaking ? 'Speaking...' : 'Standby'}
       </span>
     </div>

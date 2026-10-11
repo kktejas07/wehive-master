@@ -70,7 +70,7 @@ function PromoCard({ card, index }) {
       <div className="relative z-10 flex flex-col flex-1 p-7">
         {card.badge && (
           <span
-            className="self-start inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.14em] mb-4"
+            className="self-start inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-[0.14em] mb-4"
             style={{ background: card.accent_color || '#e1212c', color: '#fff' }}
           >
             <Tag className="w-3 h-3" />
@@ -116,7 +116,7 @@ export default function PromoCards() {
           className="flex items-end justify-between flex-wrap gap-4 mb-10"
         >
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
               <Sparkles className="w-3.5 h-3.5" />
               Special Offers
             </div>

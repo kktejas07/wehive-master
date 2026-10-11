@@ -350,7 +350,7 @@ export default function CountryHub() {
             
             <div className="relative z-10 max-w-2xl">
               <span className="text-5xl sm:text-6xl block mb-4">{country.flag}</span>
-              <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-2 font-mono">
+              <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-2 font-mono">
                 Destination Hub
               </div>
               <h1 className="font-display font-extrabold text-[38px] sm:text-[54px] tracking-[-0.03em] leading-tight">
@@ -371,7 +371,7 @@ export default function CountryHub() {
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Sidebar Navigation */}
             <div className="lg:col-span-1 space-y-2">
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/40 px-3 mb-3">
+              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/40 px-3 mb-3">
                 Pathway Hubs
               </div>
               {visaTabs.map((tab) => {
@@ -381,7 +381,7 @@ export default function CountryHub() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveVisa(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left text-[14px] font-bold transition-all ${
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left text-[14px] font-bold transition ${
                       active 
                         ? 'bg-[hsl(var(--blue-900))] text-white shadow-md' 
                         : 'bg-white border border-black/5 hover:border-black/10 text-[hsl(var(--blue-900))]/80'
@@ -439,7 +439,7 @@ export default function CountryHub() {
                     <div className="p-4 rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 flex items-start gap-3">
                       {renderRegularIcon('clock', "w-5 h-5 text-[hsl(var(--accent))] shrink-0 mt-0.5")}
                       <div>
-                        <div className="text-[11px] uppercase tracking-wider text-[hsl(var(--blue-900))]/40 font-bold font-mono">Processing Time</div>
+                        <div className="text-[12px] uppercase tracking-wider text-[hsl(var(--blue-900))]/40 font-bold font-mono">Processing Time</div>
                         <div className="text-[16px] font-bold text-[hsl(var(--blue-900))] mt-0.5">{currentVisa.timeline}</div>
                       </div>
                     </div>
@@ -447,7 +447,7 @@ export default function CountryHub() {
                     <div className="p-4 rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 flex items-start gap-3">
                       {renderRegularIcon('coins', "w-5 h-5 text-[hsl(var(--accent))] shrink-0 mt-0.5")}
                       <div>
-                        <div className="text-[11px] uppercase tracking-wider text-[hsl(var(--blue-900))]/40 font-bold font-mono">Government Fee</div>
+                        <div className="text-[12px] uppercase tracking-wider text-[hsl(var(--blue-900))]/40 font-bold font-mono">Government Fee</div>
                         <div className="text-[16px] font-bold text-[hsl(var(--blue-900))] mt-0.5">{currentVisa.fees}</div>
                       </div>
                     </div>

@@ -29,7 +29,7 @@ export default function ApplicationTimeline({ events, currentStatus }) {
             <div className="flex items-center gap-2">
               <div className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{e.label}</div>
               {isActive && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--blue-50))] text-[11px] font-bold text-[hsl(var(--blue-700))]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--blue-50))] text-[12px] font-bold text-[hsl(var(--blue-700))]">
                   Current
                 </span>
               )}

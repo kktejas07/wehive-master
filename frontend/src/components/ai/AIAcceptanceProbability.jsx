@@ -10,7 +10,7 @@ const TIER_COLORS = {
   reach: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300', icon: TrendingUp },
 };
 
-const CONFIDENCE_COLORS = { high: 'text-emerald-600', medium: 'text-amber-600', low: 'text-slate-400' };
+const CONFIDENCE_COLORS = { high: 'text-emerald-600', medium: 'text-amber-600', low: 'text-muted-foreground' };
 
 export default function AIAcceptanceProbability({ universityId, universityName }) {
   const { token } = useAuth();
@@ -79,7 +79,7 @@ export default function AIAcceptanceProbability({ universityId, universityName }
               <div className="flex items-center justify-between">
                 <div className="text-center">
                   <div className="text-[36px] font-extrabold text-purple-700">{result.probability}%</div>
-                  <div className="text-[11px] text-purple-500 font-bold uppercase tracking-wider">Probability</div>
+                  <div className="text-[12px] text-purple-500 font-bold uppercase tracking-wider">Probability</div>
                 </div>
                 <div className="text-center">
                   <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-bold ${
@@ -91,8 +91,8 @@ export default function AIAcceptanceProbability({ universityId, universityName }
                      <TrendingUp className="w-3.5 h-3.5" />}
                     {result.tier?.charAt(0).toUpperCase() + result.tier?.slice(1) || 'Unknown'}
                   </div>
-                  <div className="text-[10px] mt-1 font-semibold uppercase tracking-wider">
-                    <span className={CONFIDENCE_COLORS[result.confidence] || 'text-slate-400'}>
+                  <div className="text-[12px] mt-1 font-semibold uppercase tracking-wider">
+                    <span className={CONFIDENCE_COLORS[result.confidence] || 'text-muted-foreground'}>
                       {result.confidence} confidence
                     </span>
                   </div>
@@ -101,7 +101,7 @@ export default function AIAcceptanceProbability({ universityId, universityName }
 
               {result.factors && result.factors.length > 0 && (
                 <div>
-                  <div className="text-[11px] font-bold text-purple-600 uppercase tracking-wider mb-1.5">Key Factors</div>
+                  <div className="text-[12px] font-bold text-purple-600 uppercase tracking-wider mb-1.5">Key Factors</div>
                   <ul className="space-y-1">
                     {result.factors.map((f, i) => (
                       <li key={i} className="flex items-start gap-2 text-[12px] text-purple-800">
@@ -115,7 +115,7 @@ export default function AIAcceptanceProbability({ universityId, universityName }
 
               {result.recommendations && (
                 <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
-                  <div className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider mb-0.5">Recommendation</div>
+                  <div className="text-[12px] font-bold text-emerald-700 uppercase tracking-wider mb-0.5">Recommendation</div>
                   <p className="text-[12px] text-emerald-800">{result.recommendations}</p>
                 </div>
               )}

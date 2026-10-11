@@ -239,7 +239,7 @@ export default function AIMarketplaceSettings() {
                       <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">
                         {meta?.name || p.provider_id}
                       </div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/50">
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/50">
                         Key: {p.masked_key} · Model: {p.model || 'default'}
                       </div>
                     </div>
@@ -254,7 +254,7 @@ export default function AIMarketplaceSettings() {
                       </button>
                     )}
                     {isActive && (
-                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
+                      <span className="text-[12px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
                         Active
                       </span>
                     )}
@@ -299,7 +299,7 @@ export default function AIMarketplaceSettings() {
                     </div>
                     <div>
                       <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{p.name}</div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/50 mt-0.5">{p.description}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/50 mt-0.5">{p.description}</div>
                     </div>
                   </div>
                   {isConnected && <Check className="w-4 h-4 text-emerald-500" />}
@@ -341,6 +341,7 @@ export default function AIMarketplaceSettings() {
                   <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/30" />
                   <input
                     type="password"
+                    aria-label={selectedMeta.key_label}
                     value={apiKey}
                     onChange={e => setApiKey(e.target.value)}
                     placeholder={selectedMeta.key_placeholder}
@@ -367,12 +368,12 @@ export default function AIMarketplaceSettings() {
 
             {selectedMeta?.models?.length > 0 && (
               <div>
-                <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
+                <label htmlFor="aimarketplacesettings-model" className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
                   Model
                 </label>
                 <div className="relative">
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/30 pointer-events-none" />
-                  <select
+                  <select id="aimarketplacesettings-model"
                     value={model}
                     onChange={e => setModel(e.target.value)}
                     className="w-full h-10 px-3 pr-8 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition bg-white appearance-none"

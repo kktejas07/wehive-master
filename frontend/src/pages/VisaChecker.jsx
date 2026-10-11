@@ -24,7 +24,7 @@ const PROVIDER_COLORS = { sherpa: '#6366f1', simplevisa: '#059669', visahq: '#d9
 
 function ProviderBadge({ provider }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-bold rounded-full px-2 py-0.5"
+    <span className="inline-flex items-center gap-1 text-[12px] font-bold rounded-full px-2 py-0.5"
       style={{ background: `${PROVIDER_COLORS[provider] || '#6b7280'}15`, color: PROVIDER_COLORS[provider] || '#6b7280' }}>
       {provider}
     </span>
@@ -55,7 +55,7 @@ function ResultDisplay({ result, isFallback }) {
       <div className="flex items-center gap-3 flex-wrap">
         <OutcomeBadge outcome={result.outcome} />
         <ProviderBadge provider={result.provider} />
-        <span className="text-[11px] text-[hsl(var(--blue-900))]/40">
+        <span className="text-[12px] text-[hsl(var(--blue-900))]/40">
           Updated {new Date(result.fetchedAt).toLocaleDateString()}
         </span>
       </div>
@@ -73,7 +73,7 @@ function ResultDisplay({ result, isFallback }) {
                   )}
                 </div>
                 {p.enforcement && (
-                  <span className={`shrink-0 text-[10px] font-bold rounded-full px-2.5 py-1 ${
+                  <span className={`shrink-0 text-[12px] font-bold rounded-full px-2.5 py-1 ${
                     p.enforcement === 'MANDATORY' ? 'bg-red-50 text-red-600' :
                     p.enforcement === 'RECOMMENDED' ? 'bg-amber-50 text-amber-600' :
                     'bg-gray-50 text-gray-500'
@@ -107,7 +107,7 @@ function ResultDisplay({ result, isFallback }) {
               )}
               {p.sources && p.sources.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-black/5">
-                  <div className="text-[10px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]/40 mb-1">Sources</div>
+                  <div className="text-[12px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]/40 mb-1">Sources</div>
                   {p.sources.map((s, j) => (
                     <a key={j} href={s.url} target="_blank" rel="noopener noreferrer"
                       className="block text-[12px] text-[hsl(var(--blue-700))] hover:underline">{s.title}</a>
@@ -130,12 +130,12 @@ function ResultDisplay({ result, isFallback }) {
 function CountryCard({ c, selected, onSelect, label }) {
   return (
     <button onClick={onSelect}
-      className={`relative text-left rounded-xl border-2 px-4 py-3 transition-all ${
+      className={`relative text-left rounded-xl border-2 px-4 py-3 transition ${
         selected
           ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 shadow-sm'
           : 'border-black/5 bg-white hover:border-black/10'
       }`}>
-      <div className="text-[10px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]/40 mb-1">{label}</div>
+      <div className="text-[12px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]/40 mb-1">{label}</div>
       <div className="flex items-center gap-2.5">
         <span className="text-2xl">{c.flag}</span>
         <span className={`font-bold text-[14px] ${selected ? 'text-[hsl(var(--accent))]' : 'text-[hsl(var(--blue-900))]'}`}>
@@ -204,7 +204,7 @@ export default function VisaChecker() {
       <Navbar />
       <div className="max-w-5xl mx-auto px-5 pt-28 pb-20">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
+          <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
             <IdCard className="w-3.5 h-3.5" /> Visa Checker
           </div>
           <h1 className="font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))] leading-[1.05]">
@@ -218,7 +218,7 @@ export default function VisaChecker() {
         <div className="grid lg:grid-cols-5 gap-6 mb-10">
           <div className="lg:col-span-2 space-y-4">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Nationality</div>
+              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Nationality</div>
               <div className="grid gap-2">
                 {NATIONALITIES.map(c => (
                   <CountryCard key={c.id} c={c} selected={nationality === c.id}
@@ -230,7 +230,7 @@ export default function VisaChecker() {
 
           <div className="lg:col-span-3 space-y-4">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Destination</div>
+              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Destination</div>
               <div className="grid sm:grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
                 {DESTINATIONS.map(c => (
                   <CountryCard key={c.id} c={c} selected={destination === c.id}
@@ -240,7 +240,7 @@ export default function VisaChecker() {
             </div>
 
             <div>
-              <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Travel Date (optional)</div>
+              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Travel Date (optional)</div>
               <input type="date" value={travelDate} onChange={e => setTravelDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
                 className="w-full h-11 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--accent))] focus:shadow-sm" />

@@ -66,7 +66,7 @@ export default function PromoBanner({ className = '' }) {
               {/* Badge */}
               {banner.badge && (
                 <span
-                  className="shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.14em]"
+                  className="shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-[0.14em]"
                   style={{ background: banner.accent_color || '#e1212c', color: '#fff' }}
                 >
                   <Sparkles className="w-3 h-3" />

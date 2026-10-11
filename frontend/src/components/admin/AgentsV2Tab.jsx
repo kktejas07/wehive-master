@@ -5,6 +5,7 @@ import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import { API } from '../../context/AuthContext';
 import axios from 'axios';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const PROVIDERS = [
   { id: 'ollama', name: 'Ollama (local)' },
@@ -138,6 +139,7 @@ function AgentEditor({ initial, onSave, onCancel, saving }) {
 }
 
 function RunPanel({ agent, token, onClose }) {
+  const dialogProps = useDialogA11y(true, onClose);
   const { toast } = useToast();
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -160,13 +162,13 @@ function RunPanel({ agent, token, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-[#111632] rounded-2xl border border-white/10 w-full max-w-3xl max-h-[85vh] overflow-y-auto p-6 space-y-4 admin-scrollbar" onClick={e => e.stopPropagation()}>
+      <div {...dialogProps} className="bg-[#111632] rounded-2xl border border-white/10 w-full max-w-3xl max-h-[85vh] overflow-y-auto p-6 space-y-4 admin-scrollbar" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <div>
             <div className="font-bold text-white text-[16px]">{agent.name}</div>
             <div className="text-[11px] text-slate-400 font-mono">{agent.id} · {agent.provider_id}/{agent.model}</div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white"><X className="w-4 h-4" /></button>
+          <button aria-label="Close" onClick={onClose} className="text-slate-400 hover:text-white"><X className="w-4 h-4" /></button>
         </div>
         <label className="block">
           <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Input</span>

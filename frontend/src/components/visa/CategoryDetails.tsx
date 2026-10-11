@@ -33,7 +33,7 @@ function MetaCard({ Icon, k, v }: MetaCardProps) {
   return (
     <div className="rounded-2xl bg-white border border-black/5 p-4">
       <Icon className="w-4 h-4 text-[hsl(var(--blue-700))]" />
-      <div className="mt-2 text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--blue-900))]/55 font-bold">{k}</div>
+      <div className="mt-2 text-[12px] uppercase tracking-[0.16em] text-[hsl(var(--blue-900))]/55 font-bold">{k}</div>
       <div className="mt-1 text-[14px] font-bold text-[hsl(var(--blue-900))]">{v}</div>
     </div>
   );
@@ -114,7 +114,7 @@ export default function CategoryDetails({
           <img src={fallbackImg} alt={country.name} className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute bottom-5 left-5 right-5 text-white">
-            <div className="text-[11px] uppercase tracking-[0.16em] text-white/70 font-bold">Multi-entry</div>
+            <div className="text-[12px] uppercase tracking-[0.16em] text-white/70 font-bold">Multi-entry</div>
             <div className="text-[18px] font-bold mt-1">
               {cat.multi_entry ? 'Yes — re-enter as needed' : 'Single entry'}
             </div>

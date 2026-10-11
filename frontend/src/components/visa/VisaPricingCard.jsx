@@ -91,7 +91,7 @@ export default function VisaPricingCard({
       </div>
 
       {isFast && (
-        <div className="bg-amber-50 border-b border-amber-100 px-4 py-2 flex items-center gap-2 text-[11.5px] text-amber-800">
+        <div className="bg-amber-50 border-b border-amber-100 px-4 py-2 flex items-center gap-2 text-[12px] text-amber-800">
           <Zap className="w-3 h-3 text-amber-500 shrink-0" />
           Fast Track: +{inr(FAST_TRACK_PREMIUM_PER)} per traveller · Guaranteed by {deliveryLabel}
         </div>
@@ -132,7 +132,7 @@ export default function VisaPricingCard({
           <div className="text-[40px] sm:text-[44px] font-display font-extrabold tracking-[-0.04em] text-[hsl(var(--blue-900))]">
             {inr(payNow || payLater)}
           </div>
-          <div className="text-[10.5px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--blue-900))]/45 mt-1">
+          <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--blue-900))]/45 mt-1">
             {payNow > 0 ? 'To be paid now' : 'Due on delivery'}
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function VisaPricingCard({
         </div>
 
         {/* Footnote */}
-        <div className="flex items-start gap-1.5 text-[11px] text-[hsl(var(--blue-900))]/45 px-0.5">
+        <div className="flex items-start gap-1.5 text-[12px] text-[hsl(var(--blue-900))]/45 px-0.5">
           <Info className="w-3 h-3 shrink-0 mt-0.5" />
           <span>GST included. Embassy fees are set by the destination government and may change.</span>
         </div>

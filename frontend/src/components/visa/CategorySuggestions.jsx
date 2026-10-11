@@ -45,9 +45,9 @@ function SuggestionRow({ title, icon: Icon, countries, currentId }) {
       <div ref={scrollRef} className="flex gap-4 overflow-x-auto no-scrollbar pb-2 snap-x snap-mandatory">
         {filtered.map((c) => (
           <Link key={c.id} to={`/visa/${c.id}`} className="snap-start shrink-0 group block">
-            <div className="w-[170px] rounded-2xl overflow-hidden border border-black/5 bg-white hover:shadow-lg hover:border-[hsl(var(--accent))]/30 transition-all duration-300">
+            <div className="w-[170px] rounded-2xl overflow-hidden border border-black/5 bg-white hover:shadow-lg hover:border-[hsl(var(--accent))]/30 transition duration-300">
               <div className="relative aspect-[4/3] overflow-hidden">
-                <img
+                <img decoding="async"
                   src={landmarkFor(c) || ''}
                   alt={c.name}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -59,7 +59,7 @@ function SuggestionRow({ title, icon: Icon, countries, currentId }) {
                 </div>
               </div>
               <div className="px-3 py-2.5 flex items-center justify-between">
-                <span className="text-[11px] text-[hsl(var(--blue-900))]/50 font-medium">
+                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">
                   {c.processing_days > 0 ? `${c.processing_days} days` : 'Instant'}
                 </span>
                 <span className="text-[12px] font-bold text-[hsl(var(--accent))]">

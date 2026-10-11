@@ -321,7 +321,7 @@ export default function AuthCard({ mode, referralCode }) {
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]"
+        className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]"
       >
         <ShieldCheck className="w-3.5 h-3.5" /> Secure access
       </motion.div>
@@ -376,20 +376,20 @@ export default function AuthCard({ mode, referralCode }) {
             <form onSubmit={onEmailPwdSubmit} className="space-y-4">
               {isSignup && (
                 <div>
-                  <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma"
+                  <label htmlFor="authcard-your-name" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
+                  <input id="authcard-your-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma"
                     className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
                 </div>
               )}
               <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Email address</label>
-                <input type="email" data-testid="email-input" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com"
+                <label htmlFor="authcard-email-address" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Email address</label>
+                <input id="authcard-email-address" type="email" data-testid="email-input" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com"
                   className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
               </div>
               <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Password</label>
+                <label htmlFor="authcard-password" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Password</label>
                 <div className="relative">
-                  <input type={showPassword ? 'text' : 'password'} data-testid="password-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
+                  <input id="authcard-password" type={showPassword ? 'text' : 'password'} data-testid="password-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
                     className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
                   <button type="button" onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-700))] transition">
@@ -427,10 +427,10 @@ export default function AuthCard({ mode, referralCode }) {
                 </div>
               )}
               <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
+                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5" htmlFor="authcard-identifier">
                   {otpChannel === 'email' ? 'Email address' : otpChannel === 'whatsapp' ? 'WhatsApp number' : 'Mobile number'}
                 </label>
-                <input value={identifier} onChange={(e) => setIdentifier(e.target.value)}
+                <input id="authcard-identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)}
                   placeholder={placeholder} inputMode={otpChannel === 'email' ? 'email' : 'tel'}
                   className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
               </div>
@@ -495,7 +495,7 @@ export default function AuthCard({ mode, referralCode }) {
           Agent? Sign in to your dashboard →
         </Link>
       </div>
-      <p className="mt-4 text-[11px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
+      <p className="mt-4 text-[12px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
         By continuing you agree to our Terms and Privacy Policy.
       </p>
     </motion.div>

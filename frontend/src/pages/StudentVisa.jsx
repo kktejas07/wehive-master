@@ -136,7 +136,7 @@ function CountryCard({ c, onSelect, selected }) {
   return (
     <button
       onClick={() => onSelect(c.id)}
-      className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden group ${
+      className={`relative text-left p-5 rounded-2xl border-2 transition duration-300 overflow-hidden group ${
         selected === c.id
           ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
           : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white hover:bg-[hsl(var(--blue-50))]'
@@ -257,7 +257,7 @@ export default function StudentVisa() {
 
       <section className="pt-28 pb-16 bg-gradient-to-br from-[hsl(var(--blue-900))] to-[hsl(var(--blue-700))] text-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-white/70 mb-4">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-white/70 mb-4">
             <GraduationCap className="w-4 h-4" />
             Student Visa Program
           </div>
@@ -335,7 +335,7 @@ export default function StudentVisa() {
               <button
                 key={course.id}
                 onClick={() => setSelectedCourse(selectedCourse === course.id ? null : course.id)}
-                className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden group ${
+                className={`relative text-left p-5 rounded-2xl border-2 transition duration-300 overflow-hidden group ${
                   selectedCourse === course.id
                     ? 'border-[hsl(var(--blue-700))] shadow-lg shadow-[hsl(var(--blue-700))]/20 bg-[hsl(var(--blue-700))]'
                     : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white hover:bg-[hsl(var(--blue-50))]'
@@ -374,20 +374,20 @@ export default function StudentVisa() {
                   .map((uni) => (
                     <div
                       key={uni.id}
-                      className="relative rounded-2xl p-5 bg-white hover:bg-[hsl(var(--blue-50))] transition-all duration-300 hover:shadow-lg hover:shadow-[hsl(var(--blue-700))]/10"
+                      className="relative rounded-2xl p-5 bg-white hover:bg-[hsl(var(--blue-50))] transition duration-300 hover:shadow-lg hover:shadow-[hsl(var(--blue-700))]/10"
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center overflow-hidden">
             {uni.website ? (
-              <img
+              <img loading="lazy" decoding="async"
                 src={`https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128`}
                 alt={uni.short_name}
                 className="w-8 h-8 object-contain"
                 onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`; }}
               />
             ) : (
-              <img
+              <img loading="lazy" decoding="async"
                 src={`https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`}
                 alt={uni.short_name}
                 className="w-full h-full object-cover"
@@ -406,13 +406,13 @@ export default function StudentVisa() {
                               {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
                             </span>
                           </div>
-                          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white text-[10px] font-bold">
+                          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white text-[12px] font-bold">
                             #{uni.rank} World
                           </div>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-1">
                           {getDisplayCourses(uni.popular_courses || []).slice(0, 2).map((course) => (
-                            <span key={course} className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
+                            <span key={course} className="text-[12px] px-2 py-0.5 rounded-full bg-white border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
                               {course}
                             </span>
                           ))}
@@ -448,7 +448,7 @@ export default function StudentVisa() {
 
       <section id="universities-section" className="py-16 bg-[hsl(var(--soft-bg))] border-y border-black/5">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <GraduationCap className="w-3.5 h-3.5" /> Schools & Programs
           </div>
           <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
@@ -493,19 +493,19 @@ export default function StudentVisa() {
                 {filtered.slice((uniPage - 1) * UNI_PER_PAGE, uniPage * UNI_PER_PAGE).map((uni) => (
                 <div
                   key={uni.id}
-                  className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all"
+                  className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition"
                 >
                   <div className="flex items-start gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center overflow-hidden shrink-0">
                     {uni.website ? (
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={`https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128`}
                         alt={uni.short_name}
                         className="w-8 h-8 object-contain"
                         onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`; }}
                       />
                     ) : (
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={`https://ui-avatars.com/api/?name=${encodeURIComponent(uni.short_name)}&background=1a2a5e&color=fff&size=96&bold=true`}
                         alt={uni.short_name}
                         className="w-full h-full object-cover"
@@ -516,15 +516,15 @@ export default function StudentVisa() {
                       <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
                       <div className="text-[12px] text-[hsl(var(--blue-900))]/60 truncate">{uni.name}</div>
                       <div className="mt-1 flex items-center gap-2">
-                        <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[10px] border-0">{uni.type}</Badge>
-                        <span className="text-[11px] text-[hsl(var(--blue-900))]/50">#{uni.rank}</span>
+                        <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[12px] border-0">{uni.type}</Badge>
+                        <span className="text-[12px] text-[hsl(var(--blue-900))]/50">#{uni.rank}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {(uni.popular_courses || []).slice(0, 4).map((course) => (
-                      <span key={course} className="text-[11px] px-2.5 py-1 rounded-full bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
+                      <span key={course} className="text-[12px] px-2.5 py-1 rounded-full bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">
                         {COURSE_ID_TO_NAME[course] || course}
                       </span>
                     ))}
@@ -542,7 +542,7 @@ export default function StudentVisa() {
                   <div className="mt-4 flex items-center gap-2">
                     <Link
                       to={`/university/${uni.id}`}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-black/10 h-9 text-[12px] font-bold text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/30 transition-all"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-black/10 h-9 text-[12px] font-bold text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/30 transition"
                     >
                       View details
                     </Link>
@@ -616,7 +616,7 @@ export default function StudentVisa() {
 
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <DollarSign className="w-3.5 h-3.5" /> Annual Budget
           </div>
           <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
@@ -629,11 +629,11 @@ export default function StudentVisa() {
             <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="border-b border-black/10">
-                  <th className="text-left py-3 pr-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Country</th>
-                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Tuition (annual)</th>
-                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Living costs (annual)</th>
-                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Total (min)</th>
-                  <th className="text-left py-3 pl-4 text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Currency</th>
+                  <th className="text-left py-3 pr-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Country</th>
+                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Tuition (annual)</th>
+                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Living costs (annual)</th>
+                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Total (min)</th>
+                  <th className="text-left py-3 pl-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Currency</th>
                 </tr>
               </thead>
               <tbody>
@@ -676,7 +676,7 @@ export default function StudentVisa() {
 
       <section className="py-16 bg-[hsl(var(--soft-bg))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
             <BookOpen className="w-3.5 h-3.5" /> Score Requirements
           </div>
           <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
@@ -689,30 +689,30 @@ export default function StudentVisa() {
             {SCORE_REQUIREMENTS.map(s => {
               const Icon = s.icon;
               return (
-                <div key={s.id} className="rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group">
+                <div key={s.id} className="rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition group">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white shadow-lg">
                       <Icon className="w-6 h-6" />
                     </div>
                     <div>
                       <div className="font-bold text-[17px] text-[hsl(var(--blue-900))]">{s.label}</div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{s.format}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{s.format}</div>
                     </div>
                   </div>
                   <p className="text-[13px] text-[hsl(var(--blue-900))]/65 leading-relaxed mb-4">{s.desc}</p>
                   <div className="flex items-center gap-4 text-center">
                     <div>
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Min</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Min</div>
                       <div className="text-[18px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.min}</div>
                     </div>
                     <div className="w-px h-8 bg-black/10" />
                     <div>
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Avg</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Avg</div>
                       <div className="text-[18px] font-display font-extrabold text-[hsl(var(--accent))]">{s.avg}</div>
                     </div>
                     <div className="w-px h-8 bg-black/10" />
                     <div>
-                      <div className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Max</div>
+                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Max</div>
                       <div className="text-[18px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.max}</div>
                     </div>
                   </div>
@@ -752,7 +752,7 @@ export default function StudentVisa() {
                 }}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full" />
                 <div className="relative z-10">
-                  <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))] mb-4">
+                  <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))] mb-4">
                     Visa Details
                   </div>
                 <ComparisonRow
@@ -802,7 +802,7 @@ export default function StudentVisa() {
                 background: 'linear-gradient(135deg, hsl(var(--blue-900)) 0%, hsl(var(--blue-700)) 50%, hsl(var(--blue-500)) 100%)',
               }}>
                 <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-[hsl(var(--accent))]/20 to-transparent rounded-tl-full" />
-                <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/90">
+                <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-white/90">
                   Why apply with We Hive
                 </div>
                 <div className="mt-4 space-y-4">
@@ -861,7 +861,7 @@ export default function StudentVisa() {
             {INTAKE_TIMES.map((intake, i) => (
               <div
                 key={intake.season}
-className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var(--blue-50))] transition-all duration-300"
+className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var(--blue-50))] transition duration-300"
               >
                 <div className="relative z-10 p-7 border border-black/5 rounded-2xl bg-white/80 backdrop-blur">
                   <div className="flex items-center gap-3 mb-4">
@@ -869,7 +869,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
                       <Calendar className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/55 font-bold">Intake</div>
+                      <div className="text-[12px] uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/55 font-bold">Intake</div>
                       <div className="font-bold text-[16px] text-[hsl(var(--blue-900))]">{intake.months}</div>
                     </div>
                   </div>
@@ -895,7 +895,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               return (
                 <div
                   key={doc.title}
-                  className="relative rounded-2xl p-6 text-center overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white"
+                  className="relative rounded-2xl p-6 text-center overflow-hidden group transition duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white"
                 >
                   <div className="relative z-10">
                     <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--blue-700))] flex items-center justify-center mx-auto shadow-lg shadow-[hsl(var(--blue-700))]/20">
@@ -915,7 +915,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
                 <GraduationCap className="w-4 h-4" />
                 Results
               </div>
@@ -980,7 +980,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               if (tool.action === 'scholarship') {
                 return (
                   <button key={tool.label} onClick={() => setShowScholarshipMatcher(true)}
-                    className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group text-left w-full"
+                    className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition group text-left w-full"
                   >
                     <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
                       <tool.icon className="w-6 h-6" />
@@ -996,7 +996,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               if (tool.action === 'recommender') {
                 return (
                   <button key={tool.label} onClick={() => setShowAIRecommender(true)}
-                    className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group text-left w-full"
+                    className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition group text-left w-full"
                   >
                     <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
                       <tool.icon className="w-6 h-6" />
@@ -1011,7 +1011,7 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               }
               return (
                 <Link key={tool.label} to={tool.href}
-                  className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition-all group"
+                  className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition group"
                 >
                   <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
                     <tool.icon className="w-6 h-6" />

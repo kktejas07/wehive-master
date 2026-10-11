@@ -130,7 +130,7 @@ function VisaCard({ visa, index, onClick }) {
     >
       {visa.popular && (
         <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-white text-[10px] font-bold">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-white text-[12px] font-bold">
             <Star className="w-3 h-3" /> Popular
           </span>
         </div>
@@ -144,21 +144,21 @@ function VisaCard({ visa, index, onClick }) {
           <h3 className="font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">{visa.country}</h3>
           <div className="flex items-center gap-1">
             <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-            <span className="text-[11px] font-bold text-[hsl(var(--blue-900))]">{visa.rating}</span>
+            <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{visa.rating}</span>
           </div>
         </div>
-        <p className="text-[11px] text-[hsl(var(--blue-900))]/60 mt-1">{visa.visaType}</p>
+        <p className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">{visa.visaType}</p>
         <div className="mt-3 flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-[hsl(var(--blue-900))]/50">From</span>
+            <span className="text-[12px] text-[hsl(var(--blue-900))]/50">From</span>
             <div className="text-[18px] font-display font-extrabold text-[hsl(var(--blue-900))]">{visa.price}</div>
           </div>
           <div className="text-right">
-            <div className="flex items-center gap-1 text-[10px] text-[hsl(var(--blue-900))]/60">
+            <div className="flex items-center gap-1 text-[12px] text-[hsl(var(--blue-900))]/60">
               <Clock className="w-3 h-3" />
               {visa.processing}
             </div>
-            <div className="text-[10px] text-[hsl(var(--blue-900))]/40">{visa.reviews.toLocaleString()} reviews</div>
+            <div className="text-[12px] text-[hsl(var(--blue-900))]/40">{visa.reviews.toLocaleString()} reviews</div>
           </div>
         </div>
         <Link
@@ -187,7 +187,7 @@ export default function MapView() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8"
           >
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
               <Globe className="w-3.5 h-3.5" />
               Interactive Map
             </div>
@@ -241,11 +241,11 @@ export default function MapView() {
                     <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                   </span>
-                  <span className="text-white/80 text-[11px] font-semibold">Live Tracking</span>
+                  <span className="text-white/80 text-[12px] font-semibold">Live Tracking</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
                   <Plane className="w-3.5 h-3.5 text-white/80" />
-                  <span className="text-white/80 text-[11px] font-semibold">250+ Countries</span>
+                  <span className="text-white/80 text-[12px] font-semibold">250+ Countries</span>
                 </div>
               </div>
             </div>

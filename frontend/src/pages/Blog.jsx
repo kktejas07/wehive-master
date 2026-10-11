@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API } from '../context/AuthContext';
 import { ContentCard, ContentCardGrid } from '../components/ui/ContentCard';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
 export default function Blog() {
   const [blogs, setBlogs] = useState([]);
@@ -13,6 +14,7 @@ export default function Blog() {
   const [error, setError] = useState(null);
   const [category, setCategory] = useState('All');
   const [selectedBlog, setSelectedBlog] = useState(null);
+  const dialogProps = useDialogA11y(!!selectedBlog, () => setSelectedBlog(null));
   const [podcastData, setPodcastData] = useState(null);
   const [generatingPodcast, setGeneratingPodcast] = useState(false);
 
@@ -74,7 +76,7 @@ export default function Blog() {
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition-all shadow-sm border ${
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition shadow-sm border ${
                   category === cat 
                     ? 'bg-primary text-white border-primary' 
                     : 'bg-white text-gray-600 border-gray-200 hover:border-primary/30 hover:bg-gray-50'
@@ -92,7 +94,7 @@ export default function Blog() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center py-20 text-gray-400"
+                className="flex flex-col items-center justify-center py-20 text-muted-foreground"
               >
                 <RefreshCw className="w-8 h-8 animate-spin mb-4 text-primary" />
                 <p>Loading latest articles...</p>
@@ -170,7 +172,7 @@ export default function Blog() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col relative"
+              {...dialogProps} className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col relative"
             >
               {/* Close button */}
               <button
@@ -182,7 +184,7 @@ export default function Blog() {
 
               {/* Cover Image */}
               <div className="relative h-64 sm:h-80 w-full shrink-0">
-                <img 
+                <img loading="lazy" decoding="async" 
                   src={(selectedBlog.imageUrl && !selectedBlog.imageUrl.includes('unsplash')) ? selectedBlog.imageUrl : getRelevantImage(selectedBlog.category)} 
                   alt={selectedBlog.title}
                   className="w-full h-full object-cover"
@@ -251,7 +253,7 @@ export default function Blog() {
                     <div className="space-y-4 max-h-64 overflow-y-auto pr-2 scrollbar-hide">
                       {podcastData.map((line, idx) => (
                         <div key={idx} className={`p-3 rounded-xl max-w-[85%] ${line.speaker === 'Host' ? 'bg-indigo-800 ml-0 rounded-tl-sm' : 'bg-indigo-700 ml-auto rounded-tr-sm text-right'}`}>
-                          <div className="text-[10px] uppercase font-bold text-indigo-300 mb-1 tracking-widest">{line.speaker}</div>
+                          <div className="text-[12px] uppercase font-bold text-indigo-300 mb-1 tracking-widest">{line.speaker}</div>
                           <div className="text-[14px] leading-relaxed">{line.text}</div>
                         </div>
                       ))}

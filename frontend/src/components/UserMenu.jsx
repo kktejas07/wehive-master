@@ -66,7 +66,7 @@ export default function UserMenu() {
             </span>
             <div className="min-w-0">
               <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">{display}</div>
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
+              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
                 Signed in
               </div>
             </div>
