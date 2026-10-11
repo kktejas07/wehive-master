@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 DEFAULT_BASE_FEE_BY_TYPE = {
@@ -11,6 +12,9 @@ DEFAULT_BASE_FEE_BY_TYPE = {
 DEFAULT_SURCHARGE_INR = 350
 DEFAULT_GST_RATE = 0.18
 FLAT_APPLICATION_FEE_INR = 20000
+EXTRA_UNIVERSITY_FEE_INR = 3000
+# Indicative FX rate used to show embassy fees (stored in USD) in INR.
+USD_TO_INR = float(os.environ.get('USD_TO_INR', '83'))
 
 
 def base_fee_for(visa_type: str, fallback: int = 3500) -> int:
@@ -68,7 +72,7 @@ def compute_multi_university_fees(university_count: int) -> dict:
     if count <= 3:
         application_fee = FLAT_APPLICATION_FEE_INR
     else:
-        application_fee = FLAT_APPLICATION_FEE_INR + (count - 3) * 3000
+        application_fee = FLAT_APPLICATION_FEE_INR + (count - 3) * EXTRA_UNIVERSITY_FEE_INR
     gst = round(application_fee * DEFAULT_GST_RATE)
     total = application_fee + gst
     return {

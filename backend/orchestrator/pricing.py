@@ -80,10 +80,6 @@ def estimate_tokens(messages: list[dict], model: str = "gpt-4o") -> int:
     return max(1, total + len(messages) * 3)
 
 
-def estimate_text_tokens(text: str, model: str = "gpt-4o") -> int:
-    return max(1, len(_tiktoken_encode(text, model)))
-
-
 def calculate_cost(
     provider: str,
     prompt_tokens: int,
@@ -99,8 +95,3 @@ def calculate_cost(
     output_rate = rates.get("output", 0.0)
     cost = (prompt_tokens / 1000.0 * input_rate) + (completion_tokens / 1000.0 * output_rate)
     return round(cost, 6)
-
-
-def get_pricing(provider: str, model: Optional[str] = None) -> dict[str, float]:
-    rates = PROVIDER_PRICING.get(provider) or PROVIDER_PRICING.get(f"{provider}_{model}")
-    return rates or {"input": 0.0, "output": 0.0}

@@ -14,22 +14,11 @@ from admin_auth import get_current_admin_flex
 router = APIRouter(prefix="/blogs", tags=["Blogs"])
 logger = logging.getLogger("wehive.routes_blogs")
 
-class BlogResponse(BaseModel):
-    id: str
-    title: str
-    country_id: str
-    description: str
-    readTime: str
-    category: str
-    imageUrl: Optional[str]
-    author: dict
-    status: str
-    created_at: str
-
 def serialize_doc(doc) -> dict:
-    doc["id"] = str(doc["_id"])
-    doc["created_at"] = doc["created_at"].isoformat() + "Z"
-    del doc["_id"]
+    doc["id"] = str(doc.pop("_id"))
+    created = doc.get("created_at")
+    if isinstance(created, datetime):
+        doc["created_at"] = created.isoformat() + "Z"
     return doc
 
 @router.get("")
@@ -111,27 +100,23 @@ async def get_pending_blogs(
 
 @router.post("/{blog_id}/approve")
 async def approve_blog(blog_id: str, _admin=Depends(get_current_admin_flex)):
-    try:
-        query = {"_id": ObjectId(blog_id)}
-        res = await global_blogs_col.update_one(query, {"$set": {"status": "approved"}})
-        if res.modified_count == 0:
-            raise HTTPException(status_code=404, detail="Blog not found or already approved")
-        return {"status": "success"}
-    except Exception as e:
-        logger.error(f"Error approving blog {blog_id}: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    """Set a blog item's moderation status to 'approved' (admin only)."""
+    if not ObjectId.is_valid(blog_id):
+        raise HTTPException(status_code=404, detail="Blog not found")
+    res = await global_blogs_col.update_one({"_id": ObjectId(blog_id)}, {"$set": {"status": "approved"}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return {"status": "success", "new_status": "approved"}
 
 @router.post("/{blog_id}/reject")
 async def reject_blog(blog_id: str, _admin=Depends(get_current_admin_flex)):
-    try:
-        query = {"_id": ObjectId(blog_id)}
-        res = await global_blogs_col.update_one(query, {"$set": {"status": "rejected"}})
-        if res.modified_count == 0:
-            raise HTTPException(status_code=404, detail="Blog not found or already rejected")
-        return {"status": "success"}
-    except Exception as e:
-        logger.error(f"Error rejecting blog {blog_id}: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    """Set a blog item's moderation status to 'rejected' (admin only)."""
+    if not ObjectId.is_valid(blog_id):
+        raise HTTPException(status_code=404, detail="Blog not found")
+    res = await global_blogs_col.update_one({"_id": ObjectId(blog_id)}, {"$set": {"status": "rejected"}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return {"status": "success", "new_status": "rejected"}
 
 @router.get("/{blog_id}/podcast")
 async def generate_podcast_script(

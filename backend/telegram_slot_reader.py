@@ -3,7 +3,8 @@ public Telegram channels where users post about open appointment slots.
 
 Legitimate approach:
   - Uses official Telegram Bot API (no scraping)
-  - Reads from public channels only
+  - Reads only channels listed in TELEGRAM_SLOT_CHANNELS that the bot has been
+    added to as an administrator (getUpdates cannot read arbitrary channels)
   - Parses user messages with regex + LLM for slot dates, locations, visa types
   - Stores extracted slots in MongoDB for display
 
@@ -18,18 +19,13 @@ from typing import Optional
 
 import httpx
 
+from constants import US_VISA_CLASS_KEYWORDS
+
 logger = logging.getLogger("wehive.telegram_slots")
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_SLOT_CHANNELS = os.environ.get("TELEGRAM_SLOT_CHANNELS", "")
-
-DEFAULT_CHANNELS = [
-    {"username": "@USvisaAppointmentsHelp", "focus": "b1b2"},
-    {"username": "@h1b_slots", "focus": "h1b"},
-    {"username": "@visa_usa_b1_h1_b2_f1_slots_appo", "focus": "all"},
-    {"username": "@US_F1_Visa_Updates", "focus": "f1"},
-    {"username": "@US_H1B_Visa_Updates", "focus": "h1b"},
-]
+_skip_logged = False
 
 CONSULATE_KEYWORDS = {
     "mumbai": ["mumbai", "bombay"],
@@ -39,14 +35,6 @@ CONSULATE_KEYWORDS = {
     "hyderabad": ["hyderabad", "hyd"],
 }
 
-VISA_TYPE_KEYWORDS = {
-    "b1b2": ["b1", "b2", "b1/b2", "tourist", "visitor", "business visa"],
-    "f1": ["f1", "f-1", "student", "student visa"],
-    "h1b": ["h1b", "h1-b", "h-1b", "h1", "work visa"],
-    "h4": ["h4", "h-4", "dependent"],
-    "l1": ["l1", "l-1", "l1a", "l1b", "intra-company"],
-    "j1": ["j1", "j-1", "exchange", "exchange visitor"],
-}
 
 DATE_PATTERNS = [
     re.compile(r'(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})'),
@@ -95,7 +83,7 @@ def _detect_consulate(text: str) -> Optional[str]:
 
 def _detect_visa_type(text: str) -> Optional[str]:
     text_lower = text.lower()
-    for vt_id, keywords in VISA_TYPE_KEYWORDS.items():
+    for vt_id, keywords in US_VISA_CLASS_KEYWORDS.items():
         for kw in keywords:
             if kw in text_lower:
                 return vt_id
@@ -153,69 +141,63 @@ async def parse_slot_message(text: str) -> Optional[dict]:
     return None
 
 
-async def read_channel(channel_username: str, limit: int = 50) -> list[dict]:
-    """Read recent messages from a Telegram channel and extract slot info."""
+def configured_channels() -> list[str]:
+    """Channel usernames from TELEGRAM_SLOT_CHANNELS (comma-separated, e.g. "@a,@b")."""
+    return [c.strip() for c in TELEGRAM_SLOT_CHANNELS.split(",") if c.strip()]
+
+
+def _not_configured_reason() -> Optional[str]:
     if not TELEGRAM_BOT_TOKEN:
+        return "TELEGRAM_BOT_TOKEN not set"
+    if not configured_channels():
+        return "TELEGRAM_SLOT_CHANNELS not set"
+    return None
+
+
+async def read_all_channels() -> list[dict]:
+    """Read recent posts from the configured channels and extract slot info.
+
+    Uses the Bot API getUpdates, which only delivers posts from channels the
+    bot has been added to (as an administrator); it cannot read arbitrary
+    public channels. Skips cleanly when the token or channel list is unset.
+    """
+    global _skip_logged
+    reason = _not_configured_reason()
+    if reason:
+        if not _skip_logged:
+            logger.info("Telegram slot reader disabled: %s (bot must be an admin of each listed channel).", reason)
+            _skip_logged = True
         return []
 
-    result = await _telegram_get("getUpdates", {
-        "limit": min(limit, 100),
-        "timeout": 15,
-    })
-
+    wanted = {c.lstrip("@").lower() for c in configured_channels()}
+    result = await _telegram_get("getUpdates", {"limit": 100, "timeout": 0})
     if not result or "result" not in result:
+        logger.warning("Telegram slot reader: getUpdates returned no data (bad token or webhook set?).")
         return []
 
     slots_found = []
     for update in result["result"]:
-        msg = update.get("message", {}) or update.get("channel_post", {})
-        text = msg.get("text", "") or msg.get("caption", "")
-        chat = msg.get("chat", {})
-
-        chat_username = chat.get("username", "")
-        if channel_username.lstrip("@").lower() not in chat_username.lower():
+        msg = update.get("channel_post") or update.get("message") or {}
+        chat_username = (msg.get("chat", {}).get("username") or "").lower()
+        if chat_username not in wanted:
             continue
-
+        text = msg.get("text", "") or msg.get("caption", "")
         if not text or len(text) < 10:
             continue
-
         parsed = await parse_slot_message(text)
         if parsed and parsed.get("has_slots"):
-            slot_data = {
+            slots_found.append({
                 "source": "telegram",
-                "channel": channel_username,
+                "channel": f"@{chat_username}",
+                "channel_focus": "all",
                 "message_id": msg.get("message_id"),
-                "message_date": datetime.fromtimestamp(msg.get("date", 0)).isoformat()
-                if msg.get("date") else "",
+                "message_date": datetime.utcfromtimestamp(msg["date"]).isoformat() if msg.get("date") else "",
                 "text_preview": text[:200],
                 **parsed,
-            }
-            slots_found.append(slot_data)
-
+            })
+    if slots_found:
+        logger.info("Telegram slot reader: %d slot mentions found.", len(slots_found))
     return slots_found
-
-
-async def read_all_channels() -> list[dict]:
-    """Read from all configured Telegram slot channels."""
-    channels = DEFAULT_CHANNELS
-
-    if TELEGRAM_SLOT_CHANNELS:
-        custom = [c.strip() for c in TELEGRAM_SLOT_CHANNELS.split(",") if c.strip()]
-        channels = [{"username": c, "focus": "all"} for c in custom]
-
-    all_slots = []
-    for ch in channels:
-        try:
-            slots = await read_channel(ch["username"])
-            for s in slots:
-                s["channel_focus"] = ch.get("focus", "all")
-            all_slots.extend(slots)
-            if slots:
-                logger.info("Found %d slot mentions in %s", len(slots), ch["username"])
-        except Exception as e:
-            logger.debug("Channel %s read error: %s", ch["username"], e)
-
-    return all_slots
 
 
 async def store_telegram_slots(slots: list[dict]):
@@ -262,11 +244,3 @@ async def store_telegram_slots(slots: list[dict]):
                 stored += 1
 
     return stored
-
-
-def telegram_slot_status() -> dict:
-    return {
-        "configured": bool(TELEGRAM_BOT_TOKEN),
-        "channels": [c["username"] for c in DEFAULT_CHANNELS],
-        "channels_count": len(DEFAULT_CHANNELS),
-    }

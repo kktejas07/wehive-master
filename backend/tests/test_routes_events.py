@@ -36,7 +36,8 @@ def test_public_events(mock_col):
 @patch('routes_events.fetch_events_from_url', new_callable=AsyncMock)
 @patch('routes_events.global_events_col.insert_one', new_callable=AsyncMock)
 @patch('routes_events.audit_record', new_callable=AsyncMock)
-def test_admin_trigger_scrape(mock_audit, mock_insert, mock_fetch):
+@patch('routes_events.scraping_enabled', return_value=None)
+def test_admin_trigger_scrape(_enabled, mock_audit, mock_insert, mock_fetch):
     mock_fetch.return_value = [{"name": "Mock Event", "date": "2026-10-15", "category": "Tech"}]
     
     response = client.post("/events/scrape/trigger", json={

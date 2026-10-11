@@ -174,10 +174,11 @@ def _fallback_wait_time(from_country: str, to_country: str, location: str = "") 
         "ae": {"visitor": "3-7 days", "work": "2-4 weeks"},
     }
     wait_times = country_map.get(to_country, {"default": "2-4 weeks"})
-    source = "published_embassy_advisories"
 
+    # Static, hand-maintained numbers — never present these as live data.
     return {
-        "source": source,
+        "source": "estimate",
+        "is_estimate": True,
         "from": from_country,
         "to": to_country,
         "location": location,

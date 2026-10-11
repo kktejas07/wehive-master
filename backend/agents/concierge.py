@@ -12,15 +12,10 @@ Steps:
 """
 
 from datetime import datetime
-from typing import List, Optional
-
-import json
-
-from db import db as _db
 from enum import Enum
+from typing import Optional
 
-from data import get_country
-from eva_tools import lookup_country, get_visa_requirements, get_application_fee
+from eva_tools import lookup_country, get_application_fee
 
 
 class StepStatus(str, Enum):
@@ -70,8 +65,25 @@ class ConciergeSession:
         return f'{done}/{total}'
 
 
-# In-memory sessions (replace with DB for production)
+# In-memory sessions: lost on restart and not shared across workers.
+# Acceptable for the current single-process deployment.
 _active_sessions: dict = {}
+
+
+def _visa_requirements(country_data: Optional[dict], visa_type: str) -> Optional[dict]:
+    """Pick the visa category for ``visa_type``. ``categories`` is a dict keyed
+    by type (Tourist/Student/...) in data.py, but may be a list in Mongo docs."""
+    if not country_data:
+        return None
+    categories = country_data.get('categories') or {}
+    items = categories.items() if isinstance(categories, dict) else ((c.get('name', ''), c) for c in categories)
+    wanted = (visa_type or '').lower()
+    for key, cat in items:
+        if not isinstance(cat, dict):
+            continue
+        if wanted in (str(key).lower(), str(cat.get('name', '')).lower()):
+            return {'country': country_data.get('name'), 'visa_type': visa_type, **cat}
+    return country_data
 
 
 async def start_concierge(user_id: str, country_id: str, visa_type: str) -> dict:
@@ -81,7 +93,7 @@ async def start_concierge(user_id: str, country_id: str, visa_type: str) -> dict
 
     # Auto-fetch requirements
     country_data = await lookup_country(country_id)
-    reqs = await get_visa_requirements(country_id, visa_type)
+    reqs = _visa_requirements(country_data, visa_type)
     fees = await get_application_fee(country_id)
 
     session.complete_step('requirements', {
@@ -124,24 +136,3 @@ async def advance_concierge(user_id: str, country_id: str, step: str, data: dict
         'next_step': next_step,
         'done': next_step is None,
     }
-
-
-async def llm_conversation_step(session, user_message: str) -> dict:
-    """Use LLM to determine the next best action in the concierge flow."""
-    try:
-        from model_router import chat_with_profile
-        response = await chat_with_profile(
-            "fast_cheap",
-            [
-                {"role": "system", "content": (
-                    "You are a visa application concierge. Given the current state and user message, "
-                    "suggest the next step. Return JSON: {\"action\": \"...\", \"response\": \"...\", \"next_step\": \"...\"}. "
-                    "Only return JSON."
-                )},
-                {"role": "user", "content": f"Session: {session.to_dict()}\nUser: {user_message}"},
-            ],
-            max_tokens=300,
-        )
-        return json.loads(response.get("content", "{}"))
-    except Exception:
-        return {"action": "continue", "response": "Let me help you with that.", "next_step": session.get_next_step()}

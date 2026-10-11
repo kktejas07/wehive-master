@@ -2,7 +2,8 @@
 Covers pricing, communication_services, admin_auth (hash), data, and more.
 """
 
-import sys, os
+import os
+import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 os.environ["MONGO_URL"] = "mongodb://localhost:27017"
@@ -202,7 +203,7 @@ class TestWhatsApp:
     async def test_get_community_invite_default(self):
         from communication_services import WhatsAppService
         svc = WhatsAppService(group_invite_link="")
-        assert await svc.get_community_invite() == "https://chat.whatsapp.com/invite"
+        assert await svc.get_community_invite() == ""
 
     @pytest.mark.asyncio
     async def test_get_community_invite_custom(self):

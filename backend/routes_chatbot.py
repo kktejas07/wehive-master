@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from ai_marketplace import marketplace
 from auth_utils import get_current_user_optional
+from config import SUPPORT_PHONE
 from db import db
 from eva_tools import get_application_fee, lookup_country, search_universities
 from local_llm import local_chat_with_info
@@ -82,7 +83,9 @@ async def _gather_context(user_prompt: str) -> str:
             visa_types = data.get("visa_types", [])
             if visa_types:
                 lines.append(f"  Visa types: {', '.join(visa_types)}")
-            categories = data.get("categories", [])
+            categories = data.get("categories") or {}
+            if isinstance(categories, dict):
+                categories = list(categories.values())
             for cat in categories[:3]:
                 lines.append(
                     f"  {cat.get('name')}: ₹{cat.get('fees_inr', 'N/A')} / ${cat.get('fees_usd', 'N/A')}, {cat.get('processing_days', 'N/A')} days, docs: {len(cat.get('documents', []))}"
@@ -268,7 +271,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         except Exception:
             reply_text = (
                 "I'm having trouble reaching my brain right now. Please try again, or contact our team at "
-                "+91 91132 56726 for an immediate answer."
+                f"{SUPPORT_PHONE} for an immediate answer."
             )
             provider_info = {}
 

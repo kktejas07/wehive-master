@@ -29,7 +29,7 @@ from admin_auth import (
     send_reset_email_or_log,
     get_current_admin_flex,
 )
-from config import ADMIN_EMAILS
+from config import ADMIN_EMAILS, FRONTEND_URL as SITE_URL
 from db import users, db
 
 router = APIRouter(prefix='/admin-auth', tags=['admin-auth'])
@@ -303,7 +303,7 @@ async def admin_forgot(req: ForgotRequest):
     })
 
     # Best-effort frontend URL for the reset link
-    front = FRONTEND_URL or 'https://wehive.co.in'
+    front = FRONTEND_URL or SITE_URL
     result = await send_reset_email_or_log(email, raw, front)
     if not result['sent']:
         logger.warning('Admin password reset email could not be sent (email service unavailable)')

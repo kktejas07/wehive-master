@@ -55,7 +55,7 @@ async def bootstrap_rag_and_prompts(db) -> dict:
                     "You are {{ agent_name }}, {{ agent_role }} for We Hive Immigration Services.\n\n"
                     "CRITICAL RULES — VISA ACCURACY:\n"
                     "1. For visa requirements, fees, processing times, and document lists, you MUST call the `visa_lookup` tool. Never answer visa rules from memory.\n"
-                    "2. After every visa_lookup call, state the date checked (\"Checked today: {{ today }}\") and cite the provider (e.g. \"Source: Sherpa / SimpleVisa / VisaHQ\").\n"
+                    "2. After every visa_lookup call, state the date checked (\"Checked today: {{ today }}\") and cite the provider returned by the tool (e.g. \"Source: VisaHQ\").\n"
                     "3. End every visa-related answer with: \"Confirm with the official embassy or consulate; requirements can change.\"\n"
                     "4. For background context (country info, document types, FAQ) you may use the retrieved RAG context under \"Stable knowledge\".\n"
                     "5. Use ₹ for INR and $ for USD. Be concise (2-5 sentences).\n"
@@ -75,7 +75,7 @@ async def bootstrap_rag_and_prompts(db) -> dict:
                     "You are {{ agent_name }}, {{ agent_role }} for We Hive.\n\n"
                     "CRITICAL RULES — TRAVEL ACCURACY:\n"
                     "1. For visa requirements of any destination, ALWAYS call `visa_lookup` (live, not RAG). Date-stamp and cite the provider.\n"
-                    "2. For flight/price/availability questions, call `trip_plan` to get live itinerary + price data. Never quote prices from memory.\n"
+                    "2. You have no live flight/price tool. Never quote prices from memory; point the user to the Fly page (/map) on We Hive for live fares.\n"
                     "3. After every live tool call, state the date checked (\"Checked today: {{ today }}\") and cite the provider.\n"
                     "4. For stable travel guides, destination background, packing tips, and FAQs, use the retrieved RAG context.\n"
                     "5. Currency: ₹ for INR, $ for USD, local currency when relevant. 2-5 sentences unless a day-by-day plan is asked for.\n"
@@ -95,7 +95,7 @@ async def bootstrap_rag_and_prompts(db) -> dict:
                     "You are {{ agent_name }}, {{ agent_role }} for We Hive.\n\n"
                     "CRITICAL RULES — DOCUMENT SAFETY:\n"
                     "1. Passports, financial statements, I-20s, and IDs are sensitive. NEVER ask the user to paste raw numbers (passport, Aadhaar, SSN) in chat. Tell them to upload the document via the secure upload in their account instead.\n"
-                    "2. When the user asks \"do I have my documents ready?\" or \"what's missing?\", you may call `document_extract` ONLY if they have previously uploaded documents AND given consent. Otherwise, recommend the document checklist from RAG.\n"
+                    "2. When the user asks \"do I have my documents ready?\" or \"what's missing?\", recommend the document checklist from RAG and point them to Document Scan in their account to verify uploaded documents.\n"
                     "3. For general document checklists (tourist, student, business, work visa), use the retrieved RAG context. Cite the checklist name in [brackets].\n"
                     "4. Be concise. Use a checklist format when listing required documents. 2-6 lines is usually enough.\n"
                     "5. Documents are encrypted at rest in We Hive. Never invent document fields; only echo what the user or the tool provides.\n\n"
@@ -223,10 +223,10 @@ async def bootstrap_rag_and_prompts(db) -> dict:
                 name="Travel planner",
                 role="We Hive's travel planner — itineraries, flights, prices",
                 prompt_id="system.hive_travel",
-                tools=["visa_lookup", "trip_plan", "rag_search", "lookup_country"],
+                tools=["visa_lookup", "rag_search", "lookup_country"],
                 provider_id="ollama",
                 model="llama3.2",
-                description="Live trip plans + visa lookup + travel-guide RAG.",
+                description="Visa lookup + travel-guide RAG.",
                 tags=["hive", "travel"],
                 rag_collections=["travel_guides", "wehive_countries"],
             ),
@@ -235,10 +235,10 @@ async def bootstrap_rag_and_prompts(db) -> dict:
                 name="Documents",
                 role="We Hive's document checklist and review assistant",
                 prompt_id="system.hive_documents",
-                tools=["document_extract", "rag_search"],
+                tools=["rag_search"],
                 provider_id="ollama",
                 model="llama3.2",
-                description="PII-safe document checklist + (consented) field extraction.",
+                description="PII-safe document checklist.",
                 tags=["hive", "documents"],
                 rag_collections=["document_checklists"],
             ),
@@ -247,10 +247,10 @@ async def bootstrap_rag_and_prompts(db) -> dict:
                 name="Study abroad",
                 role="We Hive's study-abroad advisor — university Q&A, recommenders, scholarship match",
                 prompt_id="system.hive_study_abroad",
-                tools=["rag_search", "search_universities", "lookup_university", "loan_referral"],
+                tools=["rag_search", "search_universities", "lookup_university"],
                 provider_id="ollama",
                 model="llama3.2",
-                description="University RAG + live search + loan referral.",
+                description="University RAG + live search.",
                 tags=["hive", "study", "university"],
                 rag_collections=["university_data", "wehive_universities"],
             ),
@@ -316,11 +316,10 @@ async def bootstrap_rag_and_prompts(db) -> dict:
         logger.warning("Hive RAG seed failed: %s", e)
         summary["errors"].append(f"hive_rag: {e}")
 
-    # ── Hive self-learning: mine recent feeds, auto-apply improved prompts ──
-    # Greps the most recent Hive conversations and asks the LLM to improve
-    # the 4 system prompts. New versions are saved to Mongo; the next
-    # /agents-v2/{id}/run call picks them up automatically. Disable with
-    # HIVE_SELF_LEARN=0; bypass thresholds with HIVE_SELF_LEARN_FORCE=1.
+    # ── Hive self-learning (opt-in: HIVE_SELF_LEARN=1) ──
+    # Mines recent authenticated Hive conversations and stores proposed
+    # prompt rewrites as pending in `hive_proposals`. Nothing is applied
+    # until an admin approves via POST /api/hive/learning/apply.
     try:
         from seed_self_learn import seed_self_learn as _seed_self_learn
         learn_res = await _seed_self_learn(db)

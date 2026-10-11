@@ -1,30 +1,11 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException
 
 from auth_utils import get_current_user
 from db import db, users
 
 router = APIRouter(prefix='/users/me/shortlist', tags=['shortlist'])
-
-
-class ShortlistItem(BaseModel):
-    university_id: str
-    university_name: str
-    short_name: str
-    country: str
-    flag: str
-    rank: int
-    tuition_usd: int
-    added_at: datetime
-
-
-class ShortlistShare(BaseModel):
-    universities: List[dict]
-    created_at: datetime
-    share_token: str
 
 
 @router.get('')

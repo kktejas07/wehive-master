@@ -10,7 +10,6 @@ aiohttp==3.13.5
     #   aiohttp-retry
     #   kubernetes
     #   langchain-community
-    #   litellm
     #   twilio
 aiohttp-retry==2.9.1
     # via
@@ -43,8 +42,6 @@ attrs==26.1.0
     # via
     #   -r backend/requirements.txt
     #   aiohttp
-    #   jsonschema
-    #   referencing
 backoff==2.2.1
     # via posthog
 bcrypt==4.1.3
@@ -94,7 +91,6 @@ click==8.3.2
     # via
     #   -r backend/requirements.txt
     #   black
-    #   litellm
     #   typer
     #   uvicorn
 coloredlogs==15.0.1
@@ -118,10 +114,6 @@ dnspython==2.8.0
     #   pymongo
 durationpy==0.10
     # via kubernetes
-ecdsa==0.19.2
-    # via
-    #   -r backend/requirements.txt
-    #   python-jose
 email-validator==2.3.0
     # via -r backend/requirements.txt
 faiss-cpu==1.13.2
@@ -130,10 +122,6 @@ fastapi==0.110.1
     # via
     #   -r backend/requirements.txt
     #   chromadb
-fastuuid==0.14.0
-    # via
-    #   -r backend/requirements.txt
-    #   litellm
 filelock==3.25.2
     # via
     #   -r backend/requirements.txt
@@ -159,29 +147,21 @@ fsspec==2026.3.0
     #   huggingface-hub
 google==3.0.0
     # via scrapegraphai
-google-ai-generativelanguage==0.6.15
-    # via
-    #   -r backend/requirements.txt
-    #   google-generativeai
 google-api-core==2.30.2
     # via
     #   -r backend/requirements.txt
     #   firebase-admin
-    #   google-ai-generativelanguage
     #   google-api-python-client
     #   google-cloud-core
     #   google-cloud-firestore
     #   google-cloud-storage
-    #   google-generativeai
 google-api-python-client==2.194.0
     # via
     #   -r backend/requirements.txt
     #   firebase-admin
-    #   google-generativeai
 google-auth==2.49.1
     # via
     #   -r backend/requirements.txt
-    #   google-ai-generativelanguage
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
@@ -189,7 +169,6 @@ google-auth==2.49.1
     #   google-cloud-firestore
     #   google-cloud-storage
     #   google-genai
-    #   google-generativeai
 google-auth-httplib2==0.3.1
     # via
     #   -r backend/requirements.txt
@@ -210,8 +189,6 @@ google-genai==1.71.0
     # via
     #   -r backend/requirements.txt
     #   langchain-google-genai
-google-generativeai==0.8.6
-    # via -r backend/requirements.txt
 google-resumable-media==2.10.0
     # via google-cloud-storage
 googleapis-common-protos==1.74.0
@@ -267,8 +244,6 @@ httpx==0.28.1
     #   langchain-mistralai
     #   langgraph-sdk
     #   langsmith
-    #   litellm
-    #   ollama
     #   openai
 httpx-sse==0.4.3
     # via
@@ -288,10 +263,6 @@ idna==3.11
     #   httpx
     #   requests
     #   yarl
-importlib-metadata==9.0.0
-    # via
-    #   -r backend/requirements.txt
-    #   litellm
 importlib-resources==7.1.0
     # via chromadb
 iniconfig==2.3.0
@@ -300,10 +271,6 @@ iniconfig==2.3.0
     #   pytest
 isort==8.0.1
     # via -r backend/requirements.txt
-jinja2==3.1.6
-    # via
-    #   -r backend/requirements.txt
-    #   litellm
 jiter==0.13.0
     # via
     #   -r backend/requirements.txt
@@ -313,20 +280,10 @@ jmespath==1.1.0
     #   -r backend/requirements.txt
     #   boto3
     #   botocore
-jq==1.11.0
-    # via -r backend/requirements.txt
 jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.1.1
     # via jsonpatch
-jsonschema==4.26.0
-    # via
-    #   -r backend/requirements.txt
-    #   litellm
-jsonschema-specifications==2025.9.1
-    # via
-    #   -r backend/requirements.txt
-    #   jsonschema
 kubernetes==36.0.2
     # via chromadb
 langchain==1.3.2
@@ -379,18 +336,12 @@ librt==0.8.1
     # via
     #   -r backend/requirements.txt
     #   mypy
-litellm==1.80.0
-    # via -r backend/requirements.txt
 lxml==6.1.1
     # via free-proxy
 markdown-it-py==4.0.0
     # via
     #   -r backend/requirements.txt
     #   rich
-markupsafe==3.0.3
-    # via
-    #   -r backend/requirements.txt
-    #   jinja2
 mccabe==0.7.0
     # via
     #   -r backend/requirements.txt
@@ -421,8 +372,6 @@ mypy-extensions==1.1.0
     #   -r backend/requirements.txt
     #   black
     #   mypy
-nest-asyncio==1.6.0
-    # via -r backend/requirements.txt
 numpy==2.4.4
     # via
     #   -r backend/requirements.txt
@@ -437,14 +386,11 @@ oauthlib==3.3.1
     # via
     #   -r backend/requirements.txt
     #   requests-oauthlib
-ollama==0.4.7
-    # via -r backend/requirements.txt
 onnxruntime==1.23.2
     # via chromadb
 openai==2.45.0
     # via
     #   langchain-openai
-    #   litellm
 opentelemetry-api==1.43.0
     # via
     #   chromadb
@@ -509,8 +455,6 @@ pandas==3.0.2
     # via
     #   -r backend/requirements.txt
     #   scrapegraphai
-passlib==1.7.4
-    # via -r backend/requirements.txt
 pathspec==1.0.4
     # via
     #   -r backend/requirements.txt
@@ -543,16 +487,13 @@ propcache==0.4.1
 proto-plus==1.27.2
     # via
     #   -r backend/requirements.txt
-    #   google-ai-generativelanguage
     #   google-api-core
     #   google-cloud-firestore
 protobuf==5.29.6
     # via
     #   -r backend/requirements.txt
-    #   google-ai-generativelanguage
     #   google-api-core
     #   google-cloud-firestore
-    #   google-generativeai
     #   googleapis-common-protos
     #   grpcio-status
     #   onnxruntime
@@ -562,8 +503,6 @@ pyasn1==0.6.3
     # via
     #   -r backend/requirements.txt
     #   pyasn1-modules
-    #   python-jose
-    #   rsa
 pyasn1-modules==0.4.2
     # via
     #   -r backend/requirements.txt
@@ -584,7 +523,6 @@ pydantic==2.12.5
     #   chromadb
     #   fastapi
     #   google-genai
-    #   google-generativeai
     #   langchain
     #   langchain-aws
     #   langchain-classic
@@ -593,8 +531,6 @@ pydantic==2.12.5
     #   langchain-mistralai
     #   langgraph
     #   langsmith
-    #   litellm
-    #   ollama
     #   openai
     #   pydantic-settings
 pydantic-core==2.41.5
@@ -646,12 +582,9 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
     # via
     #   -r backend/requirements.txt
-    #   litellm
     #   pydantic-settings
     #   scrapegraphai
     #   uvicorn
-python-jose==3.5.0
-    # via -r backend/requirements.txt
 python-multipart==0.0.24
     # via -r backend/requirements.txt
 pytokens==0.4.1
@@ -670,11 +603,8 @@ pyyaml==6.0.3
     #   uvicorn
 rapidfuzz==3.12.2
     # via -r backend/requirements.txt
-referencing==0.37.0
-    # via
-    #   -r backend/requirements.txt
-    #   jsonschema
-    #   jsonschema-specifications
+razorpay==2.0.1
+    # via -r backend/requirements.txt
 regex==2026.4.4
     # via
     #   -r backend/requirements.txt
@@ -695,9 +625,9 @@ requests==2.33.1
     #   langchain-community
     #   langsmith
     #   posthog
+    #   razorpay
     #   requests-oauthlib
     #   requests-toolbelt
-    #   stripe
     #   tiktoken
     #   twilio
 requests-oauthlib==2.0.0
@@ -711,21 +641,10 @@ rich==14.3.3
     #   -r backend/requirements.txt
     #   chromadb
     #   typer
-rpds-py==0.30.0
-    # via
-    #   -r backend/requirements.txt
-    #   jsonschema
-    #   referencing
-rsa==4.9.1
-    # via
-    #   -r backend/requirements.txt
-    #   python-jose
 s3transfer==0.16.0
     # via
     #   -r backend/requirements.txt
     #   boto3
-s5cmd==0.2.0
-    # via -r backend/requirements.txt
 scrapegraphai==1.17.0
     # via -r backend/requirements.txt
 semchunk==4.1.1
@@ -737,7 +656,6 @@ shellingham==1.5.4
 six==1.17.0
     # via
     #   -r backend/requirements.txt
-    #   ecdsa
     #   kubernetes
     #   python-dateutil
 sniffio==1.3.1
@@ -756,8 +674,6 @@ starlette==0.37.2
     # via
     #   -r backend/requirements.txt
     #   fastapi
-stripe==15.0.1
-    # via -r backend/requirements.txt
 sympy==1.14.0
     # via onnxruntime
 tenacity==9.1.4
@@ -771,19 +687,16 @@ tiktoken==0.12.0
     # via
     #   -r backend/requirements.txt
     #   langchain-openai
-    #   litellm
     #   scrapegraphai
 tokenizers==0.22.2
     # via
     #   -r backend/requirements.txt
     #   chromadb
     #   langchain-mistralai
-    #   litellm
 tqdm==4.67.3
     # via
     #   -r backend/requirements.txt
     #   chromadb
-    #   google-generativeai
     #   huggingface-hub
     #   openai
     #   scrapegraphai
@@ -804,7 +717,6 @@ typing-extensions==4.15.0
     #   chromadb
     #   fastapi
     #   google-genai
-    #   google-generativeai
     #   grpcio
     #   huggingface-hub
     #   langchain-core
@@ -820,9 +732,7 @@ typing-extensions==4.15.0
     #   pydantic
     #   pydantic-core
     #   pyee
-    #   referencing
     #   sqlalchemy
-    #   stripe
     #   typing-inspection
 typing-inspection==0.4.2
     # via
@@ -875,9 +785,5 @@ yarl==1.23.0
     # via
     #   -r backend/requirements.txt
     #   aiohttp
-zipp==3.23.0
-    # via
-    #   -r backend/requirements.txt
-    #   importlib-metadata
 zstandard==0.25.0
     # via langsmith

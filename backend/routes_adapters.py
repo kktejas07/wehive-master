@@ -14,9 +14,13 @@ Endpoints:
   GET  /api/adapters/status                All adapters health
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from typing import Optional
 
-router = APIRouter(prefix="/adapters", tags=["third-party-adapters"])
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from auth_utils import get_current_user
+
+router = APIRouter(prefix="/adapters", tags=["third-party-adapters"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/list")
@@ -148,9 +152,13 @@ async def amadeus_restrictions(
 
 
 @router.get("/amadeus/insights")
-async def amadeus_insights(city_code: str = Query(...)):
+async def amadeus_insights(
+    city_code: str = Query(...),
+    lat: Optional[float] = Query(None, ge=-90, le=90),
+    lon: Optional[float] = Query(None, ge=-180, le=180),
+):
     from adapters.amadeus_adapter import get_tourist_insights
-    result = await get_tourist_insights(city_code)
+    result = await get_tourist_insights(city_code, lat, lon)
     if not result:
         raise HTTPException(status_code=502, detail="Amadeus unavailable")
     return {"ok": True, **result}

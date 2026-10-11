@@ -12,8 +12,8 @@ Admin-only. Lets the operator:
   POST /api/hive/learning/apply           — save a proposed prompt as a new version
   POST /api/hive/learning/auto-apply     — end-to-end: mine + auto-apply all 4 agents
 
-These endpoints are independent from the auto-runner in
-`seed_self_learn.seed_self_learn` which fires on every server boot.
+The boot-time runner (`seed_self_learn`, only when HIVE_SELF_LEARN=1) never
+applies prompts — it stores proposals as pending for approval via /apply.
 """
 
 from __future__ import annotations
@@ -181,6 +181,7 @@ async def auto_apply(body: AutoApplyBody, _=Depends(get_current_admin_flex)):
         min_feeds=body.min_feeds,
         force=body.force,
         agent_ids=body.agent_ids or list(HIVE_AGENT_IDS),
+        apply=True,
     )
     return res
 

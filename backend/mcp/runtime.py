@@ -11,7 +11,7 @@ Tools exposed are the Hyra-native tools that wrap We Hive functionality.
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("wehive.mcp")
 
@@ -518,7 +518,3 @@ async def handle_mcp_request(method: str, params: dict = None, req_id: Any = Non
 
 def list_tools() -> list[dict]:
     return [{"name": t["name"], "description": t["description"]} for t in TOOLS.values()]
-
-
-def get_tool_schema(tool_name: str) -> Optional[dict]:
-    return TOOLS.get(tool_name)

@@ -1,13 +1,10 @@
 from __future__ import annotations
-import uuid
 import asyncio
 import json
 from datetime import datetime
-from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 
 from auth_utils import get_current_user, get_current_user_optional
 from db import db
@@ -15,17 +12,6 @@ from db import db
 router = APIRouter(prefix='/notifications', tags=['notifications'])
 
 notifications_col = db['notifications']
-
-
-class NotifCreate(BaseModel):
-    type: str
-    title: str
-    body: str
-    link: Optional[str] = None
-
-
-class NotifPatch(BaseModel):
-    read: bool
 
 
 @router.get('')
@@ -106,9 +92,3 @@ async def stream_notifications(user=Depends(get_current_user_optional)):
 
 def keepalive():
     return '{"type":"keepalive"}'
-
-
-async def push_notification(user_id: str, payload: dict):
-    q = _notif_subscribers.get(user_id)
-    if q:
-        await q.put(json.dumps(payload))

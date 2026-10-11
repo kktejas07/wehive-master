@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from auth_utils import decode_jwt, create_access_token, verify_password, hash_password
 from admin_auth import get_current_admin_flex
 from db import db
-from config import SECRET_KEY, ACCESS_TOKEN_EXPIRE
+from constants import DEFAULT_AGENT_COMMISSION_RATE
 
 router = APIRouter(prefix='/agent', tags=['agent'])
 
@@ -61,7 +61,7 @@ async def agent_signup(req: AgentSignupRequest):
         'agency_name': req.agency_name or '',
         'role': 'agent',
         'status': 'active',
-        'commission_rate': 10,
+        'commission_rate': DEFAULT_AGENT_COMMISSION_RATE,
         'students_count': 0,
         'applications_count': 0,
         'total_revenue': 0,
@@ -124,7 +124,7 @@ async def agent_dashboard(agent=Depends(get_current_agent)):
             'approved_applications': len([a for a in applications if a.get('status') == 'approved']),
             'upcoming_appointments': len(upcoming),
             'total_revenue': agent.get('total_revenue', 0),
-            'commission_rate': agent.get('commission_rate', 10),
+            'commission_rate': agent.get('commission_rate', DEFAULT_AGENT_COMMISSION_RATE),
         },
         'recent_applications': sorted(applications, key=lambda a: a.get('created_at', ''), reverse=True)[:10],
         'recent_students': sorted(students, key=lambda s: s.get('created_at', ''), reverse=True)[:10],

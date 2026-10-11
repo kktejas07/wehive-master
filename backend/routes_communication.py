@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import Optional
 
 from auth_utils import get_current_user
+from config import TELEGRAM_COMMUNITY_URL
 from communication_services import telegram, discord, whatsapp_service
 from db import users
 
@@ -13,11 +13,6 @@ router = APIRouter(prefix='/communication', tags=['communication'])
 
 class TelegramLinkRequest(BaseModel):
     telegram_username: str
-
-
-class TelegramOtpRequest(BaseModel):
-    code: str
-    purpose: str = 'login'
 
 
 class NotificationRequest(BaseModel):
@@ -84,10 +79,10 @@ async def send_discord_notification(
 
 @router.get('/community/join')
 async def get_community_invite(user=Depends(get_current_user)):
-    invite_link = whatsapp_service.get_community_invite()
+    invite_link = await whatsapp_service.get_community_invite()
     return {
         'whatsapp': invite_link,
-        'telegram_group': 'https://t.me/wehivecommunity',
+        'telegram_group': TELEGRAM_COMMUNITY_URL,
     }
 
 
@@ -113,7 +108,7 @@ async def send_community_invite(
             chat_id=f'@{user["telegram_username"]}',
             text=(
                 "Our Ambition. Our Guidance. No Frontiers! 🐝\n\n"
-                "Click here to join our Telegram group: https://t.me/wehivecommunity"
+                f"Click here to join our Telegram group: {TELEGRAM_COMMUNITY_URL}"
             )
         )
         if result.get('ok'):

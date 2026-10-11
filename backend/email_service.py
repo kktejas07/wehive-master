@@ -17,6 +17,7 @@ from typing import Optional
 
 import httpx
 
+from config import DEFAULT_FROM_EMAIL, FRONTEND_URL
 from settings_service import get_all as _get_settings
 
 logger = logging.getLogger('wehive.email')
@@ -32,7 +33,7 @@ EMAIL_CSS = """
     __CONTENT__
     <tr><td style="padding:0 32px 32px 32px;text-align:center">
       <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.6">
-        Need help? Reply to this email or visit <a href="https://wehive.co.in/help" style="color:#e0212c">We Hive Help</a>.<br>
+        Need help? Reply to this email or visit <a href="__SITE_URL__/help" style="color:#e0212c">We Hive Help</a>.<br>
         &copy; 2026 We Hive. All rights reserved.
       </p>
     </td></tr>
@@ -40,6 +41,7 @@ EMAIL_CSS = """
 </td></tr></table>
 </body>
 """
+EMAIL_CSS = EMAIL_CSS.replace('__SITE_URL__', FRONTEND_URL)
 
 
 async def _get_email_config() -> dict:
@@ -71,7 +73,7 @@ async def _send_via_smtp(
     port = int(cfg.get('smtp_port') or smtp_cfg.get('port') or os.environ.get('SMTP_PORT') or '587')
     user = cfg.get('smtp_user') or smtp_cfg.get('user') or os.environ.get('SMTP_USER', '')
     password = cfg.get('smtp_password') or smtp_cfg.get('password') or os.environ.get('SMTP_PASSWORD', '')
-    from_addr = cfg.get('from_address') or smtp_cfg.get('from') or os.environ.get('SMTP_FROM', user or 'noreply@wehive.co.in')
+    from_addr = cfg.get('from_address') or smtp_cfg.get('from') or os.environ.get('SMTP_FROM', user or DEFAULT_FROM_EMAIL)
     from_name = cfg.get('from_name') or smtp_cfg.get('from_name') or os.environ.get('SMTP_FROM_NAME', 'We Hive')
 
     if not host or not user or not password or 'REPLACE' in password:
@@ -130,7 +132,7 @@ async def _send_via_postal(
 
     api_url = cfg.get('postal_api_url') or postal_cfg.get('api_url') or os.environ.get('POSTAL_API_URL', '')
     api_key = cfg.get('postal_api_key') or postal_cfg.get('api_key') or os.environ.get('POSTAL_API_KEY', '')
-    from_addr = cfg.get('from_address') or postal_cfg.get('from_address') or os.environ.get('POSTAL_FROM', 'noreply@wehive.co.in')
+    from_addr = cfg.get('from_address') or postal_cfg.get('from_address') or os.environ.get('POSTAL_FROM', DEFAULT_FROM_EMAIL)
     from_name = cfg.get('from_name') or postal_cfg.get('from_name') or os.environ.get('POSTAL_FROM_NAME', 'We Hive')
 
     if not api_url or not api_key:
@@ -223,7 +225,7 @@ def build_welcome_html(name: str) -> str:
         <li>Connect with expert immigration consultants</li>
       </ul>
       <div style="text-align:center;margin:24px 0">
-        <a href="https://wehive.co.in/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Go to Dashboard</a>
+        <a href="{FRONTEND_URL}/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Go to Dashboard</a>
       </div>
     </td></tr>
     """
@@ -245,7 +247,7 @@ def build_payment_success_html(name: str, plan_name: str, amount: int, currency:
       </div>
       <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">You now have access to all premium features. Your invoice is attached to this email.</p>
       <div style="text-align:center;margin:24px 0">
-        <a href="https://wehive.co.in/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Explore Premium Features</a>
+        <a href="{FRONTEND_URL}/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Explore Premium Features</a>
       </div>
     </td></tr>
     """
@@ -263,7 +265,7 @@ def build_payment_failed_html(name: str, plan_name: str, amount: int, currency: 
       </div>
       <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Please try again or use a different payment method.</p>
       <div style="text-align:center;margin:24px 0">
-        <a href="https://wehive.co.in/pricing" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Try Again</a>
+        <a href="{FRONTEND_URL}/pricing" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Try Again</a>
       </div>
     </td></tr>
     """
@@ -283,22 +285,8 @@ def build_subscription_activated_html(name: str, plan_name: str, since: str) -> 
         <li>Advanced AI tools and document review</li>
       </ul>
       <div style="text-align:center;margin:24px 0">
-        <a href="https://wehive.co.in/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Go to Dashboard</a>
+        <a href="{FRONTEND_URL}/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Go to Dashboard</a>
       </div>
     </td></tr>
     """
     return _wrap_html('Subscription Active!', content)
-
-
-def build_subscription_cancelled_html(name: str, plan_name: str) -> str:
-    content = f"""
-    <tr><td style="padding:0 32px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Hi{f' {name}' if name else ''},</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Your <strong>{plan_name}</strong> subscription has been cancelled.</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">You can still use all free features. Upgrade anytime from your account settings.</p>
-      <div style="text-align:center;margin:24px 0">
-        <a href="https://wehive.co.in/pricing" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">View Plans</a>
-      </div>
-    </td></tr>
-    """
-    return _wrap_html('Subscription Update', content)

@@ -1,5 +1,5 @@
 """Token budget enforcement — tracks cumulative usage, marks exhausted accounts,
-triggers alerts at 80% and 95% thresholds, and sends admin notifications on exhaustion.
+triggers alerts at 80% and 95% thresholds, and logs an admin warning on exhaustion.
 """
 
 import logging
@@ -16,22 +16,6 @@ WARNING_THRESHOLD = 0.80
 async def _notify_budget_exhaustion(
     provider: str, pct_used: float, tokens_used: int, tokens_allocated: int
 ) -> None:
-    try:
-        from posthog_service import capture_event
-        capture_event(
-            event="orchestrator_budget_exhausted",
-            distinct_id="system",
-            properties={
-                "provider": provider,
-                "pct_used": round(pct_used * 100, 1),
-                "tokens_used": tokens_used,
-                "tokens_allocated": tokens_allocated,
-                "action_required": "rotate_or_increase_quota",
-            },
-        )
-    except Exception:
-        pass
-
     logger.warning(
         "BUDGET EXHAUSTION NOTIFICATION: provider=%s pct=%.1f%% used=%d/%d — "
         "admin action required: rotate API key or increase quota",
@@ -40,33 +24,6 @@ async def _notify_budget_exhaustion(
         tokens_used,
         tokens_allocated,
     )
-
-    try:
-        from alerting_service import get_alerting_service_sync
-        import asyncio as _asyncio
-
-        _alerting = get_alerting_service_sync()
-        _asyncio.ensure_future(
-            _alerting.send_alert(
-                alert_type="budget_exhaustion",
-                severity="critical",
-                title=f"Provider Budget Exhausted: {provider}",
-                message=(
-                    f"Provider '{provider}' has exhausted its token budget at "
-                    f"{pct_used*100:.1f}% ({tokens_used:,}/{tokens_allocated:,} tokens). "
-                    "Action required: rotate API key or increase quota."
-                ),
-                metadata={
-                    "provider": provider,
-                    "pct_used": round(pct_used * 100, 1),
-                    "tokens_used": tokens_used,
-                    "tokens_allocated": tokens_allocated,
-                    "action_required": "rotate_or_increase_quota",
-                },
-            )
-        )
-    except Exception:
-        pass
 
 
 class BudgetEnforcer:

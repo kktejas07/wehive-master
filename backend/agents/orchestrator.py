@@ -1,142 +1,64 @@
-"""Multi-Agent Orchestrator — routes complex requests to the right sub-agent.
-
-Uses LLM-powered intent detection (fast_cheap profile) with regex fallback.
-Delegates to: Eva chatbot, Document Validator, Concierge, Portal AI, Workflow.
+"""Intent scoring — ``score_intents`` is the single regex intent classifier
+shared by the local template engine (local_llm) and Hive/Stark
+(routes_agentic_ai).
 """
 
 import re
-from typing import Optional
 
-RE_VISA_QA = re.compile(
-    r"(visa|requirement|document|fee|processing|embassy|appointment|how long|how much|what is|tell me about)", re.I
-)
-RE_APPLY = re.compile(r"(apply|start|begin|create|new application|want to go|planning|trip to)", re.I)
-RE_DOC_CHECK = re.compile(r"(validate|check doc|verify|is this ok|document check|scan this|check.*document)", re.I)
-RE_AGENT = re.compile(r"(my student|commission|my agents|my dashboard|students? needing)", re.I)
-RE_STUDENT = re.compile(r"(study|university|college|course|program|scholarship|intake|tuition)", re.I)
 RE_COUNTRY = re.compile(r"\b(us|uk|ca|au|de|fr|it|es|jp|sg|ae|th|ch|np|bt|pl|at|pt|gr|hr)\b", re.I)
 
 
-class OrchestratorResult:
-    def __init__(self, agent: str, confidence: float, params: dict, message: str = ""):
-        self.agent = agent
-        self.confidence = confidence
-        self.params = params
-        self.message = message
+# Canonical intents. Each pattern match adds 2 points (capped at 10); intents
+# in _INTENT_BONUS get extra weight because they are more specific than the
+# generic "visa" vocabulary that co-occurs with them.
+INTENT_PATTERNS: dict[str, list[str]] = {
+    "greeting": [
+        r"^\s*(hi+|hello|hey+|namaste|good (morning|afternoon|evening)|what'?s up|howdy|yo|"
+        r"how are you|who are you)\b[\s!.?]*$",
+    ],
+    "help": [r"\b(help|what can you do|how (do|can) you (work|help)|commands|capabilities)\b"],
+    "documents": [
+        r"\b(documents?|checklist|paperwork|what do i need|bank statements?|cover letter|photographs?)\b",
+    ],
+    "fees": [r"(\bfees?\b|\bcosts?\b|\bprice\b|how much|₹)"],
+    "visa_qa": [
+        r"\b(visa|visa type|visa requirement|embassy|consulate)\b",
+        r"\b(ds.?160|i.?20|i.?129|i.?797|h.?1b|b.?[12]|f.?1|l.?1)\b",
+        r"\b(appointment|slot|interview|biometrics|stamping)\b",
+    ],
+    "concierge": [r"\b(apply|start (an? )?application|new application|begin my application)\b"],
+    "study_abroad": [
+        r"\b(study|university|universities|college|course|program|degree|master'?s?|bachelor'?s?|phd)\b",
+        r"\b(scholarships?|ielts|toefl|gre|gmat|sat|gpa|acceptance|intake|tuition)\b",
+    ],
+    "holiday": [
+        r"\b(holiday|vacation|trip|itinerary|best time|weather|attractions?|things to do|tour|sightseeing)\b",
+    ],
+    "country_info": [
+        r"\b(travel to|visit|go to|tourism in)\s+([a-z]+(?:\s+[a-z]+)*)",
+        r"\b(tell me about|info on)\s+([a-z]+(?:\s+[a-z]+)*)",
+    ],
+    "open_source": [
+        r"\b(open.?source|github|pypi|npm|package|library|framework)\b",
+        r"\b(ollama|chromadb|langchain|llama|mistral)\b",
+        r"\b(llm|embedding|vector|rag)\b",
+    ],
+    "technical": [
+        r"\b(how does|explain|what is the difference)\b",
+        r"\b(api|code|programming|python|javascript|database)\b",
+    ],
+}
+_INTENT_BONUS = {"greeting": 8, "documents": 3, "fees": 3, "concierge": 1}
+_COMPILED_INTENTS = {k: [re.compile(p, re.I) for p in v] for k, v in INTENT_PATTERNS.items()}
 
 
-async def detect_intent_llm(query: str) -> Optional[dict]:
-    """Use LLM to detect intent with higher accuracy than regex."""
-    try:
-        from model_router import chat_with_profile
-        response = await chat_with_profile(
-            "fast_cheap",
-            [
-                {"role": "system", "content": (
-                    "You are an intent classifier for We Hive immigration platform. "
-                    "Classify the user query into EXACTLY ONE agent category. "
-                    "Return JSON: {\"agent\": \"...\", \"confidence\": 0.0-1.0, \"params\": {...}, \"reason\": \"...\"}\n\n"
-                    "Agent categories:\n"
-                    "- visa_qa: visa requirements, fees, documents, embassy info, general visa questions\n"
-                    "- concierge: user wants to apply, start a new application, plan a trip, book appointment\n"
-                    "- doc_validator: checking documents, validating scans, verifying passport\n"
-                    "- portal_ai: agent dashboard, my students, commissions, performance\n"
-                    "- workflow: multi-step research, country + university research, study abroad\n\n"
-                    "Extract country codes (2-letter) into params.country_id if mentioned.\n"
-                    "Only return JSON, nothing else."
-                )},
-                {"role": "user", "content": f"Classify: {query}"},
-            ],
-            max_tokens=200,
-            temperature=0.1,
-        )
-        content = response.get("content", "{}") if isinstance(response, dict) else "{}"
-        import json
-        return json.loads(content)
-    except Exception:
-        return None
-
-
-def detect_intent_regex(query: str) -> OrchestratorResult:
-    """Regex-based intent detection (fallback)."""
-    q = query.lower().strip()
-    scores = {"visa_qa": 0, "concierge": 0, "doc_validator": 0, "portal_ai": 0, "workflow": 0}
-
-    visa_matches = len(RE_VISA_QA.findall(q))
-    scores["visa_qa"] += visa_matches * 2
-    if RE_APPLY.search(q):
-        scores["concierge"] += 5
-    country_codes = RE_COUNTRY.findall(q)
-    if country_codes and RE_APPLY.search(q):
-        scores["concierge"] += 3
-    if RE_DOC_CHECK.search(q):
-        scores["doc_validator"] += 5
-    if RE_AGENT.search(q):
-        scores["portal_ai"] += 5
-    if RE_STUDENT.search(q) and country_codes:
-        scores["workflow"] += 3
-    if RE_STUDENT.search(q) and not country_codes:
-        scores["visa_qa"] += 2
-    if country_codes and not RE_APPLY.search(q) and not RE_VISA_QA.search(q):
-        scores["workflow"] += 2
-
-    best_agent = max(scores, key=scores.get)
-    best_score = scores[best_agent]
-
-    params = {}
-    if country_codes:
-        params["country_id"] = country_codes[0].lower()
-    if RE_STUDENT.search(q):
-        params["intent"] = "student"
-    elif RE_VISA_QA.search(q):
-        params["intent"] = "visa_info"
-
-    agent_names = {
-        "visa_qa": "Hive (visa Q&A)",
-        "concierge": "Application Concierge",
-        "doc_validator": "Document Validator",
-        "portal_ai": "Agent Portal AI",
-        "workflow": "Multi-step Research",
-    }
-
-    return OrchestratorResult(
-        agent=agent_names.get(best_agent, "Hive"),
-        confidence=min(best_score / 10, 1.0),
-        params=params,
-        message=f'Routing to {agent_names.get(best_agent, "Hive")} (confidence: {min(best_score / 10, 1.0):.0%})',
-    )
-
-
-async def detect_intent(query: str) -> OrchestratorResult:
-    """Detect intent using LLM first, falling back to regex."""
-    llm_result = await detect_intent_llm(query)
-    if llm_result and "agent" in llm_result:
-        agent_map = {
-            "visa_qa": "Hive (visa Q&A)",
-            "concierge": "Application Concierge",
-            "doc_validator": "Document Validator",
-            "portal_ai": "Agent Portal AI",
-            "workflow": "Multi-step Research",
-        }
-        agent = agent_map.get(llm_result.get("agent", "visa_qa"), "Hive (visa Q&A)")
-        confidence = llm_result.get("confidence", 0.7)
-        params = llm_result.get("params", {})
-        return OrchestratorResult(
-            agent=agent,
-            confidence=confidence,
-            params=params,
-            message=f'[LLM] Routing to {agent} (confidence: {confidence:.0%})',
-        )
-
-    return detect_intent_regex(query)
-
-
-def get_agent_endpoint(intent: OrchestratorResult) -> Optional[str]:
-    mapping = {
-        "Hive (visa Q&A)": "POST /api/chatbot/sessions/{id}/messages",
-        "Application Concierge": "POST /api/chatbot/concierge/start",
-        "Document Validator": "POST /api/scan/validate",
-        "Agent Portal AI": "GET /api/agent/ai/next-actions",
-        "Multi-step Research": "POST /api/chatbot/workflow",
-    }
-    return mapping.get(intent.agent)
+def score_intents(query: str) -> list[dict]:
+    """Return ``[{"intent", "score"}]`` sorted best-first (empty if nothing matched)."""
+    q = (query or "").strip()
+    out = []
+    for intent, patterns in _COMPILED_INTENTS.items():
+        score = sum(len(p.findall(q)) * 2 for p in patterns)
+        if score:
+            out.append({"intent": intent, "score": min(score + _INTENT_BONUS.get(intent, 0), 10)})
+    out.sort(key=lambda x: x["score"], reverse=True)
+    return out
