@@ -326,11 +326,11 @@ function LoanEligibility() {
 // ── Page Shell ────────────────────────────────────────────────────────────────
 
 const TOOLS = [
-  { id: 'pof', label: 'Proof of Funds Estimator', Icon: TrendingUp, color: '#f59e0b', desc: 'Estimate required funds for visa across countries', Component: ProofOfFundsCalculator },
+  { id: 'pof', label: 'Proof of Funds Estimator', Icon: TrendingUp, color: '#B31942', desc: 'Estimate required funds for visa across countries', Component: ProofOfFundsCalculator },
   { id: 'currency', label: 'Live Currency Exchange', Icon: Globe, color: '#1D4E89', desc: 'Real-time conversion for major global currencies', Component: LiveCurrencyConverter },
-  { id: 'budget', label: 'Budget Planner', Icon: Calculator, color: '#10b981', desc: 'Monthly living cost comparison across study cities', Component: BudgetPlanner },
-  { id: 'loan', label: 'Loan Eligibility', Icon: CreditCard, color: '#6366f1', desc: 'Education loan schemes for international students', Component: LoanEligibility },
-  { id: 'advisor', label: 'AI Financial Advisor', Icon: Bot, color: '#8b5cf6', desc: 'Ask any financial question about studying abroad', Component: AIFinancialAdvisor },
+  { id: 'budget', label: 'Budget Planner', Icon: Calculator, color: '#0A3161', desc: 'Monthly living cost comparison across study cities', Component: BudgetPlanner },
+  { id: 'loan', label: 'Loan Eligibility', Icon: CreditCard, color: '#1D4E89', desc: 'Education loan schemes for international students', Component: LoanEligibility },
+  { id: 'advisor', label: 'AI Financial Advisor', Icon: Bot, color: '#0A3161', desc: 'Ask any financial question about studying abroad', Component: AIFinancialAdvisor },
 ];
 
 export default function FinancialTools() {

@@ -21,8 +21,8 @@ export default function CountryLabel({
     <div
       className={`absolute z-30 flex items-center gap-1.5 rounded-lg px-2 py-[5px] cursor-pointer transition duration-200 ${
         active
-          ? 'bg-[#0A1A3A]/95 border-[#00E5FF]/40 shadow-[0_0_16px_rgba(0,229,255,0.15)]'
-          : 'bg-[#061440]/80 border-[#00D4FF]/20 hover:border-[#00D4FF]/35'
+          ? 'bg-[#0A1A3A]/95 border-[#8FADD6]/40 shadow-[0_0_16px_rgba(143,173,214,0.15)]'
+          : 'bg-[#061440]/80 border-[#8FADD6]/20 hover:border-[#8FADD6]/35'
       } border backdrop-blur-sm`}
       style={{
         left: left + dx,

@@ -33,7 +33,7 @@ const TESTIMONIALS = [
     visaType: "Canada Student Visa",
     rating: 5,
     avatar: "AD",
-    color: "#10B981",
+    color: "#0A3161",
   },
   {
     quote:
@@ -43,7 +43,7 @@ const TESTIMONIALS = [
     visaType: "Japan Tourist Visa",
     rating: 5,
     avatar: "VS",
-    color: "#F59E0B",
+    color: "#B31942",
   },
   {
     quote:
@@ -53,7 +53,7 @@ const TESTIMONIALS = [
     visaType: "Australia Working Holiday",
     rating: 5,
     avatar: "KN",
-    color: "#8B5CF6",
+    color: "#0A3161",
   },
   {
     quote:
@@ -63,7 +63,7 @@ const TESTIMONIALS = [
     visaType: "Schengen Visa",
     rating: 5,
     avatar: "AP",
-    color: "#EC4899",
+    color: "#B31942",
   },
 ];
 

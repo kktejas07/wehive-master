@@ -60,8 +60,8 @@ export const PLANE_ROUTES: [string, string][] = [
 
 export const NAVY = '#000B2E';
 export const NAVY_LIGHT = '#0A1A3A';
-export const ACCENT = '#00E5FF';
-export const BLUE_GLOW = '#00D4FF';
+export const ACCENT = '#8FADD6';
+export const BLUE_GLOW = '#8FADD6';
 export const DOT_COLOR = '#38BDF8';
 
 export function flagUrl(code: string) {

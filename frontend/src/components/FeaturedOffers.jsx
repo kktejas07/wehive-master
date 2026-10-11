@@ -243,7 +243,7 @@ function CountryPreview({ countries, accent }) {
           whileHover={{ scale: 1.1 }}
         >
           <div className={`flex items-center gap-1.5 bg-white/80 rounded-full px-2.5 py-1.5 border border-black/5 ${hoveredIndex === i ? 'ring-2 ring-offset-1' : ''}`}
-            style={{ ringColor: accent.includes('amber') ? '#F59E0B' : accent.includes('blue') ? '#1D4E89' : accent.includes('emerald') ? '#10B981' : '#EC4899' }}
+            style={{ ringColor: accent.includes('amber') ? '#B31942' : accent.includes('blue') ? '#1D4E89' : accent.includes('emerald') ? '#0A3161' : '#B31942' }}
           >
             <span className="w-4 h-4 rounded-full bg-[hsl(var(--blue-700))]/20 flex items-center justify-center text-[8px] font-bold text-[hsl(var(--blue-900))]/60">{country.name[0]}</span>
             <span className="text-[12px] font-semibold text-[hsl(var(--blue-900))]">{country.name}</span>

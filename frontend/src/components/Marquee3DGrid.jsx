@@ -5,17 +5,17 @@ import { Link } from 'react-router-dom';
 
 const COUNTRIES_3D = [
   { id: 'us', name: 'USA', visa: 'Tourist/Business', processing: '3-5 days', color: '#1D4E89' },
-  { id: 'uk', name: 'United Kingdom', visa: 'Tourist/Student', processing: '5-10 days', color: '#8B5CF6' },
+  { id: 'uk', name: 'United Kingdom', visa: 'Tourist/Student', processing: '5-10 days', color: '#0A3161' },
   { id: 'canada', name: 'Canada', visa: 'Tourist/Student', processing: '7-14 days', color: '#EF4444' },
-  { id: 'australia', name: 'Australia', visa: 'Tourist/Work', processing: '5-7 days', color: '#10B981' },
-  { id: 'japan', name: 'Japan', visa: 'Tourist/Business', processing: '4-6 days', color: '#F59E0B' },
-  { id: 'germany', name: 'Germany', visa: 'Schengen', processing: '5-8 days', color: '#6366F1' },
-  { id: 'france', name: 'France', visa: 'Schengen', processing: '5-8 days', color: '#EC4899' },
-  { id: 'uae', name: 'UAE', visa: 'Tourist/Transit', processing: '2-4 days', color: '#14B8A6' },
-  { id: 'singapore', name: 'Singapore', visa: 'Tourist/Business', processing: '1-3 days', color: '#F97316' },
+  { id: 'australia', name: 'Australia', visa: 'Tourist/Work', processing: '5-7 days', color: '#0A3161' },
+  { id: 'japan', name: 'Japan', visa: 'Tourist/Business', processing: '4-6 days', color: '#B31942' },
+  { id: 'germany', name: 'Germany', visa: 'Schengen', processing: '5-8 days', color: '#1D4E89' },
+  { id: 'france', name: 'France', visa: 'Schengen', processing: '5-8 days', color: '#B31942' },
+  { id: 'uae', name: 'UAE', visa: 'Tourist/Transit', processing: '2-4 days', color: '#1D4E89' },
+  { id: 'singapore', name: 'Singapore', visa: 'Tourist/Business', processing: '1-3 days', color: '#B31942' },
   { id: 'newzealand', name: 'New Zealand', visa: 'Tourist/Student', processing: '7-12 days', color: '#06B6D4' },
   { id: 'switzerland', name: 'Switzerland', visa: 'Schengen', processing: '5-7 days', color: '#84CC16' },
-  { id: 'italy', name: 'Italy', visa: 'Schengen', processing: '5-10 days', color: '#22C55E' },
+  { id: 'italy', name: 'Italy', visa: 'Schengen', processing: '5-10 days', color: '#0A3161' },
 ];
 
 function CountryCard3D({ country, index }) {
