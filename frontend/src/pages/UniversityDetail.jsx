@@ -39,11 +39,11 @@ function getFacilityIcon(name) {
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
-    <div className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 transition">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color || 'bg-[hsl(var(--accent))]/10'}`}>
-        <Icon className={`w-5 h-5 ${color ? 'text-white' : 'text-[hsl(var(--accent))]'}`} />
+    <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-5 hover:border-[hsl(var(--blue-200))] transition-colors">
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color || 'bg-[hsl(var(--blue-50))]'}`}>
+        <Icon className={`w-5 h-5 ${color ? 'text-white' : 'text-[hsl(var(--blue-700))]'}`} />
       </div>
-      <div className="mt-3 text-[12px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]/55">{label}</div>
+      <div className="mt-3 text-[12px] uppercase tracking-[0.14em] font-semibold text-muted-foreground truncate">{label}</div>
       <div className="mt-1 text-[18px] font-bold text-[hsl(var(--blue-900))]">{value}</div>
     </div>
   );
@@ -52,7 +52,7 @@ function StatCard({ icon: Icon, label, value, color }) {
 function IntakeCalendar({ intakes, country_name }) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return (
-    <div className="rounded-2xl bg-white border border-black/5 p-6">
+    <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6">
       <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-4">Intake Calendar</h3>
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
         {months.map((m, i) => {
@@ -63,16 +63,16 @@ function IntakeCalendar({ intakes, country_name }) {
               className={`rounded-xl p-3 text-center text-[12px] font-bold transition ${
                 active
                   ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
-                  : 'bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/40'
+                  : 'bg-[hsl(var(--soft-bg))] text-muted-foreground'
               }`}
             >
-              <div className="text-[16px] font-display font-extrabold">{m}</div>
+              <div className="text-[16px] font-display font-bold">{m}</div>
               <div className="mt-1">{active ? 'Open' : '—'}</div>
             </div>
           );
         })}
       </div>
-      <div className="mt-4 text-[12px] text-[hsl(var(--blue-900))]/55">
+      <div className="mt-4 text-[12px] text-muted-foreground">
         Active intakes for {country_name}: <span className="font-bold text-emerald-700">{intakes?.join(', ')}</span>
       </div>
     </div>
@@ -81,11 +81,11 @@ function IntakeCalendar({ intakes, country_name }) {
 
 function ProgramDetailsCard({ uni }) {
   return (
-    <div className="rounded-2xl bg-white border border-black/5 p-6">
+    <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6">
       <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-4">Program Details</h3>
       <div className="space-y-4">
         <div>
-          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))] mb-2">Popular Courses</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-2">Popular Courses</div>
           <div className="flex flex-wrap gap-2">
             {(uni.popular_courses || []).slice(0, 6).map(c => (
               <span key={c} className="text-[12px] px-3 py-1.5 rounded-full bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] font-medium">
@@ -94,21 +94,21 @@ function ProgramDetailsCard({ uni }) {
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-black/5">
+        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[hsl(var(--border))]">
           <div>
-            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">IELTS Min</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">IELTS Min</div>
             <div className="mt-1 text-[16px] font-bold text-[hsl(var(--blue-900))]">{uni.ielts_min || '—'}</div>
           </div>
           <div>
-            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">TOEFL Min</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">TOEFL Min</div>
             <div className="mt-1 text-[16px] font-bold text-[hsl(var(--blue-900))]">{uni.toefl_min || '—'}</div>
           </div>
           <div>
-            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">GRE</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">GRE</div>
             <div className="mt-1 text-[16px] font-bold text-[hsl(var(--blue-900))]">{uni.gre_required ? 'Required' : 'Not required'}</div>
           </div>
           <div>
-            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">GMAT</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">GMAT</div>
             <div className="mt-1 text-[16px] font-bold text-[hsl(var(--blue-900))]">{uni.gmat_required ? 'Required' : 'Not required'}</div>
           </div>
         </div>
@@ -176,8 +176,8 @@ export default function UniversityDetail() {
           <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
             <X className="w-8 h-8 text-red-500" />
           </div>
-          <h2 className="font-display font-extrabold text-[26px] text-[hsl(var(--blue-900))]">University not found</h2>
-          <Link to="/universities" className="inline-flex items-center gap-1.5 rounded-full btn-primary text-white h-11 px-6 font-bold text-[13px]">
+          <h2 className="font-display font-bold text-[26px] text-[hsl(var(--blue-900))] leading-tight">University not found</h2>
+          <Link to="/universities" className="inline-flex items-center gap-1.5 rounded-xl btn-primary text-white h-11 px-6 font-bold text-[13px]">
             Browse universities <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
@@ -190,9 +190,9 @@ export default function UniversityDetail() {
     <div className="bg-white">
       <Navbar />
 
-      <section className="pt-28 pb-12 bg-gradient-to-br from-[hsl(var(--blue-900))] to-[hsl(var(--blue-700))] text-white">
+      <section className="pt-28 pb-12 bg-[hsl(var(--blue-900))] text-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="flex items-center gap-1.5 text-[13px] text-white/60 mb-4">
+          <div className="flex items-center gap-1.5 text-[13px] text-white/75 mb-4">
             <Link to="/" className="hover:text-white">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <Link to="/universities" className="hover:text-white">Universities</Link>
@@ -214,14 +214,14 @@ export default function UniversityDetail() {
               <LanguageSwitcher universityId={id} fields={uni} onTranslated={setTranslated} />
             </div>
               <div>
-                <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] bg-white/10 rounded-full px-3 py-1">
+                <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-200))] bg-white/10 rounded-full px-3 py-1">
                   <GraduationCap className="w-3.5 h-3.5" /> {uni.type}
                 </div>
-                <h1 className="mt-3 font-display font-extrabold text-[36px] sm:text-[48px] leading-[1.0] tracking-[-0.035em]">
+                <h1 className="mt-3 font-display font-bold text-[36px] sm:text-[48px] leading-[1.0] tracking-[-0.02em]">
                   {t('short_name') || uni.short_name}
                 </h1>
-                <p className="mt-2 text-[17px] text-white/70 max-w-xl">{t('name') || uni.name}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-[14px] text-white/60">
+                <p className="mt-2 text-[17px] text-white/80 max-w-xl">{t('name') || uni.name}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-[14px] text-white/75">
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="w-4 h-4" /> {t('location') || uni.location}
                   </span>
@@ -249,14 +249,14 @@ export default function UniversityDetail() {
                   } catch {}
                 }}
                 variant="outline"
-                className="h-12 px-5 border-white/30 text-white hover:bg-white/10 rounded-full"
+                className="h-12 px-5 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white rounded-xl"
               >
                 <Bookmark className={`w-4 h-4 mr-1.5 ${saved ? 'fill-current' : ''}`} />
                 {saved ? 'Saved' : 'Save'}
               </Button>
               <button
                 onClick={() => setShowApplyModal(true)}
-                className="inline-flex items-center gap-2 rounded-full btn-accent text-white h-12 px-6 font-bold"
+                className="inline-flex items-center gap-2 rounded-xl btn-accent text-white h-12 px-6 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--blue-900))]"
               >
                 Apply now <ArrowRight className="w-4 h-4" />
               </button>
@@ -265,16 +265,16 @@ export default function UniversityDetail() {
         </div>
       </section>
 
-      <section className="py-8 bg-white border-b border-black/5">
+      <section className="py-8 bg-white border-b border-[hsl(var(--border))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <StatCard icon={Award} label="World Rank" value={`#${uni.rank}`} color="bg-amber-500" />
-            <StatCard icon={Star} label="QS Rank" value={`#${uni.qs_rank || '—'}`} color="bg-blue-500" />
-            <StatCard icon={Award} label="THE Rank" value={`#${uni.times_rank || '—'}`} color="bg-indigo-500" />
-            <StatCard icon={Users} label="Students" value={(uni.students || 0).toLocaleString()} color="bg-emerald-500" />
-            <StatCard icon={Globe2} label="Intl. Students" value={(uni.intl_students || 0).toLocaleString()} color="bg-violet-500" />
-            <StatCard icon={DollarSign} label="Tuition/yr" value={uni.tuition_usd === 0 ? 'Free' : `$${(uni.tuition_usd || 0).toLocaleString()}`} color="bg-rose-500" />
-            <StatCard icon={TrendingUp} label="Avg Salary" value={uni.avg_salary_usd ? `$${(uni.avg_salary_usd || 0).toLocaleString()}` : '—'} color="bg-cyan-500" />
+            <StatCard icon={Award} label="World Rank" value={`#${uni.rank}`} />
+            <StatCard icon={Star} label="QS Rank" value={`#${uni.qs_rank || '—'}`} />
+            <StatCard icon={Award} label="THE Rank" value={`#${uni.times_rank || '—'}`} />
+            <StatCard icon={Users} label="Students" value={(uni.students || 0).toLocaleString()} />
+            <StatCard icon={Globe2} label="Intl. Students" value={(uni.intl_students || 0).toLocaleString()} />
+            <StatCard icon={DollarSign} label="Tuition/yr" value={uni.tuition_usd === 0 ? 'Free' : `$${(uni.tuition_usd || 0).toLocaleString()}`} />
+            <StatCard icon={TrendingUp} label="Avg Salary" value={uni.avg_salary_usd ? `$${(uni.avg_salary_usd || 0).toLocaleString()}` : '—'} />
           </div>
         </div>
       </section>
@@ -282,12 +282,12 @@ export default function UniversityDetail() {
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
-            <div className="rounded-2xl bg-white border border-black/5 p-6">
-              <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-3">About</h2>
-              <p className="text-[15px] text-[hsl(var(--blue-900))]/70 leading-relaxed">
+            <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6">
+              <h2 className="font-display font-bold text-[22px] text-[hsl(var(--blue-900))] mb-3 leading-tight">About</h2>
+              <p className="text-[15px] text-muted-foreground leading-relaxed">
                 {t('description') || `${uni.short_name} is a prestigious institution located in ${uni.location}, ${uni.country_name}. Established in ${uni.established}, it is known for its academic excellence and research contributions.`}
               </p>
-              <div className="mt-4 flex flex-wrap gap-4 text-[13px] text-[hsl(var(--blue-900))]/60">
+              <div className="mt-4 flex flex-wrap gap-4 text-[13px] text-muted-foreground">
                 <span>Founded: <strong>{uni.established}</strong></span>
                 <span>Type: <strong>{uni.type}</strong></span>
                 {uni.accreditation?.length > 0 && (
@@ -301,7 +301,7 @@ export default function UniversityDetail() {
             <ProgramCard universityId={id} />
 
             <div>
-              <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-4">Campus Facilities</h2>
+              <h2 className="font-display font-bold text-[22px] text-[hsl(var(--blue-900))] mb-4 leading-tight">Campus Facilities</h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 {(uni.facilities || []).map(f => (
                   <FacilityCard key={f} name={f} />
@@ -311,26 +311,26 @@ export default function UniversityDetail() {
 
             <ReviewsCard universityId={id} />
 
-            <div className="rounded-2xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-8">
-              <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+            <div className="rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] p-6 sm:p-8">
+              <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
                 <Sparkles className="w-3.5 h-3.5" /> Ready to apply?
               </div>
-              <h3 className="mt-2 font-display font-extrabold text-[24px] tracking-[-0.025em]">
+              <h3 className="mt-2 font-display font-bold text-[24px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
                 Start your application to {uni.short_name}
               </h3>
-              <p className="mt-2 text-[15px] text-white/70 max-w-lg">
+              <p className="mt-2 text-[15px] text-muted-foreground max-w-lg">
                 We handle your student visa application from document review to submission.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   onClick={() => setShowApplyModal(true)}
-                  className="inline-flex items-center gap-2 rounded-full btn-accent text-white h-12 px-6 font-bold"
+                  className="inline-flex items-center gap-2 rounded-xl btn-accent text-white h-12 px-6 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--accent))] focus-visible:ring-offset-2"
                 >
                   Apply now <ArrowRight className="w-4 h-4" />
                 </button>
                 <Link
                   to={`/universities?country=${uni.country}`}
-                  className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white h-12 px-6 font-bold transition"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] text-[hsl(var(--blue-900))] h-12 px-6 font-semibold transition-colors"
                 >
                   More from {uni.country_name}
                 </Link>
@@ -341,24 +341,24 @@ export default function UniversityDetail() {
           <aside className="lg:col-span-4 space-y-6">
             <IntakeCalendar intakes={uni.intakes} country_name={uni.country_name} />
 
-            <div className="rounded-2xl bg-white border border-black/5 p-6">
+            <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6">
               <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-4">Key Metrics</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-black/5">
-                  <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Acceptance Rate</span>
+                <div className="flex items-center justify-between py-2 border-b border-[hsl(var(--border))]">
+                  <span className="text-[13px] text-muted-foreground">Acceptance Rate</span>
                   <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni.acceptance_rate || '—'}</span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-black/5">
-                  <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Employment Rate</span>
+                <div className="flex items-center justify-between py-2 border-b border-[hsl(var(--border))]">
+                  <span className="text-[13px] text-muted-foreground">Employment Rate</span>
                   <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{uni.employment_rate || '—'}</span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-black/5">
-                  <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Est. Living Cost/yr</span>
+                <div className="flex items-center justify-between py-2 border-b border-[hsl(var(--border))]">
+                  <span className="text-[13px] text-muted-foreground">Est. Living Cost/yr</span>
                   <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">${(uni.living_cost_usd || 0).toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Scholarships</span>
-                  <span className={`text-[14px] font-bold ${uni.scholarships ? 'text-emerald-600' : 'text-[hsl(var(--blue-900))]/40'}`}>
+                  <span className="text-[13px] text-muted-foreground">Scholarships</span>
+                  <span className={`text-[14px] font-bold ${uni.scholarships ? 'text-emerald-600' : 'text-muted-foreground'}`}>
                     {uni.scholarships ? 'Available' : 'Not available'}
                   </span>
                 </div>
@@ -367,11 +367,11 @@ export default function UniversityDetail() {
 
             {uni.website && (
               <a href={uni.website.startsWith('http') ? uni.website : `https://${uni.website}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 transition group">
+                className="flex items-center gap-2 rounded-2xl bg-white border border-[hsl(var(--border))] p-5 hover:border-[hsl(var(--blue-200))] transition-colors group">
                 <ExternalLink className="w-5 h-5 text-[hsl(var(--blue-700))]" />
                 <div>
                   <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))]">Visit official website</div>
-                  <div className="text-[12px] text-[hsl(var(--blue-900))]/50 truncate max-w-[200px]">{uni.website}</div>
+                  <div className="text-[12px] text-muted-foreground truncate max-w-[200px]">{uni.website}</div>
                 </div>
               </a>
             )}
@@ -379,12 +379,12 @@ export default function UniversityDetail() {
             <AIUniversityQA universityId={id} universityName={uni.short_name} />
             <AIAcceptanceProbability universityId={id} universityName={uni.short_name} />
 
-            <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--accent))]/10 to-[hsl(var(--accent))]/5 border border-[hsl(var(--accent))]/20 p-6">
+            <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6">
               <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-2">Study Abroad with WeHive</h3>
               <ul className="space-y-2">
                 {['Expert visa guidance', 'Document verification', 'Application tracking', 'Scholarship assistance'].map(item => (
-                  <li key={item} className="flex items-center gap-2 text-[13px] text-[hsl(var(--blue-900))]/70">
-                    <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <li key={item} className="flex items-center gap-2 text-[13px] text-muted-foreground">
+                    <Check className="w-3.5 h-3.5 text-[hsl(var(--blue-700))] shrink-0" />
                     {item}
                   </li>
                 ))}

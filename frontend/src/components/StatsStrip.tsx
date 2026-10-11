@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { TrendingUp, Globe2, ShieldCheck, Clock, Sparkles, Award, LucideIcon } from 'lucide-react';
+import { TrendingUp, Globe2, ShieldCheck, Clock, Award, LucideIcon } from 'lucide-react';
 
 interface CountUpProps {
   to: number;
@@ -41,59 +41,56 @@ interface StatItem {
   value: number;
   label: string;
   suffix: string;
-  accent: string;
 }
 
 const STATS: StatItem[] = [
-  { id: 'visas',    Icon: ShieldCheck, value: 5847, label: 'Visas approved this month', suffix: '+',  accent: 'from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))]' },
-  { id: 'rate',     Icon: TrendingUp,  value: 99,   label: 'Success rate',               suffix: '.2%', accent: 'from-emerald-500 to-emerald-300' },
-  { id: 'countries',Icon: Globe2,      value: 250,  label: 'Countries supported',        suffix: '',   accent: 'from-[hsl(var(--accent))] to-[hsl(var(--red-500))]' },
-  { id: 'sla',      Icon: Clock,       value: 12,   label: 'Average minutes to apply',   suffix: 'm',  accent: 'from-amber-500 to-amber-300' },
-  { id: 'happy',    Icon: Award,       value: 92,   label: 'Net promoter score',         suffix: '',   accent: 'from-fuchsia-500 to-pink-300' },
+  { id: 'visas',    Icon: ShieldCheck, value: 5847, label: 'Visas approved this month', suffix: '+' },
+  { id: 'rate',     Icon: TrendingUp,  value: 99,   label: 'Success rate',               suffix: '.2%' },
+  { id: 'countries',Icon: Globe2,      value: 250,  label: 'Countries supported',        suffix: '' },
+  { id: 'sla',      Icon: Clock,       value: 12,   label: 'Average minutes to apply',   suffix: 'm' },
+  { id: 'happy',    Icon: Award,       value: 92,   label: 'Net promoter score',         suffix: '' },
 ];
 
 export default function StatsStrip() {
   return (
     <section
-      className="relative z-10 py-16 sm:py-20 bg-white overflow-hidden"
+      className="relative z-10 py-16 md:py-24 bg-[hsl(var(--soft-bg))] border-y border-[hsl(var(--border))]"
       data-testid="hero-stats-strip"
       aria-label="Wehive platform stats"
     >
-
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="rounded-[28px] glass-tint-navy aurora-grain p-5 sm:p-7 relative">
-          <div className="flex items-center gap-2 justify-center mb-5">
-            <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
-            <span className="text-[12px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--blue-900))]/65">
-              The We Hive scoreboard · live
-            </span>
-            <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-5">
-            {STATS.map((s, i) => {
-              const Icon = s.Icon;
-              return (
-                <motion.div
-                  key={s.id}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-40px' }}
-                  transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex flex-col items-center text-center relative"
-                >
-                  <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${s.accent} text-white shadow-[0_8px_22px_-8px_rgba(10,44,138,0.4)] mb-2`}>
-                    <Icon className="w-4 h-4" />
-                  </span>
-                  <div className="font-display font-extrabold text-[26px] sm:text-[30px] tracking-[-0.03em] leading-none text-[hsl(var(--blue-900))]">
-                    <CountUp to={s.value} suffix={s.suffix} />
-                  </div>
-                  <div className="mt-1 text-[12px] leading-snug text-[hsl(var(--blue-900))]/65 font-bold">
-                    {s.label}
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <p className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-700))]">
+            The We Hive scoreboard
+          </p>
+          <h2 className="mt-3 font-display font-bold text-[28px] sm:text-[36px] leading-[1.15] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+            Numbers we&rsquo;re accountable for
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+          {STATS.map((s, i) => {
+            const Icon = s.Icon;
+            return (
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.3, delay: i * 0.05, ease: 'easeOut' }}
+                className={`rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm p-5 sm:p-6 flex flex-col ${i === STATS.length - 1 ? 'col-span-2 sm:col-span-1' : ''}`}
+              >
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] mb-4">
+                  <Icon className="w-5 h-5" aria-hidden="true" />
+                </span>
+                <div className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] leading-none text-[hsl(var(--blue-900))] tabular-nums">
+                  <CountUp to={s.value} suffix={s.suffix} />
+                </div>
+                <div className="mt-2 text-[14px] leading-snug text-muted-foreground">
+                  {s.label}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

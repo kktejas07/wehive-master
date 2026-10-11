@@ -39,12 +39,12 @@ function OtpDigits({ value, onChange, length = 6 }) {
     if (pasted) { e.preventDefault(); onChange(pasted); }
   };
   return (
-    <div className="flex justify-center gap-2">
+    <div className="flex justify-center gap-1.5 sm:gap-2">
       {Array.from({ length }).map((_, i) => (
         <input key={`d-${i}`} ref={(el) => (refs.current[i] = el)} value={value[i] || ''}
           onChange={(e) => handle(i, e.target.value)} onKeyDown={(e) => handleKey(i, e)}
-          onPaste={i === 0 ? handlePaste : undefined} inputMode="numeric" autoComplete="one-time-code" maxLength={1}
-          className="w-12 h-14 sm:w-12 sm:h-14 rounded-xl border-2 border-black/10 focus:border-[hsl(var(--blue-700))] outline-none text-center text-[22px] font-bold text-[hsl(var(--blue-900))] transition" />
+          onPaste={i === 0 ? handlePaste : undefined} inputMode="numeric" autoComplete="one-time-code" maxLength={1} aria-label={`Digit ${i + 1}`}
+          className="w-11 h-14 sm:w-12 rounded-xl border border-[hsl(var(--border))] bg-white focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20 outline-none text-center text-[22px] font-semibold text-[hsl(var(--blue-900))] transition-colors duration-200" />
       ))}
     </div>
   );
@@ -140,22 +140,22 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[hsl(var(--blue-900))]/45 backdrop-blur-sm animate-in fade-in duration-200"
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[hsl(var(--blue-900))]/50 backdrop-blur-[2px] animate-in fade-in duration-200"
       onClick={closeAuth}>
       <div onClick={(e) => e.stopPropagation()}
-        {...dialogProps} className="relative w-full max-w-md rounded-3xl bg-white shadow-[0_30px_70px_-30px_rgba(10,44,138,0.6)] overflow-hidden">
+        {...dialogProps} className="relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl bg-white border border-[hsl(var(--border))] shadow-xl">
         <button aria-label="Close" onClick={closeAuth}
-          className="absolute top-4 right-4 h-9 w-9 rounded-full hover:bg-black/5 inline-flex items-center justify-center text-[hsl(var(--blue-900))]/55">
+          className="absolute top-3 right-3 h-11 w-11 rounded-xl hover:bg-[hsl(var(--blue-50))] inline-flex items-center justify-center text-muted-foreground hover:text-[hsl(var(--blue-900))] transition-colors duration-200">
           <X className="w-4 h-4" />
         </button>
-        <div className="p-7 sm:p-9">
-          <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
-            <ShieldCheck className="w-3.5 h-3.5" /> Secure access
+        <div className="p-6 sm:p-8">
+          <div className="eyebrow flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4" aria-hidden="true" /> Secure access
           </div>
-          <h2 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="mt-3 pr-10 font-display font-bold text-[26px] sm:text-[28px] leading-tight tracking-[-0.02em] text-[hsl(var(--blue-900))]">
             {step === 'input' ? (isSignup ? 'Create your account' : 'Sign in to We Hive') : 'Enter the verification code'}
           </h2>
-          <p className="mt-1.5 text-[14px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
             {step === 'input' ? `We'll send a code via ${channel === 'email' ? 'email' : 'WhatsApp'}.`
               : `Code sent to ${otpInfo?.masked || identifierValue}`}
           </p>
@@ -164,41 +164,41 @@ export default function AuthModal() {
             <form onSubmit={onSend} className="mt-6 space-y-5">
               {isSignup && (
                 <div>
-                  <label htmlFor="authmodal-your-name" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
+                  <label htmlFor="authmodal-your-name" className="block text-[14px] font-semibold text-[hsl(var(--blue-900))] mb-1.5">Your name</label>
                   <input id="authmodal-your-name" {...register('name')} placeholder="e.g. Priya Sharma"
-                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
-                  {errors.name && <p className="mt-1 text-[12px] text-red-500">{errors.name.message}</p>}
+                    className="w-full h-12 rounded-xl border bg-white px-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors duration-200 focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20 border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))]" />
+                  {errors.name && <p className="mt-1.5 text-[13px] text-red-700">{errors.name.message}</p>}
                 </div>
               )}
               <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5" htmlFor="authmodal-identifier">
+                <label className="block text-[14px] font-semibold text-[hsl(var(--blue-900))] mb-1.5" htmlFor="authmodal-identifier">
                   {channel === 'email' ? 'Email address' : 'Mobile number'}
                 </label>
                 <input id="authmodal-identifier" {...register('identifier')} placeholder={channel === 'email' ? 'you@example.com' : '+91 98765 43210'}
                   inputMode={channel === 'email' ? 'email' : 'tel'}
-                  className={`w-full h-12 rounded-xl border ${errors.identifier ? 'border-red-500' : 'border-black/10'} focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white`} />
-                {errors.identifier && <p className="mt-1 text-[12px] text-red-500">{errors.identifier.message}</p>}
+                  className={`w-full h-12 rounded-xl border bg-white px-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors duration-200 focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20 ${errors.identifier ? 'border-red-500' : 'border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))]'}`} />
+                {errors.identifier && <p className="mt-1.5 text-[13px] text-red-700">{errors.identifier.message}</p>}
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setChannel('email')}
-                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
-                    channel === 'email' ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'}`}>
-                  <Mail className="w-3.5 h-3.5 inline-block mr-1" /> Email
+                <button type="button" onClick={() => setChannel('email')} aria-pressed={channel === 'email'}
+                  className={`flex-1 h-11 rounded-xl border text-[14px] font-semibold transition-colors duration-200 ${
+                    channel === 'email' ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]' : 'border-[hsl(var(--border))] bg-white text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-200))]'}`}>
+                  <Mail className="w-4 h-4 inline-block mr-1.5 -mt-0.5" aria-hidden="true" /> Email
                 </button>
-                <button type="button" onClick={() => setChannel('phone')}
-                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
-                    channel === 'phone' ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'}`}>
-                  <Phone className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
+                <button type="button" onClick={() => setChannel('phone')} aria-pressed={channel === 'phone'}
+                  className={`flex-1 h-11 rounded-xl border text-[14px] font-semibold transition-colors duration-200 ${
+                    channel === 'phone' ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]' : 'border-[hsl(var(--border))] bg-white text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-200))]'}`}>
+                  <Phone className="w-4 h-4 inline-block mr-1.5 -mt-0.5" aria-hidden="true" /> WhatsApp
                 </button>
               </div>
               <Button type="submit" disabled={sending}
-                className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
+                className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send code'}
               </Button>
-              <div className="text-center text-[13px] text-[hsl(var(--blue-900))]/60">
+              <div className="text-center text-[14px] text-muted-foreground">
                 {isSignup ? 'Already have an account? ' : 'New to We Hive? '}
                 <button type="button" onClick={() => setAuthMode(isSignup ? 'login' : 'signup')}
-                  className="font-bold text-[hsl(var(--blue-700))] hover:underline">
+                  className="font-semibold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-800))] hover:underline underline-offset-2">
                   {isSignup ? 'Sign in' : 'Create account'}
                 </button>
               </div>
@@ -207,29 +207,29 @@ export default function AuthModal() {
             <div className="mt-7 space-y-5">
               <OtpDigits value={otp} onChange={setOtp} />
               <Button disabled={verifying || otp.length !== 6} onClick={onVerify}
-                className="w-full h-12 rounded-full btn-primary text-white font-bold text-[15px]">
+                className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
                 {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> :
                   <span className="inline-flex items-center gap-1"><Check className="w-4 h-4" /> Verify & continue</span>}
               </Button>
               <div className="flex items-center justify-between text-[13px]">
                 <button type="button" onClick={() => setStep('input')}
-                  className="inline-flex items-center gap-1 text-[hsl(var(--blue-700))] font-bold hover:underline">
+                  className="inline-flex items-center gap-1 h-11 text-[hsl(var(--blue-700))] font-semibold hover:underline underline-offset-2">
                   <ArrowLeft className="w-3.5 h-3.5" /> Edit
                 </button>
                 <button type="button" disabled={cd > 0 || sending} onClick={onResend}
-                  className="text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-50">
+                  className="h-11 text-muted-foreground hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-60">
                   {cd > 0 ? `Resend in ${cd}s` : 'Resend code'}
                 </button>
               </div>
             </div>
           )}
           <div id="recaptcha-container" />
-          <div className="mt-4 pt-3 border-t border-black/5 text-center">
-            <Link to="/admin/login" onClick={closeAuth} className="text-[12px] font-bold text-[hsl(var(--blue-700))]/60 hover:text-[hsl(var(--blue-700))] transition-colors">
+          <div className="mt-6 pt-5 border-t border-[hsl(var(--border))] text-center">
+            <Link to="/admin/login" onClick={closeAuth} className="text-[13px] font-semibold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-800))] hover:underline underline-offset-2 transition-colors duration-200">
               Agent? Sign in to your dashboard →
             </Link>
           </div>
-          <p className="mt-4 text-[12px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
+          <p className="mt-3 text-[12px] text-muted-foreground text-center leading-relaxed">
             By continuing you agree to our Terms and acknowledge our Privacy Policy.
           </p>
         </div>

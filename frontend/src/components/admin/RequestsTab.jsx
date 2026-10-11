@@ -30,7 +30,7 @@ function StatusBadge({ status }) {
   const b = STATUS_BADGE[status] || STATUS_BADGE.pending;
   const Icon = b.Icon;
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-[0.12em] ${b.cls}`}>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-[0.12em] ${b.cls}`}>
       <Icon className="w-3 h-3" />
       {b.label}
     </span>
@@ -81,7 +81,7 @@ function RequestCard({ req, token, onReviewed }) {
               <User className="w-3 h-3" />
               {req.user_name || 'Unknown'} · {req.user_email || req.user_phone || '—'}
             </span>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-slate-400">
               {new Date(req.created_at).toLocaleDateString()} {new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
@@ -97,7 +97,7 @@ function RequestCard({ req, token, onReviewed }) {
               <div className="grid sm:grid-cols-2 gap-2">
                 {Object.entries(fields).map(([k, v]) => (
                   <div key={k} className="rounded-xl bg-white/5 px-4 py-2.5">
-                    <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-500">{k}</div>
+                    <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">{k}</div>
                     <div className="text-[13px] font-bold text-white mt-0.5">{v}</div>
                   </div>
                 ))}
@@ -129,14 +129,14 @@ function RequestCard({ req, token, onReviewed }) {
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Add a note explaining your decision…"
                   rows={2}
-                  className="w-full rounded-xl bg-white/5 border border-white/10 focus:border-[hsl(var(--accent))]/50 outline-none px-4 py-2.5 text-[13px] text-white placeholder:text-slate-500 resize-none"
+                  className="w-full rounded-xl bg-white/5 border border-white/10 focus:border-[hsl(var(--blue-700))]/50 outline-none px-4 py-2.5 text-[13px] text-white placeholder:text-slate-500 resize-none"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => review('approve')}
                   disabled={busy}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 px-5 py-2 text-[13px] font-bold text-white transition disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 h-10 text-[13px] font-semibold text-white transition disabled:opacity-50"
                 >
                   {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                   Approve
@@ -144,7 +144,7 @@ function RequestCard({ req, token, onReviewed }) {
                 <button
                   onClick={() => review('reject')}
                   disabled={busy}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-red-600/80 hover:bg-red-600 px-5 py-2 text-[13px] font-bold text-white transition disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 px-5 h-10 text-[13px] font-semibold text-white transition disabled:opacity-50"
                 >
                   {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
                   Reject
@@ -154,7 +154,7 @@ function RequestCard({ req, token, onReviewed }) {
           )}
 
           {req.status !== 'pending' && req.reviewed_at && (
-            <div className="text-[11.5px] text-slate-500">
+            <div className="text-[11.5px] text-slate-400">
               Reviewed {new Date(req.reviewed_at).toLocaleDateString()} {new Date(req.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           )}
@@ -198,7 +198,7 @@ export default function RequestsTab() {
               onClick={() => setStatusFilter(f.value)}
               className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${
                 statusFilter === f.value
-                  ? 'bg-[hsl(var(--accent))] text-white'
+                  ? 'bg-[hsl(var(--blue-700))] text-white'
                   : 'bg-white/5 text-slate-400 hover:bg-white/10'
               }`}
             >

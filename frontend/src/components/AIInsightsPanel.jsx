@@ -47,28 +47,27 @@ export default function AIInsightsPanel({ profileData }) {
   }
 
   return (
-    <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-xl shadow-blue-900/5 relative overflow-hidden">
-      <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-[hsl(var(--accent))]/10 blur-xl pointer-events-none" />
+    <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm">
 
-      <div className="flex items-center gap-2 mb-6">
-        <span className="h-8 w-8 rounded-lg bg-[hsl(var(--soft-bg))] text-[hsl(var(--accent))] inline-flex items-center justify-center shrink-0">
-          <Sparkles className="w-4.5 h-4.5" />
+      <div className="flex items-center gap-2 mb-5">
+        <span className="h-8 w-8 rounded-lg bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center shrink-0">
+          <Sparkles className="w-4 h-4" />
         </span>
         <div>
-          <h3 className="font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">
+          <h3 className="font-display font-bold text-[16px] text-[hsl(var(--blue-900))]">
             AI Insights & Smart Suggestions
           </h3>
-          <p className="text-[12px] text-[hsl(var(--blue-900))]/50">
+          <p className="text-[12px] text-muted-foreground">
             Personalized recommendations based on your applications and documents
           </p>
         </div>
       </div>
 
       {insights.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-black/10 bg-[hsl(var(--soft-bg))]/60 p-6 text-center">
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-[hsl(var(--soft-bg))]/60 p-6 text-center">
           <Info className="w-5 h-5 text-[hsl(var(--blue-900))]/40 mx-auto mb-2" />
           <p className="text-[13px] font-semibold text-[hsl(var(--blue-900))]">No insights yet</p>
-          <p className="mt-1 text-[12px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-1 text-[12px] text-muted-foreground">
             Start an application, take the visa assessment, or upload a document and we'll surface personalized suggestions here.
           </p>
         </div>
@@ -82,40 +81,40 @@ export default function AIInsightsPanel({ profileData }) {
             return (
               <div
                 key={insight.id}
-                className={`p-4.5 rounded-2xl border transition ${
+                className={`p-4 rounded-xl border transition-colors ${
                   isRose
-                    ? 'bg-rose-50/40 border-rose-100/60'
+                    ? 'bg-red-50/60 border-red-100'
                     : isAmber
-                    ? 'bg-amber-50/40 border-amber-100/60'
-                    : 'bg-blue-50/40 border-blue-100/60'
+                    ? 'bg-amber-50/60 border-amber-100'
+                    : 'bg-[hsl(var(--blue-50))]/60 border-[hsl(var(--blue-700))]/10'
                 }`}
               >
                 <div className="flex gap-3">
                   <span className={`h-7 w-7 rounded-lg inline-flex items-center justify-center shrink-0 ${
                     isRose
-                      ? 'bg-rose-100 text-rose-600'
+                      ? 'bg-red-100 text-red-700'
                       : isAmber
-                      ? 'bg-amber-100 text-amber-600'
-                      : 'bg-blue-100 text-blue-600'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'
                   }`}>
                     <Icon className="w-4 h-4" />
                   </span>
                   <div className="flex-1 space-y-1">
-                    <div className="font-extrabold text-[13.5px] text-[hsl(var(--blue-900))]">
+                    <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">
                       {insight.title}
                     </div>
-                    <p className="text-[12px] text-[hsl(var(--blue-900))]/70 leading-relaxed">
+                    <p className="text-[12px] text-muted-foreground leading-relaxed">
                       {insight.desc}
                     </p>
                     <div className="pt-2">
                       <Link
                         to={insight.to}
-                        className={`inline-flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider ${
+                        className={`inline-flex items-center gap-1 text-[13px] font-semibold ${
                           isRose
-                            ? 'text-rose-700 hover:text-rose-800'
+                            ? 'text-red-700 hover:text-red-800'
                             : isAmber
                             ? 'text-amber-700 hover:text-amber-800'
-                            : 'text-blue-700 hover:text-blue-800'
+                            : 'text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-800))]'
                         }`}
                       >
                         {insight.cta} <ArrowRight className="w-3 h-3" />

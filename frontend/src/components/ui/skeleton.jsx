@@ -10,7 +10,7 @@ function Skeleton({
     default: "bg-[hsl(var(--blue-100))]",
     light: "bg-white/20",
     dark: "bg-[hsl(var(--blue-900))]/20",
-    accent: "bg-[hsl(var(--accent))]/20",
+    accent: "bg-[hsl(var(--blue-700))]/20",
   }
 
   const animations = {

@@ -45,7 +45,7 @@ const INTAKE_TIMES = [
     applyBy: 'Apr – May',
     description: 'The biggest intake worldwide. Slot pressure peaks in June-July.',
     countries: 'US, UK, Germany, Italy, Spain & more',
-    color: 'bg-amber-500',
+    color: 'bg-[hsl(var(--blue-700))]',
   },
   {
     season: 'Spring Intake',
@@ -53,7 +53,7 @@ const INTAKE_TIMES = [
     applyBy: 'Sep – Oct',
     description: 'Smaller cohorts, faster decisions. Great backup if Fall slipped.',
     countries: 'US, UK, Germany, Italy, Poland & more',
-    color: 'bg-blue-500',
+    color: 'bg-[hsl(var(--blue-700))]',
   },
   {
     season: 'Summer Intake',
@@ -61,7 +61,7 @@ const INTAKE_TIMES = [
     applyBy: 'Feb – Mar',
     description: 'Niche programs only — short courses, specific masters.',
     countries: 'Limited (mostly UK, Spain, Croatia)',
-    color: 'bg-emerald-500',
+    color: 'bg-[hsl(var(--blue-700))]',
   },
 ];
 
@@ -136,17 +136,17 @@ function CountryCard({ c, onSelect, selected }) {
   return (
     <button
       onClick={() => onSelect(c.id)}
-      className={`relative text-left p-5 rounded-2xl border-2 transition duration-300 overflow-hidden group ${
+      className={`relative text-left p-5 rounded-2xl border transition-colors duration-200 overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] ${
         selected === c.id
-          ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
-          : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white hover:bg-[hsl(var(--blue-50))]'
+          ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] ring-1 ring-[hsl(var(--blue-700))]'
+          : 'border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] bg-white hover:bg-[hsl(var(--blue-50))]'
       }`}
     >
       <div className="relative z-10">
         <div className="text-3xl mb-2">{countryFlag(c.code) || <Globe className="w-7 h-7 text-[hsl(var(--blue-700))]/40" />}</div>
         <div className="font-bold text-[hsl(var(--blue-900))]">{c.name}</div>
         {meta.processing_weeks && (
-          <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">
+          <div className="text-[12px] text-muted-foreground mt-1">
             {meta.processing_weeks}
           </div>
         )}
@@ -157,10 +157,10 @@ function CountryCard({ c, onSelect, selected }) {
 
 function ComparisonRow({ label, value, icon: Icon }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-black/5">
+    <div className="flex items-center justify-between py-3 border-b border-[hsl(var(--border))]">
       <div className="flex items-center gap-3">
-        {Icon && <Icon className="w-4 h-4 text-[hsl(var(--accent))]" />}
-        <span className="text-[14px] text-[hsl(var(--blue-900))]/70">{label}</span>
+        {Icon && <Icon className="w-4 h-4 text-[hsl(var(--blue-700))]" />}
+        <span className="text-[14px] text-muted-foreground">{label}</span>
       </div>
       <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{value}</span>
     </div>
@@ -173,15 +173,15 @@ function IntakeCard({ intake, index }) {
       <div className={`absolute left-0 top-0 w-7 h-7 rounded-full ${intake.color} flex items-center justify-center text-white text-[12px] font-bold`}>
         {index + 1}
       </div>
-      <div className="absolute left-[13px] top-7 bottom-0 w-px bg-black/10" />
+      <div className="absolute left-[13px] top-7 bottom-0 w-px bg-[hsl(var(--border))]" />
       <div className="pb-8">
         <div className="flex items-baseline gap-3">
           <h3 className="text-[18px] font-bold text-[hsl(var(--blue-900))]">{intake.season}</h3>
-          <span className="text-[13px] text-[hsl(var(--blue-900))]/60">{intake.months}</span>
+          <span className="text-[13px] text-muted-foreground">{intake.months}</span>
         </div>
-        <div className="text-[12px] font-bold text-[hsl(var(--accent))] mt-1">Apply by: {intake.applyBy}</div>
-        <p className="text-[13.5px] text-[hsl(var(--blue-900))]/65 mt-2">{intake.description}</p>
-        <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-2">{intake.countries}</div>
+        <div className="text-[12px] font-bold text-[hsl(var(--blue-700))] mt-1">Apply by: {intake.applyBy}</div>
+        <p className="text-[14px] text-muted-foreground mt-2">{intake.description}</p>
+        <div className="text-[12px] text-muted-foreground mt-2">{intake.countries}</div>
       </div>
     </div>
   );
@@ -255,44 +255,44 @@ export default function StudentVisa() {
     <div className="bg-white">
       <Navbar variant="light" />
 
-      <section className="pt-28 pb-16 bg-gradient-to-br from-[hsl(var(--blue-900))] to-[hsl(var(--blue-700))] text-white">
+      <section className="pt-28 pb-16 bg-[hsl(var(--blue-900))] text-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-white/70 mb-4">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-200))] mb-4">
             <GraduationCap className="w-4 h-4" />
             Student Visa Program
           </div>
-          <h1 className="font-display font-extrabold text-[42px] sm:text-[56px] leading-[1.0] tracking-[-0.03em]">
+          <h1 className="font-display font-bold text-[36px] sm:text-[56px] leading-[1.05] tracking-[-0.02em]">
             Study abroad.<br />
-            <span className="text-[hsl(var(--accent))]">Sorted.</span>
+            <span className="text-[hsl(var(--blue-200))]">Sorted.</span>
           </h1>
-          <p className="mt-4 text-[16px] text-white/70 max-w-xl">
+          <p className="mt-4 text-[16px] sm:text-[18px] leading-relaxed text-white/80 max-w-xl">
             Apply for a student visa to the USA, UK, Germany, Italy, Spain and 7 more — with country-specific document review, slot priority, and an on-time guarantee.
           </p>
-          <div className="flex flex-wrap gap-4 mt-8">
-            <Button onClick={() => { if (isAuthed) { document.getElementById('universities-section')?.scrollIntoView({ behavior: 'smooth' }); } else { openAuth('signup'); } }} className="btn-accent h-12 px-6">
+          <div className="flex flex-wrap gap-3 mt-8">
+            <Button onClick={() => { if (isAuthed) { document.getElementById('universities-section')?.scrollIntoView({ behavior: 'smooth' }); } else { openAuth('signup'); } }} className="btn-accent h-12 px-6 text-white">
               Start my student visa <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
               onClick={() => setShowAIRecommender(true)}
               variant="outline"
-              className="h-12 px-6 border-purple-400/50 text-purple-300 hover:bg-purple-500/20 hover:text-purple-200 hover:border-purple-400"
+              className="h-12 px-6 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
             >
 
               <Sparkles className="w-4 h-4 mr-1.5" /> AI recommend
             </Button>
-            <Button variant="outline" className="h-12 px-6 border-white/30 text-white hover:bg-white/10">
+            <Button variant="ghost" className="h-12 px-5 text-white/90 underline-offset-4 hover:underline hover:bg-transparent hover:text-white">
               Book free consultation
             </Button>
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-[hsl(var(--soft-bg))]">
+      <section className="py-16 md:py-24 bg-[hsl(var(--soft-bg))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <h2 className="font-display font-extrabold text-[32px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
             Student visa countries we support
           </h2>
-          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Country-specific student visa guidance across {STUDENT_COUNTRIES.length} destinations.
           </p>
 
@@ -310,14 +310,14 @@ export default function StudentVisa() {
         </div>
       </section>
 
-      <section className="py-16 bg-white border-t border-black/5">
+      <section className="py-16 md:py-24 bg-white border-t border-[hsl(var(--border))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+              <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
                 What do you want to study?
               </h2>
-              <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+              <p className="mt-2 text-[15px] text-muted-foreground">
                 Select your course category to find the best universities for you
               </p>
             </div>
@@ -335,10 +335,10 @@ export default function StudentVisa() {
               <button
                 key={course.id}
                 onClick={() => setSelectedCourse(selectedCourse === course.id ? null : course.id)}
-                className={`relative text-left p-5 rounded-2xl border-2 transition duration-300 overflow-hidden group ${
+                className={`relative text-left p-5 rounded-2xl border transition-colors duration-200 overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] ${
                   selectedCourse === course.id
-                    ? 'border-[hsl(var(--blue-700))] shadow-lg shadow-[hsl(var(--blue-700))]/20 bg-[hsl(var(--blue-700))]'
-                    : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white hover:bg-[hsl(var(--blue-50))]'
+                    ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))]'
+                    : 'border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] bg-white hover:bg-[hsl(var(--blue-50))]'
                 }`}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors duration-300 ${
@@ -349,7 +349,7 @@ export default function StudentVisa() {
                   <course.icon className={`w-6 h-6 ${selectedCourse === course.id ? 'text-white' : 'text-[hsl(var(--blue-700))]'}`} />
                 </div>
                 <div className={`font-bold text-[hsl(var(--blue-900))] ${selectedCourse === course.id ? 'text-white' : ''}`}>{course.label}</div>
-                <div className={`text-[12px] mt-1 ${selectedCourse === course.id ? 'text-white/80' : 'text-[hsl(var(--blue-900))]/60'}`}>{course.description}</div>
+                <div className={`text-[12px] mt-1 ${selectedCourse === course.id ? 'text-white/80' : 'text-muted-foreground'}`}>{course.description}</div>
               </button>
             ))}
           </div>
@@ -374,7 +374,7 @@ export default function StudentVisa() {
                   .map((uni) => (
                     <div
                       key={uni.id}
-                      className="relative rounded-2xl p-5 bg-white hover:bg-[hsl(var(--blue-50))] transition duration-300 hover:shadow-lg hover:shadow-[hsl(var(--blue-700))]/10"
+                      className="relative rounded-2xl p-5 bg-white border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] transition duration-200 hover:shadow-md hover:-translate-y-0.5"
                     >
                       <div className="relative z-10">
                         <div className="flex items-center gap-3">
@@ -396,17 +396,17 @@ export default function StudentVisa() {
           </div>
                           <div>
                             <div className="font-bold text-[hsl(var(--blue-900))]">{uni.short_name}</div>
-                            <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{uni.name}</div>
+                            <div className="text-[12px] text-muted-foreground">{uni.name}</div>
                           </div>
                         </div>
                         <div className="mt-3 flex items-center justify-between">
                           <div className="text-[13px]">
-                            <span className="text-[hsl(var(--blue-900))]/60">Tuition:</span>{' '}
+                            <span className="text-muted-foreground">Tuition:</span>{' '}
                             <span className="font-bold text-[hsl(var(--blue-900))]">
                               {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
                             </span>
                           </div>
-                          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] text-white text-[12px] font-bold">
+                          <div className="px-3 py-1 rounded-full bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] text-[12px] font-semibold">
                             #{uni.rank} World
                           </div>
                         </div>
@@ -423,8 +423,8 @@ export default function StudentVisa() {
               </div>
               {universities.filter(u => u.courses?.includes(selectedCourse) && u.country === selected).length === 0 && (
                 <div className="text-center py-8 bg-[hsl(var(--soft-bg))] rounded-xl">
-                  <BookOpen className="w-10 h-10 text-[hsl(var(--blue-900))]/30 mx-auto" />
-                  <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60">
+                  <BookOpen className="w-10 h-10 text-muted-foreground mx-auto" />
+                  <p className="mt-3 text-[14px] text-muted-foreground">
                     No universities found for this course in {selectedCountry?.name}.{' '}
                     <Link to={`/universities?course=${selectedCourse}`} className="text-[hsl(var(--blue-700))] font-bold hover:underline">
                       Browse all countries
@@ -438,7 +438,7 @@ export default function StudentVisa() {
           <div className="mt-8 flex items-center justify-center">
             <Link
               to="/universities"
-              className="inline-flex items-center gap-2 rounded-full btn-primary text-white h-12 px-8 font-bold"
+              className="inline-flex items-center gap-2 rounded-xl btn-primary text-white h-12 px-8 font-bold"
             >
               Browse all universities <ArrowRight className="w-4 h-4" />
             </Link>
@@ -446,31 +446,31 @@ export default function StudentVisa() {
         </div>
       </section>
 
-      <section id="universities-section" className="py-16 bg-[hsl(var(--soft-bg))] border-y border-black/5">
+      <section id="universities-section" className="py-16 bg-[hsl(var(--soft-bg))] border-y border-[hsl(var(--border))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <GraduationCap className="w-3.5 h-3.5" /> Schools & Programs
           </div>
-          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
             Universities in {selectedCountry?.name}
           </h2>
-          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Explore programs offered by universities in {selectedCountry?.name}. Select multiple universities and apply with a single application.
           </p>
 
           {/* ── Filters ── */}
-          <div className="mt-6 flex flex-wrap gap-3 items-center bg-white rounded-2xl border border-black/5 p-4">
+          <div className="mt-6 flex flex-wrap gap-3 items-center bg-white rounded-2xl border border-[hsl(var(--border))] p-4">
             <div className="relative flex-1 min-w-[180px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/30" />
-              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search universities..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-[hsl(var(--blue-50))] border border-black/10 text-[13px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/30 outline-none focus:border-[hsl(var(--blue-700))]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} aria-label="Search universities" placeholder="Search universities..." className="w-full h-11 pl-9 pr-4 rounded-xl bg-white border border-[hsl(var(--border))] text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] placeholder:text-muted-foreground outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20" />
             </div>
-            <input type="number" value={tuitionMax} onChange={e => setTuitionMax(e.target.value)} placeholder="Max tuition $" className="h-10 w-32 px-3 rounded-xl bg-[hsl(var(--blue-50))] border border-black/10 text-[13px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--blue-700))]" />
-            <input type="number" step="0.5" min="0" max="9" value={ieltsFilter} onChange={e => setIeltsFilter(e.target.value)} placeholder="IELTS ≤" className="h-10 w-24 px-3 rounded-xl bg-[hsl(var(--blue-50))] border border-black/10 text-[13px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--blue-700))]" />
-            <label className="flex items-center gap-1.5 text-[12px] font-bold text-[hsl(var(--blue-900))] cursor-pointer whitespace-nowrap">
+            <input type="number" value={tuitionMax} onChange={e => setTuitionMax(e.target.value)} aria-label="Maximum tuition in USD" placeholder="Max tuition $" className="h-11 w-[calc(50%-6px)] sm:w-36 px-3 rounded-xl bg-white border border-[hsl(var(--border))] text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] placeholder:text-muted-foreground outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20" />
+            <input type="number" step="0.5" min="0" max="9" value={ieltsFilter} onChange={e => setIeltsFilter(e.target.value)} aria-label="Maximum IELTS requirement" placeholder="IELTS ≤" className="h-11 w-[calc(50%-6px)] sm:w-28 px-3 rounded-xl bg-white border border-[hsl(var(--border))] text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] placeholder:text-muted-foreground outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20" />
+            <label className="flex items-center gap-2 min-h-[44px] text-[14px] font-semibold text-[hsl(var(--blue-900))] cursor-pointer whitespace-nowrap">
               <input type="checkbox" checked={scholarshipsOnly} onChange={e => setScholarshipsOnly(e.target.checked)} className="accent-[hsl(var(--blue-700))]" />
               Scholarships only
             </label>
-            <select value={sortField} onChange={e => setSortField(e.target.value)} className="h-10 px-3 rounded-xl bg-[hsl(var(--blue-50))] border border-black/10 text-[13px] font-bold text-[hsl(var(--blue-900))] outline-none">
+            <select aria-label="Sort universities" value={sortField} onChange={e => setSortField(e.target.value)} className="h-11 px-3 rounded-xl bg-white border border-[hsl(var(--border))] text-[13px] font-bold text-[hsl(var(--blue-900))] outline-none">
               <option value="rank">Sort: Rank</option>
               <option value="tuition">Sort: Tuition</option>
               <option value="name">Sort: Name</option>
@@ -478,25 +478,25 @@ export default function StudentVisa() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="mt-8 text-center py-12 bg-white rounded-2xl border border-black/5">
-              <BookOpen className="w-10 h-10 text-[hsl(var(--blue-900))]/30 mx-auto" />
-              <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60">
+            <div className="mt-8 text-center py-12 bg-white rounded-2xl border border-[hsl(var(--border))]">
+              <BookOpen className="w-10 h-10 text-muted-foreground mx-auto" />
+              <p className="mt-3 text-[14px] text-muted-foreground">
                 No universities match your filters.
               </p>
             </div>
           ) : (
             <>
-              <div className="mt-6 flex items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/50">
+              <div className="mt-6 flex items-center gap-2 text-[12px] text-muted-foreground">
                 <span className="font-bold text-[hsl(var(--blue-900))]">{filtered.length}</span> universities found
               </div>
               <div className="mt-3 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filtered.slice((uniPage - 1) * UNI_PER_PAGE, uniPage * UNI_PER_PAGE).map((uni) => (
                 <div
                   key={uni.id}
-                  className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition"
+                  className="rounded-2xl bg-white border border-[hsl(var(--border))] p-5 hover:border-[hsl(var(--blue-200))] hover:shadow-md hover:-translate-y-0.5 transition duration-200"
                 >
                   <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center overflow-hidden shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center overflow-hidden shrink-0">
                     {uni.website ? (
                       <img loading="lazy" decoding="async"
                         src={`https://www.google.com/s2/favicons?domain=${new URL(uni.website).hostname}&sz=128`}
@@ -514,10 +514,10 @@ export default function StudentVisa() {
                   </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.short_name}</div>
-                      <div className="text-[12px] text-[hsl(var(--blue-900))]/60 truncate">{uni.name}</div>
+                      <div className="text-[12px] text-muted-foreground truncate">{uni.name}</div>
                       <div className="mt-1 flex items-center gap-2">
                         <Badge className="bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] text-[12px] border-0">{uni.type}</Badge>
-                        <span className="text-[12px] text-[hsl(var(--blue-900))]/50">#{uni.rank}</span>
+                        <span className="text-[12px] text-muted-foreground">#{uni.rank}</span>
                       </div>
                     </div>
                   </div>
@@ -531,10 +531,10 @@ export default function StudentVisa() {
                   </div>
 
                   <div className="mt-3 flex items-center gap-4 text-[12px]">
-                    <span className="text-[hsl(var(--blue-900))]/60">
+                    <span className="text-muted-foreground">
                       Tuition: <strong className="text-[hsl(var(--blue-900))]">{uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}</strong>
                     </span>
-                    <span className="text-[hsl(var(--blue-900))]/60">
+                    <span className="text-muted-foreground">
                       IELTS: <strong className="text-[hsl(var(--blue-900))]">{uni.ielts_min}+</strong>
                     </span>
                   </div>
@@ -542,13 +542,13 @@ export default function StudentVisa() {
                   <div className="mt-4 flex items-center gap-2">
                     <Link
                       to={`/university/${uni.id}`}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-black/10 h-9 text-[12px] font-bold text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/30 transition"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-[hsl(var(--border))] h-10 text-[13px] font-semibold text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/30 transition"
                     >
                       View details
                     </Link>
                     <Link
                       to={`/university/${uni.id}?apply=true`}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl btn-primary text-white h-9 text-[12px] font-bold"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl btn-primary text-white h-10 text-[13px] font-semibold"
                     >
                       Apply <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
@@ -580,19 +580,19 @@ export default function StudentVisa() {
                     variant="outline"
                     disabled={uniPage === 1}
                     onClick={() => setUniPage(p => Math.max(1, p - 1))}
-                    className="rounded-full h-9 px-3 text-[12px] font-bold"
+                    className="rounded-xl h-10 px-3 text-[13px] font-semibold"
                   >
                     Prev
                   </Button>
                   {getPages().map((p, i) =>
                     p === '...' ? (
-                      <span key={`dots-${i}`} className="w-9 text-center text-[13px] text-[hsl(var(--blue-900))]/40 font-bold">...</span>
+                      <span key={`dots-${i}`} className="w-9 text-center text-[13px] text-muted-foreground font-bold">...</span>
                     ) : (
                       <Button
                         key={p}
                         variant={p === uniPage ? 'default' : 'outline'}
                         onClick={() => setUniPage(p)}
-                        className={`rounded-full h-9 w-9 p-0 text-[13px] font-bold ${p === uniPage ? 'bg-[hsl(var(--blue-700))] text-white' : ''}`}
+                        className={`rounded-xl h-10 w-10 p-0 text-[13px] font-semibold ${p === uniPage ? 'bg-[hsl(var(--blue-700))] text-white' : ''}`}
                       >
                         {p}
                       </Button>
@@ -602,7 +602,7 @@ export default function StudentVisa() {
                     variant="outline"
                     disabled={uniPage === totalPages}
                     onClick={() => setUniPage(p => Math.min(totalPages, p + 1))}
-                    className="rounded-full h-9 px-3 text-[12px] font-bold"
+                    className="rounded-xl h-10 px-3 text-[13px] font-semibold"
                   >
                     Next
                   </Button>
@@ -614,26 +614,55 @@ export default function StudentVisa() {
         </div>
       </section>
 
-      <section className="py-16 bg-white">
+      <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <DollarSign className="w-3.5 h-3.5" /> Annual Budget
           </div>
-          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
             Estimated annual budget by country
           </h2>
-          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Tuition and living costs vary by university and city. Below are typical ranges.
           </p>
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[600px]">
+          {/* Mobile: stacked cards instead of a wide table */}
+          <ul className="mt-6 grid gap-3 sm:hidden">
+            {ANNUAL_BUDGETS.map(b => {
+              const totalMin = b.tuition_min + b.living_min;
+              const totalMax = b.tuition_max + b.living_max;
+              return (
+                <li key={b.country} className="rounded-2xl bg-white border border-[hsl(var(--border))] p-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xl">{countryFlag(b.code) || <Globe className="w-5 h-5 text-muted-foreground" />}</span>
+                      <span className="font-bold text-[16px] text-[hsl(var(--blue-900))] truncate">{b.name}</span>
+                    </div>
+                    <span className="text-[12px] font-semibold text-muted-foreground">{b.currency}</span>
+                  </div>
+                  <dl className="mt-3 grid grid-cols-2 gap-y-2 text-[14px]">
+                    <dt className="text-muted-foreground">Tuition / yr</dt>
+                    <dd className="text-right text-[hsl(var(--blue-900))]">
+                      {b.tuition_min === 0 ? 'Free' : `${b.tuition_min?.toLocaleString()}`}
+                      {b.tuition_max > 0 && b.tuition_min > 0 ? ` – ${b.tuition_max?.toLocaleString()}` : ''}
+                    </dd>
+                    <dt className="text-muted-foreground">Living / yr</dt>
+                    <dd className="text-right text-[hsl(var(--blue-900))]">{b.living_min?.toLocaleString()} – {b.living_max?.toLocaleString()}</dd>
+                    <dt className="font-semibold text-[hsl(var(--blue-900))] pt-2 border-t border-[hsl(var(--border))]">Total</dt>
+                    <dd className="text-right font-bold text-[hsl(var(--blue-900))] pt-2 border-t border-[hsl(var(--border))]">{totalMin?.toLocaleString()} – {totalMax?.toLocaleString()}</dd>
+                  </dl>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="mt-6 hidden sm:block overflow-x-auto rounded-2xl border border-[hsl(var(--border))] bg-white">
+            <table className="w-full">
               <thead>
-                <tr className="border-b border-black/10">
-                  <th className="text-left py-3 pr-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Country</th>
-                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Tuition (annual)</th>
-                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Living costs (annual)</th>
-                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Total (min)</th>
-                  <th className="text-left py-3 pl-4 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Currency</th>
+                <tr className="border-b border-[hsl(var(--border))]">
+                  <th className="text-left py-3 pl-5 pr-4 text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Country</th>
+                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Tuition (annual)</th>
+                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Living costs (annual)</th>
+                  <th className="text-left py-3 px-4 text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Total (min)</th>
+                  <th className="text-left py-3 pl-4 pr-5 text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Currency</th>
                 </tr>
               </thead>
               <tbody>
@@ -641,10 +670,10 @@ export default function StudentVisa() {
                   const totalMin = b.tuition_min + b.living_min;
                   const totalMax = b.tuition_max + b.living_max;
                   return (
-                    <tr key={b.country} className="border-b border-black/5 hover:bg-[hsl(var(--blue-50))] transition">
-                      <td className="py-3 pr-4">
+                    <tr key={b.country} className="border-b last:border-b-0 border-[hsl(var(--border))] hover:bg-[hsl(var(--soft-bg))] transition-colors">
+                      <td className="py-3 pl-5 pr-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">{countryFlag(b.code) || <Globe className="w-5 h-5 text-[hsl(var(--blue-900))]/40" />}</span>
+                          <span className="text-xl">{countryFlag(b.code) || <Globe className="w-5 h-5 text-muted-foreground" />}</span>
                           <span className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{b.name}</span>
                         </div>
                       </td>
@@ -660,63 +689,63 @@ export default function StudentVisa() {
                           {totalMin?.toLocaleString()} – {totalMax?.toLocaleString()}
                         </span>
                       </td>
-                      <td className="py-3 pl-4 text-[13px] text-[hsl(var(--blue-900))]/60">{b.currency}</td>
+                      <td className="py-3 pl-4 pr-5 text-[13px] text-muted-foreground">{b.currency}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex items-start gap-2 text-[12px] text-[hsl(var(--blue-900))]/55">
+          <div className="mt-4 flex items-start gap-2 text-[12px] text-muted-foreground">
             <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             <span>Figures are indicative. Actual costs depend on university, program, and lifestyle. Use our Cost of Living Calculator for a precise estimate.</span>
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-[hsl(var(--soft-bg))]">
+      <section className="py-16 md:py-24 bg-[hsl(var(--soft-bg))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <BookOpen className="w-3.5 h-3.5" /> Score Requirements
           </div>
-          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
             English proficiency & entrance exams
           </h2>
-          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Most universities require one or more of these test scores. Requirements vary by program and institution.
           </p>
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {SCORE_REQUIREMENTS.map(s => {
               const Icon = s.icon;
               return (
-                <div key={s.id} className="rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition group">
+                <div key={s.id} className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 hover:border-[hsl(var(--blue-200))] hover:shadow-md hover:-translate-y-0.5 transition duration-200 group">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-white shadow-lg">
+                    <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-[hsl(var(--blue-700))]">
                       <Icon className="w-6 h-6" />
                     </div>
                     <div>
                       <div className="font-bold text-[17px] text-[hsl(var(--blue-900))]">{s.label}</div>
-                      <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{s.format}</div>
+                      <div className="text-[12px] text-muted-foreground">{s.format}</div>
                     </div>
                   </div>
-                  <p className="text-[13px] text-[hsl(var(--blue-900))]/65 leading-relaxed mb-4">{s.desc}</p>
+                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-4">{s.desc}</p>
                   <div className="flex items-center gap-4 text-center">
                     <div>
-                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Min</div>
-                      <div className="text-[18px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.min}</div>
+                      <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Min</div>
+                      <div className="text-[18px] font-display font-bold text-[hsl(var(--blue-900))]">{s.min}</div>
                     </div>
-                    <div className="w-px h-8 bg-black/10" />
+                    <div className="w-px h-8 bg-[hsl(var(--border))]" />
                     <div>
-                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Avg</div>
-                      <div className="text-[18px] font-display font-extrabold text-[hsl(var(--accent))]">{s.avg}</div>
+                      <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Avg</div>
+                      <div className="text-[18px] font-display font-bold text-[hsl(var(--blue-700))]">{s.avg}</div>
                     </div>
-                    <div className="w-px h-8 bg-black/10" />
+                    <div className="w-px h-8 bg-[hsl(var(--border))]" />
                     <div>
-                      <div className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55">Max</div>
-                      <div className="text-[18px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.max}</div>
+                      <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Max</div>
+                      <div className="text-[18px] font-display font-bold text-[hsl(var(--blue-900))]">{s.max}</div>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-black/5">
+                  <div className="mt-4 pt-3 border-t border-[hsl(var(--border))]">
                     <Link to="/universities" className="inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline group-hover:gap-2 transition-all">
                       Check university requirements <ChevronRight className="w-3 h-3" />
                     </Link>
@@ -725,7 +754,7 @@ export default function StudentVisa() {
               );
             })}
           </div>
-          <div className="mt-6 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200 p-5">
+          <div className="mt-6 rounded-2xl bg-amber-50 border border-amber-200 p-5">
             <div className="flex items-start gap-3">
               <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-[13px] text-amber-800">
@@ -736,23 +765,20 @@ export default function StudentVisa() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="grid lg:grid-cols-12 gap-10">
             <div className="lg:col-span-7">
-              <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+              <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
                 {selectedCountry?.name} Student Visa
               </h2>
-              <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+              <p className="mt-2 text-[15px] text-muted-foreground">
                 {studentMeta.note || `${selectedCountry?.name} student visa details and requirements`}
               </p>
 
-              <div className="mt-6 rounded-2xl border border-black/5 p-6 overflow-hidden relative" style={{
-                  background: 'linear-gradient(135deg, #ffffff 0%, hsl(var(--blue-50)/30%) 100%)',
-                }}>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[hsl(var(--accent))]/5 to-transparent rounded-bl-full" />
+              <div className="mt-6 rounded-2xl border border-[hsl(var(--border))] bg-white shadow-sm p-6 overflow-hidden relative">
                 <div className="relative z-10">
-                  <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))] mb-4">
+                  <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-4">
                     Visa Details
                   </div>
                 <ComparisonRow
@@ -788,7 +814,7 @@ export default function StudentVisa() {
                 <div className="pt-4">
                   <Link
                     to={`/visa/${selectedCountry?.id}`}
-                    className="inline-flex items-center gap-2 rounded-full btn-primary text-white h-11 px-6 font-bold"
+                    className="inline-flex items-center gap-2 rounded-xl btn-accent text-white h-12 px-6 font-semibold"
                   >
                     Apply for {selectedCountry?.name} <ChevronRight className="w-4 h-4" />
                   </Link>
@@ -798,48 +824,45 @@ export default function StudentVisa() {
             </div>
 
             <aside className="lg:col-span-5">
-              <div className="relative rounded-2xl overflow-hidden p-7 sticky top-28" style={{
-                background: 'linear-gradient(135deg, hsl(var(--blue-900)) 0%, hsl(var(--blue-700)) 50%, hsl(var(--blue-500)) 100%)',
-              }}>
-                <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-[hsl(var(--accent))]/20 to-transparent rounded-tl-full" />
-                <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-white/90">
+              <div className="relative rounded-2xl overflow-hidden p-6 sm:p-7 lg:sticky lg:top-28 bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))]">
+                <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
                   Why apply with We Hive
                 </div>
                 <div className="mt-4 space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                      <Zap className="w-4 h-4 text-white" />
+                    <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0">
+                      <Zap className="w-4 h-4 text-[hsl(var(--blue-700))]" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14px] text-white">On-time, or it's on us</div>
-                      <div className="text-[12px] text-white/70 mt-0.5">We commit to your intake date. If we miss, we refund.</div>
+                      <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">On-time, or it's on us</div>
+                      <div className="text-[14px] text-muted-foreground mt-0.5">We commit to your intake date. If we miss, we refund.</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                      <Check className="w-4 h-4 text-white" />
+                    <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0">
+                      <Check className="w-4 h-4 text-[hsl(var(--blue-700))]" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14px] text-white">Documents reviewed by humans</div>
-                      <div className="text-[12px] text-white/70 mt-0.5">Every SOP and financial document checked before submission.</div>
+                      <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">Documents reviewed by humans</div>
+                      <div className="text-[14px] text-muted-foreground mt-0.5">Every SOP and financial document checked before submission.</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                      <Users className="w-4 h-4 text-white" />
+                    <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 text-[hsl(var(--blue-700))]" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14px] text-white">Slots before they vanish</div>
-                      <div className="text-[12px] text-white/70 mt-0.5">We grab VFS appointments the moment they open.</div>
+                      <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">Slots before they vanish</div>
+                      <div className="text-[14px] text-muted-foreground mt-0.5">We grab VFS appointments the moment they open.</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                      <Globe className="w-4 h-4 text-white" />
+                    <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0">
+                      <Globe className="w-4 h-4 text-[hsl(var(--blue-700))]" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14px] text-white">Real humans on call</div>
-                      <div className="text-[12px] text-white/70 mt-0.5">WhatsApp, email, or call. Including weekends.</div>
+                      <div className="font-bold text-[15px] text-[hsl(var(--blue-900))]">Real humans on call</div>
+                      <div className="text-[14px] text-muted-foreground mt-0.5">WhatsApp, email, or call. Including weekends.</div>
                     </div>
                   </div>
                 </div>
@@ -849,27 +872,27 @@ export default function StudentVisa() {
         </div>
       </section>
 
-      <section className="py-16 bg-[hsl(var(--soft-bg))]">
+      <section className="py-16 md:py-24 bg-[hsl(var(--soft-bg))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
             Student visa application timeline
           </h2>
-          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Most student visa rejections trace back to a late start. Here's the apply-by window for each intake season.
           </p>
           <div className="mt-8 grid md:grid-cols-3 gap-6">
             {INTAKE_TIMES.map((intake, i) => (
               <div
                 key={intake.season}
-className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var(--blue-50))] transition duration-300"
+className="relative rounded-2xl overflow-hidden group bg-white"
               >
-                <div className="relative z-10 p-7 border border-black/5 rounded-2xl bg-white/80 backdrop-blur">
+                <div className="relative z-10 p-6 border border-[hsl(var(--border))] rounded-2xl bg-white shadow-sm">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-12 h-12 rounded-xl ${intake.color} flex items-center justify-center text-white shadow-lg`}>
+                    <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-[hsl(var(--blue-700))]">
                       <Calendar className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="text-[12px] uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/55 font-bold">Intake</div>
+                      <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Intake</div>
                       <div className="font-bold text-[16px] text-[hsl(var(--blue-900))]">{intake.months}</div>
                     </div>
                   </div>
@@ -881,12 +904,12 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
             Documents required for a student visa
           </h2>
-          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Country-specific add-ons (SOPs, English test scores, sponsorship letters) are listed on each country page — these four are the constant.
           </p>
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -895,14 +918,14 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               return (
                 <div
                   key={doc.title}
-                  className="relative rounded-2xl p-6 text-center overflow-hidden group transition duration-300 hover:shadow-xl hover:shadow-[hsl(var(--blue-700))]/10 bg-white"
+                  className="relative rounded-2xl p-6 text-center overflow-hidden group bg-white border border-[hsl(var(--border))] shadow-sm"
                 >
                   <div className="relative z-10">
-                    <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--blue-700))] flex items-center justify-center mx-auto shadow-lg shadow-[hsl(var(--blue-700))]/20">
-                      <Icon className="w-7 h-7 text-white" />
+                    <div className="w-14 h-14 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center mx-auto">
+                      <Icon className="w-6 h-6 text-[hsl(var(--blue-700))]" />
                     </div>
                     <div className="mt-4 font-bold text-[15px] text-[hsl(var(--blue-900))]">{doc.title}</div>
-                    <div className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{doc.desc}</div>
+                    <div className="mt-1 text-[13px] text-muted-foreground">{doc.desc}</div>
                   </div>
                 </div>
               );
@@ -911,35 +934,35 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
         </div>
       </section>
 
-      <section className="py-16 bg-[hsl(var(--blue-900))] text-white">
+      <section className="py-16 md:py-24 bg-white border-t border-[hsl(var(--border))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
                 <GraduationCap className="w-4 h-4" />
                 Results
               </div>
-              <h2 className="mt-3 font-display font-extrabold text-[36px] tracking-[-0.025em]">
+              <h2 className="mt-3 font-display font-bold text-[28px] sm:text-[36px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
                 We Hive student visa results
               </h2>
-              <div className="mt-8 grid grid-cols-3 gap-6">
+              <div className="mt-8 grid grid-cols-3 gap-4 sm:gap-6">
                 <div>
-                  <div className="text-[36px] font-display font-extrabold">10K+</div>
-                  <div className="text-[13px] text-white/60">Student visas processed</div>
+                  <div className="text-[28px] sm:text-[36px] font-display font-bold text-[hsl(var(--blue-900))]">10K+</div>
+                  <div className="text-[13px] text-muted-foreground">Student visas processed</div>
                 </div>
                 <div>
-                  <div className="text-[36px] font-display font-extrabold">10</div>
-                  <div className="text-[13px] text-white/60">Destinations supported</div>
+                  <div className="text-[28px] sm:text-[36px] font-display font-bold text-[hsl(var(--blue-900))]">10</div>
+                  <div className="text-[13px] text-muted-foreground">Destinations supported</div>
                 </div>
                 <div>
-                  <div className="text-[36px] font-display font-extrabold">98%</div>
-                  <div className="text-[13px] text-white/60">Documents accepted on first try</div>
+                  <div className="text-[28px] sm:text-[36px] font-display font-bold text-[hsl(var(--blue-900))]">98%</div>
+                  <div className="text-[13px] text-muted-foreground">Documents accepted on first try</div>
                 </div>
               </div>
             </div>
-            <div className="bg-white/5 rounded-2xl p-7">
-              <h3 className="font-bold text-[18px]">Start your student visa today</h3>
-              <p className="mt-2 text-[14px] text-white/60">
+            <div className="bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] rounded-2xl p-6 sm:p-7">
+              <h3 className="font-bold text-[20px] text-[hsl(var(--blue-900))]">Start your student visa today</h3>
+              <p className="mt-2 text-[15px] text-muted-foreground">
                 Pick where you're studying and start your visa today. Most students finish their application paperwork in under an hour.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
@@ -947,12 +970,12 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
                   <Link
                     key={c.id}
                     to={`/visa/${c.id}`}
-                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 rounded-full px-4 py-2 text-[13px] font-bold transition"
+                    className="inline-flex items-center gap-2 bg-white border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] text-[hsl(var(--blue-900))] rounded-full px-4 min-h-[44px] text-[14px] font-semibold transition-colors"
                   >
                     {countryFlag(c.code) || <Globe className="w-4 h-4" />} {c.name}
                   </Link>
                 ))}
-                <span className="inline-flex items-center bg-white/10 rounded-full px-4 py-2 text-[13px] font-bold">
+                <span className="inline-flex items-center rounded-full px-4 min-h-[44px] text-[14px] font-semibold text-muted-foreground">
                   +5 more
                 </span>
               </div>
@@ -961,33 +984,33 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
         </div>
       </section>
 
-      <section className="py-16 bg-[hsl(var(--soft-bg))] border-t border-black/5">
+      <section className="py-16 md:py-24 bg-[hsl(var(--soft-bg))] border-t border-[hsl(var(--border))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[28px] sm:text-[32px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
             Study abroad tools
           </h2>
-          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Everything you need for a successful study abroad journey.
           </p>
           <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: Sparkles, label: 'Visa Interview Simulator', desc: 'Practice mock embassy interviews with scoring', href: '/visa-interview', color: 'bg-violet-500' },
-              { icon: Calculator, label: 'AI Scholarship Matcher', desc: 'Find scholarships matching your profile', color: 'bg-amber-500', action: 'scholarship' },
-              { icon: Sparkles, label: 'AI University Recommender', desc: 'Get personalized AI university recommendations', color: 'bg-purple-500', action: 'recommender' },
-              { icon: Home, label: 'Cost of Living Calculator', desc: 'Compare tuition, rent, food, and transport costs', href: '/student-visa', color: 'bg-emerald-500' },
-              { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate university-specific application documents', href: '/student-visa', color: 'bg-purple-500' },
+              { icon: Sparkles, label: 'Visa Interview Simulator', desc: 'Practice mock embassy interviews with scoring', href: '/visa-interview' },
+              { icon: Calculator, label: 'AI Scholarship Matcher', desc: 'Find scholarships matching your profile', color: 'bg-[hsl(var(--blue-700))]', action: 'scholarship' },
+              { icon: Sparkles, label: 'AI University Recommender', desc: 'Get personalized AI university recommendations', color: 'bg-[hsl(var(--blue-700))]', action: 'recommender' },
+              { icon: Home, label: 'Cost of Living Calculator', desc: 'Compare tuition, rent, food, and transport costs', href: '/student-visa' },
+              { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate university-specific application documents', href: '/student-visa' },
             ].map(tool => {
               if (tool.action === 'scholarship') {
                 return (
                   <button key={tool.label} onClick={() => setShowScholarshipMatcher(true)}
-                    className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition group text-left w-full"
+                    className="rounded-2xl bg-white border border-[hsl(var(--border))] p-5 hover:border-[hsl(var(--blue-200))] hover:shadow-md hover:-translate-y-0.5 transition duration-200 group text-left w-full"
                   >
-                    <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
+                    <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-[hsl(var(--blue-700))]">
                       <tool.icon className="w-6 h-6" />
                     </div>
-                    <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
-                    <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
-                    <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">
+                    <h3 className="mt-3 font-bold text-[16px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
+                    <p className="mt-1 text-[14px] text-muted-foreground">{tool.desc}</p>
+                    <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] group-hover:gap-2 transition-all">
                       Open <ChevronRight className="w-3 h-3" />
                     </div>
                   </button>
@@ -996,14 +1019,14 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               if (tool.action === 'recommender') {
                 return (
                   <button key={tool.label} onClick={() => setShowAIRecommender(true)}
-                    className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition group text-left w-full"
+                    className="rounded-2xl bg-white border border-[hsl(var(--border))] p-5 hover:border-[hsl(var(--blue-200))] hover:shadow-md hover:-translate-y-0.5 transition duration-200 group text-left w-full"
                   >
-                    <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
+                    <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-[hsl(var(--blue-700))]">
                       <tool.icon className="w-6 h-6" />
                     </div>
-                    <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
-                    <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
-                    <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">
+                    <h3 className="mt-3 font-bold text-[16px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
+                    <p className="mt-1 text-[14px] text-muted-foreground">{tool.desc}</p>
+                    <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] group-hover:gap-2 transition-all">
                       Open <ChevronRight className="w-3 h-3" />
                     </div>
                   </button>
@@ -1011,14 +1034,14 @@ className="relative rounded-2xl overflow-hidden group bg-white hover:bg-[hsl(var
               }
               return (
                 <Link key={tool.label} to={tool.href}
-                  className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition group"
+                  className="rounded-2xl bg-white border border-[hsl(var(--border))] p-5 hover:border-[hsl(var(--blue-200))] hover:shadow-md hover:-translate-y-0.5 transition duration-200 group"
                 >
-                  <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg`}>
+                  <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center text-[hsl(var(--blue-700))]">
                     <tool.icon className="w-6 h-6" />
                   </div>
                   <h3 className="mt-3 font-bold text-[15px] text-[hsl(var(--blue-900))]">{tool.label}</h3>
-                  <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60">{tool.desc}</p>
-                  <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] group-hover:gap-2 transition-all">
+                  <p className="mt-1 text-[13px] text-muted-foreground">{tool.desc}</p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] group-hover:gap-2 transition-all">
                     Open <ChevronRight className="w-3 h-3" />
                   </div>
                 </Link>

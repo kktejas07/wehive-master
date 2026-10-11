@@ -49,7 +49,7 @@ interface EventItem {
 }
 
 function EventCard({ ev }: { ev: EventItem }) {
-  const accent = ev.accent_color || '#e1212c';
+  const accent = ev.accent_color || '#047857';
   const tagLabel = TAG_LABEL[ev.tag || ''] || ev.tag || 'Featured';
   const tagColorClass = TAG_COLOR[ev.tag || ''] || TAG_COLOR.promo;
 
@@ -57,12 +57,12 @@ function EventCard({ ev }: { ev: EventItem }) {
     <Link
       to={ev.cta_url || '#'}
       data-testid={`event-banner-${ev.id}`}
-      className="group relative block aspect-[16/9] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-[0_30px_70px_-30px_rgba(10,44,138,0.4)] hover:shadow-[0_30px_70px_-20px_rgba(225,33,44,0.4)] transition duration-500"
+      className="group relative block aspect-[16/9] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-[0_30px_70px_-30px_rgba(37,99,235,0.4)] hover:shadow-[0_30px_70px_-20px_rgba(4,120,87,0.4)] transition duration-500"
     >
       {/* Background gradient or image */}
       <div
         className="absolute inset-0 z-0"
-        style={{ background: `linear-gradient(135deg, ${accent} 0%, #0a2c8a 100%)` }}
+        style={{ background: `linear-gradient(135deg, ${accent} 0%, #2563EB 100%)` }}
       />
       
       {/* Background image if available */}
@@ -213,7 +213,7 @@ export default function EventsBanner({
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
             <div>
-              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] animate-pulse">
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] animate-pulse">
                 Live now
               </div>
               <div className="h-8 w-48 bg-[hsl(var(--soft-bg))] rounded mt-1 animate-pulse" />
@@ -234,7 +234,7 @@ export default function EventsBanner({
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-2">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-2">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-60" />
                 <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
@@ -259,7 +259,7 @@ export default function EventsBanner({
         <div className="mt-8 text-center">
           <Link
             to="/offers"
-            className="inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--accent))] transition-colors"
+            className="inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] transition-colors"
           >
             View all offers
             <ArrowRight className="w-4 h-4" />

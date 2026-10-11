@@ -18,21 +18,21 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
 
   return (
     <div className="flex items-center justify-between pt-4 border-t border-white/5">
-      <span className="text-[11px] text-slate-500">
+      <span className="text-[11px] text-slate-400">
         {skip + 1}–{Math.min(skip + limit, total)} of {total}
       </span>
       <div className="flex items-center gap-1">
         <button
           onClick={() => goTo(1)}
           disabled={currentPage === 1}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
         >
           <ChevronsLeft className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={() => goTo(currentPage - 1)}
           disabled={currentPage === 1}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
         >
           <ChevronLeft className="w-3.5 h-3.5" />
         </button>
@@ -45,7 +45,7 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
             onClick={() => goTo(p)}
             className={`w-7 h-7 rounded-lg text-[11px] font-bold transition ${
               p === currentPage
-                ? 'bg-[hsl(var(--accent))] text-white'
+                ? 'bg-[hsl(var(--blue-700))] text-white'
                 : 'text-slate-400 hover:text-white hover:bg-white/10'
             }`}
           >
@@ -58,14 +58,14 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
         <button
           onClick={() => goTo(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
         >
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={() => goTo(totalPages)}
           disabled={currentPage === totalPages}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
         >
           <ChevronsRight className="w-3.5 h-3.5" />
         </button>

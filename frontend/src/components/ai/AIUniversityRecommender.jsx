@@ -63,20 +63,20 @@ export default function AIUniversityRecommender({ open, onClose }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div {...dialogProps} className="rounded-2xl bg-white border border-black/10 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[hsl(var(--blue-900))]/60" onClick={onClose}>
+      <div {...dialogProps} className="rounded-2xl bg-white border border-[hsl(var(--border))] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-5 border-b border-black/5">
+        <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-5 border-b border-[hsl(var(--border))]">
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="h-10 w-10 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-[hsl(var(--blue-700))]" />
             </div>
             <div>
-              <h3 className="font-extrabold text-[16px] text-[hsl(var(--blue-900))]">AI University Recommender</h3>
-              <p className="text-[12px] text-[hsl(var(--blue-900))]/50">Personalized matches powered by AI</p>
+              <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))]">AI University Recommender</h3>
+              <p className="text-[12px] text-muted-foreground">Personalized matches powered by AI</p>
             </div>
           </div>
-          <button aria-label="Close" onClick={onClose} className="h-8 w-8 rounded-lg bg-black/5 hover:bg-black/10 flex items-center justify-center">
+          <button aria-label="Close" onClick={onClose} className="h-11 w-11 rounded-full hover:bg-[hsl(var(--blue-50))] flex items-center justify-center transition-colors">
             <X className="w-4 h-4 text-[hsl(var(--blue-900))]" />
           </button>
         </div>
@@ -88,13 +88,13 @@ export default function AIUniversityRecommender({ open, onClose }) {
                 <label htmlFor="aiuniversityrecommender-budget-usd-year" className="block text-[12px] font-bold text-[hsl(var(--blue-900))] mb-1">
                   <DollarSign className="w-3.5 h-3.5 inline mr-1" /> Budget (USD/year)
                 </label>
-                <input id="aiuniversityrecommender-budget-usd-year" type="number" value={budget} onChange={e => setBudget(e.target.value)} className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-black/10 text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-purple-500" />
+                <input id="aiuniversityrecommender-budget-usd-year" type="number" value={budget} onChange={e => setBudget(e.target.value)} className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--border))] text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div>
                 <label htmlFor="aiuniversityrecommender-preferred-country" className="block text-[12px] font-bold text-[hsl(var(--blue-900))] mb-1">
                   <Globe className="w-3.5 h-3.5 inline mr-1" /> Preferred Country
                 </label>
-                <input id="aiuniversityrecommender-preferred-country" type="text" value={country} onChange={e => setCountry(e.target.value)} placeholder="us, gb, de... or leave blank" className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-black/10 text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-purple-500" />
+                <input id="aiuniversityrecommender-preferred-country" type="text" value={country} onChange={e => setCountry(e.target.value)} placeholder="us, gb, de... or leave blank" className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--border))] text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
             </div>
 
@@ -107,7 +107,7 @@ export default function AIUniversityRecommender({ open, onClose }) {
                   <button key={c.id} onClick={() => toggleCourse(c.id)}
                     className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition ${
                       preferredCourses.includes(c.id)
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-[hsl(var(--blue-700))] text-white'
                         : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-100))]'
                     }`}>
                     {c.label}
@@ -121,11 +121,11 @@ export default function AIUniversityRecommender({ open, onClose }) {
                 <label htmlFor="aiuniversityrecommender-ielts-score" className="block text-[12px] font-bold text-[hsl(var(--blue-900))] mb-1">
                   <Target className="w-3.5 h-3.5 inline mr-1" /> IELTS Score
                 </label>
-                <input id="aiuniversityrecommender-ielts-score" type="number" step="0.5" min="0" max="9" value={ieltsScore} onChange={e => setIeltsScore(e.target.value)} placeholder="e.g. 6.5" className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-black/10 text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-purple-500" />
+                <input id="aiuniversityrecommender-ielts-score" type="number" step="0.5" min="0" max="9" value={ieltsScore} onChange={e => setIeltsScore(e.target.value)} placeholder="e.g. 6.5" className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--border))] text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div className="flex items-end pb-2">
                 <label className="flex items-center gap-2 text-[12px] font-bold text-[hsl(var(--blue-900))] cursor-pointer">
-                  <input type="checkbox" checked={scholarshipsOnly} onChange={e => setScholarshipsOnly(e.target.checked)} className="w-4 h-4 accent-purple-600" />
+                  <input type="checkbox" checked={scholarshipsOnly} onChange={e => setScholarshipsOnly(e.target.checked)} className="w-4 h-4 accent-[hsl(var(--blue-700))]" />
                   <GraduationCap className="w-3.5 h-3.5" /> Scholarships only
                 </label>
               </div>
@@ -133,11 +133,11 @@ export default function AIUniversityRecommender({ open, onClose }) {
 
             <div>
               <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))] mb-1">Additional preferences (optional)</label>
-              <textarea value={preferences} onChange={e => setPreferences(e.target.value)} placeholder="e.g. I prefer campuses in big cities, want strong CS programs, need on-campus housing..." rows={2} className="w-full px-4 py-2 rounded-xl bg-[hsl(var(--blue-50))] border border-black/10 text-[13px] text-[hsl(var(--blue-900))] outline-none focus:border-purple-500 resize-none" />
+              <textarea value={preferences} onChange={e => setPreferences(e.target.value)} placeholder="e.g. I prefer campuses in big cities, want strong CS programs, need on-campus housing..." rows={2} className="w-full px-4 py-2 rounded-xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--border))] text-[13px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--blue-700))] resize-none" />
             </div>
 
             <button onClick={handleRecommend} disabled={busy}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 hover:brightness-110 disabled:opacity-50 text-white font-extrabold text-[14px] flex items-center justify-center gap-2">
+              className="w-full h-12 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[14px] flex items-center justify-center gap-2">
               {busy ? <><Loader2 className="w-5 h-5 animate-spin" /> Finding matches...</> : <><Sparkles className="w-5 h-5" /> Get AI Recommendations</>}
             </button>
           </div>
@@ -151,37 +151,37 @@ export default function AIUniversityRecommender({ open, onClose }) {
             {results.recommendations && results.recommendations.length > 0 ? (
               <div className="space-y-3">
                 {results.recommendations.map((uni, idx) => (
-                  <div key={uni.id} className="rounded-xl bg-[hsl(var(--blue-50))] p-4 border border-black/5 hover:border-purple-300 transition">
+                  <div key={uni.id} className="rounded-xl bg-[hsl(var(--blue-50))] p-4 border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] transition">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-[12px] font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">#{idx + 1}</span>
+                          <span className="text-[12px] font-bold text-[hsl(var(--blue-700))] bg-[hsl(var(--blue-100))] px-2 py-0.5 rounded-full">#{idx + 1}</span>
                           <h4 className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.name}</h4>
                         </div>
-                        <p className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-0.5">{uni.country} · Rank #{uni.rank} · ${uni.tuition_usd?.toLocaleString()}/yr</p>
+                        <p className="text-[12px] text-muted-foreground mt-0.5">{uni.country} · Rank #{uni.rank} · ${uni.tuition_usd?.toLocaleString()}/yr</p>
                       </div>
                       {uni.fit_score != null && (
-                        <div className="shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white font-extrabold text-[18px]">
+                        <div className="shrink-0 w-14 h-14 rounded-full bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] flex items-center justify-center text-[hsl(var(--blue-700))] font-bold text-[18px]">
                           {uni.fit_score}
                         </div>
                       )}
                     </div>
-                    {uni.reason && <p className="mt-2 text-[13px] text-[hsl(var(--blue-900))]/70 leading-relaxed">{uni.reason}</p>}
+                    {uni.reason && <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{uni.reason}</p>}
                     {uni.strengths && uni.strengths.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {uni.strengths.map((s, i) => (
-                          <span key={i} className="text-[12px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{s}</span>
+                          <span key={i} className="text-[12px] px-2 py-0.5 rounded-full bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]">{s}</span>
                         ))}
                       </div>
                     )}
-                    <Link to={`/university/${uni.id}`} className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-purple-600 hover:underline">
+                    <Link to={`/university/${uni.id}`} className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline">
                       View profile <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-[hsl(var(--blue-900))]/50">
+              <div className="text-center py-8 text-muted-foreground">
                 <GraduationCap className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p className="text-[15px] font-bold">No recommendations found</p>
                 <p className="text-[13px] mt-1">Try broadening your criteria.</p>

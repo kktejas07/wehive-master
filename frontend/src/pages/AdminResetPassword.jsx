@@ -50,8 +50,8 @@ export default function AdminResetPassword() {
     return (
       <AdminAuthShell title="Password reset" subtitle="Redirecting you to the dashboard…">
         <div className="flex flex-col items-center">
-          <CheckCircle2 className="w-12 h-12 text-emerald-300 mb-3" />
-          <p className="text-[14px] text-slate-300">You're signed in with your new password.</p>
+          <CheckCircle2 className="w-12 h-12 text-emerald-600 mb-3" />
+          <p className="text-[15px] text-muted-foreground">You're signed in with your new password.</p>
         </div>
       </AdminAuthShell>
     );
@@ -63,7 +63,7 @@ export default function AdminResetPassword() {
       subtitle="Your reset link is single-use and expires 30 minutes after it was sent."
       footer={
         <>
-          <Link to="/admin/login" className="text-[hsl(var(--accent))] font-bold hover:underline">
+          <Link to="/admin/login" className="text-[hsl(var(--blue-700))] font-semibold hover:underline">
             Back to sign-in
           </Link>
         </>

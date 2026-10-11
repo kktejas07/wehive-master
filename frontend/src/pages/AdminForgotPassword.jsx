@@ -39,29 +39,29 @@ export default function AdminForgotPassword() {
         subtitle="If an admin account exists for that email, we've sent a reset link valid for 30 minutes."
         footer={
           <>
-            <Link to="/admin/login" className="text-[hsl(var(--accent))] font-bold hover:underline">
+            <Link to="/admin/login" className="text-[hsl(var(--blue-700))] font-semibold hover:underline">
               Back to sign-in
             </Link>
           </>
         }
       >
         <div className="flex flex-col items-center text-center">
-          <span className="h-16 w-16 rounded-full bg-emerald-500/15 text-emerald-300 inline-flex items-center justify-center mb-4">
+          <span className="h-16 w-16 rounded-full bg-emerald-50 text-emerald-700 inline-flex items-center justify-center mb-4">
             <Mail className="w-7 h-7" />
           </span>
-          <p className="text-[14px] text-slate-300">
+          <p className="text-[15px] text-muted-foreground">
             {sent.message}
           </p>
           {sent.dev_mode && sent.dev_link && (
-            <div className="mt-5 w-full rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-left">
-              <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-amber-300 mb-1">Dev mode</div>
-              <p className="text-[12.5px] text-slate-300 leading-relaxed">
+            <div className="mt-5 w-full rounded-xl bg-amber-50 border border-amber-200 p-4 text-left">
+              <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-amber-800 mb-1">Dev mode</div>
+              <p className="text-[13px] text-amber-900 leading-relaxed">
                 SMTP isn't configured, so we're showing the reset link here. Open it to set a new password:
               </p>
               <a
                 data-testid="admin-forgot-dev-link"
                 href={`/admin/reset-password?token=${encodeURIComponent(sent.dev_token)}`}
-                className="mt-2 inline-block text-[12.5px] font-mono text-[hsl(var(--accent))] break-all hover:underline"
+                className="mt-2 inline-block text-[13px] font-mono text-[hsl(var(--blue-700))] break-all hover:underline"
               >
                 /admin/reset-password?token={sent.dev_token.slice(0, 12)}…
               </a>
@@ -79,7 +79,7 @@ export default function AdminForgotPassword() {
       footer={
         <>
           Remembered it?{' '}
-          <Link to="/admin/login" className="text-[hsl(var(--accent))] font-bold hover:underline">
+          <Link to="/admin/login" className="text-[hsl(var(--blue-700))] font-semibold hover:underline">
             Back to sign-in
           </Link>
         </>

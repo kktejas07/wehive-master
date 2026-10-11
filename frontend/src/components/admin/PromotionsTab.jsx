@@ -23,13 +23,13 @@ const SEASON_OPTIONS = ['all', 'summer', 'fall', 'winter', 'spring', 'student_in
 function Field({ label, value, onChange, placeholder = '', type = 'text', className = '' }) {
   return (
     <label className={`block ${className}`}>
-      <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">{label}</span>
+      <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--accent))]/50 placeholder:text-slate-600"
+        className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50 placeholder:text-slate-500"
       />
     </label>
   );
@@ -49,11 +49,11 @@ function PromoForm({ onSave, onCancel, busy }) {
         <Field label="Max uses" value={String(form.max_uses)} onChange={(v) => set('max_uses')(parseInt(v, 10) || 0)} type="number" />
         <Field label="Min cart value" value={String(form.min_cart_value)} onChange={(v) => set('min_cart_value')(parseFloat(v) || 0)} type="number" />
         <div>
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Season</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Season</span>
           <select
             value={form.season}
             onChange={(e) => set('season')(e.target.value)}
-            className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--accent))]/50"
+            className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50"
           >
             {SEASON_OPTIONS.map((v) => <option key={v} value={v}>{v.replace('_', ' ')}</option>)}
           </select>
@@ -65,14 +65,14 @@ function PromoForm({ onSave, onCancel, busy }) {
         <button
           onClick={onCancel}
           disabled={busy}
-          className="inline-flex items-center gap-1.5 rounded-full bg-white/5 hover:bg-white/10 px-5 py-2 text-[13px] font-bold text-slate-300 transition disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 hover:bg-white/10 px-5 h-10 text-[13px] font-semibold text-slate-300 transition disabled:opacity-50"
         >
           <X className="w-3.5 h-3.5" /> Cancel
         </button>
         <button
           onClick={() => onSave(form)}
           disabled={busy || !form.code.trim() || !form.description.trim() || !form.expires_at}
-          className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--accent))] hover:opacity-90 px-5 py-2 text-[13px] font-bold text-white transition disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--blue-700))] hover:opacity-90 px-5 h-10 text-[13px] font-semibold text-white transition disabled:opacity-50"
         >
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           Save promo code
@@ -142,7 +142,7 @@ export default function PromotionsTab() {
           !creating && (
             <button
               onClick={() => setCreating(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] hover:opacity-90 px-5 py-2.5 text-[13px] font-bold text-white transition"
+              className="inline-flex items-center gap-2 rounded-lg bg-[hsl(var(--blue-700))] hover:opacity-90 px-5 h-10.5 text-[13px] font-semibold text-white transition"
             >
               <Plus className="w-4 h-4" /> New Promo Code
             </button>
@@ -153,7 +153,7 @@ export default function PromotionsTab() {
       {creating && (
         <Panel>
           <div className="text-[14px] font-bold text-white mb-5 flex items-center gap-2">
-            <Tag className="w-4 h-4 text-[hsl(var(--accent))]" /> New Promo Code
+            <Tag className="w-4 h-4 text-blue-300" /> New Promo Code
           </div>
           <PromoForm onSave={create} onCancel={() => setCreating(false)} busy={busy} />
         </Panel>
@@ -179,10 +179,10 @@ export default function PromotionsTab() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[14px] font-bold font-mono text-white">{promo.code}</span>
-                    <span className="text-[10px] uppercase tracking-[0.12em] font-bold rounded-full px-2 py-0.5 bg-white/8 text-slate-400">
+                    <span className="text-[11px] uppercase tracking-[0.12em] font-bold rounded-full px-2 py-0.5 bg-white/8 text-slate-400">
                       {promo.discount_percent}% off · {promo.season || 'all'}
                     </span>
-                    <span className={`text-[10px] uppercase tracking-[0.12em] font-bold rounded-full px-2 py-0.5 ${promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/5 text-slate-500'}`}>
+                    <span className={`text-[11px] uppercase tracking-[0.12em] font-bold rounded-full px-2 py-0.5 ${promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/5 text-slate-400'}`}>
                       {promo.active ? 'Live' : 'Off'}
                     </span>
                   </div>
@@ -202,7 +202,7 @@ export default function PromotionsTab() {
                   </button>
                   <button
                     onClick={() => remove(promo.code)}
-                    className="w-8 h-8 rounded-lg hover:bg-red-500/10 flex items-center justify-center text-slate-500 hover:text-red-400 transition"
+                    className="w-8 h-8 rounded-lg hover:bg-red-500/10 flex items-center justify-center text-slate-400 hover:text-red-400 transition"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

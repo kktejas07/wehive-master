@@ -24,14 +24,14 @@ const FIELD_LABELS = {
 
 function PremiumGate({ onUpgrade, upgrading }) {
   return (
-    <div className="rounded-2xl border border-[hsl(var(--accent))]/30 bg-gradient-to-br from-[hsl(var(--soft-bg))] to-white p-6 sm:p-7 text-center" data-testid="scan-premium-gate">
-      <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent))]/10 mb-3">
-        <Crown className="w-5 h-5 text-[hsl(var(--accent))]" />
+    <div className="rounded-2xl border border-[hsl(var(--blue-700))]/30 bg-[hsl(var(--soft-bg))] p-6 sm:p-7 text-center" data-testid="scan-premium-gate">
+      <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--blue-700))]/10 mb-3">
+        <Crown className="w-5 h-5 text-[hsl(var(--blue-700))]" />
       </div>
-      <h3 className="font-display text-[22px] font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+      <h3 className="font-display text-[22px] font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
         Unlock AI document scanning
       </h3>
-      <p className="mt-2 text-[13.5px] text-[hsl(var(--blue-900))]/65 max-w-md mx-auto">
+      <p className="mt-2 text-[13.5px] text-muted-foreground max-w-md mx-auto">
         Upload your passport and supporting documents — our AI extracts every detail in seconds,
         so you don't have to type a thing. Premium feature.
       </p>
@@ -51,7 +51,7 @@ function PremiumGate({ onUpgrade, upgrading }) {
         data-testid="scan-upgrade-btn"
         onClick={onUpgrade}
         disabled={upgrading}
-        className="mt-5 rounded-full btn-accent text-white h-11 px-6 font-bold"
+        className="mt-5 rounded-xl btn-accent text-white h-11 px-6 font-bold"
       >
         {upgrading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -61,7 +61,7 @@ function PremiumGate({ onUpgrade, upgrading }) {
           </span>
         )}
       </Button>
-      <div className="mt-2 text-[12px] text-[hsl(var(--blue-900))]/50">
+      <div className="mt-2 text-[12px] text-muted-foreground">
         Demo mode — no payment required
       </div>
     </div>
@@ -88,19 +88,19 @@ function ExtractionView({ data, onConfirm, onRetry }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-black/5 bg-white">
-        <div className="px-4 py-3 border-b border-black/5 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+      <div className="rounded-2xl border border-border bg-white">
+        <div className="px-4 py-3 border-b border-border text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
           Extracted fields
         </div>
         <dl className="divide-y divide-black/5">
           {rows.length === 0 && (
-            <div className="px-4 py-6 text-center text-[13px] text-[hsl(var(--blue-900))]/55">
+            <div className="px-4 py-6 text-center text-[13px] text-muted-foreground">
               No fields detected. Try a clearer photo.
             </div>
           )}
           {rows.map(([label, value]) => (
             <div key={label} className="grid grid-cols-[140px_1fr] gap-3 px-4 py-2.5 text-[13.5px]">
-              <dt className="text-[hsl(var(--blue-900))]/60">{label}</dt>
+              <dt className="text-muted-foreground">{label}</dt>
               <dd className="font-bold text-[hsl(var(--blue-900))] break-words">{String(value)}</dd>
             </div>
           ))}
@@ -119,10 +119,10 @@ function ExtractionView({ data, onConfirm, onRetry }) {
       )}
 
       <div className="flex gap-2 pt-1">
-        <Button variant="outline" onClick={onRetry} className="rounded-full h-10 px-4 font-bold border-black/10" data-testid="scan-retry-btn">
+        <Button variant="outline" onClick={onRetry} className="rounded-xl h-11 px-5 font-bold border-slate-300" data-testid="scan-retry-btn">
           Scan another
         </Button>
-        <Button onClick={() => onConfirm(data)} className="rounded-full btn-accent text-white h-10 px-5 font-bold" data-testid="scan-apply-btn">
+        <Button onClick={() => onConfirm(data)} className="rounded-xl btn-accent text-white h-10 px-5 font-bold" data-testid="scan-apply-btn">
           Use these values
         </Button>
       </div>
@@ -238,22 +238,22 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
             onClick={handleClose}
           />
           <motion.div
-            {...dialogProps} className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+            {...dialogProps} className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
             initial={{ y: 24, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 16, opacity: 0, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 260, damping: 26 }}
           >
-            <header className="flex items-center justify-between px-5 sm:px-7 pt-5 pb-4 border-b border-black/5">
+            <header className="flex items-center justify-between px-5 sm:px-7 pt-5 pb-4 border-b border-border">
               <div className="flex items-center gap-2.5">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))]/10">
-                  <Sparkles className="w-4.5 h-4.5 text-[hsl(var(--accent))]" />
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--blue-700))]/10">
+                  <Sparkles className="w-4.5 h-4.5 text-[hsl(var(--blue-700))]" />
                 </span>
                 <div>
-                  <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+                  <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
                     AI Document Scan
                   </div>
-                  <h2 className="font-display text-[18px] font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+                  <h2 className="font-display text-[18px] font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
                     {mode === 'passport' ? 'Scan your passport' : 'Scan a supporting document'}
                   </h2>
                 </div>
@@ -261,7 +261,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
               <button
                 data-testid="scan-modal-close"
                 onClick={handleClose}
-                className="h-9 w-9 rounded-full hover:bg-black/5 inline-flex items-center justify-center"
+                className="h-10 w-10 rounded-xl hover:bg-black/5 inline-flex items-center justify-center"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" />
@@ -285,7 +285,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                         data-testid={`scan-mode-${v}`}
                         onClick={() => { setMode(v); setResult(null); setFile(null); }}
                         className={`px-4 py-1.5 rounded-full transition ${
-                          mode === v ? 'bg-white shadow text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/60'
+                          mode === v ? 'bg-white shadow text-[hsl(var(--blue-900))]' : 'text-muted-foreground'
                         }`}
                       >
                         {l}
@@ -295,7 +295,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
 
                   <label
                     data-testid="scan-drop-zone"
-                    className="block rounded-2xl border-2 border-dashed border-black/15 bg-[hsl(var(--soft-bg))]/60 p-6 text-center cursor-pointer hover:border-[hsl(var(--accent))]/50 transition"
+                    className="block rounded-2xl border-2 border-dashed border-black/15 bg-[hsl(var(--soft-bg))]/60 p-6 text-center cursor-pointer hover:border-[hsl(var(--blue-700))]/50 transition"
                   >
                     <input
                       ref={inputRef}
@@ -305,11 +305,11 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                       className="hidden"
                       onChange={(e) => onPick(e.target.files?.[0])}
                     />
-                    <Upload className="w-6 h-6 mx-auto text-[hsl(var(--blue-900))]/50" />
+                    <Upload className="w-6 h-6 mx-auto text-muted-foreground" />
                     <div className="mt-2 text-[13.5px] font-bold text-[hsl(var(--blue-900))]">
                       {file ? file.name : 'Click to choose an image'}
                     </div>
-                    <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
+                    <div className="text-[12px] text-muted-foreground">
                       JPG, PNG or WEBP · max 8MB
                     </div>
                   </label>
@@ -319,7 +319,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                       <Button
                         variant="outline"
                         onClick={() => setFile(null)}
-                        className="rounded-full h-10 px-4 font-bold border-black/10"
+                        className="rounded-xl h-11 px-5 font-bold border-slate-300"
                         data-testid="scan-clear-btn"
                       >
                         Clear
@@ -328,7 +328,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                         data-testid="scan-start-btn"
                         onClick={onScan}
                         disabled={scanning}
-                        className="flex-1 rounded-full btn-accent text-white h-10 px-5 font-bold"
+                        className="flex-1 rounded-xl btn-accent text-white h-10 px-5 font-bold"
                       >
                         {scanning ? (
                           <span className="inline-flex items-center gap-2">
@@ -343,7 +343,7 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                     </div>
                   )}
 
-                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55 leading-relaxed">
+                  <div className="text-[12px] text-muted-foreground leading-relaxed">
                     Your image is processed by AI and not stored permanently.
                     Keep lighting even, avoid glare, and crop to the data page.
                   </div>

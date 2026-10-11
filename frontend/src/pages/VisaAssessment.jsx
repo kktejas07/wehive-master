@@ -79,20 +79,20 @@ export default function VisaAssessment() {
     const gpa = Number(studentGpa);
     
     if (studentCountry === 'de') {
-      if (gpa >= 80 && budget === 'low') return { level: 'High Match', color: 'text-emerald-500 bg-emerald-50', pct: 92, text: 'Germany has low tuition but requires high GPAs.' };
-      if (gpa >= 70) return { level: 'Good Match', color: 'text-emerald-600 bg-emerald-50', pct: 78, text: 'Strong eligibility for German public & private universities.' };
-      return { level: 'Moderate Match', color: 'text-amber-500 bg-amber-50', pct: 60, text: 'Public universities might be competitive; private is likely.' };
+      if (gpa >= 80 && budget === 'low') return { level: 'High Match', color: 'text-emerald-700 bg-emerald-50', pct: 92, text: 'Germany has low tuition but requires high GPAs.' };
+      if (gpa >= 70) return { level: 'Good Match', color: 'text-emerald-700 bg-emerald-50', pct: 78, text: 'Strong eligibility for German public & private universities.' };
+      return { level: 'Moderate Match', color: 'text-amber-800 bg-amber-50', pct: 60, text: 'Public universities might be competitive; private is likely.' };
     }
     
     if (studentCountry === 'us' || studentCountry === 'gb') {
-      if (budget === 'high' && gpa >= 75) return { level: 'High Match', color: 'text-emerald-500 bg-emerald-50', pct: 95, text: 'Great profiles for US/UK private institutions and scholarships.' };
-      if (budget === 'mid' && gpa >= 65) return { level: 'Good Match', color: 'text-emerald-600 bg-emerald-50', pct: 82, text: 'Strong fit for regional and public universities.' };
-      return { level: 'Needs Review', color: 'text-rose-500 bg-rose-50', pct: 45, text: 'Budget or GPA might restrict options. Let us find scholarships.' };
+      if (budget === 'high' && gpa >= 75) return { level: 'High Match', color: 'text-emerald-700 bg-emerald-50', pct: 95, text: 'Great profiles for US/UK private institutions and scholarships.' };
+      if (budget === 'mid' && gpa >= 65) return { level: 'Good Match', color: 'text-emerald-700 bg-emerald-50', pct: 82, text: 'Strong fit for regional and public universities.' };
+      return { level: 'Needs Review', color: 'text-red-700 bg-red-50', pct: 45, text: 'Budget or GPA might restrict options. Let us find scholarships.' };
     }
 
     // Default CA/AU
-    if (gpa >= 70 && budget !== 'low') return { level: 'High Match', color: 'text-emerald-500 bg-emerald-50', pct: 88, text: 'Excellent prospects for college and university programs.' };
-    return { level: 'Good Match', color: 'text-emerald-600 bg-emerald-50', pct: 75, text: 'Standard requirements met. Visa approval probability is high.' };
+    if (gpa >= 70 && budget !== 'low') return { level: 'High Match', color: 'text-emerald-700 bg-emerald-50', pct: 88, text: 'Excellent prospects for college and university programs.' };
+    return { level: 'Good Match', color: 'text-emerald-700 bg-emerald-50', pct: 75, text: 'Standard requirements met. Visa approval probability is high.' };
   };
 
   const handleNext = () => setStep((s) => s + 1);
@@ -142,37 +142,36 @@ Phone: ${phone}`;
   return (
     <div className="min-h-screen bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]">
       <Navbar />
-      <main className="pt-32 pb-24">
+      <main className="pt-28 pb-16 md:pb-24">
         <div className="max-w-3xl mx-auto px-5">
           {/* Header */}
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
+            <span className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <ClipboardCheck className="w-3.5 h-3.5" /> Eligibility Calculator
             </span>
-            <h1 className="font-display font-extrabold text-[36px] sm:text-[48px] tracking-[-0.03em] text-[hsl(var(--blue-900))] leading-tight">
+            <h1 className="font-display font-bold text-[36px] sm:text-[48px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               Visa Eligibility Assessment
             </h1>
-            <p className="mt-2.5 text-[15px] text-[hsl(var(--blue-900))]/65 max-w-lg mx-auto">
+            <p className="mt-2.5 text-[15px] text-muted-foreground max-w-lg mx-auto">
               Check your CRS Express Entry points or study visa approval probability in under 2 minutes.
             </p>
           </div>
 
           {/* Form Card */}
-          <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-10 shadow-xl shadow-blue-900/5 relative overflow-hidden">
+          <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-10 shadow-sm relative overflow-hidden">
             {/* Background blob */}
-            <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-[hsl(var(--accent))]/5 blur-2xl pointer-events-none" />
 
             {!submitted ? (
               <div>
                 {/* Progress bar */}
                 <div className="mb-8">
-                  <div className="flex justify-between items-center text-[12px] font-bold text-[hsl(var(--blue-900))]/50 mb-2 font-mono">
+                  <div className="flex justify-between items-center text-[12px] font-semibold text-muted-foreground mb-2">
                     <span>STEP {step} OF {pathway ? 4 : 2}</span>
                     <span>{Math.round((step / (pathway ? 4 : 2)) * 100)}%</span>
                   </div>
                   <div className="h-2 rounded-full bg-[hsl(var(--soft-bg))] overflow-hidden">
                     <div 
-                      className="h-full bg-[hsl(var(--accent))] rounded-full transition-all duration-300"
+                      className="h-full bg-[hsl(var(--blue-700))] rounded-full transition-all duration-300"
                       style={{ width: `${(step / (pathway ? 4 : 2)) * 100}%` }}
                     />
                   </div>
@@ -182,36 +181,36 @@ Phone: ${phone}`;
                   {step === 1 && (
                     <motion.div
                       key="step1"
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-6"
                     >
-                      <h2 className="text-[20px] font-display font-black">Choose your visa pathway</h2>
+                      <h2 className="text-[20px] font-display font-bold leading-tight">Choose your visa pathway</h2>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <button
                           type="button"
                           onClick={() => { setPathway('pr'); handleNext(); }}
-                          className={`flex flex-col text-left p-6 rounded-2xl border-2 transition group ${
-                            pathway === 'pr' ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 shadow-sm' : 'border-black/5 hover:border-black/10'
+                          className={`flex flex-col text-left p-5 sm:p-6 rounded-2xl border transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] ${
+                            pathway === 'pr' ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] shadow-sm' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'
                           }`}
                         >
-                          <ShieldCheck className="w-8 h-8 text-[hsl(var(--accent))] mb-3 group-hover:scale-105 transition-transform" />
+                          <ShieldCheck className="w-8 h-8 text-[hsl(var(--blue-700))] mb-3" />
                           <div className="font-bold text-[16px]">Permanent Residency (PR)</div>
-                          <div className="text-[13px] text-[hsl(var(--blue-900))]/60 mt-1">
+                          <div className="text-[13px] text-muted-foreground mt-1">
                             Assess Express Entry CRS points for Canada PR or points-based immigration.
                           </div>
                         </button>
                         <button
                           type="button"
                           onClick={() => { setPathway('student'); handleNext(); }}
-                          className={`flex flex-col text-left p-6 rounded-2xl border-2 transition group ${
-                            pathway === 'student' ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 shadow-sm' : 'border-black/5 hover:border-black/10'
+                          className={`flex flex-col text-left p-5 sm:p-6 rounded-2xl border transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] ${
+                            pathway === 'student' ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] shadow-sm' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'
                           }`}
                         >
-                          <GraduationCap className="w-8 h-8 text-[hsl(var(--accent))] mb-3 group-hover:scale-105 transition-transform" />
+                          <GraduationCap className="w-8 h-8 text-[hsl(var(--blue-700))] mb-3" />
                           <div className="font-bold text-[16px]">Student Visa Pathway</div>
-                          <div className="text-[13px] text-[hsl(var(--blue-900))]/60 mt-1">
+                          <div className="text-[13px] text-muted-foreground mt-1">
                             Evaluate university admission profiles and visa approval chances.
                           </div>
                         </button>
@@ -223,20 +222,20 @@ Phone: ${phone}`;
                   {step === 2 && pathway === 'pr' && (
                     <motion.div
                       key="step2-pr"
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-5"
                     >
-                      <h2 className="text-[20px] font-display font-black">Core Demographics</h2>
+                      <h2 className="text-[20px] font-display font-bold leading-tight">Core Demographics</h2>
                       
                       <div className="space-y-4">
                         <div>
-                          <label htmlFor="visaassessment-age-group" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Age Group</label>
+                          <label htmlFor="visaassessment-age-group" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Age Group</label>
                           <select id="visaassessment-age-group" 
                             value={prAge} 
                             onChange={(e) => setPrAge(e.target.value)}
-                            className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
+                            className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
                           >
                             <option value="18-24">18 - 24 years</option>
                             <option value="25-29">25 - 29 years (Max Points)</option>
@@ -247,11 +246,11 @@ Phone: ${phone}`;
                         </div>
 
                         <div>
-                          <label htmlFor="visaassessment-highest-education-level" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Highest Education Level</label>
+                          <label htmlFor="visaassessment-highest-education-level" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Highest Education Level</label>
                           <select id="visaassessment-highest-education-level" 
                             value={prEdu} 
                             onChange={(e) => setPrEdu(e.target.value)}
-                            className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
+                            className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
                           >
                             <option value="phd">PhD / Doctoral Degree</option>
                             <option value="masters">Master's Degree or Professional Degree</option>
@@ -262,10 +261,10 @@ Phone: ${phone}`;
                       </div>
 
                       <div className="pt-4 flex justify-between">
-                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 text-[14px] font-bold text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 min-h-[44px] px-1 text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))]">
                           <ArrowLeft className="w-4 h-4" /> Back
                         </button>
-                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-full btn-primary text-white h-11 px-5 font-bold text-[14px]">
+                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">
                           Continue <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
@@ -275,20 +274,20 @@ Phone: ${phone}`;
                   {step === 3 && pathway === 'pr' && (
                     <motion.div
                       key="step3-pr"
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-5"
                     >
-                      <h2 className="text-[20px] font-display font-black">Experience & Language</h2>
+                      <h2 className="text-[20px] font-display font-bold leading-tight">Experience & Language</h2>
 
                       <div className="space-y-4">
                         <div>
-                          <label htmlFor="visaassessment-english-proficiency-ielts-equi" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">English Proficiency (IELTS Equivalent)</label>
+                          <label htmlFor="visaassessment-english-proficiency-ielts-equi" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">English Proficiency (IELTS Equivalent)</label>
                           <select id="visaassessment-english-proficiency-ielts-equi" 
                             value={prLanguage} 
                             onChange={(e) => setPrLanguage(e.target.value)}
-                            className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
+                            className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
                           >
                             <option value="clb9">CLB 9 or higher (IELTS Listening 8.0, others 7.0)</option>
                             <option value="clb8">CLB 8 (IELTS Listening 7.5, others 6.5)</option>
@@ -298,11 +297,11 @@ Phone: ${phone}`;
                         </div>
 
                         <div>
-                          <label htmlFor="visaassessment-skilled-work-experience-outsid" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Skilled Work Experience (Outside Canada)</label>
+                          <label htmlFor="visaassessment-skilled-work-experience-outsid" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Skilled Work Experience (Outside Canada)</label>
                           <select id="visaassessment-skilled-work-experience-outsid" 
                             value={prExp} 
                             onChange={(e) => setPrExp(e.target.value)}
-                            className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
+                            className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
                           >
                             <option value="3plus">3 years or more</option>
                             <option value="2years">2 years</option>
@@ -313,10 +312,10 @@ Phone: ${phone}`;
                       </div>
 
                       <div className="pt-4 flex justify-between">
-                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 text-[14px] font-bold text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 min-h-[44px] px-1 text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))]">
                           <ArrowLeft className="w-4 h-4" /> Back
                         </button>
-                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-full btn-primary text-white h-11 px-5 font-bold text-[14px]">
+                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">
                           Calculate Score <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
@@ -327,24 +326,24 @@ Phone: ${phone}`;
                   {step === 2 && pathway === 'student' && (
                     <motion.div
                       key="step2-student"
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-5"
                     >
-                      <h2 className="text-[20px] font-display font-black">Target & Background</h2>
+                      <h2 className="text-[20px] font-display font-bold leading-tight">Target & Background</h2>
 
                       <div className="space-y-4">
                         <div>
-                          <label id="visaassessment-target-destination" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Target Destination</label>
+                          <label id="visaassessment-target-destination" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Target Destination</label>
                           <div role="group" aria-labelledby="visaassessment-target-destination" className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {COUNTRIES.map((c) => (
                               <button
                                 key={c.id}
                                 type="button"
                                 onClick={() => setStudentCountry(c.id)}
-                                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition ${
-                                  studentCountry === c.id ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 font-bold text-[hsl(var(--accent))]' : 'border-black/5 hover:border-black/10 text-[hsl(var(--blue-900))]'
+                                className={`flex items-center gap-2 px-3 min-h-[44px] rounded-xl border transition-colors min-w-0 ${
+                                  studentCountry === c.id ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] font-bold text-[hsl(var(--blue-700))]' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))] text-[hsl(var(--blue-900))]'
                                 }`}
                               >
                                 <span className="text-xl">{c.flag}</span>
@@ -355,11 +354,11 @@ Phone: ${phone}`;
                         </div>
 
                         <div>
-                          <label htmlFor="visaassessment-current-education-level" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Current Education Level</label>
+                          <label htmlFor="visaassessment-current-education-level" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Current Education Level</label>
                           <select id="visaassessment-current-education-level" 
                             value={studentEdu} 
                             onChange={(e) => setStudentEdu(e.target.value)}
-                            className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--accent))]"
+                            className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
                           >
                             <option value="masters">Completed Master's Degree</option>
                             <option value="bachelors">Completed Bachelor's Degree</option>
@@ -369,10 +368,10 @@ Phone: ${phone}`;
                       </div>
 
                       <div className="pt-4 flex justify-between">
-                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 text-[14px] font-bold text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 min-h-[44px] px-1 text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))]">
                           <ArrowLeft className="w-4 h-4" /> Back
                         </button>
-                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-full btn-primary text-white h-11 px-5 font-bold text-[14px]">
+                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">
                           Continue <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
@@ -382,18 +381,18 @@ Phone: ${phone}`;
                   {step === 3 && pathway === 'student' && (
                     <motion.div
                       key="step3-student"
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-5"
                     >
-                      <h2 className="text-[20px] font-display font-black">Academic & Budget</h2>
+                      <h2 className="text-[20px] font-display font-bold leading-tight">Academic & Budget</h2>
 
                       <div className="space-y-4">
                         <div>
-                          <label htmlFor="visaassessment-gpa-academic-score" className="block justify-between flex text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">
+                          <label htmlFor="visaassessment-gpa-academic-score" className="block justify-between flex text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">
                             <span>GPA / Academic Score (%)</span>
-                            <span className="text-[hsl(var(--accent))]">{studentGpa}%</span>
+                            <span className="text-[hsl(var(--blue-700))]">{studentGpa}%</span>
                           </label>
                           <input id="visaassessment-gpa-academic-score" 
                             type="range" 
@@ -401,16 +400,16 @@ Phone: ${phone}`;
                             max="100" 
                             value={studentGpa} 
                             onChange={(e) => setStudentGpa(e.target.value)}
-                            className="w-full accent-[hsl(var(--accent))]"
+                            className="w-full accent-[hsl(var(--blue-700))]"
                           />
-                          <div className="flex justify-between text-[12px] text-[hsl(var(--blue-900))]/40 mt-1 font-mono">
+                          <div className="flex justify-between text-[12px] text-muted-foreground mt-1">
                             <span>50% (Minimum)</span>
                             <span>100% (Perfect)</span>
                           </div>
                         </div>
 
                         <div>
-                          <label id="visaassessment-yearly-tuition-budget" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-2">Yearly Tuition Budget</label>
+                          <label id="visaassessment-yearly-tuition-budget" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Yearly Tuition Budget</label>
                           <div role="group" aria-labelledby="visaassessment-yearly-tuition-budget" className="grid grid-cols-3 gap-2">
                             {[
                               { id: 'low', label: 'Under ₹15 Lakh' },
@@ -421,8 +420,8 @@ Phone: ${phone}`;
                                 key={b.id}
                                 type="button"
                                 onClick={() => setStudentBudget(b.id)}
-                                className={`px-3 py-3 rounded-xl border text-center transition text-[13px] ${
-                                  studentBudget === b.id ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 font-bold text-[hsl(var(--accent))]' : 'border-black/5 hover:border-black/10 text-[hsl(var(--blue-900))]'
+                                className={`px-2 sm:px-3 min-h-[48px] rounded-xl border text-center transition-colors text-[13px] ${
+                                  studentBudget === b.id ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] font-bold text-[hsl(var(--blue-700))]' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))] text-[hsl(var(--blue-900))]'
                                 }`}
                               >
                                 {b.label}
@@ -433,10 +432,10 @@ Phone: ${phone}`;
                       </div>
 
                       <div className="pt-4 flex justify-between">
-                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 text-[14px] font-bold text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 min-h-[44px] px-1 text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))]">
                           <ArrowLeft className="w-4 h-4" /> Back
                         </button>
-                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-full btn-primary text-white h-11 px-5 font-bold text-[14px]">
+                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">
                           Get Matching Strength <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
@@ -447,55 +446,55 @@ Phone: ${phone}`;
                   {step === 4 && (
                     <motion.div
                       key="step4"
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-5"
                     >
                       <div className="text-center mb-4">
-                        <span className="inline-flex items-center gap-1 text-[12px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full mb-2">
+                        <span className="inline-flex items-center gap-1 text-[12px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full mb-2">
                           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Calculation Completed!
                         </span>
-                        <h2 className="text-[22px] font-display font-black text-[hsl(var(--blue-900))]">Reveal your assessment</h2>
-                        <p className="text-[13px] text-[hsl(var(--blue-900))]/60 mt-1">
+                        <h2 className="text-[22px] font-display font-bold text-[hsl(var(--blue-900))] leading-tight">Reveal your assessment</h2>
+                        <p className="text-[13px] text-muted-foreground mt-1">
                           We will send your detailed country match analysis and customized document checklist directly to you.
                         </p>
                       </div>
 
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                          <label htmlFor="visaassessment-full-name" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Full Name</label>
+                          <label htmlFor="visaassessment-full-name" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-1.5">Full Name</label>
                           <input id="visaassessment-full-name" 
                             required 
                             type="text" 
                             placeholder="Priya Sharma" 
                             value={name} 
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] outline-none focus:border-[hsl(var(--accent))]"
+                            className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
                           />
                         </div>
 
                         <div className="grid sm:grid-cols-2 gap-4">
                           <div>
-                            <label htmlFor="visaassessment-email-address" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Email Address</label>
+                            <label htmlFor="visaassessment-email-address" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-1.5">Email Address</label>
                             <input id="visaassessment-email-address" 
                               required 
                               type="email" 
                               placeholder="priya@example.com" 
                               value={email} 
                               onChange={(e) => setEmail(e.target.value)}
-                              className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] outline-none focus:border-[hsl(var(--accent))]"
+                              className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
                             />
                           </div>
                           <div>
-                            <label htmlFor="visaassessment-phone-number" className="block text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/60 mb-1.5">Phone Number</label>
+                            <label htmlFor="visaassessment-phone-number" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-1.5">Phone Number</label>
                             <input id="visaassessment-phone-number" 
                               required 
                               type="tel" 
                               placeholder="+91 90007 34326" 
                               value={phone} 
                               onChange={(e) => setPhone(e.target.value)}
-                              className="w-full h-12 rounded-xl border border-black/10 px-4 text-[14px] outline-none focus:border-[hsl(var(--accent))]"
+                              className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
                             />
                           </div>
                         </div>
@@ -503,14 +502,14 @@ Phone: ${phone}`;
                         <button 
                           type="submit" 
                           disabled={loading}
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--accent))] hover:opacity-90 text-white font-bold text-[15px] h-12 px-6 transition disabled:opacity-50 mt-4"
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent-hover))] text-white font-semibold text-[15px] h-12 px-6 transition-colors disabled:opacity-50 mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
                         >
                           {loading ? 'Submitting...' : 'See My Eligibility Score'} <Send className="w-4 h-4" />
                         </button>
                       </form>
 
                       <div className="pt-2 flex justify-start">
-                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 text-[13px] font-bold text-muted-foreground hover:text-[hsl(var(--blue-900))]">
                           <ArrowLeft className="w-4 h-4" /> Back
                         </button>
                       </div>
@@ -525,31 +524,31 @@ Phone: ${phone}`;
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-6 space-y-6"
               >
-                <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-500">
+                <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
 
                 <div className="space-y-2">
-                  <h2 className="text-[28px] font-display font-black">Your Eligibility Analysis</h2>
-                  <p className="text-[14px] text-[hsl(var(--blue-900))]/60">
+                  <h2 className="text-[28px] font-display font-bold leading-tight">Your Eligibility Analysis</h2>
+                  <p className="text-[14px] text-muted-foreground">
                     Thanks {name}! Here are your calculated results. A visa consultant has been assigned and will contact you at {phone} within 24 hours.
                   </p>
                 </div>
 
                 {pathway === 'pr' ? (
-                  <div className="max-w-md mx-auto rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 p-6 space-y-4">
-                    <div className="text-[12px] uppercase tracking-wider text-[hsl(var(--blue-900))]/50 font-bold font-mono">Estimated Express Entry CRS Points</div>
-                    <div className="text-[64px] font-display font-extrabold text-[hsl(var(--blue-700))] leading-none">
+                  <div className="max-w-md mx-auto rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-6 space-y-4">
+                    <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Estimated Express Entry CRS Points</div>
+                    <div className="text-[64px] font-display font-bold text-[hsl(var(--blue-700))] leading-none">
                       {calculateCRS()}
-                      <span className="text-[16px] text-[hsl(var(--blue-900))]/40 font-bold"> / 600</span>
+                      <span className="text-[16px] text-muted-foreground font-bold"> / 600</span>
                     </div>
-                    <div className="text-[13px] text-[hsl(var(--blue-900))]/70 leading-relaxed pt-2 border-t border-black/5">
+                    <div className="text-[13px] text-muted-foreground leading-relaxed pt-2 border-t border-[hsl(var(--border))]">
                       Your CRS score is excellent. Current rounds range between 490-530. You are highly eligible for Express Entry PR PNP pathways.
                     </div>
                   </div>
                 ) : (
-                  <div className="max-w-md mx-auto rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 p-6 space-y-4">
-                    <div className="text-[12px] uppercase tracking-wider text-[hsl(var(--blue-900))]/50 font-bold font-mono">Student Matching Analysis</div>
+                  <div className="max-w-md mx-auto rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-6 space-y-4">
+                    <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Student Matching Analysis</div>
                     
                     {(() => {
                       const match = getStudentMatchStrength();
@@ -559,11 +558,11 @@ Phone: ${phone}`;
                             <span className={`text-[13px] font-bold px-3 py-1 rounded-full ${match.color}`}>
                               {match.level}
                             </span>
-                            <span className="text-[28px] font-display font-black text-[hsl(var(--blue-700))]">
+                            <span className="text-[28px] font-display font-bold text-[hsl(var(--blue-700))]">
                               {match.pct}%
                             </span>
                           </div>
-                          <div className="text-[13px] text-[hsl(var(--blue-900))]/70 leading-relaxed pt-2 border-t border-black/5">
+                          <div className="text-[13px] text-muted-foreground leading-relaxed pt-2 border-t border-[hsl(var(--border))]">
                             {match.text} We have matching universities and scholarships aligned with your budget.
                           </div>
                         </div>
@@ -572,20 +571,20 @@ Phone: ${phone}`;
                   </div>
                 )}
 
-                <div className="pt-4 flex gap-3 justify-center">
+                <div className="pt-4 flex flex-wrap gap-3 justify-center">
                   <button 
                     onClick={() => {
                       setStep(1);
                       setPathway('');
                       setSubmitted(false);
                     }}
-                    className="rounded-full border border-black/10 hover:border-black/20 text-[13px] font-bold px-6 h-11"
+                    className="rounded-xl border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-700))] text-[14px] font-semibold px-6 h-11"
                   >
                     Calculate Again
                   </button>
                   <a 
                     href="/resources" 
-                    className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--blue-900))] text-white text-[13px] font-bold px-6 h-11 hover:opacity-90"
+                    className="inline-flex items-center gap-1 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[14px] font-semibold px-6 h-11 hover:bg-[hsl(var(--blue-800))] transition-colors"
                   >
                     View Resource Guides <ArrowRight className="w-4 h-4" />
                   </a>

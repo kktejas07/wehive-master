@@ -146,23 +146,24 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))]/75 transition"
+        aria-expanded={open}
+        className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-900))] transition-colors duration-200"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-[hsl(var(--accent))] text-white text-[10px] font-bold flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 h-5 min-w-5 px-1 rounded-full bg-[hsl(var(--blue-700))] text-white text-[12px] leading-none font-bold ring-2 ring-white flex items-center justify-center">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl bg-white border border-black/10 shadow-[0_20px_60px_-15px_rgba(10,44,138,0.25)] overflow-hidden z-[100]">
+        <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 rounded-2xl bg-white border border-[hsl(var(--border))] shadow-lg overflow-hidden z-[100]">
           <div className="flex items-center justify-between px-4 py-3 border-b border-black/5">
             <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Notifications</span>
             {unread > 0 && (
-              <button onClick={markAllRead} className="inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--accent))] hover:underline">
+              <button onClick={markAllRead} className="inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline">
                 <CheckCheck className="w-3.5 h-3.5" /> Mark all read
               </button>
             )}
@@ -188,7 +189,7 @@ export default function NotificationBell() {
             <Link
               to="/account?tab=aitools"
               onClick={() => setOpen(false)}
-              className="text-[12px] font-bold text-[hsl(var(--accent))] hover:underline"
+              className="text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline"
             >
               View all activity
             </Link>

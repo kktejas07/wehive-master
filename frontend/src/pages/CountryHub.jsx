@@ -335,32 +335,30 @@ export default function CountryHub() {
   return (
     <div className="min-h-screen bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]">
       <Navbar />
-      <main className="pt-32 pb-24">
+      <main className="pt-28 pb-16 md:pb-24">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           
           {/* Back button */}
-          <Link to="/" className="inline-flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline mb-6">
+          <Link to="/" className="inline-flex items-center gap-1 min-h-[44px] text-[14px] font-semibold text-[hsl(var(--blue-700))] hover:underline mb-4">
             ← Back to Destinations
           </Link>
 
           {/* Hero Banner Section */}
-          <div className="rounded-[32px] bg-[hsl(var(--blue-900))] text-white p-8 sm:p-12 relative overflow-hidden mb-10 shadow-xl">
-            <div className="absolute -top-20 -right-20 h-60 w-60 rounded-full bg-[hsl(var(--accent))]/20 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
+          <div className="rounded-2xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-12 relative overflow-hidden mb-10">
             
             <div className="relative z-10 max-w-2xl">
               <span className="text-5xl sm:text-6xl block mb-4">{country.flag}</span>
-              <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-2 font-mono">
+              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-200))] mb-2">
                 Destination Hub
               </div>
-              <h1 className="font-display font-extrabold text-[38px] sm:text-[54px] tracking-[-0.03em] leading-tight">
+              <h1 className="font-display font-bold text-[36px] sm:text-[52px] tracking-[-0.02em] leading-tight">
                 Immigrate to {country.name}
               </h1>
               <p className="mt-4 text-[16px] sm:text-[18px] text-white/80 leading-relaxed">
                 {country.desc} Explore requirements, timelines, and fees across study, settlement, work, and visit pathways.
               </p>
               
-              <div className="mt-6 flex flex-wrap gap-4 text-[13px] font-medium text-white/70">
+              <div className="mt-6 flex flex-wrap gap-4 text-[14px] font-medium text-white/80">
                 <div>Capital: <span className="font-bold text-white">{country.capital}</span></div>
                 <div className="hidden sm:block text-white/30">|</div>
                 <div>Currency: <span className="font-bold text-white">{country.currency}</span></div>
@@ -370,8 +368,8 @@ export default function CountryHub() {
 
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Sidebar Navigation */}
-            <div className="lg:col-span-1 space-y-2">
-              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/40 px-3 mb-3">
+            <div className="lg:col-span-1 grid grid-cols-2 lg:grid-cols-1 gap-2 content-start">
+              <div className="col-span-2 lg:col-span-1 text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground px-1 mb-1">
                 Pathway Hubs
               </div>
               {visaTabs.map((tab) => {
@@ -381,27 +379,28 @@ export default function CountryHub() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveVisa(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left text-[14px] font-bold transition ${
-                      active 
-                        ? 'bg-[hsl(var(--blue-900))] text-white shadow-md' 
-                        : 'bg-white border border-black/5 hover:border-black/10 text-[hsl(var(--blue-900))]/80'
+                    aria-pressed={active}
+                    className={`w-full flex items-center gap-3 px-4 min-h-[48px] rounded-xl border text-left text-[14px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] ${
+                      active
+                        ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white'
+                        : 'bg-white border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] text-[hsl(var(--blue-900))]'
                     }`}
                   >
-                    {renderRegularIcon(tab.id, `w-4 h-4 ${active ? 'text-[hsl(var(--accent))]' : 'text-[hsl(var(--blue-700))]'}`)}
+                    {renderRegularIcon(tab.id, `w-4 h-4 shrink-0 ${active ? 'text-white' : 'text-[hsl(var(--blue-700))]'}`)}
                     {tab.label}
                   </button>
                 );
               })}
 
-              <div className="pt-6">
+              <div className="col-span-2 lg:col-span-1 pt-4">
                 <div className="rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] p-5 text-center">
                   <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">Check Eligibility</div>
-                  <p className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1 leading-relaxed">
+                  <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
                     Calculate your visa points and admission scores for {country.name} now.
                   </p>
                   <Link 
                     to="/assessment" 
-                    className="mt-4 w-full inline-flex items-center justify-center gap-1 rounded-xl bg-[hsl(var(--accent))] text-white font-bold text-[12px] h-10 px-4 hover:opacity-90 transition"
+                    className="mt-4 w-full inline-flex items-center justify-center gap-1 rounded-xl bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] font-semibold text-[14px] h-11 px-4 transition-colors"
                   >
                     Start Points Test <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
@@ -414,70 +413,70 @@ export default function CountryHub() {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeVisa}
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -15 }}
                   transition={{ duration: 0.25 }}
-                  className="rounded-3xl bg-white border border-black/5 p-6 sm:p-10 shadow-lg shadow-blue-900/5 space-y-6"
+                  className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-10 shadow-sm space-y-6"
                 >
                   <div className="flex items-center gap-2">
                     <span className="h-10 w-10 rounded-xl bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center">
                       {renderRegularIcon(activeVisa, "w-5 h-5")}
                     </span>
                     <div>
-                      <h2 className="text-[22px] font-display font-black leading-tight text-[hsl(var(--blue-900))]">
+                      <h2 className="text-[22px] font-display font-bold leading-tight text-[hsl(var(--blue-900))]">
                         {currentVisa.title}
                       </h2>
                     </div>
                   </div>
 
-                  <p className="text-[15px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
+                  <p className="text-[15px] text-muted-foreground leading-relaxed">
                     {currentVisa.desc}
                   </p>
 
                   <div className="grid sm:grid-cols-2 gap-4 pt-2">
-                    <div className="p-4 rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 flex items-start gap-3">
-                      {renderRegularIcon('clock', "w-5 h-5 text-[hsl(var(--accent))] shrink-0 mt-0.5")}
+                    <div className="p-4 rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] flex items-start gap-3">
+                      {renderRegularIcon('clock', "w-5 h-5 text-[hsl(var(--blue-700))] shrink-0 mt-0.5")}
                       <div>
-                        <div className="text-[12px] uppercase tracking-wider text-[hsl(var(--blue-900))]/40 font-bold font-mono">Processing Time</div>
+                        <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Processing Time</div>
                         <div className="text-[16px] font-bold text-[hsl(var(--blue-900))] mt-0.5">{currentVisa.timeline}</div>
                       </div>
                     </div>
                     
-                    <div className="p-4 rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 flex items-start gap-3">
-                      {renderRegularIcon('coins', "w-5 h-5 text-[hsl(var(--accent))] shrink-0 mt-0.5")}
+                    <div className="p-4 rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] flex items-start gap-3">
+                      {renderRegularIcon('coins', "w-5 h-5 text-[hsl(var(--blue-700))] shrink-0 mt-0.5")}
                       <div>
-                        <div className="text-[12px] uppercase tracking-wider text-[hsl(var(--blue-900))]/40 font-bold font-mono">Government Fee</div>
+                        <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Government Fee</div>
                         <div className="text-[16px] font-bold text-[hsl(var(--blue-900))] mt-0.5">{currentVisa.fees}</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Requirements List */}
-                  <div className="pt-4 border-t border-black/5">
+                  <div className="pt-4 border-t border-[hsl(var(--border))]">
                     <h3 className="text-[16px] font-bold text-[hsl(var(--blue-900))] mb-4 flex items-center gap-1.5">
                       <FileText className="w-4 h-4 text-[hsl(var(--blue-700))]" /> Key Requirements Checklist
                     </h3>
                     
                     <div className="grid sm:grid-cols-2 gap-3">
                       {currentVisa.requirements.map((req, i) => (
-                        <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl border border-black/5 bg-white">
+                        <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl border border-[hsl(var(--border))] bg-white">
                           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                          <span className="text-[13px] font-medium text-[hsl(var(--blue-900))]/80">{req}</span>
+                          <span className="text-[14px] font-medium text-[hsl(var(--blue-900))]">{req}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Direct application trigger */}
-                  <div className="pt-6 border-t border-black/5 flex flex-wrap justify-between items-center gap-4">
+                  <div className="pt-6 border-t border-[hsl(var(--border))] flex flex-wrap justify-between items-center gap-4">
                     <div>
                       <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Ready to file for {country.name}?</div>
-                      <p className="text-[12px] text-[hsl(var(--blue-900))]/60">Get complete documents reviewed by our certified experts.</p>
+                      <p className="text-[12px] text-muted-foreground">Get complete documents reviewed by our certified experts.</p>
                     </div>
                     <Link
                       to="/assessment"
-                      className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--blue-700))] text-white text-[13px] font-bold px-6 h-11 hover:bg-[hsl(var(--blue-800))] transition"
+                      className="inline-flex items-center gap-2 rounded-xl btn-accent text-white text-[15px] font-semibold px-6 h-12 transition-colors"
                     >
                       Start Filing Now <ArrowRight className="w-4 h-4" />
                     </Link>

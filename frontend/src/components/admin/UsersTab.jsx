@@ -9,12 +9,12 @@ function Chip({ children, color = 'slate' }) {
   const map = {
     emerald: 'bg-emerald-500/15 text-emerald-300',
     amber:   'bg-amber-500/15 text-amber-300',
-    indigo:  'bg-indigo-500/15 text-indigo-300',
+    indigo:  'bg-blue-500/15 text-blue-200',
     red:     'bg-red-500/15 text-red-300',
     slate:   'bg-white/5 text-slate-300',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] uppercase tracking-[0.14em] font-bold ${map[color]}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] uppercase tracking-[0.14em] font-bold ${map[color]}`}>
       {children}
     </span>
   );
@@ -74,13 +74,13 @@ export default function UsersTab() {
       <Panel>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               data-testid="admin-users-search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search by name, email or phone…"
-              className="w-full h-10 pl-9 pr-3 rounded-xl bg-white/5 border border-white/10 focus:border-[hsl(var(--accent))] text-[13.5px] text-white placeholder:text-slate-500 outline-none"
+              className="w-full h-10 pl-9 pr-3 rounded-xl bg-white/5 border border-white/10 focus:border-[hsl(var(--blue-700))] text-[13.5px] text-white placeholder:text-slate-500 outline-none"
             />
           </div>
           <select
@@ -100,7 +100,7 @@ export default function UsersTab() {
       <Panel className="mt-4 overflow-x-auto p-0">
         <table className="min-w-full text-[13.5px]">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-slate-500 bg-white/5">
+            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 bg-white/5">
               <th className="px-5 py-3">User</th>
               <th className="px-5 py-3">Contact</th>
               <th className="px-5 py-3">Role</th>
@@ -110,20 +110,20 @@ export default function UsersTab() {
           </thead>
           <tbody>
             {items === null && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-500"><Loader2 className="w-5 h-5 animate-spin inline text-[hsl(var(--accent))]" /></td></tr>
+              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
             )}
             {items?.length === 0 && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-500">No users match.</td></tr>
+              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400">No users match.</td></tr>
             )}
             {items?.map((u) => (
               <tr key={u.id} data-testid={`admin-user-row-${u.id}`} className="border-t border-white/5 hover:bg-white/5">
                 <td className="px-5 py-3">
                   <div className="font-bold text-white">{u.name || '—'}</div>
-                  <div className="text-[11px] text-slate-500 font-mono">{u.id.slice(0, 8)}…</div>
+                  <div className="text-[11px] text-slate-400 font-mono">{u.id.slice(0, 8)}…</div>
                 </td>
                 <td className="px-5 py-3 text-slate-300">
                   <div>{u.email || '—'}</div>
-                  <div className="text-[12px] text-slate-500">{u.phone || '—'}</div>
+                  <div className="text-[12px] text-slate-400">{u.phone || '—'}</div>
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex flex-wrap gap-1.5">
@@ -150,7 +150,7 @@ export default function UsersTab() {
                       data-testid={`toggle-staff-${u.id}`}
                       disabled={busy === u.id}
                       onClick={() => patch(u, { is_staff: !u.is_staff, staff_role: u.is_staff ? null : 'consultant' }, u.is_staff ? 'Staff removed' : 'Made staff')}
-                      className="inline-flex items-center gap-1 rounded-lg bg-white/5 hover:bg-white/10 px-2.5 py-1.5 text-[11.5px] font-bold text-indigo-300"
+                      className="inline-flex items-center gap-1 rounded-lg bg-white/5 hover:bg-white/10 px-2.5 py-1.5 text-[11.5px] font-bold text-blue-300"
                     >
                       <UserCog className="w-3 h-3" /> {u.is_staff ? 'Unstaff' : 'Staff'}
                     </button>

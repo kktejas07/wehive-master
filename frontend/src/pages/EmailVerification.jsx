@@ -1,48 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Loader2, Check, X, ShieldCheck, Sparkles, Mail, RefreshCw } from 'lucide-react';
+import { Loader2, Check, ShieldCheck, Mail, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyActionCode } from 'firebase/auth';
 import { initFirebase } from '../lib/firebase';
-
-const CONFETTI_COLORS = [
-  '#e0212c', '#2563eb', '#16a34a', '#f59e0b', '#8b5cf6',
-  '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1',
-];
-
-function ConfettiBurst() {
-  const particles = Array.from({ length: 50 }, (_, i) => ({
-    id: i,
-    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 8 + 4,
-    delay: Math.random() * 0.5,
-    duration: Math.random() * 1 + 1.5,
-    rotation: Math.random() * 360,
-  }));
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          initial={{ opacity: 0, scale: 0, x: '50%', y: '50%' }}
-          animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 0], x: `${p.x - 50}%`, y: `${p.y - 50}%`, rotate: p.rotation }}
-          transition={{ delay: p.delay, duration: p.duration, ease: 'easeOut' }}
-          className="absolute rounded-full"
-          style={{
-            width: p.size,
-            height: p.size,
-            backgroundColor: p.color,
-            left: '50%',
-            top: '50%',
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 export default function EmailVerification() {
   const [searchParams] = useSearchParams();
@@ -89,160 +50,86 @@ export default function EmailVerification() {
     }
   }, [status, countdown, navigate]);
 
+  const H2 = 'mt-6 font-display font-bold text-[24px] leading-tight tracking-[-0.02em] text-[hsl(var(--blue-900))]';
+  const fade = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0 }, transition: { duration: 0.25, ease: 'easeOut' } };
+
   return (
     <div className="bg-white min-h-screen">
-      <main className="min-h-screen flex items-center justify-center bg-[hsl(var(--soft-bg))] px-5 pt-20">
+      <main className="min-h-screen flex items-center justify-center bg-[hsl(var(--soft-bg))] px-4 py-16">
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-          className="relative rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-[0_30px_70px_-30px_rgba(10,44,138,0.45)] p-8 sm:p-10 overflow-hidden max-w-md w-full"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="relative rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm p-6 sm:p-10 max-w-md w-full"
         >
-          {status === 'success' && <ConfettiBurst />}
-
-          <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none">
-            <motion.div
-              animate={{ x: [0, 20, -10, 0], y: [0, -10, 15, 0] }}
-              transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute -top-20 -right-20 h-[280px] w-[280px] rounded-full bg-[hsl(var(--blue-50))] blur-3xl"
-            />
-            <motion.div
-              animate={{ x: [0, -15, 10, 0], y: [0, 10, -15, 0] }}
-              transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute -bottom-24 -left-24 h-[260px] w-[260px] rounded-full bg-[#FEE5E7] blur-3xl"
-            />
+          <div className="eyebrow flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4" aria-hidden="true" /> Account verification
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" /> Account verification
-          </motion.div>
-
+          <div aria-live="polite">
           <AnimatePresence mode="wait">
             {status === 'verifying' && (
-              <motion.div
-                key="verifying"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mt-8 text-center"
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-20 h-20 rounded-2xl bg-[hsl(var(--blue-700))] flex items-center justify-center mx-auto shadow-lg shadow-[hsl(var(--blue-700))]/20"
-                >
-                  <Loader2 className="w-8 h-8 text-white animate-spin" />
-                </motion.div>
-                <h2 className="mt-6 font-display font-extrabold text-[24px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
-                  Verifying your email
-                </h2>
-                <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/60">
+              <motion.div key="verifying" {...fade} className="mt-8 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--blue-50))] flex items-center justify-center mx-auto">
+                  <Loader2 className="w-7 h-7 text-[hsl(var(--blue-700))] animate-spin" aria-hidden="true" />
+                </div>
+                <h1 className={H2}>Verifying your email</h1>
+                <p className="mt-2 text-[15px] text-muted-foreground">
                   Please wait while we verify your email address...
                 </p>
               </motion.div>
             )}
 
             {status === 'success' && (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                className="mt-8 text-center"
-              >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.2 }}
-                  className="w-20 h-20 rounded-2xl bg-emerald-500 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20"
-                >
-                  <Check className="w-9 h-9 text-white" />
-                </motion.div>
-                <motion.h2
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="mt-6 font-display font-extrabold text-[24px] tracking-[-0.025em] text-[hsl(var(--blue-900))]"
-                >
-                  Email verified
-                </motion.h2>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="mt-2 flex items-center justify-center gap-1.5"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span className="text-[14px] text-[hsl(var(--blue-900))]/60">
-                    Your email has been verified successfully
-                  </span>
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                </motion.div>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="mt-3 text-[13px] text-[hsl(var(--blue-900))]/45"
-                >
+              <motion.div key="success" {...fade} className="mt-8 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto">
+                  <Check className="w-8 h-8 text-emerald-700" aria-hidden="true" />
+                </div>
+                <h1 className={H2}>Email verified</h1>
+                <p className="mt-2 text-[15px] text-muted-foreground">
+                  Your email has been verified successfully.
+                </p>
+                <p className="mt-3 text-[13px] text-muted-foreground">
                   Redirecting to sign in{countdown > 0 ? ` in ${countdown}s...` : '...'}
-                </motion.p>
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1 }}
-                  className="mt-5"
-                >
+                </p>
+                <div className="mt-6">
                   <Link
                     to="/login"
-                    className="inline-flex items-center gap-2 rounded-full btn-primary text-white h-12 px-8 font-bold hover:shadow-lg hover:shadow-[hsl(var(--blue-700))]/25 transition-shadow"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl btn-accent h-12 px-6 font-semibold"
                   >
-                    Sign in now
-                    <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                      →
-                    </motion.span>
+                    Sign in now <span aria-hidden="true">→</span>
                   </Link>
-                </motion.div>
+                </div>
               </motion.div>
             )}
 
             {status === 'error' && (
-              <motion.div
-                key="error"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-8 text-center"
-              >
-                <div className="w-20 h-20 rounded-2xl bg-amber-500 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20">
-                  <RefreshCw className="w-9 h-9 text-white" />
+              <motion.div key="error" {...fade} className="mt-8 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto">
+                  <RefreshCw className="w-7 h-7 text-amber-700" aria-hidden="true" />
                 </div>
-                <h2 className="mt-6 font-display font-extrabold text-[22px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
-                  Link expired or used
-                </h2>
-                <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/60">
+                <h1 className={H2}>Link expired or used</h1>
+                <p className="mt-2 text-[15px] text-muted-foreground">
                   {message || 'This verification link has expired or was already used.'}
                 </p>
-                <p className="mt-4 text-[13px] text-[hsl(var(--blue-900))]/45">
+                <p className="mt-3 text-[14px] text-muted-foreground">
                   Sign in with your email and password to receive a new verification link automatically.
                 </p>
                 <div className="mt-6 flex flex-col gap-3">
-                  <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-full btn-primary text-white h-12 px-8 font-bold">
-                    <Mail className="w-4 h-4" /> Sign in to get new link
+                  <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-xl btn-accent h-12 px-6 font-semibold">
+                    <Mail className="w-4 h-4" aria-hidden="true" /> Sign in to get new link
                   </Link>
-                  <Link to="/signup" className="text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline">
+                  <Link to="/signup" className="text-[14px] link-primary">
                     Don't have an account? Sign up
                   </Link>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
 
-          <div className="mt-6 pt-5 border-t border-black/5 text-center">
-            <Link to="/" className="text-[13px] font-bold text-[hsl(var(--blue-700))]/60 hover:text-[hsl(var(--blue-700))]">
+          <div className="mt-8 pt-5 border-t border-[hsl(var(--border))] text-center">
+            <Link to="/" className="text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
               Back to home
             </Link>
           </div>

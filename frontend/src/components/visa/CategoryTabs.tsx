@@ -7,13 +7,16 @@ export const TYPE_ICONS: Record<string, LucideIcon> = {
   Work: Building2,
 };
 
+// One consistent selection colour for every visa type (primary blue).
+// Kept as a map so existing imports keep working.
+const PRIMARY = 'hsl(var(--blue-700))';
 export const TYPE_COLORS: Record<string, string> = {
-  Tourist: '#22c55e',
-  Business: '#0a2c8a',
-  Student: '#f59e0b',
-  Work: '#ec4899',
-  Transit: '#0ea5e9',
-  Medical: '#dc2626',
+  Tourist: PRIMARY,
+  Business: PRIMARY,
+  Student: PRIMARY,
+  Work: PRIMARY,
+  Transit: PRIMARY,
+  Medical: PRIMARY,
 };
 
 interface CategoryTabsProps {
@@ -25,22 +28,23 @@ interface CategoryTabsProps {
 export default function CategoryTabs({ categories, value, onChange }: CategoryTabsProps) {
   const ids = Object.keys(categories || {});
   return (
-    <div className="inline-flex flex-wrap gap-2 p-1.5 rounded-2xl bg-white border border-black/8">
+    <div role="tablist" aria-label="Visa type" className="grid grid-cols-2 sm:inline-flex sm:flex-wrap gap-1.5 p-1.5 w-full sm:w-auto rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm">
       {ids.map((id) => {
         const Icon = TYPE_ICONS[id] || Plane;
         const active = value === id;
-        const color = TYPE_COLORS[id] || '#0a2c8a';
         return (
           <button
             key={id}
+            type="button"
+            role="tab"
+            aria-selected={active}
             onClick={() => onChange(id)}
             data-testid={`visa-type-${id.toLowerCase()}`}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13.5px] font-bold transition ${
+            className={`inline-flex items-center justify-center sm:justify-start gap-2 rounded-xl px-4 min-h-[44px] text-[14px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] focus-visible:ring-offset-2 ${
               active
-                ? 'text-white'
-                : 'text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-900))]'
+                ? 'bg-[hsl(var(--blue-700))] text-white'
+                : 'text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))]'
             }`}
-            style={active ? { background: color } : {}}
           >
             <Icon className="w-3.5 h-3.5" />
             {id}

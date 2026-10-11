@@ -105,7 +105,7 @@ function Bubble({ m, onSpeak, speaking, ttsEnabled }) {
           'max-w-[85%] rounded-2xl px-4 py-3 shadow-sm text-[14px] leading-snug whitespace-pre-wrap',
           me
             ? 'bg-[hsl(var(--blue-700))] text-white rounded-br-sm'
-            : 'bg-white border border-black/5 text-[hsl(var(--blue-900))] rounded-bl-sm'
+            : 'bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] rounded-bl-sm'
         )}
       >
         {m.text}
@@ -119,7 +119,7 @@ function AssistantBlock({ m, onSpeak, speaking, ttsEnabled, checkedAt }) {
   const sources = m.sources || [];
 
   return (
-    <div className="rounded-2xl border border-black/5 bg-white shadow-sm p-5">
+    <div className="rounded-2xl border border-[hsl(var(--border))] bg-white shadow-sm p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 text-[12px] font-bold tracking-wide text-[hsl(var(--blue-700))]">
           <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
@@ -132,7 +132,7 @@ function AssistantBlock({ m, onSpeak, speaking, ttsEnabled, checkedAt }) {
             'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold transition',
             ttsEnabled
               ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-100))]'
-              : 'bg-black/5 text-[hsl(var(--blue-900))]/40'
+              : 'bg-[hsl(var(--soft-bg))] text-muted-foreground'
           )}
           aria-label="Listen"
         >
@@ -141,31 +141,31 @@ function AssistantBlock({ m, onSpeak, speaking, ttsEnabled, checkedAt }) {
         </button>
       </div>
 
-      <div className="text-[14.5px] leading-relaxed text-[hsl(var(--blue-900))] whitespace-pre-wrap">
+      <div className="text-[15px] leading-relaxed text-[hsl(var(--blue-900))] whitespace-pre-wrap">
         {parts.main}
       </div>
 
       {parts.reminder && (
-        <div className="mt-3 rounded-xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] px-3 py-2 text-[12.5px] font-semibold border border-[hsl(var(--blue-100))]">
+        <div className="mt-3 rounded-xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] px-3 py-2 text-[13px] font-semibold border border-[hsl(var(--blue-100))]">
           {parts.reminder}
         </div>
       )}
 
-      <div className="mt-4 pt-3 border-t border-black/5 flex flex-wrap items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/65">
+      <div className="mt-4 pt-3 border-t border-[hsl(var(--border))] flex flex-wrap items-center gap-2 text-[12px] text-muted-foreground">
         <span className="font-semibold">Sources</span>
         {sources.length > 0 ? (
           sources.map((s) => (
             <span
               key={s}
-              className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--blue-900))] text-white px-2.5 py-0.5"
+              className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] px-2.5 py-0.5"
             >
               {s === 'visa_lookup' ? 'Live visa API' : s.replace(/_/g, ' ')}
             </span>
           ))
         ) : (
-          <span className="text-[hsl(var(--blue-900))]/40">RAG knowledge base</span>
+          <span className="text-muted-foreground">RAG knowledge base</span>
         )}
-        <span className="ml-auto font-semibold text-[hsl(var(--blue-900))]/55">
+        <span className="ml-auto font-semibold text-muted-foreground">
           {checkedAt || `Checked today · confirm with the embassy`}
         </span>
       </div>
@@ -348,23 +348,20 @@ export default function Hive({ inOverlay }) {
   const partsMain = (s) => parseAnswerParts(s).main;
 
   return (
-    <div className="relative min-h-screen pb-16">
-      {/* Aurora backdrop — same We Hive hero treatment */}
-      <div className="absolute inset-0 -z-10 aurora-bg" aria-hidden />
-      <div className="absolute inset-0 -z-10 bg-grain opacity-30" aria-hidden />
+    <div className="relative min-h-screen pb-16 bg-[hsl(var(--soft-bg))]">
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14">
         {/* ── Header ───────────────────────────────────────────────────── */}
-        <header className="rounded-3xl glass-tint-navy border border-[hsl(var(--blue-100))] shadow-[0_25px_60px_-30px_rgba(10,44,138,0.35)] p-5 sm:p-6">
+        <header className="rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm p-5 sm:p-6">
           <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-[hsl(var(--blue-700))] text-white inline-flex items-center justify-center shadow-[0_10px_30px_-10px_rgba(10,44,138,0.55)]">
+            <div className="h-12 w-12 shrink-0 rounded-xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center">
               <Sparkles className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="font-display font-extrabold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+              <h1 className="font-display font-bold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
                 Hive
               </h1>
-              <p className="text-[12.5px] sm:text-[13.5px] text-[hsl(var(--blue-900))]/65">
+              <p className="text-[13px] sm:text-[14px] text-muted-foreground">
                 WeHive travel & visa assistant
               </p>
             </div>
@@ -410,10 +407,10 @@ export default function Hive({ inOverlay }) {
                   key={a.id}
                   onClick={() => setActiveAgent(a.id)}
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12.5px] font-bold transition border',
+                    'inline-flex items-center gap-2 rounded-full px-3.5 min-h-[44px] text-[14px] font-semibold transition-colors border',
                     active
-                      ? 'bg-[hsl(var(--blue-700))] text-white border-[hsl(var(--blue-700))] shadow-[0_10px_25px_-12px_rgba(10,44,138,0.7)]'
-                      : 'bg-white text-[hsl(var(--blue-900))] border-[hsl(var(--blue-100))] hover:border-[hsl(var(--blue-700))]/30'
+                      ? 'bg-[hsl(var(--blue-700))] text-white border-[hsl(var(--blue-700))] shadow-sm'
+                      : 'bg-white text-[hsl(var(--blue-900))] border-[hsl(var(--blue-100))] hover:border-[hsl(var(--blue-200))]'
                   )}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -426,7 +423,7 @@ export default function Hive({ inOverlay }) {
 
         {/* ── Prompt kit ──────────────────────────────────────────────── */}
         <section className="mt-6">
-          <div className="text-[12px] font-extrabold uppercase tracking-[0.18em] text-[hsl(var(--blue-900))]/55 mb-2.5">
+          <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2.5">
             Prompt kit
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -434,29 +431,29 @@ export default function Hive({ inOverlay }) {
               <button
                 key={p.title}
                 onClick={() => send(p.sample)}
-                className="text-left rounded-2xl bg-white border border-black/5 p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition group"
+                className="text-left rounded-2xl bg-white border border-[hsl(var(--border))] p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition group"
               >
-                <div className="font-display font-extrabold text-[15px] text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))]">
+                <div className="font-display font-bold text-[15px] text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))]">
                   {p.title}
                 </div>
-                <div className="text-[12px] text-[hsl(var(--blue-900))]/55 mt-0.5">{p.sub}</div>
+                <div className="text-[12px] text-muted-foreground mt-0.5">{p.sub}</div>
               </button>
             ))}
           </div>
         </section>
 
         {/* ── Chat transcript ────────────────────────────────────────── */}
-        <section className="mt-6 rounded-3xl bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_25px_60px_-30px_rgba(10,44,138,0.25)] overflow-hidden">
+        <section className="mt-6 rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm overflow-hidden">
           <div ref={scroller} className="p-4 sm:p-5 space-y-3 min-h-[280px] max-h-[60vh] overflow-y-auto">
             {messages.length === 0 && (
               <div className="text-center py-10">
                 <div className="inline-flex h-12 w-12 rounded-2xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] items-center justify-center mb-3">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <h2 className="font-display font-extrabold text-[20px] text-[hsl(var(--blue-900))]">
+                <h2 className="font-display font-bold text-[20px] text-[hsl(var(--blue-900))] leading-tight">
                   Ask {activeSpec?.label || 'Hive'} anything
                 </h2>
-                <p className="text-[12.5px] text-[hsl(var(--blue-900))]/60 mt-1 max-w-sm mx-auto">
+                <p className="text-[13px] text-muted-foreground mt-1 max-w-sm mx-auto">
                   Pick a prompt above or type below. Visa and travel answers
                   are date-stamped and cite the source.
                 </p>
@@ -467,27 +464,26 @@ export default function Hive({ inOverlay }) {
               m.role === 'user' ? (
                 <Bubble key={m.id} m={m} ttsEnabled={ttsEnabled} />
               ) : m.isAuthPrompt ? (
-                <div key={m.id} className="rounded-2xl border border-[hsl(var(--accent))]/20 bg-[hsl(var(--accent))]/5 shadow-sm p-6 text-center">
-                  <Sparkles className="w-8 h-8 mx-auto mb-3 text-[hsl(var(--accent))]" />
-                  <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))] mb-2">
+                <div key={m.id} className="rounded-2xl border border-[hsl(var(--blue-100))] bg-[hsl(var(--blue-50))] p-6 text-center">
+                  <Sparkles className="w-8 h-8 mx-auto mb-3 text-[hsl(var(--blue-700))]" />
+                  <h3 className="font-display font-bold text-[18px] text-[hsl(var(--blue-900))] mb-2">
                     Sign in to continue
                   </h3>
-                  <p className="text-[13px] text-[hsl(var(--blue-900))]/65 mb-4 max-w-sm mx-auto">
+                  <p className="text-[13px] text-muted-foreground mb-4 max-w-sm mx-auto">
                     Create an account or sign in to ask custom questions and get
                     personalised visa, travel, and document assistance.
                   </p>
                   <div className="flex items-center justify-center gap-3">
                     <Button
                       onClick={() => navigate('/signup')}
-                      className="rounded-full font-bold h-10 px-5 text-white"
-                      style={{ background: 'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--accent)) 130%)' }}
+                      className="rounded-xl btn-accent font-semibold h-11 px-5 text-white"
                     >
                       Create account
                     </Button>
                     <Button
                       onClick={() => navigate('/login')}
                       variant="outline"
-                      className="rounded-full font-bold h-10 px-5 border-[hsl(var(--blue-700))]/30 text-[hsl(var(--blue-700))]"
+                      className="rounded-xl font-semibold h-11 px-5 bg-white text-[hsl(var(--blue-900))]"
                     >
                       Sign in
                     </Button>
@@ -507,7 +503,7 @@ export default function Hive({ inOverlay }) {
 
             {sending && (
               <div className="flex justify-start">
-                <div className="rounded-2xl rounded-bl-sm bg-white border border-black/5 px-4 py-3 inline-flex items-center gap-2 text-[hsl(var(--blue-900))]/65">
+                <div className="rounded-2xl rounded-bl-sm bg-white border border-[hsl(var(--border))] px-4 py-3 inline-flex items-center gap-2 text-muted-foreground">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span className="text-[13px]">
                     {activeSpec?.label || 'Hive'} is thinking…
@@ -517,27 +513,27 @@ export default function Hive({ inOverlay }) {
             )}
 
             {error && (
-              <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-[12.5px]">
+              <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-[13px]">
                 {error}
               </div>
             )}
             {(listening || speaking) && (
-              <div className="px-3 py-2 border-t border-black/5 bg-white/40">
+              <div className="px-3 py-2 border-t border-[hsl(var(--border))] bg-[hsl(var(--soft-bg))]">
                 <VoiceWaveform isActive={listening} isSpeaking={speaking} />
               </div>
             )}
           </div>
 
           {/* ── Composer ─────────────────────────────────────────────── */}
-          <div className="border-t border-black/5 p-3 bg-white/80">
+          <div className="border-t border-[hsl(var(--border))] p-3 bg-white">
             <div className="flex items-center gap-1.5">
               <button
                 onClick={listening ? stopListening : startListening}
                 className={cn(
-                  'h-10 w-10 rounded-full inline-flex items-center justify-center transition',
+                  'h-11 w-11 shrink-0 rounded-full inline-flex items-center justify-center transition-colors border',
                   listening
-                    ? 'bg-red-100 text-red-600 animate-pulse'
-                    : 'bg-black/5 text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-700))]'
+                    ? 'bg-red-100 text-red-600 motion-safe:animate-pulse'
+                    : 'bg-[hsl(var(--soft-bg))] text-muted-foreground hover:text-[hsl(var(--blue-700))]'
                 )}
                 aria-label={listening ? 'Stop listening' : 'Voice input'}
                 title={listening ? 'Stop listening' : 'Voice input'}
@@ -554,23 +550,19 @@ export default function Hive({ inOverlay }) {
                   }
                 }}
                 placeholder={`Ask ${activeSpec?.label || 'Hive'} about visas, trips, or documents…`}
-                className="flex-1 h-11 rounded-full border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] text-[hsl(var(--blue-900))] bg-white"
+                className="flex-1 min-w-0 h-11 rounded-full border border-[hsl(var(--border))] focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 outline-none px-4 text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] bg-white"
               />
               <button
                 onClick={() => send()}
                 disabled={sending || !text.trim()}
-                className="h-11 w-11 rounded-full text-white inline-flex items-center justify-center disabled:opacity-50"
-                style={{
-                  background:
-                    'linear-gradient(135deg, hsl(var(--blue-700)) 0%, hsl(var(--accent)) 130%)',
-                }}
+                className="h-11 w-11 shrink-0 rounded-full bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white inline-flex items-center justify-center disabled:opacity-50 transition-colors"
                 aria-label="Send"
               >
                 <Send className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setMessages([])}
-                className="h-10 w-10 rounded-full inline-flex items-center justify-center bg-black/5 text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-700))]"
+                className="h-11 w-11 shrink-0 rounded-full inline-flex items-center justify-center bg-white border border-[hsl(var(--border))] text-muted-foreground hover:text-[hsl(var(--blue-700))]"
                 aria-label="Clear chat"
                 title="Clear chat"
               >
@@ -579,10 +571,10 @@ export default function Hive({ inOverlay }) {
               <button
                 onClick={() => setTtsEnabled((v) => !v)}
                 className={cn(
-                  'h-10 w-10 rounded-full inline-flex items-center justify-center transition',
+                  'h-11 w-11 shrink-0 rounded-full inline-flex items-center justify-center transition-colors border',
                   ttsEnabled
-                    ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'
-                    : 'bg-black/5 text-[hsl(var(--blue-900))]/40'
+                    ? 'bg-[hsl(var(--blue-50))] border-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))]'
+                    : 'bg-white border-[hsl(var(--border))] text-muted-foreground'
                 )}
                 aria-label={ttsEnabled ? 'Mute voice' : 'Enable voice'}
                 title={ttsEnabled ? 'Mute voice' : 'Enable voice'}
@@ -590,7 +582,7 @@ export default function Hive({ inOverlay }) {
                 <Volume2 className="w-4 h-4" />
               </button>
             </div>
-            <div className="text-[12px] text-[hsl(var(--blue-900))]/45 mt-2 px-2 flex items-center gap-1.5">
+            <div className="text-[12px] text-muted-foreground mt-2 px-2 flex items-center gap-1.5">
               <ShieldCheck className="w-3 h-3" />
               {activeAgent === 'hive_visa' && 'Visa answers are date-stamped. Always confirm with the official embassy.'}
               {activeAgent === 'hive_travel' && 'Trip prices come from live tools. Confirm before booking.'}
@@ -612,7 +604,7 @@ function ModelToggle({ active, onClick, icon, label }) {
         'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold border transition',
         active
           ? 'bg-white text-[hsl(var(--blue-700))] border-[hsl(var(--blue-100))] shadow-sm'
-          : 'bg-white/40 text-[hsl(var(--blue-900))]/60 border-white/40 hover:bg-white/70'
+          : 'bg-white/40 text-muted-foreground border-white/40 hover:bg-white/70'
       )}
     >
       {icon}

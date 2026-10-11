@@ -17,7 +17,7 @@ export default function DeliveryCountdown({ cutoffHour = 18, label = 'Apply toda
 
   if (compact) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[hsl(var(--accent))]">
+      <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[hsl(var(--blue-700))]">
         <Clock className="w-3 h-3" />
         {h}h {m}m left
       </span>
@@ -25,12 +25,12 @@ export default function DeliveryCountdown({ cutoffHour = 18, label = 'Apply toda
   }
 
   return (
-    <div className="inline-flex items-center gap-3 rounded-full bg-white border border-black/8 pl-2 pr-4 py-1.5 shadow-sm">
-      <span className="h-7 w-7 rounded-full bg-[hsl(var(--accent))] inline-flex items-center justify-center">
-        <Clock className="w-3.5 h-3.5 text-white" />
+    <div className="inline-flex items-center gap-3 rounded-full bg-white border border-[hsl(var(--border))] pl-1.5 pr-4 py-1.5">
+      <span className="h-7 w-7 rounded-full bg-[hsl(var(--blue-50))] inline-flex items-center justify-center">
+        <Clock className="w-3.5 h-3.5 text-[hsl(var(--blue-700))]" aria-hidden="true" />
       </span>
       <span className="leading-tight">
-        <span className="block text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
+        <span className="block text-[12px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">
           {label}
         </span>
         <span className="block text-[13px] font-bold text-[hsl(var(--blue-900))]">

@@ -5,22 +5,19 @@ import axios from 'axios';
 import { API } from '../context/AuthContext';
 
 const FALLBACK_UPDATES = [
-  { icon: CheckCircle2, text: 'Visa approved for Priya S. · Dubai', time: '2 min ago', color: 'text-emerald-500' },
+  { icon: CheckCircle2, text: 'Visa approved for Priya S. · Dubai', time: '2 min ago', color: 'text-emerald-600' },
   { icon: Plane, text: 'Flights booked for Rajesh K. · Tokyo', time: '5 min ago', color: 'text-[hsl(var(--blue-700))]' },
-  { icon: Star, text: 'New 5-star review from Sarah M.', time: '8 min ago', color: 'text-amber-500' },
-  { icon: CheckCircle2, text: 'Visa approved for Amit C. · Singapore', time: '12 min ago', color: 'text-emerald-500' },
+  { icon: Star, text: 'New 5-star review from Sarah M.', time: '8 min ago', color: 'text-[hsl(var(--blue-700))]' },
+  { icon: CheckCircle2, text: 'Visa approved for Amit C. · Singapore', time: '12 min ago', color: 'text-emerald-600' },
   { icon: Clock, text: 'Application submitted by Deepa R. · UK', time: '15 min ago', color: 'text-[hsl(var(--blue-700))]' },
-  { icon: CheckCircle2, text: 'Visa approved for Vikram J. · USA', time: '18 min ago', color: 'text-emerald-500' },
+  { icon: CheckCircle2, text: 'Visa approved for Vikram J. · USA', time: '18 min ago', color: 'text-emerald-600' },
 ];
 
 function LiveBadge() {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-      </span>
-      <span className="text-[12px] uppercase tracking-[0.15em] font-bold text-emerald-600">Live</span>
+      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+      <span className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-900))]">Live</span>
     </div>
   );
 }
@@ -48,7 +45,7 @@ export default function LiveTickerMarquee() {
             icon: Newspaper,
             text: news.title,
             time: new Date(news.date || news.created_at).toLocaleDateString(),
-            color: 'text-white' // Making icon white to match marquee
+            color: 'text-[hsl(var(--blue-700))]'
           }));
           setUpdates(formatted);
         }
@@ -62,19 +59,16 @@ export default function LiveTickerMarquee() {
   const doubled = [...updates, ...updates, ...updates, ...updates, ...updates, ...updates];
 
   return (
-    <div className="relative bg-gradient-to-r from-[hsl(var(--blue-900))] via-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))] py-3 overflow-hidden">
-      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[hsl(var(--blue-900))] to-transparent z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[hsl(var(--blue-900))] to-transparent z-10" />
-
-      <div className="absolute left-8 top-1/2 -translate-y-1/2 z-20">
-        <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/10">
-          <LiveBadge />
-        </div>
+    <div className="relative flex items-stretch bg-white border-y border-[hsl(var(--border))]" aria-label="Recent activity">
+      <div className="relative z-20 shrink-0 flex items-center pl-4 pr-3 sm:pl-8 sm:pr-4 bg-white border-r border-[hsl(var(--border))]">
+        <LiveBadge />
       </div>
 
-      <div className="flex">
+      <div className="relative flex-1 min-w-0 overflow-hidden py-3">
+        <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-white to-transparent z-10" aria-hidden="true" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10" aria-hidden="true" />
         <motion.div
-          className="flex gap-8 items-center"
+          className="flex w-max gap-10 items-center"
           animate={{ x: ['0%', '-50%'] }}
           transition={{
             duration: 45,
@@ -86,9 +80,9 @@ export default function LiveTickerMarquee() {
             const ItemIcon = update.icon;
             return (
               <div key={i} className="flex items-center gap-3">
-                <ItemIcon className={`w-4 h-4 ${update.color} flex-shrink-0`} />
-                <span className="text-[13px] font-semibold text-white whitespace-nowrap">{update.text}</span>
-                <span className="text-[12px] text-white/40 whitespace-nowrap">{update.time}</span>
+                <ItemIcon className={`w-4 h-4 ${update.color} flex-shrink-0`} aria-hidden="true" />
+                <span className="text-[14px] font-medium text-[hsl(var(--blue-900))] whitespace-nowrap">{update.text}</span>
+                <span className="text-[12px] text-muted-foreground whitespace-nowrap">{update.time}</span>
               </div>
             );
           })}

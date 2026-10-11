@@ -56,30 +56,30 @@ export default function Blog() {
   }, [category]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-[hsl(var(--soft-bg))]">
       <Navbar />
       
-      <main className="flex-grow pt-24 pb-16">
+      <main className="flex-grow pt-28 pb-16 md:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight flex items-center justify-center gap-4">
-              <FileText className="w-10 h-10 text-primary" />
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3 inline-flex items-center gap-2"><FileText className="w-3.5 h-3.5" /> Guides &amp; stories</div>
+            <h1 className="font-display text-[36px] md:text-[52px] font-bold text-[hsl(var(--blue-900))] tracking-[-0.02em] leading-tight">
               We Hive Blog
             </h1>
-            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="mt-4 text-[16px] sm:text-[18px] text-muted-foreground max-w-2xl mx-auto">
               Discover travel stories, visa guides, and expert advice for your international journey.
             </p>
           </div>
 
-          <div className="flex items-center justify-center gap-3 flex-wrap mb-12">
+          <div className="flex items-center justify-center gap-2 flex-wrap mb-10">
             {CATEGORIES.map(cat => (
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition shadow-sm border ${
+                className={`px-4 min-h-[44px] rounded-full text-[14px] font-semibold transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] focus-visible:ring-offset-2 ${
                   category === cat 
                     ? 'bg-primary text-white border-primary' 
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-primary/30 hover:bg-gray-50'
+                    : 'bg-white text-muted-foreground border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] hover:text-[hsl(var(--blue-900))]'
                 }`}
               >
                 {cat}
@@ -108,11 +108,11 @@ export default function Blog() {
                 className="flex flex-col items-center justify-center py-20 text-center"
               >
                 <AlertCircle className="w-12 h-12 text-red-400 mb-4" />
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Oops!</h3>
-                <p className="text-gray-500 max-w-md">{error}</p>
+                <h3 className="text-xl font-bold text-[hsl(var(--blue-900))] mb-2">Oops!</h3>
+                <p className="text-muted-foreground max-w-md">{error}</p>
                 <button 
                   onClick={() => setCategory('All')}
-                  className="mt-6 px-6 py-2 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 transition-colors"
+                  className="mt-6 px-6 h-11 bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] rounded-xl font-semibold hover:border-[hsl(var(--blue-700))] transition-colors"
                 >
                   Try Again
                 </button>
@@ -123,10 +123,10 @@ export default function Blog() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center py-20 text-gray-500 text-center"
+                className="flex flex-col items-center justify-center py-20 text-muted-foreground text-center"
               >
-                <FileText className="w-12 h-12 text-gray-300 mb-4" />
-                <h3 className="text-xl font-bold text-gray-800 mb-2">No Articles Found</h3>
+                <FileText className="w-12 h-12 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-bold text-[hsl(var(--blue-900))] mb-2">No Articles Found</h3>
                 <p>We haven't published any articles in this category yet.</p>
               </motion.div>
             ) : (
@@ -140,9 +140,9 @@ export default function Blog() {
                   {blogs.map((story, i) => (
                     <motion.div
                       key={story.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.1, duration: 0.5 }}
+                      transition={{ delay: Math.min(i, 6) * 0.05, duration: 0.3 }}
                     >
                       <ContentCard
                         imageUrl={(story.imageUrl && !story.imageUrl.includes('unsplash')) ? story.imageUrl : getRelevantImage(story.category)}
@@ -152,7 +152,7 @@ export default function Blog() {
                         readTime={story.readTime || '5 min read'}
                         category={story.category}
                         countryId={story.country_id}
-                        accentColor="#0a2c8a"
+                        accentColor="#2563EB"
                         onClick={() => setSelectedBlog(story)}
                       />
                     </motion.div>
@@ -167,17 +167,18 @@ export default function Blog() {
       {/* Blog Preview Modal */}
       <AnimatePresence>
         {selectedBlog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[hsl(var(--blue-900))]/60">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.98, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              {...dialogProps} className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col relative"
+              exit={{ opacity: 0, scale: 0.98, y: 8 }}
+              {...dialogProps} className="bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col relative"
             >
               {/* Close button */}
               <button
                 onClick={() => setSelectedBlog(null)}
-                className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-colors"
+                aria-label="Close article"
+                className="absolute top-3 right-3 z-10 w-11 h-11 inline-flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -192,16 +193,16 @@ export default function Blog() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
                   <div className="flex gap-2 mb-3">
-                    <span className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full uppercase tracking-wider">
+                    <span className="px-3 py-1 bg-primary text-white text-[12px] font-bold rounded-full uppercase tracking-[0.14em]">
                       {selectedBlog.category}
                     </span>
                     {selectedBlog.country_id && (
-                      <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/30">
+                      <span className="px-3 py-1 bg-black/40 text-white text-[12px] font-bold rounded-full uppercase tracking-[0.14em] border border-white/30">
                         {selectedBlog.country_id.substring(0,3)}
                       </span>
                     )}
                   </div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight">
+                  <h2 className="font-display text-[24px] sm:text-[32px] font-bold text-white leading-tight">
                     {selectedBlog.title}
                   </h2>
                 </div>
@@ -209,7 +210,7 @@ export default function Blog() {
 
               {/* Content */}
               <div className="p-6 sm:p-8 overflow-y-auto">
-                <div className="flex items-center justify-between mb-8 text-sm text-gray-500 font-medium pb-6 border-b border-gray-100 flex-wrap gap-4">
+                <div className="flex items-center justify-between mb-8 text-sm text-muted-foreground font-medium pb-6 border-b border-[hsl(var(--border))] flex-wrap gap-4">
                   <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
                       <UserIcon className="w-4 h-4" />
@@ -237,7 +238,7 @@ export default function Blog() {
                       }
                     }}
                     disabled={generatingPodcast || podcastData}
-                    className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold transition disabled:opacity-50"
+                    className="flex items-center gap-2 bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-4 min-h-[44px] rounded-xl font-semibold transition-colors disabled:opacity-50"
                   >
                     {generatingPodcast ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
                     {podcastData ? 'Podcast Ready' : 'Generate AI Podcast'}
@@ -246,14 +247,14 @@ export default function Blog() {
                 
                 {/* Podcast Display */}
                 {podcastData && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-8 bg-indigo-900 text-indigo-50 rounded-2xl p-6 shadow-inner">
-                    <h3 className="font-black text-xl mb-4 flex items-center gap-2 text-white">
-                      <Mic className="text-indigo-400" /> AI Podcast Transcript
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-8 bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] rounded-2xl p-5 sm:p-6">
+                    <h3 className="font-bold text-[18px] mb-4 flex items-center gap-2 text-[hsl(var(--blue-900))]">
+                      <Mic className="w-5 h-5 text-[hsl(var(--blue-700))]" /> AI Podcast Transcript
                     </h3>
                     <div className="space-y-4 max-h-64 overflow-y-auto pr-2 scrollbar-hide">
                       {podcastData.map((line, idx) => (
-                        <div key={idx} className={`p-3 rounded-xl max-w-[85%] ${line.speaker === 'Host' ? 'bg-indigo-800 ml-0 rounded-tl-sm' : 'bg-indigo-700 ml-auto rounded-tr-sm text-right'}`}>
-                          <div className="text-[12px] uppercase font-bold text-indigo-300 mb-1 tracking-widest">{line.speaker}</div>
+                        <div key={idx} className={`p-3 rounded-xl max-w-[85%] ${line.speaker === 'Host' ? 'bg-white border border-[hsl(var(--border))] ml-0 rounded-tl-sm' : 'bg-[hsl(var(--blue-50))] ml-auto rounded-tr-sm text-right'}`}>
+                          <div className="text-[12px] uppercase font-bold text-[hsl(var(--blue-700))] mb-1 tracking-[0.14em]">{line.speaker}</div>
                           <div className="text-[14px] leading-relaxed">{line.text}</div>
                         </div>
                       ))}
@@ -261,7 +262,7 @@ export default function Blog() {
                   </motion.div>
                 )}
 
-                <div className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed">
+                <div className="max-w-none text-[16px] text-[hsl(var(--blue-900))] leading-relaxed">
                   {selectedBlog.description?.split('\\n').map((paragraph, i) => (
                     <p key={i} className="mb-4">{paragraph}</p>
                   ))}

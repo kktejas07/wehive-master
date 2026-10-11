@@ -73,9 +73,9 @@ export default function HeroSearchLive({ query, setQuery }) {
 
   return (
     <div ref={boxRef} className="relative" data-testid="hero-search-wrap">
-      <div className="relative rounded-full bg-white border border-black/5 shadow-[0_24px_60px_-30px_rgba(10,44,138,0.45)] p-1.5 flex items-center gap-1.5">
-        <div className="flex-1 flex items-center gap-3 pl-5">
-          <Search className="w-4 h-4 text-[hsl(var(--blue-900))]/45" />
+      <div className="relative rounded-2xl bg-white border border-[hsl(var(--border))] shadow-md p-1.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 focus-within:border-[hsl(var(--blue-700))] focus-within:ring-2 focus-within:ring-[hsl(var(--blue-700))]/20 transition-colors">
+        <div className="flex-1 min-w-0 flex items-center gap-3 pl-3 sm:pl-4">
+          <Search className="w-4 h-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <input
             ref={inputRef}
             data-testid="hero-search-input"
@@ -84,15 +84,16 @@ export default function HeroSearchLive({ query, setQuery }) {
             onFocus={() => setOpen(true)}
             onKeyDown={onKey}
             placeholder={t('hero.search')}
-            className="w-full bg-transparent border-0 outline-none focus:outline-none placeholder:text-[hsl(var(--blue-900))]/40 text-[15px] py-3 text-[hsl(var(--blue-900))]"
+            aria-label={t('hero.search')}
+            className="w-full min-w-0 bg-transparent border-0 outline-none focus:outline-none placeholder:text-[hsl(var(--blue-900))]/45 text-[16px] py-3 text-[hsl(var(--blue-900))]"
             autoComplete="off"
           />
-          {loading && <Loader2 className="w-4 h-4 animate-spin text-[hsl(var(--blue-900))]/30" />}
+          {loading && <Loader2 className="w-4 h-4 shrink-0 animate-spin text-muted-foreground" aria-hidden="true" />}
         </div>
         <Button
           onClick={onSubmit}
           data-testid="hero-search-submit"
-          className="rounded-full btn-accent text-white h-12 px-5 shadow-sm font-bold"
+          className="shrink-0 w-full sm:w-auto rounded-xl btn-accent text-white h-12 px-4 sm:px-6 font-semibold"
         >
           {t('hero.find')}
           <ArrowRight className="w-4 h-4 ml-1" />
@@ -102,10 +103,10 @@ export default function HeroSearchLive({ query, setQuery }) {
       {showPopover && (
         <div
           data-testid="hero-search-popover"
-          className="absolute left-0 right-0 mt-3 rounded-2xl bg-white border border-black/8 shadow-[0_30px_70px_-30px_rgba(10,44,138,0.45)] overflow-hidden z-[70]"
+          className="absolute left-0 right-0 mt-2 rounded-2xl bg-white border border-[hsl(var(--border))] shadow-lg overflow-hidden z-[70]"
         >
           {results.length === 0 && !loading && (
-            <div className="px-5 py-6 text-center text-[13.5px] text-[hsl(var(--blue-900))]/55">
+            <div className="px-5 py-6 text-center text-[14px] text-muted-foreground">
               {t('hero.noMatch').replace('{q}', q)}
             </div>
           )}
@@ -117,27 +118,27 @@ export default function HeroSearchLive({ query, setQuery }) {
                 onMouseEnter={() => setActive(i)}
                 onMouseDown={(e) => { e.preventDefault(); go(c); }}
                 className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer ${
-                  i === active ? 'bg-[hsl(var(--soft-bg))]' : ''
+                  i === active ? 'bg-[hsl(var(--blue-50))]' : ''
                 }`}
               >
                 <span className="text-xl leading-none">{c.flag || <Globe className="w-5 h-5 text-[hsl(var(--blue-900))]/40" />}</span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">
+                  <div className="text-[14px] font-semibold text-[hsl(var(--blue-900))] truncate">
                     {c.name}
                   </div>
-                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
+                  <div className="text-[12px] text-muted-foreground">
                     {c.no_visa
                       ? 'Visa-free for Indians'
                       : (c.visa_types || []).slice(0, 3).join(' · ') || 'Visa required'}
                   </div>
                 </div>
-                <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/40">
+                <span className="text-[12px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">
                   {c.iso2 || c.id?.toUpperCase()}
                 </span>
               </li>
             ))}
           </ul>
-          <div className="px-4 py-2 text-[12px] text-[hsl(var(--blue-900))]/45 border-t border-black/5 flex items-center justify-between">
+          <div className="px-4 py-2 text-[12px] text-muted-foreground border-t border-[hsl(var(--border))] flex items-center justify-between gap-3">
             <span>{t('hero.searchKeys')}</span>
             <span>{t('hero.searchSource')}</span>
           </div>

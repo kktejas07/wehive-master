@@ -12,7 +12,7 @@ const TESTIMONIALS = [
     visaType: "USA Tourist Visa",
     rating: 5,
     avatar: "PS",
-    color: "#0A2C8A",
+    color: "#2563EB",
   },
   {
     quote:
@@ -22,7 +22,7 @@ const TESTIMONIALS = [
     visaType: "UK Business Visa",
     rating: 5,
     avatar: "RM",
-    color: "#E1212C",
+    color: "#047857",
   },
   {
     quote:
@@ -170,7 +170,7 @@ export default function AnimatedTestimonials() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <Star className="w-3.5 h-3.5" />
             Testimonials
           </div>

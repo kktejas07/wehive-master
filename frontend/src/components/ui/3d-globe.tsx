@@ -58,7 +58,7 @@ function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
       }}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.5, delay: Math.random() * 0.5 }}
+      transition={{ duration: 0.3, delay: Math.random() * 0.5 }}
       onMouseEnter={() => onHover(marker)}
       onMouseLeave={onLeave}
       onClick={() => onClick?.(marker)}
@@ -68,7 +68,7 @@ function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
         animate={isHovered ? { scale: 1.2 } : { scale: 1 }}
         whileHover={{ scale: 1.3 }}
       >
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-white transition duration-300 ${isHovered ? 'bg-[hsl(var(--accent))]' : 'bg-[hsl(var(--blue-700))]'}`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-white transition duration-300 ${isHovered ? 'bg-[hsl(var(--blue-800))]' : 'bg-[hsl(var(--blue-700))]'}`}>
           <MapPin className="w-4 h-4 text-white" />
         </div>
         {isHovered && (
@@ -79,12 +79,12 @@ function Marker({ marker, radius, isHovered, onHover, onLeave, onClick }) {
           >
             <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{marker.label}</div>
             {marker.visaType && (
-              <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{marker.visaType}</div>
+              <div className="text-[12px] text-muted-foreground">{marker.visaType}</div>
             )}
             <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-white transform rotate-45" />
           </motion.div>
         )}
-        <span className="absolute inset-0 rounded-full animate-ping bg-[hsl(var(--accent))]/30 opacity-75" />
+        <span className="absolute inset-0 rounded-full motion-safe:animate-ping bg-[hsl(var(--blue-700))]/30 opacity-75" />
       </motion.div>
     </motion.div>
   );
@@ -187,7 +187,7 @@ export function Globe3D({
               transformStyle: 'preserve-3d',
             }}
           >
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--blue-700))] via-[hsl(var(--blue-500))] to-[hsl(var(--blue-900))] shadow-[0_0_60px_rgba(10,44,138,0.4)]" />
+            <div className="absolute inset-0 rounded-full bg-[hsl(var(--blue-800))] shadow-[0_0_40px_rgba(37,99,235,0.25)]" />
             <div className="absolute inset-0 rounded-full" style={{ transform: 'translateZ(10px)' }}>
               <svg viewBox="0 0 400 400" className="w-full h-full opacity-30">
                 <ellipse cx="200" cy="200" rx="180" ry="180" fill="none" stroke="white" strokeWidth="0.5" />
@@ -228,7 +228,7 @@ export function Globe3D({
           <div
             className="absolute inset-0 rounded-full pointer-events-none"
             style={{
-              boxShadow: 'inset 0 0 80px rgba(10,44,138,0.3)',
+              boxShadow: 'inset 0 0 80px rgba(37,99,235,0.3)',
               transform: 'translateZ(-20px)',
             }}
           />

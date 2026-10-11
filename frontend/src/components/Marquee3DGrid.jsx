@@ -94,8 +94,8 @@ export default function Marquee3DGrid() {
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(10,44,138,0.05) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(10,44,138,0.05) 1px, transparent 1px)
+              linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px)
             `,
             backgroundSize: '40px 40px',
           }}
@@ -109,7 +109,7 @@ export default function Marquee3DGrid() {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <Globe className="w-3.5 h-3.5" />
             Popular Destinations
           </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Bus, Car, Hotel, Sparkle, Phone, ChevronRight, Clock } from 'lucide-react';
+import { Plane, Bus, Car, Hotel, Phone, Clock } from 'lucide-react';
 import Reveal from './Reveal';
 import { BRAND } from '../data/mock';
 
@@ -56,38 +56,37 @@ function DealCard({ deal, category, onCall }) {
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="relative flex-shrink-0 w-[260px] sm:w-[290px] rounded-2xl bg-white border border-black/8 shadow-sm overflow-hidden cursor-pointer group"
+      whileHover={{ y: -2, transition: { duration: 0.2 } }}
+      className="relative flex-shrink-0 w-[260px] sm:w-[290px] h-full rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group"
     >
-      {discount >= 20 && (
-        <div className="absolute top-3 right-3 z-20">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-white text-[12px] font-bold uppercase tracking-wider">
-            {discount}% OFF
-          </span>
+      <div className="p-5">
+        <div className="mb-3 h-6 flex items-center">
+          {discount >= 20 && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] text-[12px] font-semibold">
+              Save {discount}%
+            </span>
+          )}
         </div>
-      )}
-
-      <div className="p-4 pt-10">
         {category === 'flights' && (
           <>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <span className="text-[18px] font-bold text-[hsl(var(--blue-900))]">{deal.from} → {deal.to}</span>
+                <span className="text-[18px] font-semibold text-[hsl(var(--blue-900))]">{deal.from} → {deal.to}</span>
               </div>
-              <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.airline}</span>
+              <span className="text-[12px] text-muted-foreground font-medium">{deal.airline}</span>
             </div>
-            <div className="flex items-center gap-4 text-[12px] text-[hsl(var(--blue-900))]/60 mb-3">
+            <div className="flex items-center gap-4 text-[12px] text-muted-foreground mb-3">
               <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {deal.time}</span>
               <span>{deal.stops}</span>
-              <span className="text-[hsl(var(--accent))] font-bold">{deal.seats} seats left</span>
+              <span className="text-[hsl(var(--blue-900))] font-semibold">{deal.seats} seats left</span>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}</span>
-                <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
+                <span className="text-[12px] text-muted-foreground line-through">₹{deal.original.toLocaleString('en-IN')}</span>
+                <div className="text-[20px] font-display font-bold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
               </div>
-              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
-                <Phone className="w-3.5 h-3.5 text-white" /> Call
+              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="inline-flex min-h-[40px] items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[hsl(var(--border))] bg-white text-[hsl(var(--blue-700))] text-[13px] font-semibold hover:bg-[hsl(var(--blue-50))] hover:border-[hsl(var(--blue-700))]/30 transition-colors">
+                <Phone className="w-3.5 h-3.5" aria-hidden="true" /> Call
               </a>
             </div>
           </>
@@ -96,17 +95,17 @@ function DealCard({ deal, category, onCall }) {
         {category === 'buses' && (
           <>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{deal.from} → {deal.to}</span>
-              <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.operator}</span>
+              <span className="text-[16px] font-semibold text-[hsl(var(--blue-900))]">{deal.from} → {deal.to}</span>
+              <span className="text-[12px] text-muted-foreground font-medium">{deal.operator}</span>
             </div>
-            <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.type} · {deal.departure} → {deal.arrival}</div>
+            <div className="text-[12px] text-muted-foreground mb-2">{deal.type} · {deal.departure} → {deal.arrival}</div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}</span>
-                <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
+                <span className="text-[12px] text-muted-foreground line-through">₹{deal.original.toLocaleString('en-IN')}</span>
+                <div className="text-[20px] font-display font-bold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}</div>
               </div>
-              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
-                <Phone className="w-3.5 h-3.5 text-white" /> Call
+              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="inline-flex min-h-[40px] items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[hsl(var(--border))] bg-white text-[hsl(var(--blue-700))] text-[13px] font-semibold hover:bg-[hsl(var(--blue-50))] hover:border-[hsl(var(--blue-700))]/30 transition-colors">
+                <Phone className="w-3.5 h-3.5" aria-hidden="true" /> Call
               </a>
             </div>
           </>
@@ -115,17 +114,17 @@ function DealCard({ deal, category, onCall }) {
         {category === 'cars' && (
           <>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{deal.company}</span>
-              <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.location}</span>
+              <span className="text-[16px] font-semibold text-[hsl(var(--blue-900))]">{deal.company}</span>
+              <span className="text-[12px] text-muted-foreground font-medium">{deal.location}</span>
             </div>
-            <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.vehicle} · {deal.type} · {deal.seats} Seats{deal.fuelType}</div>
+            <div className="text-[12px] text-muted-foreground mb-2">{deal.vehicle} · {deal.type} · {deal.seats} Seats{deal.fuelType}</div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/day</span>
-                <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/day</span></div>
+                <span className="text-[12px] text-muted-foreground line-through">₹{deal.original.toLocaleString('en-IN')}/day</span>
+                <div className="text-[20px] font-display font-bold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-muted-foreground">/day</span></div>
               </div>
-              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
-                <Phone className="w-3.5 h-3.5 text-white" /> Call
+              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="inline-flex min-h-[40px] items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[hsl(var(--border))] bg-white text-[hsl(var(--blue-700))] text-[13px] font-semibold hover:bg-[hsl(var(--blue-50))] hover:border-[hsl(var(--blue-700))]/30 transition-colors">
+                <Phone className="w-3.5 h-3.5" aria-hidden="true" /> Call
               </a>
             </div>
           </>
@@ -134,18 +133,18 @@ function DealCard({ deal, category, onCall }) {
         {category === 'hotels' && (
           <>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{deal.name}</span>
-              <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">{deal.category}</span>
+              <span className="text-[16px] font-semibold text-[hsl(var(--blue-900))]">{deal.name}</span>
+              <span className="text-[12px] text-muted-foreground font-medium">{deal.category}</span>
             </div>
-            <div className="text-[12px] text-[hsl(var(--blue-900))]/60 mb-2">{deal.location} · {deal.rooms}</div>
-            <div className="text-[12px] text-[hsl(var(--blue-900))]/50 mb-2">{deal.amenities}</div>
+            <div className="text-[12px] text-muted-foreground mb-2">{deal.location} · {deal.rooms}</div>
+            <div className="text-[12px] text-muted-foreground mb-2">{deal.amenities}</div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 line-through">₹{deal.original.toLocaleString('en-IN')}/night</span>
-                <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-[hsl(var(--blue-900))]/50">/night</span></div>
+                <span className="text-[12px] text-muted-foreground line-through">₹{deal.original.toLocaleString('en-IN')}/night</span>
+                <div className="text-[20px] font-display font-bold text-[hsl(var(--blue-900))]">₹{deal.price.toLocaleString('en-IN')}<span className="text-[12px] font-normal text-muted-foreground">/night</span></div>
               </div>
-              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[12px] font-bold hover:bg-[hsl(var(--red-600))] transition-colors active:bg-[hsl(var(--accent))]">
-                <Phone className="w-3.5 h-3.5 text-white" /> Call
+              <a href={`tel:${BRAND.phoneRaw}`} onClick={(e) => e.stopPropagation()} className="inline-flex min-h-[40px] items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[hsl(var(--border))] bg-white text-[hsl(var(--blue-700))] text-[13px] font-semibold hover:bg-[hsl(var(--blue-50))] hover:border-[hsl(var(--blue-700))]/30 transition-colors">
+                <Phone className="w-3.5 h-3.5" aria-hidden="true" /> Call
               </a>
             </div>
           </>
@@ -159,21 +158,21 @@ function CategorySection({ category, deals }) {
   const Icon = category.icon;
 
   return (
-    <div className="py-8 sm:py-10 border-b border-black/5 last:border-0">
-      <div className="px-5 sm:px-8 mb-5">
+    <div className="py-6 sm:py-8">
+      <div className="px-4 sm:px-6 mb-5">
         <div className="flex items-center gap-2.5">
-          <div className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[hsl(var(--blue-700))] text-white">
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]">
             <Icon className="w-4 h-4" />
           </div>
-          <h3 className="text-[18px] sm:text-[22px] font-display font-extrabold text-[hsl(var(--blue-900))]">{category.label}</h3>
-          <span className="ml-auto text-[12px] text-[hsl(var(--blue-900))]/50 font-medium flex items-center gap-1">
-            Live deals <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <h3 className="text-[18px] sm:text-[20px] font-display font-semibold text-[hsl(var(--blue-900))]">{category.label}</h3>
+          <span className="ml-auto text-[12px] text-muted-foreground font-medium flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" /> Live deals
           </span>
         </div>
       </div>
 
-      <div className="px-5 sm:px-8">
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+      <div className="px-4 sm:px-6">
+        <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
           {deals.map((deal, i) => (
             <div key={deal.id} className="snap-start">
               <DealCard
@@ -192,53 +191,54 @@ export default function DealsSection() {
   const [activeTab, setActiveTab] = useState('flights');
 
   return (
-    <section className="relative py-12 sm:py-16 bg-[hsl(var(--soft-bg))]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+    <section className="relative py-16 md:py-24 bg-[hsl(var(--soft-bg))] border-y border-[hsl(var(--border))]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="mb-8">
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
-            <Sparkle className="w-3.5 h-3.5" />
-            Exclusive deals
+          <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-700))]">
+            Travel deals
           </div>
-          <h2 className="mt-3 text-[26px] sm:text-[36px] lg:text-[42px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            Flights, Hotels, Buses & <span className="text-[hsl(var(--accent))]">Car Rentals.</span>
+          <h2 className="mt-3 text-[28px] sm:text-[36px] leading-[1.15] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+            Flights, hotels, buses &amp; car rentals
           </h2>
-          <p className="mt-2 text-[14px] sm:text-[15px] text-[hsl(var(--blue-900))]/60 max-w-xl">
+          <p className="mt-3 text-[16px] leading-relaxed text-muted-foreground max-w-xl">
             Real-time deals from top providers. Tap to call our travel desk for instant booking.
           </p>
         </Reveal>
 
-        <div className="flex gap-2 mb-6 flex-wrap">
+        <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap" role="group" aria-label="Deal categories">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
               <button
                 key={cat.id}
+                type="button"
+                aria-pressed={activeTab === cat.id}
                 onClick={() => setActiveTab(cat.id)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-bold transition whitespace-nowrap ${
+                className={`inline-flex min-h-[44px] items-center gap-2 px-4 py-2.5 rounded-full text-[14px] font-semibold transition-colors duration-200 whitespace-nowrap shrink-0 border ${
                   activeTab === cat.id
-                    ? 'bg-[hsl(var(--blue-700))] text-white'
-                    : 'bg-white text-[hsl(var(--blue-900))]/60 border border-black/10 hover:border-black/20'
+                    ? 'bg-[hsl(var(--blue-900))] border-[hsl(var(--blue-900))] text-white'
+                    : 'bg-white text-muted-foreground border-[hsl(var(--border))] hover:text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-900))]/30'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4" aria-hidden="true" />
                 {cat.label}
               </button>
             );
           })}
         </div>
 
-        <div className="rounded-2xl bg-white border border-black/8 shadow-sm">
+        <div className="rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm">
           {CATEGORIES.filter((c) => c.id === activeTab).map((cat) => (
             <CategorySection key={cat.id} category={cat} deals={DEALS[cat.id]} />
           ))}
         </div>
 
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center">
           <a
             href={`tel:${BRAND.phoneRaw}`}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[hsl(var(--blue-700))] text-white text-[14px] font-bold hover:bg-[hsl(var(--blue-800))] transition-colors"
+            className="inline-flex min-h-[44px] items-center gap-2 px-5 py-3 rounded-xl bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] text-[14px] font-semibold hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))] transition-colors"
           >
-            <Phone className="w-4 h-4" />
+            <Phone className="w-4 h-4 text-[hsl(var(--blue-700))]" aria-hidden="true" />
             Call for all deals · {BRAND.phone}
           </a>
         </div>

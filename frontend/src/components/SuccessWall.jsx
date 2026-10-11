@@ -37,7 +37,7 @@ const TESTIMONIALS = [
     year: '2026',
     comment: 'The application portal is a game changer. No traditional agent gives you this level of control and transparency. Handed in my CoS, visa approved in under a month.',
     avatarInitials: 'VS',
-    stampColor: 'rgba(10, 44, 138, 0.8)', // UK Royal Blue
+    stampColor: 'rgba(37, 99, 235, 0.8)', // UK Royal Blue
   },
   {
     id: 4,
@@ -142,7 +142,7 @@ export default function SuccessWall() {
         
         {/* Title */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <ShieldCheck className="w-3.5 h-3.5" /> Success Wall
           </div>
           <h2 className="font-display font-extrabold text-[28px] sm:text-[40px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">

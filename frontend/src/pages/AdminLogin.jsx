@@ -44,7 +44,7 @@ export default function AdminLogin() {
       footer={
         <>
           New admin?{' '}
-          <Link to="/admin/signup" className="text-[hsl(var(--accent))] font-bold hover:underline" data-testid="admin-goto-signup">
+          <Link to="/admin/signup" className="text-[hsl(var(--blue-700))] font-semibold hover:underline" data-testid="admin-goto-signup">
             Create an account
           </Link>
         </>
@@ -58,7 +58,7 @@ export default function AdminLogin() {
           {busy ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Sign in to admin'}
         </PrimaryButton>
         <div className="text-center">
-          <Link to="/admin/forgot-password" className="text-[12.5px] text-slate-400 hover:text-slate-200" data-testid="admin-goto-forgot">
+          <Link to="/admin/forgot-password" className="text-[14px] font-medium text-[hsl(var(--blue-700))] hover:underline" data-testid="admin-goto-forgot">
             Forgot your password?
           </Link>
         </div>

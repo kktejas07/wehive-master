@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Grid2X2, Map as MapIcon, Sparkle, Loader2, Compass, Search } from 'lucide-react';
+import { Grid2X2, Map as MapIcon, Compass, Search } from 'lucide-react';
 import { COUNTRIES } from '../data/mock';
 import { API } from '../context/AuthContext';
 import { landmarkFor } from '../lib/landmarks';
@@ -91,87 +91,92 @@ function CountryCard({ c, index = 0 }) {
     >
       <Link to={isNoVisa ? `/holiday/${c.id}` : `/visa/${c.id}`} className="group block card-lift">
         <motion.article
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.25 }}
-          className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))]"
+          whileHover={{ y: -2 }}
+          transition={{ duration: 0.2 }}
+          className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))] shadow-sm group-hover:shadow-md transition-shadow duration-200"
         >
           {cardImage ? (
             <img decoding="async"
               src={cardImage}
               alt={c.name}
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-[1.06]"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]" />
+            <div className="absolute inset-0 bg-[hsl(var(--blue-900))]" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/90 via-[#0F172A]/35 to-transparent" />
 
         {/* Visa type badges - top */}
         {!isNoVisa && types.length > 0 && (
           <div className="absolute top-3 left-3 right-3 flex flex-wrap gap-1.5">
-            {types.slice(0, 3).map((t) => (
+            {types.slice(0, 3).map((t, ti) => (
               <span
                 key={`${c.id}-${t}`}
-                className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/90 backdrop-blur text-[12px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--blue-900))]"
+                className={`${ti === 2 ? 'hidden sm:inline-flex' : 'inline-flex'} items-center px-2 py-0.5 rounded-full bg-white/95 text-[12px] uppercase tracking-[0.08em] font-semibold text-[hsl(var(--blue-900))]`}
               >
                 {t}
               </span>
             ))}
+            {types.length > 2 && (
+              <span className="inline-flex sm:hidden items-center px-2 py-0.5 rounded-full bg-white/95 text-[12px] font-semibold text-muted-foreground">
+                +{types.length - 2}
+              </span>
+            )}
             {types.length > 3 && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/90 backdrop-blur text-[12px] font-bold text-[hsl(var(--blue-900))]/60">
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-white/95 text-[12px] font-semibold text-muted-foreground">
                 +{types.length - 3}
               </span>
             )}
           </div>
         )}
         {isNoVisa && (
-          <div className="absolute top-3 left-3 inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[12px] uppercase tracking-[0.14em] font-bold">
+          <div className="absolute top-3 left-3 inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/95 text-emerald-700 text-[12px] uppercase tracking-[0.08em] font-semibold">
             Visa-free
           </div>
         )}
 
         <div className="absolute left-0 right-0 bottom-0 p-3 sm:p-4 text-white">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[12px] sm:text-[14px] font-display font-bold tracking-tight truncate">
+            <span className="text-[14px] sm:text-[15px] font-display font-semibold truncate">
               {c.name}
             </span>
             <span className="text-[16px] sm:text-[18px]">{c.flag}</span>
           </div>
 
           {isNoVisa ? (
-            <div className="text-[12px] uppercase tracking-[0.14em] text-white/80 font-bold">
+            <div className="text-[12px] uppercase tracking-[0.08em] text-white/80 font-semibold">
               No Visa Required
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-3 gap-2 mt-2 text-[12px] sm:text-[12px] uppercase tracking-[0.08em] text-white/60 font-bold">
-                <div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2 text-[12px] uppercase tracking-[0.08em] text-white/70 font-semibold">
+                <div className="hidden sm:block">
                   <div>Type</div>
-                  <div className="text-white text-[12px] sm:text-[12px] font-bold mt-0.5 truncate">
+                  <div className="text-white text-[12px] font-semibold mt-0.5 truncate">
                     {types[0] || 'E-VISA'}
                   </div>
                 </div>
-                <div className="text-center">
+                <div className="sm:text-center">
                   <div>Valid</div>
-                  <div className="text-white text-[12px] sm:text-[12px] font-bold mt-0.5 truncate">
+                  <div className="text-white text-[12px] font-semibold mt-0.5 truncate">
                     {validity}
                   </div>
                 </div>
                 <div className="text-right">
                   <div>Fees</div>
-                  <div className="text-white text-[12px] sm:text-[12px] font-bold mt-0.5 truncate">
+                  <div className="text-white text-[12px] font-semibold mt-0.5 truncate">
                     ${fees_usd || c.fees}
                   </div>
                 </div>
               </div>
               <div className="mt-2 pt-2 border-t border-white/10">
-                <div className="text-[12px] uppercase tracking-[0.08em] text-white/50 mb-1">Documents:</div>
+                <div className="text-[12px] uppercase tracking-[0.08em] text-white/70 mb-1">Documents:</div>
                 <div className="text-[12px] text-white/80 truncate">
                   {Array.isArray(documents) ? documents.slice(0, 3).join(', ') : documents}
                 </div>
               </div>
-              <div className="mt-2 text-[12px] text-[hsl(var(--accent))] font-bold cursor-pointer hover:underline">
+              <div className="mt-2 text-[12px] text-white font-semibold underline-offset-2 group-hover:underline">
                 Get emergency assistance →
               </div>
             </>
@@ -180,10 +185,10 @@ function CountryCard({ c, index = 0 }) {
       </motion.article>
       <div className="mt-3 px-1 flex items-center justify-between">
         <div>
-          <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
+          <div className="text-[12px] text-muted-foreground">
             {isNoVisa ? 'Holiday planner' : 'Standard delivery'}
           </div>
-          <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] inline-flex items-center gap-2">
+          <div className="text-[14px] font-semibold text-[hsl(var(--blue-900))] inline-flex items-center gap-2">
             {isNoVisa ? `${c.holiday_default_days || 7} days suggested` : `${delivery.standard_days ?? 7} days`}
             {!isNoVisa && delivery.same_day && (
               <DeliveryCountdown compact deliveryDays={delivery.standard_days ?? 7} />
@@ -205,7 +210,7 @@ function CountryCard({ c, index = 0 }) {
                 navigate(`/holiday/${c.id}`);
               }
             }}
-            className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[12px] font-bold transition cursor-pointer"
+            className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[12px] font-semibold transition-colors cursor-pointer"
           >
             <Compass className="w-3 h-3" />
             Plan
@@ -219,19 +224,19 @@ function CountryCard({ c, index = 0 }) {
 
 function MapPlaceholder({ items }) {
   return (
-    <div className="relative aspect-[16/9] rounded-3xl overflow-hidden border border-black/5 bg-[hsl(var(--blue-50))]">
+    <div className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-[hsl(var(--border))] bg-[hsl(var(--blue-50))]">
       <img loading="lazy" decoding="async"
         src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1600&q=80"
         alt="World map"
         className="absolute inset-0 h-full w-full object-cover opacity-90"
       />
-      <div className="absolute inset-0 bg-gradient-to-tr from-[hsl(var(--blue-900))]/30 to-transparent" />
+      <div className="absolute inset-0 bg-[hsl(var(--blue-900))]/15" />
       <div className="absolute bottom-6 left-6 right-6 flex flex-wrap items-center gap-2">
         {items.slice(0, 10).map((c) => (
           <Link
             key={c.id}
             to={c.no_visa ? `/holiday/${c.id}` : `/visa/${c.id}`}
-            className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-[12.5px] font-bold text-[hsl(var(--blue-900))] hover:bg-white shadow-sm"
+            className="inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1.5 text-[13px] font-semibold text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] shadow-sm transition-colors"
           >
             <span>{c.flag}</span>
             <span>{c.name}</span>
@@ -337,43 +342,45 @@ export default function CountryGrid({ filters }) {
   };
 
   return (
-    <section id="countries" className="relative py-16 sm:py-24 lg:py-28 bg-white">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+    <section id="countries" className="relative py-16 md:py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="flex items-end justify-between flex-wrap gap-6 mb-8 sm:mb-10">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
-              <Sparkle className="w-3.5 h-3.5" />
+            <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-700))]">
               {showEvents ? 'Events & festivals' : showHolidays ? 'Visa-free holidays' : 'Popular destinations'}
             </div>
-            <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[48px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <h2 className="mt-3 text-[28px] sm:text-[36px] leading-[1.15] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
               {showEvents ? (
-                <>Travel to the world&rsquo;s{' '}<span className="text-[hsl(var(--accent))]">biggest moments.</span></>
+                <>Travel to the world&rsquo;s biggest moments.</>
               ) : showHolidays ? (
-                <>Pack a bag.{' '}<span className="text-[hsl(var(--accent))]">Skip the visa.</span></>
+                <>Pack a bag. Skip the visa.</>
               ) : (
-                <>A world of visas,{' '}<span className="text-[hsl(var(--accent))]">in one place.</span></>
+                <>A world of visas, in one place.</>
               )}
             </h2>
-            <p className="mt-3 text-[14.5px] sm:text-[15.5px] text-[hsl(var(--blue-900))]/65 max-w-xl">
+            <p className="mt-3 text-[16px] leading-relaxed text-muted-foreground max-w-xl">
               {showEvents
                 ? 'Visa packages timed to coincide with the world\'s great festivals, sporting events and concerts. (Coming soon)'
                 : showHolidays
                   ? 'Destinations Indian passport holders can enter visa-free or with a visa-on-arrival. Tap a country to see the holiday plan.'
                   : 'Real ETA. Real fees. No hidden charges. Tap a country to see everything you need before you apply.'}
             </p>
-            <div className="mt-4 relative w-full max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/40" />
+            <div className="mt-6 relative w-full max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <input
                 type="text"
                 placeholder="Search country..."
+                aria-label="Search countries"
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-black/10 bg-white text-[14px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 focus:outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 transition"
+                className="w-full h-11 pl-10 pr-10 rounded-xl border border-[hsl(var(--border))] bg-white text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 focus:outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 transition-colors"
               />
               {search && (
                 <button
+                  type="button"
                   onClick={() => { setSearch(''); setPage(1); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-900))] text-[16px]"
+                  aria-label="Clear search"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-[hsl(var(--blue-900))] text-[18px]"
                 >
                   ×
                 </button>
@@ -382,23 +389,27 @@ export default function CountryGrid({ filters }) {
           </div>
 
           {!showEvents && (
-            <div className="inline-flex items-center rounded-full bg-white border border-black/10 p-1">
+            <div className="inline-flex items-center rounded-xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-1" role="group" aria-label="View mode">
               <button
-                onClick={() => setView('grid')}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-bold transition ${
+                type="button"
+              onClick={() => setView('grid')}
+              aria-pressed={view === 'grid'}
+                className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-4 py-2 text-[14px] font-semibold transition-colors duration-200 ${
                   view === 'grid'
-                    ? 'bg-[hsl(var(--blue-700))] text-white'
-                    : 'text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-900))]'
+                    ? 'bg-white text-[hsl(var(--blue-700))] shadow-sm'
+                    : 'text-muted-foreground hover:text-[hsl(var(--blue-900))]'
                 }`}
               >
                 <Grid2X2 className="w-3.5 h-3.5" /> Grid
               </button>
               <button
-                onClick={() => setView('map')}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-bold transition ${
+                type="button"
+              onClick={() => setView('map')}
+              aria-pressed={view === 'map'}
+                className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-4 py-2 text-[14px] font-semibold transition-colors duration-200 ${
                   view === 'map'
-                    ? 'bg-[hsl(var(--blue-700))] text-white'
-                    : 'text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-900))]'
+                    ? 'bg-white text-[hsl(var(--blue-700))] shadow-sm'
+                    : 'text-muted-foreground hover:text-[hsl(var(--blue-900))]'
                 }`}
               >
                 <MapIcon className="w-3.5 h-3.5" /> Map
@@ -415,14 +426,14 @@ export default function CountryGrid({ filters }) {
           <EmptyResults />
         ) : view === 'grid' ? (
           <>
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
               {displayedItems.map((c, i) => (
                 <CountryCard key={c.id} c={c} index={i} />
               ))}
             </div>
             {totalPages > 1 && (
               <div className="mt-8 flex flex-col items-center gap-3">
-                <span className="text-[13px] text-[hsl(var(--blue-900))]/55">
+                <span className="text-[13px] text-muted-foreground">
                   {search.trim() ? `${totalCount} result${totalCount !== 1 ? 's' : ''} for "${search}"` : `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, search.trim() ? totalCount : allItems.length)} of ${search.trim() ? totalCount : allItems.length} countries`}
                 </span>
                 <Pagination>
@@ -436,14 +447,14 @@ export default function CountryGrid({ filters }) {
                     {renderPageNumbers().map((p, idx) =>
                       p === '...' ? (
                         <PaginationItem key={`ellipsis-${idx}`}>
-                          <span className="flex h-9 w-9 items-center justify-center text-[hsl(var(--blue-900))]/40">…</span>
+                          <span className="flex h-9 w-9 items-center justify-center text-muted-foreground">…</span>
                         </PaginationItem>
                       ) : (
                         <PaginationItem key={p}>
                           <PaginationLink
                             isActive={page === p}
                             onClick={() => setPage(p)}
-                            className={`cursor-pointer ${page === p ? '' : 'text-[hsl(var(--blue-900))]/65'}`}
+                            className={`cursor-pointer ${page === p ? 'border-[hsl(var(--blue-700))] text-[hsl(var(--blue-700))]' : 'text-muted-foreground'}`}
                           >
                             {p}
                           </PaginationLink>
@@ -471,11 +482,11 @@ export default function CountryGrid({ filters }) {
 
 function EmptyResults() {
   return (
-    <div className="rounded-3xl bg-[hsl(var(--soft-bg))] border border-dashed border-black/15 p-14 text-center">
-      <div className="font-display font-extrabold text-[24px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+    <div className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-dashed border-[hsl(var(--border))] p-8 sm:p-14 text-center">
+      <div className="font-display font-bold text-[22px] tracking-[-0.01em] text-[hsl(var(--blue-900))]">
         No countries match these filters
       </div>
-      <p className="mt-2 text-[14.5px] text-[hsl(var(--blue-900))]/60 max-w-md mx-auto">
+      <p className="mt-2 text-[15px] text-muted-foreground max-w-md mx-auto">
         Try widening your visa type or delivery speed. Most travellers find what they need under <strong>Any Time</strong> + <strong>All Visa Types</strong>.
       </p>
     </div>
@@ -494,20 +505,20 @@ function EventsBoard() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {events.map((e) => (
-        <article key={e.id} className="group rounded-2xl overflow-hidden bg-white border border-black/5 card-lift">
+        <article key={e.id} className="group rounded-2xl overflow-hidden bg-white border border-[hsl(var(--border))] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition duration-200">
           <div className="relative aspect-[16/10] overflow-hidden">
-            <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
-            <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[12px] font-bold text-[hsl(var(--blue-900))]">
+            <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/50 to-transparent" />
+            <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-[12px] font-semibold text-[hsl(var(--blue-900))]">
               <span>{e.country.slice(0,2).toUpperCase()}</span> {e.city}
             </div>
           </div>
           <div className="p-5">
-            <div className="text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--accent))]">{e.date}</div>
-            <div className="mt-1 text-[18px] font-display font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+            <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-700))]">{e.date}</div>
+            <div className="mt-1 text-[18px] font-display font-bold tracking-[-0.01em] text-[hsl(var(--blue-900))]">
               {e.title}
             </div>
-            <div className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/55">{e.country}</div>
+            <div className="mt-1 text-[14px] text-muted-foreground">{e.country}</div>
           </div>
         </article>
       ))}

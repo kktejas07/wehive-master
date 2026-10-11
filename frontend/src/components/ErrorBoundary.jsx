@@ -31,11 +31,11 @@ export class ErrorBoundary extends Component {
       return (
         <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))] p-6">
           <div className="max-w-md w-full text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[hsl(var(--destructive))]/10">
-              <AlertTriangle className="w-10 h-10 text-[hsl(var(--destructive))]" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-red-50">
+              <AlertTriangle className="w-7 h-7 text-red-700" aria-hidden="true" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">
+              <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-[hsl(var(--foreground))]">
                 Something went wrong
               </h1>
               <p className="mt-2 text-[hsl(var(--muted-foreground))]">

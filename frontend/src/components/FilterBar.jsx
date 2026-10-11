@@ -43,35 +43,36 @@ function useOutsideClose(ref, onClose) {
   }, [ref, onClose]);
 }
 
-function Pop({ Icon, label, value, color, children }) {
+function Pop({ Icon, label, value, align = 'left', last = false, children }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   useOutsideClose(ref, () => setOpen(false));
+  const mobileAlign = align === 'right' ? 'right-0' : 'left-0';
+  const deskAlign = last ? 'sm:left-auto sm:right-0' : 'sm:left-0 sm:right-auto';
   return (
-    <div className="relative flex-shrink-0 min-w-[12rem] overflow-visible" ref={ref}>
+    <div className="relative min-w-0 sm:flex-1 overflow-visible" ref={ref}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex min-w-0 items-center gap-3 px-3 py-2 rounded-2xl hover:bg-[hsl(var(--blue-50))] transition text-left"
+        aria-expanded={open}
+        aria-haspopup="true"
+        className="flex w-full min-w-0 min-h-[52px] items-center gap-3 px-3 py-2 rounded-xl hover:bg-[hsl(var(--soft-bg))] transition-colors duration-200 text-left"
       >
-        <span
-          className="h-8 w-8 rounded-full inline-flex items-center justify-center shrink-0"
-          style={{ background: color }}
-        >
-          <Icon className="w-4 h-4 text-white" />
+        <span className="h-9 w-9 rounded-lg hidden sm:inline-flex items-center justify-center shrink-0 bg-[hsl(var(--blue-50))]">
+          <Icon className="w-4 h-4 text-[hsl(var(--blue-700))]" aria-hidden="true" />
         </span>
         <span className="flex min-w-0 flex-col items-start leading-tight">
-          <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
+          <span className="text-[12px] uppercase tracking-[0.1em] sm:tracking-[0.14em] font-semibold text-muted-foreground truncate max-w-full">
             {label}
           </span>
-          <span className="text-[13.5px] font-bold text-[hsl(var(--blue-900))] inline-flex min-w-0 items-center gap-1 truncate">
-            {value}
-            <ChevronDown className="w-3 h-3 text-[hsl(var(--blue-900))]/40" />
+          <span className="mt-0.5 text-[14px] font-semibold text-[hsl(var(--blue-900))] inline-flex max-w-full min-w-0 items-center gap-1">
+            <span className="truncate">{value}</span>
+            <ChevronDown className="w-3.5 h-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           </span>
         </span>
       </button>
       {open && (
-        <div className="absolute z-30 mt-2 left-0 sm:left-auto sm:right-0 w-[calc(100vw-2.5rem)] sm:w-[300px] rounded-2xl bg-white border border-black/5 shadow-[0_20px_50px_-25px_rgba(10,44,138,0.45)] p-2">
+        <div className={`absolute z-30 mt-2 ${mobileAlign} ${deskAlign} w-[calc(100vw-2.5rem)] max-w-[320px] sm:w-[300px] rounded-2xl bg-white border border-[hsl(var(--border))] shadow-lg p-2`}>
           {typeof children === 'function' ? children(() => setOpen(false)) : children}
         </div>
       )}
@@ -90,13 +91,13 @@ function OptionList({ options, value, onSelect, close }) {
               onSelect(o);
               close();
             }}
-            className={`w-full text-left px-3 py-2.5 rounded-xl hover:bg-[hsl(var(--blue-50))] transition flex flex-col ${
+            className={`w-full text-left px-3 py-2.5 rounded-xl hover:bg-[hsl(var(--soft-bg))] transition-colors flex flex-col ${
               value === o.label ? 'bg-[hsl(var(--blue-50))]' : ''
             }`}
           >
-            <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{o.label}</span>
+            <span className={`text-[14px] font-semibold ${value === o.label ? 'text-[hsl(var(--blue-700))]' : 'text-[hsl(var(--blue-900))]'}`}>{o.label}</span>
             {o.sub && (
-              <span className="text-[12px] text-[hsl(var(--blue-900))]/55">{o.sub}</span>
+              <span className="text-[12px] text-muted-foreground">{o.sub}</span>
             )}
           </button>
         </li>
@@ -112,27 +113,24 @@ function TabsBar({ value, onChange }) {
     { id: 'events',   label: 'Events',   Icon: Ticket },
   ];
   return (
-    <div className="flex justify-center gap-2">
+    <div className="flex justify-center gap-1 sm:gap-2" role="group" aria-label="Browse mode">
       {tabs.map((t) => {
         const active = value === t.id;
         const Icon = t.Icon;
         return (
           <button
             key={t.id}
+            type="button"
             onClick={() => onChange(t.id)}
-            className={`relative inline-flex flex-col items-center gap-1 px-5 py-2 transition ${
-              active ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/45 hover:text-[hsl(var(--blue-900))]/70'
+            aria-pressed={active}
+            className={`relative inline-flex min-h-[44px] items-center gap-2 rounded-xl px-4 py-2 text-[14px] font-semibold transition-colors duration-200 ${
+              active
+                ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'
+                : 'text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--soft-bg))]'
             }`}
           >
-            <span
-              className={`h-10 w-10 rounded-xl inline-flex items-center justify-center transition ${
-                active ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]' : ''
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-            </span>
-            <span className="text-[12px] uppercase tracking-[0.14em] font-bold">{t.label}</span>
-            {active && <span className="absolute -bottom-1 h-[3px] w-8 bg-[hsl(var(--accent))] rounded-full" />}
+            <Icon className="w-4 h-4" aria-hidden="true" />
+            <span>{t.label}</span>
           </button>
         );
       })}
@@ -144,10 +142,10 @@ export default function FilterBar({ value, onChange }) {
   const v = value || DEFAULT_FILTERS;
   const set = (patch) => onChange({ ...v, ...patch });
   return (
-    <div className="flex flex-col items-center gap-5">
+    <div className="flex flex-col items-center gap-4">
       <TabsBar value={v.view} onChange={(view) => set({ view })} />
-      <div className="w-full max-w-4xl rounded-full bg-white border border-black/5 shadow-[0_20px_50px_-30px_rgba(10,44,138,0.4)] px-2 py-1.5 flex items-center gap-2 overflow-visible whitespace-nowrap sm:justify-between relative z-50">
-        <Pop Icon={Zap} label="Visa delivery" value={v.delivery} color="#22c55e">
+      <div className="w-full max-w-4xl rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm p-1.5 grid grid-cols-2 gap-1 sm:flex sm:items-center sm:gap-1 overflow-visible relative z-50">
+        <Pop Icon={Zap} label="Visa delivery" value={v.delivery}>
           {(close) => (
             <OptionList
               options={DELIVERY}
@@ -157,8 +155,8 @@ export default function FilterBar({ value, onChange }) {
             />
           )}
         </Pop>
-        <span className="hidden sm:block w-px h-7 bg-black/8" />
-        <Pop Icon={FileText} label="Type" value={v.visa_type} color="#0a2c8a">
+        <span className="hidden sm:block w-px h-8 shrink-0 bg-[hsl(var(--border))]" aria-hidden="true" />
+        <Pop Icon={FileText} label="Type" value={v.visa_type} align="right">
           {(close) => (
             <OptionList
               options={VISA_TYPES}
@@ -168,8 +166,8 @@ export default function FilterBar({ value, onChange }) {
             />
           )}
         </Pop>
-        <span className="hidden sm:block w-px h-7 bg-black/8" />
-        <Pop Icon={FolderOpen} label="Documents" value={v.documents} color="#f59e0b">
+        <span className="hidden sm:block w-px h-8 shrink-0 bg-[hsl(var(--border))]" aria-hidden="true" />
+        <Pop Icon={FolderOpen} label="Documents" value={v.documents}>
           {(close) => (
             <OptionList
               options={DOCS}
@@ -179,12 +177,13 @@ export default function FilterBar({ value, onChange }) {
             />
           )}
         </Pop>
-        <span className="hidden sm:block w-px h-7 bg-black/8" />
+        <span className="hidden sm:block w-px h-8 shrink-0 bg-[hsl(var(--border))]" aria-hidden="true" />
         <Pop
           Icon={Sparkles}
           label="Holidays"
           value={v.travel_date ? new Date(v.travel_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'Select Dates'}
-          color="#ec4899"
+          align="right"
+          last
         >
           {(close) => (
             <div className="p-1">
@@ -198,14 +197,15 @@ export default function FilterBar({ value, onChange }) {
                 initialFocus
               />
               {v.travel_date && (
-                <div className="flex items-center justify-between px-2 py-2 border-t border-black/5">
-                  <div className="text-[12px] text-[hsl(var(--blue-900))]/65 inline-flex items-center gap-1">
+                <div className="flex items-center justify-between px-2 py-2 border-t border-[hsl(var(--border))]">
+                  <div className="text-[12px] text-muted-foreground inline-flex items-center gap-1">
                     <CalIcon className="w-3.5 h-3.5" />
                     {new Date(v.travel_date).toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
                   </div>
                   <button
+                    type="button"
                     onClick={() => set({ travel_date: null })}
-                    className="text-[12px] font-bold text-[hsl(var(--accent))] hover:underline"
+                    className="min-h-[32px] px-2 text-[13px] font-semibold text-[hsl(var(--blue-700))] hover:underline"
                   >
                     Clear
                   </button>

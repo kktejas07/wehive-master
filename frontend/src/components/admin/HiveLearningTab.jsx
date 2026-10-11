@@ -20,12 +20,12 @@ const AGENT_OPTIONS = [
 function StatCard({ label, value, hint, Icon }) {
   return (
     <div className="rounded-2xl bg-[#111632] border border-white/5 p-4">
-      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400">
         {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
         {label}
       </div>
-      <div className="mt-2 text-[26px] font-extrabold text-white tracking-tight">{value}</div>
-      {hint ? <div className="mt-1 text-[11.5px] text-slate-500">{hint}</div> : null}
+      <div className="mt-2 text-[26px] font-bold text-white tracking-tight">{value}</div>
+      {hint ? <div className="mt-1 text-[11.5px] text-slate-400">{hint}</div> : null}
     </div>
   );
 }
@@ -39,7 +39,7 @@ function Pill({ children, tone = 'slate' }) {
     amber: 'bg-amber-500/10 text-amber-300 border-amber-400/20',
   };
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10.5px] font-bold ${tones[tone] || tones.slate}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold ${tones[tone] || tones.slate}`}>
       {children}
     </span>
   );
@@ -56,7 +56,7 @@ function ActionButton({ onClick, loading, children, Icon, tone = 'navy', disable
     <button
       onClick={onClick}
       disabled={loading || disabled}
-      className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-[12.5px] font-bold transition disabled:opacity-50 ${tones[tone]}`}
+      className={`inline-flex items-center gap-2 rounded-lg border px-3.5 h-10 text-[12.5px] font-semibold transition disabled:opacity-50 ${tones[tone]}`}
     >
       {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : Icon ? <Icon className="w-3.5 h-3.5" /> : null}
       {children}
@@ -223,7 +223,7 @@ export default function HiveLearningTab() {
             <select
               value={days}
               onChange={(e) => setDays(parseInt(e.target.value, 10) || 7)}
-              className="h-9 rounded-full bg-[#111632] border border-white/10 px-3 text-[12px] text-slate-200 outline-none"
+              className="h-10 rounded-lg bg-[#111632] border border-white/10 px-3 text-[12px] text-slate-200 outline-none"
             >
               {[1, 3, 7, 14, 30].map(d => <option key={d} value={d}>Last {d} day{d > 1 ? 's' : ''}</option>)}
             </select>
@@ -305,7 +305,7 @@ export default function HiveLearningTab() {
                     <li key={a.agent_id} className="flex items-center gap-2">
                       <Pill tone="green">v{a.version}</Pill>
                       <span className="font-mono text-slate-300">{a.agent_id}</span>
-                      <span className="text-slate-500">delta={a.delta}</span>
+                      <span className="text-slate-400">delta={a.delta}</span>
                     </li>
                   ))}
                 </ul>
@@ -381,7 +381,7 @@ export default function HiveLearningTab() {
                       <li key={g.label} className="rounded-lg bg-red-500/5 border border-red-400/20 p-2">
                         <div className="font-bold text-red-200">{g.label}</div>
                         <div className="text-slate-300">{g.why_weak}</div>
-                        {g.evidence && <div className="text-slate-500 text-[11px]">{g.evidence}</div>}
+                        {g.evidence && <div className="text-slate-400 text-[11px]">{g.evidence}</div>}
                       </li>
                     ))}
                   </ul>
@@ -395,7 +395,7 @@ export default function HiveLearningTab() {
                       <li key={t.label} className="rounded-lg bg-amber-500/5 border border-amber-400/20 p-2">
                         <div className="font-bold text-amber-200">{t.label}</div>
                         <div className="text-slate-300">{t.description}</div>
-                        {t.suggested_tool && <div className="text-slate-500 text-[11px]">→ {t.suggested_tool}</div>}
+                        {t.suggested_tool && <div className="text-slate-400 text-[11px]">→ {t.suggested_tool}</div>}
                       </li>
                     ))}
                   </ul>
@@ -416,7 +416,7 @@ export default function HiveLearningTab() {
               <select
                 value={proposeAgent}
                 onChange={(e) => setProposeAgent(e.target.value)}
-                className="h-9 rounded-full bg-[#0a0e1e] border border-white/10 px-3 text-[12px] text-slate-200 outline-none"
+                className="h-10 rounded-lg bg-[#0a0e1e] border border-white/10 px-3 text-[12px] text-slate-200 outline-none"
               >
                 {AGENT_OPTIONS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
               </select>
@@ -492,7 +492,7 @@ export default function HiveLearningTab() {
                   </div>
                   <div className="text-slate-300">{p.sub}</div>
                   <div className="text-slate-400 italic mt-1">"{p.sample_question}"</div>
-                  {p.rationale && <div className="text-slate-500 text-[11px] mt-1">{p.rationale}</div>}
+                  {p.rationale && <div className="text-slate-400 text-[11px] mt-1">{p.rationale}</div>}
                 </li>
               ))}
             </ul>
@@ -553,7 +553,7 @@ export default function HiveLearningTab() {
                     <Pill tone="navy">{f.agent_id}</Pill>
                     {f.tool_calls?.map(t => <Pill key={t} tone="slate">{t}</Pill>)}
                     {f.error && <Pill tone="red">error</Pill>}
-                    <span className="ml-auto text-[10.5px] text-slate-500 inline-flex items-center gap-1">
+                    <span className="ml-auto text-[11px] text-slate-400 inline-flex items-center gap-1">
                       <Clock className="w-3 h-3" />{new Date(f.ts).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -582,7 +582,7 @@ export default function HiveLearningTab() {
                     <Pill tone={p.payload?.applied ? 'green' : 'slate'}>{p.kind}</Pill>
                     {p.payload?.agent_id && <Pill tone="navy">{p.payload.agent_id}</Pill>}
                     {p.payload?.version != null && <Pill tone="slate">v{p.payload.version}</Pill>}
-                    <span className="ml-auto text-[10.5px] text-slate-500 inline-flex items-center gap-1">
+                    <span className="ml-auto text-[11px] text-slate-400 inline-flex items-center gap-1">
                       <Clock className="w-3 h-3" />{new Date(p.ts).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>

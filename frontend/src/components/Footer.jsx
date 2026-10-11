@@ -2,17 +2,22 @@ import { Link } from 'react-router-dom';
 import { Twitter, Instagram, Linkedin, Youtube, Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { BRAND, FOOTER_COLS } from '../data/mock';
 
+// Flag emojis in the link data read as decoration — strip them for the minimal footer.
+const stripFlags = (label) => label.replace(/\s*(?:[\u{1F1E6}-\u{1F1FF}]{2})/gu, '');
+
+const headingClass = 'text-[12px] uppercase tracking-[0.14em] text-white/60 font-semibold mb-4';
+
 function FooterColumn({ col }) {
   return (
     <div>
-      <div className="text-[12px] uppercase tracking-[0.16em] text-white/55 font-bold mb-4">
+      <h2 className={`font-sans ${headingClass}`}>
         {col.title}
-      </div>
-      <ul className="space-y-3">
+      </h2>
+      <ul className="space-y-2.5">
         {col.links.map((link) => (
           <li key={link.id}>
-            <Link to={link.to} className="text-[14px] text-white/75 hover:text-white transition-colors">
-              {link.label}
+            <Link to={link.to} className="text-[14px] leading-6 text-white/80 hover:text-white transition-colors duration-200">
+              {stripFlags(link.label)}
             </Link>
           </li>
         ))}
@@ -23,10 +28,10 @@ function FooterColumn({ col }) {
 
 function FooterBrand() {
   const socials = [
-    { id: 'tw', Icon: Twitter, href: 'https://twitter.com/wehive' },
-    { id: 'ig', Icon: Instagram, href: 'https://instagram.com/wehive' },
-    { id: 'li', Icon: Linkedin, href: 'https://linkedin.com/company/wehive' },
-    { id: 'yt', Icon: Youtube, href: 'https://youtube.com/@wehive' },
+    { id: 'tw', Icon: Twitter, href: 'https://twitter.com/wehive', label: 'We Hive on X (Twitter)' },
+    { id: 'ig', Icon: Instagram, href: 'https://instagram.com/wehive', label: 'We Hive on Instagram' },
+    { id: 'li', Icon: Linkedin, href: 'https://linkedin.com/company/wehive', label: 'We Hive on LinkedIn' },
+    { id: 'yt', Icon: Youtube, href: 'https://youtube.com/@wehive', label: 'We Hive on YouTube' },
   ];
   return (
     <div className="lg:col-span-4">
@@ -34,25 +39,25 @@ function FooterBrand() {
         <img
           src={BRAND.logoWhite}
           alt={BRAND.name}
-          className="h-16 sm:h-20 w-auto select-none brightness-0 invert"
+          className="w-[144px] h-[48px] object-cover select-none brightness-0 invert"
           draggable={false}
         />
       </div>
-      <p className="mt-5 text-white/65 text-[15px] leading-relaxed max-w-sm">
+      <p className="mt-5 text-white/70 text-[15px] leading-relaxed max-w-sm">
         At {BRAND.name} Immigration Services, we turn aspirations into international opportunities.
         Expert guidance, transparent processes, and a smooth journey from start to finish.
       </p>
-      <div className="mt-7 flex items-center gap-3">
-        {socials.map(({ id, Icon, href }) => (
+      <div className="mt-6 flex items-center gap-2">
+        {socials.map(({ id, Icon, href, label }) => (
           <a
             key={id}
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="h-10 w-10 inline-flex items-center justify-center rounded-full border border-white/15 hover:border-white/40 hover:bg-white/5 transition-colors"
-            aria-label="social"
+            className="h-11 w-11 inline-flex items-center justify-center rounded-full border border-white/15 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/5 transition-colors duration-200"
+            aria-label={label}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className="w-4 h-4" aria-hidden="true" />
           </a>
         ))}
       </div>
@@ -69,13 +74,13 @@ function FooterContact() {
   ];
   return (
     <div>
-      <div className="text-[12px] uppercase tracking-[0.16em] text-white/55 font-bold mb-4">Get in touch</div>
+      <h2 className={`font-sans ${headingClass}`}>Get in touch</h2>
       <ul className="space-y-3">
         {items.map(({ id, Icon, label, href }) => (
-          <li key={id} className="flex items-start gap-3 text-[14px] text-white/80">
-            <Icon className="w-4 h-4 mt-0.5 text-[hsl(var(--accent))] shrink-0" />
+          <li key={id} className="flex items-start gap-3 text-[14px] leading-6 text-white/80">
+            <Icon aria-hidden="true" className="w-4 h-4 mt-1 text-white/60 shrink-0" />
             {href ? (
-              <a href={href} className="hover:text-white transition-colors">{label}</a>
+              <a href={href} className="hover:text-white transition-colors duration-200 break-words">{label}</a>
             ) : (
               <span>{label}</span>
             )}
@@ -88,15 +93,11 @@ function FooterContact() {
 
 export default function Footer() {
   return (
-    <footer className="relative bg-[hsl(var(--blue-900))] text-white overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none opacity-[0.07]" style={{
-        backgroundImage: 'radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px)',
-        backgroundSize: '22px 22px',
-      }} />
-      <div className="relative max-w-7xl mx-auto px-5 sm:px-8 pt-20 pb-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16">
+    <footer className="relative bg-[hsl(var(--blue-900))] text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 pb-24 sm:pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 mb-12 md:mb-16">
           <FooterBrand />
-          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-10">
+          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
             {FOOTER_COLS.slice(0, 3).map((col) => (
               <FooterColumn key={col.id} col={col} />
             ))}
@@ -105,12 +106,12 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-8 border-t border-white/10">
-          <p className="text-[13px] text-white/50">
+          <p className="text-[13px] text-white/60">
             © {new Date().getFullYear()} {BRAND.name} Immigration Services. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-[12px] text-white/55">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-white/60">
             <span className="inline-flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
               All systems normal
             </span>
             <span>256-bit SSL · SOC 2 · GDPR · PCI</span>

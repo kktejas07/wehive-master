@@ -763,7 +763,7 @@ export default function USVisaSlots() {
         <main className="pt-28 pb-16 flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--blue-700))] mx-auto mb-3" />
-            <p className="text-[14px] text-[hsl(var(--blue-900))]/50">Loading slot data...</p>
+            <p className="text-[14px] text-muted-foreground">Loading slot data...</p>
           </div>
         </main>
         <Footer />
@@ -776,39 +776,39 @@ export default function USVisaSlots() {
       <Navbar />
       <main className="pt-28 pb-16">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
-          <div className="flex items-center gap-1.5 text-[13px] text-[hsl(var(--blue-900))]/55 mb-6">
+          <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mb-6">
             <Link to="/" className="hover:text-[hsl(var(--blue-700))]">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="font-bold text-[hsl(var(--blue-900))]">{meta.label} Visa Slot Tracker</span>
           </div>
 
           <div className="flex justify-center mb-6">
-            <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[hsl(var(--accent))] border-2 border-[hsl(var(--accent))] text-[13px] font-extrabold text-white uppercase tracking-[0.15em] animate-pulse shadow-[0_0_20px_rgba(var(--accent-hsl),0.3)]">
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[12px] font-semibold text-amber-800 uppercase tracking-[0.14em]">
               <Clock className="w-4 h-4" />
               Hurry — Slots Fill Fast!
             </span>
           </div>
 
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <RefreshCw className="w-3.5 h-3.5" /> Live Wait Times
             </div>
-            <h1 className="font-display font-extrabold text-[32px] sm:text-[42px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <h1 className="font-display font-bold text-[32px] sm:text-[44px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               {meta.label} Visa Appointment Slots
             </h1>
-            <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/55 max-w-xl mx-auto">
+            <p className="mt-2 text-[15px] text-muted-foreground max-w-xl mx-auto">
               Current wait times for {meta.adj} visa appointments across VFS centres. Choose your destination above.
             </p>
           </div>
 
           {/* Status Bar */}
-          <div className="rounded-2xl bg-white border border-black/5 p-4 mb-8 flex flex-wrap items-center justify-between gap-3">
+          <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-4 mb-8 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                 <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Live</span>
               </div>
-              <div className="text-[12px] text-[hsl(var(--blue-900))]/50">
+              <div className="text-[12px] text-muted-foreground">
                 Wait times refreshed regularly
               </div>
             </div>
@@ -816,7 +816,7 @@ export default function USVisaSlots() {
               onClick={handleRefresh}
               disabled={refreshing}
               variant="outline"
-              className="h-9 rounded-full text-[12px] font-bold gap-1.5"
+              className="h-10 rounded-xl text-[13px] font-semibold gap-1.5"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -825,7 +825,7 @@ export default function USVisaSlots() {
 
           {/* Country Selector */}
           <div className="flex justify-center mb-8">
-            <div className="inline-flex rounded-full bg-white border border-black/10 p-1 gap-0.5 overflow-x-auto max-w-full no-scrollbar">
+            <div role="tablist" aria-label="Destination" className="flex flex-wrap justify-center gap-2 max-w-3xl">
               {[
                 { id: 'usa', flag: '🇺🇸', label: 'USA' },
                 { id: 'uk', flag: '🇬🇧', label: 'UK' },
@@ -840,11 +840,14 @@ export default function USVisaSlots() {
               ].map(c => (
                 <button
                   key={c.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedCountry === c.id}
                   onClick={() => handleCountryChange(c.id)}
-                  className={`px-3.5 py-2 min-h-[36px] sm:min-h-0 rounded-full text-[12px] font-bold transition-colors whitespace-nowrap ${
+                  className={`px-3.5 min-h-[44px] sm:min-h-[40px] rounded-full border text-[13px] font-semibold transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] focus-visible:ring-offset-2 ${
                     selectedCountry === c.id
-                      ? 'bg-[hsl(var(--accent))] text-white'
-                      : 'text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))]'
+                      ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white'
+                      : 'bg-white border-[hsl(var(--border))] text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-200))]'
                   }`}
                 >
                   {c.flag} {c.label}
@@ -855,18 +858,18 @@ export default function USVisaSlots() {
 
           {/* ── Gated Content: Register to view live slots ── */}
           {!isAuthed && (
-            <div className="rounded-3xl bg-gradient-to-br from-[hsl(var(--blue-700))] via-[hsl(var(--blue-800))] to-[hsl(var(--blue-900))] p-8 sm:p-10 mb-8 text-center text-white">
-              <div className="inline-flex h-16 w-16 rounded-2xl bg-white/15 items-center justify-center mb-5">
+            <div className="rounded-2xl bg-[hsl(var(--blue-900))] p-6 sm:p-10 mb-8 text-center text-white">
+              <div className="inline-flex h-14 w-14 rounded-xl bg-white/10 items-center justify-center mb-5">
                 <Clock className="w-8 h-8" />
               </div>
-              <h2 className="font-display font-extrabold text-[26px] sm:text-[32px] tracking-[-0.02em] mb-3">
+              <h2 className="font-display font-bold text-[26px] sm:text-[32px] tracking-[-0.02em] mb-3 leading-tight">
                 Don't Miss Your Slot — Slots Fill in Minutes!
               </h2>
               <p className="text-[15px] text-white/75 max-w-lg mx-auto mb-2 leading-relaxed">
                 {meta.adj} visa appointment slots open unpredictably and disappear fast. Our system monitors all consulates <strong className="text-white">24/7</strong> so you never miss one.
               </p>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-[14px] text-white/80">
-                <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-4 py-2">
+                <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-4 py-2 max-w-full">
                   <MapPin className="w-4 h-4" /> {getConsulatesForCountry(selectedCountry).map(c => summary?.consulates?.[c]?.city || c.charAt(0).toUpperCase() + c.slice(1)).join(', ')}
                 </span>
                 <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-4 py-2">
@@ -877,7 +880,7 @@ export default function USVisaSlots() {
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button
                   onClick={() => navigate('/signup')}
-                  className="h-12 px-8 rounded-full bg-white text-[hsl(var(--blue-800))] hover:bg-white/90 font-bold text-[14px]"
+                  className="h-12 px-6 rounded-xl btn-accent text-white font-semibold text-[15px]"
                 >
                   Register Free to View Live Slots
                 </Button>
@@ -886,7 +889,7 @@ export default function USVisaSlots() {
                   href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '') || '919000734326'}?text=Hi%2C%20I%20need%20help%20with%20a%20${meta.adj}%20visa%20appointment.`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold text-[14px] transition"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-xl border border-white/30 text-white hover:bg-white/10 font-semibold text-[15px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
                   <Send className="w-4 h-4" />
                   Chat on WhatsApp
@@ -901,7 +904,7 @@ export default function USVisaSlots() {
                 </a>
               </div>
 
-              <p className="mt-6 text-[12px] text-white/50">
+              <p className="mt-6 text-[12px] text-white/70">
                 Already registered? <button onClick={() => navigate('/login')} className="font-bold text-white/80 hover:text-white underline">Sign in</button> to view live slot availability.
               </p>
             </div>
@@ -922,7 +925,7 @@ export default function USVisaSlots() {
                 <div
                   key={cid}
                   className={`rounded-2xl bg-white border p-5 transition hover:shadow-md ${
-                    available ? 'border-emerald-200' : 'border-black/5'
+                    available ? 'border-emerald-200' : 'border-[hsl(var(--border))]'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -931,7 +934,7 @@ export default function USVisaSlots() {
                         <Building2 className="w-4 h-4 text-[hsl(var(--blue-700))]" />
                         <h3 className="font-bold text-[15px] text-[hsl(var(--blue-900))]">{data.city}</h3>
                       </div>
-                      <p className="text-[12px] text-[hsl(var(--blue-900))]/40 mt-0.5">{data.jurisdiction || data.name}</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">{data.jurisdiction || data.name}</p>
                     </div>
                   </div>
 
@@ -940,10 +943,10 @@ export default function USVisaSlots() {
                       const hasData = vtData.wait_time && vtData.wait_time !== 'N/A';
                       return (
                         <div key={vtId} className="flex items-center justify-between">
-                          <span className="text-[13px] font-medium text-[hsl(var(--blue-900))]/70">
+                          <span className="text-[13px] font-medium text-muted-foreground">
                             {vtData.name || vtId.toUpperCase()}
                           </span>
-                          <span className={`text-[17px] font-display font-extrabold tracking-[-0.02em] tabular-nums ${
+                          <span className={`text-[17px] font-display font-bold tracking-[-0.02em] tabular-nums ${
                             hasData ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/25'
                           }`}>
                             {hasData ? vtData.wait_time : '—'}
@@ -957,7 +960,7 @@ export default function USVisaSlots() {
                     href={bookingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 w-full justify-center min-h-[44px] rounded-full bg-[hsl(var(--blue-700))] text-white text-[13px] font-bold hover:bg-[hsl(229,85%,28%)] active:scale-[0.98] transition-colors"
+                    className="inline-flex items-center gap-1.5 w-full justify-center min-h-[44px] rounded-xl bg-[hsl(var(--blue-700))] text-white text-[14px] font-semibold hover:bg-[hsl(var(--blue-800))] transition-colors"
                   >
                     Book on VFS Global
                     <ExternalLink className="w-3 h-3" />
@@ -972,16 +975,16 @@ export default function USVisaSlots() {
           )}
 
           {/* Notification Subscription */}
-          <div className="rounded-2xl bg-white border border-black/5 p-5 sm:p-6 mb-6">
+          <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-5 sm:p-6 mb-6">
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-[hsl(var(--blue-700))]/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center flex-shrink-0">
                 <BellRing className="w-5 h-5 text-[hsl(var(--blue-700))]" />
               </div>
               <div>
-                <h2 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">
+                <h2 className="font-display font-bold text-[18px] text-[hsl(var(--blue-900))] leading-tight">
                   Get Notified Instantly
                 </h2>
-                <p className="mt-0.5 text-[13px] text-[hsl(var(--blue-900))]/60">
+                <p className="mt-0.5 text-[13px] text-muted-foreground">
                   We check every 2-3 minutes and send alerts the moment {meta.adj} visa slots open up.
                 </p>
               </div>
@@ -998,14 +1001,14 @@ export default function USVisaSlots() {
                   <Button
                     onClick={() => setShowSubscribeForm(true)}
                     variant="outline"
-                    className="h-8 rounded-full text-[12px] font-bold"
+                    className="h-10 rounded-xl text-[13px] font-semibold"
                   >
                     Update Preferences
                   </Button>
                   <Button
                     onClick={handleUnsubscribe}
                     variant="outline"
-                    className="h-8 rounded-full text-[12px] font-bold text-red-600 border-red-200 hover:bg-red-50"
+                    className="h-10 rounded-xl text-[13px] font-semibold text-red-600 border-red-200 hover:bg-red-50"
                   >
                     Unsubscribe
                   </Button>
@@ -1039,20 +1042,20 @@ export default function USVisaSlots() {
           </div>
 
           {/* WhatsApp Contact */}
-          <div className="rounded-3xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-6 sm:p-8 text-center mb-8">
-            <div className="inline-flex h-14 w-14 rounded-2xl bg-green-100 items-center justify-center mb-4">
-              <Send className="w-7 h-7 text-green-600" />
+          <div className="rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm p-6 sm:p-8 text-center mb-8">
+            <div className="inline-flex h-14 w-14 rounded-xl bg-[hsl(var(--blue-50))] items-center justify-center mb-4">
+              <Send className="w-7 h-7 text-[hsl(var(--blue-700))]" />
             </div>
-            <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))]">
+            <h2 className="font-display font-bold text-[22px] text-[hsl(var(--blue-900))] leading-tight">
               Need Help Booking?
             </h2>
-            <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/60 max-w-md mx-auto">
+            <p className="mt-2 text-[14px] text-muted-foreground max-w-md mx-auto">
               Our team can help you find and book early {meta.adj} visa appointments. Message us on WhatsApp.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
               <a
                 href={`tel:${(whatsappNumber || '+91 9000734326').replace(/[\s+]/g, '')}`}
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white font-bold text-[13px] transition"
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white font-bold text-[13px] transition"
               >
                 <Phone className="w-4 h-4" />
                 Call {whatsappNumber || '+91 9000734326'}
@@ -1061,7 +1064,7 @@ export default function USVisaSlots() {
                 href={`https://wa.me/${whatsappNumber?.replace(/[\s+]/g, '')}?text=Hi%2C%20I%20need%20help%20with%20a%20${meta.adj}%20visa%20appointment.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-green-600 hover:bg-green-700 text-white font-bold text-[13px] transition"
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] font-semibold text-[14px] transition-colors"
               >
                 <Send className="w-4 h-4" />
                 Chat on WhatsApp
@@ -1071,12 +1074,12 @@ export default function USVisaSlots() {
 
           {/* Recent Slots */}
           {isAuthed && slots.length > 0 && (
-            <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
+            <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="font-display font-extrabold text-[20px] text-[hsl(var(--blue-900))]">
+                <h2 className="font-display font-bold text-[20px] text-[hsl(var(--blue-900))] leading-tight">
                   Recently Detected Slots
                 </h2>
-                <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]/40">
+                <span className="text-[12px] font-bold text-muted-foreground">
                   {slots.slice(0, 20).length} latest
                 </span>
               </div>
@@ -1089,16 +1092,16 @@ export default function USVisaSlots() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.25, delay: i * 0.03 }}
-                      className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 p-4 hover:border-[hsl(var(--accent))]/30 hover:shadow-sm transition"
+                      className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-4 hover:border-[hsl(var(--blue-700))]/30 hover:shadow-sm transition"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-white border border-black/5 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-lg bg-white border border-[hsl(var(--border))] flex items-center justify-center">
                             <MapPin className="w-4 h-4 text-[hsl(var(--blue-700))]" />
                           </div>
                           <div>
                             <p className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{slot.city || slot.consulate_name}</p>
-                            <p className="text-[12px] text-[hsl(var(--blue-900))]/40">{slot.consulate_name || slot.consulate}</p>
+                            <p className="text-[12px] text-muted-foreground">{slot.consulate_name || slot.consulate}</p>
                           </div>
                         </div>
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-bold bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))]">
@@ -1107,28 +1110,28 @@ export default function USVisaSlots() {
                       </div>
 
                       <div className="flex items-center gap-3 mb-3">
-                        <div className={`flex-1 rounded-xl p-3 ${hasDate ? 'bg-white border border-emerald-100' : 'bg-white/50 border border-black/5'}`}>
+                        <div className={`flex-1 rounded-xl p-3 ${hasDate ? 'bg-white border border-emerald-100' : 'bg-white/50 border border-[hsl(var(--border))]'}`}>
                           <div className="flex items-center gap-1.5 mb-1">
-                            <Calendar className={`w-3.5 h-3.5 ${hasDate ? 'text-emerald-600' : 'text-[hsl(var(--blue-900))]/30'}`} />
-                            <span className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40">Date</span>
+                            <Calendar className={`w-3.5 h-3.5 ${hasDate ? 'text-emerald-600' : 'text-muted-foreground'}`} />
+                            <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Date</span>
                           </div>
-                          <p className={`text-[15px] font-display font-extrabold ${hasDate ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/30'}`}>
+                          <p className={`text-[15px] font-display font-bold ${hasDate ? 'text-[hsl(var(--blue-900))]' : 'text-muted-foreground'}`}>
                             {formatSlotDate(slot.date, 'Not available')}
                           </p>
                         </div>
                         {slot.time && (
-                          <div className="flex-1 rounded-xl bg-white p-3 border border-black/5">
-                            <span className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40 block mb-1">Time</span>
-                            <p className="text-[15px] font-display font-extrabold text-[hsl(var(--blue-900))] font-mono">{slot.time}</p>
+                          <div className="flex-1 rounded-xl bg-white p-3 border border-[hsl(var(--border))]">
+                            <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground block mb-1">Time</span>
+                            <p className="text-[15px] font-display font-bold text-[hsl(var(--blue-900))] font-mono">{slot.time}</p>
                           </div>
                         )}
                       </div>
 
                       <div className="flex items-center justify-between">
                         {slot.day_of_week && (
-                          <span className="text-[12px] font-medium text-[hsl(var(--blue-900))]/50">{slot.day_of_week}</span>
+                          <span className="text-[12px] font-medium text-muted-foreground">{slot.day_of_week}</span>
                         )}
-                        <span className="text-[12px] font-medium text-[hsl(var(--blue-900))]/40">
+                        <span className="text-[12px] font-medium text-muted-foreground">
                           {formatDetectedAt(slot.detected_at)}
                         </span>
                       </div>
@@ -1140,8 +1143,8 @@ export default function USVisaSlots() {
           )}
 
           {/* How It Works */}
-          <div className="mt-8 rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-            <h2 className="font-display font-extrabold text-[20px] text-[hsl(var(--blue-900))] mb-6 text-center">
+          <div className="mt-8 rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8">
+            <h2 className="font-display font-bold text-[20px] text-[hsl(var(--blue-900))] mb-6 text-center leading-tight">
               How It Works
             </h2>
             <div className="grid sm:grid-cols-3 gap-6">
@@ -1167,7 +1170,7 @@ export default function USVisaSlots() {
                     {item.icon}
                   </div>
                   <h3 className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{item.title}</h3>
-                  <p className="mt-1.5 text-[13px] text-[hsl(var(--blue-900))]/55 leading-relaxed">{item.desc}</p>
+                  <p className="mt-1.5 text-[13px] text-muted-foreground leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -1186,7 +1189,7 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
   return (
     <div className="space-y-5">
       <div>
-        <label id="usvisaslots-visa-types" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">
+        <label id="usvisaslots-visa-types" className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground block mb-2">
           Visa Types
         </label>
         <div role="group" aria-labelledby="usvisaslots-visa-types" className="flex flex-wrap gap-2">
@@ -1197,7 +1200,7 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
               className={`px-3.5 py-2 rounded-full text-[12px] font-bold border-2 transition ${
                 selectedVisas.includes(vt.id)
                   ? 'bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))]/30'
-                  : 'border-black/10 text-[hsl(var(--blue-900))]/40 hover:border-black/20'
+                  : 'border-[hsl(var(--border))] text-muted-foreground hover:border-[hsl(var(--blue-200))]'
               }`}
             >
               {vt.label}
@@ -1207,7 +1210,7 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
       </div>
 
       <div>
-        <label id="usvisaslots-consulates" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">
+        <label id="usvisaslots-consulates" className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground block mb-2">
           Consulates
         </label>
         <div role="group" aria-labelledby="usvisaslots-consulates" className="flex flex-wrap gap-2">
@@ -1218,7 +1221,7 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
               className={`px-3.5 py-2 rounded-full text-[12px] font-bold border-2 transition ${
                 selectedConsulates.includes(c.id)
                   ? 'bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))]/30'
-                  : 'border-black/10 text-[hsl(var(--blue-900))]/40 hover:border-black/20'
+                  : 'border-[hsl(var(--border))] text-muted-foreground hover:border-[hsl(var(--blue-200))]'
               }`}
             >
               {c.label}
@@ -1230,7 +1233,7 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
       <Button
         onClick={onSubscribe}
         disabled={subscribing || selectedVisas.length === 0 || selectedConsulates.length === 0}
-        className="w-full h-12 rounded-full btn-accent text-white font-bold"
+        className="w-full h-12 rounded-xl btn-accent text-white font-bold"
       >
         {subscribing ? (
           <Loader2 className="w-4 h-4 animate-spin" />

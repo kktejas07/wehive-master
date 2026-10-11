@@ -7,16 +7,15 @@ export default function WhatsNextCard() {
     { id: 'n3', Icon: Headphones, t: 'Real-time updates', d: "You'll see status changes live and on email/WhatsApp." },
   ];
   return (
-    <section className="rounded-3xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-7 relative overflow-hidden">
-      <div className="absolute -top-16 -right-16 h-[180px] w-[180px] rounded-full bg-[hsl(var(--accent))]/25 blur-3xl" />
-      <div className="relative">
-        <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-white/70 inline-flex items-center gap-2">
-          <Map className="w-3.5 h-3.5 text-[hsl(var(--accent))]" /> What happens next
+    <section className="rounded-2xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-7">
+      <div>
+        <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-white/80 inline-flex items-center gap-2">
+          <Map className="w-3.5 h-3.5 text-[hsl(var(--blue-100))]" /> What happens next
         </div>
-        <h3 className="mt-2 font-display font-extrabold text-[22px] tracking-[-0.025em]">
+        <h3 className="mt-2 font-display font-bold text-[22px] tracking-[-0.02em]">
           We take it from here.
         </h3>
-        <ul className="mt-4 space-y-3 text-[13.5px] text-white/85">
+        <ul className="mt-4 space-y-3 text-[14px] text-white/85">
           {items.map((n) => {
             const Icon = n.Icon;
             return (
@@ -26,7 +25,7 @@ export default function WhatsNextCard() {
                 </span>
                 <div>
                   <div className="text-[14px] font-bold">{n.t}</div>
-                  <div className="text-[12.5px] text-white/65">{n.d}</div>
+                  <div className="text-[13px] text-white/75">{n.d}</div>
                 </div>
               </li>
             );

@@ -316,7 +316,7 @@ function OfferCard({ offer, index, isActive, onSelect }) {
         whileHover={{ y: -6, scale: 1.02, z: 50 }}
         onClick={() => onSelect(offer)}
         className={`relative rounded-2xl border-2 ${offer.borderColor} ${offer.bgGradient} p-5 sm:p-6 cursor-pointer transition duration-300 ${
-          isActive ? 'ring-2 ring-offset-2 ring-[hsl(var(--accent))]' : ''
+          isActive ? 'ring-2 ring-offset-2 ring-[hsl(var(--blue-700))]' : ''
         }`}
         style={{ transformStyle: 'preserve-3d' }}
       >
@@ -576,7 +576,7 @@ export default function FeaturedOffers() {
       <section className="py-12 sm:py-16 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <Sparkles className="w-3.5 h-3.5" />
               Featured Offers
             </div>
@@ -601,8 +601,8 @@ export default function FeaturedOffers() {
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `
-              radial-gradient(circle at 20% 20%, rgba(10,44,138,0.05) 0%, transparent 20%),
-              radial-gradient(circle at 80% 80%, rgba(225,33,44,0.03) 0%, transparent 20%)
+              radial-gradient(circle at 20% 20%, rgba(37,99,235,0.05) 0%, transparent 20%),
+              radial-gradient(circle at 80% 80%, rgba(4,120,87,0.03) 0%, transparent 20%)
             `,
             backgroundSize: '50px 50px',
           }}
@@ -616,7 +616,7 @@ export default function FeaturedOffers() {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <Sparkles className="w-3.5 h-3.5" />
             Featured Offers
           </div>

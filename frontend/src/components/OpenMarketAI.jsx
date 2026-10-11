@@ -22,7 +22,7 @@ function Bubble({ m, onDelete }) {
         className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm relative ${
           me
             ? 'bg-[hsl(var(--blue-700))] text-white rounded-br-sm'
-            : 'bg-[hsl(var(--soft-bg))] border border-black/8 text-[hsl(var(--blue-900))] rounded-bl-sm'
+            : 'bg-[hsl(var(--soft-bg))] border border-border text-[hsl(var(--blue-900))] rounded-bl-sm'
         }`}
       >
         <div className="text-[13.5px] leading-relaxed whitespace-pre-wrap">{m.text}</div>
@@ -104,17 +104,17 @@ export default function OpenMarketAI({ onClose }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[26px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
             Open Market AI
           </h2>
-          <p className="mt-1 text-[13.5px] text-[hsl(var(--blue-900))]/55">
+          <p className="mt-1 text-[13.5px] text-muted-foreground">
             Ask anything about visas, travel, or documentation — Hive is here to help.
           </p>
         </div>
         {messages.length > 0 && (
           <button
             onClick={onClear}
-            className="inline-flex items-center gap-1.5 rounded-full text-[12px] font-bold text-[hsl(var(--blue-900))]/50 hover:text-red-500 transition"
+            className="inline-flex items-center gap-1.5 rounded-full text-[12px] font-bold text-muted-foreground hover:text-red-500 transition"
           >
             <Trash2 className="w-3.5 h-3.5" /> Clear chat
           </button>
@@ -131,17 +131,17 @@ export default function OpenMarketAI({ onClose }) {
       )}
 
       {messages.length === 0 && (
-        <div className="bg-[hsl(var(--soft-bg))] rounded-2xl border border-black/8 p-5">
+        <div className="bg-[hsl(var(--soft-bg))] rounded-2xl border border-border p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-[hsl(var(--accent))]" />
-            <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--accent))]">Try asking</span>
+            <Sparkles className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+            <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-700))]">Try asking</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {SUGGESTIONS.map((q) => (
               <button
                 key={q}
                 onClick={() => onSend(q)}
-                className="text-[12.5px] font-semibold text-[hsl(var(--blue-700))] bg-white hover:bg-[hsl(var(--blue-50))] rounded-full px-3.5 py-2 border border-black/8 transition"
+                className="text-[12.5px] font-semibold text-[hsl(var(--blue-700))] bg-white hover:bg-[hsl(var(--blue-50))] rounded-full px-3.5 py-2 border border-border transition"
               >
                 {q}
               </button>
@@ -157,7 +157,7 @@ export default function OpenMarketAI({ onClose }) {
           ))}
           {sending && (
             <div className="flex justify-start">
-              <div className="bg-[hsl(var(--soft-bg))] border border-black/8 rounded-2xl rounded-bl-sm px-4 py-3">
+              <div className="bg-[hsl(var(--soft-bg))] border border-border rounded-2xl rounded-bl-sm px-4 py-3">
                 <Loader2 className="w-4 h-4 animate-spin text-[hsl(var(--blue-700))]" />
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function OpenMarketAI({ onClose }) {
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') onSend(); }}
           placeholder="Ask Hive anything about visas, travel, or documents..."
-          className="flex-1 h-11 rounded-full border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-5 text-[14px] text-[hsl(var(--blue-900))] transition"
+          className="flex-1 h-11 rounded-full border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-5 text-[14px] text-[hsl(var(--blue-900))] transition"
         />
         <button
           onClick={() => onSend()}

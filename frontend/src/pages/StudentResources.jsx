@@ -72,7 +72,7 @@ const SECTIONS = [
 function SectionLoader() {
   return (
     <div className="flex items-center justify-center py-24">
-      <div className="w-8 h-8 rounded-full border-2 border-[hsl(var(--blue-100))] border-t-[hsl(var(--accent))] animate-spin" />
+      <div className="w-8 h-8 rounded-full border-2 border-[hsl(var(--blue-100))] border-t-[hsl(var(--blue-700))] animate-spin" />
     </div>
   );
 }
@@ -86,14 +86,14 @@ export default function StudentResources() {
     <div className="min-h-screen bg-white text-[hsl(var(--blue-900))]">
       <Navbar />
       <div className="max-w-6xl mx-auto px-5 pt-28 pb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-          <div className="text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
             Student Tools
           </div>
-          <h1 className="font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))] leading-[1.05]">
+          <h1 className="font-display font-bold text-[36px] sm:text-[52px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-[1.05]">
             Resource Hub
           </h1>
-          <p className="mt-4 text-[16px] text-[hsl(var(--blue-900))]/60 max-w-xl">
+          <p className="mt-4 text-[16px] text-muted-foreground max-w-xl">
             Everything you need to prepare for studying abroad — scholarships, housing, costs, SOP writing, and alumni connections.
           </p>
         </motion.div>
@@ -110,18 +110,18 @@ export default function StudentResources() {
                 return (
                   <motion.button
                     key={s.id}
-                    initial={{ opacity: 0, y: 24 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.07 }}
                     onClick={() => setActive(s.id)}
-                    className="group relative text-left rounded-2xl bg-white border border-black/5 p-6 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-lg transition card-lift"
+                    className="group relative text-left rounded-2xl bg-white border border-[hsl(var(--border))] p-6 hover:border-[hsl(var(--blue-200))] hover:shadow-md hover:-translate-y-0.5 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))]"
                   >
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: s.bg }}>
-                      <Icon className="w-6 h-6" style={{ color: s.color }} />
+                    <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center mb-4">
+                      <Icon className="w-6 h-6 text-[hsl(var(--blue-700))]" />
                     </div>
                     <div className="font-bold text-[17px] text-[hsl(var(--blue-900))] mb-1.5">{s.label}</div>
-                    <div className="text-[13px] text-[hsl(var(--blue-900))]/60 leading-relaxed">{s.desc}</div>
-                    <div className="mt-5 flex items-center gap-1 text-[12px] font-bold" style={{ color: s.color }}>
+                    <div className="text-[14px] text-muted-foreground leading-relaxed">{s.desc}</div>
+                    <div className="mt-5 flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--blue-700))]">
                       Open tool <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </motion.button>
@@ -129,9 +129,9 @@ export default function StudentResources() {
               })}
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="mt-8 border-t border-black/5 pt-8">
-              <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/40 mb-4">Also useful</div>
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+              className="mt-8 border-t border-[hsl(var(--border))] pt-8">
+              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-4">Also useful</div>
               <div className="flex flex-wrap gap-3">
                 {[
                   { to: '/intake-calendar', Icon: Calendar, label: 'Intake Calendar', desc: 'When to apply by country' },
@@ -143,13 +143,13 @@ export default function StudentResources() {
                   { to: '/events', Icon: Sparkles, label: 'Global Events', desc: 'Promotions and seasonal travel picks' },
                 ].map(({ to, Icon, label, desc }) => (
                   <Link key={to} to={to}
-                    className="flex items-center gap-3 rounded-xl border border-black/5 bg-white px-4 py-3 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition min-w-0">
-                    <Icon className="w-5 h-5 shrink-0 text-[hsl(var(--blue-900))]/40" />
+                    className="flex items-center gap-3 rounded-xl border border-[hsl(var(--border))] bg-white px-4 py-3 hover:border-[hsl(var(--blue-200))] hover:shadow-sm transition min-w-0 min-h-[56px]">
+                    <Icon className="w-5 h-5 shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-[13px] text-[hsl(var(--blue-900))]">{label}</div>
-                      <div className="text-[12px] text-[hsl(var(--blue-900))]/50 truncate">{desc}</div>
+                      <div className="text-[12px] text-muted-foreground truncate">{desc}</div>
                     </div>
-                    <ChevronRight className="w-4 h-4 shrink-0 text-[hsl(var(--blue-900))]/30" />
+                    <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
                   </Link>
                 ))}
               </div>
@@ -161,18 +161,18 @@ export default function StudentResources() {
           <AnimatePresence mode="wait">
             <motion.div
               key={active}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
             >
               <div className="flex items-center gap-3 mb-6">
                 <button
                   onClick={() => setActive(null)}
-                  className="text-[13px] font-bold text-[hsl(var(--blue-900))]/50 hover:text-[hsl(var(--blue-900))] flex items-center gap-1"
+                  className="min-h-[44px] text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))] flex items-center gap-1"
                 >
                   ← All Resources
                 </button>
-                <span className="text-[hsl(var(--blue-900))]/30">/</span>
+                <span className="text-muted-foreground">/</span>
                 <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{current.label}</span>
               </div>
               <Suspense fallback={<SectionLoader />}>

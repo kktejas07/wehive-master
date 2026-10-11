@@ -103,7 +103,7 @@ export default function PromoCodesTab() {
           <div>
             <div className="text-[13px] text-white/60">{promos.length} promo codes</div>
           </div>
-          <button onClick={() => setShowForm(!showForm)} className="inline-flex items-center gap-1.5 bg-[hsl(var(--accent))] text-white h-9 px-4 rounded-full text-[12px] font-bold hover:bg-[hsl(var(--accent))]/90 transition">
+          <button onClick={() => setShowForm(!showForm)} className="inline-flex items-center gap-1.5 bg-[hsl(var(--blue-700))] text-white h-10 px-4 rounded-lg text-[12px] font-semibold hover:bg-[hsl(var(--blue-700))]/90 transition">
             <Plus className="w-3.5 h-3.5" /> New Promo Code
           </button>
         </div>
@@ -116,52 +116,52 @@ export default function PromoCodesTab() {
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="promocodestab-code" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Code</label>
+                <label htmlFor="promocodestab-code" className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Code</label>
                 <div className="flex gap-2">
-                  <input id="promocodestab-code" value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))} className="flex-1 h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--accent))]/50 font-mono uppercase" placeholder="SUMMER2025" />
+                  <input id="promocodestab-code" value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))} className="flex-1 h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50 font-mono uppercase" placeholder="SUMMER2025" />
                   <button onClick={generateCode} className="h-10 px-3 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 transition" title="Generate"><RefreshCw className="w-4 h-4" /></button>
                 </div>
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Season</label>
+                <label className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Season</label>
                 <select value={form.season} onChange={e => setForm(p => ({ ...p, season: e.target.value }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none">
                   {SEASONS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                 </select>
               </div>
               <div>
-                <label htmlFor="promocodestab-discount" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Discount %</label>
+                <label htmlFor="promocodestab-discount" className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Discount %</label>
                 <input id="promocodestab-discount" type="number" value={form.discount_percent} onChange={e => setForm(p => ({ ...p, discount_percent: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" max="100" />
               </div>
               <div>
-                <label htmlFor="promocodestab-fixed-discount" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Fixed Discount (₹)</label>
+                <label htmlFor="promocodestab-fixed-discount" className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Fixed Discount (₹)</label>
                 <input id="promocodestab-fixed-discount" type="number" value={form.discount_fixed} onChange={e => setForm(p => ({ ...p, discount_fixed: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" />
               </div>
               <div>
-                <label htmlFor="promocodestab-max-uses" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Max Uses</label>
+                <label htmlFor="promocodestab-max-uses" className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Max Uses</label>
                 <input id="promocodestab-max-uses" type="number" value={form.max_uses} onChange={e => setForm(p => ({ ...p, max_uses: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="1" />
               </div>
               <div>
-                <label htmlFor="promocodestab-min-cart-value" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Min Cart Value (₹)</label>
+                <label htmlFor="promocodestab-min-cart-value" className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Min Cart Value (₹)</label>
                 <input id="promocodestab-min-cart-value" type="number" value={form.min_cart_value} onChange={e => setForm(p => ({ ...p, min_cart_value: Number(e.target.value) }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" min="0" />
               </div>
               <div>
-                <label htmlFor="promocodestab-expires-at" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Expires At</label>
+                <label htmlFor="promocodestab-expires-at" className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Expires At</label>
                 <input id="promocodestab-expires-at" type="date" value={form.expires_at} onChange={e => setForm(p => ({ ...p, expires_at: e.target.value }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
               </div>
               <div>
-                <label htmlFor="promocodestab-description" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Description</label>
+                <label htmlFor="promocodestab-description" className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-1">Description</label>
                 <input id="promocodestab-description" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" placeholder="Summer discount 2025" />
               </div>
             </div>
             <div>
-              <label id="promocodestab-applicable-visa-types" className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-2">Applicable Visa Types</label>
+              <label id="promocodestab-applicable-visa-types" className="text-[11px] uppercase tracking-[0.14em] font-bold text-white/40 block mb-2">Applicable Visa Types</label>
               <div role="group" aria-labelledby="promocodestab-applicable-visa-types" className="flex flex-wrap gap-2">
                 {VISA_TYPES.map(t => (
-                  <button key={t} onClick={() => toggleVisaType(t)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition ${form.applicable_visa_types.includes(t) ? 'bg-[hsl(var(--accent))] text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}>{t}</button>
+                  <button key={t} onClick={() => toggleVisaType(t)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition ${form.applicable_visa_types.includes(t) ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}>{t}</button>
                 ))}
               </div>
             </div>
-            <button onClick={handleCreate} className="inline-flex items-center gap-1.5 bg-[hsl(var(--accent))] text-white h-10 px-5 rounded-full text-[13px] font-bold hover:bg-[hsl(var(--accent))]/90 transition">
+            <button onClick={handleCreate} className="inline-flex items-center gap-1.5 bg-[hsl(var(--blue-700))] text-white h-10 px-5 rounded-lg text-[13px] font-semibold hover:bg-[hsl(var(--blue-700))]/90 transition">
               <Save className="w-4 h-4" /> Create Promo Code
             </button>
           </div>
@@ -177,20 +177,20 @@ export default function PromoCodesTab() {
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-[10px] uppercase tracking-[0.14em] text-white/40 font-bold">Code</th>
-                  <th className="text-left py-3 px-4 text-[10px] uppercase tracking-[0.14em] text-white/40 font-bold">Season</th>
-                  <th className="text-left py-3 px-4 text-[10px] uppercase tracking-[0.14em] text-white/40 font-bold">Discount</th>
-                  <th className="text-left py-3 px-4 text-[10px] uppercase tracking-[0.14em] text-white/40 font-bold">Uses</th>
-                  <th className="text-left py-3 px-4 text-[10px] uppercase tracking-[0.14em] text-white/40 font-bold">Expires</th>
-                  <th className="text-left py-3 px-4 text-[10px] uppercase tracking-[0.14em] text-white/40 font-bold">Status</th>
-                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-[0.14em] text-white/40 font-bold">Actions</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] text-white/40 font-bold">Code</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] text-white/40 font-bold">Season</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] text-white/40 font-bold">Discount</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] text-white/40 font-bold">Uses</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] text-white/40 font-bold">Expires</th>
+                  <th className="text-left py-3 px-4 text-[11px] uppercase tracking-[0.14em] text-white/40 font-bold">Status</th>
+                  <th className="text-right py-3 px-4 text-[11px] uppercase tracking-[0.14em] text-white/40 font-bold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {promos.map(p => (
                   <tr key={p._id} className="border-b border-white/5 hover:bg-white/5 transition">
                     <td className="py-3 px-4">
-                      <button onClick={() => handleCopy(p.code)} className="font-mono font-bold text-white hover:text-[hsl(var(--accent))] transition inline-flex items-center gap-1.5">
+                      <button onClick={() => handleCopy(p.code)} className="font-mono font-bold text-white hover:text-blue-300 transition inline-flex items-center gap-1.5">
                         {p.code} {copied === p.code ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-white/30" />}
                       </button>
                       <div className="text-[11px] text-white/30">{p.description}</div>

@@ -54,20 +54,14 @@ export default function PromoBanner({ className = '' }) {
             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
             transition={{ duration: 0.25 }}
             className="relative rounded-2xl overflow-hidden"
-            style={{ background: banner.bg_color || '#0a2c8a' }}
+            style={{ background: banner.bg_color || '#2563EB' }}
           >
-            {/* Decorative blobs */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20" style={{ background: banner.accent_color || '#e1212c' }} />
-              <div className="absolute -bottom-6 -left-6 w-28 h-28 rounded-full opacity-10" style={{ background: banner.accent_color || '#e1212c' }} />
-            </div>
-
-            <div className="relative z-10 flex items-center gap-4 px-5 py-4 flex-wrap">
+            <div className="relative flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 flex-wrap">
               {/* Badge */}
               {banner.badge && (
                 <span
-                  className="shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-[0.14em]"
-                  style={{ background: banner.accent_color || '#e1212c', color: '#fff' }}
+                  className="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold uppercase tracking-[0.14em]"
+                  style={{ background: banner.accent_color || '#047857', color: '#fff' }}
                 >
                   <Sparkles className="w-3 h-3" />
                   {banner.badge}
@@ -77,14 +71,14 @@ export default function PromoBanner({ className = '' }) {
               <div className="flex-1 min-w-0">
                 <div className="text-[15px] font-bold text-white leading-snug">{banner.title}</div>
                 {banner.subtitle && (
-                  <div className="text-[12.5px] text-white/70 mt-0.5">{banner.subtitle}</div>
+                  <div className="text-[13px] text-white/85 mt-0.5">{banner.subtitle}</div>
                 )}
               </div>
 
               {banner.cta_text && banner.cta_link && (
                 <Link
                   to={banner.cta_link}
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/20 hover:bg-white/30 px-4 py-2 text-[13px] font-bold text-white transition"
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-white/90 h-10 px-4 text-[14px] font-semibold text-[hsl(var(--blue-900))] transition-colors"
                 >
                   {banner.cta_text} <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -92,10 +86,10 @@ export default function PromoBanner({ className = '' }) {
 
               <button
                 onClick={() => handleDismiss(banner.id)}
-                className="shrink-0 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition"
+                className="shrink-0 w-10 h-10 rounded-xl hover:bg-white/15 flex items-center justify-center text-white/80 hover:text-white transition-colors"
                 aria-label="Dismiss"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </motion.div>

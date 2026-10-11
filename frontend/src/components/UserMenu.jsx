@@ -27,13 +27,13 @@ export default function UserMenu() {
       <>
         <button
           onClick={() => navigate('/login')}
-          className="hidden sm:inline-flex items-center px-3 py-2 rounded-full text-[13px] font-bold text-[hsl(var(--blue-900))]/80 hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))] transition"
+          className="hidden sm:inline-flex items-center h-10 px-3 rounded-lg text-[14px] font-semibold text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))] transition-colors duration-200"
         >
           {t('cta.signIn')}
         </button>
         <button
           onClick={() => navigate('/signup')}
-          className="hidden md:inline-flex items-center rounded-full btn-primary text-white px-4 py-2 text-[13px] font-bold"
+          className="hidden md:inline-flex items-center h-10 rounded-xl btn-primary text-white px-4 text-[14px] font-semibold"
         >
           {t('cta.signUp')}
         </button>
@@ -51,22 +51,24 @@ export default function UserMenu() {
       <button
         onClick={() => setOpen((v) => !v)}
         data-testid="usermenu-trigger"
-        className="inline-flex items-center gap-2 rounded-full bg-white border border-black/8 hover:border-[hsl(var(--blue-700))]/30 px-2 py-1.5 transition"
+        aria-expanded={open}
+        aria-label="Account menu"
+        className="inline-flex items-center gap-1.5 h-10 rounded-full bg-white border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] pl-1 pr-2 transition-colors duration-200"
       >
         <span className="h-8 w-8 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-1 ring-black/5">
           <img src={aUrl} alt={initial} className="h-full w-full object-cover" />
         </span>
-        <ChevronDown className="w-3.5 h-3.5 text-[hsl(var(--blue-900))]/55" />
+        <ChevronDown aria-hidden="true" className="w-3.5 h-3.5 text-muted-foreground" />
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-64 rounded-2xl backdrop-blur-xl bg-white/85 border border-white/40 shadow-[0_20px_50px_-25px_rgba(10,44,138,0.4)] p-2 z-50">
-          <div className="px-3 py-3 border-b border-black/5 flex items-center gap-3">
+        <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-[hsl(var(--border))] shadow-lg p-2 z-50">
+          <div className="px-3 py-3 mb-1 border-b border-[hsl(var(--border))] flex items-center gap-3">
             <span className="h-10 w-10 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-2 ring-white">
               <img src={aUrl} alt={initial} className="h-full w-full object-cover" />
             </span>
             <div className="min-w-0">
-              <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">{display}</div>
-              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
+              <div className="text-[14px] font-semibold text-[hsl(var(--blue-900))] truncate">{display}</div>
+              <div className="text-[12px] text-muted-foreground">
                 Signed in
               </div>
             </div>
@@ -86,7 +88,7 @@ export default function UserMenu() {
                 to={it.to}
                 onClick={() => setOpen(false)}
                 data-testid={`usermenu-${it.id}`}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))]"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))] transition-colors duration-200"
               >
                 <Icon className="w-4 h-4 text-[hsl(var(--blue-700))]" />
                 {it.label}
@@ -102,7 +104,7 @@ export default function UserMenu() {
               firebaseLogout();
               logout();
             }}
-            className="w-full text-left flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] text-[hsl(var(--accent))] hover:bg-red-50"
+            className="w-full text-left flex items-center gap-2.5 rounded-xl px-3 py-2.5 mt-1 text-[14px] text-[hsl(var(--blue-900))] hover:text-red-700 hover:bg-red-50 transition-colors duration-200"
           >
             <LogOut className="w-4 h-4" />
             Sign out

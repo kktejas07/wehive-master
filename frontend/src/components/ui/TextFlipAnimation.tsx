@@ -18,10 +18,10 @@ export default function TextFlipAnimation({ words, className = '', interval = 30
       <AnimatePresence mode="wait">
         <motion.span
           key={currentIndex}
-          initial={{ rotateX: -90, opacity: 0, y: -10 }}
-          animate={{ rotateX: 0, opacity: 1, y: 0 }}
-          exit={{ rotateX: 90, opacity: 0, y: 10 }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
           className="inline-block"
           style={{ 
             display: 'inline-block',
@@ -41,7 +41,7 @@ export function TextFlipDemo() {
     <div className="font-display font-extrabold text-[40px] sm:text-[64px] lg:text-[80px] tracking-[-0.035em] leading-[1.1] text-[hsl(var(--blue-900))]">
       <TextFlipAnimation
         words={['visa', 'travel', 'journey', 'adventure']}
-        className="text-[hsl(var(--accent))]"
+        className="text-[hsl(var(--blue-700))]"
       />
     </div>
   );

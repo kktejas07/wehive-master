@@ -61,7 +61,7 @@ const IELTS_OPTIONS = ['5.5', '6.0', '6.5', '7.0', '7.5+'];
 function ToggleChip({ label, selected, onClick }) {
   return (
     <button onClick={onClick}
-      className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-bold transition ${selected ? 'bg-[hsl(var(--accent))] text-white' : 'bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/60 hover:bg-[hsl(var(--blue-50))]'}`}>
+      className={`rounded-full border px-3.5 min-h-[40px] text-[14px] font-semibold transition-colors ${selected ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white' : 'bg-white border-[hsl(var(--border))] text-muted-foreground hover:border-[hsl(var(--blue-200))] hover:text-[hsl(var(--blue-900))]'}`}>
       {label}
     </button>
   );
@@ -69,14 +69,14 @@ function ToggleChip({ label, selected, onClick }) {
 
 function UniCard({ uni, rank }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: rank * 0.07 }}
-      className="flex items-center gap-4 rounded-2xl border border-black/5 bg-white px-5 py-4 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition">
-      <div className="w-9 h-9 rounded-xl bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))] font-bold text-[14px] flex items-center justify-center shrink-0">
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: rank * 0.07 }}
+      className="flex items-center gap-4 rounded-2xl border border-[hsl(var(--border))] bg-white px-5 py-4 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition">
+      <div className="w-9 h-9 rounded-xl bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))] font-bold text-[14px] flex items-center justify-center shrink-0">
         #{rank + 1}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-bold text-[14.5px] text-[hsl(var(--blue-900))] truncate">{uni.name}</div>
-        <div className="text-[12px] text-[hsl(var(--blue-900))]/55 flex items-center gap-2 flex-wrap mt-0.5">
+        <div className="font-bold text-[15px] text-[hsl(var(--blue-900))] truncate">{uni.name}</div>
+        <div className="text-[12px] text-muted-foreground flex items-center gap-2 flex-wrap mt-0.5">
           <span>{uni.country}</span>
           {uni.rank && <span>World #{uni.rank}</span>}
           {uni.tuition_usd && <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" />${uni.tuition_usd.toLocaleString()}/yr</span>}
@@ -174,14 +174,14 @@ export default function ProgramRecommender() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 p-6 space-y-6">
+      <div className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-6 space-y-6">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-[hsl(var(--accent))]" />
+          <Sparkles className="w-5 h-5 text-[hsl(var(--blue-700))]" />
           <span className="font-bold text-[16px] text-[hsl(var(--blue-900))]">Find Your Best-Fit Universities</span>
         </div>
 
         <div>
-          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Study Level</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-2">Study Level</div>
           <div className="flex flex-wrap gap-2">
             {['Diploma', 'Bachelor', 'Masters', 'PhD'].map(l => (
               <ToggleChip key={l} label={l} selected={form.level === l} onClick={() => setForm(f => ({ ...f, level: l }))} />
@@ -190,7 +190,7 @@ export default function ProgramRecommender() {
         </div>
 
         <div>
-          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Course / Field (pick up to 3)</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-2">Course / Field (pick up to 3)</div>
           <div className="flex flex-wrap gap-2">
             {COURSES.map(c => (
               <ToggleChip key={c.value} label={c.label} selected={form.courses.includes(c.value)}
@@ -200,7 +200,7 @@ export default function ProgramRecommender() {
         </div>
 
         <div>
-          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Target Countries (pick up to 3)</div>
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-2">Target Countries (pick up to 3)</div>
           <div className="flex flex-wrap gap-2">
             {COUNTRIES.map(c => (
               <ToggleChip key={c.value} label={c.label} selected={form.countries.includes(c.value)}
@@ -211,7 +211,7 @@ export default function ProgramRecommender() {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">Annual Budget</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-2">Annual Budget</div>
             <div className="flex flex-wrap gap-2">
               {BUDGET_OPTIONS.map(b => (
                 <ToggleChip key={b.value} label={b.label} selected={form.budget === b.value}
@@ -220,7 +220,7 @@ export default function ProgramRecommender() {
             </div>
           </div>
           <div>
-            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-2">IELTS Score</div>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-2">IELTS Score</div>
             <div className="flex flex-wrap gap-2">
               {IELTS_OPTIONS.map(s => (
                 <ToggleChip key={s} label={s} selected={form.ielts === s} onClick={() => setForm(f => ({ ...f, ielts: s }))} />
@@ -230,7 +230,7 @@ export default function ProgramRecommender() {
         </div>
 
         <button onClick={search} disabled={loading}
-          className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] hover:opacity-90 text-white font-bold text-[14px] px-6 py-3 transition disabled:opacity-50">
+          className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent-hover))] text-white font-semibold text-[15px] px-6 h-12 transition-colors disabled:opacity-50">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           {loading ? 'Finding matches…' : 'Find Matching Universities'}
         </button>
@@ -238,8 +238,8 @@ export default function ProgramRecommender() {
 
       <AnimatePresence>
         {searched && !loading && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-3">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-3">
               {results?.length ? `${results.length} matches found` : 'No matches — try adjusting filters'}
             </div>
             <div className="space-y-2">
@@ -249,7 +249,7 @@ export default function ProgramRecommender() {
             </div>
             {results && (page + 1) * PAGE_SIZE < results.length && (
               <button onClick={() => setPage(p => p + 1)}
-                className="mt-4 w-full rounded-xl border border-black/5 py-3 text-[13px] font-bold text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))] hover:border-black/10 transition">
+                className="mt-4 w-full rounded-xl border border-[hsl(var(--border))] py-3 text-[13px] font-bold text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:border-[hsl(var(--border))] transition">
                 Show more ({results.length - (page + 1) * PAGE_SIZE} remaining)
               </button>
             )}

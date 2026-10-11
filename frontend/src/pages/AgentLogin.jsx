@@ -38,27 +38,27 @@ export default function AgentLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--blue-900))] to-[hsl(var(--blue-700))] flex items-center justify-center p-5">
+    <div className="min-h-screen bg-[hsl(var(--soft-bg))] flex items-center justify-center px-4 py-10 sm:p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex h-16 w-16 rounded-2xl bg-white/10 items-center justify-center mb-4">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="inline-flex h-12 w-12 rounded-xl bg-[hsl(var(--blue-50))] items-center justify-center mb-4">
+            <Shield className="w-6 h-6 text-[hsl(var(--blue-700))]" />
           </div>
-          <h1 className="text-[28px] font-display font-extrabold text-white">Agent Portal</h1>
-          <p className="text-white/60 mt-1">{mode === 'login' ? 'Sign in to manage your students' : 'Create your agent account'}</p>
+          <h1 className="text-[28px] sm:text-[32px] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">Agent Portal</h1>
+          <p className="text-muted-foreground mt-1 text-[15px]">{mode === 'login' ? 'Sign in to manage your students' : 'Create your agent account'}</p>
         </div>
 
-        <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-2xl">
-          <div className="flex mb-6 bg-[hsl(var(--soft-bg))] rounded-full p-1">
+        <div className="rounded-2xl bg-white border border-border p-6 sm:p-8 shadow-sm">
+          <div className="flex mb-6 bg-[hsl(var(--soft-bg))] border border-border rounded-xl p-1">
             <button
               onClick={() => { setMode('login'); setError(''); }}
-              className={`flex-1 py-2.5 rounded-full text-[13px] font-bold transition ${mode === 'login' ? 'bg-white text-[hsl(var(--blue-900))] shadow-sm' : 'text-[hsl(var(--blue-900))]/50'}`}
+              className={`flex-1 min-h-[40px] rounded-lg text-[14px] font-semibold transition-colors ${mode === 'login' ? 'bg-white text-[hsl(var(--blue-900))] shadow-sm' : 'text-muted-foreground'}`}
             >
               <LogIn className="w-4 h-4 inline mr-1.5" /> Sign In
             </button>
             <button
               onClick={() => { setMode('signup'); setError(''); }}
-              className={`flex-1 py-2.5 rounded-full text-[13px] font-bold transition ${mode === 'signup' ? 'bg-white text-[hsl(var(--blue-900))] shadow-sm' : 'text-[hsl(var(--blue-900))]/50'}`}
+              className={`flex-1 min-h-[40px] rounded-lg text-[14px] font-semibold transition-colors ${mode === 'signup' ? 'bg-white text-[hsl(var(--blue-900))] shadow-sm' : 'text-muted-foreground'}`}
             >
               <UserPlus className="w-4 h-4 inline mr-1.5" /> Register
             </button>
@@ -72,39 +72,39 @@ export default function AgentLogin() {
             {mode === 'signup' && (
               <>
                 <div>
-                  <label htmlFor="agentlogin-full-name" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Full Name</label>
-                  <input id="agentlogin-full-name" value={name} onChange={e => setName(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your name" />
+                  <label htmlFor="agentlogin-full-name" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Full Name</label>
+                  <input id="agentlogin-full-name" value={name} onChange={e => setName(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your name" />
                 </div>
                 <div>
-                  <label htmlFor="agentlogin-phone" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Phone</label>
-                  <input id="agentlogin-phone" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="+91 98765 43210" />
+                  <label htmlFor="agentlogin-phone" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Phone</label>
+                  <input id="agentlogin-phone" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="+91 98765 43210" />
                 </div>
                 <div>
-                  <label htmlFor="agentlogin-agency-name-optional" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Agency Name (Optional)</label>
-                  <input id="agentlogin-agency-name-optional" value={agency} onChange={e => setAgency(e.target.value)} className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your agency" />
+                  <label htmlFor="agentlogin-agency-name-optional" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Agency Name (Optional)</label>
+                  <input id="agentlogin-agency-name-optional" value={agency} onChange={e => setAgency(e.target.value)} className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your agency" />
                 </div>
               </>
             )}
             <div>
-              <label htmlFor="agentlogin-email" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Email</label>
-              <input id="agentlogin-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="agent@example.com" />
+              <label htmlFor="agentlogin-email" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Email</label>
+              <input id="agentlogin-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="agent@example.com" />
             </div>
             <div>
-              <label htmlFor="agentlogin-password" className="text-[12px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Password</label>
+              <label htmlFor="agentlogin-password" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Password</label>
               <div className="relative">
-                <input id="agentlogin-password" type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[14px]" placeholder="••••••••" />
-                <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--blue-900))]/40">
+                <input id="agentlogin-password" type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[14px]" placeholder="••••••••" />
+                <button type="button" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? 'Hide password' : 'Show password'} className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-[hsl(var(--blue-900))]">
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            <Button type="submit" disabled={loading} className="w-full h-12 rounded-full btn-accent text-white font-bold">
+            <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl btn-accent text-white font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (mode === 'login' ? 'Sign In' : 'Create Account')}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <Link to="/" className="text-[13px] text-[hsl(var(--blue-700))] hover:underline font-bold">
+            <Link to="/" className="text-[14px] text-[hsl(var(--blue-700))] hover:underline font-semibold">
               Back to WeHive
             </Link>
           </div>

@@ -3,16 +3,17 @@ import { Plus, Minus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FAQS } from '../data/mock';
 import Reveal from './Reveal';
-import TextFlipAnimation from './ui/TextFlipAnimation';
 
 function FaqItem({ item, isOpen, onToggle }) {
   return (
     <button
+      type="button"
       onClick={onToggle}
-      className="w-full text-left py-6 group flex items-start gap-6"
+      aria-expanded={isOpen}
+      className="w-full text-left py-5 sm:py-6 group flex items-start gap-4 sm:gap-6"
     >
       <div className="flex-1">
-        <div className="text-[17px] sm:text-[19px] font-bold tracking-tight text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))] transition">
+        <div className="text-[17px] sm:text-[18px] font-semibold text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
           {item.q}
         </div>
         <div
@@ -21,13 +22,13 @@ function FaqItem({ item, isOpen, onToggle }) {
           }`}
         >
           <div className="overflow-hidden">
-            <p className="text-[15px] leading-relaxed text-[hsl(var(--blue-900))]/65 max-w-3xl">
+            <p className="text-[16px] leading-relaxed text-muted-foreground max-w-3xl">
               {item.a}
             </p>
           </div>
         </div>
       </div>
-      <span className="shrink-0 mt-1 inline-flex items-center justify-center h-9 w-9 rounded-full border border-black/10 text-[hsl(var(--blue-900))] group-hover:border-[hsl(var(--accent))]/40 group-hover:text-[hsl(var(--accent))] transition">
+      <span className="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-full border border-[hsl(var(--border))] bg-white text-[hsl(var(--blue-900))] group-hover:border-[hsl(var(--blue-700))]/40 group-hover:text-[hsl(var(--blue-700))] transition-colors duration-200" aria-hidden="true">
         {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
       </span>
     </button>
@@ -37,29 +38,24 @@ function FaqItem({ item, isOpen, onToggle }) {
 export default function Faq() {
   const [openId, setOpenId] = useState(FAQS[0]?.id ?? null);
   return (
-    <section className="relative py-16 sm:py-24 lg:py-28 bg-[hsl(var(--soft-bg))] border-y border-black/5">
-      <div className="max-w-5xl mx-auto px-5 sm:px-8">
+    <section className="relative py-16 md:py-24 bg-[hsl(var(--soft-bg))] border-y border-[hsl(var(--border))]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-700))]">
             FAQ
           </div>
-          <h2 className="mt-3 text-[28px] sm:text-[40px] lg:text-[44px] leading-[1.08] font-display font-extrabold tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-            <span>Questions,</span>{' '}
-            <TextFlipAnimation
-              words={['answered.', 'solved.', 'clarified.']}
-              className="gradient-text"
-              interval={4000}
-            />
+          <h2 className="mt-3 text-[28px] sm:text-[36px] leading-[1.15] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+            Questions, answered.
           </h2>
         </Reveal>
-        <div className="mt-10 sm:mt-12 divide-y divide-black/8 border-y border-black/8">
+        <div className="mt-10 sm:mt-12 rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm px-5 sm:px-8 divide-y divide-[hsl(var(--border))]">
           {FAQS.map((item, i) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, x: -12 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.35, delay: Math.min(i * 0.04, 0.3) }}
+              transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.2), ease: 'easeOut' }}
             >
               <FaqItem
                 item={item}

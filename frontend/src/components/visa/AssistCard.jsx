@@ -7,14 +7,14 @@ export default function AssistCard() {
     { id: 'a3', icon: Star, l: 'Approval probability', s: '94%' },
   ];
   return (
-    <div className="rounded-3xl bg-[hsl(var(--soft-bg))] border border-black/5 p-7 sticky top-28">
-      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--accent))]">
+    <div className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-6 sm:p-7 lg:sticky lg:top-28">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
         <Sparkles className="w-3.5 h-3.5" /> Document AI
       </div>
-      <h3 className="mt-2 font-display font-extrabold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+      <h3 className="mt-2 font-display font-bold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
         Snap. Upload. Done.
       </h3>
-      <p className="mt-2 text-[14px] leading-relaxed text-[hsl(var(--blue-900))]/65">
+      <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
         Auto-detects rotation, glare and missing pages. You get a green check or
         a one-line fix — never a vague rejection.
       </p>
@@ -22,13 +22,13 @@ export default function AssistCard() {
         {rows.map((r) => {
           const Icon = r.icon;
           return (
-            <div key={r.id} className="flex items-center gap-3 rounded-xl bg-white border border-black/5 p-3">
+            <div key={r.id} className="flex items-center gap-3 rounded-xl bg-white border border-[hsl(var(--border))] p-3">
               <span className="h-9 w-9 rounded-lg bg-[hsl(var(--blue-50))] inline-flex items-center justify-center text-[hsl(var(--blue-700))]">
                 <Icon className="w-4 h-4" />
               </span>
               <div className="flex-1">
-                <div className="text-[13.5px] font-bold text-[hsl(var(--blue-900))]">{r.l}</div>
-                <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{r.s}</div>
+                <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{r.l}</div>
+                <div className="text-[12px] text-muted-foreground">{r.s}</div>
               </div>
               <Check className="w-4 h-4 text-emerald-600" />
             </div>

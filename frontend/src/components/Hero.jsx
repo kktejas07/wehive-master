@@ -1,51 +1,23 @@
-import { useState, useRef } from 'react';
-import { ArrowRight, Phone } from 'lucide-react';
+import { useState } from 'react';
+import { Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Button } from './ui/button';
+import { motion } from 'framer-motion';
 import FilterBar, { DEFAULT_FILTERS } from './FilterBar';
 import { COUNTRIES, BRAND } from '../data/mock';
 import { useI18n } from '../context/I18nContext';
 import HeroSearchLive from './HeroSearchLive';
 import TextFlipAnimation from './ui/TextFlipAnimation';
 
+const EASE = [0.22, 1, 0.36, 1];
+
 function TrustPill() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="inline-flex items-center gap-2 rounded-full bg-white border border-black/5 shadow-sm px-3.5 py-1.5 text-[12.5px]"
-      whileHover={{ scale: 1.02, boxShadow: '0 4px 20px rgba(10,44,138,0.15)' }}
-    >
-      <span className="relative inline-flex h-2 w-2">
-        <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-60" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-      </span>
+    <div className="inline-flex items-center gap-2 rounded-full bg-white border border-[hsl(var(--border))] shadow-sm px-3.5 py-1.5 text-[13px]">
+      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
       <span className="text-[hsl(var(--blue-900))] font-semibold">12,000+ visas processed</span>
-      <span className="text-[hsl(var(--blue-900))]/40">·</span>
-      <span className="text-[hsl(var(--blue-900))]/70">98.6% approval</span>
-    </motion.div>
-  );
-}
-
-function FloatingBadge({ icon, text, delay }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay, duration: 0.5 }}
-      className="absolute bg-white/80 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 shadow-lg"
-      style={{
-        animation: `float ${3 + delay}s ease-in-out infinite`,
-        animationDelay: `${delay}s`,
-      }}
-    >
-      <div className="flex items-center gap-2">
-        <span className="text-[hsl(var(--accent))]">{icon}</span>
-        <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{text}</span>
-      </div>
-    </motion.div>
+      <span className="text-muted-foreground" aria-hidden="true">·</span>
+      <span className="text-muted-foreground">98.6% approval</span>
+    </div>
   );
 }
 
@@ -55,8 +27,8 @@ function HeroSearch({ query, setQuery }) {
 
 function CountrySuggestions({ items, label }) {
   return (
-    <div className="mt-5">
-      <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-900))]/50 mb-3 text-center">
+    <div className="mt-6">
+      <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-muted-foreground mb-3 text-center">
         {label}
       </div>
       <div className="flex flex-wrap justify-center gap-2">
@@ -64,11 +36,11 @@ function CountrySuggestions({ items, label }) {
           <Link
             key={c.id}
             to={`/visa/${c.id}`}
-            className="group inline-flex items-center gap-2 rounded-full bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/30 px-3.5 py-2 text-[13.5px] font-bold text-[hsl(var(--blue-900))]/80 hover:text-[hsl(var(--blue-700))] hover:shadow-sm transition"
+            className="group inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-700))]/40 px-4 py-2 text-[14px] font-semibold text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200"
           >
             <span className="text-base leading-none">{c.flag}</span>
             <span>{c.name}</span>
-            <span className="text-[hsl(var(--blue-900))]/40 group-hover:text-[hsl(var(--accent))] transition-colors">→</span>
+            <span className="text-muted-foreground group-hover:text-[hsl(var(--blue-700))] transition-colors" aria-hidden="true">→</span>
           </Link>
         ))}
       </div>
@@ -85,61 +57,54 @@ export default function Hero({ filters, onFilters }) {
   const setF = onFilters || (() => {});
 
   return (
-    <section className="relative z-30 pt-36 pb-16 sm:pt-44 sm:pb-24 overflow-visible bg-grain aurora-bg aurora-grain">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-white" />
-        <div className="absolute inset-0 bg-dots opacity-60" />
-        <div className="absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full bg-[hsl(var(--blue-50))] blur-3xl opacity-90" />
-        <div className="absolute -bottom-40 -left-40 h-[420px] w-[420px] rounded-full bg-[#FEE5E7] blur-3xl opacity-90" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 relative">
+    <section className="relative z-30 pt-32 pb-16 sm:pt-40 sm:pb-24 overflow-visible bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <motion.div
-          className="flex justify-center mb-7"
-          initial={{ opacity: 0, y: -10 }}
+          className="flex justify-center mb-6"
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           <TrustPill />
         </motion.div>
 
         <motion.h1
           data-testid="hero-heading"
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-          className="text-center mx-auto max-w-5xl font-display font-extrabold text-[40px] leading-[1.05] sm:text-[64px] sm:leading-[1.02] lg:text-[80px] lg:leading-[1.0] tracking-[-0.035em] text-[hsl(var(--blue-900))] text-balance"
+          transition={{ duration: 0.3, delay: 0.05, ease: EASE }}
+          className="text-center mx-auto max-w-4xl font-display font-bold text-[36px] leading-[1.1] sm:text-[48px] lg:text-[56px] lg:leading-[1.05] tracking-[-0.02em] text-[hsl(var(--blue-900))] text-balance"
         >
-          <span className="gradient-text-hover">Global visa,</span>{' '}
+          Global visa,{' '}
           <TextFlipAnimation
             words={['sorted.', 'fast.', 'easy.', 'done.']}
-            className="text-[hsl(var(--accent))]"
+            className="text-[hsl(var(--blue-700))]"
             interval={2500}
           />
         </motion.h1>
         <motion.p
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.18, ease: 'easeOut' }}
-          className="text-center mx-auto max-w-2xl mt-5 text-[15px] sm:text-[18px] leading-relaxed text-[hsl(var(--blue-900))]/65 px-2"
+          transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
+          className="text-center mx-auto max-w-2xl mt-5 text-[16px] sm:text-[18px] leading-relaxed text-muted-foreground"
         >
           {t('hero.sub')}
         </motion.p>
 
         <motion.div
           className="mt-10"
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.28, ease: 'easeOut' }}
+          transition={{ duration: 0.3, delay: 0.15, ease: 'easeOut' }}
         >
           <FilterBar value={f} onChange={setF} />
         </motion.div>
 
         <motion.div
           className="mt-8 mx-auto max-w-3xl relative z-30"
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.38, ease: 'easeOut' }}
+          transition={{ duration: 0.3, delay: 0.2, ease: 'easeOut' }}
         >
           <HeroSearch query={query} setQuery={setQuery} />
           {!query && (
@@ -150,12 +115,13 @@ export default function Hero({ filters, onFilters }) {
           )}
         </motion.div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-[14px] text-muted-foreground">
+          <span>Prefer to talk?</span>
           <a
             href={`tel:${BRAND.phoneRaw}`}
-            className="inline-flex items-center gap-2 rounded-full bg-white border border-black/8 hover:border-[hsl(var(--accent))]/40 text-[hsl(var(--blue-900))] px-5 py-3 text-[14px] font-bold transition"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-2 font-semibold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-800))] hover:underline underline-offset-4 transition-colors"
           >
-            <Phone className="w-4 h-4 text-[hsl(var(--accent))]" />
+            <Phone className="w-4 h-4 text-[hsl(var(--blue-700))]" />
             {BRAND.phone}
           </a>
         </div>

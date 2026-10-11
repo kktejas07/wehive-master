@@ -28,24 +28,24 @@ function SuggestionRow({ title, icon: Icon, countries, currentId }) {
     <div className="mb-10 last:mb-0">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[hsl(var(--accent))]/10 flex items-center justify-center">
-            <Icon className="w-4 h-4 text-[hsl(var(--accent))]" />
+          <div className="w-9 h-9 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center">
+            <Icon className="w-4 h-4 text-[hsl(var(--blue-700))]" />
           </div>
-          <h3 className="font-display font-extrabold text-[20px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">{title}</h3>
+          <h3 className="font-display font-bold text-[20px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">{title}</h3>
         </div>
         <div className="flex gap-1.5">
-          <button onClick={() => scroll(-1)} className="w-8 h-8 rounded-full border border-black/10 flex items-center justify-center hover:bg-[hsl(var(--soft-bg))] transition">
-            <ChevronLeft className="w-4 h-4 text-[hsl(var(--blue-900))]/60" />
+          <button type="button" aria-label="Scroll left" onClick={() => scroll(-1)} className="w-10 h-10 rounded-full bg-white border border-[hsl(var(--border))] flex items-center justify-center hover:bg-[hsl(var(--soft-bg))] transition">
+            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
-          <button onClick={() => scroll(1)} className="w-8 h-8 rounded-full border border-black/10 flex items-center justify-center hover:bg-[hsl(var(--soft-bg))] transition">
-            <ChevronRight className="w-4 h-4 text-[hsl(var(--blue-900))]/60" />
+          <button type="button" aria-label="Scroll right" onClick={() => scroll(1)} className="w-10 h-10 rounded-full bg-white border border-[hsl(var(--border))] flex items-center justify-center hover:bg-[hsl(var(--soft-bg))] transition">
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
       </div>
-      <div ref={scrollRef} className="flex gap-4 overflow-x-auto no-scrollbar pb-2 snap-x snap-mandatory">
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto no-scrollbar pb-2 snap-x snap-mandatory [mask-image:linear-gradient(to_right,black_88%,transparent)] lg:[mask-image:none]">
         {filtered.map((c) => (
           <Link key={c.id} to={`/visa/${c.id}`} className="snap-start shrink-0 group block">
-            <div className="w-[170px] rounded-2xl overflow-hidden border border-black/5 bg-white hover:shadow-lg hover:border-[hsl(var(--accent))]/30 transition duration-300">
+            <div className="w-[170px] rounded-2xl overflow-hidden border border-[hsl(var(--border))] bg-white hover:shadow-md hover:-translate-y-0.5 hover:border-[hsl(var(--blue-200))] transition duration-200">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <img decoding="async"
                   src={landmarkFor(c) || ''}
@@ -59,10 +59,10 @@ function SuggestionRow({ title, icon: Icon, countries, currentId }) {
                 </div>
               </div>
               <div className="px-3 py-2.5 flex items-center justify-between">
-                <span className="text-[12px] text-[hsl(var(--blue-900))]/50 font-medium">
+                <span className="text-[12px] text-muted-foreground font-medium">
                   {c.processing_days > 0 ? `${c.processing_days} days` : 'Instant'}
                 </span>
-                <span className="text-[12px] font-bold text-[hsl(var(--accent))]">
+                <span className="text-[12px] font-bold text-[hsl(var(--blue-700))]">
                   {c.fees_inr > 0 ? `₹${c.fees_inr.toLocaleString()}` : 'Free'}
                 </span>
               </div>
@@ -98,13 +98,13 @@ export default function CategorySuggestions({ currentId }) {
   });
 
   return (
-    <section className="py-20 bg-[hsl(var(--soft-bg))] border-y border-black/5">
+    <section className="py-16 md:py-24 bg-[hsl(var(--soft-bg))] border-y border-[hsl(var(--border))]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="mb-10">
-          <h2 className="font-display font-extrabold text-[28px] sm:text-[36px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[28px] sm:text-[36px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
             Explore visas by category
           </h2>
-          <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60 max-w-xl">
+          <p className="mt-2 text-[15px] text-muted-foreground max-w-xl">
             Find the right visa for your travel needs across our curated categories.
           </p>
         </div>

@@ -52,34 +52,34 @@ function AgentEditor({ initial, onSave, onCancel, saving }) {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">ID</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">ID</span>
           <input value={form.id} onChange={e => update('id', e.target.value)} disabled={!!initial}
             placeholder="hive_scholarship_match" className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono disabled:opacity-50" />
         </label>
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Name</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Name</span>
           <input value={form.name} onChange={e => update('name', e.target.value)} placeholder="Scholarship Matchmaker"
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Role</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Role</span>
         <input value={form.role} onChange={e => update('role', e.target.value)} placeholder="a scholarship matching assistant for Indian students"
           className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
       </label>
       <label className="block">
-        <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Description</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Description</span>
         <input value={form.description} onChange={e => update('description', e.target.value)}
           className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Prompt ID</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Prompt ID</span>
           <input value={form.prompt_id} onChange={e => update('prompt_id', e.target.value)}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono" />
         </label>
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Provider</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Provider</span>
           <select value={form.provider_id} onChange={e => update('provider_id', e.target.value)}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none">
             {PROVIDERS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -88,39 +88,39 @@ function AgentEditor({ initial, onSave, onCancel, saving }) {
       </div>
       <div className="grid grid-cols-3 gap-3">
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Model</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Model</span>
           <input value={form.model} onChange={e => update('model', e.target.value)}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono" />
         </label>
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Max Iterations</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Max Iterations</span>
           <input type="number" min={1} max={20} value={form.max_iterations} onChange={e => update('max_iterations', e.target.value)}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
         </label>
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Max Tokens</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Max Tokens</span>
           <input type="number" min={50} max={4096} value={form.max_tokens} onChange={e => update('max_tokens', e.target.value)}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tools (comma-separated registry names)</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tools (comma-separated registry names)</span>
         <input value={form.tools} onChange={e => update('tools', e.target.value)} placeholder="lookup_country, search_universities"
           className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none font-mono" />
       </label>
       <label className="block">
-        <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">RAG Collections (comma-separated)</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">RAG Collections (comma-separated)</span>
         <input value={form.rag_collections} onChange={e => update('rag_collections', e.target.value)} placeholder="wehive_countries, wehive_universities"
           className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none font-mono" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Temperature (0-1)</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Temperature (0-1)</span>
           <input type="number" step="0.1" min={0} max={1} value={form.temperature} onChange={e => update('temperature', e.target.value)}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
         </label>
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tags (comma-separated)</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tags (comma-separated)</span>
           <input value={form.tags} onChange={e => update('tags', e.target.value)}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
         </label>
@@ -171,12 +171,12 @@ function RunPanel({ agent, token, onClose }) {
           <button aria-label="Close" onClick={onClose} className="text-slate-400 hover:text-white"><X className="w-4 h-4" /></button>
         </div>
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Input</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Input</span>
           <textarea value={input} onChange={e => setInput(e.target.value)} rows={3}
             placeholder="Ask the agent anything…"
             className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[13px] text-white outline-none focus:border-emerald-500/50 resize-y" />
         </label>
-        <button onClick={run} disabled={busy || !input.trim()} className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
+        <button onClick={run} disabled={busy || !input.trim()} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
           Run Agent
         </button>
@@ -185,22 +185,22 @@ function RunPanel({ agent, token, onClose }) {
           <div className="space-y-3 mt-2">
             <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-[10px] uppercase tracking-wider text-emerald-300 font-bold">Final Answer</div>
-                <div className="text-[10px] text-slate-400 font-mono">{result.duration_ms}ms</div>
+                <div className="text-[11px] uppercase tracking-wider text-emerald-300 font-bold">Final Answer</div>
+                <div className="text-[11px] text-slate-400 font-mono">{result.duration_ms}ms</div>
               </div>
               <div className="text-[13px] text-white whitespace-pre-wrap">{result.final_answer}</div>
             </div>
             {result.steps?.length > 0 && (
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">Trace ({result.steps.length} steps)</div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-2">Trace ({result.steps.length} steps)</div>
                 <div className="space-y-2">
                   {result.steps.map((s, i) => (
                     <div key={i} className="p-3 rounded-xl bg-white/5 text-[12px]">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-slate-500 font-mono">#{s.iteration}</span>
-                        {s.tool_name && <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-mono text-[10px]">TOOL: {s.tool_name}</span>}
-                        {s.error && <span className="px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 font-mono text-[10px]">error</span>}
-                        <span className="text-slate-500 ml-auto text-[10px]">{s.duration_ms}ms</span>
+                        <span className="text-slate-400 font-mono">#{s.iteration}</span>
+                        {s.tool_name && <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-mono text-[11px]">TOOL: {s.tool_name}</span>}
+                        {s.error && <span className="px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 font-mono text-[11px]">error</span>}
+                        <span className="text-slate-400 ml-auto text-[11px]">{s.duration_ms}ms</span>
                       </div>
                       {s.tool_args && Object.keys(s.tool_args).length > 0 && (
                         <div className="text-slate-400 font-mono text-[11px] mb-1">args: {JSON.stringify(s.tool_args)}</div>
@@ -283,10 +283,10 @@ export default function AgentsV2Tab() {
         subtitle="Composable tool-using LLM agents. ReAct loop, RAG context, pluggable model."
         right={
           <div className="flex gap-2">
-            <button onClick={refresh} className="h-9 px-3 rounded-full bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 inline-flex items-center gap-1.5">
+            <button onClick={refresh} className="h-10 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 inline-flex items-center gap-1.5">
               <RefreshCw className="w-3.5 h-3.5" /> Refresh
             </button>
-            <button onClick={() => setEditing(EMPTY_FORM)} className="h-9 px-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5">
+            <button onClick={() => setEditing(EMPTY_FORM)} className="h-10 px-3 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white inline-flex items-center gap-1.5">
               <Plus className="w-3.5 h-3.5" /> New Agent
             </button>
           </div>
@@ -325,7 +325,7 @@ export default function AgentsV2Tab() {
                       <span className="text-[12px] text-slate-300">{a.name}</span>
                     </div>
                     {a.description && <div className="text-[12px] text-slate-400 mb-1.5">{a.description}</div>}
-                    <div className="flex flex-wrap items-center gap-2 text-[10px]">
+                    <div className="flex flex-wrap items-center gap-2 text-[11px]">
                       <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono inline-flex items-center gap-1">
                         <Cpu className="w-2.5 h-2.5" /> {a.provider_id}/{a.model || 'default'}
                       </span>

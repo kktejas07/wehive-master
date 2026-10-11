@@ -8,29 +8,28 @@ export default function NotFound() {
   return (
     <div className="bg-white">
       <Navbar />
-      <main className="min-h-[70vh] flex items-center justify-center px-5 py-24">
-        <div className="max-w-md w-full text-center space-y-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[hsl(var(--blue-50))]">
-            <Compass className="w-10 h-10 text-[hsl(var(--blue-700))]" />
-          </div>
+      <main className="min-h-[70vh] flex items-center px-4 pt-28 md:pt-36 pb-16 md:pb-24">
+        <div className="max-w-xl w-full mx-auto text-center">
           <div>
-            <h1 className="font-display font-extrabold text-[30px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
-              404 — Page not found
-            </h1>
-            <p className="mt-2 text-[hsl(var(--blue-900))]/60">
-              The page you're looking for doesn't exist or may have moved.
-            </p>
+            <span className="icon-tile h-14 w-14 rounded-2xl">
+              <Compass className="w-7 h-7" aria-hidden="true" />
+            </span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button asChild className="rounded-full btn-accent text-white h-11 px-6 font-bold gap-2">
+          <div className="eyebrow mt-6">Error 404</div>
+          <h1 className="h-display mt-3">Page not found</h1>
+          <p className="lead mt-4">
+            The page you're looking for doesn't exist or may have moved.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+            <Button asChild className="btn-accent h-12 px-6 text-[15px]">
               <Link to="/">
-                <Home className="w-4 h-4" />
+                <Home className="w-4 h-4" aria-hidden="true" />
                 Go home
               </Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-full h-11 px-6 font-bold gap-2">
+            <Button asChild variant="outline" className="h-12 px-6 text-[15px]">
               <Link to="/student-visa">
-                <Compass className="w-4 h-4" />
+                <Compass className="w-4 h-4" aria-hidden="true" />
                 Browse destinations
               </Link>
             </Button>

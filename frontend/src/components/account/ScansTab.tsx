@@ -54,7 +54,7 @@ function Field({ label, value }: FieldProps) {
   if (value == null || value === '') return null;
   return (
     <div className="min-w-0">
-      <dt className="text-[12px] uppercase tracking-[0.16em] text-[hsl(var(--blue-900))]/55 font-bold">{label}</dt>
+      <dt className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">{label}</dt>
       <dd className="mt-0.5 text-[13px] text-[hsl(var(--blue-900))] font-medium truncate">{String(value)}</dd>
     </div>
   );
@@ -82,18 +82,18 @@ function ScanCard({ scan, onDelete, onOpenRaw }: ScanCardProps) {
   return (
     <article
       data-testid={`scan-card-${scan.id}`}
-      className="rounded-2xl bg-white border border-black/5 p-5 transition hover:border-[hsl(var(--blue-700))]/25"
+      className="rounded-2xl bg-white border border-border p-5 transition hover:border-[hsl(var(--blue-700))]/25"
     >
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
-          <span className={`h-10 w-10 rounded-xl inline-flex items-center justify-center ${isPassport ? 'bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))]' : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'}`}>
+          <span className={`h-10 w-10 rounded-xl inline-flex items-center justify-center ${isPassport ? 'bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))]' : 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'}`}>
             {isPassport ? <ShieldCheck className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
           </span>
           <div>
             <div className="text-[14.5px] font-bold text-[hsl(var(--blue-900))]">
               {isPassport ? 'Passport scan' : (e.document_kind || e.title || 'Document scan').toString().replace(/_/g, ' ')}
             </div>
-            <div className="text-[12px] text-[hsl(var(--blue-900))]/55">
+            <div className="text-[12px] text-muted-foreground">
               {when.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} ·{' '}
               {when.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
             </div>
@@ -163,7 +163,7 @@ function ScanCard({ scan, onDelete, onOpenRaw }: ScanCardProps) {
       <div className="mt-4 flex justify-end">
         <button
           onClick={() => onOpenRaw(scan)}
-          className="text-[12px] text-[hsl(var(--blue-900))]/55 hover:text-[hsl(var(--blue-700))] font-bold"
+          className="text-[12px] text-muted-foreground hover:text-[hsl(var(--blue-700))] font-bold"
         >
           View full extracted JSON
         </button>
@@ -183,17 +183,17 @@ function RawScanModal({ scan, onClose }: RawScanModalProps) {
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        {...dialogProps} className="max-w-2xl w-full rounded-3xl bg-white p-6 max-h-[80vh] overflow-y-auto"
+        {...dialogProps} className="max-w-2xl w-full rounded-2xl bg-white p-6 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">
           <div>
-            <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">Scan details</div>
-            <h3 className="font-display font-extrabold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+            <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">Scan details</div>
+            <h3 className="font-display font-bold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
               {scan.kind === 'passport' ? 'Passport' : 'Document'} scan
             </h3>
           </div>
-          <button onClick={onClose} className="rounded-full h-9 w-9 bg-black/5 hover:bg-black/10 inline-flex items-center justify-center text-[hsl(var(--blue-900))]">
+          <button onClick={onClose} className="rounded-xl h-10 w-10 bg-black/5 hover:bg-black/10 inline-flex items-center justify-center text-[hsl(var(--blue-900))]">
             ✕
           </button>
         </div>
@@ -207,14 +207,14 @@ function RawScanModal({ scan, onClose }: RawScanModalProps) {
 
 function EmptyState({ isPremium }: { isPremium?: boolean }) {
   return (
-    <div className="rounded-3xl bg-[hsl(var(--soft-bg))] border border-black/5 p-10 text-center" data-testid="scans-empty">
-      <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))] mb-4">
+    <div className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-border p-10 text-center" data-testid="scans-empty">
+      <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))] mb-4">
         <ScanLine className="w-7 h-7" />
       </span>
-      <h3 className="font-display font-extrabold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+      <h3 className="font-display font-bold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
         No scans yet
       </h3>
-      <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 max-w-sm mx-auto">
+      <p className="mt-2 text-[14px] text-muted-foreground max-w-sm mx-auto">
         {isPremium
           ? 'Open any application and tap "Scan with AI" — we\'ll extract passport & document fields automatically.'
           : 'Scanning is a Premium feature. Upgrade to unlock passport OCR and auto-filled applications.'}
@@ -222,7 +222,7 @@ function EmptyState({ isPremium }: { isPremium?: boolean }) {
       <div className="mt-5">
         <Link
           to="/account?tab=applications"
-          className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] hover:brightness-110 text-white px-5 py-2.5 text-[13px] font-bold"
+          className="inline-flex items-center gap-2 rounded-xl btn-accent text-white h-11 px-5 text-[14px] font-semibold"
         >
           <Sparkles className="w-3.5 h-3.5" /> Go to applications
         </Link>
@@ -286,13 +286,13 @@ export default function ScansTab({ user, token }: ScansTabProps) {
     <div data-testid="scans-tab">
       <div className="flex items-center justify-between gap-3 flex-wrap mb-6">
         <div>
-          <div className="text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
             My AI scans
           </div>
-          <h2 className="mt-1 font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="mt-1 font-display font-bold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
             {total} scan{total === 1 ? '' : 's'} captured
           </h2>
-          <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/60 max-w-md">
+          <p className="mt-1 text-[13px] text-muted-foreground max-w-md">
             Every passport or document you've scanned with Wehive AI, including which application they were applied to.
           </p>
         </div>
@@ -310,7 +310,7 @@ export default function ScansTab({ user, token }: ScansTabProps) {
                 className={`rounded-lg px-3 py-1.5 text-[12px] font-bold transition ${
                   filter === f.id
                     ? 'bg-[hsl(var(--blue-700))] text-white'
-                    : 'text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-900))]'
+                    : 'text-muted-foreground hover:text-[hsl(var(--blue-900))]'
                 }`}
               >
                 {f.label}

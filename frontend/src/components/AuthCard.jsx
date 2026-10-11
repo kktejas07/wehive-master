@@ -8,23 +8,29 @@ import { useAuth, API } from '../context/AuthContext';
 import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useToast } from '../hooks/use-toast';
 
+const INPUT_CLS = 'w-full h-12 rounded-xl border border-[hsl(var(--border))] bg-white px-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors duration-200 hover:border-[hsl(var(--blue-200))] focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20';
+const LABEL_CLS = 'block text-[14px] font-semibold text-[hsl(var(--blue-900))] mb-1.5';
+const ALT_LINK_CLS = 'font-semibold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-800))] hover:underline underline-offset-2';
+
 function TabsInline({ value, onChange, tabs }) {
   return (
-    <div className="inline-flex p-1 rounded-full bg-[hsl(var(--soft-bg))] border border-black/5">
+    <div className="grid grid-flow-col auto-cols-fr w-full p-1 rounded-xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))]">
       {tabs.filter(t => t.enabled !== false).map((opt) => {
         const Icon = opt.Icon;
         const active = value === opt.id;
         return (
           <button
             key={opt.id}
+            type="button"
             onClick={() => onChange(opt.id)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-bold transition ${
+            aria-pressed={active}
+            className={`inline-flex items-center justify-center gap-1.5 rounded-lg h-10 px-3 text-[14px] font-semibold transition-colors duration-200 ${
               active
-                ? 'bg-white shadow-sm text-[hsl(var(--blue-700))]'
-                : 'text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]'
+                ? 'bg-white shadow-sm text-[hsl(var(--blue-700))] ring-1 ring-[hsl(var(--border))]'
+                : 'text-muted-foreground hover:text-[hsl(var(--blue-900))]'
             }`}
           >
-            <Icon className="w-3.5 h-3.5" />
+            <Icon className="w-4 h-4" aria-hidden="true" />
             {opt.label}
           </button>
         );
@@ -54,7 +60,7 @@ function OtpDigits({ value, onChange, length = 6 }) {
     }
   };
   return (
-    <div className="flex justify-center gap-2">
+    <div className="flex justify-center gap-1.5 sm:gap-2">
       {Array.from({ length }).map((_, i) => (
         <input
           key={`otp-${i}`}
@@ -66,7 +72,8 @@ function OtpDigits({ value, onChange, length = 6 }) {
           inputMode="numeric"
           autoComplete="one-time-code"
           maxLength={1}
-          className="w-12 h-14 rounded-xl border-2 border-black/10 focus:border-[hsl(var(--blue-700))] outline-none text-center text-[22px] font-bold text-[hsl(var(--blue-900))] transition"
+          aria-label={`Digit ${i + 1}`}
+          className="w-11 h-14 sm:w-12 rounded-xl border border-[hsl(var(--border))] bg-white focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20 outline-none text-center text-[22px] font-semibold text-[hsl(var(--blue-900))] transition-colors duration-200"
         />
       ))}
     </div>
@@ -299,50 +306,22 @@ export default function AuthCard({ mode, referralCode }) {
   const placeholder = otpChannel === 'email' ? 'you@example.com' : '+91 98765 43210';
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
-      className="relative rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-[0_30px_70px_-30px_rgba(10,44,138,0.45)] p-7 sm:p-9 overflow-hidden"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className="relative rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm p-6 sm:p-8"
     >
-      <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none">
-        <motion.div
-          animate={{ x: [0, 20, -10, 0], y: [0, -10, 15, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -top-20 -right-20 h-[280px] w-[280px] rounded-full bg-[hsl(var(--blue-50))] blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -15, 10, 0], y: [0, 10, -15, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -bottom-24 -left-24 h-[260px] w-[260px] rounded-full bg-[#FEE5E7] blur-3xl"
-        />
+      <div className="eyebrow flex items-center gap-1.5">
+        <ShieldCheck className="w-4 h-4" aria-hidden="true" /> Secure access
       </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: -6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]"
-      >
-        <ShieldCheck className="w-3.5 h-3.5" /> Secure access
-      </motion.div>
-      <motion.h1
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.16 }}
-        className="mt-2 font-display font-extrabold text-[30px] tracking-[-0.025em] text-[hsl(var(--blue-900))]"
-      >
+      <h1 className="mt-3 font-display font-bold text-[28px] sm:text-[32px] leading-tight tracking-[-0.02em] text-[hsl(var(--blue-900))]">
         {step === 'otp'
           ? 'Enter the verification code'
           : isSignup
             ? 'Create your account'
             : 'Sign in to We Hive'}
-      </motion.h1>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.22 }}
-        className="mt-1.5 text-[14px] text-[hsl(var(--blue-900))]/60"
-      >
+      </h1>
+      <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
         {step === 'otp'
           ? `Code sent to ${otpInfo?.masked || identifier}`
           : tab === 'google'
@@ -350,24 +329,24 @@ export default function AuthCard({ mode, referralCode }) {
             : tab === 'emailpwd'
               ? isSignup ? 'Create account with email and password.' : 'Sign in with your email and password.'
               : `We'll send a code via ${otpChannel === 'email' ? 'email' : otpChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'}.`}
-      </motion.p>
+      </p>
 
       {step === 'input' ? (
         <div className="mt-6 space-y-5">
-          <div className="flex justify-center">
+          <div>
             <TabsInline value={tab} onChange={setTab} tabs={allowedTabs} />
           </div>
 
           {tab === 'google' ? (
             <div className="space-y-4">
               <Button disabled={googleLoading} onClick={onGoogleLogin} variant="outline"
-                className="w-full h-12 rounded-full border-2 border-black/10 font-bold text-[15px] flex items-center gap-3 hover:bg-[hsl(var(--blue-50))] hover:text-[hsl(var(--blue-700))]">
+                className="w-full h-12 rounded-xl font-semibold text-[15px] flex items-center gap-3">
                 {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleIcon />}
                 Continue with Google
               </Button>
-              <div className="text-center text-[13px] text-[hsl(var(--blue-900))]/60">
+              <div className="text-center text-[14px] text-muted-foreground">
                 {isSignup ? 'Already have an account? ' : 'New to We Hive? '}
-                <Link to={isSignup ? '/login' : '/signup'} className="font-bold text-[hsl(var(--blue-700))] hover:underline">
+                <Link to={isSignup ? '/login' : '/signup'} className={ALT_LINK_CLS}>
                   {isSignup ? 'Sign in' : 'Create account'}
                 </Link>
               </div>
@@ -376,43 +355,44 @@ export default function AuthCard({ mode, referralCode }) {
             <form onSubmit={onEmailPwdSubmit} className="space-y-4">
               {isSignup && (
                 <div>
-                  <label htmlFor="authcard-your-name" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
+                  <label htmlFor="authcard-your-name" className={LABEL_CLS}>Your name</label>
                   <input id="authcard-your-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma"
-                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
+                    className={INPUT_CLS} />
                 </div>
               )}
               <div>
-                <label htmlFor="authcard-email-address" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Email address</label>
+                <label htmlFor="authcard-email-address" className={LABEL_CLS}>Email address</label>
                 <input id="authcard-email-address" type="email" data-testid="email-input" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com"
-                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
+                  className={INPUT_CLS} />
               </div>
               <div>
-                <label htmlFor="authcard-password" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Password</label>
+                <label htmlFor="authcard-password" className={LABEL_CLS}>Password</label>
                 <div className="relative">
                   <input id="authcard-password" type={showPassword ? 'text' : 'password'} data-testid="password-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters"
-                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
+                    className={`${INPUT_CLS} pr-12`} />
                   <button type="button" onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-[hsl(var(--blue-900))]/40 hover:text-[hsl(var(--blue-700))] transition">
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 {!isSignup && (
                   <button type="button" onClick={onForgotPassword} disabled={forgotSending}
-                    className="mt-1.5 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline disabled:opacity-50">
+                    className="mt-2 text-[13px] font-semibold text-[hsl(var(--blue-700))] hover:underline underline-offset-2 disabled:opacity-50">
                     {forgotSending ? 'Sending reset link…' : 'Forgot password?'}
                   </button>
                 )}
               </div>
               <Button type="submit" data-testid={isSignup ? "signup-submit" : "login-submit"} disabled={emailPwdLoading}
-                className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
+                className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
                 {emailPwdLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isSignup ? 'Create account' : 'Sign in'}
               </Button>
               {verificationSent && (
-                <p className="text-center text-[13px] text-green-600 font-semibold">Verification email sent! Check your inbox.</p>
+                <p className="text-center text-[13px] text-emerald-700 font-semibold">Verification email sent! Check your inbox.</p>
               )}
-              <div className="text-center text-[13px] text-[hsl(var(--blue-900))]/60">
+              <div className="text-center text-[14px] text-muted-foreground">
                 {isSignup ? 'Already have an account? ' : 'New to We Hive? '}
-                <Link to={isSignup ? '/login' : '/signup'} className="font-bold text-[hsl(var(--blue-700))] hover:underline">
+                <Link to={isSignup ? '/login' : '/signup'} className={ALT_LINK_CLS}>
                   {isSignup ? 'Sign in' : 'Create account'}
                 </Link>
               </div>
@@ -421,45 +401,47 @@ export default function AuthCard({ mode, referralCode }) {
             <>
               {isSignup && (
                 <div>
-                  <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">Your name</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma"
-                    className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
+                  <label htmlFor="authcard-otp-name" className={LABEL_CLS}>Your name</label>
+                  <input id="authcard-otp-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma"
+                    className={INPUT_CLS} />
                 </div>
               )}
               <div>
-                <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5" htmlFor="authcard-identifier">
+                <label className={LABEL_CLS} htmlFor="authcard-identifier">
                   {otpChannel === 'email' ? 'Email address' : otpChannel === 'whatsapp' ? 'WhatsApp number' : 'Mobile number'}
                 </label>
                 <input id="authcard-identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)}
                   placeholder={placeholder} inputMode={otpChannel === 'email' ? 'email' : 'tel'}
-                  className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 transition bg-white" />
+                  className={INPUT_CLS} />
               </div>
               <div className="flex gap-2">
                 <button type="button" onClick={() => setOtpChannel('email')}
-                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                  aria-pressed={otpChannel === 'email'}
+                  className={`flex-1 h-11 rounded-xl border text-[14px] font-semibold transition-colors duration-200 ${
                     otpChannel === 'email'
-                      ? 'bg-[hsl(var(--blue-700))] text-white'
-                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
+                      ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'
+                      : 'border-[hsl(var(--border))] bg-white text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-200))]'
                   }`}>
-                  <Mail className="w-3.5 h-3.5 inline-block mr-1" /> Email
+                  <Mail className="w-4 h-4 inline-block mr-1.5 -mt-0.5" aria-hidden="true" /> Email
                 </button>
                 <button type="button" onClick={() => setOtpChannel('whatsapp')}
-                  className={`flex-1 h-10 rounded-full text-[12px] font-bold transition ${
+                  aria-pressed={otpChannel === 'whatsapp'}
+                  className={`flex-1 h-11 rounded-xl border text-[14px] font-semibold transition-colors duration-200 ${
                     otpChannel === 'whatsapp'
-                      ? 'bg-[hsl(var(--blue-700))] text-white'
-                      : 'bg-black/5 text-[hsl(var(--blue-900))]/60 hover:bg-black/10'
+                      ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'
+                      : 'border-[hsl(var(--border))] bg-white text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-200))]'
                   }`}>
-                  <MessageSquare className="w-3.5 h-3.5 inline-block mr-1" /> WhatsApp
+                  <MessageSquare className="w-4 h-4 inline-block mr-1.5 -mt-0.5" aria-hidden="true" /> WhatsApp
                 </button>
 
               </div>
               <Button disabled={sending} onClick={onSendOtp}
-                className="w-full h-12 rounded-full btn-accent text-white font-bold text-[15px]">
+                className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send code'}
               </Button>
-              <div className="text-center text-[13px] text-[hsl(var(--blue-900))]/60">
+              <div className="text-center text-[14px] text-muted-foreground">
                 {isSignup ? 'Already have an account? ' : 'New to We Hive? '}
-                <Link to={isSignup ? '/login' : '/signup'} className="font-bold text-[hsl(var(--blue-700))] hover:underline">
+                <Link to={isSignup ? '/login' : '/signup'} className={ALT_LINK_CLS}>
                   {isSignup ? 'Sign in' : 'Create account'}
                 </Link>
               </div>
@@ -470,7 +452,7 @@ export default function AuthCard({ mode, referralCode }) {
         <div className="mt-7 space-y-5">
           <OtpDigits value={otp} onChange={setOtp} />
           <Button disabled={verifying || otp.length !== 6} onClick={onVerifyOtp}
-            className="w-full h-12 rounded-full btn-primary text-white font-bold text-[15px]">
+            className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
             {verifying ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
@@ -478,24 +460,24 @@ export default function AuthCard({ mode, referralCode }) {
             )}
           </Button>
           <div className="flex items-center justify-between text-[13px]">
-            <button onClick={() => setStep('input')}
-              className="inline-flex items-center gap-1 text-[hsl(var(--blue-700))] font-bold hover:underline">
+            <button type="button" onClick={() => setStep('input')}
+              className="inline-flex items-center gap-1 h-11 text-[hsl(var(--blue-700))] font-semibold hover:underline underline-offset-2">
               <ArrowLeft className="w-3.5 h-3.5" /> Edit
             </button>
-            <button disabled={sending || countdown > 0} onClick={onResend}
-              className="text-[hsl(var(--blue-900))]/65 hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-50">
+            <button type="button" disabled={sending || countdown > 0} onClick={onResend}
+              className="h-11 text-muted-foreground hover:text-[hsl(var(--blue-700))] font-semibold disabled:opacity-60">
               {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
             </button>
           </div>
         </div>
       )}
       <div id="recaptcha-container" />
-      <div className="mt-5 pt-4 border-t border-black/5 text-center">
-        <Link to="/admin/login" className="text-[12px] font-bold text-[hsl(var(--blue-700))]/60 hover:text-[hsl(var(--blue-700))] transition-colors">
+      <div className="mt-6 pt-5 border-t border-[hsl(var(--border))] text-center">
+        <Link to="/admin/login" className="text-[13px] font-semibold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-800))] hover:underline underline-offset-2 transition-colors duration-200">
           Agent? Sign in to your dashboard →
         </Link>
       </div>
-      <p className="mt-4 text-[12px] text-[hsl(var(--blue-900))]/45 text-center leading-relaxed">
+      <p className="mt-3 text-[12px] text-muted-foreground text-center leading-relaxed">
         By continuing you agree to our Terms and Privacy Policy.
       </p>
     </motion.div>

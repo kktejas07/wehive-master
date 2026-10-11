@@ -47,41 +47,41 @@ function PromptEditor({ initial, onSave, onCancel, saving }) {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">ID</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">ID</span>
           <input value={form.id} onChange={e => update('id', e.target.value)} disabled={!!initial}
             placeholder="system.hive" className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono disabled:opacity-50" />
         </label>
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Version</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Version</span>
           <input type="number" min={1} value={form.version} onChange={e => update('version', e.target.value)}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Description</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Description</span>
         <input value={form.description} onChange={e => update('description', e.target.value)}
           className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tags (comma-separated)</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tags (comma-separated)</span>
           <input value={form.tags} onChange={e => update('tags', e.target.value)} placeholder="agent, react"
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
         </label>
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Variables (comma-separated)</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Variables (comma-separated)</span>
           <input value={form.variables} onChange={e => update('variables', e.target.value)} placeholder="user_input, context"
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">System Prompt</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">System Prompt</span>
         <textarea value={form.system} onChange={e => update('system', e.target.value)} rows={6}
           placeholder="You are {{ agent_name }}, {{ agent_role }}."
           className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[12px] text-white outline-none font-mono resize-y" />
       </label>
       <label className="block">
-        <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">User Template</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">User Template</span>
         <textarea value={form.user} onChange={e => update('user', e.target.value)} rows={4}
           placeholder="{{ user_input }}"
           className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[12px] text-white outline-none font-mono resize-y" />
@@ -168,10 +168,10 @@ export default function PromptsTab() {
         subtitle="Versioned prompt templates. YAML defaults + Mongo overrides. Used by agents and Hive."
         right={
           <div className="flex gap-2">
-            <button onClick={reloadAll} className="h-9 px-3 rounded-full bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 inline-flex items-center gap-1.5">
+            <button onClick={reloadAll} className="h-10 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 inline-flex items-center gap-1.5">
               <RefreshCw className="w-3.5 h-3.5" /> Reload
             </button>
-            <button onClick={() => openEditor(null)} className="h-9 px-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5">
+            <button onClick={() => openEditor(null)} className="h-10 px-3 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white inline-flex items-center gap-1.5">
               <Plus className="w-3.5 h-3.5" /> New Prompt
             </button>
           </div>
@@ -209,23 +209,23 @@ export default function PromptsTab() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <code className="text-[13px] font-mono text-white font-bold">{p.id}</code>
-                      <span className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-slate-300 font-mono">v{p.version}</span>
+                      <span className="px-1.5 py-0.5 rounded bg-white/10 text-[11px] text-slate-300 font-mono">v{p.version}</span>
                       {p.source && (
-                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-[10px] text-emerald-300 font-mono">{p.source}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-[11px] text-emerald-300 font-mono">{p.source}</span>
                       )}
                     </div>
                     {p.description && <div className="text-[12px] text-slate-300 mb-1.5">{p.description}</div>}
                     {p.tags?.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-1">
                         {p.tags.map(t => (
-                          <span key={t} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 text-[10px] text-slate-400">
+                          <span key={t} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 text-[11px] text-slate-400">
                             <Tag className="w-2.5 h-2.5" /> {t}
                           </span>
                         ))}
                       </div>
                     )}
                     {p.variables?.length > 0 && (
-                      <div className="text-[10px] text-slate-500 font-mono">vars: {p.variables.join(', ')}</div>
+                      <div className="text-[11px] text-slate-400 font-mono">vars: {p.variables.join(', ')}</div>
                     )}
                   </div>
                   <div className="flex gap-1">

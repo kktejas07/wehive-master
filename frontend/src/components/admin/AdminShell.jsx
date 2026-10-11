@@ -38,7 +38,7 @@ const TABS = [
 
 export default function AdminShell({ children }) {
   const { admin, logout } = useAdminAuth();
-  const { pathname } = useLocation();
+  const pathname = useLocation().pathname.replace(/\/+$/, '') || '/';
   const [profileOpen, setProfileOpen] = useState(false);
   const [pwModal, setPwModal] = useState(false);
   const dialogProps = useDialogA11y(pwModal, () => setPwModal(false));
@@ -67,10 +67,10 @@ export default function AdminShell({ children }) {
         <aside className="hidden lg:flex flex-col bg-[#0a0e1e] border-r border-white/5 p-5 overflow-y-auto admin-scrollbar">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-200 hover:text-white">
             <img src={BRAND.logo} alt="We Hive" className="h-10 w-auto brightness-0 invert" />
-            <span className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-bold">Admin</span>
+            <span className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold">Admin</span>
           </Link>
 
-          <nav className="mt-8 space-y-1 flex-1">
+          <nav aria-label="Admin sections" className="mt-8 space-y-0.5 flex-1">
             {TABS.map((t) => {
               const Icon = t.Icon;
               const active = pathname === t.to || (t.id !== 'overview' && pathname.startsWith(t.to));
@@ -80,9 +80,9 @@ export default function AdminShell({ children }) {
                   to={t.to}
                   end={t.id === 'overview'}
                   data-testid={t.testid}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] font-bold transition ${
+                  className={`flex items-center gap-3 px-3 min-h-[40px] rounded-lg text-[13.5px] font-semibold transition-colors duration-150 ${
                     active
-                      ? 'bg-[hsl(var(--accent))] text-white shadow-[0_10px_30px_-10px_rgba(225,33,44,0.6)]'
+                      ? 'bg-[hsl(var(--blue-700))] text-white'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -108,7 +108,7 @@ export default function AdminShell({ children }) {
                 </span>
                 <div className="min-w-0 text-left">
                   <div className="text-[13px] font-bold truncate">{user?.name || 'Admin'}</div>
-                  <div className="text-[11px] text-slate-500 truncate">{user?.email}</div>
+                  <div className="text-[12px] text-slate-400 truncate">{user?.email}</div>
                 </div>
               </button>
 
@@ -116,13 +116,13 @@ export default function AdminShell({ children }) {
                 <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl bg-[#111632] border border-white/10 shadow-2xl overflow-hidden z-50">
                   <button
                     onClick={() => { setPwModal(true); setProfileOpen(false); }}
-                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-semibold text-slate-300 hover:bg-white/5 transition"
+                    className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-slate-200 hover:bg-white/5 transition-colors"
                   >
                     <Key className="w-3.5 h-3.5" /> Change Password
                   </button>
                   <button
                     onClick={() => { logout(); setProfileOpen(false); }}
-                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-semibold text-red-400 hover:bg-white/5 transition border-t border-white/5"
+                    className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-red-300 hover:bg-white/5 transition-colors border-t border-white/5"
                   >
                     <LogOut className="w-3.5 h-3.5" /> Sign out
                   </button>
@@ -133,7 +133,7 @@ export default function AdminShell({ children }) {
             <div className="mt-3">
               <Link
                 to="/"
-                className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/10 hover:border-white/30 py-1.5 px-4 text-[12px] font-bold text-slate-300 w-full"
+                className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/10 hover:border-white/30 min-h-[36px] px-4 text-[12px] font-semibold text-slate-300 hover:text-white transition-colors w-full"
               >
                 <ArrowLeft className="w-3 h-3" /> Site
               </Link>
@@ -143,7 +143,7 @@ export default function AdminShell({ children }) {
 
         <main className="p-5 sm:p-8 lg:p-10 max-w-full overflow-y-auto relative z-10 admin-scrollbar">
           {/* Mobile tab pill bar */}
-          <div className="lg:hidden flex overflow-x-auto gap-2 mb-5 -mx-5 px-5">
+          <nav aria-label="Admin sections" className="lg:hidden flex overflow-x-auto snap-x scroll-px-5 [scrollbar-width:none] gap-1.5 mb-5 -mx-5 px-5">
             {TABS.map((t) => {
               const active = pathname === t.to || (t.id !== 'overview' && pathname.startsWith(t.to));
               return (
@@ -151,15 +151,15 @@ export default function AdminShell({ children }) {
                   key={t.id}
                   to={t.to}
                   end={t.id === 'overview'}
-                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-bold ${
-                    active ? 'bg-[hsl(var(--accent))] text-white' : 'bg-white/10 text-slate-300'
+                  className={`shrink-0 snap-start inline-flex items-center rounded-lg px-3.5 min-h-[40px] text-[13px] font-semibold whitespace-nowrap transition-colors ${
+                    active ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 border border-white/10 text-slate-300 hover:text-white'
                   }`}
                 >
                   {t.label}
                 </NavLink>
               );
             })}
-          </div>
+          </nav>
           {children}
         </main>
       </div>
@@ -169,16 +169,19 @@ export default function AdminShell({ children }) {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setPwModal(false)}>
           <div {...dialogProps} className="rounded-2xl bg-[#111632] border border-white/10 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
-              <h3 className="text-[16px] font-bold text-white mb-4">Change Password</h3>
-              <div className="space-y-3">
-                <input type="password" value={pwForm.current} onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))} placeholder="Current password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-600 outline-none focus:border-[hsl(var(--accent))]" />
-                <input type="password" value={pwForm.new} onChange={e => setPwForm(p => ({ ...p, new: e.target.value }))} placeholder="New password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-600 outline-none focus:border-[hsl(var(--accent))]" />
-                <input type="password" value={pwForm.confirm} onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))} placeholder="Confirm new password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-600 outline-none focus:border-[hsl(var(--accent))]" />
+              <h3 className="text-[16px] font-semibold text-white mb-4">Change password</h3>
+              <div className="space-y-2">
+                <label htmlFor="admin-pw-current" className="block text-[12px] font-semibold text-slate-300 mb-1">Current password</label>
+                <input id="admin-pw-current" type="password" value={pwForm.current} onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))} placeholder="Current password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-500 outline-none focus:border-[hsl(var(--blue-700))]" />
+                <label htmlFor="admin-pw-new" className="block text-[12px] font-semibold text-slate-300 mb-1">New password</label>
+                <input id="admin-pw-new" type="password" value={pwForm.new} onChange={e => setPwForm(p => ({ ...p, new: e.target.value }))} placeholder="New password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-500 outline-none focus:border-[hsl(var(--blue-700))]" />
+                <label htmlFor="admin-pw-confirm" className="block text-[12px] font-semibold text-slate-300 mb-1">Confirm new password</label>
+                <input id="admin-pw-confirm" type="password" value={pwForm.confirm} onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))} placeholder="Confirm new password" className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-500 outline-none focus:border-[hsl(var(--blue-700))]" />
                 {pwError && <p className="text-[12px] text-red-400 font-semibold">{pwError}</p>}
               </div>
               <div className="flex gap-2 mt-5">
-                <button onClick={() => setPwModal(false)} className="flex-1 h-11 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-[13px] transition">Cancel</button>
-                <button onClick={handlePasswordChange} disabled={pwSaving || !pwForm.current || !pwForm.new} className="flex-1 h-11 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 text-white font-bold text-[13px] transition">{pwSaving ? 'Saving...' : 'Update Password'}</button>
+                <button onClick={() => setPwModal(false)} className="flex-1 h-11 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-[13px] transition-colors">Cancel</button>
+                <button onClick={handlePasswordChange} disabled={pwSaving || !pwForm.current || !pwForm.new} className="flex-1 h-11 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-semibold text-[13px] transition-colors">{pwSaving ? 'Saving...' : 'Update Password'}</button>
               </div>
             </div>
           </div>
@@ -190,15 +193,15 @@ export default function AdminShell({ children }) {
 
 export function AdminHeader({ title, subtitle, right }) {
   return (
-    <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
+    <div className="flex items-end justify-between gap-4 flex-wrap mb-6 sm:mb-8 pb-5 border-b border-white/5">
       <div>
-        <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))]">
+        <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-blue-300">
           We Hive · Super Admin
         </div>
-        <h1 className="mt-2 font-display font-extrabold text-[32px] sm:text-[40px] tracking-[-0.03em] text-white">
+        <h1 className="mt-1.5 font-display font-bold text-[26px] sm:text-[32px] leading-tight tracking-[-0.02em] text-white">
           {title}
         </h1>
-        {subtitle && <p className="mt-1 text-[14px] text-slate-400 max-w-xl">{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-[14px] text-slate-400 max-w-2xl">{subtitle}</p>}
       </div>
       {right}
     </div>
@@ -207,6 +210,6 @@ export function AdminHeader({ title, subtitle, right }) {
 
 export function Panel({ children, className = '' }) {
   return (
-    <div className={`rounded-2xl bg-[#111632] border border-white/5 p-5 ${className}`}>{children}</div>
+    <div className={`rounded-2xl bg-[#111632] border border-white/[0.08] p-4 sm:p-5 ${className}`}>{children}</div>
   );
 }

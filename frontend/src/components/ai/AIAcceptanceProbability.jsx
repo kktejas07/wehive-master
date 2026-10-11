@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const TIER_COLORS = {
   safety: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300', icon: CheckCircle },
-  target: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300', icon: Target },
+  target: { bg: 'bg-[hsl(var(--blue-100))]', text: 'text-[hsl(var(--blue-700))]', border: 'border-[hsl(var(--blue-200))]', icon: Target },
   reach: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300', icon: TrendingUp },
 };
 
@@ -49,27 +49,27 @@ export default function AIAcceptanceProbability({ universityId, universityName }
   return (
     <div className="mt-4">
       <button onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-2 text-[13px] font-bold text-purple-600 hover:text-purple-700 transition">
+        className="inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] transition">
         <Target className="w-4 h-4" />
         {open ? 'Hide' : 'Estimate my acceptance chances'}
       </button>
 
       {open && (
-        <div className="mt-3 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 p-4">
-          <h4 className="font-bold text-[14px] text-purple-800 mb-3 flex items-center gap-1.5">
+        <div className="mt-3 rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-200))] p-4">
+          <h4 className="font-bold text-[14px] text-[hsl(var(--blue-800))] mb-3 flex items-center gap-1.5">
             <Sparkles className="w-4 h-4" /> Acceptance Probability — {universityName}
           </h4>
 
           {!result ? (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <input type="number" step="0.01" min="0" max="4" value={gpa} onChange={e => setGpa(e.target.value)} placeholder="GPA (e.g. 3.5)" className="h-10 px-3 rounded-xl bg-white border border-purple-200 text-[13px] outline-none focus:border-purple-500" />
-                <input type="number" step="0.5" min="0" max="9" value={ielts} onChange={e => setIelts(e.target.value)} placeholder="IELTS (e.g. 7.0)" className="h-10 px-3 rounded-xl bg-white border border-purple-200 text-[13px] outline-none focus:border-purple-500" />
+                <input type="number" step="0.01" min="0" max="4" value={gpa} onChange={e => setGpa(e.target.value)} placeholder="GPA (e.g. 3.5)" className="h-10 px-3 rounded-xl bg-white border border-[hsl(var(--blue-200))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
+                <input type="number" step="0.5" min="0" max="9" value={ielts} onChange={e => setIelts(e.target.value)} placeholder="IELTS (e.g. 7.0)" className="h-10 px-3 rounded-xl bg-white border border-[hsl(var(--blue-200))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
-              <input type="text" value={testScores} onChange={e => setTestScores(e.target.value)} placeholder="GRE/GMAT/other scores" className="w-full h-10 px-3 rounded-xl bg-white border border-purple-200 text-[13px] outline-none focus:border-purple-500" />
-              <textarea value={background} onChange={e => setBackground(e.target.value)} placeholder="Extracurriculars, work experience, achievements..." rows={2} className="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-[13px] outline-none focus:border-purple-500 resize-none" />
+              <input type="text" value={testScores} onChange={e => setTestScores(e.target.value)} placeholder="GRE/GMAT/other scores" className="w-full h-10 px-3 rounded-xl bg-white border border-[hsl(var(--blue-200))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
+              <textarea value={background} onChange={e => setBackground(e.target.value)} placeholder="Extracurriculars, work experience, achievements..." rows={2} className="w-full px-3 py-2 rounded-xl bg-white border border-[hsl(var(--blue-200))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))] resize-none" />
               <button onClick={handleEstimate} disabled={busy}
-                className="w-full h-10 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 hover:brightness-110 disabled:opacity-50 text-white font-bold text-[13px] flex items-center justify-center gap-1.5">
+                className="w-full h-10 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] flex items-center justify-center gap-1.5">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 {busy ? 'Estimating...' : 'Estimate probability'}
               </button>
@@ -78,8 +78,8 @@ export default function AIAcceptanceProbability({ universityId, universityName }
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="text-center">
-                  <div className="text-[36px] font-extrabold text-purple-700">{result.probability}%</div>
-                  <div className="text-[12px] text-purple-500 font-bold uppercase tracking-wider">Probability</div>
+                  <div className="text-[36px] font-bold text-[hsl(var(--blue-700))]">{result.probability}%</div>
+                  <div className="text-[12px] text-[hsl(var(--blue-700))] font-bold uppercase tracking-[0.14em]">Probability</div>
                 </div>
                 <div className="text-center">
                   <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-bold ${
@@ -91,7 +91,7 @@ export default function AIAcceptanceProbability({ universityId, universityName }
                      <TrendingUp className="w-3.5 h-3.5" />}
                     {result.tier?.charAt(0).toUpperCase() + result.tier?.slice(1) || 'Unknown'}
                   </div>
-                  <div className="text-[12px] mt-1 font-semibold uppercase tracking-wider">
+                  <div className="text-[12px] mt-1 font-semibold uppercase tracking-[0.14em]">
                     <span className={CONFIDENCE_COLORS[result.confidence] || 'text-muted-foreground'}>
                       {result.confidence} confidence
                     </span>
@@ -101,11 +101,11 @@ export default function AIAcceptanceProbability({ universityId, universityName }
 
               {result.factors && result.factors.length > 0 && (
                 <div>
-                  <div className="text-[12px] font-bold text-purple-600 uppercase tracking-wider mb-1.5">Key Factors</div>
+                  <div className="text-[12px] font-bold text-[hsl(var(--blue-700))] uppercase tracking-[0.14em] mb-1.5">Key Factors</div>
                   <ul className="space-y-1">
                     {result.factors.map((f, i) => (
-                      <li key={i} className="flex items-start gap-2 text-[12px] text-purple-800">
-                        <HelpCircle className="w-3 h-3 text-purple-400 shrink-0 mt-0.5" />
+                      <li key={i} className="flex items-start gap-2 text-[12px] text-[hsl(var(--blue-800))]">
+                        <HelpCircle className="w-3 h-3 text-[hsl(var(--blue-500))] shrink-0 mt-0.5" />
                         {f}
                       </li>
                     ))}
@@ -115,12 +115,12 @@ export default function AIAcceptanceProbability({ universityId, universityName }
 
               {result.recommendations && (
                 <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
-                  <div className="text-[12px] font-bold text-emerald-700 uppercase tracking-wider mb-0.5">Recommendation</div>
+                  <div className="text-[12px] font-bold text-emerald-700 uppercase tracking-[0.14em] mb-0.5">Recommendation</div>
                   <p className="text-[12px] text-emerald-800">{result.recommendations}</p>
                 </div>
               )}
 
-              <button onClick={() => setResult(null)} className="w-full h-9 rounded-xl bg-white border border-purple-200 hover:bg-purple-50 text-purple-700 font-bold text-[12px]">
+              <button onClick={() => setResult(null)} className="w-full h-9 rounded-xl bg-white border border-[hsl(var(--blue-200))] hover:bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] font-bold text-[12px]">
                 Try different scores
               </button>
             </div>
