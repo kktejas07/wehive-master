@@ -126,7 +126,7 @@ function TabsBar({ value, onChange }) {
             className={`relative inline-flex min-h-[44px] items-center gap-2 rounded-xl px-4 py-2 text-[14px] font-semibold transition-colors duration-200 ${
               active
                 ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]'
-                : 'text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--soft-bg))]'
+                : 'text-white/80 hover:text-white hover:bg-white/10'
             }`}
           >
             <Icon className="w-4 h-4" aria-hidden="true" />
