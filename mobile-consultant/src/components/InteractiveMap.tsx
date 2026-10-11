@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { MapPin, Star, GraduationCap, Clock, Coins, CheckCircle, Info, Compass, HelpCircle } from "lucide-react";
+import { MapPin, Star, GraduationCap, Clock, Coins, CheckCircle, Info, Compass, HelpCircle, Globe } from "lucide-react";
 import { CountryInfo } from "../types";
 import { useColorScheme } from "../hooks/useColorScheme";
 
@@ -109,7 +109,7 @@ export function InteractiveMap({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-[24px] border border-slate-200/50 dark:border-slate-800 p-5 shadow-sm space-y-4 text-left" id="interactive-destination-map-widget">
+    <div className="bg-white rounded-[24px] border border-slate-200/50 p-5 shadow-sm space-y-4 text-left" id="interactive-destination-map-widget">
       {/* Widget Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -117,14 +117,14 @@ export function InteractiveMap({
             <Compass className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-xs font-black text-slate-800 dark:text-slate-100">Interactive Destination Map</h3>
-            <p className="text-[10px] text-slate-500 dark:text-slate-500 font-medium font-sans">
+            <h3 className="text-xs font-black text-slate-800">Interactive Destination Map</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium font-sans">
               Visualize your shortlisted study destinations on the global compass
             </p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100/40 font-mono tracking-wider">
+          <span className="text-[11px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100/40 dark:border-emerald-900/50 font-mono tracking-wider">
             {shortlistedIds.length} Shortlisted
           </span>
         </div>
@@ -157,10 +157,10 @@ export function InteractiveMap({
         </svg>
 
         {/* Latitude/Longitude Indicator Lines (Subtle Overlay decoration) */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[7px] font-mono font-bold text-slate-500 dark:text-slate-700 tracking-widest uppercase pointer-events-none -rotate-90">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 tracking-widest uppercase pointer-events-none -rotate-90">
           Equator 0°N
         </div>
-        <div className="absolute bottom-2 right-4 text-[7px] font-mono font-bold text-slate-500 dark:text-slate-700 tracking-widest pointer-events-none">
+        <div className="absolute bottom-2 right-4 text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 tracking-widest pointer-events-none">
           WEHIVE GLOBAL MAP VISUALIZER
         </div>
 
@@ -198,7 +198,7 @@ export function InteractiveMap({
                     ? "bg-blue-600 border-white text-white z-20 scale-110"
                     : isShortlisted
                     ? "bg-emerald-500 border-white text-white z-10"
-                    : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                    : "bg-white border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400"
                 }`}
               >
                 {isShortlisted ? (
@@ -209,7 +209,7 @@ export function InteractiveMap({
               </button>
 
               {/* Minimal floating name tag */}
-              <div className="absolute top-7 left-1/2 -translate-x-1/2 bg-slate-900/80 dark:bg-slate-950/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md pointer-events-none shadow-xs border border-white/10 whitespace-nowrap opacity-60 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-7 left-1/2 -translate-x-1/2 bg-slate-900/80 dark:bg-slate-950/90 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-md pointer-events-none shadow-xs border border-white/10 whitespace-nowrap opacity-60 group-hover:opacity-100 transition-opacity">
                 {pin.name}
               </div>
             </div>
@@ -231,18 +231,18 @@ export function InteractiveMap({
                   <span className="text-xs font-black">{hoveredPin.name}</span>
                 </div>
                 {shortlistedIds.includes(hoveredPin.id) ? (
-                  <span className="text-[8px] font-black uppercase text-emerald-400 font-mono tracking-wider flex items-center gap-0.5">
-                    ★ Shortlisted
+                  <span className="text-[11px] font-black uppercase text-emerald-400 font-mono tracking-wider flex items-center gap-0.5">
+                    <Star className="w-2.5 h-2.5 fill-current" aria-hidden="true" /> Shortlisted
                   </span>
                 ) : (
-                  <span className="text-[8px] font-semibold text-slate-400 font-mono">
+                  <span className="text-[11px] font-semibold text-slate-400 font-mono">
                     Click pin to view details
                   </span>
                 )}
               </div>
 
               {/* Metrics Grid */}
-              <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[9px]">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
                 {/* Tuition Fee */}
                 <div className="space-y-0.5">
                   <span className="text-slate-400 font-bold flex items-center gap-1">
@@ -282,8 +282,8 @@ export function InteractiveMap({
 
       {/* Mini-Shortlisted Legend & Toggle Panel */}
       <div className="bg-slate-50 dark:bg-slate-800/10 border border-slate-100 dark:border-slate-800/60 p-3.5 rounded-2xl space-y-2.5">
-        <span className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono block">
-          🌍 Quick-Bookmark Countries Directory
+        <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block">
+          <Globe className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Quick-Bookmark Countries Directory
         </span>
         
         <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
@@ -302,12 +302,12 @@ export function InteractiveMap({
                 className={`flex items-center justify-between p-2 rounded-xl border cursor-pointer transition-all ${
                   isShortlisted
                     ? "bg-emerald-50/35 dark:bg-emerald-950/10 border-emerald-200/50 dark:border-emerald-900/30"
-                    : "bg-white dark:bg-slate-900 border-slate-200/50 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700"
+                    : "bg-white border-slate-200/50 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700"
                 }`}
               >
                 <div className="flex items-center gap-1.5 overflow-hidden">
                   <span className="text-sm shrink-0">{pin.flag}</span>
-                  <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 truncate">
                     {pin.name}
                   </span>
                 </div>
@@ -318,7 +318,7 @@ export function InteractiveMap({
                   className={`p-1 rounded-md border transition-all cursor-pointer ${
                     isShortlisted
                       ? "bg-emerald-500 border-emerald-500 text-white shadow-2xs"
-                      : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-600 border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-600 dark:hover:text-slate-400"
+                      : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-600 border-slate-200/60 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-600 dark:hover:text-slate-400"
                   }`}
                   title={isShortlisted ? "Remove from Shortlist" : "Add to Shortlist"}
                 >

@@ -48,7 +48,7 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
       
       {/* Header */}
       <div className="mb-6">
-        <span className="text-[10px] font-black uppercase text-blue-700 tracking-wider font-mono flex items-center gap-1">
+        <span className="text-[11px] font-black uppercase text-blue-700 dark:text-blue-300 tracking-wider font-mono flex items-center gap-1">
           <Users className="w-3 h-3" /> Agent Hub
         </span>
         <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Sub-Agent Console</h2>
@@ -57,41 +57,41 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
       {/* Referral & Rewards Dashboard */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <Coins className="w-4.5 h-4.5 text-blue-900" />
+          <Coins className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Referral Commissions</h3>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/50">
-            <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Commission Earned</div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold font-mono">Commission Earned</div>
             <div className="text-md font-black text-slate-800 mt-0.5">₹15,500</div>
           </div>
 
           <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/50">
-            <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Pending Approval</div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold font-mono">Pending Approval</div>
             <div className="text-md font-black text-slate-800 mt-0.5">₹5,000</div>
           </div>
         </div>
 
-        <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3.5 flex justify-between items-center text-xs">
+        <div className="bg-blue-50/50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-xl p-3.5 flex justify-between items-center text-xs">
           <div>
-            <div className="font-bold text-blue-950">Next Payout Scheduled</div>
-            <p className="text-[10px] text-blue-900/60 mt-0.5">Scheduled direct transfer: July 10, 2026</p>
+            <div className="font-bold text-blue-950 dark:text-blue-300">Next Payout Scheduled</div>
+            <p className="text-[11px] text-blue-900/60 mt-0.5">Scheduled direct transfer: July 10, 2026</p>
           </div>
-          <CreditCard className="w-4.5 h-4.5 text-blue-700 shrink-0" />
+          <CreditCard className="w-4.5 h-4.5 text-blue-700 dark:text-blue-300 shrink-0" />
         </div>
       </div>
 
       {/* Lead Board Registration */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <Users className="w-4.5 h-4.5 text-blue-900" />
+          <Users className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Register New Student Lead</h3>
         </div>
 
         <form onSubmit={handleAddLead} className="space-y-3">
           <div>
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Student Name</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Student Name</label>
             <input
               required
               type="text"
@@ -103,7 +103,7 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
           </div>
 
           <div>
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Student Email</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Student Email</label>
             <input
               required
               type="email"
@@ -115,7 +115,7 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
           </div>
 
           <div>
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Study Destination</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Study Destination</label>
             <select
               value={newLeadCountry}
               onChange={(e) => setNewLeadCountry(e.target.value)}
@@ -157,12 +157,12 @@ export default function AgentTab({ onTriggerNotification, colorScheme }: AgentTa
             <div key={l.id} className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl flex justify-between items-center text-xs">
               <div>
                 <div className="font-bold text-slate-800">{l.name}</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">{l.email} • {l.country}</div>
+                <div className="text-[11px] text-slate-500 mt-0.5">{l.email} • {l.country}</div>
               </div>
-              <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+              <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                 l.status === "completed" 
-                  ? "text-emerald-600 bg-emerald-50 border border-emerald-100" 
-                  : "text-blue-600 bg-blue-50 border border-blue-100"
+                  ? "text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50" 
+                  : "text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50"
               }`}>
                 {l.status}
               </span>

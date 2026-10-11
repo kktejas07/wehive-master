@@ -46,7 +46,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
       
       {/* Header */}
       <div className="mb-6">
-        <span className="text-[10px] font-black uppercase text-rose-600 tracking-wider font-mono flex items-center gap-1">
+        <span className="text-[11px] font-black uppercase text-rose-600 dark:text-rose-300 tracking-wider font-mono flex items-center gap-1">
           <HeartHandshake className="w-3 h-3" /> Secure & Support
         </span>
         <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Emergency Assist</h2>
@@ -56,7 +56,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm text-center space-y-4 mb-6">
         {sosCountdown !== null ? (
           <div className="space-y-3 py-2 animate-pulse">
-            <div className="text-4xl font-black text-rose-600 font-mono">{sosCountdown}s</div>
+            <div className="text-4xl font-black text-rose-600 dark:text-rose-300 font-mono">{sosCountdown}s</div>
             <div className="text-xs font-bold text-slate-800">Dispatching SOS in {sosCountdown} seconds...</div>
             <button
               onClick={cancelSos}
@@ -75,7 +75,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
             </button>
             <div>
               <h3 className="text-xs font-extrabold text-slate-800">One-Tap Crisis SOS</h3>
-              <p className="text-[10px] text-slate-500 max-w-[200px] mx-auto mt-1 leading-normal">
+              <p className="text-[11px] text-slate-500 max-w-[200px] mx-auto mt-1 leading-normal">
                 Pressing sends your exact GPS coordinates to your registered emergency contact and local coordinator.
               </p>
             </div>
@@ -86,13 +86,13 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
       {/* Embassy Hotline Finder */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <ShieldAlert className="w-4.5 h-4.5 text-blue-900" />
+          <ShieldAlert className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Embassy & Consulate Directory</h3>
         </div>
 
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target City</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target City</label>
             <input
               type="text"
               value={targetCity}
@@ -104,10 +104,10 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
           <div className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl space-y-2">
             <div className="flex justify-between items-center text-xs font-bold">
               <span className="text-slate-800">Indian Consulate in {targetCity}</span>
-              <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full uppercase tracking-wider font-mono">Open</span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-full uppercase tracking-wider font-mono">Open</span>
             </div>
             
-            <div className="space-y-1.5 text-[10.5px] text-slate-600">
+            <div className="space-y-1.5 text-[11px] text-slate-600">
               <div className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <a href="tel:+4989210449" className="font-bold hover:underline">+49 89 2104 490</a>
@@ -124,13 +124,13 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
       {/* Insurance Card Wallet */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <HeartHandshake className="w-4.5 h-4.5 text-blue-900" />
+          <HeartHandshake className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Health Insurance Card Wallet</h3>
         </div>
 
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Insurance Provider</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Insurance Provider</label>
             <input
               type="text"
               value={insurer}
@@ -140,7 +140,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
           </div>
 
           <div>
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Insurance Policy Number</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Insurance Policy Number</label>
             <input
               type="text"
               value={policyNum}

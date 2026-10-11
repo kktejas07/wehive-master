@@ -89,10 +89,10 @@ export default function NotificationBanner({ onNavigate }: NotificationBannerPro
           {/* Core Content */}
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-center mb-0.5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 font-mono">
+              <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-400 font-mono">
                 {currentNotif.type === "message" ? "Hive AI Agent" : "WeHive Push Alert"}
               </span>
-              <span className="text-[9px] text-slate-500 font-medium font-mono">now</span>
+              <span className="text-[11px] text-slate-400 font-medium font-mono">now</span>
             </div>
             <h4 className="text-xs font-bold text-white tracking-tight truncate">
               {currentNotif.title}
@@ -101,7 +101,7 @@ export default function NotificationBanner({ onNavigate }: NotificationBannerPro
               {currentNotif.body}
             </p>
             {currentNotif.actionTab && (
-              <div className="flex items-center gap-1 text-[9px] text-blue-400 font-bold mt-1.5 uppercase tracking-wider font-mono">
+              <div className="flex items-center gap-1 text-[11px] text-blue-400 font-bold mt-1.5 uppercase tracking-wider font-mono">
                 <span>View Details</span>
                 <ChevronRight className="w-3 h-3" />
               </div>

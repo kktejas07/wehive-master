@@ -42,7 +42,7 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
     return (
       // Real phone: the OS draws its own status bar, so no simulated one here.
       // Height and safe-area padding come from #wehive-app-root in index.css.
-      <div id="wehive-app-root" className="w-full h-screen bg-slate-50 dark:bg-slate-950 flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
+      <div id="wehive-app-root" className="w-full h-screen bg-slate-50 dark:bg-slate-950 flex flex-col overflow-hidden text-slate-800 font-sans transition-colors duration-300">
         <div className="flex-1 flex flex-col overflow-hidden relative">
           {children}
         </div>
@@ -67,7 +67,7 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
-             iOS View
+            iOS View
           </button>
           <button
             onClick={() => setPlatform("android")}
@@ -77,7 +77,7 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            🤖 Android View
+            Android View
           </button>
         </div>
       </div>
@@ -118,21 +118,21 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
             <div className="w-4 h-4 rounded bg-red-600 flex items-center justify-center font-black text-white text-[10px] shadow-sm">
               W
             </div>
-            <span className="text-[10px] font-black tracking-wider text-blue-100 font-mono">WEHIVE</span>
+            <span className="text-[11px] font-black tracking-wider text-blue-100 font-mono">WEHIVE</span>
           </div>
           <span className="text-[11px] leading-none select-none tracking-tight">{currentTime}</span>
           <div className="flex items-center gap-1.5 leading-none">
             <Signal className="w-3 h-3 text-slate-200" />
             <Wifi className="w-3.5 h-3.5 text-slate-200" />
             <div className="flex items-center gap-0.5 ml-0.5">
-              <span className="text-[10px] font-medium leading-none">{batteryLevel}%</span>
+              <span className="text-[11px] font-medium leading-none">{batteryLevel}%</span>
               <Battery className="w-4 h-3.5 text-red-400 fill-red-400" />
             </div>
           </div>
         </div>
 
         {/* Simulated Mobile screen Area */}
-        <div className="flex-1 flex flex-col overflow-hidden relative bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
+        <div className="flex-1 flex flex-col overflow-hidden relative bg-slate-50 dark:bg-slate-950 text-slate-800 font-sans transition-colors duration-300">
           {children}
         </div>
 
@@ -158,7 +158,7 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
             </button>
             {/* Recent Apps Button */}
             <button aria-hidden="true" tabIndex={-1} className="text-slate-400 hover:text-white transition-colors">
-              <div className="w-3.5 h-3.5 rounded-sm bg-slate-400 hover:bg-white" />
+              <div className="w-3.5 h-3.5 rounded-sm bg-slate-400 hover:bg-white dark:hover:bg-slate-800" />
             </button>
           </div>
         )}

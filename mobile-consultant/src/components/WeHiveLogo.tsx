@@ -18,8 +18,8 @@ export default function WeHiveLogo({
   // Height configurations
   const sizes = {
     sm: { height: "h-6", text: "text-sm", tagline: "text-[6px]", gap: "gap-1.5" },
-    md: { height: "h-8", text: "text-lg", tagline: "text-[8px]", gap: "gap-2" },
-    lg: { height: "h-12", text: "text-2xl", tagline: "text-[10px]", gap: "gap-3" },
+    md: { height: "h-8", text: "text-lg", tagline: "text-[11px]", gap: "gap-2" },
+    lg: { height: "h-12", text: "text-2xl", tagline: "text-[11px]", gap: "gap-3" },
     xl: { height: "h-16", text: "text-4xl", tagline: "text-xs", gap: "gap-4" },
     custom: { height: "", text: "", tagline: "", gap: "" },
   };
@@ -110,9 +110,11 @@ export default function WeHiveLogo({
   return (
     <div className={`inline-flex flex-col items-center justify-center ${className}`}>
       <img 
-        src="/wehive-logo.png" 
-        alt="WeHive Logo" 
-        className={`object-contain ${selectedSize.height} ${theme === "white" ? "brightness-0 invert" : ""}`}
+        // Tightly cropped wordmark: the square wehive-logo.png is mostly padding,
+        // which made the mark illegible at header sizes.
+        src="/wehive-wordmark.png" 
+        alt="WeHive" 
+        className={`object-contain w-auto ${selectedSize.height} ${theme === "white" ? "brightness-0 invert" : ""}`}
       />
       {/* Subtitle / Tagline below */}
       {showTagline && (

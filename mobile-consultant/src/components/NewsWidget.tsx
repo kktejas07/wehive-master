@@ -42,7 +42,7 @@ export default function NewsWidget() {
   return (
     <div className="mt-4 px-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 text-sm">
+        <h3 className="font-bold text-slate-800 flex items-center gap-2 text-sm">
           <Newspaper className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           Immigration Updates
         </h3>
@@ -65,10 +65,10 @@ export default function NewsWidget() {
           >
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">
+                <span className="text-[11px] uppercase font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">
                   {item.category || "News"}
                 </span>
-                <span className="text-[10px] text-slate-400">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
                   {new Date(item.date).toLocaleDateString()}
                 </span>
               </div>

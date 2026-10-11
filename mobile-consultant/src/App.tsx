@@ -447,57 +447,57 @@ function AppContent() {
         </div>
 
         {/* Unified Bottom Tab Navigation bar */}
-        <div className={`app-tab-bar shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 px-4 flex justify-around items-center z-40 shadow-lg select-none transition-colors duration-300 ${
+        <div className={`app-tab-bar shrink-0 bg-white border-t border-slate-200/80 dark:border-slate-800 px-4 flex justify-around items-center z-40 shadow-lg select-none transition-colors duration-300 ${
           platform === "ios" ? "h-20 pb-5" : "h-16"
         }`}>
           {/* Tab Button: Home */}
           <button
             onClick={() => handleNavigate("home")}
-            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("home")}`}
+            className={`flex flex-col items-center justify-center w-16 h-12 transition-all duration-200 cursor-pointer ${getTabClass("home")}`}
           >
             <Home className="w-5 h-5 shrink-0" />
-            <span className="text-[9px] mt-1 font-mono tracking-wide">Home</span>
+            <span className="text-[11px] mt-1 font-mono tracking-wide">Home</span>
           </button>
 
           {/* Tab Button: Explore */}
           <button
             onClick={() => handleNavigate("explore")}
-            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("explore")}`}
+            className={`flex flex-col items-center justify-center w-16 h-12 transition-all duration-200 cursor-pointer ${getTabClass("explore")}`}
           >
             <Compass className="w-5 h-5 shrink-0" />
-            <span className="text-[9px] mt-1 font-mono tracking-wide">Explore</span>
+            <span className="text-[11px] mt-1 font-mono tracking-wide">Explore</span>
           </button>
 
           {/* Tab Button: Hive AI Chat */}
           <button
             onClick={() => handleNavigate("chat")}
-            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("chat")}`}
+            className={`flex flex-col items-center justify-center w-16 h-12 transition-all duration-200 cursor-pointer ${getTabClass("chat")}`}
           >
             <div className="relative">
-              <img src="/favicon.png" alt="Hive AI" className="w-5 h-5 shrink-0 object-contain" />
+              <img src="/favicon.png" alt="" className="w-5 h-5 shrink-0 object-contain" />
               <span className={`absolute -top-1 -right-1.5 w-2 h-2 rounded-full border border-white animate-pulse ${
                 colorScheme === "forced-navy" ? "bg-blue-600" : "bg-red-600"
               }`} />
             </div>
-            <span className="text-[9px] mt-1 font-mono tracking-wide">Hive AI</span>
+            <span className="text-[11px] mt-1 font-mono tracking-wide">Hive AI</span>
           </button>
 
           {/* Tab Button: Vault */}
           <button
             onClick={() => handleNavigate("vault")}
-            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("vault")}`}
+            className={`flex flex-col items-center justify-center w-16 h-12 transition-all duration-200 cursor-pointer ${getTabClass("vault")}`}
           >
             <Folder className="w-5 h-5 shrink-0" />
-            <span className="text-[9px] mt-1 font-mono tracking-wide">Vault</span>
+            <span className="text-[11px] mt-1 font-mono tracking-wide">Vault</span>
           </button>
 
           {/* Tab Button: Journey Tracking */}
           <button
             onClick={() => handleNavigate("tracking")}
-            className={`flex flex-col items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer ${getTabClass("tracking")}`}
+            className={`flex flex-col items-center justify-center w-16 h-12 transition-all duration-200 cursor-pointer ${getTabClass("tracking")}`}
           >
             <CheckSquare className="w-5 h-5 shrink-0" />
-            <span className="text-[9px] mt-1 font-mono tracking-wide">Journey</span>
+            <span className="text-[11px] mt-1 font-mono tracking-wide">Journey</span>
           </button>
         </div>
       </div>
