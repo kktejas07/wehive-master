@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useColorScheme } from "../hooks/useColorScheme";
 import { SecurityLog, BiometricAnimationStyle } from "../types";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -231,6 +232,7 @@ export default function SettingsModal({
     }
   };
 
+  const dialog = useDialogA11y(isOpen, onClose);
   if (!isOpen) return null;
 
   return (
@@ -241,7 +243,7 @@ export default function SettingsModal({
 
         {/* Settings Panel Bottom Sheet */}
         <motion.div
-          id="settings-panel-modal"
+          {...dialog} id="settings-panel-modal"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
@@ -261,12 +263,12 @@ export default function SettingsModal({
               </div>
               <div>
                 <h3 className="text-base font-black text-slate-800 dark:text-slate-100 tracking-tight">App Settings</h3>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono font-medium">Config & Preferences</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-500 font-mono font-medium">Config & Preferences</p>
               </div>
             </div>
-            <button
+            <button aria-label="Close settings"
               onClick={onClose}
-              className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+              className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
             >
               <X className="w-4.5 h-4.5" />
             </button>
@@ -277,7 +279,7 @@ export default function SettingsModal({
             
             {/* 0. More Tools & Services */}
             <div className="space-y-2.5">
-              <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block px-1">
+              <span className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono block px-1">
                 More Tools & Services
               </span>
               <div className="grid grid-cols-2 gap-3">
@@ -302,7 +304,7 @@ export default function SettingsModal({
                       </div>
                       <div className="mt-2.5">
                         <div className="text-[12px] font-extrabold text-slate-800 dark:text-slate-200">{tool.label}</div>
-                        <p className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">{tool.desc}</p>
+                        <p className="text-[9.5px] text-slate-500 dark:text-slate-500 mt-0.5 leading-tight">{tool.desc}</p>
                       </div>
                     </button>
                   );
@@ -317,7 +319,7 @@ export default function SettingsModal({
                   <Shield className="w-4.5 h-4.5 text-blue-950 dark:text-blue-400 mt-0.5 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Biometric Protection</h4>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500">Lock application on startup or idle reload.</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-500">Lock application on startup or idle reload.</p>
                   </div>
                 </div>
                 {/* Switch Button */}
@@ -677,7 +679,7 @@ export default function SettingsModal({
               {/* Destination Country Speed Dial Selector */}
               <div className="bg-white dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono flex items-center gap-1">
+                  <span className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono flex items-center gap-1">
                     <Globe className="w-3 h-3 text-slate-400" />
                     Destination Helpline
                   </span>
@@ -711,7 +713,7 @@ export default function SettingsModal({
                             {contact.number}
                           </span>
                         </div>
-                        <p className="text-[9px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
+                        <p className="text-[9px] text-slate-500 dark:text-slate-500 truncate mt-0.5">
                           {contact.description}
                         </p>
                       </div>
@@ -732,7 +734,7 @@ export default function SettingsModal({
               {/* Custom Student Personal Speed Dials */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-1">
-                  <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono flex items-center gap-1">
+                  <span className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono flex items-center gap-1">
                     <UserPlus className="w-3 h-3 text-slate-400" />
                     My Speed Dials ({customContacts.filter(c => c.countryId === securityActiveCountry).length})
                   </span>
@@ -756,7 +758,7 @@ export default function SettingsModal({
                       onSubmit={handleAddContact}
                       className="bg-white dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 space-y-2.5 overflow-hidden"
                     >
-                      <span className="text-[8px] font-black uppercase text-slate-400 dark:text-slate-500 font-mono block">
+                      <span className="text-[8px] font-black uppercase text-slate-500 dark:text-slate-500 font-mono block">
                         Add New Speed Dial ({getCountryName(securityActiveCountry)})
                       </span>
                       
@@ -943,7 +945,7 @@ export default function SettingsModal({
                   <Palette className="w-4.5 h-4.5 text-blue-950 dark:text-blue-400 mt-0.5 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Visual Theme Preference</h4>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500">Choose the global accent colors & background feel.</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-500">Choose the global accent colors & background feel.</p>
                   </div>
                 </div>
 

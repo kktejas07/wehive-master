@@ -4,6 +4,7 @@ import { Fingerprint, ScanFace, Check, RefreshCw, Lock, ShieldCheck, HelpCircle 
 import LottiePlayer from "./LottiePlayer";
 import { BiometricAnimationStyle } from "../types";
 import WeHiveLogo from "./WeHiveLogo";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface BiometricAuthProps {
   platform: "ios" | "android";
@@ -26,6 +27,7 @@ export default function BiometricAuth({
   const [progress, setProgress] = useState(0);
   const [failCount, setFailCount] = useState(0);
   const hasTriggeredSuccess = useRef(false);
+  const dialog = useDialogA11y(true);
 
   // Auto start scanning on mount
   useEffect(() => {
@@ -148,7 +150,7 @@ export default function BiometricAuth({
 
   return (
     <motion.div
-      id="biometric-auth-overlay"
+      {...dialog} id="biometric-auth-overlay"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

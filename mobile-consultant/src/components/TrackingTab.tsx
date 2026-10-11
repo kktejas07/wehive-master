@@ -10,6 +10,7 @@ import { jsPDF } from "jspdf";
 import { DEFAULT_JOURNEY_MILESTONES } from "../data";
 import { JourneyMilestone } from "../types";
 import { useNotifications } from "./NotificationContext";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface VaultDocument {
   id: string;
@@ -410,6 +411,7 @@ export default function TrackingTab() {
   const [selectedViewerDoc, setSelectedViewerDoc] = useState<VaultDocument | null>(null);
   const [viewerTab, setViewerTab] = useState<"scan" | "cert">("scan");
   const [isNewUploadOpen, setIsNewUploadOpen] = useState(false);
+  const uploadDialog = useDialogA11y(!!activeUploadMilestone || isNewUploadOpen, () => handleCloseUpload());
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   // Gemini AI OCR Extraction States
@@ -2545,8 +2547,9 @@ export default function TrackingTab() {
       {/* ================= SIMULATED FILE UPLOAD DRAWER OVERLAY ================= */}
       {(activeUploadMilestone || isNewUploadOpen) && (
         <div className="absolute inset-0 bg-black/60 flex items-end justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-t-3xl rounded-b-xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none">
+          <div {...uploadDialog} className="bg-white rounded-t-3xl rounded-b-xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none">
             <button
+              aria-label="Close"
               onClick={handleCloseUpload}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
             >

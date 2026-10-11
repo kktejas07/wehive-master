@@ -7,6 +7,7 @@ import { useNotifications } from "./NotificationContext";
 import { useColorScheme } from "../hooks/useColorScheme";
 import WeHiveLogo from "./WeHiveLogo";
 import NewsWidget from "./NewsWidget";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface HomeTabProps {
   onNavigate: (tabId: string) => void;
@@ -46,6 +47,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
   const [loadingNextSteps, setLoadingNextSteps] = useState(false);
   const [errorNextSteps, setErrorNextSteps] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const bookingDialog = useDialogA11y(showBookingModal, () => setShowBookingModal(false));
   const [selectedConsultant, setSelectedConsultant] = useState(CONSULTANTS[0]);
   const [bookingDate, setBookingDate] = useState("2026-07-06");
   const [bookingTime, setBookingTime] = useState("10:00 AM");
@@ -246,7 +248,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               <button
                 onClick={onLock}
                 title="Lock App (Biometric Simulation)"
-                className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
+                className="p-2.5 bg-blue-900/40 rounded-full relative before:absolute before:-inset-1 border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
               >
                 <Lock className="w-4 h-4" />
               </button>
@@ -254,7 +256,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
             <button 
               onClick={onOpenNotifications}
               title="Open Notifications"
-              className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors relative cursor-pointer"
+              className="p-2.5 bg-blue-900/40 rounded-full relative before:absolute before:-inset-1 border border-blue-800/40 text-blue-200 hover:text-white transition-colors relative cursor-pointer"
             >
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-600 text-[10px] text-white font-extrabold w-4.5 h-4.5 rounded-full flex items-center justify-center border border-blue-950 animate-pulse">
@@ -266,7 +268,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
             <button 
               onClick={() => onNavigate("vault")}
               title="Scan Documents"
-              className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
+              className="p-2.5 bg-blue-900/40 rounded-full relative before:absolute before:-inset-1 border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
             >
               <Scan className="w-4 h-4" />
             </button>
@@ -274,7 +276,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               <button
                 onClick={onOpenSettings}
                 title="Open Settings"
-                className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
+                className="p-2.5 bg-blue-900/40 rounded-full relative before:absolute before:-inset-1 border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
               >
                 <Settings className="w-4 h-4" />
               </button>
@@ -823,7 +825,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               </div>
               <div>
                 <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Budget Assistant</h3>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium font-sans">Evaluate your move prep savings</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-500 font-medium font-sans">Evaluate your move prep savings</p>
               </div>
             </div>
             <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono tracking-wider">
@@ -835,7 +837,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
           <div className="grid grid-cols-2 gap-3.5">
             {/* Dream Country Selector */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block">
+              <label className="text-[10px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono block">
                 Dream Country
               </label>
               <div className="relative">
@@ -850,7 +852,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                     </option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400 dark:text-slate-500">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500 dark:text-slate-500">
                   <ChevronDown className="w-4 h-4" />
                 </div>
               </div>
@@ -858,12 +860,12 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
             {/* Monthly Savings input */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono block flex items-center justify-between">
                 <span>Monthly Savings</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">(USD)</span>
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 font-mono text-xs font-black">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 dark:text-slate-500 font-mono text-xs font-black">
                   $
                 </div>
                 <input
@@ -881,7 +883,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
           {/* Quick Slider control for savings */}
           <div className="space-y-1">
-            <div className="flex justify-between text-[9px] font-bold text-slate-400 dark:text-slate-500 font-mono uppercase">
+            <div className="flex justify-between text-[9px] font-bold text-slate-500 dark:text-slate-500 font-mono uppercase">
               <span>Savings range adjustment</span>
               <span className="text-slate-500 dark:text-slate-400 font-bold">${budgetSavings.toLocaleString()} / $5,000</span>
             </div>
@@ -900,7 +902,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
           <div className="bg-slate-50/80 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800/60 p-3.5 rounded-2xl space-y-3 shadow-2xs">
             {/* Currency conversion notification banner */}
             <div className="flex items-center justify-between text-[10px]">
-              <span className="text-slate-400 dark:text-slate-500 font-mono font-medium flex items-center gap-1">
+              <span className="text-slate-500 dark:text-slate-500 font-mono font-medium flex items-center gap-1">
                 <Coins className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 Estimated Conversion Rate
               </span>
@@ -913,32 +915,32 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
             <div className="grid grid-cols-2 gap-4 pt-1 text-left">
               {/* User Native budget */}
               <div className="space-y-0.5">
-                <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block">Your Monthly Funds</span>
+                <span className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono block">Your Monthly Funds</span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-base font-extrabold text-slate-800 dark:text-slate-100">
                     {activeBudgetInfo.symbol}{nativeSavings.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold font-mono">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-500 font-bold font-mono">
                     /mo
                   </span>
                 </div>
-                <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 block leading-tight">
+                <span className="text-[9px] font-medium text-slate-500 dark:text-slate-500 block leading-tight">
                   Equivalent of ${budgetSavings.toLocaleString()} USD
                 </span>
               </div>
 
               {/* Target Country Average cost */}
               <div className="space-y-0.5">
-                <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block">Average Living Cost</span>
+                <span className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono block">Average Living Cost</span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-base font-extrabold text-slate-800 dark:text-slate-100">
                     {activeBudgetInfo.symbol}{averageCost.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold font-mono">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-500 font-bold font-mono">
                     /mo
                   </span>
                 </div>
-                <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 block leading-tight">
+                <span className="text-[9px] font-medium text-slate-500 dark:text-slate-500 block leading-tight">
                   Est. range: {activeBudgetInfo.nativeCostStr}
                 </span>
               </div>
@@ -1123,8 +1125,9 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
       {/* Booking Dialog Modal */}
       {showBookingModal && (
         <div className="absolute inset-0 bg-black/60 flex items-end justify-center z-50 animate-fade-in p-4">
-          <div className="bg-white rounded-3xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none">
+          <div {...bookingDialog} className="bg-white rounded-3xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none">
             <button
+              aria-label="Close"
               onClick={() => setShowBookingModal(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
             >

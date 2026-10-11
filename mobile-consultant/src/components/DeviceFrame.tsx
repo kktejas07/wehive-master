@@ -147,17 +147,17 @@ export default function DeviceFrame({ children, platform, setPlatform }: DeviceF
         {platform === "android" && (
           <div className="h-12 bg-blue-950 border-t border-blue-900 flex justify-around items-center px-8 z-40 select-none shrink-0 rounded-b-[32px]">
             {/* Back Button */}
-            <button className="text-slate-400 hover:text-white transition-colors">
+            <button aria-hidden="true" tabIndex={-1} className="text-slate-400 hover:text-white transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             {/* Home Button */}
-            <button className="text-slate-400 hover:text-white transition-colors">
+            <button aria-hidden="true" tabIndex={-1} className="text-slate-400 hover:text-white transition-colors">
               <div className="w-4 h-4 rounded-md border-2 border-slate-400 hover:border-white" />
             </button>
             {/* Recent Apps Button */}
-            <button className="text-slate-400 hover:text-white transition-colors">
+            <button aria-hidden="true" tabIndex={-1} className="text-slate-400 hover:text-white transition-colors">
               <div className="w-3.5 h-3.5 rounded-sm bg-slate-400 hover:bg-white" />
             </button>
           </div>

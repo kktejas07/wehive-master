@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 import jsPDF from "jspdf";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Joyride, Step } from "react-joyride";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface DocumentItem {
   id: string;
@@ -32,6 +33,8 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
   const [searchQuery, setSearchQuery] = useState("");
   const [isIdentificationUnlocked, setIsIdentificationUnlocked] = useState(false);
   const [ocrResult, setOcrResult] = useState<string | null>(null);
+  const ocrDialog = useDialogA11y(!!ocrResult, () => setOcrResult(null));
+  const previewDialog = useDialogA11y(!!previewDoc, () => setPreviewDoc(null));
   const [runTour, setRunTour] = useState(true);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -467,7 +470,7 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
           >
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl p-6"
+              {...ocrDialog} className="bg-white rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl p-6"
             >
               <h3 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-emerald-500" /> AI OCR Data Extracted
@@ -502,7 +505,7 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl"
+              {...previewDialog} className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl"
               style={{ maxHeight: '80vh' }}
             >
               <div className="flex justify-between items-center p-4 border-b border-slate-100">

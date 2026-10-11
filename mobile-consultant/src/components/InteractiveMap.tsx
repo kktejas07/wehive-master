@@ -118,7 +118,7 @@ export function InteractiveMap({
           </div>
           <div>
             <h3 className="text-xs font-black text-slate-800 dark:text-slate-100">Interactive Destination Map</h3>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium font-sans">
+            <p className="text-[10px] text-slate-500 dark:text-slate-500 font-medium font-sans">
               Visualize your shortlisted study destinations on the global compass
             </p>
           </div>
@@ -157,10 +157,10 @@ export function InteractiveMap({
         </svg>
 
         {/* Latitude/Longitude Indicator Lines (Subtle Overlay decoration) */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[7px] font-mono font-bold text-slate-300 dark:text-slate-700 tracking-widest uppercase pointer-events-none -rotate-90">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[7px] font-mono font-bold text-slate-500 dark:text-slate-700 tracking-widest uppercase pointer-events-none -rotate-90">
           Equator 0°N
         </div>
-        <div className="absolute bottom-2 right-4 text-[7px] font-mono font-bold text-slate-300 dark:text-slate-700 tracking-widest pointer-events-none">
+        <div className="absolute bottom-2 right-4 text-[7px] font-mono font-bold text-slate-500 dark:text-slate-700 tracking-widest pointer-events-none">
           WEHIVE GLOBAL MAP VISUALIZER
         </div>
 
@@ -282,7 +282,7 @@ export function InteractiveMap({
 
       {/* Mini-Shortlisted Legend & Toggle Panel */}
       <div className="bg-slate-50 dark:bg-slate-800/10 border border-slate-100 dark:border-slate-800/60 p-3.5 rounded-2xl space-y-2.5">
-        <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block">
+        <span className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono block">
           🌍 Quick-Bookmark Countries Directory
         </span>
         
@@ -318,7 +318,7 @@ export function InteractiveMap({
                   className={`p-1 rounded-md border transition-all cursor-pointer ${
                     isShortlisted
                       ? "bg-emerald-500 border-emerald-500 text-white shadow-2xs"
-                      : "bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-600 dark:hover:text-slate-400"
+                      : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-600 border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-600 dark:hover:text-slate-400"
                   }`}
                   title={isShortlisted ? "Remove from Shortlist" : "Add to Shortlist"}
                 >

@@ -67,7 +67,7 @@ export default function EmergencyTab({ onTriggerNotification, colorScheme }: Eme
           </div>
         ) : (
           <div className="space-y-3">
-            <button
+            <button aria-label="Send SOS alert"
               onClick={triggerSos}
               className="h-20 w-20 rounded-full bg-rose-600 text-white inline-flex items-center justify-center shadow-lg shadow-rose-600/30 hover:bg-rose-700 transition cursor-pointer"
             >

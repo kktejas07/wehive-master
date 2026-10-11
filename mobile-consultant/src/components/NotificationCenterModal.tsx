@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useNotifications, PushNotification } from "./NotificationContext";
 import { useColorScheme } from "../hooks/useColorScheme";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface NotificationCenterModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export default function NotificationCenterModal({ isOpen, onClose, onNavigate }:
 
   const { colorScheme, setColorScheme } = useColorScheme();
 
+  const dialog = useDialogA11y(isOpen, onClose);
   if (!isOpen) return null;
 
   const handleNotifClick = (notif: PushNotification) => {
@@ -65,7 +67,7 @@ export default function NotificationCenterModal({ isOpen, onClose, onNavigate }:
 
         {/* Modal Container */}
         <motion.div
-          id="notification-center-panel"
+          {...dialog} id="notification-center-panel"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
@@ -88,7 +90,7 @@ export default function NotificationCenterModal({ isOpen, onClose, onNavigate }:
               </div>
               <h3 className="text-base font-black text-slate-800 tracking-tight">Notification Center</h3>
             </div>
-            <button
+            <button aria-label="Close notifications"
               onClick={onClose}
               className="p-1.5 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
             >

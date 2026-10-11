@@ -250,7 +250,7 @@ function AppContent() {
 
   const getTabClass = (tabId: string) => {
     const isActive = activeTab === tabId;
-    if (!isActive) return "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200";
+    if (!isActive) return "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
     
     if (colorScheme === "forced-red") {
       return "text-red-600 dark:text-red-400 font-extrabold";

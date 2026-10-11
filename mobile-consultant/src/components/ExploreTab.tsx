@@ -6,6 +6,7 @@ import { CountryInfo } from "../types";
 import { useColorScheme } from "../hooks/useColorScheme";
 import { getCachedCountryGuides, isAppOffline } from "../utils/offlineCache";
 import { InteractiveMap } from "./InteractiveMap";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface Phrase {
   original: string;
@@ -493,6 +494,7 @@ export default function ExploreTab({
   }, [selectedCountryId]);
 
   const [activeCountry, setActiveCountry] = useState<CountryInfo | null>(null);
+  const countryDialog = useDialogA11y(!!activeCountry, () => handleBack());
   const [searchQuery, setSearchQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     try {
@@ -1312,7 +1314,7 @@ export default function ExploreTab({
               exit={{ scale: 0.92, opacity: 0, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-[85%] border border-slate-100 relative z-10"
+              {...countryDialog} className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-[85%] border border-slate-100 relative z-10"
             >
               {/* Banner / Header */}
               <div className="relative h-36 shrink-0">
@@ -1333,7 +1335,7 @@ export default function ExploreTab({
                 </div>
 
                 {/* Close Button */}
-                <button
+                <button aria-label="Close"
                   onClick={handleBack}
                   className="absolute top-3 right-3 p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white cursor-pointer transition-colors z-20"
                 >
@@ -1444,7 +1446,7 @@ export default function ExploreTab({
                       </div>
 
                       {/* Description */}
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-500 leading-tight">
                         Familiarize yourself with crucial vocabulary, student terminology, and pronunciation to help prep for your move!
                       </p>
 
@@ -1505,11 +1507,11 @@ export default function ExploreTab({
                                 <div className="space-y-0.5">
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{phrase.original}</span>
-                                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">
+                                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-500 uppercase tracking-wider font-mono">
                                       {phrase.category}
                                     </span>
                                   </div>
-                                  <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500 italic block">
+                                  <span className="text-[9px] font-mono text-slate-500 dark:text-slate-500 italic block">
                                     Pronunciation: <strong className="text-slate-500 dark:text-slate-400 font-semibold font-mono">[{phrase.pronunciation}]</strong>
                                   </span>
                                 </div>
@@ -1521,7 +1523,7 @@ export default function ExploreTab({
                                     className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                                       isSpeaking
                                         ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 animate-pulse"
-                                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+                                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
                                     }`}
                                     title="Listen Pronunciation"
                                   >
@@ -1534,7 +1536,7 @@ export default function ExploreTab({
                                     className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                                       isLearned
                                         ? "bg-emerald-500 border-emerald-500 text-white"
-                                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-300 dark:text-slate-600 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-500"
+                                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-600 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-500"
                                     }`}
                                     title={isLearned ? "Mark as Unlearned" : "Mark as Learned"}
                                   >
@@ -1552,7 +1554,7 @@ export default function ExploreTab({
                               </p>
 
                               {phrase.context && (
-                                <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 bg-slate-50/80 dark:bg-slate-900/30 p-1.5 rounded-lg border border-slate-100/50 dark:border-slate-800/40 italic leading-relaxed">
+                                <p className="text-[9px] text-slate-500 dark:text-slate-500 mt-1 bg-slate-50/80 dark:bg-slate-900/30 p-1.5 rounded-lg border border-slate-100/50 dark:border-slate-800/40 italic leading-relaxed">
                                   💡 {phrase.context}
                                 </p>
                               )}

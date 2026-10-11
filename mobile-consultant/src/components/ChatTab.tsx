@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "motion/react";
 import Markdown from "react-markdown";
 import { Message } from "../types";
 import { useNotifications } from "./NotificationContext";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 const SUGGESTIONS = [
   "🇬🇧 Tell me about the UK Graduate Route.",
@@ -77,6 +78,7 @@ export default function ChatTab() {
   const [speechRecognitionSupported, setSpeechRecognitionSupported] = useState(true);
   const [speakingMessageIndex, setSpeakingMessageIndex] = useState<number | null>(null);
   const [isListeningModeSimulated, setIsListeningModeSimulated] = useState(false);
+  const listeningDialog = useDialogA11y(isListening, () => stopListening(false));
   const [isAutoSpeakEnabled, setIsAutoSpeakEnabled] = useState(false);
   const [speechRecognitionInstance, setSpeechRecognitionInstance] = useState<any>(null);
 
@@ -1031,7 +1033,7 @@ export default function ChatTab() {
               placeholder="Ask about visas, top colleges, or scholarships..."
               className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs focus:outline-blue-900 disabled:opacity-50 font-medium"
             />
-            <button
+            <button aria-label="Send message"
               type="submit"
               disabled={loading || !input.trim()}
               className="p-3 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all shadow-md shadow-red-500/10 hover:shadow-red-500/25 disabled:opacity-50 cursor-pointer shrink-0"
@@ -1089,7 +1091,7 @@ export default function ChatTab() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 15 }}
-                className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl z-50 flex flex-col justify-between p-6 select-none rounded-b-2xl overflow-hidden animate-fade-in"
+                {...listeningDialog} className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl z-50 flex flex-col justify-between p-6 select-none rounded-b-2xl overflow-hidden animate-fade-in"
               >
                 {/* Header status */}
                 <div className="flex flex-col items-center mt-6 text-center space-y-1.5">
@@ -1578,7 +1580,7 @@ export default function ChatTab() {
                   placeholder={`Write a question to ${activePeer.name}...`}
                   className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-blue-900"
                 />
-                <button
+                <button aria-label="Send message"
                   type="submit"
                   disabled={!peerInput.trim()}
                   className="p-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all disabled:opacity-50 cursor-pointer shrink-0"
@@ -1818,7 +1820,7 @@ export default function ChatTab() {
                       placeholder={`Post a question/advice in ${activeCircle?.name.split(" ")[0]} Circle...`}
                       className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-blue-900 font-medium"
                     />
-                    <button
+                    <button aria-label="Send message"
                       type="submit"
                       disabled={!groupInput.trim()}
                       className="p-2.5 bg-blue-950 text-white rounded-xl hover:bg-black transition-all disabled:opacity-50 cursor-pointer shrink-0"
