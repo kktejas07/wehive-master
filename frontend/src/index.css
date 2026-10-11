@@ -4,10 +4,10 @@
    hsl(var(--token))). Owned by the shell; ask before editing.
 
    Colour roles
-     ink text ........ text-[hsl(var(--blue-900))]   #0F172A
-     secondary text .. text-muted-foreground         #475569
-     primary/link .... hsl(var(--blue-700)) #2563EB, hover hsl(var(--blue-800))
-     CTA (green) ..... hsl(var(--accent)) #047857, hover hsl(var(--accent-hover))
+     ink text ........ text-[hsl(var(--blue-900))]   #0B1220
+     secondary text .. text-muted-foreground         #4A5568
+     primary/link .... hsl(var(--blue-700)) #0A3161 navy, hover hsl(var(--blue-800))
+     CTA (red) ....... hsl(var(--accent)) #B31942, hover hsl(var(--accent-hover))
                        main call-to-action buttons ONLY
      surfaces ........ white cards, hsl(var(--soft-bg)) page tint,
                        hsl(var(--blue-50)) tint, hsl(var(--border)) hairlines
@@ -17,18 +17,18 @@
      .container-page   max-w-7xl centred container with 16/24/32px gutters
      .section          vertical rhythm for a page band: py-16 md:py-24
      .section-tint     .section on the soft-bg tint
-     .eyebrow          12px uppercase label, tracking .14em, primary blue
+     .eyebrow          12px uppercase label, tracking .14em, primary navy
      .h-display        page H1  (32-36px mobile -> 48-56px desktop)
      .h-section        section H2 (28px -> 36px)
      .h-card           card H3 (18-20px)
      .lead             16-18px secondary body copy
      .card-surface     white card: 1px border, rounded-2xl, shadow-sm
      .card-lift        hover lift (2px + soft shadow) — pair with a card
-     .icon-tile        40px blue-50 tile with a blue-700 icon (single style)
-     .btn-primary      blue fill  (add h-11 px-5 rounded-xl font-semibold)
-     .btn-accent       green CTA fill (one per view)
+     .icon-tile        40px blue-50 tile with a navy icon (single style)
+     .btn-primary      navy fill  (add h-11 px-5 rounded-xl font-semibold)
+     .btn-accent       red CTA fill (one per view)
      .btn-outline      white + border secondary button
-     .link-primary     blue text link with underline on hover
+     .link-primary     navy text link with underline on hover
      .text-balance     balanced wrapping for headings
      .no-scrollbar / .scrollbar-none   hide scrollbar, keep scrolling
 

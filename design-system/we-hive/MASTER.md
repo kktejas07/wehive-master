@@ -70,52 +70,20 @@
 
 ### Buttons
 
+Use the classes in `frontend/src/index.css` (add `h-11 px-5 rounded-xl font-semibold`):
+
 ```css
-/* Primary Button */
-.btn-primary {
-  background: #059669;
-  color: #000000;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #2563EB;
-  border: 2px solid #2563EB;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+.btn-primary { background: hsl(var(--primary)); color: #fff; }        /* navy #0A3161 */
+.btn-accent  { background: hsl(var(--accent));  color: #fff; }        /* red #B31942 — one main CTA per view */
+.btn-outline { background: #fff; border: 1px solid hsl(var(--border)); color: hsl(var(--blue-900)); }
+/* hover: darker shade (--blue-800 / --accent-hover), 150-200ms; focus-visible ring in --ring */
 ```
 
 ### Cards
 
 ```css
-.card {
-  background: #F8FAFC;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
+.card-surface { background: #fff; border: 1px solid hsl(var(--border)); border-radius: 16px; box-shadow: var(--shadow-sm); }
+.card-lift:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 ```
 
 ### Inputs
@@ -130,9 +98,9 @@
 }
 
 .input:focus {
-  border-color: #2563EB;
+  border-color: #0A3161;
   outline: none;
-  box-shadow: 0 0 0 3px #2563EB20;
+  box-shadow: 0 0 0 3px #0A316120;
 }
 ```
 

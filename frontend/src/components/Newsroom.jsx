@@ -5,6 +5,8 @@ import { Newspaper, AlertCircle, RefreshCw, AlertTriangle, X, Sparkles } from 'l
 import { API } from '../context/AuthContext';
 import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
+const PAGE = 9;
+
 const Newsroom = ({ countryId }) => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,6 +14,7 @@ const Newsroom = ({ countryId }) => {
   const [errorState, setErrorState] = useState(null); // { status, message }
   const [category, setCategory] = useState('All');
   const [selectedNews, setSelectedNews] = useState(null);
+  const [visible, setVisible] = useState(PAGE);
   const dialogProps = useDialogA11y(!!selectedNews, () => setSelectedNews(null));
 
   const CATEGORIES = ["All", "F1", "H1B", "O1", "EB1", "Business", "Travel"];
@@ -88,6 +91,7 @@ const Newsroom = ({ countryId }) => {
   };
 
   useEffect(() => {
+    setVisible(PAGE);
     fetchNews();
   }, [countryId, category]);
 
@@ -200,7 +204,7 @@ const Newsroom = ({ countryId }) => {
               exit={{ opacity: 0 }}
               className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3"
             >
-              {news.map((item, idx) => (
+              {news.slice(0, visible).map((item, idx) => (
                 <motion.button
                   type="button"
                   key={item.id || idx}
@@ -234,6 +238,17 @@ const Newsroom = ({ countryId }) => {
                   </div>
                 </motion.button>
               ))}
+              {visible < news.length && (
+                <div className="md:col-span-2 lg:col-span-3 flex justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setVisible(v => v + PAGE)}
+                    className="h-11 px-5 rounded-xl btn-outline font-semibold"
+                  >
+                    Show more ({news.length - visible} left)
+                  </button>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
