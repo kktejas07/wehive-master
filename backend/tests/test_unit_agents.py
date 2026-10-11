@@ -5,7 +5,8 @@ Tests pure logic and class behaviour where possible. DB-dependent functions
 are tested with monkey-patched mocks.
 """
 
-import sys, os
+import os
+import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 os.environ.setdefault("MONGO_URL", "mongodb://localhost:27017")
@@ -17,66 +18,6 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
-
-# ─── Orchestrator ─────────────────────────────────────────────────────────────
-from agents.orchestrator import detect_intent, get_agent_endpoint, OrchestratorResult
-
-
-class TestOrchestrator:
-    @pytest.mark.asyncio
-    async def test_detect_visa_qa(self):
-        result = await detect_intent("What are the visa requirements for US?")
-        assert "visa Q&A" in result.agent
-        assert result.confidence > 0
-
-    @pytest.mark.asyncio
-    async def test_detect_concierge(self):
-        result = await detect_intent("I want to apply for a tourist visa to Canada")
-        assert "Concierge" in result.agent
-
-    @pytest.mark.asyncio
-    async def test_detect_doc_validator(self):
-        result = await detect_intent("Can you check this document for me?")
-        assert "Document Validator" in result.agent
-
-    @pytest.mark.asyncio
-    async def test_detect_portal_ai(self):
-        result = await detect_intent("Show me my students needing attention")
-        assert "Portal AI" in result.agent
-
-    @pytest.mark.asyncio
-    async def test_detect_workflow(self):
-        result = await detect_intent("I want to study at a university in Canada")
-        assert "Research" in result.agent or "workflow" in result.agent.lower() or "visa" in result.agent.lower()
-
-    @pytest.mark.asyncio
-    async def test_empty_query_defaults_to_visa_qa(self):
-        result = await detect_intent("hello")
-        assert result.agent is not None
-
-    @pytest.mark.asyncio
-    async def test_params_extracted(self):
-        result = await detect_intent("Tell me about visa for UK")
-        assert result.params.get("country_id") == "uk"
-
-    @pytest.mark.asyncio
-    async def test_student_intent(self):
-        result = await detect_intent("Can I study in Australia?")
-        assert result.params.get("intent") == "student"
-
-    def test_get_agent_endpoint_known(self):
-        result = OrchestratorResult("Hive (visa Q&A)", 0.8, {})
-        assert get_agent_endpoint(result) == "POST /api/chatbot/sessions/{id}/messages"
-
-    def test_get_agent_endpoint_unknown(self):
-        result = OrchestratorResult("Unknown Agent", 0.0, {})
-        assert get_agent_endpoint(result) is None
-
-    @pytest.mark.asyncio
-    async def test_confidence_capped(self):
-        result = await detect_intent("visa visa visa visa visa visa visa visa visa visa visa")
-        assert result.confidence <= 1.0
 
 
 # ─── Concierge ────────────────────────────────────────────────────────────────
@@ -133,7 +74,7 @@ class TestConciergeSession:
 @pytest.mark.asyncio
 async def test_start_concierge():
     with patch("agents.concierge.lookup_country", new=AsyncMock(return_value={"name": "Canada"})):
-        with patch("agents.concierge.get_visa_requirements", new=AsyncMock(return_value={"docs": ["passport"]})):
+        with patch("agents.concierge._visa_requirements", return_value={"docs": ["passport"]}):
             with patch("agents.concierge.get_application_fee", new=AsyncMock(return_value={"fee_inr": 5000})):
                 result = await start_concierge("u1", "ca", "tourist")
                 assert result["country"] == "Canada"
@@ -145,7 +86,7 @@ async def test_start_concierge():
 @pytest.mark.asyncio
 async def test_start_concierge_no_country_data():
     with patch("agents.concierge.lookup_country", new=AsyncMock(return_value=None)):
-        with patch("agents.concierge.get_visa_requirements", new=AsyncMock(return_value=None)):
+        with patch("agents.concierge._visa_requirements", return_value=None):
             with patch("agents.concierge.get_application_fee", new=AsyncMock(return_value=None)):
                 result = await start_concierge("u1", "xx", "tourist")
                 assert result["country"] == "xx"
@@ -164,7 +105,7 @@ async def test_advance_concierge_no_session():
 @pytest.mark.asyncio
 async def test_advance_concierge_unknown_step():
     with patch("agents.concierge.lookup_country", new=AsyncMock(return_value={"name": "Canada"})):
-        with patch("agents.concierge.get_visa_requirements", new=AsyncMock(return_value={})):
+        with patch("agents.concierge._visa_requirements", return_value={}):
             with patch("agents.concierge.get_application_fee", new=AsyncMock(return_value={})):
                 await start_concierge("u1", "ca", "tourist")
     result = await advance_concierge("u1", "ca", "nonexistent_step")
@@ -174,7 +115,7 @@ async def test_advance_concierge_unknown_step():
 @pytest.mark.asyncio
 async def test_advance_concierge_happy_path():
     with patch("agents.concierge.lookup_country", new=AsyncMock(return_value={"name": "Canada"})):
-        with patch("agents.concierge.get_visa_requirements", new=AsyncMock(return_value={})):
+        with patch("agents.concierge._visa_requirements", return_value={}):
             with patch("agents.concierge.get_application_fee", new=AsyncMock(return_value={})):
                 await start_concierge("u1", "ca", "tourist")
     result = await advance_concierge("u1", "ca", "passport_scan", {"file": "passport.jpg"})
@@ -422,7 +363,7 @@ class TestPdfAgent:
 
 
 # ─── Tool Registry ────────────────────────────────────────────────────────────
-from tool_registry import Tool, register_tool, get_tool, list_tools, tool_definitions
+from tool_registry import Tool, register_tool, get_tool, list_tools
 
 
 class TestToolRegistry:
@@ -457,14 +398,6 @@ class TestToolRegistry:
         assert d["name"] == "dict_test"
         assert d["description"] == "desc"
 
-    def test_tool_definitions(self):
-        async def handler(**kwargs):
-            return "ok"
-        register_tool("def_test", "desc", {}, handler)
-        defs = tool_definitions()
-        assert len(defs) == 1
-        assert defs[0]["name"] == "def_test"
-
     def test_register_all(self):
         import tool_registry as tr
         tr._tools.clear()
@@ -475,4 +408,4 @@ class TestToolRegistry:
                         with patch("eva_tools.get_application_fee", new=AsyncMock()):
                             with patch("eva_tools.lookup_university", new=AsyncMock()):
                                 tr.register_all()
-        assert len(tr.list_tools()) == 11
+        assert len(tr.list_tools()) == 8

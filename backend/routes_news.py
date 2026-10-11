@@ -14,21 +14,11 @@ from admin_auth import get_current_admin_flex
 router = APIRouter(prefix="/news", tags=["News"])
 logger = logging.getLogger("wehive.routes_news")
 
-class NewsResponse(BaseModel):
-    id: str
-    title: str
-    country_id: str
-    content: str
-    date: str
-    category: str
-    source_url: Optional[str]
-    status: str
-    created_at: str
-
 def serialize_doc(doc) -> dict:
-    doc["id"] = str(doc["_id"])
-    doc["created_at"] = doc["created_at"].isoformat() + "Z"
-    del doc["_id"]
+    doc["id"] = str(doc.pop("_id"))
+    created = doc.get("created_at")
+    if isinstance(created, datetime):
+        doc["created_at"] = created.isoformat() + "Z"
     return doc
 
 @router.get("")
@@ -143,27 +133,23 @@ async def get_pending_news(
 
 @router.post("/{news_id}/approve")
 async def approve_news(news_id: str, _admin=Depends(get_current_admin_flex)):
-    try:
-        query = {"_id": ObjectId(news_id)}
-        res = await global_news_col.update_one(query, {"$set": {"status": "approved"}})
-        if res.modified_count == 0:
-            raise HTTPException(status_code=404, detail="News not found or already approved")
-        return {"status": "success"}
-    except Exception as e:
-        logger.error(f"Error approving news {news_id}: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    """Set a news item's moderation status to 'approved' (admin only)."""
+    if not ObjectId.is_valid(news_id):
+        raise HTTPException(status_code=404, detail="News not found")
+    res = await global_news_col.update_one({"_id": ObjectId(news_id)}, {"$set": {"status": "approved"}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="News not found")
+    return {"status": "success", "new_status": "approved"}
 
 @router.post("/{news_id}/reject")
 async def reject_news(news_id: str, _admin=Depends(get_current_admin_flex)):
-    try:
-        query = {"_id": ObjectId(news_id)}
-        res = await global_news_col.update_one(query, {"$set": {"status": "rejected"}})
-        if res.modified_count == 0:
-            raise HTTPException(status_code=404, detail="News not found or already rejected")
-        return {"status": "success"}
-    except Exception as e:
-        logger.error(f"Error rejecting news {news_id}: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    """Set a news item's moderation status to 'rejected' (admin only)."""
+    if not ObjectId.is_valid(news_id):
+        raise HTTPException(status_code=404, detail="News not found")
+    res = await global_news_col.update_one({"_id": ObjectId(news_id)}, {"$set": {"status": "rejected"}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="News not found")
+    return {"status": "success", "new_status": "rejected"}
 
 @router.post("/run_aggregator")
 async def trigger_aggregator(_admin=Depends(get_current_admin_flex)):

@@ -6,10 +6,10 @@ import string
 from datetime import datetime, timedelta
 from typing import Optional
 
+from config import OTP_LENGTH, OTP_TTL_MIN
 from db import db, otps
 
-OTP_LENGTH = 6
-OTP_EXPIRY_MINUTES = int(os.environ.get('OTP_EXPIRY_MINUTES', '10'))
+OTP_EXPIRY_MINUTES = OTP_TTL_MIN
 RESEND_COOLDOWN = int(os.environ.get('OTP_RESEND_COOLDOWN_SECONDS', '60'))
 MAX_ATTEMPTS = 5
 MAX_RESENDS = 5

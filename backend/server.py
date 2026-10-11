@@ -14,6 +14,7 @@ from starlette.middleware.cors import CORSMiddleware
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+from config import FRONTEND_URL, IS_DEV  # noqa: E402
 from db import ensure_indexes  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
 from routes_users import router as users_router  # noqa: E402
@@ -185,7 +186,12 @@ if _raw_origins:
             _exact_origins.append(o)
 
 if not _exact_origins and not _wildcard_regexes:
-    _allow_origins = ['https://wehive.co.in', 'https://www.wehive.co.in']
+    # Default: the configured public site, plus its www/apex twin.
+    _scheme, _, _host = FRONTEND_URL.partition('://')
+    _twin = _host[4:] if _host.startswith('www.') else f'www.{_host}'
+    _allow_origins = [FRONTEND_URL]
+    if '.' in _host and not _host.replace('.', '').replace(':', '').isdigit():
+        _allow_origins.append(f'{_scheme}://{_twin}')
     _origin_regex = None
 elif _exact_origins and not _wildcard_regexes:
     _allow_origins = _exact_origins
@@ -271,7 +277,7 @@ async def on_startup():
             logger.info('Seeded countries: %s', res)
         else:
             logger.info('Countries collection already has %d docs', count)
-        logger.info('Indexes ensured. OTP channel = %s', os.environ.get('OTP_CHANNEL', 'mock'))
+        logger.info('Indexes ensured. OTP channel = %s', os.environ.get('OTP_CHANNEL', 'mock' if IS_DEV else '') or 'unset (OTP disabled)')
         uni_count = await db['universities_v2'].estimated_document_count()
         if uni_count < 100:
             logger.info('Universities count low (%d) — (re)seeding …', uni_count)
@@ -281,6 +287,13 @@ async def on_startup():
             logger.info('Universities collection has %d docs', uni_count)
     except Exception as e:
         logger.exception('Startup failure: %s', e)
+
+    try:
+        # ReAct agents (agents-v2) resolve tools by name from this registry.
+        from tool_registry import register_all as register_agent_tools
+        register_agent_tools()
+    except Exception as e:
+        logger.exception('Agent tool registration failed: %s', e)
 
     try:
         from bootstrap_rag import bootstrap_rag_and_prompts

@@ -19,7 +19,6 @@ Admin only:
 from __future__ import annotations
 
 import logging
-import os
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -79,7 +78,7 @@ class DeleteDocsRequest(BaseModel):
 @router.get("/status")
 async def rag_status(user=Depends(get_current_admin_flex)):
     """Backend status — Chroma, Ollama, prompt store."""
-    from ollama_embeddings import is_available, OLLAMA_EMBED_MODEL
+    from ollama_embeddings import is_available, OLLAMA_EMBED_MODEL, OLLAMA_HOST
     from vector_store import list_collections, _USE_CHROMA, CHROMA_PATH
 
     collections = list_collections()
@@ -104,7 +103,7 @@ async def rag_status(user=Depends(get_current_admin_flex)):
         "ollama": {
             "available": ollama_ok,
             "embed_model": OLLAMA_EMBED_MODEL,
-            "host": os.environ.get("OLLAMA_HOST", "http://localhost:11434"),
+            "host": OLLAMA_HOST,
         },
     }
 

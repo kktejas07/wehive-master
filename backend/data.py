@@ -5,6 +5,7 @@ with per-category fees, validity, processing time and required documents.
 This mirrors atlys.com's Indian-passport categorisation.
 """
 
+import copy
 from typing import List, Dict, Any
 
 
@@ -2462,8 +2463,10 @@ HOLIDAY_PLANS: Dict[str, Dict[str, Any]] = {
 def get_country(country_id: str):
     country = next((c for c in COUNTRIES if c['id'] == country_id), None)
     if country:
-        country['application_fee'] = 20000
-        country['embassy_fee'] = country.get('fees_usd', 0) * 83 if country.get('fees_usd') else 0
+        country = copy.deepcopy(country)  # never mutate the shared static COUNTRIES entries
+        from fee_calculator import FLAT_APPLICATION_FEE_INR, USD_TO_INR
+        country['application_fee'] = FLAT_APPLICATION_FEE_INR
+        country['embassy_fee'] = round((country.get('fees_usd') or 0) * USD_TO_INR)
         country['fee_disclaimer'] = 'Flat ₹20,000 application fee per applicant — includes our service fees and the applicable government/embassy fee.'
     return country
 

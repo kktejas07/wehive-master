@@ -21,10 +21,11 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user, get_current_user_optional
 from db import db
 
-router = APIRouter(prefix="/kg", tags=["knowledge-graph-services"])
+router = APIRouter(prefix="/kg", tags=["knowledge-graph-services"], dependencies=[Depends(get_current_user)])
 logger = logging.getLogger("wehive.kg_services")
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
@@ -192,7 +193,7 @@ async def kg_disambiguate(
 
 
 @router.get("/cache/stats")
-async def kg_cache_stats(user=Depends(get_current_user)):
+async def kg_cache_stats(user=Depends(get_current_admin_flex)):
     mongo_count = await db["kg_entity_cache"].count_documents({})
     return {
         "ok": True,
@@ -203,18 +204,14 @@ async def kg_cache_stats(user=Depends(get_current_user)):
 
 
 @router.post("/cache/clear")
-async def kg_cache_clear(user=Depends(get_current_user)):
-    if user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
+async def kg_cache_clear(user=Depends(get_current_admin_flex)):
     _kg_cache.clear()
     deleted = await db["kg_entity_cache"].delete_many({})
     return {"ok": True, "memory_cleared": True, "mongo_deleted": deleted.deleted_count}
 
 
 @router.get("/rag/index")
-async def kg_rag_index(user=Depends(get_current_user)):
-    if user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
+async def kg_rag_index(user=Depends(get_current_admin_flex)):
 
     entities = await db["kg_entity_cache"].find().to_list(1000)
     if not entities:

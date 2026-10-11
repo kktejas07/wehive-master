@@ -1,6 +1,6 @@
 """Agents V2 API — generic composable LLM agents.
 
-Public (auth required):
+Logged-in users:
   GET  /api/agents-v2                  list all agent definitions
   GET  /api/agents-v2/{id}             get a single agent spec
   POST /api/agents-v2/{id}/run         run an agent on a user input
@@ -19,8 +19,9 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from auth_utils import get_current_user, get_current_user_optional
+from auth_utils import get_current_user
 from admin_auth import get_current_admin_flex
+from rate_limit import RateLimit
 from db import db
 from agent_framework import (
     AgentSpec,
@@ -32,6 +33,9 @@ from agent_framework import (
 logger = logging.getLogger("wehive.routes_agents_v2")
 
 router = APIRouter(prefix="/agents-v2", tags=["agents-v2"])
+
+# Each run may hit a paid LLM several times (ReAct loop) — cap per IP.
+_run_limiter = RateLimit(max_calls=20, window_seconds=60)
 
 
 class RunAgentRequest(BaseModel):
@@ -82,12 +86,17 @@ async def delete_agent(agent_id: str, _=Depends(get_current_admin_flex)):
 
 
 @router.post("/{agent_id}/run")
-async def run_agent_endpoint(agent_id: str, req: RunAgentRequest, user=Depends(get_current_user_optional)):
+async def run_agent_endpoint(
+    agent_id: str,
+    req: RunAgentRequest,
+    user=Depends(get_current_user),
+    _rl=Depends(_run_limiter),
+):
     reg = _registry()
     spec = await reg.get(agent_id)
     if not spec:
         raise HTTPException(404, f"Agent not found: {agent_id}")
-    user_id = user.get("_id", "") if isinstance(user, dict) else ""
+    user_id = str(user.get("_id", ""))
     try:
         run = await run_agent(
             spec,
@@ -113,7 +122,7 @@ async def run_agent_endpoint(agent_id: str, req: RunAgentRequest, user=Depends(g
             )
         except Exception:
             pass
-        raise HTTPException(500, f"Agent run failed: {e}")
+        raise HTTPException(500, "Agent run failed")
     doc = run.to_dict()
     try:
         await db["agent_runs"].insert_one({**doc, "_id": f"{agent_id}-{run.started_at}"})
@@ -141,7 +150,7 @@ async def run_agent_endpoint(agent_id: str, req: RunAgentRequest, user=Depends(g
 
 
 @router.get("/{agent_id}/runs")
-async def list_agent_runs(agent_id: str, limit: int = 20, user=Depends(get_current_user)):
+async def list_agent_runs(agent_id: str, limit: int = 20, _=Depends(get_current_admin_flex)):
     try:
         cursor = (
             db["agent_runs"]
@@ -155,4 +164,4 @@ async def list_agent_runs(agent_id: str, limit: int = 20, user=Depends(get_curre
         return {"ok": True, "runs": out}
     except Exception as e:
         logger.exception("List agent runs failed: %s", e)
-        raise HTTPException(500, str(e))
+        raise HTTPException(500, "Could not list agent runs")

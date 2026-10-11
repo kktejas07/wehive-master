@@ -16,9 +16,10 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
 
-router = APIRouter(prefix="/n8n", tags=["n8n-automation"])
+router = APIRouter(prefix="/n8n", tags=["n8n-automation"], dependencies=[Depends(get_current_user)])
 
 N8N_BASE_URL = os.environ.get("N8N_BASE_URL", "http://localhost:5678")
 N8N_API_KEY = os.environ.get("N8N_API_KEY", "")
@@ -99,9 +100,7 @@ async def list_workflows():
 
 
 @router.post("/workflows/trigger")
-async def trigger_workflow(req: TriggerWorkflowRequest, user=Depends(get_current_user)):
-    if user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
+async def trigger_workflow(req: TriggerWorkflowRequest, user=Depends(get_current_admin_flex)):
 
     template = next((t for t in VISA_WORKFLOW_TEMPLATES if t["id"] == req.workflow_id), None)
     if not template:

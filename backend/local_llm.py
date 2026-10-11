@@ -1,7 +1,7 @@
 """Local AI Response Engine — No API keys needed.
 
 Three-tier architecture:
-  Tier 1 — Ollama (local LLM):     If Ollama is running on http://localhost:11434,
+  Tier 1 — Ollama (local LLM):     If Ollama is running on OLLAMA_HOST,
                                     use it for intelligent, context-aware replies.
   Tier 2 — Template engine:         Intent-driven template matching with real data
                                     from eva_tools / data.py.
@@ -19,9 +19,10 @@ from typing import Optional
 
 import httpx
 
-from agents.orchestrator import detect_intent_regex
-from eva_tools import lookup_country, search_countries, search_universities, get_application_fee, get_visa_requirements
-from tool_registry import list_tools, get_tool
+from agents.orchestrator import score_intents
+from constants import VISA_CATEGORY_KEYWORDS
+from eva_tools import lookup_country, search_universities
+from ollama_embeddings import OLLAMA_HOST
 
 logger = logging.getLogger("wehive.local_llm")
 
@@ -34,7 +35,7 @@ _FALLBACK_HIVE_PROMPT = (
 )
 
 # ── Local LLM backends ────────────────────────────────────────────────────────
-OLLAMA_BASE = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_BASE = OLLAMA_HOST
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
 
 _ollama_available = None  # lazily checked
@@ -88,11 +89,11 @@ _SEMANTIC_MODEL = None
 INTENT_EXAMPLES = {
     "greeting": ["hi", "hello", "hey", "namaste", "good morning", "what's up"],
     "visa_qa": ["visa requirements for canada", "how to get us visa", "uk tourist visa fee", "schengen visa documents"],
-    "student": ["study in germany", "universities in canada", "student visa australia", "ielts requirement"],
+    "study_abroad": ["study in germany", "universities in canada", "student visa australia", "ielts requirement"],
     "holiday": ["best time to visit japan", "thailand travel tips", "holiday in dubai", "things to do in paris"],
     "help": ["what can you do", "how does this work", "help", "commands", "capabilities"],
     "fees": ["visa fee for uk", "how much does us visa cost", "canada visa price", "application fee"],
-    "docs": ["documents required", "what do i need", "required documents", "checklist"],
+    "documents": ["documents required", "what do i need", "required documents", "checklist"],
 }
 
 
@@ -147,6 +148,20 @@ FALLBACKS = [
 COUNTRY_NOT_FOUND = "I couldn't find information for that country right now. Try one of these: US, UK, Canada, Australia, Germany, France, Japan, Singapore, UAE, Thailand, or New Zealand."
 
 
+def _categories(country_data: dict) -> list[dict]:
+    """Visa categories as a list. data.py stores them as a dict keyed by type
+    (Tourist/Business/...); Mongo docs may already be a list."""
+    cats = country_data.get("categories") or []
+    if isinstance(cats, dict):
+        return [{**c, "type": k} for k, c in cats.items() if isinstance(c, dict)]
+    return [c for c in cats if isinstance(c, dict)]
+
+
+def _cat_matches(cat: dict, visa_type: str) -> bool:
+    v = (visa_type or "").lower()
+    return bool(v) and (v == str(cat.get("type", "")).lower() or v in str(cat.get("name", "")).lower())
+
+
 def _fmt_money(amount, currency="₹"):
     if not amount or amount == "N/A":
         return "N/A"
@@ -174,9 +189,9 @@ def _visa_requirements_response(country_data: dict, visa_type: Optional[str] = N
     if visa_types:
         lines.append(f"**Visa types available:** {', '.join(visa_types)}\n")
 
-    categories = country_data.get("categories", [])
+    categories = _categories(country_data)
     if visa_type:
-        matching = [c for c in categories if c.get("name", "").lower() == visa_type.lower()]
+        matching = [c for c in categories if _cat_matches(c, visa_type)]
         if matching:
             cat = matching[0]
             lines.append(f"**{cat.get('name')} Visa**")
@@ -214,7 +229,7 @@ def _fees_response(country_data: dict) -> str:
     name = country_data.get("name", "this country")
     lines = [f"💰 **Visa Fees for {name}**\n"]
 
-    categories = country_data.get("categories", [])
+    categories = _categories(country_data)
     for cat in categories[:5]:
         inr = _fmt_money(cat.get("fees_inr"))
         usd = _fmt_money(cat.get("fees_usd"), "$")
@@ -248,8 +263,8 @@ def _student_response(country_data: dict, unis: list) -> str:
         if intakes:
             lines.append(f"  📅 Intakes: {', '.join(intakes)}")
 
-    categories = country_data.get("categories", [])
-    student_cats = [c for c in categories if "student" in c.get("name", "").lower()]
+    categories = _categories(country_data)
+    student_cats = [c for c in categories if _cat_matches(c, "student")]
     if student_cats:
         cat = student_cats[0]
         lines.append(f"\n  💰 Student visa fee: {_fmt_money(cat.get('fees_inr'))} / {_fmt_money(cat.get('fees_usd'), '$')}")
@@ -337,31 +352,10 @@ async def _handle_greeting(query: str, context: str, params: dict) -> str:
     return _greeting_response()
 
 
-# ── Visa category keywords (sorted by specificity) ──────────────────────────
-VISA_TYPE_KEYWORDS = {
-    "sticker": ["sticker", "traditional", "embassy", "consulate", "in-person", "appointment", "biometric"],
-    "e-visa": ["e-visa", "evisa", "electronic visa", "online visa", "digital visa", "eta"],
-    "on-arrival": ["on-arrival", "on arrival", "landing", "arrival visa", "visa on arrival", "voa"],
-    "visa-free": ["visa-free", "visa free", "no visa", "without visa", "free entry", "visa exempt", "visa exemption"],
-    "transit": ["transit", "layover", "connecting flight", "stopover", "airport transit"],
-    "medical": ["medical", "health", "treatment", "medical visa"],
-    "business": ["business", "corporate", "work trip", "business trip", "conference"],
-    "student": ["study", "student", "university", "college", "academic"],
-    "work": ["work", "employment", "job", "professional", "employee"],
-    "tourist": ["tourist", "tourism", "travel", "vacation", "sightseeing"],
-}
-
-
 async def _handle_visa_qa(query: str, context: str, params: dict) -> str:
     country_id = params.get("country_id")
     q = query.lower()
-
-    # Detect visa category (more specific first)
-    visa_category = None
-    for cat, keywords in VISA_TYPE_KEYWORDS.items():
-        if any(kw in q for kw in keywords):
-            visa_category = cat
-            break
+    visa_category = _visa_category(query)
 
     if not country_id:
         return "Which country are you interested in? Try asking about the US, UK, Canada, Australia, or any other country!"
@@ -377,7 +371,7 @@ async def _handle_visa_qa(query: str, context: str, params: dict) -> str:
     # List all visa types available for a country
     if is_list or q.startswith("list"):
         visa_types = data.get("visa_types", [])
-        categories = data.get("categories", [])
+        categories = _categories(data)
         lines = [f"📋 **Visa options for {data.get('name', country_id)}:**\n"]
         highlights = data.get("highlights", [])
         if highlights:
@@ -391,29 +385,36 @@ async def _handle_visa_qa(query: str, context: str, params: dict) -> str:
     if is_fee:
         return _fees_response(data)
     if is_docs and visa_category:
-        return _docs_response(visa_category)
+        return await _handle_docs(query, context, params)
 
     # If specific category requested, filter categories
-    matching = []
-    categories = data.get("categories", [])
-    if visa_category:
-        # Check if any category name matches
-        for cat in categories:
-            cname = cat.get("name", "").lower()
-            for kw in VISA_TYPE_KEYWORDS.get(visa_category, []):
-                if kw in cname or visa_category in cname:
-                    matching.append(cat)
-                    break
-        if not matching:
-            # Try broader match by checking visa_type names
-            visa_types = [vt.lower() for vt in data.get("visa_types", [])]
-            if visa_category in visa_types or any(visa_category in vt for vt in visa_types):
-                matching = categories
-
-    if matching:
-        return _visa_requirements_response(data, visa_category)
-
     return _visa_requirements_response(data, visa_category)
+
+
+def _visa_category(query: str) -> Optional[str]:
+    q = query.lower()
+    for cat, keywords in VISA_CATEGORY_KEYWORDS.items():
+        if any(kw in q for kw in keywords):
+            return cat
+    return None
+
+
+async def _handle_docs(query: str, context: str, params: dict) -> str:
+    """Document checklist — country-specific when a country is known."""
+    visa_type = _visa_category(query)
+    if visa_type not in ("tourist", "business", "student", "work"):
+        visa_type = "tourist"
+    country_id = params.get("country_id")
+    data = await lookup_country(country_id) if country_id else None
+    if data:
+        cat = next((c for c in _categories(data) if _cat_matches(c, visa_type)), None)
+        if cat and cat.get("documents"):
+            return (
+                f"📋 **Documents for a {data.get('name', country_id)} {cat.get('name', visa_type.title())} visa:**"
+                f"{_fmt_docs(cat['documents'])}\n\n"
+                "Upload them in your We Hive account and we'll check them for you."
+            )
+    return _docs_response(visa_type)
 
 
 async def _handle_student(query: str, context: str, params: dict) -> str:
@@ -455,43 +456,29 @@ async def _handle_fallback(query: str, context: str, params: dict) -> str:
 # ── Intent Registry ──────────────────────────────────────────────────────────
 
 INTENT_HANDLERS = {
-    "Hive (visa Q&A)": _handle_visa_qa,
-    "visa_qa": _handle_visa_qa,
-    "workflow": _handle_student,
-    "concierge": _handle_visa_qa,
-    "holiday": _handle_holiday,
-    "help": _handle_help,
     "greeting": _handle_greeting,
+    "help": _handle_help,
+    "documents": _handle_docs,
+    "fees": _handle_visa_qa,
+    "visa_qa": _handle_visa_qa,
+    "concierge": _handle_visa_qa,
+    "country_info": _handle_visa_qa,
+    "study_abroad": _handle_student,
+    "holiday": _handle_holiday,
     "fallback": _handle_fallback,
 }
 
 
 def _classify_intent(query: str) -> str:
-    """Classify intent using: semantic (if available) → regex heuristics → orchestrator."""
-    q = query.lower().strip()
-
-    # Tier A — Semantic classification (if sentence-transformers is installed)
+    """Semantic match (if sentence-transformers is installed), else the shared
+    regex scorer in agents.orchestrator. Returns an INTENT_HANDLERS key."""
     semantic = _semantic_classify(query)
-    if semantic:
+    if semantic in INTENT_HANDLERS:
         return semantic
-
-    # Tier B — Regex heuristics
-    greeting_patterns = re.compile(
-        r"^(hi|hello|hey|hii|h ello| heyy|namaste|good (morning|afternoon|evening)|"
-        r"what'?s up|howdy|sup|yo|^how are you|who are you|what can you do|help)$", re.I
-    )
-    if greeting_patterns.match(q) or greeting_patterns.search(q):
-        return "greeting"
-    if re.search(r"\b(help|what can you do|how (do|can) you (work|help)|guide|commands|capabilities)\b", q):
-        return "help"
-    if re.search(r"\b(holiday|vacation|trip|travel|visit|tour|destination|best time|weather|attraction|itinerary|plan)", q):
-        result = detect_intent_regex(query)
-        if "visa" in result.agent.lower() or "qa" in result.agent.lower():
-            return "holiday"
-        return result.agent
-
-    # Tier C — Orchestrator regex scoring
-    return detect_intent_regex(query).agent
+    for hit in score_intents(query):
+        if hit["intent"] in INTENT_HANDLERS:
+            return hit["intent"]
+    return "fallback"
 
 
 # ── Main Engine ──────────────────────────────────────────────────────────────
@@ -538,7 +525,9 @@ async def local_chat(query: str, context: str = "", conversation_history: str = 
 
     # Tier 2: Template engine with semantic intent matching
     intent_label = _classify_intent(query)
-    handler = INTENT_HANDLERS.get(intent_label, _handle_fallback)
+    if intent_label == "fallback" and params.get("country_id"):
+        intent_label = "visa_qa"
+    handler = INTENT_HANDLERS[intent_label]
     try:
         response = await handler(query, context, params)
     except Exception as e:

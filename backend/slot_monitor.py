@@ -309,33 +309,41 @@ def _get_bls_booking_url(consulate_id: str, visa_type: str) -> str:
 
 
 async def _fetch_wait_times():
-    """Fetch wait times from VisaHQ API + fallback to published estimates."""
+    """Fetch wait times from the VisaHQ API.
 
+    Returns (results, is_estimate). Without VISA_HQ_API_KEY (or when VisaHQ has
+    no data) the values are static published estimates, flagged is_estimate=True
+    so the UI can label them as such.
+    """
     try:
         from adapters.visahq_adapter import get_slot_wait_time
     except ImportError:
-        return None
+        return None, True
 
     results = {}
+    is_estimate = False
     for consulate in US_CONSULATES_INDIA:
         cid = consulate["id"]
         results[cid] = {}
+        wait_data = await get_slot_wait_time("in", "us", cid)
+        if not wait_data or wait_data.get("is_estimate") or wait_data.get("source") != "visahq":
+            is_estimate = True
         for vt in VISA_TYPES:
-            wait_data = await get_slot_wait_time("in", "us", cid)
             if wait_data and "wait_times" in wait_data:
                 wt = wait_data["wait_times"].get(vt["id"], wait_data["wait_times"].get("default", "N/A"))
                 results[cid][vt["id"]] = str(wt)
             else:
                 results[cid][vt["id"]] = PUBLISHED_WAIT_TIMES.get(vt["id"], {}).get(cid, "N/A")
-    return results
+    return results, is_estimate
 
 
 def _get_wait_time_estimate(consulate_id: str, visa_type: str) -> str:
     return PUBLISHED_WAIT_TIMES.get(visa_type, {}).get(consulate_id, "Varies — check booking portal")
 
 
-def _build_wait_time_summary(wait_times: dict) -> str:
-    lines = [f"\U0001f4ca *US Visa Appointment Wait Times* (updated {datetime.utcnow().strftime('%d %b %Y')})\n"]
+def _build_wait_time_summary(wait_times: dict, is_estimate: bool = True) -> str:
+    label = "Estimated " if is_estimate else ""
+    lines = [f"\U0001f4ca *US Visa Appointment {label}Wait Times* (updated {datetime.utcnow().strftime('%d %b %Y')})\n"]
 
     for consulate in US_CONSULATES_INDIA:
         cid = consulate["id"]
@@ -363,7 +371,8 @@ async def _run_slot_check():
     _last_check = datetime.utcnow().isoformat()
     _total_checks += 1
 
-    wait_times = await _fetch_wait_times()
+    wait_times, is_estimate = await _fetch_wait_times()
+    source = "estimate" if is_estimate else "visahq"
 
     if wait_times:
         check_date = datetime.utcnow().strftime("%Y-%m-%d")
@@ -375,7 +384,7 @@ async def _run_slot_check():
                     "consulate": cid,
                     "visa_type": vt["id"],
                     "check_date": check_date,
-                    "source": "wait_time_estimate",
+                    "source": source,
                 })
                 if not existing:
                     import uuid
@@ -392,7 +401,8 @@ async def _run_slot_check():
                         "booking_url_bls": _get_bls_booking_url(cid, vt["id"]),
                         "check_date": check_date,
                         "detected_at": datetime.utcnow(),
-                        "source": "wait_time_estimate",
+                        "source": source,
+                        "is_estimate": is_estimate,
                     })
 
     try:
@@ -405,11 +415,11 @@ async def _run_slot_check():
     except ImportError:
         pass
     except Exception as e:
-        logger.debug("Telegram slot reader skipped: %s", e)
+        logger.warning("Telegram slot reader failed: %s", e)
 
     if TELEGRAM_BOT_TOKEN and wait_times:
         telegram = TelegramService(TELEGRAM_BOT_TOKEN)
-        summary = _build_wait_time_summary(wait_times)
+        summary = _build_wait_time_summary(wait_times, is_estimate)
         if TELEGRAM_CHANNEL_ID and _total_checks == 1:
             await telegram.send_message(TELEGRAM_CHANNEL_ID, summary)
         _notifications_sent += 1
@@ -434,15 +444,6 @@ def start_slot_monitor():
         logger.info("US visa slot monitor scheduler started")
 
 
-async def force_check():
-    await _run_slot_check()
-    return {
-        "last_check": _last_check,
-        "stats": {"total_checks": _total_checks, "notifications_sent": _notifications_sent},
-        "mode": CHECKER_MODE,
-    }
-
-
 def get_wait_times_for_display(country: str = "usa") -> dict:
     corridor = CORRIDORS.get(country, CORRIDORS["usa"])
     result = {}
@@ -453,6 +454,9 @@ def get_wait_times_for_display(country: str = "usa") -> dict:
             "city": consul["city"],
             "jurisdiction": consul.get("jurisdiction", ""),
             "booking_url": corridor["booking_url"],
+            # Hand-maintained published figures, not live availability.
+            "source": "estimate",
+            "is_estimate": True,
             "wait_times": {
                 vt["id"]: {
                     "visa": vt["label"],

@@ -56,9 +56,9 @@ async def get_model_profile(profile_id: str):
 @router.post("/chat")
 async def chat_with_profile(req: ChatWithProfileRequest, user=Depends(get_current_user)):
     from model_router import chat_with_profile as cwp
-    result = await cwp(req.profile_id, req.messages, req.max_tokens, req.temperature)
+    result = await cwp(req.profile_id, req.messages, req.max_tokens, req.temperature, user.get("_id", ""))
     if "error" in result:
-        raise HTTPException(status_code=502, detail=result["error"])
+        raise HTTPException(status_code=result.get("status", 502), detail=result["error"])
     return result
 
 
@@ -138,7 +138,7 @@ async def mcp_runtime_status():
 
 
 @router.get("/accounts")
-async def list_orchestrator_accounts(user=Depends(get_current_user)):
+async def list_orchestrator_accounts(_admin=Depends(get_current_admin_flex)):
     from orchestrator.vault import AccountsVault
 
     vault = AccountsVault()
@@ -149,7 +149,7 @@ async def list_orchestrator_accounts(user=Depends(get_current_user)):
 
 
 @router.post("/accounts")
-async def upsert_orchestrator_account(req: OrchestratorAccountRequest, user=Depends(get_current_user)):
+async def upsert_orchestrator_account(req: OrchestratorAccountRequest, _admin=Depends(get_current_admin_flex)):
     from orchestrator.vault import AccountsVault
 
     vault = AccountsVault()
@@ -159,7 +159,7 @@ async def upsert_orchestrator_account(req: OrchestratorAccountRequest, user=Depe
 
 
 @router.delete("/accounts/{provider_id}")
-async def delete_orchestrator_account(provider_id: str, user=Depends(get_current_user)):
+async def delete_orchestrator_account(provider_id: str, _admin=Depends(get_current_admin_flex)):
     from orchestrator.vault import AccountsVault
 
     vault = AccountsVault()
@@ -168,7 +168,7 @@ async def delete_orchestrator_account(provider_id: str, user=Depends(get_current
 
 
 @router.get("/budgets")
-async def get_budget_status(user=Depends(get_current_user)):
+async def get_budget_status(_admin=Depends(get_current_admin_flex)):
     from orchestrator.budget import BudgetEnforcer
 
     enforcer = BudgetEnforcer()
@@ -177,7 +177,7 @@ async def get_budget_status(user=Depends(get_current_user)):
 
 
 @router.post("/budgets/check")
-async def check_budgets(user=Depends(get_current_user)):
+async def check_budgets(_admin=Depends(get_current_admin_flex)):
     from orchestrator.budget import BudgetEnforcer
     from orchestrator.token_pool import TokenPoolManager
 
@@ -187,7 +187,7 @@ async def check_budgets(user=Depends(get_current_user)):
 
 
 @router.post("/budgets/refresh")
-async def refresh_budget_accounts(user=Depends(get_current_user)):
+async def refresh_budget_accounts(_admin=Depends(get_current_admin_flex)):
     from orchestrator.budget import BudgetEnforcer
     from orchestrator.token_pool import TokenPoolManager
 
@@ -197,7 +197,7 @@ async def refresh_budget_accounts(user=Depends(get_current_user)):
 
 
 @router.get("/usage")
-async def get_usage_stats(days: int = Query(30, ge=1, le=365), user=Depends(get_current_user)):
+async def get_usage_stats(days: int = Query(30, ge=1, le=365), _admin=Depends(get_current_admin_flex)):
     from orchestrator.token_pool import TokenPoolManager
 
     stats = await TokenPoolManager().get_usage_stats(days=days)
@@ -205,7 +205,7 @@ async def get_usage_stats(days: int = Query(30, ge=1, le=365), user=Depends(get_
 
 
 @router.get("/usage/log")
-async def get_usage_log(limit: int = Query(100, ge=1, le=500), user=Depends(get_current_user)):
+async def get_usage_log(limit: int = Query(100, ge=1, le=500), _admin=Depends(get_current_admin_flex)):
     from orchestrator.token_pool import TokenPoolManager
 
     log = await TokenPoolManager().get_audit_log(limit=limit)

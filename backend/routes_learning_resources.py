@@ -10,10 +10,12 @@ Endpoints (all read-only, no create/update/delete):
 Seeded from a static curated catalogue on module load.
 """
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import Optional
 
-router = APIRouter(prefix="/learn", tags=["learning-resources"])
+from auth_utils import get_current_user
+
+router = APIRouter(prefix="/learn", tags=["learning-resources"], dependencies=[Depends(get_current_user)])
 
 CATEGORIES = [
     {"id": "visa-basics", "name": "Visa Basics", "icon": "Globe"},
@@ -262,14 +264,6 @@ async def list_categories():
     return {"ok": True, "categories": CATEGORIES}
 
 
-@router.get("/resources/{resource_id}")
-async def get_resource(resource_id: str):
-    for r in RESOURCES:
-        if r["id"] == resource_id:
-            return {"ok": True, "resource": r}
-    raise HTTPException(status_code=404, detail="Resource not found")
-
-
 @router.get("/resources/search")
 async def search_resources(q: str = Query(..., min_length=2)):
     q_lower = q.lower()
@@ -280,3 +274,11 @@ async def search_resources(q: str = Query(..., min_length=2)):
         or any(q_lower in t.lower() for t in r["tags"])
     ]
     return {"ok": True, "query": q, "count": len(results), "resources": results}
+
+
+@router.get("/resources/{resource_id}")
+async def get_resource(resource_id: str):
+    for r in RESOURCES:
+        if r["id"] == resource_id:
+            return {"ok": True, "resource": r}
+    raise HTTPException(status_code=404, detail="Resource not found")

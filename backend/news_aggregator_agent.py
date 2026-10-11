@@ -1,319 +1,297 @@
-"""Global News Aggregator Agent with ScrapeGraphAI Integration.
+"""Global News Aggregator Agent.
 
-This script aggregates global immigration news across various countries.
-It primarily uses ScrapeGraphAI to scrape designated open sources (GitHub links, social media, official sites).
-If a scrape fails, it falls back to the AI Marketplace/Agent framework.
+Pulls immigration / visa news from official public RSS/Atom feeds over plain
+HTTP (no LLM, no API key) and stores each item as a *pending* news document
+with its real source URL and published date. Items are deduplicated by URL.
+Nothing is generated or invented: if a feed is unreachable the error is
+recorded and the run moves on.
 """
 
 import asyncio
+import html
 import logging
-from datetime import datetime, timedelta
-from typing import List, Dict, Any
-import json
 import os
+import re
+import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from typing import Any, Dict, List, Optional
+
 import httpx
 
-from db import db, global_news_col
-from ai_marketplace import AIMarketplace
-from vector_store import upsert_documents
-
-try:
-    from scrapegraphai.graphs import SmartScraperGraph
-    SCRAPEGRAPH_AVAILABLE = True
-except ImportError:
-    SCRAPEGRAPH_AVAILABLE = False
-
+from db import global_news_col
 
 logger = logging.getLogger("wehive.news_aggregator")
 
-TARGET_COUNTRIES = [
-    "India", "USA", "United Kingdom", "Canada", "Australia",
-    "Germany", "France", "Japan", "Brazil", "UAE"
-]
-
 CATEGORIES = ["F1", "H1B", "O1", "EB1", "Business", "Travel"]
 
-# Automated seed URLs to scrape daily across platforms
-SEED_URLS = {
-    "united-kingdom": [
-        {"url": "https://www.gov.uk/browse/visas-immigration", "platform": "website"},
-        {"url": "https://github.com/topics/uk-immigration", "platform": "github"},
-        {"url": "https://twitter.com/ukhomeoffice", "platform": "twitter"}
-    ],
-    "usa": [
-        {"url": "https://www.uscis.gov/newsroom", "platform": "website"},
-        {"url": "https://github.com/topics/uscis", "platform": "github"},
-        {"url": "https://twitter.com/USCIS", "platform": "twitter"}
-    ]
-}
+USER_AGENT = "WeHiveNewsBot/1.0 (+https://wehive.app; immigration news aggregator)"
+FEED_TIMEOUT = httpx.Timeout(20.0, connect=10.0)
+MAX_FEED_BYTES = 5 * 1024 * 1024
+MAX_ITEMS_PER_FEED = int(os.environ.get("NEWS_MAX_ITEMS_PER_FEED", "20"))
 
-def _parse_agent_response(response_text: str) -> List[Dict[str, Any]]:
-    """Attempt to parse the JSON array of news from the LLM response."""
-    if not isinstance(response_text, str):
-        return []
+# Official/public feeds, each verified to return RSS/Atom XML (Oct 2026).
+NEWS_FEEDS: List[Dict[str, Any]] = [
+    {
+        "name": "USCIS",
+        "url": "https://www.uscis.gov/news/rss-feed/59144",
+        "country_id": "usa",
+    },
+    {
+        "name": "UK Visas and Immigration (GOV.UK)",
+        "url": "https://www.gov.uk/search/news-and-communications.atom"
+               "?organisations%5B%5D=uk-visas-and-immigration",
+        "country_id": "united-kingdom",
+    },
+    {
+        "name": "Immigration, Refugees and Citizenship Canada",
+        "url": "https://api.io.canada.ca/io-server/gc/news/en/v2"
+               "?dept=departmentofcitizenshipandimmigration&type=newsreleases"
+               "&sort=publishedDate&orderBy=desc&pick=50&format=atom&atomtitle=IRCC",
+        "country_id": "canada",
+    },
+    {
+        "name": "U.S. Department of State - Travel Advisories",
+        "url": "https://travel.state.gov/_res/rss/TAsTWs.xml",
+        "country_id": "usa",
+        "category": "Travel",
+    },
+]
+
+_ATOM = "{http://www.w3.org/2005/Atom}"
+_DC = "{http://purl.org/dc/elements/1.1/}"
+_TAG_RE = re.compile(r"<[^>]+>")
+_WS_RE = re.compile(r"\s+")
+
+
+# ---------------------------------------------------------------------------
+# Feed fetching / parsing (also used by blog_aggregator_agent)
+# ---------------------------------------------------------------------------
+
+def _clean_text(value: Optional[str], limit: int = 1000) -> str:
+    """Strip HTML tags/entities and collapse whitespace."""
+    if not value:
+        return ""
+    text = html.unescape(_TAG_RE.sub(" ", value))
+    return _WS_RE.sub(" ", text).strip()[:limit]
+
+
+def _parse_date(value: Optional[str]) -> Optional[datetime]:
+    """Parse RFC-822 (RSS) or ISO-8601 (Atom) dates into naive UTC datetimes."""
+    if not value:
+        return None
+    value = value.strip()
+    dt: Optional[datetime] = None
     try:
-        start = response_text.find('[')
-        end = response_text.rfind(']')
-        if start != -1 and end != -1:
-            json_str = response_text[start:end+1]
-            return json.loads(json_str)
-        return []
-    except Exception as e:
-        logger.error(f"Failed to parse agent response: {e}")
-        return []
+        dt = parsedate_to_datetime(value)
+    except (TypeError, ValueError, IndexError):
+        dt = None
+    if dt is None:
+        for fmt in ("%a, %d %b %Y", "%d %b %Y"):
+            try:
+                dt = datetime.strptime(value, fmt)
+                break
+            except ValueError:
+                continue
+    if dt is None:
+        try:
+            dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if dt.tzinfo is not None:
+        dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
 
-def _route_social_media_url(url: str, platform: str = None) -> str:
-    """Rewrite social media URLs to use public proxy viewers to avoid login walls."""
-    if not url:
-        return url
 
-    url_lower = url.lower()
+def _text(el: Optional[ET.Element]) -> str:
+    return "".join(el.itertext()).strip() if el is not None else ""
 
-    if platform == "twitter" or "x.com" in url_lower or "twitter.com" in url_lower:
-        username = url.rstrip('/').split('/')[-1]
-        return f"https://nitter.net/{username}"
 
-    if platform == "instagram" or "instagram.com" in url_lower:
-        username = url.rstrip('/').split('/')[-1]
-        return f"https://www.picuki.com/profile/{username}"
+def parse_feed(xml_bytes: bytes) -> List[Dict[str, Any]]:
+    """Parse RSS 2.0 or Atom XML into a newest-first list of
+    {title, url, summary, published (datetime|None), author, categories}."""
+    root = ET.fromstring(xml_bytes)
+    items: List[Dict[str, Any]] = []
 
-    return url
+    for it in root.iter("item"):  # RSS 2.0
+        link = _text(it.find("link"))
+        guid = it.find("guid")
+        if not link and guid is not None and guid.get("isPermaLink", "true") != "false":
+            link = _text(guid)
+        items.append({
+            "title": _clean_text(_text(it.find("title")), 300),
+            "url": link,
+            "summary": _clean_text(_text(it.find("description"))),
+            "published": _parse_date(_text(it.find("pubDate")) or _text(it.find(f"{_DC}date"))),
+            "author": _clean_text(_text(it.find(f"{_DC}creator")), 120),
+            "categories": [_text(c) for c in it.findall("category") if _text(c)],
+        })
 
-async def _openai_available() -> bool:
-    """Quick check if OpenAI API is reachable (not rate-limited/quota-exceeded)."""
-    key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if not key:
-        return False
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            r = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "hi"}], "max_tokens": 1},
-            )
-            return r.status_code == 200
-    except Exception:
-        return False
+    for entry in root.iter(f"{_ATOM}entry"):  # Atom
+        link = next(
+            (ln.get("href", "") for ln in entry.findall(f"{_ATOM}link")
+             if ln.get("rel", "alternate") == "alternate" and ln.get("href")),
+            "",
+        )
+        summary = _text(entry.find(f"{_ATOM}summary")) or _text(entry.find(f"{_ATOM}content"))
+        published = _text(entry.find(f"{_ATOM}published")) or _text(entry.find(f"{_ATOM}updated"))
+        items.append({
+            "title": _clean_text(_text(entry.find(f"{_ATOM}title")), 300),
+            "url": link,
+            "summary": _clean_text(summary),
+            "published": _parse_date(published),
+            "author": _clean_text(_text(entry.find(f"{_ATOM}author/{_ATOM}name")), 120),
+            "categories": [c.get("term", "") for c in entry.findall(f"{_ATOM}category") if c.get("term")],
+        })
 
-async def fetch_news_from_url(url: str, country: str, platform: str = None) -> List[Dict[str, Any]]:
-    """Use ScrapeGraphAI to extract news from a specific URL or social media handle."""
-    if not SCRAPEGRAPH_AVAILABLE:
-        logger.warning("ScrapeGraphAI is not installed. Skipping (no fabricated fallback).")
-        return await fetch_news_for_country_fallback(AIMarketplace(), country)
+    items = [i for i in items if i["title"] and i["url"].startswith(("http://", "https://"))]
+    items.sort(key=lambda i: i["published"] or datetime.min, reverse=True)
+    return items
 
-    if not await _openai_available():
-        logger.warning("OpenAI unavailable (quota/rate-limit). Skipping ScrapeGraphAI.")
-        return await fetch_news_for_country_fallback(AIMarketplace(), country)
 
-    target_url = _route_social_media_url(url, platform)
-    logger.info(f"Scraping URL: {target_url} (Original: {url})")
-
-    prompt = f"""
-    Extract the latest immigration news, policy updates, or visa-related announcements from this page.
-    If this is a GitHub repository or social media feed, carefully read the recent posts or readmes for any relevant news.
-    You MUST categorize each news item into exactly ONE of these categories: F1, H1B, O1, EB1, Business, Travel.
-    Format the output strictly as a JSON array of objects with the following keys:
-    - "title": string (Headline of the news)
-    - "date": string (Extract date from text, e.g., "2026-10-15". If unspecified, try to infer it)
-    - "category": string (must be one of: F1, H1B, O1, EB1, Business, Travel)
-    - "content": string (A brief summary of the news, 2-3 sentences)
-    - "source_url": string (Link to the full article or post if available, else null)
-    """
-
-    graph_config = {
-        "llm": {
-            "api_key": os.environ.get("OPENAI_API_KEY", "mock-key"),
-            "model": "openai/gpt-4o-mini",
+def feed_client() -> httpx.AsyncClient:
+    return httpx.AsyncClient(
+        timeout=FEED_TIMEOUT,
+        follow_redirects=True,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.5",
         },
-        "verbose": True,
-        "headless": True,
+    )
+
+
+async def fetch_feed(client: httpx.AsyncClient, url: str) -> List[Dict[str, Any]]:
+    """GET a feed and parse it. Raises on HTTP / size / parse errors."""
+    resp = await client.get(url)
+    resp.raise_for_status()
+    if len(resp.content) > MAX_FEED_BYTES:
+        raise ValueError(f"feed too large ({len(resp.content)} bytes)")
+    return parse_feed(resp.content)
+
+
+def classify_category(text: str, default: str = "Business") -> str:
+    """Keyword-map a headline/summary onto one of CATEGORIES."""
+    t = text.lower()
+    if re.search(r"\bh-?1b\b", t):
+        return "H1B"
+    if re.search(r"\bo-?1\b", t):
+        return "O1"
+    if re.search(r"\beb-?1\b", t):
+        return "EB1"
+    if re.search(r"\bf-?1\b|\bstudent|\bstudy\b|\buniversit", t):
+        return "F1"
+    if re.search(r"\btravel|\bvisitor|\btourist|\badvisory", t):
+        return "Travel"
+    return default
+
+
+async def ingest_vectors(kind: str, ids: List[str], docs: List[str], metas: List[dict]) -> None:
+    """Best-effort RAG ingest of newly inserted items (local embeddings)."""
+    if not ids:
+        return
+    try:
+        from ollama_embeddings import embed_query
+        from vector_store import upsert_documents
+        embeddings = [await embed_query(text) for text in docs]
+        upsert_documents("wehive_rag", ids, docs, embeddings, metas)
+        logger.info("Ingested %d %s items into Vector DB.", len(ids), kind)
+    except Exception as e:
+        logger.warning("Vector DB ingest skipped for %s: %s", kind, e)
+
+
+async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc) -> Dict[str, Any]:
+    """Fetch every feed and upsert its items into `col`, deduplicated by source_url.
+
+    `to_doc(feed, item)` maps a parsed item to the stored fields. New items are
+    inserted with status 'pending'; an existing URL whose title/date changed is
+    refreshed without touching its moderation status.
+    Returns {"inserted", "updated", "skipped", "errors": [...], "feeds": {...}}.
+    """
+    stats: Dict[str, Any] = {"inserted": 0, "updated": 0, "skipped": 0, "errors": [], "feeds": {}}
+    vector_ids: List[str] = []
+    vector_docs: List[str] = []
+    vector_metas: List[dict] = []
+
+    async with feed_client() as client:
+        for feed in feeds:
+            fstats: Dict[str, Any] = {"inserted": 0, "updated": 0, "skipped": 0}
+            stats["feeds"][feed["name"]] = fstats
+            try:
+                items = await fetch_feed(client, feed["url"])
+            except Exception as e:
+                msg = f"{feed['name']}: {type(e).__name__}: {e}"[:300]
+                logger.warning("%s feed failed — %s", kind, msg)
+                stats["errors"].append(msg)
+                fstats["error"] = msg
+                continue
+
+            for item in items[:MAX_ITEMS_PER_FEED]:
+                fields = to_doc(feed, item)
+                existing = await col.find_one({"source_url": item["url"]})
+                if existing:
+                    if existing.get("title") == fields["title"] and existing.get("date") == fields["date"]:
+                        fstats["skipped"] += 1
+                    else:
+                        await col.update_one(
+                            {"_id": existing["_id"]},
+                            {"$set": {**fields, "updated_at": datetime.utcnow()}},
+                        )
+                        fstats["updated"] += 1
+                    continue
+                res = await col.insert_one({**fields, "status": "pending", "created_at": datetime.utcnow()})
+                fstats["inserted"] += 1
+                vector_ids.append(str(res.inserted_id))
+                vector_docs.append(f"{fields['title']} {item['summary']}")
+                vector_metas.append({"type": kind, "country_id": fields["country_id"], "category": fields["category"]})
+
+            for k in ("inserted", "updated", "skipped"):
+                stats[k] += fstats[k]
+            await asyncio.sleep(1)  # be polite between hosts
+
+    await ingest_vectors(kind, vector_ids, vector_docs, vector_metas)
+    logger.info(
+        "%s aggregator finished: inserted=%d updated=%d skipped=%d errors=%d",
+        kind, stats["inserted"], stats["updated"], stats["skipped"], len(stats["errors"]),
+    )
+    return stats
+
+
+# ---------------------------------------------------------------------------
+# Aggregator
+# ---------------------------------------------------------------------------
+
+def _news_doc(feed: Dict[str, Any], item: Dict[str, Any]) -> Dict[str, Any]:
+    published = item["published"]
+    return {
+        "title": item["title"],
+        "country_id": feed["country_id"],
+        "date": published.strftime("%Y-%m-%d") if published else None,
+        "published_at": published,
+        "category": feed.get("category") or classify_category(f"{item['title']} {item['summary']}"),
+        "content": item["summary"],
+        "source_url": item["url"],
+        "source_name": feed["name"],
+        "source": "rss",
     }
 
-    try:
-        def run_scraper():
-            smart_scraper_graph = SmartScraperGraph(
-                prompt=prompt,
-                source=target_url,
-                config=graph_config
-            )
-            return smart_scraper_graph.run()
 
-        result = await asyncio.to_thread(run_scraper)
-
-        if isinstance(result, list):
-            return result
-        elif isinstance(result, dict) and "news" in result:
-            return result["news"]
-        elif isinstance(result, dict):
-            for v in result.values():
-                if isinstance(v, list):
-                    return v
-        return []
-    except Exception as e:
-        logger.error(f"ScrapeGraphAI failed for {url}: {e}")
-        return await fetch_news_for_country_fallback(AIMarketplace(), country)
-
-async def fetch_news_for_country_fallback(marketplace: AIMarketplace, country: str) -> List[Dict[str, Any]]:
-    """Scrape-failure fallback: returns nothing rather than LLM-fabricated news."""
-    # Never let an LLM invent news: without a real scraped source, return nothing.
-    logger.warning(f"No scraped source for news in {country}; skipping (no LLM-generated news).")
-    return []
-
-
-async def run_aggregator():
-    """Main task that runs every 24 hours."""
-    logger.info("Starting Global News Aggregator automated scraping loop...")
-    marketplace = AIMarketplace()
-
-    total_added = 0
-    total_skipped = 0
-    vector_ids = []
-    vector_docs = []
-    vector_metas = []
-
-    # 1. Scrape predefined seed URLs across platforms
-    for country_id, seeds in SEED_URLS.items():
-        logger.info(f"Scraping {len(seeds)} seed URLs for {country_id}...")
-        for seed in seeds:
-            try:
-                news_items = await fetch_news_from_url(seed["url"], country_id, seed.get("platform"))
-            except Exception as e:
-                logger.error(f"Scrape failed for {seed['url']}: {e}")
-                continue
-            for news in news_items:
-                title = news.get("title")
-                category = news.get("category", "Travel")
-
-                existing = await global_news_col.find_one({
-                    "title": title,
-                    "country_id": country_id,
-                })
-                if existing:
-                    total_skipped += 1
-                    continue
-
-                today_str = datetime.utcnow().strftime("%Y-%m-%d")
-                news_date = news.get("date")
-                if not news_date or not isinstance(news_date, str) or len(news_date) < 10:
-                    news_date = today_str
-
-                doc = {
-                    "title": title,
-                    "country_id": country_id,
-                    "date": news_date,
-                    "category": category,
-                    "content": news.get("content"),
-                    "source_url": news.get("source_url"),
-                    "status": "pending",
-                    "created_at": datetime.utcnow()
-                }
-                res = await global_news_col.insert_one(doc)
-                total_added += 1
-
-                doc_id = str(res.inserted_id)
-                vector_ids.append(doc_id)
-                vector_docs.append(f"{title} {news.get('content', '')}")
-                vector_metas.append({
-                    "type": "news",
-                    "country_id": country_id,
-                    "category": category
-                })
-            await asyncio.sleep(2)
-
-    # 2. Fallback LLM generation for countries without seeds
-    for country in TARGET_COUNTRIES:
-        country_id = country.lower().replace(" ", "-")
-        if country_id not in SEED_URLS:
-            logger.info(f"No seeds found for {country}, using LLM fallback...")
-            try:
-                news_items = await fetch_news_for_country_fallback(marketplace, country)
-            except Exception as e:
-                logger.error(f"LLM fallback failed for {country}: {e}")
-                continue
-
-            for news in news_items:
-                title = news.get("title")
-                category = news.get("category", "Travel")
-
-                existing = await global_news_col.find_one({
-                    "title": title,
-                    "country_id": country_id,
-                })
-                if existing:
-                    total_skipped += 1
-                    continue
-
-                today_str = datetime.utcnow().strftime("%Y-%m-%d")
-                news_date = news.get("date")
-                if not news_date or not isinstance(news_date, str) or len(news_date) < 10:
-                    news_date = today_str
-
-                doc = {
-                    "title": title,
-                    "country_id": country_id,
-                    "date": news_date,
-                    "category": category,
-                    "content": news.get("content"),
-                    "source_url": news.get("source_url"),
-                    "status": "pending",
-                    "created_at": datetime.utcnow()
-                }
-                res = await global_news_col.insert_one(doc)
-                total_added += 1
-
-                doc_id = str(res.inserted_id)
-                vector_ids.append(doc_id)
-                vector_docs.append(f"{title} {news.get('content', '')}")
-                vector_metas.append({
-                    "type": "news",
-                    "country_id": country_id,
-                    "category": category
-                })
-
-            await asyncio.sleep(2)
-
-    if vector_ids:
-        try:
-            from ollama_embeddings import embed_query
-            embeddings = []
-            for text in vector_docs:
-                emb = await embed_query(text)
-                embeddings.append(emb)
-            upsert_documents("wehive_rag", vector_ids, vector_docs, embeddings, vector_metas)
-            logger.info(f"Ingested {len(vector_ids)} news items into Vector DB.")
-        except Exception as e:
-            logger.error(f"Failed to ingest news into vector DB: {e}")
-
-    logger.info(f"Aggregator finished. Inserted {total_added} pending news items, skipped {total_skipped} duplicates.")
+async def run_aggregator() -> Dict[str, Any]:
+    """Fetch NEWS_FEEDS and upsert pending news. Returns per-run counts/errors."""
+    logger.info("News aggregator: fetching %d RSS/Atom feeds...", len(NEWS_FEEDS))
+    stats = await upsert_feed_items(global_news_col, NEWS_FEEDS, "news", _news_doc)
     await run_auto_approval()
+    return stats
+
 
 async def run_auto_approval():
-    """Fallback task that runs periodically to auto-approve safe news."""
+    """Approve pending news only when AGGREGATOR_AUTO_APPROVE is explicitly enabled."""
     if os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() not in ("1", "true", "yes"):
         logger.info("AGGREGATOR_AUTO_APPROVE disabled; leaving pending news for admin review.")
         return
+    result = await global_news_col.update_many({"status": "pending"}, {"$set": {"status": "approved"}})
+    logger.info("Auto-approved %d pending news items.", result.modified_count)
 
-    logger.info("Running auto-approval check for news...")
-
-    query = {
-        "status": "pending"
-    }
-
-    update = {
-        "$set": {"status": "approved"}
-    }
-
-    result = await global_news_col.update_many(query, update)
-    if result.modified_count > 0:
-        logger.info(f"Auto-approved {result.modified_count} safe news items.")
-    else:
-        logger.info("No safe pending news ready for auto-approval.")
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
-    async def main():
-        await run_aggregator()
-        await run_auto_approval()
-
-    asyncio.run(main())
+    asyncio.run(run_aggregator())

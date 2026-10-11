@@ -1,18 +1,22 @@
 """AI Agent runner — triggers agents and streams results into notifications.
 
 Endpoints:
-  POST /api/agents/run          Run all agents now
-  GET  /api/agents/status       Current agent status / last run
-  POST /api/agents/schedule     Toggle periodic scheduling
+  POST /api/agents/run                 Run all proactive agents now (admin)
+  GET  /api/agents/status              Scheduler status + last-run counts
+  GET  /api/agents/aggregator-runs     Last 20 aggregator runs (admin)
+  POST /api/agents/aggregators/run     Trigger one aggregator cycle in background (admin)
+  GET  /api/agents/aggregators/status  Run status (optionally ?run_id=) + DB counts (admin)
 """
 
 import asyncio
 import logging
+import os
+import uuid
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Query
+from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
 from db import db
 
@@ -22,8 +26,7 @@ router = APIRouter(prefix="/agents", tags=["agents"])
 logger = logging.getLogger("wehive.agents_router")
 
 notifications_col = db["notifications"]
-
-import os
+aggregator_runs_col = db["aggregator_runs"]
 
 SCHEDULE_INTERVAL = 3600  # 1 hour
 DAILY_AGGREGATOR_INTERVAL_SECONDS = int(os.environ.get("DAILY_AGGREGATOR_INTERVAL_SECONDS", 1800))  # 30 minutes
@@ -72,8 +75,9 @@ async def _insert_alert_as_notification(user_id: str, alert: dict):
 
 
 @router.post("/run")
-async def trigger_agents(user=Depends(get_current_user)):
-    """Run all agents now. Alerts are pushed into the user's notification stream."""
+async def trigger_agents(_admin=Depends(get_current_admin_flex)):
+    """Run all agents now (admin only — agents scan every user's data).
+    Alerts are pushed into each affected user's notification stream."""
     global _last_run, _last_results
     _last_run = datetime.utcnow().isoformat()
     results = await run_all_agents()
@@ -101,14 +105,11 @@ async def trigger_agents(user=Depends(get_current_user)):
 
 @router.get("/status")
 async def agent_status(user=Depends(get_current_user)):
-    """Get current agent status and last run summary."""
-    # Fetch last aggregator runs from DB
+    """Get current agent status and last run summary (counts only — the raw
+    alerts belong to other users and are never returned here)."""
     agg_runs = []
     try:
-        from db import db
-        cursor = db["aggregator_runs"].find(
-            {}, {"_id": 0}
-        ).sort("ts", -1).limit(5)
+        cursor = aggregator_runs_col.find({}, {"_id": 0}).sort("ts", -1).limit(5)
         agg_runs = [doc async for doc in cursor]
     except Exception:
         pass
@@ -119,7 +120,10 @@ async def agent_status(user=Depends(get_current_user)):
         "daily_interval_hours": DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600,
         "next_daily_run_utc": _next_daily_run,
         "last_run": _last_run,
-        "last_results": _last_results,
+        "last_results": {
+            aid: {"name": d.get("name"), "alerts_count": d.get("alerts_count", 0)}
+            for aid, d in _last_results.items()
+        },
         "recent_aggregator_runs": agg_runs,
         "available_agents": [
             {"id": aid, "name": meta["name"], "description": meta["description"]}
@@ -129,17 +133,56 @@ async def agent_status(user=Depends(get_current_user)):
 
 
 @router.get("/aggregator-runs")
-async def aggregator_runs(user=Depends(get_current_user)):
-    """Get last 20 aggregator runs with results."""
-    try:
-        from db import db
-        cursor = db["aggregator_runs"].find(
-            {}, {"_id": 0}
-        ).sort("ts", -1).limit(20)
-        runs = [doc async for doc in cursor]
-        return {"ok": True, "runs": runs}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
+async def aggregator_runs(_admin=Depends(get_current_admin_flex)):
+    """Last 20 aggregator runs: overall status plus per-source
+    {status, inserted, updated, skipped, errors}."""
+    cursor = aggregator_runs_col.find({}, {"_id": 0}).sort("ts", -1).limit(20)
+    return {"ok": True, "runs": [doc async for doc in cursor]}
+
+
+@router.post("/aggregators/run")
+async def run_aggregators_now(admin=Depends(get_current_admin_flex)):
+    """Trigger one full aggregator cycle (news, blogs, events, intakes) in the
+    background. Returns the run id to poll via GET /agents/aggregators/status."""
+    if _cycle_lock.locked():
+        running = await aggregator_runs_col.find_one({"status": "running"}, {"_id": 0}, sort=[("ts", -1)])
+        raise HTTPException(409, {"message": "An aggregator run is already in progress",
+                                  "run_id": (running or {}).get("run_id")})
+    run_id = str(uuid.uuid4())
+    await aggregator_runs_col.insert_one({
+        "run_id": run_id, "ts": datetime.utcnow().isoformat(), "trigger": "admin",
+        "triggered_by": admin.get("_id"), "status": "running", "results": {},
+    })
+    asyncio.create_task(run_aggregator_cycle(trigger="admin", run_id=run_id))
+    return {"ok": True, "run_id": run_id, "status": "running"}
+
+
+@router.get("/aggregators/status")
+async def aggregators_status(
+    run_id: Optional[str] = Query(None),
+    _admin=Depends(get_current_admin_flex),
+):
+    """One run (by run_id) or the latest 5 runs, plus pending/total counts per collection."""
+    if run_id:
+        run = await aggregator_runs_col.find_one({"run_id": run_id}, {"_id": 0})
+        if not run:
+            raise HTTPException(404, "Run not found")
+        return {"ok": True, "run": run}
+    counts = {}
+    for name in ("global_news", "global_blogs", "global_events", "global_intakes"):
+        col = db[name]
+        counts[name] = {
+            "total": await col.count_documents({}),
+            "pending": await col.count_documents({"status": "pending"}),
+        }
+    cursor = aggregator_runs_col.find({}, {"_id": 0}).sort("ts", -1).limit(5)
+    return {
+        "ok": True,
+        "running": _cycle_lock.locked(),
+        "next_scheduled_run_utc": _next_daily_run,
+        "counts": counts,
+        "recent_runs": [doc async for doc in cursor],
+    }
 
 
 async def _scheduler_loop():
@@ -160,81 +203,111 @@ async def _scheduler_loop():
 
 
 _daily_task: Optional[asyncio.Task] = None
+_cycle_lock = asyncio.Lock()
+
+
+def _source_result(outcome) -> dict:
+    """Normalise an aggregator's return value / exception into
+    {status: ok|empty|skipped|error, inserted, updated, skipped, errors}."""
+    if isinstance(outcome, Exception):
+        return {"status": "error", "inserted": 0, "updated": 0, "skipped": 0,
+                "errors": [f"{type(outcome).__name__}: {outcome}"[:300]]}
+    r = dict(outcome or {})
+    errors = list(r.pop("errors", []) or [])
+    if r.get("status") == "error" and r.get("message"):
+        errors.append(str(r.pop("message"))[:300])
+    res = {
+        "inserted": int(r.get("inserted", 0) or 0),
+        "updated": int(r.get("updated", 0) or 0),
+        "skipped": int(r.get("skipped", 0) or 0),
+        "errors": errors,
+    }
+    if r.get("feeds"):
+        res["feeds"] = r["feeds"]
+    reason = r.get("disabled") or (r.get("reason") if r.get("status") == "skipped" else None)
+    if errors or r.get("status") == "error":
+        res["status"] = "error"
+    elif reason:
+        res["status"], res["reason"] = "skipped", reason
+    elif res["inserted"] + res["updated"] + res["skipped"] == 0:
+        res["status"] = "empty"
+    else:
+        res["status"] = "ok"
+    return res
+
+
+async def run_aggregator_cycle(trigger: str = "scheduler", run_id: Optional[str] = None) -> dict:
+    """Run events, news, blogs and intakes once (each isolated) and record the
+    outcome in aggregator_runs. Concurrent cycles are serialised."""
+    from event_aggregator_agent import run_aggregator as run_events
+    from news_aggregator_agent import run_aggregator as run_news
+    from blog_aggregator_agent import run_aggregator as run_blogs
+    from intake_aggregator_agent import run_aggregator as run_intakes
+
+    async with _cycle_lock:
+        run_id = run_id or str(uuid.uuid4())
+        start_ts = datetime.utcnow().isoformat()
+        await aggregator_runs_col.update_one(
+            {"run_id": run_id},
+            {"$setOnInsert": {"ts": start_ts, "trigger": trigger}, "$set": {"status": "running"}},
+            upsert=True,
+        )
+
+        # Mark past events as past. Never re-date or auto-approve items here:
+        # approval is admin-driven unless AGGREGATOR_AUTO_APPROVE is set.
+        try:
+            from db import global_events_col
+            today_str = datetime.utcnow().strftime("%Y-%m-%d")
+            await global_events_col.update_many(
+                {"date": {"$type": "string", "$lt": today_str}, "is_past": {"$ne": True}},
+                {"$set": {"is_past": True}},
+            )
+        except Exception as e:
+            logger.warning("Aggregator past-event marking failed: %s", e)
+
+        results = {}
+        for name, fn in (("events", run_events), ("news", run_news),
+                         ("blogs", run_blogs), ("intakes", run_intakes)):
+            try:
+                logger.info("Aggregator: running %s...", name)
+                outcome = await fn()
+            except Exception as e:
+                logger.exception("Aggregator: %s failed", name)
+                outcome = e
+            results[name] = _source_result(outcome)
+            logger.info("Aggregator: %s -> %s", name, results[name]["status"])
+
+        statuses = {r["status"] for r in results.values()}
+        if "error" in statuses:
+            overall = "error"
+        elif "ok" in statuses:
+            overall = "ok"
+        else:
+            overall = "empty"
+        try:
+            await aggregator_runs_col.update_one({"run_id": run_id}, {"$set": {
+                "status": overall,
+                "finished_at": datetime.utcnow().isoformat(),
+                "results": results,
+            }})
+        except Exception as e:
+            logger.warning("Failed to record aggregator run: %s", e)
+        logger.info("Aggregator cycle %s finished: %s", run_id, overall)
+        return {"run_id": run_id, "status": overall, "results": results}
+
 
 async def _daily_aggregator_loop():
-    """Background loop: run web aggregators (events, news, blogs, intakes) every 30 minutes.
-    Each aggregator is isolated — one failure won't block the others.
-    Auto-approval and date refresh run after each aggregation. Runs immediately on first startup."""
+    """Background loop: run one aggregator cycle every DAILY_AGGREGATOR_INTERVAL_SECONDS
+    (first run immediately on startup)."""
     global _next_daily_run
-    first_run = True
     while True:
-        if not first_run:
-            next_dt = datetime.utcnow() + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)
-            _next_daily_run = next_dt.isoformat()
-            logger.info("Aggregator sleeping for %d seconds (%0.1f hours). Next run: %s UTC",
-                        DAILY_AGGREGATOR_INTERVAL_SECONDS, DAILY_AGGREGATOR_INTERVAL_SECONDS / 3600, _next_daily_run)
-            await asyncio.sleep(DAILY_AGGREGATOR_INTERVAL_SECONDS)
-        first_run = False
-
+        _next_daily_run = (datetime.utcnow() + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)).isoformat()
         try:
-            start_dt = datetime.utcnow()
-            start_ts = start_dt.isoformat()
-            _next_daily_run = (start_dt + timedelta(seconds=DAILY_AGGREGATOR_INTERVAL_SECONDS)).isoformat()
-            results = {}
-
-            # 0. Mark past events as past. Never re-date or auto-approve items here:
-            #    approval is admin-driven unless AGGREGATOR_AUTO_APPROVE is set
-            #    (enforced inside each agent's run_auto_approval).
-            try:
-                from db import global_events_col
-                today_str = datetime.utcnow().strftime("%Y-%m-%d")
-                await global_events_col.update_many(
-                    {"date": {"$type": "string", "$lt": today_str}, "is_past": {"$ne": True}},
-                    {"$set": {"is_past": True}},
-                )
-            except Exception as ref_e:
-                logger.warning("Aggregator past-event marking failed: %s", ref_e)
-
-            async def _run_one(name: str, agg_fn, approve_fn):
-                try:
-                    logger.info("Aggregator agent: running %s...", name)
-                    await agg_fn()
-                    await approve_fn()
-                    logger.info("Aggregator agent: %s complete", name)
-                    return "ok"
-                except Exception as e:
-                    logger.exception("Aggregator agent: %s failed: %s", name, e)
-                    return str(e)
-
-            from event_aggregator_agent import run_aggregator as run_events
-            from event_aggregator_agent import run_auto_approval as approve_events
-            from news_aggregator_agent import run_aggregator as run_news
-            from news_aggregator_agent import run_auto_approval as approve_news
-            from blog_aggregator_agent import run_aggregator as run_blogs
-            from blog_aggregator_agent import run_auto_approval as approve_blogs
-            from intake_aggregator_agent import run_aggregator as run_intakes
-
-            async def _noop(): pass
-
-            results["events"] = await _run_one("events", run_events, approve_events)
-            results["news"] = await _run_one("news", run_news, approve_news)
-            results["blogs"] = await _run_one("blogs", run_blogs, approve_blogs)
-            results["intakes"] = await _run_one("intakes", run_intakes, _noop)
-
-            # Record run in DB for monitoring
-            try:
-                from db import db
-                await db["aggregator_runs"].insert_one({
-                    "ts": start_ts,
-                    "finished_at": datetime.utcnow().isoformat(),
-                    "results": results,
-                })
-            except Exception as e:
-                logger.warning("Failed to record aggregator run: %s", e)
-
-            logger.info("Aggregator Scheduler: complete — %s. Next scheduled run: %s UTC", results, _next_daily_run)
-        except Exception as loop_e:
-            logger.exception("Critical error in aggregator loop: %s", loop_e)
+            await run_aggregator_cycle(trigger="scheduler")
+        except Exception as e:
+            logger.exception("Critical error in aggregator loop: %s", e)
+        logger.info("Aggregator sleeping %ds. Next run: %s UTC", DAILY_AGGREGATOR_INTERVAL_SECONDS, _next_daily_run)
+        await asyncio.sleep(DAILY_AGGREGATOR_INTERVAL_SECONDS)
 
 
 def start_scheduler():

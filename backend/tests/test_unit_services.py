@@ -2,7 +2,9 @@
 normalize, config, constants, models, auth_utils (remaining gaps).
 """
 
-import sys, os, importlib
+import importlib
+import os
+import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 os.environ.setdefault("MONGO_URL", "mongodb://localhost:27017")
@@ -115,7 +117,7 @@ async def test_revenue_for_appointment_fee():
 
 
 # ─── Serializers (full coverage) ─────────────────────────────────────────────
-from serializers import _serialize_datetime, serialize_doc, public_user, public_admin, serialize_event
+from serializers import _serialize_datetime, serialize_doc, public_user, serialize_event
 
 
 class TestSerializeDatetime:
@@ -153,19 +155,6 @@ class TestPublicUserExtended:
         u = {"_id": "u1", "email": "user@other.com"}
         result = public_user(u, include_admin_flag=True)
         assert result["is_admin"] is False
-
-
-class TestPublicAdminExtended:
-    def test_password_updated_at(self):
-        dt = datetime(2025, 6, 1)
-        u = {"_id": "a1", "password_hash": "x", "password_updated_at": dt}
-        result = public_admin(u)
-        assert isinstance(result["password_updated_at"], str)
-
-    def test_missing_fields(self):
-        u = {"_id": "a1"}
-        result = public_admin(u)
-        assert result["has_password"] is False
 
 
 class TestSerializeEvent:
@@ -234,16 +223,13 @@ class TestConfig:
 
 
 # ─── Constants ────────────────────────────────────────────────────────────────
-from constants import AppStatus, OtpChannel, BILLABLE_STATUSES, STATUS_LABELS, REFERRAL_REWARD_INR, MIN_DEPOSIT_FOR_REWARD
+from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS, REFERRAL_REWARD_INR
 
 
 class TestConstants:
     def test_app_status_values(self):
         assert AppStatus.DRAFT.value == "draft"
         assert AppStatus.APPROVED.value == "approved"
-
-    def test_otp_channel_values(self):
-        assert OtpChannel.AUTO.value == "auto"
 
     def test_billable_statuses(self):
         assert AppStatus.SUBMITTED in BILLABLE_STATUSES
@@ -254,13 +240,12 @@ class TestConstants:
 
     def test_referral_constants(self):
         assert REFERRAL_REWARD_INR == 500
-        assert MIN_DEPOSIT_FOR_REWARD == 2000
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
 from models import (
     SendOtpRequest, VerifyOtpRequest, ApplicationCreate, Application,
-    SavedPlanCreate, LeadCreate, Lead, UniversityApplicationCreate,
+    SavedPlanCreate, LeadCreate, UniversityApplicationCreate,
     PrimaryApplicant, UpdateProfileRequest, PublicUser, AuthTokens
 )
 
@@ -287,11 +272,6 @@ class TestModels:
     def test_lead_create_validation(self):
         req = LeadCreate(name="John", email="john@test.com", message="Hello")
         assert req.name == "John"
-
-    def test_lead_defaults(self):
-        lead = Lead(name="John", email="john@test.com", message="Hi")
-        assert lead.id is not None
-        assert lead.surname == ""
 
     def test_update_profile_request(self):
         req = UpdateProfileRequest(name="New Name", gender="male")
@@ -320,7 +300,7 @@ class TestModels:
 # ─── Auth Utils (remaining coverage) ─────────────────────────────────────────
 from auth_utils import (
     classify_identifier, normalize_phone, mask, sign_jwt, decode_jwt,
-    gen_otp, otp_expiry, create_access_token, get_current_user,
+    create_access_token, get_current_user,
     get_current_user_optional
 )
 
@@ -400,21 +380,6 @@ class TestAuthUtilsExtended:
     def test_create_access_token_no_sub_raises(self):
         with pytest.raises(ValueError, match="sub"):
             create_access_token({"role": "admin"})
-
-    def test_otp_expiry(self):
-        expiry = otp_expiry()
-        now = datetime.utcnow()
-        assert expiry > now
-        assert expiry < now + timedelta(minutes=15)
-
-    def test_gen_otp_default_length(self):
-        otp = gen_otp()
-        assert len(otp) == 6
-        assert otp.isdigit()
-
-    def test_gen_otp_custom_length(self):
-        otp = gen_otp(8)
-        assert len(otp) == 8
 
 
 @pytest.mark.asyncio

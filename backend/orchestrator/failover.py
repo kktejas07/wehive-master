@@ -10,6 +10,7 @@ import time
 from collections import defaultdict
 from typing import Optional
 
+from config import FRONTEND_URL
 from db import db
 from orchestrator.models import CircuitState
 from orchestrator.vault import PROVIDER_BASE_URLS, AccountsVault
@@ -61,14 +62,6 @@ CIRCUIT_BREAKER_THRESHOLD = 3
 CIRCUIT_HALF_OPEN_TIMEOUT = 60
 
 CB_COLLECTION = "orchestrator_circuit_breakers"
-
-
-def _capture_event(event: str, distinct_id: str, properties: dict) -> None:
-    try:
-        from posthog_service import capture_event
-        capture_event(event=event, distinct_id=distinct_id, properties=properties)
-    except Exception:
-        pass
 
 
 class CircuitBreaker:
@@ -143,7 +136,6 @@ class CircuitBreaker:
     async def record_success(self, provider: str) -> None:
         await self._ensure_loaded()
         state = self._circuits[provider.lower()]
-        previous_state = state.state
         state.failures = 0
         if state.state == "HALF_OPEN":
             state.state = "CLOSED"
@@ -151,22 +143,9 @@ class CircuitBreaker:
             logger.info("Circuit CLOSED for %s", provider)
         await self._persist(provider)
 
-        if state.state != previous_state:
-            _capture_event(
-                "orchestrator_circuit_change",
-                "system",
-                {
-                    "provider": provider,
-                    "previous_state": previous_state,
-                    "new_state": state.state,
-                    "failure_count": state.failures,
-                },
-            )
-
     async def record_failure(self, provider: str, status_code: int = 500) -> None:
         await self._ensure_loaded()
         state = self._circuits[provider.lower()]
-        previous_state = state.state
         state.failures += 1
         state.last_failure = time.monotonic()
 
@@ -201,20 +180,6 @@ class CircuitBreaker:
             state.paused_until = time.monotonic() + CIRCUIT_BREAKER_PAUSE_SECS
 
         await self._persist(provider)
-
-        if state.state != previous_state:
-            _capture_event(
-                "orchestrator_circuit_change",
-                "system",
-                {
-                    "provider": provider,
-                    "previous_state": previous_state,
-                    "new_state": state.state,
-                    "failure_count": state.failures,
-                    "status_code": status_code,
-                    "permanently_disabled": state.permanently_disabled,
-                },
-            )
 
     def get_state(self, provider: str) -> dict:
         state = self._circuits[provider.lower()]
@@ -356,7 +321,7 @@ class FailoverRouter:
         }
 
         if provider == "openrouter":
-            headers["HTTP-Referer"] = "https://wehive.co.in"
+            headers["HTTP-Referer"] = FRONTEND_URL
             headers["X-Title"] = "We Hive"
 
         if provider == "cloudflare":

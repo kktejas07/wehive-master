@@ -28,7 +28,7 @@ if not BASE_URL or not BASE_URL.startswith('http'):
 
 ADMIN_EMAIL = 'admin@wehive.co.in'
 ADMIN_PASS = os.environ.get('TEST_ADMIN_PASSWORD', '')
-ALLOWED_SIGNUP_EMAIL = 'krishnakranthiteja@gmail.com'
+ALLOWED_SIGNUP_EMAIL = os.environ.get('TEST_ADMIN_SIGNUP_EMAIL', 'signup-allowed@example.com')
 
 
 # ---------- helpers ----------

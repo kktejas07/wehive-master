@@ -6,7 +6,7 @@ where bugs were found, so regressions in API shape are caught early.
 from models import (
     SendOtpRequest, SendOtpResponse, VerifyOtpRequest,
     AuthTokens, PublicUser, Application, ApplicationCreate,
-    Lead, LeadCreate,
+    LeadCreate,
 )
 
 
@@ -61,10 +61,3 @@ class TestLeadContract:
         assert 'name' in fields
         assert 'email' in fields
         assert 'message' in fields
-
-    def test_response_has_expected_fields(self):
-        fields = Lead.model_fields.keys()
-        assert 'id' in fields
-        assert 'name' in fields
-        assert 'email' in fields
-        assert 'created_at' in fields

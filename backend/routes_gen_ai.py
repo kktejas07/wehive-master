@@ -21,7 +21,7 @@ from typing import Optional
 from auth_utils import get_current_user, get_current_user_optional
 from db import db
 
-router = APIRouter(prefix="/gen", tags=["gen-ai"])
+router = APIRouter(prefix="/gen", tags=["gen-ai"], dependencies=[Depends(get_current_user)])
 
 
 class TextGenRequest(BaseModel):

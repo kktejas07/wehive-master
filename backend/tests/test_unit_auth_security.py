@@ -76,7 +76,9 @@ class TestJwtTtl:
         os.environ['APP_ENV'] = 'test'
         os.environ.pop('JWT_EXPIRES_HOURS', None)
         global _auth
+        import config
         import auth_utils
+        importlib.reload(config)
         importlib.reload(auth_utils)
         _auth = auth_utils
 
@@ -103,10 +105,20 @@ class TestJwtTtl:
 
     def test_custom_ttl_via_env(self):
         os.environ['JWT_EXPIRES_HOURS'] = '48'
+        import config
         import auth_utils
+        importlib.reload(config)
         importlib.reload(auth_utils)
         assert auth_utils.JWT_EXPIRES_HOURS == 48
         os.environ.pop('JWT_EXPIRES_HOURS', None)
+        importlib.reload(config)
+        importlib.reload(auth_utils)
+
+    def test_admin_ttl_defaults_to_12_hours(self):
+        import config
+        os.environ.pop('ADMIN_JWT_EXPIRES_HOURS', None)
+        importlib.reload(config)
+        assert config.ADMIN_JWT_EXPIRES_HOURS == 12
 
 
 # ─────────────────────────────────────────────────────────────────────────────

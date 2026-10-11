@@ -4,6 +4,7 @@ import logging
 
 from data import COUNTRIES as STATIC_COUNTRIES, get_country as static_get, get_holiday_plan
 from db import db
+from fee_calculator import FLAT_APPLICATION_FEE_INR, USD_TO_INR
 
 router = APIRouter(prefix='/countries', tags=['countries'])
 logger = logging.getLogger('wehive')
@@ -100,8 +101,8 @@ async def list_countries(
     if limit:
         items = items[:limit]
     for c in items:
-        c['application_fee'] = 20000
-        c['embassy_fee'] = (c.get('fees_usd') or 0) * 83
+        c['application_fee'] = FLAT_APPLICATION_FEE_INR
+        c['embassy_fee'] = round((c.get('fees_usd') or 0) * USD_TO_INR)
         c['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
     return items
 
@@ -111,8 +112,8 @@ async def country_detail(country_id: str):
     c = await _get_one(country_id)
     if not c:
         raise HTTPException(404, 'Country not found')
-    c['application_fee'] = 20000
-    c['embassy_fee'] = (c.get('fees_usd') or 0) * 83
+    c['application_fee'] = FLAT_APPLICATION_FEE_INR
+    c['embassy_fee'] = round((c.get('fees_usd') or 0) * USD_TO_INR)
     c['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
     return _strip_mongo(c)
 

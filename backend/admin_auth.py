@@ -22,7 +22,7 @@ import bcrypt
 import jwt
 from fastapi import HTTPException, Header
 
-from config import ADMIN_EMAILS, JWT_SECRET, JWT_ALG, JWT_EXPIRES_HOURS, RESET_TOKEN_TTL_MIN
+from config import ADMIN_EMAILS, JWT_SECRET, JWT_ALG, ADMIN_JWT_EXPIRES_HOURS, RESET_TOKEN_TTL_MIN
 
 
 # ---------- passwords ----------
@@ -52,7 +52,7 @@ def sign_admin_jwt(user_id: str) -> str:
     payload = {
         'sub': user_id,
         'role': 'admin',
-        'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRES_HOURS),
+        'exp': datetime.utcnow() + timedelta(hours=ADMIN_JWT_EXPIRES_HOURS),
         'iat': datetime.utcnow(),
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)

@@ -1,8 +1,9 @@
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
+import re
 import uuid
 
 from db import db
@@ -12,6 +13,9 @@ logger = logging.getLogger("wehive.intake_aggregator")
 
 global_intakes_col = db["global_intakes"]
 
+SYSTEM_USER_ID = "system_aggregator"
+REFRESH_HOURS = int(os.environ.get("INTAKE_REFRESH_HOURS", "24"))
+
 TARGET_COUNTRIES = [
     "USA", "United Kingdom", "Canada", "Australia",
     "Germany", "France", "Ireland", "New Zealand", "Netherlands",
@@ -20,6 +24,12 @@ TARGET_COUNTRIES = [
 
 async def run_aggregator():
     """Runs the LLM aggregator to extract real-time intake data globally (excluding India)."""
+    latest = await global_intakes_col.find_one({}, sort=[("fetched_at", -1)])
+    if latest and isinstance(latest.get("fetched_at"), datetime) and \
+            datetime.utcnow() - latest["fetched_at"] < timedelta(hours=REFRESH_HOURS):
+        logger.info("Intake aggregator skipped: data refreshed within the last %dh.", REFRESH_HOURS)
+        return {"status": "skipped", "reason": f"fresh (< {REFRESH_HOURS}h old)"}
+
     logger.info("Starting intake aggregator agent...")
 
     # We ask the LLM to output a JSON list of countries with intakes broken down by track
@@ -58,16 +68,23 @@ Return ONLY valid JSON in this exact structure:
 Return only the raw JSON. No markdown fences. No prose.
 """
 
+    # Scheduled runs use the platform key pool under a system identity, calling the
+    # provider directly: no per-user free-token quota, and no local template
+    # fallback (which returns prose, not JSON).
+    provider, _pid = await marketplace.get_active_provider(SYSTEM_USER_ID)
+    if provider is None:
+        logger.info("Intake aggregator skipped: no LLM provider configured (set an LLM key or Settings -> Default LLM).")
+        return {"status": "skipped", "reason": "no LLM provider configured"}
+
     try:
-        reply = await marketplace.chat(
-            user_id="system_aggregator",
+        reply = await provider.chat(
             system_prompt="You are a JSON-only API.",
             user_prompt=prompt,
-            max_tokens=4000
+            max_tokens=4000,
         )
+        await marketplace._estimate_and_track_usage(SYSTEM_USER_ID, prompt, reply or "")
 
-        reply = reply.strip()
-        import re
+        reply = (reply or "").strip()
         m = re.search(r"\[.*\]", reply, re.DOTALL)
         if m:
             data = json.loads(m.group(0))
@@ -84,6 +101,7 @@ Return only the raw JSON. No markdown fences. No prose.
             c["_id"] = str(uuid.uuid4())
             c["batch_id"] = batch_id
             c["fetched_at"] = datetime.utcnow()
+            c["source"] = "ai_generated"
             docs.append(c)
 
         if docs:
@@ -92,7 +110,7 @@ Return only the raw JSON. No markdown fences. No prose.
             await global_intakes_col.insert_many(docs)
             logger.info(f"Successfully aggregated {len(docs)} countries' intake data.")
 
-        return {"status": "ok", "countries_processed": len(docs)}
+        return {"status": "ok" if docs else "empty", "inserted": len(docs)}
 
     except Exception as e:
         logger.error(f"Failed to run intake aggregator: {e}")

@@ -24,7 +24,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from admin_auth import get_current_admin_flex
-from config import ADMIN_EMAILS
+from config import ADMIN_EMAILS, DESTINATION_IMAGE_BASE_URLS, IS_DEV
 from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS
 from audit import record as audit_record, recent as audit_recent
 from db import db, users, applications, holiday_plans, leads, otps, universities_col
@@ -712,7 +712,7 @@ def _mask(value: str, keep: int = 4) -> str:
 async def admin_integrations(_=Depends(get_current_admin)):
     from settings_service import get_all as _get_settings
     overrides = await settings_col.find_one({'_id': 'integrations'}) or {}
-    otp_channel = overrides.get('OTP_CHANNEL', os.environ.get('OTP_CHANNEL', 'mock'))
+    otp_channel = overrides.get('OTP_CHANNEL', os.environ.get('OTP_CHANNEL', 'mock' if IS_DEV else ''))
 
     # Check both DB settings and env vars for SMTP/Twilio config
     twilio_cfg = await _get_settings('twilio')
@@ -1076,11 +1076,7 @@ async def admin_sync_destinations_to_r2_stream(_=Depends(get_current_admin)):
                 pass
 
             # Upload - try multiple sources
-            source_urls = [
-                f'https://wehive.co.in/images/destinations/{filename}',
-                f'https://raw.githubusercontent.com/kktejas07/wehive-master/main/frontend/public/images/destinations/{filename}',
-                f'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations/{filename}',
-            ]
+            source_urls = [f'{base}/{filename}' for base in DESTINATION_IMAGE_BASE_URLS]
             uploaded_ok = False
             for src_url in source_urls:
                 try:
@@ -1151,11 +1147,7 @@ async def admin_sync_destinations_to_r2(_=Depends(get_current_admin)):
 
     manifest = await _load_manifest()
     results = []
-    base_urls = [
-        'https://wehive.co.in/images/destinations',
-        'https://raw.githubusercontent.com/kktejas07/wehive-master/main/frontend/public/images/destinations',
-        'https://raw.githubusercontent.com/kktejas07/wehive-master/dev-fixes/frontend/public/images/destinations',
-    ]
+    base_urls = DESTINATION_IMAGE_BASE_URLS
 
     for entry in manifest:
         filename = entry['filename']

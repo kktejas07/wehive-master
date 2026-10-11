@@ -38,7 +38,6 @@ Profiles:
 """
 
 import logging
-import time
 import uuid
 from enum import Enum
 from typing import Optional
@@ -46,7 +45,7 @@ from typing import Optional
 import httpx
 
 from orchestrator.budget import BudgetEnforcer
-from orchestrator.failover import CircuitBreaker, FailoverRouter
+from orchestrator.failover import CircuitBreaker
 from orchestrator.pricing import calculate_cost, estimate_tokens
 from orchestrator.token_pool import TokenPoolManager
 from orchestrator.vault import AccountsVault, PROVIDER_BASE_URLS
@@ -357,49 +356,6 @@ _orchestrator_vault = AccountsVault()
 _orchestrator_pool = TokenPoolManager()
 _orchestrator_budget = BudgetEnforcer(vault=_orchestrator_vault, token_pool=_orchestrator_pool)
 _orchestrator_breaker = CircuitBreaker()
-_orchestrator_failover = FailoverRouter(token_pool=_orchestrator_pool, breaker=_orchestrator_breaker)
-
-
-class CircuitBreaker:
-    """Tracks provider failures and prevents cascading retries."""
-
-    def __init__(self, failure_threshold: int = 3, recovery_timeout: int = 60):
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self._failures: dict[str, list[float]] = {}
-        self._open_until: dict[str, float] = {}
-
-    def record_failure(self, provider: str):
-        now = time.time()
-        self._failures.setdefault(provider, [])
-        self._failures[provider] = [t for t in self._failures[provider] if now - t < 120]
-        self._failures[provider].append(now)
-        if len(self._failures[provider]) >= self.failure_threshold:
-            self._open_until[provider] = now + self.recovery_timeout
-            logger.warning("Circuit breaker OPEN for %s until %s", provider, self._open_until[provider])
-
-    def record_success(self, provider: str):
-        self._failures.pop(provider, None)
-        self._open_until.pop(provider, None)
-
-    def is_open(self, provider: str) -> bool:
-        if provider in self._open_until:
-            if time.time() < self._open_until[provider]:
-                return True
-            del self._open_until[provider]
-            logger.info("Circuit breaker reset for %s", provider)
-        return False
-
-    def status(self, provider: str) -> str:
-        if self.is_open(provider):
-            return "open"
-        recent = len([t for t in self._failures.get(provider, []) if time.time() - t < 120])
-        if recent >= self.failure_threshold - 1:
-            return "degraded"
-        return "healthy"
-
-
-_circuit_breaker = CircuitBreaker()
 
 
 def get_profile(profile_id: str) -> Optional[dict]:
@@ -419,10 +375,6 @@ def list_profiles(tier: Optional[str] = None, provider: Optional[str] = None) ->
             continue
         results.append({"id": pid, **profile})
     return results
-
-
-def get_circuit_breaker() -> CircuitBreaker:
-    return _orchestrator_breaker
 
 
 def _extract_content(response: dict) -> str:
@@ -531,11 +483,27 @@ async def chat_with_profile(
     max_tokens: int = 1024,
     temperature: float = None,
     user_id: str = "",
+    _visited: Optional[set] = None,
 ) -> dict:
-    """Chat using a curated model profile with budget checks and automatic failover."""
+    """Chat using a curated model profile with budget checks and automatic failover.
+
+    Each profile is tried at most once per call; when the fallback chain is
+    exhausted the result is ``{"error": ..., "status": 503}``.
+    """
     profile = get_profile(profile_id)
     if not profile:
-        return {"error": f"Unknown profile: {profile_id}"}
+        return {"error": f"Unknown profile: {profile_id}", "status": 400}
+    visited = _visited if _visited is not None else set()
+    visited.add(profile_id)
+
+    async def _failover(reason: str) -> dict:
+        fallback_id = get_fallback_profile(profile_id)
+        if fallback_id and fallback_id not in visited:
+            logger.info("Failing over from %s to %s (%s)", profile_id, fallback_id, reason)
+            return await chat_with_profile(
+                fallback_id, messages, max_tokens, temperature, user_id, _visited=visited
+            )
+        return {"error": f"All providers unavailable ({reason})", "status": 503}
 
     provider_id = profile["provider"]
     model = profile["model"]
@@ -550,21 +518,14 @@ async def chat_with_profile(
 
     # Check persistent circuit breaker
     if not _orchestrator_breaker.allow(provider_id):
-        fallback_id = get_fallback_profile(profile_id)
-        if fallback_id:
-            logger.info("Provider %s circuit open, falling back to %s", provider_id, fallback_id)
-            return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
-        return {"error": f"Provider {provider_id} unavailable and no fallback configured"}
+        return await _failover(f"provider {provider_id} circuit open")
 
     # Check budget (skip if no orchestrator account exists; env/BYOK keys are treated as unlimited)
     try:
         acct = await _orchestrator_vault.get_account(provider_id)
         if acct and not await _orchestrator_budget.pre_check(provider_id, estimated_prompt_tokens + tok):
             logger.warning("Provider %s budget exhausted; falling back", provider_id)
-            fallback_id = get_fallback_profile(profile_id)
-            if fallback_id:
-                return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
-            return {"error": f"Provider {provider_id} budget exhausted"}
+            return await _failover(f"provider {provider_id} budget exhausted")
     except Exception as e:
         logger.warning("Budget pre-check failed for %s: %s", provider_id, e)
 
@@ -606,32 +567,19 @@ async def chat_with_profile(
         await _orchestrator_breaker.record_failure(provider_id, status_code or 500)
         logger.error("Profile %s (provider %s) failed with status %s", profile_id, provider_id, status_code)
 
-        fallback_id = get_fallback_profile(profile_id)
-        if fallback_id and fallback_id != profile_id:
-            logger.info("Failing over from %s to %s", profile_id, fallback_id)
-            return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
-
-        return {"error": f"Provider {provider_id} failed (status {status_code})"}
+        return await _failover(f"provider {provider_id} failed with status {status_code}")
 
     except httpx.HTTPStatusError as e:
         status_code = e.response.status_code if e.response else 500
         logger.error("Profile %s (provider %s) HTTP error: %s", profile_id, provider_id, e)
         await _orchestrator_breaker.record_failure(provider_id, status_code)
-        fallback_id = get_fallback_profile(profile_id)
-        if fallback_id and fallback_id != profile_id:
-            return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
-        return {"error": f"Provider {provider_id} HTTP error {status_code}"}
+        return await _failover(f"provider {provider_id} HTTP error {status_code}")
 
     except Exception as e:
         logger.error("Profile %s (provider %s) failed: %s", profile_id, provider_id, e)
         await _orchestrator_breaker.record_failure(provider_id, 500)
 
-        fallback_id = get_fallback_profile(profile_id)
-        if fallback_id and fallback_id != profile_id:
-            logger.info("Failing over from %s to %s", profile_id, fallback_id)
-            return await chat_with_profile(fallback_id, messages, max_tokens, temperature, user_id)
-
-        return {"error": f"Provider {provider_id} error: {e}"}
+        return await _failover(f"provider {provider_id} error")
 
 
 def circuit_breaker_status() -> dict:

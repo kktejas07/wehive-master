@@ -5,14 +5,12 @@ supporting document) and return a structured JSON with the fields we can
 reliably lift out of it so the frontend can auto-fill visa forms.
 """
 
-import os
 import re
 import json
 import base64
 import logging
 import uuid
 from datetime import datetime
-from pathlib import Path
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
@@ -115,10 +113,6 @@ class ScanResponse(BaseModel):
     extracted: dict
     raw: Optional[str] = None
     created_at: datetime
-
-
-class UpgradeRequest(BaseModel):
-    tier: str = 'premium'     # placeholder for future: monthly/annual
 
 
 # ---------- helpers ---------- #

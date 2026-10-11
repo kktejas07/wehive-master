@@ -10,19 +10,10 @@ from db import db
 
 settings_col = db['settings']
 
-_cache: dict[str, dict] = {}
-_cache_ts: float = 0
-_CACHE_TTL = 30  # seconds
-
 
 async def _load(namespace: str) -> dict:
     doc = await settings_col.find_one({'_id': namespace})
     return (doc or {}).get('config', {})
-
-
-async def get(namespace: str, key: str, default=None):
-    doc = await _load(namespace)
-    return doc.get(key, default)
 
 
 async def get_all(namespace: str) -> dict:
@@ -45,45 +36,12 @@ async def get_razorpay_keys() -> tuple[str, str, str]:
     return key_id, key_secret, webhook_secret
 
 
-async def get_firebase_config() -> dict:
-    cfg = await _load('firebase')
-    return cfg if cfg else {}
-
-
-async def get_smtp_config() -> dict:
-    return await _load('smtp')
-
-
-async def get_twilio_config() -> dict:
-    return await _load('twilio')
-
-
-async def get_general_config() -> dict:
-    return await _load('general')
-
-
 async def get_notification_config() -> dict:
     return await _load('notifications')
 
 
-async def get_branding_config() -> dict:
-    return await _load('branding')
-
-
 async def get_r2_config() -> dict:
     return await _load('r2')
-
-
-async def get_postal_config() -> dict:
-    return await _load('postal')
-
-
-async def get_openwa_config() -> dict:
-    return await _load('openwa')
-
-
-async def get_email_config() -> dict:
-    return await _load('email')
 
 
 async def get_default_llm_config() -> dict:

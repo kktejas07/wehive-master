@@ -12,13 +12,11 @@ Behaviour:
      hive_study_abroad).
   3. If a proposal is materially different (Jaccard distance >=
      HIVE_SELF_LEARN_MIN_DELTA, default 0.12) AND there are at least
-     HIVE_SELF_LEARN_MIN_FEEDS feeds in the window (default 8), the new
-     prompt is saved as a new version in Mongo. Because the agent
-     framework re-reads the latest version on every run, the new prompt
-     is in effect immediately — this is the "real-time update" the spec
-     asks for.
+     HIVE_SELF_LEARN_MIN_FEEDS authenticated feeds in the window
+     (default 8), it is stored as a pending proposal in `hive_proposals`.
+     Nothing is applied until an admin approves it.
 
-Disable with HIVE_SELF_LEARN=0. Force-apply (bypass thresholds) with
+Off by default; enable with HIVE_SELF_LEARN=1. Bypass thresholds with
 HIVE_SELF_LEARN_FORCE=1.
 """
 
@@ -37,7 +35,7 @@ logger = logging.getLogger("wehive.seed_self_learn")
 
 
 async def seed_self_learn(db) -> dict:
-    """Mine recent feeds and auto-apply improved prompts in real time.
+    """Mine recent feeds and store prompt proposals as pending.
 
     Returns a summary dict. Never raises — failures are reported in the
     summary so the server boot is not blocked.
