@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Twitter, Instagram, Linkedin, Youtube, Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { BRAND, FOOTER_COLS } from '../data/mock';
+import NewsletterSignup from './NewsletterSignup';
 
 // Flag emojis in the link data read as decoration — strip them for the minimal footer.
 const stripFlags = (label) => label.replace(/\s*(?:[\u{1F1E6}-\u{1F1FF}]{2})/gu, '');
@@ -95,6 +96,7 @@ export default function Footer() {
   return (
     <footer className="relative bg-[hsl(var(--blue-900))] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 pb-24 sm:pb-10">
+        <NewsletterSignup />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 mb-12 md:mb-16">
           <FooterBrand />
           <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">

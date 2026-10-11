@@ -8,6 +8,9 @@ export const BRAND = {
   logoWhite: '/brand/wehive-logo.png',
   phone: '+91 90007 34326',
   phoneRaw: '+919000734326',
+  // WhatsApp Business number shown next to the newsletter signup.
+  whatsapp: '+91 90007 34326',
+  whatsappRaw: '919000734326',
   email: 'info@wehive.co.in',
   address: 'WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049, India',
   ballariAddress: 'Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103, India',

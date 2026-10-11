@@ -14,6 +14,8 @@ const EXACT_TITLES = {
   '/visa-interview-sandbox': `Visa Interview Sandbox | ${SITE_NAME}`,
   '/help': `Help Center | ${SITE_NAME}`,
   '/contact': `Contact Us | ${SITE_NAME}`,
+  '/newsletter/confirm': `Confirm Subscription | ${SITE_NAME}`,
+  '/newsletter/unsubscribe': `Unsubscribe | ${SITE_NAME}`,
   '/student-visa': `Student Visa & Universities | ${SITE_NAME}`,
   '/visa-interview': `Visa Interview Prep | ${SITE_NAME}`,
   '/universities': `Universities | ${SITE_NAME}`,

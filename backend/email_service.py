@@ -211,6 +211,20 @@ def build_otp_html(otp_code: str, purpose: str, expiry_minutes: int) -> str:
     return _wrap_html('Your verification code', content)
 
 
+def build_newsletter_confirm_html(confirm_url: str, unsubscribe_url: str) -> str:
+    content = f"""
+    <tr><td style="padding:0 32px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Thanks for signing up for We Hive updates.</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 20px 0;line-height:1.6">Confirm your email to start receiving visa rule changes, slot alerts and study-abroad news. If you didn't ask for this, ignore this email and you won't hear from us again.</p>
+      <div style="text-align:center;margin:24px 0">
+        <a href="{confirm_url}" style="display:inline-block;background:#B31942;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Confirm subscription</a>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin:0 0 8px 0;line-height:1.6">This link expires in 48 hours. You can <a href="{unsubscribe_url}" style="color:#94a3b8">unsubscribe</a> at any time.</p>
+    </td></tr>
+    """
+    return _wrap_html('Confirm your subscription', content)
+
+
 def build_welcome_html(name: str) -> str:
     content = f"""
     <tr><td style="padding:0 32px;text-align:left">

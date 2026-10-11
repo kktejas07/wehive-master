@@ -48,6 +48,7 @@ from routes_admin_universities import router as admin_universities_router  # noq
 from routes_ai_universities import router as ai_universities_router  # noqa: E402
 from routes_programs import router as programs_router, admin_router as admin_programs_router  # noqa: E402
 from routes_reviews import router as reviews_router  # noqa: E402
+from routes_newsletter import router as newsletter_router  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
 from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
 from routes_rag import router as rag_router  # noqa: E402
@@ -135,6 +136,7 @@ api_router.include_router(ai_universities_router)
 api_router.include_router(programs_router)
 api_router.include_router(admin_programs_router)
 api_router.include_router(reviews_router)
+api_router.include_router(newsletter_router)
 api_router.include_router(i18n_router)
 api_router.include_router(agents_ai_router)
 api_router.include_router(rag_router)
@@ -255,8 +257,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    logger.warning('Validation error: %s', exc.errors(), extra={'path': str(request.url)})
-    return JSONResponse(status_code=422, content={'ok': False, 'detail': exc.errors()})
+    # 'ctx' can hold raw exception objects (e.g. a validator's ValueError) that
+    # are not JSON-serialisable; 'msg' already carries the readable message.
+    errors = [{k: v for k, v in err.items() if k != 'ctx'} for err in exc.errors()]
+    logger.warning('Validation error: %s', errors, extra={'path': str(request.url)})
+    return JSONResponse(status_code=422, content={'ok': False, 'detail': errors})
 
 
 @app.exception_handler(Exception)
