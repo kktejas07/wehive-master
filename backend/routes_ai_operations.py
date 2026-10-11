@@ -26,12 +26,35 @@ import httpx
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
-from auth_utils import get_current_user, get_current_user_optional
+from auth_utils import get_current_user
+from ollama_embeddings import OLLAMA_HOST
 
 router = APIRouter(prefix="/ai", tags=["ai-operations"])
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
+
+
+def _uid(user) -> str:
+    return str(user.get("_id", "")) if isinstance(user, dict) else ""
+
+
+async def _llm(user, system: str, prompt: str, max_tokens: int = 1024) -> str:
+    """Single text call through the AI marketplace (BYOK -> free pool -> local)."""
+    from ai_marketplace import marketplace
+    return await marketplace.chat(_uid(user) or "anonymous", system, prompt, max_tokens=max_tokens)
+
+
+async def _llm_image(user, system: str, prompt: str, image_b64: str, mime: str, max_tokens: int = 1024) -> str:
+    from ai_marketplace import marketplace
+    return await marketplace.chat_with_image(_uid(user) or "anonymous", system, prompt, image_b64, mime, max_tokens=max_tokens)
+
+
+def _parse_json(content: str):
+    """Parse a JSON object from an LLM reply (tolerates ```json fences)."""
+    import json
+    clean = (content or "").replace("```json", "").replace("```", "").strip()
+    return json.loads(clean)
 
 
 class SmartSearchRequest(BaseModel):
@@ -90,10 +113,8 @@ AI_SEARCH_SCHEMA = {
 
 
 @router.post("/smart-search")
-async def smart_search(req: SmartSearchRequest, user=Depends(get_current_user_optional)):
+async def smart_search(req: SmartSearchRequest, user=Depends(get_current_user)):
     try:
-        from ai_marketplace import marketplace
-
         system = (
             "You are an intelligent search engine for We Hive platform. "
             "Search across all available data: visa information, countries, universities, "
@@ -105,17 +126,10 @@ async def smart_search(req: SmartSearchRequest, user=Depends(get_current_user_op
 
         context = f"Searchable collections: {[c['name'] for c in AI_SEARCH_SCHEMA['collections']]}"
 
-        messages = [
-            {"role": "system", "content": f"{system}\n\n{context}"},
-            {"role": "user", "content": f"Search for: {req.query}"},
-        ]
-
-        response = await marketplace.chat(messages=messages, max_tokens=1024)
-        content = response.get("content", "{}") if isinstance(response, dict) else "{}"
+        content = await _llm(user, f"{system}\n\n{context}", f"Search for: {req.query}", 1024)
 
         try:
-            import json
-            parsed = json.loads(content)
+            parsed = _parse_json(content)
         except Exception:
             parsed = {"results": [{"title": "Search Result", "snippet": content, "source": "llm", "relevance": 0.9}], "total": 1}
 
@@ -133,8 +147,6 @@ async def smart_search_schema():
 @router.post("/briefing")
 async def ai_briefing(req: BriefingRequest, user=Depends(get_current_user)):
     try:
-        from ai_marketplace import marketplace
-
         format_prompts = {
             "summary": "Provide a concise 2-3 paragraph summary.",
             "detailed": "Provide a comprehensive analysis with multiple sections.",
@@ -150,13 +162,7 @@ async def ai_briefing(req: BriefingRequest, user=Depends(get_current_user)):
         if req.context:
             system += f"\n\nContext: {req.context}"
 
-        messages = [
-            {"role": "system", "content": system},
-            {"role": "user", "content": f"Briefing topic: {req.topic}"},
-        ]
-
-        response = await marketplace.chat(messages=messages, max_tokens=2048)
-        content = response.get("content", "") if isinstance(response, dict) else str(response)
+        content = await _llm(user, system, f"Briefing topic: {req.topic}", 2048)
 
         return {"ok": True, "topic": req.topic, "format": req.format, "briefing": content}
 
@@ -167,8 +173,6 @@ async def ai_briefing(req: BriefingRequest, user=Depends(get_current_user)):
 @router.post("/resume-screening")
 async def resume_screening(req: ResumeScreeningRequest, user=Depends(get_current_user)):
     try:
-        from ai_marketplace import marketplace
-
         system = (
             "You are an expert resume screener. Analyze the resume against the job description "
             "and criteria. Return structured JSON with: "
@@ -183,17 +187,10 @@ async def resume_screening(req: ResumeScreeningRequest, user=Depends(get_current
         if req.criteria:
             user_prompt += f"\n\nScreening Criteria: {', '.join(req.criteria)}"
 
-        messages = [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        response = await marketplace.chat(messages=messages, max_tokens=1024)
-        content = response.get("content", "{}") if isinstance(response, dict) else "{}"
+        content = await _llm(user, system, user_prompt, 1024)
 
         try:
-            import json
-            result = json.loads(content)
+            result = _parse_json(content)
         except Exception:
             result = {"match_score": 50, "recommendation": "Review manually", "error": "Could not parse response"}
 
@@ -203,22 +200,33 @@ async def resume_screening(req: ResumeScreeningRequest, user=Depends(get_current
         raise HTTPException(status_code=502, detail=str(e))
 
 
+def _pdf_text(contents: bytes) -> str:
+    """Extract text from a PDF. The PDF library is optional (not in requirements)."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        try:
+            from PyPDF2 import PdfReader
+        except ImportError:
+            raise HTTPException(status_code=503, detail="PDF parsing is not available on this server; upload a .txt resume instead")
+    import io
+    try:
+        reader = PdfReader(io.BytesIO(contents))
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read PDF file")
+
+
 @router.post("/resume-screening/upload")
 async def resume_screening_upload(
     file: UploadFile = File(...),
     job_description: Optional[str] = Form(None),
+    user=Depends(get_current_user),
 ):
     contents = await file.read()
 
-    text = ""
-    if file.filename and file.filename.endswith(".pdf"):
-        try:
-            import io
-            from PyPDF2 import PdfReader
-            reader = PdfReader(io.BytesIO(contents))
-            text = "\n".join(page.extract_text() or "" for page in reader.pages)
-        except ImportError:
-            text = contents.decode("utf-8", errors="ignore")
+    if file.filename and file.filename.lower().endswith(".pdf"):
+        text = _pdf_text(contents)
     else:
         text = contents.decode("utf-8", errors="ignore")[:10000]
 
@@ -226,15 +234,13 @@ async def resume_screening_upload(
         raise HTTPException(status_code=400, detail="Could not extract sufficient text from file")
 
     return await resume_screening(
-        ResumeScreeningRequest(resume_text=text, job_description=job_description)
+        ResumeScreeningRequest(resume_text=text, job_description=job_description), user
     )
 
 
 @router.post("/performance-review")
 async def performance_review(req: PerformanceReviewRequest, user=Depends(get_current_user)):
     try:
-        from ai_marketplace import marketplace
-
         system = (
             "You are an HR AI assistant for We Hive. Draft a professional performance review. "
             "Return JSON: "
@@ -251,17 +257,10 @@ async def performance_review(req: PerformanceReviewRequest, user=Depends(get_cur
             f"Self-rating: {req.rating or 'Not provided'}/5"
         )
 
-        messages = [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        response = await marketplace.chat(messages=messages, max_tokens=1500)
-        content = response.get("content", "{}") if isinstance(response, dict) else "{}"
+        content = await _llm(user, system, user_prompt, 1500)
 
         try:
-            import json
-            result = json.loads(content)
+            result = _parse_json(content)
         except Exception:
             result = {"review": content, "overall_rating": "N/A"}
 
@@ -279,7 +278,7 @@ async def ai_status():
 
     try:
         async with httpx.AsyncClient(timeout=3) as client:
-            resp = await client.get("http://localhost:11434/api/tags")
+            resp = await client.get(f"{OLLAMA_HOST}/api/tags")
             ollama_ok = resp.status_code == 200
     except Exception:
         pass
@@ -354,15 +353,14 @@ async def vision_ocr(
     image_b64 = base64.b64encode(contents).decode("utf-8")
 
     try:
-        from ai_marketplace import marketplace
-        response = await marketplace.chat_with_image(
-            system_prompt="Extract all text from this image. Return ONLY the extracted text, nothing else.",
-            user_prompt=f"OCR this image. Language: {language}",
-            image_b64=image_b64,
-            mime=file.content_type or "image/png",
-            max_tokens=1000,
+        text = await _llm_image(
+            user,
+            "Extract all text from this image. Return ONLY the extracted text, nothing else.",
+            f"OCR this image. Language: {language}",
+            image_b64,
+            file.content_type or "image/png",
+            1000,
         )
-        text = response.get("content", "") if isinstance(response, dict) else str(response)
         return {"ok": True, "text": text, "file": file.filename}
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
@@ -380,22 +378,20 @@ async def vision_classify(
     label_list = [lb.strip() for lb in labels.split(",")] if labels else ["passport", "visa", "id_card", "bank_statement", "other"]
 
     try:
-        from ai_marketplace import marketplace
-        response = await marketplace.chat_with_image(
-            system_prompt=(
+        content = await _llm_image(
+            user,
+            (
                 f"Classify this document image into one of: {', '.join(label_list)}. "
                 "Return JSON: {\"classification\": \"...\", \"confidence\": 0-100, \"reasoning\": \"...\"}. "
                 "Only return JSON."
             ),
-            user_prompt=f"Classify this document. Options: {', '.join(label_list)}",
-            image_b64=image_b64,
-            mime=file.content_type or "image/png",
-            max_tokens=300,
+            f"Classify this document. Options: {', '.join(label_list)}",
+            image_b64,
+            file.content_type or "image/png",
+            300,
         )
-        content = response.get("content", "{}") if isinstance(response, dict) else "{}"
         try:
-            import json
-            result = json.loads(content)
+            result = _parse_json(content)
         except Exception:
             result = {"classification": "other", "confidence": 50}
         return {"ok": True, "file": file.filename, **result}
@@ -410,15 +406,8 @@ async def vision_parse_resume(
 ):
     contents = await file.read()
 
-    text = ""
-    if file.filename and file.filename.endswith(".pdf"):
-        try:
-            import io
-            from PyPDF2 import PdfReader
-            reader = PdfReader(io.BytesIO(contents))
-            text = "\n".join(page.extract_text() or "" for page in reader.pages)
-        except ImportError:
-            text = contents.decode("utf-8", errors="ignore")
+    if file.filename and file.filename.lower().endswith(".pdf"):
+        text = _pdf_text(contents)
     else:
         text = contents.decode("utf-8", errors="ignore")[:15000]
 
@@ -426,24 +415,20 @@ async def vision_parse_resume(
         raise HTTPException(status_code=400, detail="Could not extract text from file")
 
     try:
-        from ai_marketplace import marketplace
-        response = await marketplace.chat(
-            messages=[
-                {"role": "system", "content": (
-                    "Parse this resume into structured JSON. Return: "
-                    '{"name": "", "email": "", "phone": "", "skills": [...], '
-                    '"experience": [{"company": "", "role": "", "duration": "", "highlights": [...]}], '
-                    '"education": [{"degree": "", "institution": "", "year": ""}], '
-                    '"total_years_experience": 0}. Only return JSON.'
-                )},
-                {"role": "user", "content": f"Resume text:\n{text[:8000]}"},
-            ],
-            max_tokens=1024,
+        content = await _llm(
+            user,
+            (
+                "Parse this resume into structured JSON. Return: "
+                '{"name": "", "email": "", "phone": "", "skills": [...], '
+                '"experience": [{"company": "", "role": "", "duration": "", "highlights": [...]}], '
+                '"education": [{"degree": "", "institution": "", "year": ""}], '
+                '"total_years_experience": 0}. Only return JSON.'
+            ),
+            f"Resume text:\n{text[:8000]}",
+            1024,
         )
-        content = response.get("content", "{}") if isinstance(response, dict) else "{}"
         try:
-            import json
-            result = json.loads(content)
+            result = _parse_json(content)
         except Exception:
             result = {"name": "", "error": "Could not parse", "raw": content}
         return {"ok": True, **result}
@@ -481,29 +466,20 @@ async def speech_transcribe(
 @router.post("/translate")
 async def translate(req: TranslateRequest, user=Depends(get_current_user)):
     try:
-        from ai_marketplace import marketplace
-        response = await marketplace.chat(
-            messages=[
-                {"role": "system", "content": (
-                    f"Translate from {req.source_lang} to {req.target_lang}. "
-                    "Return only the translated text."
-                )},
-                {"role": "user", "content": req.text},
-            ],
-            temperature=0.3,
+        translated = await _llm(
+            user,
+            f"Translate from {req.source_lang} to {req.target_lang}. Return only the translated text.",
+            req.text,
+            2048,
         )
-        translated = response.get("content", "") if isinstance(response, dict) else ""
         return {"ok": True, "source": req.source_lang, "target": req.target_lang, "translated": translated}
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
 
 
 @router.post("/next-steps")
-async def generate_next_steps(req: NextStepsRequest):
+async def generate_next_steps(req: NextStepsRequest, user=Depends(get_current_user)):
     try:
-        from ai_marketplace import marketplace
-        import json
-
         prompt = (
             "Analyze the study abroad preparation progress for the following student:\n"
             f"- Target Academic Level: {req.academicLevel}\n"
@@ -535,16 +511,13 @@ async def generate_next_steps(req: NextStepsRequest):
             "}"
         )
 
-        response = await marketplace.chat(
-            messages=[
-                {"role": "system", "content": "You are WeHive's AI Next Steps Engine. You must return only a valid JSON object matching the requested schema. Do not write any markdown code blocks or explanations outside the JSON."},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.4,
+        content = await _llm(
+            user,
+            "You are WeHive's AI Next Steps Engine. You must return only a valid JSON object matching the requested schema. Do not write any markdown code blocks or explanations outside the JSON.",
+            prompt,
+            1500,
         )
-        content = response.get("content", "") if isinstance(response, dict) else ""
-        clean_content = content.replace("```json", "").replace("```", "").strip()
-        data = json.loads(clean_content)
+        data = _parse_json(content)
         return {"ok": True, **data}
     except Exception as e:
         return {

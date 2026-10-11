@@ -81,17 +81,17 @@ export default function ApplicationFormCard({ application, onUpdated }) {
   const onChange = (k, v) => setDraft((d) => ({ ...d, [k]: v }));
 
   return (
-    <section className="rounded-3xl bg-white border border-black/8 overflow-hidden" data-testid="application-form-card">
-      <header className="flex items-center justify-between gap-3 px-5 sm:px-6 py-4 border-b border-black/5">
+    <section className="rounded-2xl bg-white border border-border shadow-sm overflow-hidden" data-testid="application-form-card">
+      <header className="flex items-center justify-between gap-3 px-5 sm:px-6 py-4 border-b border-border">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 shrink-0">
-            <Sparkles className="w-4 h-4 text-emerald-700" />
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--blue-50))] shrink-0">
+            <Sparkles className="w-4 h-4 text-[hsl(var(--blue-700))]" />
           </span>
           <div className="min-w-0">
-            <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-emerald-700">
+            <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-700))]">
               {isEmpty ? 'Application form' : 'AI auto-filled'}
             </div>
-            <div className="text-[13px] text-[hsl(var(--blue-900))]/70 truncate">
+            <div className="text-[13px] text-muted-foreground truncate">
               {isEmpty
                 ? 'Scan your passport or fill these fields manually.'
                 : `${filled} of ${total} fields ready · saved to your draft.`}
@@ -104,7 +104,7 @@ export default function ApplicationFormCard({ application, onUpdated }) {
             size="sm"
             onClick={() => setEditing(true)}
             data-testid="form-edit-btn"
-            className="rounded-full h-9 px-4 font-bold border-black/10 hover:border-[hsl(var(--blue-700))]/30"
+            className="rounded-xl h-10 px-4 font-semibold border-slate-300 hover:border-[hsl(var(--blue-700))]/30"
           >
             <Pencil className="w-3.5 h-3.5 mr-1" />
             {isEmpty ? 'Fill in' : 'Edit'}
@@ -117,7 +117,7 @@ export default function ApplicationFormCard({ application, onUpdated }) {
               onClick={onCancel}
               disabled={saving}
               data-testid="form-cancel-btn"
-              className="rounded-full h-9 px-4 font-bold border-black/10"
+              className="rounded-xl h-10 px-4 font-semibold border-slate-300"
             >
               <X className="w-3.5 h-3.5 mr-1" /> Cancel
             </Button>
@@ -126,7 +126,7 @@ export default function ApplicationFormCard({ application, onUpdated }) {
               onClick={onSave}
               disabled={saving}
               data-testid="form-save-btn"
-              className="rounded-full h-9 px-4 font-bold btn-accent text-white"
+              className="rounded-xl h-10 px-4 font-semibold btn-accent text-white"
             >
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (
                 <span className="inline-flex items-center gap-1"><Save className="w-3.5 h-3.5" /> Save</span>
@@ -149,9 +149,9 @@ export default function ApplicationFormCard({ application, onUpdated }) {
             {FIELDS.map((f) => (
               <label
                 key={f.key}
-                className={`block ${f.wide ? 'sm:col-span-2' : ''} rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 px-4 py-2.5 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/35 transition`}
+                className={`block ${f.wide ? 'sm:col-span-2' : ''} rounded-2xl bg-[hsl(var(--soft-bg))] border border-border px-4 py-2.5 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/35 transition`}
               >
-                <div className="text-[10.5px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
+                <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">
                   {f.label}
                 </div>
                 <input
@@ -174,16 +174,18 @@ export default function ApplicationFormCard({ application, onUpdated }) {
             transition={{ duration: 0.18 }}
           >
             {isEmpty ? (
-              <div className="px-5 sm:px-6 py-8 text-center text-[13px] text-[hsl(var(--blue-900))]/55 flex flex-col items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-[hsl(var(--blue-900))]/35" />
-                Nothing here yet. Click <strong>Scan with AI</strong> at the top to
-                lift fields from your passport, or use <strong>Fill in</strong>.
+              <div className="px-5 sm:px-6 py-8 text-center text-[13px] text-muted-foreground flex flex-col items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-muted-foreground" />
+                <p className="max-w-sm">
+                  Nothing here yet. Click <strong className="text-[hsl(var(--blue-900))]">Scan with AI</strong> at the top to
+                  lift fields from your passport, or use <strong className="text-[hsl(var(--blue-900))]">Fill in</strong>.
+                </p>
               </div>
             ) : (
               <dl className="px-5 sm:px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-[13.5px]">
                 {FIELDS.filter((f) => data[f.key]).map((f) => (
-                  <div key={f.key} className="flex justify-between gap-3 border-b border-black/5 py-1.5">
-                    <dt className="text-[hsl(var(--blue-900))]/60">{f.label}</dt>
+                  <div key={f.key} className="flex justify-between gap-3 border-b border-border py-1.5">
+                    <dt className="text-muted-foreground">{f.label}</dt>
                     <dd className="font-bold text-[hsl(var(--blue-900))] truncate">{data[f.key]}</dd>
                   </div>
                 ))}

@@ -11,15 +11,9 @@ import Newsroom from '../components/Newsroom';
 import StatsStrip from '../components/StatsStrip';
 import AIServices from '../components/ai/AIServices';
 import OnTimeGuarantee from '../components/OnTimeGuarantee';
-import WorldMap from '../components/world-map/WorldMap';
-
 import LiveTickerMarquee from '../components/LiveTickerMarquee';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
-import { motion } from 'framer-motion';
-import { Globe, ArrowRight, Sparkles, Plane, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { ContentCard, ContentCardGrid } from '../components/ui/ContentCard';
 import { updateSEO } from '../lib/seo';
 
 export default function Home() {
@@ -34,18 +28,19 @@ export default function Home() {
   }, []);
 
   return (
-    <div>
+    <div className="bg-white">
       <Navbar />
+      {/* Hero → proof → destinations/services → how it works → guarantee → extras → FAQ → CTA */}
       <Hero filters={filters} onFilters={setFilters} />
       <LiveTickerMarquee />
-      <SchengenCarousel />
       <CountryGrid filters={filters} />
-      <OnTimeGuarantee />
       <StatsStrip />
-      <DealsSection />
-      <Newsroom />
+      <SchengenCarousel />
       <AIServices />
       <HowItWorks />
+      <OnTimeGuarantee />
+      <DealsSection />
+      <Newsroom />
       <Faq />
       <CtaBanner />
       <Footer />

@@ -93,14 +93,28 @@ def _truncate(text: str, n: int = FEED_TEXT_LIMIT) -> str:
     return s[:n] + ("…" if len(s) > n else "")
 
 
-async def recent_feeds(*, days: int = 7, limit: int = 200, agent_id: Optional[str] = None) -> list[dict]:
-    coll = db[FEED_COLL]
+def _feed_query(days: int, agent_id: Optional[str] = None, authenticated_only: bool = False) -> dict:
     q: dict[str, Any] = {}
     if days and days > 0:
         since = (datetime.utcnow() - timedelta(days=days)).isoformat() + "Z"
         q["ts"] = {"$gte": since}
     if agent_id:
         q["agent_id"] = agent_id
+    if authenticated_only:
+        # Anonymous runs must never steer prompt learning.
+        q["user_id"] = {"$nin": ["", None]}
+    return q
+
+
+async def recent_feeds(
+    *,
+    days: int = 7,
+    limit: int = 200,
+    agent_id: Optional[str] = None,
+    authenticated_only: bool = False,
+) -> list[dict]:
+    coll = db[FEED_COLL]
+    q = _feed_query(days, agent_id, authenticated_only)
     cur = coll.find(q, {"_id": 0}).sort("ts", -1).limit(max(1, min(limit, 1000)))
     return [d async for d in cur]
 
@@ -219,7 +233,7 @@ def _feeds_to_corpus(feeds: list[dict], max_n: int = MAX_FEEDS_FOR_PROPOSAL) -> 
 
 async def mine_patterns(*, days: int = 7, max_feeds: int = MAX_FEEDS_FOR_MINING) -> dict:
     """Grep the recent feeds and return intent clusters + gap analysis."""
-    feeds = await recent_feeds(days=days, limit=max_feeds)
+    feeds = await recent_feeds(days=days, limit=max_feeds, authenticated_only=True)
     if not feeds:
         return {
             "ok": True,
@@ -268,7 +282,7 @@ async def propose_prompt_edits(*, agent_id: str, days: int = 7) -> dict:
     from agent_framework import get_agent_registry
     from prompts_lib import get_store
 
-    feeds = await recent_feeds(days=days, limit=200, agent_id=agent_id)
+    feeds = await recent_feeds(days=days, limit=200, agent_id=agent_id, authenticated_only=True)
     if not feeds:
         return {
             "ok": False,
@@ -340,7 +354,7 @@ async def propose_prompt_edits(*, agent_id: str, days: int = 7) -> dict:
 
 async def propose_new_prompts(*, days: int = 7, top_n: int = 3) -> dict:
     """Suggest 1-3 NEW prompt kit cards based on recurring intents."""
-    feeds = await recent_feeds(days=days, limit=200)
+    feeds = await recent_feeds(days=days, limit=200, authenticated_only=True)
     if not feeds:
         return {"ok": False, "note": f"No feeds in the last {days} day(s)."}
     corpus = _feeds_to_corpus(feeds, max_n=min(len(feeds), 120))
@@ -370,7 +384,7 @@ async def propose_new_prompts(*, days: int = 7, top_n: int = 3) -> dict:
 
 async def propose_new_tools(*, days: int = 7) -> dict:
     """Suggest new tool definitions (name, description, JSON schema) for gaps."""
-    feeds = await recent_feeds(days=days, limit=200)
+    feeds = await recent_feeds(days=days, limit=200, authenticated_only=True)
     if not feeds:
         return {"ok": False, "note": f"No feeds in the last {days} day(s)."}
     corpus = _feeds_to_corpus(feeds, max_n=min(len(feeds), 120))
@@ -479,7 +493,7 @@ async def apply_prompt_edit(*, agent_id: str, new_system: str, proposed_version:
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# Real-time auto-apply — invoked by seed.py / bootstrap
+# Proposal generation — invoked by bootstrap (pending only) and the admin API
 # ─────────────────────────────────────────────────────────────────────────
 
 import os as _os
@@ -524,6 +538,7 @@ async def auto_apply_recent(
     min_delta: float = _MIN_PROMPT_DELTA,
     min_feeds: int = _MIN_FEEDS_FOR_AUTO_APPLY,
     force: bool = False,
+    apply: bool = False,
 ) -> dict:
     """End-to-end real-time update:
 
@@ -539,6 +554,9 @@ async def auto_apply_recent(
         min_delta: Jaccard-distance threshold (smaller = more conservative).
         min_feeds: don't auto-apply on tiny corpora.
         force: if True, ignore `min_feeds` and `min_delta` (admin override).
+        apply: if False (default) proposals are stored as pending in
+            `hive_proposals` for an admin to approve via /hive/learning/apply.
+            Only the admin-triggered endpoint passes True.
 
     Returns:
         dict with per-agent outcomes and a summary.
@@ -546,6 +564,7 @@ async def auto_apply_recent(
     targets = list(agent_ids or HIVE_AGENT_IDS)
     overall: dict[str, Any] = {
         "applied": [],
+        "pending": [],
         "skipped": [],
         "errors": [],
         "feeds_seen": 0,
@@ -554,14 +573,9 @@ async def auto_apply_recent(
         "force": force,
     }
 
-    # Pre-compute corpus size once
-    sample = await recent_feeds(days=days, limit=1)
-    if sample:
-        overall["feeds_seen"] = await db[FEED_COLL].count_documents(
-            {"ts": {"$gte": (datetime.utcnow() - timedelta(days=days)).isoformat() + "Z"}}
-        )
-    else:
-        overall["feeds_seen"] = 0
+    overall["feeds_seen"] = await db[FEED_COLL].count_documents(
+        _feed_query(days, authenticated_only=True)
+    )
 
     if not force and overall["feeds_seen"] < min_feeds:
         overall["note"] = (
@@ -593,6 +607,20 @@ async def auto_apply_recent(
                 })
                 continue
 
+            if not apply:
+                await save_proposal("prompt_edit", {
+                    "agent_id": agent_id,
+                    "prompt_id": proposal.get("prompt_id"),
+                    "current_version": proposal.get("current_version"),
+                    "proposed_version": proposal.get("proposed_version"),
+                    "new_system": new,
+                    "changes": proposal.get("changes"),
+                    "delta": delta,
+                    "applied": False,
+                })
+                overall["pending"].append({"agent_id": agent_id, "delta": delta})
+                continue
+
             # Apply → bumps prompt version; agent picks it up next run
             apply_res = await apply_prompt_edit(
                 agent_id=agent_id,
@@ -622,9 +650,9 @@ async def auto_apply_recent(
 
 
 def self_learn_enabled() -> bool:
-    """Read the HIVE_SELF_LEARN env flag. Default: ON, with a 7d window."""
-    v = _os.environ.get("HIVE_SELF_LEARN", "1").strip().lower()
-    return v not in ("0", "false", "no", "off")
+    """Read the HIVE_SELF_LEARN env flag. Default: OFF."""
+    v = _os.environ.get("HIVE_SELF_LEARN", "0").strip().lower()
+    return v in ("1", "true", "yes", "on")
 
 
 def self_learn_days() -> int:
@@ -656,10 +684,11 @@ async def run_self_learn(
     min_delta: Optional[float] = None,
     force: bool = False,
 ) -> dict:
-    """The single entry point that bootstrap_rag and seed.py call.
+    """The single entry point that bootstrap_rag and seed_self_learn call.
 
-    Honors the HIVE_SELF_LEARN* env vars by default. Set HIVE_SELF_LEARN=0
-    to disable. Set HIVE_SELF_LEARN_FORCE=1 to bypass thresholds.
+    Off unless HIVE_SELF_LEARN=1. Never applies prompts: proposals are
+    stored as pending for admin approval. HIVE_SELF_LEARN_FORCE=1 bypasses
+    the feed/delta thresholds.
     """
     if not self_learn_enabled() and not force:
         return {"ok": True, "skipped": True, "reason": "HIVE_SELF_LEARN disabled"}

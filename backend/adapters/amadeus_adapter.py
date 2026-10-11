@@ -127,24 +127,37 @@ async def get_travel_restrictions(from_country: str, to_country: str) -> Optiona
     )
 
 
-async def get_tourist_insights(city_code: str) -> Optional[dict]:
-    """Get popular tourist destinations, activities, and score."""
-    result = await _amadeus_get(
-        "v1/shopping/activities",
-        {"latitude": city_code, "radius": 10},
-    )
-    return {"city": city_code, "activities": result.get("data", []) if result else []}
-
-
-async def get_airport_info(iata_code: str) -> Optional[dict]:
-    """Get airport information by IATA code."""
+async def _city_coordinates(city_code: str) -> Optional[tuple[float, float]]:
+    """Resolve an IATA city code (e.g. PAR) to (latitude, longitude)."""
     result = await _amadeus_get(
         "v1/reference-data/locations",
-        {"subType": "AIRPORT", "keyword": iata_code.upper()},
+        {"subType": "CITY", "keyword": city_code.upper()},
     )
-    if result and result.get("data"):
-        return result["data"][0]
+    cities = (result or {}).get("data") or []
+    match = next((c for c in cities if c.get("iataCode") == city_code.upper()), cities[0] if cities else None)
+    geo = (match or {}).get("geoCode") or {}
+    if "latitude" in geo and "longitude" in geo:
+        return float(geo["latitude"]), float(geo["longitude"])
     return None
+
+
+async def get_tourist_insights(
+    city_code: str, lat: Optional[float] = None, lon: Optional[float] = None
+) -> Optional[dict]:
+    """Tours & activities around a city. Coordinates are looked up from the
+    city code unless the caller passes lat/lon. None when Amadeus is unavailable."""
+    if lat is None or lon is None:
+        coords = await _city_coordinates(city_code)
+        if not coords:
+            return None
+        lat, lon = coords
+    result = await _amadeus_get(
+        "v1/shopping/activities",
+        {"latitude": lat, "longitude": lon, "radius": 10},
+    )
+    if result is None:
+        return None
+    return {"city": city_code, "location": f"{lat},{lon}", "activities": result.get("data", [])}
 
 
 def amadeus_status() -> dict:
@@ -157,7 +170,7 @@ def amadeus_status() -> dict:
             "flight_price_analysis", "flight_delay_prediction", "flight_status",
             "hotel_search", "travel_restrictions", "tourist_insights",
             "points_of_interest", "location_score", "safe_place",
-            "airport_info", "airport_routes", "seat_map",
+            "airport_routes", "seat_map",
         ],
     }
 

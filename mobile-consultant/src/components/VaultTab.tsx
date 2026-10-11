@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 import jsPDF from "jspdf";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Joyride, Step } from "react-joyride";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface DocumentItem {
   id: string;
@@ -32,6 +33,8 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
   const [searchQuery, setSearchQuery] = useState("");
   const [isIdentificationUnlocked, setIsIdentificationUnlocked] = useState(false);
   const [ocrResult, setOcrResult] = useState<string | null>(null);
+  const ocrDialog = useDialogA11y(!!ocrResult, () => setOcrResult(null));
+  const previewDialog = useDialogA11y(!!previewDoc, () => setPreviewDoc(null));
   const [runTour, setRunTour] = useState(true);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -245,7 +248,7 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
       {/* Vault Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <span className="text-[10px] font-black uppercase text-rose-500 tracking-wider font-mono flex items-center gap-1">
+          <span className="text-[11px] font-black uppercase text-rose-500 tracking-wider font-mono flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5" /> Secure Vault
           </span>
           <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">My Document Locker</h2>
@@ -254,7 +257,7 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
         <div className="flex gap-2 items-center">
           <button 
             onClick={handleExportPDF} 
-            className="tour-step-export flex items-center gap-1 bg-slate-900 text-white px-3 py-1.5 rounded-full text-[10px] font-bold hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
+            className="tour-step-export flex items-center gap-1 bg-slate-900 text-white px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export Report</span>
@@ -281,9 +284,9 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
         <div className="mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center h-32">
           <div className="flex-1">
             <h3 className="text-sm font-bold text-slate-800">Storage Usage</h3>
-            <p className="text-[10px] text-slate-500 mt-0.5">Documents by Category</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Documents by Category</p>
             <div className="mt-2 text-2xl font-black text-slate-800">
-              {documents.length} <span className="text-xs font-normal text-slate-500">Total Docs</span>
+              {documents.length} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">Total Docs</span>
             </div>
           </div>
           <div className="w-1/2 h-full">
@@ -307,7 +310,7 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
           <Sparkles className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <h4 className="text-xs font-bold">AI Compliance Auditor</h4>
-            <p className="text-[10.5px] text-slate-300 leading-relaxed">
+            <p className="text-[11px] text-slate-300 leading-relaxed">
               Files uploaded are scanned for clarity and embassy compliance.
             </p>
           </div>
@@ -328,12 +331,12 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
                 <div className="flex items-center gap-2 text-slate-700">
                   <Folder className="w-4 h-4 text-blue-500" />
                   <h3 className="text-sm font-bold">{category}</h3>
-                  <span className="text-[10px] font-bold bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded-full">{categoryDocs.length}</span>
+                  <span className="text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded-full">{categoryDocs.length}</span>
                 </div>
                 {category === "Identification" && (
                   <button 
                     onClick={() => setIsIdentificationUnlocked(!isIdentificationUnlocked)}
-                    className="flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
+                    className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 cursor-pointer"
                   >
                     {isLocked ? <Lock className="w-3 h-3 text-rose-500" /> : <ShieldCheck className="w-3 h-3 text-emerald-500" />}
                     {isLocked ? "Unlock Required" : "Secured"}
@@ -343,12 +346,12 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
               
               {isLocked ? (
                 <div 
-                  className="bg-slate-100 rounded-2xl p-6 border border-slate-200/60 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-200 transition-colors shadow-inner"
+                  className="bg-slate-100 rounded-2xl p-6 border border-slate-200/60 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors shadow-inner"
                   onClick={() => setIsIdentificationUnlocked(true)}
                 >
                   <Fingerprint className="w-10 h-10 text-rose-400 animate-pulse" />
                   <p className="text-xs font-bold text-slate-700 mt-1">Biometric Unlock Required</p>
-                  <p className="text-[10px] text-slate-500 text-center max-w-[200px]">Tap fingerprint to simulate TouchID / FaceID validation.</p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 text-center max-w-[200px]">Tap the fingerprint to unlock with Touch ID or Face ID.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -364,18 +367,18 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
                             <div className="flex items-center gap-2">
                               <h3 className="text-xs font-extrabold text-slate-800">{doc.name}</h3>
                               {doc.tag && (
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${doc.tag === 'Urgent' ? 'bg-red-100 text-red-600' : 'bg-purple-100 text-purple-600'}`}>
+                                <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md ${doc.tag === 'Urgent' ? 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-300' : 'bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300'}`}>
                                   {doc.tag}
                                </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500">
+                            <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500">
                               <span>{doc.type}</span>
                               <span>•</span>
                               <span>For {doc.requiredFor}</span>
                             </div>
                           </div>
-                          <div className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-[9px] font-bold ${color}`}>
+                          <div className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-[11px] font-bold ${color}`}>
                             <StatusIcon className={`w-3 h-3 ${doc.status === 'pending_review' ? 'animate-spin' : ''}`} />
                             <span>{label}</span>
                           </div>
@@ -384,13 +387,13 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
                         {/* Uploaded details vs missing */}
                         <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between">
                           {isMissing ? (
-                            <span className="text-[10px] text-slate-400 italic">No document uploaded yet</span>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400 italic">No document uploaded yet</span>
                           ) : (
                             <div className="flex items-center gap-2">
                               <FileText className="w-4 h-4 text-slate-400" />
                               <div>
                                 <div className="text-[11px] font-semibold text-slate-700 max-w-[150px] truncate">{doc.fileName}</div>
-                                <div className="text-[9px] text-slate-400">{doc.fileSize}</div>
+                                <div className="text-[11px] text-slate-500 dark:text-slate-400">{doc.fileSize}</div>
                               </div>
                             </div>
                           )}
@@ -403,15 +406,15 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
                                     const newTag = doc.tag ? undefined : (Math.random() > 0.5 ? "Urgent" : "Reviewed");
                                     setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, tag: newTag } : d));
                                   }}
-                                  className={`h-8 w-8 rounded-lg border flex items-center justify-center transition-colors cursor-pointer ${doc.tag ? 'bg-purple-50 border-purple-200 hover:bg-purple-100' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`}
+                                  className={`h-8 w-8 rounded-lg border flex items-center justify-center transition-colors cursor-pointer ${doc.tag ? 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900/50 hover:bg-purple-100' : 'bg-slate-50 border-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                   title="Toggle Tag"
                                 >
-                                  <Tag className={`w-3.5 h-3.5 ${doc.tag ? 'text-purple-600' : 'text-slate-600'}`} />
+                                  <Tag className={`w-3.5 h-3.5 ${doc.tag ? 'text-purple-600 dark:text-purple-300' : 'text-slate-600'}`} />
                                 </button>
 
                                 <button 
                                   onClick={() => setPreviewDoc(doc as any)}
-                                  className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer"
+                                  className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                                   title="Preview file"
                                 >
                                   <Eye className="w-3.5 h-3.5 text-slate-600" />
@@ -419,10 +422,10 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
                                 
                                 <button 
                                   onClick={() => handleDeleteSimulate(doc.id, doc.name)}
-                                  className="h-8 w-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center hover:bg-rose-100 transition-colors cursor-pointer"
+                                  className="h-8 w-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 flex items-center justify-center hover:bg-rose-100 transition-colors cursor-pointer"
                                   title="Remove file"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                  <Trash2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-300" />
                                 </button>
                               </>
                             )}
@@ -431,7 +434,7 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
                               <button
                                 onClick={() => handleUploadClick(doc.id, doc.name, doc.category, doc.type, doc.requiredFor)}
                                 disabled={isLoading}
-                                className={`tour-step-upload inline-flex items-center gap-1 px-3.5 h-8 rounded-lg bg-slate-900 text-white text-[10px] font-bold hover:bg-slate-800 disabled:opacity-50 transition-colors cursor-pointer`}
+                                className={`tour-step-upload inline-flex items-center gap-1 px-3.5 h-8 rounded-lg bg-slate-900 text-white text-[11px] font-bold hover:bg-slate-800 disabled:opacity-50 transition-colors cursor-pointer`}
                               >
                                 {isLoading ? (
                                   <>
@@ -467,14 +470,14 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
           >
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl p-6"
+              {...ocrDialog} className="bg-white rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl p-6"
             >
               <h3 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-emerald-500" /> AI OCR Data Extracted
               </h3>
-              <p className="text-[10px] text-slate-500 mb-4">The following text was automatically extracted from your real uploaded image:</p>
+              <p className="text-[11px] text-slate-500 mb-4">The following text was automatically extracted from your real uploaded image:</p>
               
-              <pre className="text-[10px] text-slate-700 bg-slate-50 p-3 rounded-xl whitespace-pre-wrap font-mono border border-slate-100 max-h-40 overflow-y-auto">
+              <pre className="text-[11px] text-slate-700 bg-slate-50 p-3 rounded-xl whitespace-pre-wrap font-mono border border-slate-100 max-h-40 overflow-y-auto">
                 {ocrResult}
               </pre>
               
@@ -502,17 +505,17 @@ export default function VaultTab({ onTriggerNotification, colorScheme }: VaultTa
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl"
+              {...previewDialog} className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl"
               style={{ maxHeight: '80vh' }}
             >
               <div className="flex justify-between items-center p-4 border-b border-slate-100">
                 <div>
                   <h3 className="text-sm font-bold text-slate-800">{previewDoc.name}</h3>
-                  <p className="text-[10px] text-slate-500">{previewDoc.fileName}</p>
+                  <p className="text-[11px] text-slate-500">{previewDoc.fileName}</p>
                 </div>
                 <button 
                   onClick={() => setPreviewDoc(null)}
-                  className="p-2 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5 text-slate-500" />
                 </button>

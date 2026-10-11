@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import os
 import uuid
 import string
-import random
+import secrets
 from datetime import datetime
 from typing import Optional
 
@@ -21,7 +20,7 @@ router = APIRouter(prefix='/referrals', tags=['referrals'])
 
 def _gen_code(length=8):
     chars = string.ascii_uppercase + string.digits
-    return ''.join(random.choices(chars, k=length))
+    return ''.join(secrets.choice(chars) for _ in range(length))
 
 
 class CreateCodeResponse(BaseModel):
@@ -35,7 +34,8 @@ class ClaimRequest(BaseModel):
 
 
 def _get_base_url():
-    return os.environ.get('FRONTEND_URL') or os.environ.get('PUBLIC_APP_URL') or 'https://wehive.in'
+    from config import FRONTEND_URL
+    return FRONTEND_URL
 
 
 @router.post('/code', response_model=CreateCodeResponse)

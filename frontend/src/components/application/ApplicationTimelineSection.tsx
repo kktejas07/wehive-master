@@ -13,11 +13,11 @@ export default function ApplicationTimelineSection({
   TimelineComponent,
 }: ApplicationTimelineSectionProps) {
   return (
-    <section className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-      <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+    <section className="rounded-2xl bg-white border border-border shadow-sm p-5 sm:p-8">
+      <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
         Application timeline
       </div>
-      <h2 className="mt-1 font-display font-extrabold text-[24px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+      <h2 className="mt-1 font-display font-bold text-[24px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
         Track every step
       </h2>
       <div className="mt-6">

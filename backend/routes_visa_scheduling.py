@@ -1,19 +1,14 @@
 """Visa appointment scheduling routes."""
 import uuid
 from datetime import datetime, timedelta
-from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Body
 from pydantic import BaseModel
-from auth_utils import get_current_user, get_current_user_optional
+from auth_utils import get_current_user
 from admin_auth import get_current_admin_flex
 from db import db
 
 router = APIRouter(prefix='/visa-scheduling', tags=['visa-scheduling'])
-
-
-class AppointmentSlot(BaseModel):
-    date: str
-    time_slots: List[str]
 
 
 class BookAppointmentRequest(BaseModel):
@@ -43,8 +38,13 @@ async def generate_slots(data: dict = Body(...), _admin=Depends(get_current_admi
     times = data.get('times', ['9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM'])
     embassy = data.get('embassy', '')
 
-    start = datetime.fromisoformat(start_date)
-    end = datetime.fromisoformat(end_date)
+    try:
+        start = datetime.fromisoformat(start_date)
+        end = datetime.fromisoformat(end_date)
+    except (TypeError, ValueError):
+        raise HTTPException(400, 'start_date and end_date must be ISO dates (YYYY-MM-DD)')
+    if not country_id:
+        raise HTTPException(400, 'country_id is required')
     DAY_MAP = {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'}
     
     created = 0
@@ -146,8 +146,7 @@ async def get_interview_preparation(country_id: str):
             'Do not use your phone inside the embassy',
             'Be prepared to show financial proof',
         ],
-        'average_duration_minutes': 15,
-        'success_rate': '85-90% for well-prepared applicants',
+        'estimated_duration_minutes': 15,
     }
     if country and country.get('student_meta'):
         prep['student_specific'] = country['student_meta']

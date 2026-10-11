@@ -7,6 +7,7 @@ import { useNotifications } from "./NotificationContext";
 import { useColorScheme } from "../hooks/useColorScheme";
 import WeHiveLogo from "./WeHiveLogo";
 import NewsWidget from "./NewsWidget";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface HomeTabProps {
   onNavigate: (tabId: string) => void;
@@ -46,6 +47,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
   const [loadingNextSteps, setLoadingNextSteps] = useState(false);
   const [errorNextSteps, setErrorNextSteps] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const bookingDialog = useDialogA11y(showBookingModal, () => setShowBookingModal(false));
   const [selectedConsultant, setSelectedConsultant] = useState(CONSULTANTS[0]);
   const [bookingDate, setBookingDate] = useState("2026-07-06");
   const [bookingTime, setBookingTime] = useState("10:00 AM");
@@ -246,7 +248,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               <button
                 onClick={onLock}
                 title="Lock App (Biometric Simulation)"
-                className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
+                className="p-2.5 bg-blue-900/40 rounded-full relative before:absolute before:-inset-1 border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
               >
                 <Lock className="w-4 h-4" />
               </button>
@@ -254,7 +256,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
             <button 
               onClick={onOpenNotifications}
               title="Open Notifications"
-              className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors relative cursor-pointer"
+              className="p-2.5 bg-blue-900/40 rounded-full relative before:absolute before:-inset-1 border border-blue-800/40 text-blue-200 hover:text-white transition-colors relative cursor-pointer"
             >
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-600 text-[10px] text-white font-extrabold w-4.5 h-4.5 rounded-full flex items-center justify-center border border-blue-950 animate-pulse">
@@ -266,7 +268,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
             <button 
               onClick={() => onNavigate("vault")}
               title="Scan Documents"
-              className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
+              className="p-2.5 bg-blue-900/40 rounded-full relative before:absolute before:-inset-1 border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
             >
               <Scan className="w-4 h-4" />
             </button>
@@ -274,7 +276,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               <button
                 onClick={onOpenSettings}
                 title="Open Settings"
-                className="p-2 bg-blue-900/40 rounded-full border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
+                className="p-2.5 bg-blue-900/40 rounded-full relative before:absolute before:-inset-1 border border-blue-800/40 text-blue-200 hover:text-white transition-colors cursor-pointer flex items-center justify-center shadow-md shadow-blue-950/20"
               >
                 <Settings className="w-4 h-4" />
               </button>
@@ -286,7 +288,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
           <p className="text-white/80 text-sm font-semibold mb-1 flex items-center gap-1.5">
             Good morning, Tejas 👋
           </p>
-          <p className={`${colorScheme === "forced-navy" ? "text-blue-400" : "text-red-400"} text-[10px] font-semibold tracking-wider uppercase font-mono`}>Immigration & Education</p>
+          <p className={`${colorScheme === "forced-navy" ? "text-blue-400" : "text-red-400"} text-[11px] font-semibold tracking-wider uppercase font-mono`}>Immigration & Education</p>
           <h1 className="text-2xl font-extrabold tracking-tight mt-0.5 text-white">
             Where would you <br />like to study & work?
           </h1>
@@ -306,18 +308,18 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
         <div className="relative z-10 mt-4">
           <div 
             onClick={() => setShowProfilePopover(!showProfilePopover)}
-            className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3 flex items-center justify-between cursor-pointer hover:bg-white/15 transition-all group select-none"
+            className="bg-white/10 dark:bg-slate-900 backdrop-blur-md border border-white/15 rounded-2xl p-3 flex items-center justify-between cursor-pointer hover:bg-white/15 transition-all group select-none"
           >
             <div className="flex items-center gap-3">
               {/* Profile Avatar with glowing online state */}
-              <div className="relative w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-sm font-black text-white border border-white/20 shadow-sm">
+              <div className="relative w-10 h-10 rounded-full bg-white/15 dark:bg-slate-900 flex items-center justify-center text-sm font-black text-white border border-white/20 shadow-sm">
                 KT
                 <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full animate-pulse" />
               </div>
               
               {/* Academic Level Info */}
               <div className="text-left">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-300 font-mono block">Academic Profile</span>
+                <span className="text-[11px] uppercase font-bold tracking-wider text-slate-300 font-mono block">Academic Profile</span>
                 <span className="text-xs font-black text-white flex items-center gap-1 group-hover:text-amber-300 transition-colors">
                   {academicLevel}
                   <ChevronDown className="w-3.5 h-3.5 text-white/60 group-hover:text-amber-300 transition-colors shrink-0" />
@@ -331,7 +333,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                 <span className="text-[11px] font-black text-emerald-400 font-mono">
                   {profileCompletion}%
                 </span>
-                <span className="text-[8px] text-white/60 uppercase tracking-widest">
+                <span className="text-[11px] text-white/60 uppercase tracking-widest">
                   Completed
                 </span>
               </div>
@@ -364,14 +366,14 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                 <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 mb-3">
                   <div>
                     <h3 className="text-xs font-black text-slate-800 tracking-tight">Student Profile Details</h3>
-                    <p className="text-[9px] text-slate-400 font-mono">KRISHNA KRANTHI TEJA KUMAR</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">KRISHNA KRANTHI TEJA KUMAR</p>
                   </div>
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowProfilePopover(false);
                     }}
-                    className="p-1 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
+                    className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -379,7 +381,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
                 {/* 1. Academic Level Dropdown/Selector */}
                 <div className="space-y-1.5 mb-3.5">
-                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider font-mono flex items-center gap-1">
+                  <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono flex items-center gap-1">
                     <BookOpen className="w-3.5 h-3.5 text-slate-400" />
                     Modify Academic Goal Level
                   </span>
@@ -407,14 +409,14 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                               "home"
                             );
                           }}
-                          className={`py-1.5 px-2 rounded-xl text-[10px] font-bold text-center border transition-all cursor-pointer ${
+                          className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center border transition-all cursor-pointer ${
                             isSelected
                               ? colorScheme === "forced-navy"
-                                ? "bg-blue-50 border-blue-600 text-blue-900 shadow-sm"
+                                ? "bg-blue-50 dark:bg-blue-950/40 border-blue-600 text-blue-900 dark:text-blue-300 shadow-sm"
                                 : colorScheme === "forced-red"
-                                ? "bg-red-50 border-red-600 text-red-900 shadow-sm"
+                                ? "bg-red-50 dark:bg-red-950/40 border-red-600 text-red-900 dark:text-red-300 shadow-sm"
                                 : "bg-slate-900 border-slate-900 text-white shadow-sm"
-                              : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-600"
+                              : "bg-slate-50 border-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600"
                           }`}
                         >
                           {level}
@@ -426,22 +428,22 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
                 {/* 2. Interactive Document Completion Progress */}
                 <div className="space-y-1.5">
-                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider font-mono block">
+                  <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider font-mono block">
                     Profile Checklist
                   </span>
                   
                   <div className="space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200/50">
                     {/* Basic details item */}
-                    <div className="flex items-center justify-between text-[10px]">
+                    <div className="flex items-center justify-between text-[11px]">
                       <span className="flex items-center gap-1.5 font-medium text-slate-600">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                         Account & Bio Information
                       </span>
-                      <span className="font-bold text-emerald-600 font-mono">100%</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-300 font-mono">100%</span>
                     </div>
 
                     {/* Passport */}
-                    <div className="flex items-center justify-between text-[10px]">
+                    <div className="flex items-center justify-between text-[11px]">
                       <span className="flex items-center gap-1.5 font-medium text-slate-600">
                         <span className={`w-1.5 h-1.5 rounded-full ${
                           typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("passport") ? "bg-emerald-500" : "bg-slate-300"
@@ -449,14 +451,14 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                         Passport Datapage Scan
                       </span>
                       <span className={`font-bold font-mono ${
-                        typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("passport") ? "text-emerald-600" : "text-slate-400"
+                        typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("passport") ? "text-emerald-600 dark:text-emerald-300" : "text-slate-400"
                       }`}>
                         {typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("passport") ? "MET" : "PENDING"}
                       </span>
                     </div>
 
                     {/* Admission Offer */}
-                    <div className="flex items-center justify-between text-[10px]">
+                    <div className="flex items-center justify-between text-[11px]">
                       <span className="flex items-center gap-1.5 font-medium text-slate-600">
                         <span className={`w-1.5 h-1.5 rounded-full ${
                           typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("offer_letter") ? "bg-emerald-500" : "bg-slate-300"
@@ -464,14 +466,14 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                         University Admission Offer
                       </span>
                       <span className={`font-bold font-mono ${
-                        typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("offer_letter") ? "text-emerald-600" : "text-slate-400"
+                        typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("offer_letter") ? "text-emerald-600 dark:text-emerald-300" : "text-slate-400"
                       }`}>
                         {typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("offer_letter") ? "MET" : "PENDING"}
                       </span>
                     </div>
 
                     {/* Visa */}
-                    <div className="flex items-center justify-between text-[10px]">
+                    <div className="flex items-center justify-between text-[11px]">
                       <span className="flex items-center gap-1.5 font-medium text-slate-600">
                         <span className={`w-1.5 h-1.5 rounded-full ${
                           typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("visa") ? "bg-emerald-500" : "bg-slate-300"
@@ -479,14 +481,14 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                         German Student Visa Copy
                       </span>
                       <span className={`font-bold font-mono ${
-                        typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("visa") ? "text-emerald-600" : "text-slate-400"
+                        typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("visa") ? "text-emerald-600 dark:text-emerald-300" : "text-slate-400"
                       }`}>
                         {typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("visa") ? "MET" : "PENDING"}
                       </span>
                     </div>
 
                     {/* Transcripts */}
-                    <div className="flex items-center justify-between text-[10px]">
+                    <div className="flex items-center justify-between text-[11px]">
                       <span className="flex items-center gap-1.5 font-medium text-slate-600">
                         <span className={`w-1.5 h-1.5 rounded-full ${
                           typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("transcript") ? "bg-emerald-500" : "bg-slate-300"
@@ -494,7 +496,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                         Academic Merit Transcripts
                       </span>
                       <span className={`font-bold font-mono ${
-                        typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("transcript") ? "text-emerald-600" : "text-slate-400"
+                        typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("transcript") ? "text-emerald-600 dark:text-emerald-300" : "text-slate-400"
                       }`}>
                         {typeof window !== "undefined" && localStorage.getItem("wehive_vault_documents")?.includes("transcript") ? "MET" : "PENDING"}
                       </span>
@@ -509,7 +511,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                         setShowProfilePopover(false);
                         onNavigate("tracking");
                       }}
-                      className={`w-full py-2 rounded-xl text-white text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 shadow-sm transition-all active:scale-[0.98] cursor-pointer ${
+                      className={`w-full py-2 rounded-xl text-white text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 shadow-sm transition-all active:scale-[0.98] cursor-pointer ${
                         colorScheme === "forced-navy" ? "bg-blue-600 hover:bg-blue-700" : colorScheme === "forced-red" ? "bg-red-600 hover:bg-red-700" : "bg-slate-900 hover:bg-black"
                       }`}
                     >
@@ -532,19 +534,19 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
           <div className={`mb-5 bg-white rounded-2xl p-4 shadow-md border-l-4 ${colorScheme === "forced-navy" ? "border-blue-600" : "border-red-600"} animate-fade-in`}>
             <div className="flex justify-between items-start">
               <div>
-                <span className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md ${
-                  colorScheme === "forced-navy" ? "text-blue-600 bg-blue-50" : "text-red-600 bg-red-50"
+                <span className={`text-[11px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md ${
+                  colorScheme === "forced-navy" ? "text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40" : "text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-950/40"
                 }`}>
                   Upcoming Call
                 </span>
                 <h3 className="text-sm font-bold text-slate-800 mt-1">{activeConsultation.expertName}</h3>
                 <p className="text-xs text-slate-500">{activeConsultation.role}</p>
               </div>
-              <div className="p-2 bg-blue-50 rounded-xl">
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/40 rounded-xl">
                 {activeConsultation.mode === "Video" ? (
-                  <Video className="w-4 h-4 text-blue-900" />
+                  <Video className="w-4 h-4 text-blue-900 dark:text-blue-300" />
                 ) : (
-                  <Phone className="w-4 h-4 text-blue-900" />
+                  <Phone className="w-4 h-4 text-blue-900 dark:text-blue-300" />
                 )}
               </div>
             </div>
@@ -564,13 +566,13 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
         {/* AI Evaluator Call-To-Action Card */}
         <div className="mb-6 bg-gradient-to-r from-blue-900 via-blue-950 to-indigo-950 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
-          <div className="absolute right-0 bottom-0 translate-x-4 translate-y-4 w-28 h-28 bg-white/5 rounded-full" />
+          <div className="absolute right-0 bottom-0 translate-x-4 translate-y-4 w-28 h-28 bg-white/5 dark:bg-slate-900 rounded-full" />
           <div className="flex items-start gap-3 relative z-10">
-            <div className="p-3 bg-white/10 rounded-2xl">
+            <div className="p-3 bg-white/10 dark:bg-slate-900 rounded-2xl">
               <Sparkles className="w-6 h-6 text-red-400 animate-pulse" />
             </div>
             <div className="flex-1">
-              <span className="text-[10px] bg-red-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <span className="text-[11px] bg-red-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                 WeHive Smart Engine
               </span>
               <h3 className="text-base font-bold mt-1.5">Free Eligibility Evaluator</h3>
@@ -590,13 +592,13 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
         {/* Mock Visa Interview Sandbox Call-To-Action Card */}
         <div className="mb-6 bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden border border-white/5">
-          <div className="absolute right-0 bottom-0 translate-x-4 translate-y-4 w-28 h-28 bg-white/5 rounded-full" />
+          <div className="absolute right-0 bottom-0 translate-x-4 translate-y-4 w-28 h-28 bg-white/5 dark:bg-slate-900 rounded-full" />
           <div className="flex items-start gap-3 relative z-10">
-            <div className="p-3 bg-white/10 rounded-2xl">
+            <div className="p-3 bg-white/10 dark:bg-slate-900 rounded-2xl">
               <Mic className="w-6 h-6 text-emerald-400 animate-pulse" />
             </div>
             <div className="flex-1">
-              <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <span className="text-[11px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                 Embassy Prep
               </span>
               <h3 className="text-base font-bold mt-1.5">Visa Interview Sandbox</h3>
@@ -618,12 +620,12 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
         <div className="mb-6 bg-white rounded-2xl p-5 border border-slate-200/50 shadow-sm space-y-4" id="ai-recommended-steps-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-rose-50 rounded-xl">
-                <Sparkles className="w-5 h-5 text-rose-600 animate-pulse" />
+              <div className="p-2 bg-rose-50 dark:bg-rose-950/40 rounded-xl">
+                <Sparkles className="w-5 h-5 text-rose-600 dark:text-rose-300 animate-pulse" />
               </div>
               <div>
                 <h3 className="text-sm font-extrabold text-slate-800">Recommended Next Steps</h3>
-                <p className="text-[10px] text-slate-400 font-medium font-sans">Gemini AI Personalized Preparation Advisor</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium font-sans">Gemini AI Personalized Preparation Advisor</p>
               </div>
             </div>
             
@@ -631,18 +633,18 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
               onClick={() => fetchNextSteps(true)}
               disabled={loadingNextSteps}
               title="Refresh Recommendations"
-              className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors flex items-center justify-center cursor-pointer text-slate-500 disabled:opacity-50"
+              className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer text-slate-500 disabled:opacity-50"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loadingNextSteps ? "animate-spin text-rose-600" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingNextSteps ? "animate-spin text-rose-600 dark:text-rose-300" : ""}`} />
             </button>
           </div>
 
           {/* AI Trajectory Advisory Note */}
           {nextSteps?.advisoryNote && !loadingNextSteps && (
-            <div className="p-3 bg-rose-50/40 border border-rose-100/60 rounded-xl text-[11px] leading-relaxed text-slate-600 font-medium flex items-start gap-2 animate-fade-in">
+            <div className="p-3 bg-rose-50/40 dark:bg-rose-950/40 border border-rose-100/60 dark:border-rose-900/50 rounded-xl text-[11px] leading-relaxed text-slate-600 font-medium flex items-start gap-2 animate-fade-in">
               <Sparkles className="w-4 h-4 text-rose-500 shrink-0 mt-0.5 animate-pulse" />
               <div>
-                <span className="font-extrabold text-rose-700 block mb-0.5">AI Advisor Summary</span>
+                <span className="font-extrabold text-rose-700 dark:text-rose-300 block mb-0.5">AI Advisor Summary</span>
                 {nextSteps.advisoryNote}
               </div>
             </div>
@@ -659,7 +661,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
           {/* Error Message */}
           {errorNextSteps && !loadingNextSteps && (
-            <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 flex items-center gap-2 animate-fade-in">
+            <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 rounded-xl text-xs text-red-600 dark:text-red-300 flex items-center gap-2 animate-fade-in">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
               <span className="font-medium">{errorNextSteps}</span>
             </div>
@@ -695,10 +697,10 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                     <div className="flex justify-between items-start gap-2">
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${priorityBadge}`}>
+                          <span className={`text-[11px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${priorityBadge}`}>
                             {item.priority} Priority
                           </span>
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${catColor}`}>
+                          <span className={`text-[11px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${catColor}`}>
                             {item.category}
                           </span>
                         </div>
@@ -729,7 +731,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                             onNavigate("tracking");
                           }
                         }}
-                        className="text-[10px] font-extrabold text-blue-900 bg-blue-50/80 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-100 flex items-center gap-1 cursor-pointer transition-colors"
+                        className="text-[11px] font-extrabold text-blue-900 dark:text-blue-300 bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-900/50 flex items-center gap-1 cursor-pointer transition-colors"
                       >
                         <span>{item.actionLabel}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -750,7 +752,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
         {/* Quick Country Destination Chips */}
         <div className="mb-6">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2.5 font-mono">Popular Destinations</h2>
+          <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2.5 font-mono">Popular Destinations</h2>
           <div className="grid grid-cols-3 gap-2">
             {STUDY_DESTINATIONS.map((c) => (
               <button
@@ -759,7 +761,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                   onSelectCountry(c.id);
                   onNavigate("explore");
                 }}
-                className="bg-white hover:bg-slate-100 p-2.5 rounded-xl border border-slate-200/60 shadow-xs text-center transition-all hover:scale-102 flex flex-col items-center gap-1 justify-center cursor-pointer"
+                className="bg-white hover:bg-slate-100 dark:hover:bg-slate-800 p-2.5 rounded-xl border border-slate-200/60 shadow-xs text-center transition-all hover:scale-102 flex flex-col items-center gap-1 justify-center cursor-pointer"
               >
                 <span className="text-2xl filter drop-shadow-xs">{c.flag}</span>
                 <span className="text-[11px] font-bold text-slate-700 truncate w-full">{c.name}</span>
@@ -772,49 +774,49 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
         {/* WeHive Success Index Stats Banner */}
         <div className="mb-6 bg-white rounded-2xl p-4 border border-slate-200/50 shadow-xs">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 font-mono">WeHive Track Record</h2>
+          <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 font-mono">WeHive Track Record</h2>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-              <div className="p-2 bg-red-50 rounded-lg shrink-0">
-                <Award className="w-4 h-4 text-red-600" />
+              <div className="p-2 bg-red-50 dark:bg-red-950/40 rounded-lg shrink-0">
+                <Award className="w-4 h-4 text-red-600 dark:text-red-300" />
               </div>
               <div>
                 <p className="text-sm font-extrabold text-slate-800">99.2%</p>
-                <p className="text-[10px] text-slate-500 font-medium">Visa Success Rate</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Visa Success Rate</p>
               </div>
             </div>
             <div className="flex items-center gap-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-              <div className="p-2 bg-blue-50 rounded-lg shrink-0">
-                <BookOpen className="w-4 h-4 text-blue-900" />
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg shrink-0">
+                <BookOpen className="w-4 h-4 text-blue-900 dark:text-blue-300" />
               </div>
               <div>
                 <p className="text-sm font-extrabold text-slate-800">1200+</p>
-                <p className="text-[10px] text-slate-500 font-medium">Partner Colleges</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Partner Colleges</p>
               </div>
             </div>
             <div className="flex items-center gap-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-              <div className="p-2 bg-red-50 rounded-lg shrink-0">
-                <Users className="w-4 h-4 text-red-600" />
+              <div className="p-2 bg-red-50 dark:bg-red-950/40 rounded-lg shrink-0">
+                <Users className="w-4 h-4 text-red-600 dark:text-red-300" />
               </div>
               <div>
                 <p className="text-sm font-extrabold text-slate-800">25,000+</p>
-                <p className="text-[10px] text-slate-500 font-medium">Careers Guided</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Careers Guided</p>
               </div>
             </div>
             <div className="flex items-center gap-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-              <div className="p-2 bg-blue-50 rounded-lg shrink-0">
-                <Globe className="w-4 h-4 text-blue-900" />
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg shrink-0">
+                <Globe className="w-4 h-4 text-blue-900 dark:text-blue-300" />
               </div>
               <div>
                 <p className="text-sm font-extrabold text-slate-800">100%</p>
-                <p className="text-[10px] text-slate-500 font-medium">End-to-End Support</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">End-to-End Support</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Budget Assistant Widget */}
-        <div className="mb-6 bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/60 dark:border-slate-800 shadow-md space-y-4" id="budget-assistant-widget">
+        <div className="mb-6 bg-white rounded-3xl p-5 border border-slate-200/60 shadow-md space-y-4" id="budget-assistant-widget">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -822,11 +824,11 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                 <PiggyBank className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Budget Assistant</h3>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium font-sans">Evaluate your move prep savings</p>
+                <h3 className="text-sm font-extrabold text-slate-800">Budget Assistant</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium font-sans">Evaluate your move prep savings</p>
               </div>
             </div>
-            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono tracking-wider">
+            <span className="text-[11px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:text-slate-400 font-mono tracking-wider">
               Calculator
             </span>
           </div>
@@ -835,14 +837,14 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
           <div className="grid grid-cols-2 gap-3.5">
             {/* Dream Country Selector */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block">
+              <label className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block">
                 Dream Country
               </label>
               <div className="relative">
                 <select
                   value={dreamCountryId}
                   onChange={(e) => handleDreamCountryChange(e.target.value)}
-                  className="w-full text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-900/10 appearance-none cursor-pointer pr-8 text-slate-800 dark:text-slate-200"
+                  className="w-full text-xs font-bold border border-slate-200 rounded-xl p-2.5 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-900/10 appearance-none cursor-pointer pr-8 text-slate-800 dark:text-slate-200"
                 >
                   {STUDY_DESTINATIONS.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -850,7 +852,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                     </option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400 dark:text-slate-500">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500 dark:text-slate-500">
                   <ChevronDown className="w-4 h-4" />
                 </div>
               </div>
@@ -858,12 +860,12 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
             {/* Monthly Savings input */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block flex items-center justify-between">
+              <label className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-500 tracking-wider font-mono block flex items-center justify-between">
                 <span>Monthly Savings</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">(USD)</span>
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 font-mono text-xs font-black">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 dark:text-slate-400 font-mono text-xs font-black">
                   $
                 </div>
                 <input
@@ -873,7 +875,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                   step="50"
                   value={budgetSavings}
                   onChange={(e) => handleSavingsChange(Math.max(0, Number(e.target.value)))}
-                  className="w-full text-xs font-bold font-mono border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 pl-7 pr-3 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-900/10 text-slate-800 dark:text-slate-200"
+                  className="w-full text-xs font-bold font-mono border border-slate-200 rounded-xl py-2.5 pl-7 pr-3 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-900/10 text-slate-800 dark:text-slate-200"
                 />
               </div>
             </div>
@@ -881,7 +883,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
           {/* Quick Slider control for savings */}
           <div className="space-y-1">
-            <div className="flex justify-between text-[9px] font-bold text-slate-400 dark:text-slate-500 font-mono uppercase">
+            <div className="flex justify-between text-[11px] font-bold text-slate-500 dark:text-slate-500 font-mono uppercase">
               <span>Savings range adjustment</span>
               <span className="text-slate-500 dark:text-slate-400 font-bold">${budgetSavings.toLocaleString()} / $5,000</span>
             </div>
@@ -899,8 +901,8 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
           {/* Comparison evaluation */}
           <div className="bg-slate-50/80 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800/60 p-3.5 rounded-2xl space-y-3 shadow-2xs">
             {/* Currency conversion notification banner */}
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="text-slate-400 dark:text-slate-500 font-mono font-medium flex items-center gap-1">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-slate-500 dark:text-slate-400 font-mono font-medium flex items-center gap-1">
                 <Coins className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 Estimated Conversion Rate
               </span>
@@ -913,32 +915,32 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
             <div className="grid grid-cols-2 gap-4 pt-1 text-left">
               {/* User Native budget */}
               <div className="space-y-0.5">
-                <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block">Your Monthly Funds</span>
+                <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block">Your Monthly Funds</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-base font-extrabold text-slate-800 dark:text-slate-100">
+                  <span className="text-base font-extrabold text-slate-800">
                     {activeBudgetInfo.symbol}{nativeSavings.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold font-mono">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold font-mono">
                     /mo
                   </span>
                 </div>
-                <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 block leading-tight">
+                <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block leading-tight">
                   Equivalent of ${budgetSavings.toLocaleString()} USD
                 </span>
               </div>
 
               {/* Target Country Average cost */}
               <div className="space-y-0.5">
-                <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono block">Average Living Cost</span>
+                <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono block">Average Living Cost</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-base font-extrabold text-slate-800 dark:text-slate-100">
+                  <span className="text-base font-extrabold text-slate-800">
                     {activeBudgetInfo.symbol}{averageCost.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold font-mono">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold font-mono">
                     /mo
                   </span>
                 </div>
-                <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 block leading-tight">
+                <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block leading-tight">
                   Est. range: {activeBudgetInfo.nativeCostStr}
                 </span>
               </div>
@@ -946,7 +948,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
 
             {/* Budget Coverage progress bar */}
             <div className="space-y-1.5 pt-1.5 border-t border-slate-200/40 dark:border-slate-800/40">
-              <div className="flex justify-between items-center text-[10px] font-bold">
+              <div className="flex justify-between items-center text-[11px] font-bold">
                 <span className="text-slate-500 dark:text-slate-400">Budget Coverage Goal</span>
                 <span className={`font-mono ${
                   diffPercent >= 100 
@@ -1001,7 +1003,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                 </h4>
                 
                 {/* Custom insights matching each country's context */}
-                <p className="text-[10.5px] leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
+                <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
                   {(() => {
                     if (isSurplus) {
                       switch (dreamCountryId) {
@@ -1048,8 +1050,8 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
         {/* 1-on-1 Expert Consulting Panel */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2.5">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">Talk to Counselors</h2>
-            <span className="text-[10px] bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">Free</span>
+            <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-mono">Talk to Counselors</h2>
+            <span className="text-[11px] bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300 font-bold px-2 py-0.5 rounded">Free</span>
           </div>
 
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
@@ -1063,14 +1065,14 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                     {con.photo}
                   </div>
                   <h3 className="text-xs font-bold text-slate-800 truncate leading-tight">{con.name}</h3>
-                  <p className="text-[10px] text-slate-500 mt-1 line-clamp-2 leading-tight h-7">{con.role}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-tight h-7">{con.role}</p>
                 </div>
                 <button
                   onClick={() => {
                     setSelectedConsultant(con);
                     setShowBookingModal(true);
                   }}
-                  className="mt-3.5 w-full bg-blue-50 text-blue-900 font-bold text-[10px] py-1.5 rounded-lg border border-blue-100 hover:bg-blue-900 hover:text-white hover:border-blue-900 transition-all select-none cursor-pointer text-center"
+                  className="mt-3.5 w-full bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 font-bold text-[11px] py-1.5 rounded-lg border border-blue-100 dark:border-blue-900/50 hover:bg-blue-900 hover:text-white hover:border-blue-900 transition-all select-none cursor-pointer text-center"
                 >
                   Book slot
                 </button>
@@ -1082,12 +1084,12 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
         {/* Help & FAQs Section */}
         <div className="mb-6 bg-white rounded-2xl p-4 border border-slate-200/50 shadow-xs">
           <div className="flex items-center gap-2 mb-3">
-            <div className={`p-1.5 rounded-lg ${colorScheme === "forced-navy" ? "bg-blue-50 text-blue-600" : "bg-red-50 text-red-600"}`}>
+            <div className={`p-1.5 rounded-lg ${colorScheme === "forced-navy" ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300" : "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300"}`}>
               <HelpCircle className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono">Help & FAQs</h2>
-              <p className="text-[10px] text-slate-400">Common visa & university questions</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Common visa & university questions</p>
             </div>
           </div>
 
@@ -1102,14 +1104,14 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                   <button
                     type="button"
                     onClick={() => toggleFaq(index)}
-                    className="w-full py-3 px-3.5 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between text-left transition-colors cursor-pointer animate-fade-in"
+                    className="w-full py-3 px-3.5 bg-slate-50/50 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between text-left transition-colors cursor-pointer animate-fade-in"
                   >
                     <span className="text-xs font-bold text-slate-700 pr-4 leading-snug">{faq.question}</span>
                     <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180 text-slate-600" : ""}`} />
                   </button>
                   
                   {isOpen && (
-                    <div className="p-3.5 bg-white text-xs text-slate-500 leading-relaxed border-t border-slate-100/60 animate-fade-in">
+                    <div className="p-3.5 bg-white text-xs text-slate-500 leading-relaxed border-t border-slate-100/60 dark:border-slate-800 animate-fade-in">
                       {faq.answer}
                     </div>
                   )}
@@ -1123,18 +1125,19 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
       {/* Booking Dialog Modal */}
       {showBookingModal && (
         <div className="absolute inset-0 bg-black/60 flex items-end justify-center z-50 animate-fade-in p-4">
-          <div className="bg-white rounded-3xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none">
+          <div {...bookingDialog} className="bg-white rounded-3xl w-full max-w-[360px] p-5 shadow-2xl relative animate-slide-up select-none">
             <button
+              aria-label="Close"
               onClick={() => setShowBookingModal(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
             >
-              ✕
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
 
             {justBooked ? (
               <div className="py-8 flex flex-col items-center text-center">
-                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mb-3">
-                  <CheckCircle className="w-8 h-8 text-blue-600 animate-scale-up" />
+                <div className="w-14 h-14 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center mb-3">
+                  <CheckCircle className="w-8 h-8 text-blue-600 dark:text-blue-300 animate-scale-up" />
                 </div>
                 <h3 className="text-base font-bold text-slate-800">Consultation Booked!</h3>
                 <p className="text-xs text-slate-500 mt-1">We sent a confirmation calendar invite to your registered email.</p>
@@ -1142,16 +1145,16 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
             ) : (
               <form onSubmit={handleBookingSubmit} className="space-y-4">
                 <div>
-                  <span className="text-[9px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded-full uppercase font-mono">
+                  <span className="text-[11px] font-bold text-blue-900 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full uppercase font-mono">
                     Book WeHive Specialist
                   </span>
                   <h3 className="text-sm font-extrabold text-slate-800 mt-1">Select slot with {selectedConsultant.name}</h3>
-                  <p className="text-[11px] text-slate-400">{selectedConsultant.role}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">{selectedConsultant.role}</p>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                       Select Date
                     </label>
                     <input
@@ -1165,7 +1168,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                       Choose Time Slot
                     </label>
                     <select
@@ -1182,7 +1185,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                       Meeting Type
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -1191,7 +1194,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                         onClick={() => setBookingMode("Video")}
                         className={`p-2 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 transition-all ${
                           bookingMode === "Video"
-                            ? "border-blue-900 bg-blue-50 text-blue-900"
+                            ? "border-blue-900 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300"
                             : "border-slate-200 bg-white text-slate-600"
                         }`}
                       >
@@ -1203,7 +1206,7 @@ export default function HomeTab({ onNavigate, onSelectCountry, bookedSessions, o
                         onClick={() => setBookingMode("Voice")}
                         className={`p-2 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 transition-all ${
                           bookingMode === "Voice"
-                            ? "border-blue-900 bg-blue-50 text-blue-900"
+                            ? "border-blue-900 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300"
                             : "border-slate-200 bg-white text-slate-600"
                         }`}
                       >

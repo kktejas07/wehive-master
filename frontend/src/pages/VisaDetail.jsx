@@ -69,14 +69,14 @@ export default function VisaDetail() {
       <div className="bg-white">
         <Navbar />
         <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-5 text-center">
-          <AlertTriangle className="w-10 h-10 text-[hsl(var(--accent))]" />
-          <h1 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">
+          <AlertTriangle className="w-10 h-10 text-[hsl(var(--blue-700))]" />
+          <h1 className="font-display font-bold text-[24px] text-[hsl(var(--blue-900))] leading-tight">
             Something went wrong loading this page
           </h1>
-          <p className="text-[hsl(var(--blue-900))]/60 max-w-md">
+          <p className="text-muted-foreground max-w-md">
             Please check your connection and try again.
           </p>
-          <Button onClick={() => setReloadKey((k) => k + 1)} className="rounded-full btn-accent text-white h-11 px-6 font-bold">
+          <Button onClick={() => setReloadKey((k) => k + 1)} className="rounded-xl btn-accent text-white h-11 px-6 font-bold">
             Try again
           </Button>
         </div>
@@ -90,14 +90,14 @@ export default function VisaDetail() {
       <div className="bg-white">
         <Navbar />
         <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-5 text-center">
-          <AlertTriangle className="w-10 h-10 text-[hsl(var(--accent))]" />
-          <h1 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">
+          <AlertTriangle className="w-10 h-10 text-[hsl(var(--blue-700))]" />
+          <h1 className="font-display font-bold text-[24px] text-[hsl(var(--blue-900))] leading-tight">
             We couldn't find that visa page
           </h1>
-          <p className="text-[hsl(var(--blue-900))]/60 max-w-md">
+          <p className="text-muted-foreground max-w-md">
             "{id}" isn't a destination we recognize. Try browsing our full list of destinations instead.
           </p>
-          <Button onClick={() => navigate('/student-visa')} className="rounded-full btn-accent text-white h-11 px-6 font-bold">
+          <Button onClick={() => navigate('/student-visa')} className="rounded-xl btn-accent text-white h-11 px-6 font-bold">
             Browse destinations
           </Button>
         </div>
@@ -135,7 +135,7 @@ export default function VisaDetail() {
     <div className="bg-white">
       <Navbar />
 
-      <section className="relative pt-28 bg-[hsl(var(--soft-bg))] border-b border-black/5 aurora-bg aurora-grain">
+      <section className="relative pt-28 bg-[hsl(var(--soft-bg))] border-b border-[hsl(var(--border))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 pb-16">
           <VisaBreadcrumb countryName={country.name} />
           <div className="mt-8 flex justify-start">
@@ -147,13 +147,13 @@ export default function VisaDetail() {
         </div>
       </section>
 
-      <section className="py-20 bg-white">
+      <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-7">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
               <FileText className="w-3.5 h-3.5" /> Required for {type}
             </div>
-            <h2 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+            <h2 className="mt-2 font-display font-bold text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               Documents you will need
             </h2>
             {cat && <DocsList docs={cat.documents} />}
@@ -161,7 +161,8 @@ export default function VisaDetail() {
               <Button
                 onClick={onApply}
                 disabled={applying}
-                className="rounded-full btn-accent text-white h-12 px-6 font-bold"
+                variant="outline"
+                className="rounded-xl bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] hover:bg-white hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] h-12 px-5 font-semibold"
               >
                 Begin {type.toLowerCase()} application
                 <ChevronRight className="w-4 h-4 ml-1" />

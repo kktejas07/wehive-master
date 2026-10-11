@@ -1,11 +1,11 @@
 import { Check, Clock, Send, Eye, ShieldCheck, AlertTriangle } from 'lucide-react';
 
 const STATUS_META = {
-  draft: { Icon: Clock, color: '#94a3b8', label: 'Draft' },
-  submitted: { Icon: Send, color: '#0a2c8a', label: 'Submitted' },
-  in_review: { Icon: Eye, color: '#f59e0b', label: 'In review' },
-  approved: { Icon: ShieldCheck, color: '#16a34a', label: 'Approved' },
-  rejected: { Icon: AlertTriangle, color: '#e1212c', label: 'Action needed' },
+  draft: { Icon: Clock, color: '#64748b', cls: 'bg-slate-500', label: 'Draft' },
+  submitted: { Icon: Send, color: '#0A3161', cls: 'bg-[hsl(var(--blue-700))]', label: 'Submitted' },
+  in_review: { Icon: Eye, color: '#b45309', cls: 'bg-amber-600', label: 'In review' },
+  approved: { Icon: ShieldCheck, color: '#B31942', cls: 'bg-emerald-700', label: 'Approved' },
+  rejected: { Icon: AlertTriangle, color: '#DC2626', cls: 'bg-red-600', label: 'Action needed' },
 };
 
 export default function ApplicationTimeline({ events, currentStatus }) {
@@ -20,29 +20,28 @@ export default function ApplicationTimeline({ events, currentStatus }) {
         return (
           <li key={e.id} className="relative pl-12 pb-7 last:pb-0">
             <span
-              className="absolute left-0 top-0 h-9 w-9 rounded-xl text-white inline-flex items-center justify-center"
-              style={{ background: meta.color }}
+              className={`absolute left-0 top-0 h-9 w-9 rounded-xl text-white inline-flex items-center justify-center ${meta.cls}`}
             >
               <Icon className="w-4 h-4" />
             </span>
-            {!isLast && <span className="absolute left-[17px] top-9 bottom-0 w-px bg-black/10" />}
-            <div className="flex items-center gap-2">
+            {!isLast && <span className="absolute left-[17px] top-9 bottom-0 w-px bg-border" />}
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{e.label}</div>
               {isActive && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--blue-50))] text-[11px] font-bold text-[hsl(var(--blue-700))]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--blue-50))] text-[12px] font-bold text-[hsl(var(--blue-700))]">
                   Current
                 </span>
               )}
             </div>
-            <div className="text-[12.5px] text-[hsl(var(--blue-900))]/55">
+            <div className="text-[13px] text-muted-foreground">
               {new Date(e.at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </div>
-            {e.note && <div className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/75">{e.note}</div>}
+            {e.note && <div className="mt-1 text-[14px] text-muted-foreground">{e.note}</div>}
           </li>
         );
       })}
       {list.length === 0 && (
-        <li className="rounded-xl bg-[hsl(var(--soft-bg))] border border-dashed border-black/15 p-5 text-[14px] text-[hsl(var(--blue-900))]/65">
+        <li className="rounded-xl bg-[hsl(var(--soft-bg))] border border-dashed border-black/15 p-5 text-[14px] text-muted-foreground">
           Timeline starts after your first submission.
         </li>
       )}

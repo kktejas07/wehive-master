@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Shield, Clock, RefreshCw, CheckCircle2, AlertTriangle, ArrowRight, Phone } from 'lucide-react';
 import Reveal from './Reveal';
-import { BRAND } from '../data/mock';
+import { BRAND, KEY_STATS } from '../data/mock';
 
 const MISSED_CASES = [
   { name: 'Priya Sharma', missed_by: '2 days', reason: 'Singapore Passport Pickup Delay', avatar: 'PS' },
@@ -29,47 +29,40 @@ const TRUST_POINTS = [
 
 export default function OnTimeGuarantee() {
   return (
-    <section className="relative py-16 sm:py-24 bg-[hsl(var(--blue-900))] overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[hsl(var(--accent))] rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-400 rounded-full blur-[100px]" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
-        <Reveal className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-4">
-            <Shield className="w-4 h-4" />
+    <section className="relative section bg-white">
+      <div className="container-page">
+        <Reveal className="text-center mb-12 md:mb-16">
+          <div className="eyebrow inline-flex items-center gap-2 mb-4">
+            <Shield className="w-4 h-4" aria-hidden="true" />
             Our promise
           </div>
-          <h2 className="font-display font-extrabold text-[42px] sm:text-[56px] lg:text-[64px] tracking-[-0.03em] leading-[1.05] text-white">
-            On Time.
-            <br />
-            <span className="text-[hsl(var(--accent))]">Guaranteed.</span>
+          <h2 className="h-section">
+            On Time. Guaranteed.
           </h2>
-          <p className="mt-6 text-[16px] sm:text-[18px] text-white/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="lead mt-5 max-w-2xl mx-auto">
             We understand the anxiety of the visa process. That's why we commit to delivering your visa exactly as promised — or we make it right.
           </p>
         </Reveal>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-12 md:mb-16">
           {TRUST_POINTS.map((point, i) => {
             const Icon = point.Icon;
             return (
               <motion.div
                 key={point.title}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 8 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.12, duration: 0.5 }}
-                className="relative rounded-2xl p-7 bg-white/5 backdrop-blur border border-white/10"
+                transition={{ delay: i * 0.06, duration: 0.3, ease: 'easeOut' }}
+                className="relative card-surface p-6 sm:p-7"
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))] mb-5">
-                  <Icon className="w-6 h-6" />
+                <div className="icon-tile mb-5">
+                  <Icon className="w-5 h-5" aria-hidden="true" />
                 </div>
-                <h3 className="text-[18px] font-display font-extrabold text-white mb-3">
+                <h3 className="h-card mb-2">
                   {point.title}
                 </h3>
-                <p className="text-[14px] text-white/60 leading-relaxed">
+                <p className="text-[15px] text-muted-foreground leading-relaxed">
                   {point.desc}
                 </p>
               </motion.div>
@@ -78,16 +71,16 @@ export default function OnTimeGuarantee() {
         </div>
 
         <Reveal>
-          <div className="rounded-3xl p-8 sm:p-10 bg-white/5 backdrop-blur border border-white/10">
+          <div className="rounded-2xl p-6 sm:p-10 bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))]">
             <div className="flex items-start gap-4 mb-6">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex-shrink-0">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex-shrink-0">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-[20px] font-display font-extrabold text-white mb-1">
+                <h3 className="h-card mb-1">
                   When we miss our commitment
                 </h3>
-                <p className="text-[14px] text-white/60">
+                <p className="text-[15px] text-muted-foreground">
                   We believe in radical transparency. Here's when and why we've missed our on-time guarantee:
                 </p>
               </div>
@@ -97,22 +90,22 @@ export default function OnTimeGuarantee() {
               {MISSED_CASES.map((c, i) => (
                 <motion.div
                   key={c.name}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 8 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.4 }}
-                  className="rounded-xl p-5 bg-white/5 border border-white/10"
+                  transition={{ delay: i * 0.05, duration: 0.3, ease: 'easeOut' }}
+                  className="rounded-xl p-5 bg-white border border-[hsl(var(--border))]"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-[13px] font-bold">
+                    <div className="w-10 h-10 rounded-full bg-[hsl(var(--blue-50))] flex items-center justify-center text-[hsl(var(--blue-700))] text-[13px] font-semibold">
                       {c.avatar}
                     </div>
                     <div>
-                      <div className="text-[14px] font-bold text-white">{c.name}</div>
-                      <div className="text-[11px] text-red-400 font-medium">Missed by {c.missed_by}</div>
+                      <div className="text-[14px] font-semibold text-[hsl(var(--blue-900))]">{c.name}</div>
+                      <div className="text-[12px] text-red-700 font-medium">Missed by {c.missed_by}</div>
                     </div>
                   </div>
-                  <div className="text-[12px] text-white/50">{c.reason}</div>
+                  <div className="text-[13px] text-muted-foreground">{c.reason}</div>
                 </motion.div>
               ))}
             </div>
@@ -121,16 +114,16 @@ export default function OnTimeGuarantee() {
 
         <Reveal className="mt-12 text-center">
           <div className="inline-flex flex-col items-center gap-4">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[13px] font-bold">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[13px] font-semibold">
               <CheckCircle2 className="w-4 h-4" />
-              On-time delivery rate: 98.6%
+              On-time delivery rate: {KEY_STATS.onTimeRate}
             </div>
-            <p className="text-white/60 text-[14px] max-w-md">
-              We process visas across 120+ destinations. Our PRO team monitors every application to ensure it reaches you on time.
+            <p className="text-muted-foreground text-[15px] max-w-md">
+              We process visas across {KEY_STATS.countries} countries. Our PRO team monitors every application to ensure it reaches you on time.
             </p>
             <a
               href={`tel:${BRAND.phoneRaw}`}
-              className="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[hsl(var(--accent))] text-white font-bold hover:opacity-90 transition"
+              className="mt-2 inline-flex items-center gap-2 h-12 px-6 rounded-xl btn-accent font-semibold"
             >
               <Phone className="w-4 h-4" />
               Talk to our team

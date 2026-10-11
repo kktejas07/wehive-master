@@ -65,7 +65,7 @@ const INTERVIEW_QUESTIONS = {
 };
 
 const COUNTRY_LIST = [
-  { id: 'us', label: 'US F-1', flag: '', color: 'bg-blue-500' },
+  { id: 'us', label: 'US F-1', flag: '', color: 'bg-[hsl(var(--blue-700))]' },
   { id: 'uk', label: 'UK Tier 4', flag: '', color: 'bg-red-500' },
   { id: 'schengen', label: 'Schengen', flag: '', color: 'bg-amber-500' },
   { id: 'canada', label: 'Canada', flag: '', color: 'bg-red-600' },
@@ -81,7 +81,7 @@ const SCORE_CRITERIA = [
 
 function getScoreLabel(score) {
   if (score >= 90) return { label: 'Excellent', color: 'text-emerald-600', icon: Star };
-  if (score >= 75) return { label: 'Good', color: 'text-blue-600', icon: CheckCircle2 };
+  if (score >= 75) return { label: 'Good', color: 'text-[hsl(var(--blue-700))]', icon: CheckCircle2 };
   if (score >= 50) return { label: 'Needs Work', color: 'text-amber-600', icon: AlertCircle };
   return { label: 'Practice More', color: 'text-red-600', icon: XCircle };
 }
@@ -158,63 +158,63 @@ export default function VisaInterview() {
 
       <main className="pt-28 pb-16">
         <div className="max-w-4xl mx-auto px-5 sm:px-8">
-          <div className="flex items-center gap-1.5 text-[13px] text-[hsl(var(--blue-900))]/55 mb-6">
+          <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mb-6">
             <Link to="/" className="hover:text-[hsl(var(--blue-700))]">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="text-[hsl(var(--blue-900))] font-bold">Visa Interview Simulator</span>
           </div>
 
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <Shield className="w-3.5 h-3.5" /> Mock Interview
             </div>
-            <h1 className="font-display font-extrabold text-[36px] sm:text-[44px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <h1 className="font-display font-bold text-[36px] sm:text-[44px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               Visa Interview Simulator
             </h1>
-            <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60 max-w-2xl mx-auto">
+            <p className="mt-2 text-[15px] text-muted-foreground max-w-2xl mx-auto">
               Practice mock embassy interviews with real questions used by consular officers. Get scored on clarity, specificity, confidence, and preparation.
             </p>
           </div>
 
           {phase === 'select' && (
             <div className="max-w-2xl mx-auto">
-              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-                <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))] mb-2">Select visa type</h2>
-                <p className="text-[14px] text-[hsl(var(--blue-900))]/60 mb-6">Choose the country and visa category you want to practice for.</p>
+              <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8">
+                <h2 className="font-display font-bold text-[22px] text-[hsl(var(--blue-900))] mb-2 leading-tight">Select visa type</h2>
+                <p className="text-[14px] text-muted-foreground mb-6">Choose the country and visa category you want to practice for.</p>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {COUNTRY_LIST.map(c => (
                     <button
                       key={c.id}
                       onClick={() => setCountry(c.id)}
-                      className={`relative text-left p-5 rounded-2xl border-2 transition-all ${
+                      className={`relative text-left p-5 rounded-2xl border-2 transition ${
                         country === c.id
                           ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
-                          : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30 bg-white'
+                          : 'border-[hsl(var(--border))] hover:border-[hsl(var(--blue-700))]/30 bg-white'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-3xl">{c.flag || <Flag className="w-7 h-7 text-[hsl(var(--blue-700))]" />}</span>
                         <div>
                           <div className="font-bold text-[hsl(var(--blue-900))]">{c.label}</div>
-                          <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{INTERVIEW_QUESTIONS[c.id]?.questions.length} questions</div>
+                          <div className="text-[12px] text-muted-foreground">{INTERVIEW_QUESTIONS[c.id]?.questions.length} questions</div>
                         </div>
                       </div>
                     </button>
                   ))}
                 </div>
                 <div className="mt-6">
-                  <Button onClick={startInterview} className="w-full h-12 rounded-full btn-accent text-white font-bold">
+                  <Button onClick={startInterview} className="w-full h-12 rounded-xl btn-accent text-white font-semibold">
                     Start mock interview <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
               </div>
 
-              <div className="mt-6 rounded-2xl bg-white border border-black/5 p-6">
+              <div className="mt-6 rounded-2xl bg-white border border-[hsl(var(--border))] p-6">
                 <h3 className="font-bold text-[15px] text-[hsl(var(--blue-900))] mb-3">Tips</h3>
                 <ul className="space-y-2">
                   {['Speak clearly and confidently', 'Give specific, detailed answers', 'Show ties to your home country', 'Be honest — consular officers spot inconsistencies', 'Practice with a timer (2 min per question)'].map(tip => (
-                    <li key={tip} className="flex items-start gap-2 text-[13px] text-[hsl(var(--blue-900))]/70">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <li key={tip} className="flex items-start gap-2 text-[13px] text-muted-foreground">
+                      <CheckCircle2 className="w-4 h-4 text-[hsl(var(--blue-700))] shrink-0 mt-0.5" />
                       {tip}
                     </li>
                   ))}
@@ -226,28 +226,28 @@ export default function VisaInterview() {
           {phase === 'interview' && (
             <div className="max-w-3xl mx-auto">
               <div className="mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-900))]/60">
+                <div className="flex items-center gap-2 text-[13px] font-bold text-muted-foreground">
                   Question {currentQ + 1} of {total}
                 </div>
-                <div className={`flex items-center gap-1.5 text-[14px] font-bold ${timeLeft < 30 ? 'text-red-500' : 'text-[hsl(var(--blue-900))]'}`}>
+                <div className={`flex items-center gap-1.5 text-[14px] font-bold ${timeLeft < 30 ? 'text-red-600' : 'text-[hsl(var(--blue-900))]'}`}>
                   <Clock className="w-4 h-4" />
                   {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
                 </div>
               </div>
 
-              <div className="w-full bg-white rounded-full h-1.5 mb-8 overflow-hidden">
+              <div className="w-full bg-[hsl(var(--border))] rounded-full h-1.5 mb-8 overflow-hidden">
                 <div
-                  className="h-full bg-[hsl(var(--accent))] transition-all"
+                  className="h-full bg-[hsl(var(--blue-700))] transition-all"
                   style={{ width: `${((currentQ + 1) / total) * 100}%` }}
                 />
               </div>
 
-              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8 mb-6">
+              <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8 mb-6">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-3xl">{COUNTRY_LIST.find(c => c.id === country)?.flag || <Flag className="w-7 h-7 text-[hsl(var(--blue-700))]" />}</span>
                   <div>
-                    <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--accent))]">{INTERVIEW_QUESTIONS[country]?.name}</div>
-                    <div className="text-[13px] text-[hsl(var(--blue-900))]/60">Consular Officer</div>
+                    <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">{INTERVIEW_QUESTIONS[country]?.name}</div>
+                    <div className="text-[13px] text-muted-foreground">Consular Officer</div>
                   </div>
                 </div>
                 <p className="text-[18px] font-bold text-[hsl(var(--blue-900))] leading-relaxed">
@@ -259,40 +259,41 @@ export default function VisaInterview() {
                       <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       <div>
                         <div className="text-[12px] font-bold text-amber-800">Tip</div>
-                        <div className="text-[12.5px] text-amber-700 mt-0.5">{currentQData.tips}</div>
+                        <div className="text-[13px] text-amber-800 mt-0.5">{currentQData.tips}</div>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
+              <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Your answer</label>
-                  <span className="text-[12px] text-[hsl(var(--blue-900))]/40">{answer.length} characters</span>
+                  <label htmlFor="visainterview-answer" className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Your answer</label>
+                  <span className="text-[12px] text-muted-foreground">{answer.length} characters</span>
                 </div>
                 <textarea
+                  id="visainterview-answer"
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   placeholder="Type or speak your answer here..."
-                  className="w-full min-h-[140px] rounded-2xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none p-4 text-[14px] text-[hsl(var(--blue-900))] resize-none transition"
+                  className="w-full min-h-[140px] rounded-2xl border border-[hsl(var(--border))] focus:border-[hsl(var(--blue-700))] outline-none p-4 text-[14px] text-[hsl(var(--blue-900))] resize-none transition"
                 />
-                <div className="mt-4 flex items-center justify-between">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       onClick={() => setIsRecording(!isRecording)}
-                      className="rounded-full h-10 px-4"
+                      className="rounded-xl h-11 px-4"
                     >
                       {isRecording ? <MicOff className="w-4 h-4 mr-1.5 text-red-500" /> : <Mic className="w-4 h-4 mr-1.5" />}
                       {isRecording ? 'Stop' : 'Record'}
                     </Button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" onClick={skipQuestion} className="text-[13px] h-10 rounded-full">
+                    <Button variant="ghost" onClick={skipQuestion} className="text-[14px] h-11 rounded-xl">
                       Skip
                     </Button>
-                    <Button onClick={handleNext} className="rounded-full btn-accent text-white h-10 px-5 font-bold">
+                    <Button onClick={handleNext} className="rounded-xl btn-accent text-white h-11 px-5 font-semibold">
                       {currentQ + 1 < total ? 'Next question' : 'See results'}
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
@@ -308,46 +309,46 @@ export default function VisaInterview() {
                 <div className={`inline-flex h-20 w-20 rounded-2xl items-center justify-center mb-4 ${totalScore >= 75 ? 'bg-emerald-100' : totalScore >= 50 ? 'bg-amber-100' : 'bg-red-100'}`}>
                   {totalScore >= 75 ? <CheckCircle2 className="w-10 h-10 text-emerald-600" /> : totalScore >= 50 ? <AlertCircle className="w-10 h-10 text-amber-600" /> : <XCircle className="w-10 h-10 text-red-600" />}
                 </div>
-                <h2 className="font-display font-extrabold text-[32px] text-[hsl(var(--blue-900))]">Interview Complete</h2>
-                <div className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60">{INTERVIEW_QUESTIONS[country]?.name}</div>
+                <h2 className="font-display font-bold text-[32px] text-[hsl(var(--blue-900))] leading-tight">Interview Complete</h2>
+                <div className="mt-2 text-[15px] text-muted-foreground">{INTERVIEW_QUESTIONS[country]?.name}</div>
               </div>
 
-              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8 mb-6 text-center">
-                <div className="text-[48px] font-display font-extrabold">{totalScore}%</div>
+              <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8 mb-6 text-center">
+                <div className="text-[48px] font-display font-bold">{totalScore}%</div>
                 <div className={`text-[16px] font-bold mt-1 ${scoreInfo.color}`}>
                   <scoreInfo.icon className="w-4 h-4 inline mr-1" />
                   {scoreInfo.label}
                 </div>
-                <div className="mt-4 flex justify-center gap-6">
+                <div className="mt-4 flex flex-wrap justify-center gap-4 sm:gap-6">
                   {SCORE_CRITERIA.map(c => (
                     <div key={c.key} className="text-center">
-                      <div className="text-[20px] font-display font-extrabold text-[hsl(var(--blue-900))]">
+                      <div className="text-[20px] font-display font-bold text-[hsl(var(--blue-900))]">
                         {Math.min(100, Math.floor(totalScore * (0.8 + Math.random() * 0.4)))}
                       </div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/55 uppercase tracking-[0.1em]">{c.label}</div>
+                      <div className="text-[12px] text-muted-foreground uppercase tracking-[0.14em]">{c.label}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8 mb-6">
+              <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8 mb-6">
                 <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-4">Question Review</h3>
                 <div className="space-y-3">
                   {results.map((r, i) => {
                     const s = r.score;
                     return (
-                      <div key={i} className="rounded-xl border border-black/5 p-4">
+                      <div key={i} className="rounded-xl border border-[hsl(var(--border))] p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">
                             <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{r.question}</div>
                             {r.answer !== '(skipped)' && (
-                              <div className="mt-1 text-[12.5px] text-[hsl(var(--blue-900))]/60">{r.answer}</div>
+                              <div className="mt-1 text-[13px] text-muted-foreground">{r.answer}</div>
                             )}
                             {r.answer === '(skipped)' && (
-                              <div className="mt-1 text-[12px] italic text-[hsl(var(--blue-900))]/40">Skipped</div>
+                              <div className="mt-1 text-[12px] italic text-muted-foreground">Skipped</div>
                             )}
                           </div>
-                          <div className={`text-[18px] font-display font-extrabold shrink-0 ${s >= 75 ? 'text-emerald-600' : s >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                          <div className={`text-[18px] font-display font-bold shrink-0 ${s >= 75 ? 'text-emerald-600' : s >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
                             {s}%
                           </div>
                         </div>
@@ -358,13 +359,13 @@ export default function VisaInterview() {
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-3">
-                <Button onClick={startInterview} className="rounded-full btn-accent text-white h-12 px-6 font-bold">
+                <Button onClick={startInterview} variant="outline" className="rounded-xl bg-white text-[hsl(var(--blue-900))] h-12 px-6 font-semibold">
                   <RefreshCw className="w-4 h-4 mr-1.5" />
                   Practice again
                 </Button>
                 <Link
                   to={`/student-visa?country=${country}`}
-                  className="inline-flex items-center gap-2 rounded-full btn-primary text-white h-12 px-6 font-bold"
+                  className="inline-flex items-center gap-2 rounded-xl btn-accent text-white h-12 px-6 font-semibold"
                 >
                   Apply for visa <ChevronRight className="w-4 h-4" />
                 </Link>

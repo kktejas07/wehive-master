@@ -38,6 +38,7 @@ const CountryHub = lazy(() => import('./pages/CountryHub'));
 const TrackPortal = lazy(() => import('./pages/TrackPortal'));
 const Help = lazy(() => import('./pages/Help'));
 const Contact = lazy(() => import('./pages/Contact'));
+const NewsletterStatus = lazy(() => import('./pages/NewsletterStatus'));
 const StudentVisa = lazy(() => import('./pages/StudentVisa'));
 const VisaInterview = lazy(() => import('./pages/VisaInterview'));
 const VisaInterviewSandbox = lazy(() => import('./pages/VisaInterviewSandbox'));
@@ -111,6 +112,7 @@ function AnimatedRoutes() {
           <Route path="/visa-interview-sandbox" element={<PageTransition><VisaInterviewSandbox /></PageTransition>} />
           <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+          <Route path="/newsletter/:action" element={<PageTransition><NewsletterStatus /></PageTransition>} />
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
           <Route path="/visa-interview" element={<PageTransition><VisaInterview /></PageTransition>} />
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />

@@ -39,41 +39,45 @@ export default function TrackPortal() {
   return (
     <div className="min-h-screen bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]">
       <Navbar />
-      <main className="pt-32 pb-24">
+      <main className="pt-28 pb-16 md:pb-24">
         <div className="max-w-4xl mx-auto px-5">
           
           <div className="grid md:grid-cols-12 gap-8 items-center">
             {/* Search Panel */}
             <div className="md:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))]">
+              <div className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
                 <Clock className="w-3.5 h-3.5" /> 24/7 File Tracking
               </div>
-              <h1 className="font-display font-extrabold text-[36px] sm:text-[48px] tracking-[-0.03em] leading-none text-[hsl(var(--blue-900))]">
+              <h1 className="font-display font-bold text-[36px] sm:text-[48px] tracking-[-0.02em] leading-tight text-[hsl(var(--blue-900))]">
                 Track Your Application
               </h1>
-              <p className="text-[15px] text-[hsl(var(--blue-900))]/65 leading-relaxed max-w-md">
+              <p className="text-[15px] text-muted-foreground leading-relaxed max-w-md">
                 We believe transparency is non-negotiable. Enter your WeHive application ID below for live status updates.
               </p>
 
-              <form onSubmit={handleSearch} className="relative max-w-md">
-                <input
-                  required
-                  type="text"
-                  placeholder="Enter Application ID (e.g., #us-student-101)"
-                  value={appId}
-                  onChange={(e) => setAppId(e.target.value)}
-                  className="w-full h-14 pl-12 pr-32 rounded-2xl border-2 border-black/5 focus:border-[hsl(var(--accent))] outline-none text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 bg-white transition shadow-md shadow-blue-900/5 font-mono"
-                />
-                <Search className="absolute left-4.5 top-4.5 w-5 h-5 text-[hsl(var(--blue-900))]/45" />
+              <form onSubmit={handleSearch} className="relative max-w-md flex flex-col gap-2 sm:block">
+                <label htmlFor="trackportal-app-id" className="sr-only">Application ID</label>
+                <div className="relative">
+                  <input
+                    id="trackportal-app-id"
+                    required
+                    type="text"
+                    placeholder="Application ID, e.g. us-student-101"
+                    value={appId}
+                    onChange={(e) => setAppId(e.target.value)}
+                    className="w-full h-14 pl-12 pr-4 sm:pr-36 rounded-xl border border-[hsl(var(--border))] focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 outline-none text-[16px] sm:text-[15px] text-[hsl(var(--blue-900))] placeholder:text-muted-foreground bg-white transition shadow-sm"
+                  />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" aria-hidden="true" />
+                </div>
                 <button
                   type="submit"
-                  className="absolute right-2 top-2 h-10 px-6 rounded-xl bg-[hsl(var(--blue-900))] text-white font-bold text-[13px] hover:opacity-90 transition"
+                  className="sm:absolute sm:right-2 sm:top-2 h-12 sm:h-10 px-6 rounded-xl btn-accent text-white font-semibold text-[15px] sm:text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
                 >
                   Track Status
                 </button>
               </form>
 
-              <div className="text-[12.5px] text-[hsl(var(--blue-900))]/60">
+              <div className="text-[13px] text-muted-foreground">
                 Don&apos;t have an Application ID?{' '}
                 <Link to="/assessment" className="text-[hsl(var(--blue-700))] font-bold hover:underline">
                   Start an assessment to file with us →
@@ -82,10 +86,9 @@ export default function TrackPortal() {
             </div>
 
             {/* Visual Guide Card */}
-            <div className="md:col-span-5 bg-white border border-black/5 rounded-3xl p-6 shadow-xl shadow-blue-900/5 relative overflow-hidden">
-              <div className="absolute -top-10 -left-10 h-24 w-24 rounded-full bg-[hsl(var(--accent))]/5 blur-xl pointer-events-none" />
+            <div className="md:col-span-5 bg-white border border-[hsl(var(--border))] rounded-2xl p-6 shadow-sm relative overflow-hidden">
               
-              <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))] mb-4">
+              <h3 className="font-display font-bold text-[18px] text-[hsl(var(--blue-900))] mb-4">
                 WeHive Tracking Promise
               </h3>
               
@@ -94,12 +97,12 @@ export default function TrackPortal() {
                   const StepIcon = s.icon;
                   return (
                     <div key={i} className="flex gap-3">
-                      <span className="h-8 w-8 rounded-lg bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center shrink-0">
+                      <span className="h-9 w-9 rounded-lg bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] inline-flex items-center justify-center shrink-0">
                         <StepIcon className="w-4 h-4" />
                       </span>
                       <div>
-                        <div className="font-bold text-[13.5px] text-[hsl(var(--blue-900))]">{s.title}</div>
-                        <p className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-0.5 leading-relaxed">{s.desc}</p>
+                        <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{s.title}</div>
+                        <p className="text-[13px] text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
                       </div>
                     </div>
                   );

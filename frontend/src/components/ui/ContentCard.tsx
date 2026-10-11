@@ -34,36 +34,34 @@ export function ContentCard({
 
   const getCategoryColor = (cat?: string) => {
     const c = cat?.toLowerCase() || '';
-    if (c.includes('f1') || c.includes('student')) return 'bg-blue-500/90 border-blue-400';
-    if (c.includes('h1b') || c.includes('o1') || c.includes('eb1') || c.includes('work')) return 'bg-emerald-500/90 border-emerald-400';
-    if (c.includes('business')) return 'bg-purple-500/90 border-purple-400';
-    if (c.includes('travel')) return 'bg-amber-500/90 border-amber-400';
-    return 'bg-white/20 border-white/30';
+    // One calm badge style for every category (no rainbow chips).
+    return c ? 'bg-white text-[hsl(var(--blue-900))] border-white' : 'bg-white/90 text-[hsl(var(--blue-900))] border-white';
   };
 
   const getCountryInfo = (cid?: string) => {
     if (!cid) return null;
     const c = cid.toLowerCase();
-    if (c.includes('us') || c.includes('united-states')) return { color: 'bg-blue-600', label: 'USA 🇺🇸' };
-    if (c.includes('uk') || c.includes('united-kingdom')) return { color: 'bg-red-600', label: 'UK 🇬🇧' };
-    if (c.includes('australia')) return { color: 'bg-orange-600', label: 'AUS 🇦🇺' };
-    if (c.includes('canada')) return { color: 'bg-red-500', label: 'CAN 🇨🇦' };
-    if (c.includes('germany')) return { color: 'bg-yellow-600', label: 'GER 🇩🇪' };
-    return { color: 'bg-gray-500', label: cid.toUpperCase().substring(0, 3) };
+    const color = 'bg-[hsl(var(--blue-900))]/70';
+    if (c.includes('us') || c.includes('united-states')) return { color, label: 'USA' };
+    if (c.includes('uk') || c.includes('united-kingdom')) return { color, label: 'UK' };
+    if (c.includes('australia')) return { color, label: 'AUS' };
+    if (c.includes('canada')) return { color, label: 'CAN' };
+    if (c.includes('germany')) return { color, label: 'GER' };
+    return { color, label: cid.toUpperCase().substring(0, 3) };
   };
 
   const countryInfo = getCountryInfo(countryId);
 
   return (
     <motion.div
-      whileHover={{ y: -4, scale: 1.01 }}
-      transition={{ duration: 0.25 }}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       onClick={onClick}
-      className={`relative cursor-pointer overflow-hidden rounded-2xl shadow-lg group ${className}`}
+      className={`relative cursor-pointer overflow-hidden rounded-2xl border border-[hsl(var(--border))] shadow-sm hover:shadow-md transition-shadow duration-200 group ${className}`}
     >
       {/* Background Image */}
       <div
-        className="absolute inset-0 h-full w-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+        className="absolute inset-0 h-full w-full bg-cover bg-center"
         style={{
           backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
           backgroundColor: imageUrl ? undefined : accentColor,
@@ -71,22 +69,22 @@ export function ContentCard({
       />
       
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--blue-900))]/90 via-[hsl(var(--blue-900))]/45 to-[hsl(var(--blue-900))]/10" />
       
       {/* Hover Darken Overlay */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
 
       {/* Content Container */}
       <div className="relative h-full flex flex-col justify-between p-5 sm:p-6 min-h-[280px] sm:min-h-[320px]">
         {/* Top Section - Badges */}
         <div className="mb-auto flex gap-2 flex-wrap">
           {category && (
-            <span className={`inline-block px-3 py-1 rounded-full backdrop-blur-md text-white text-[10px] uppercase tracking-[0.14em] font-bold border ${getCategoryColor(category)}`}>
+            <span className={`inline-block px-3 py-1 rounded-full text-[12px] uppercase tracking-[0.1em] font-semibold border ${getCategoryColor(category)}`}>
               {category}
             </span>
           )}
           {countryInfo && (
-            <span className={`inline-block px-3 py-1 rounded-full text-white text-[10px] uppercase tracking-[0.1em] font-bold shadow-sm ${countryInfo.color}`}>
+            <span className={`inline-block px-3 py-1 rounded-full text-white text-[12px] uppercase tracking-[0.1em] font-semibold ${countryInfo.color}`}>
               {countryInfo.label}
             </span>
           )}
@@ -98,14 +96,14 @@ export function ContentCard({
           {author && (
             <div className="flex items-center gap-3">
               {author.avatar ? (
-                <img
+                <img loading="lazy" decoding="async"
                   src={author.avatar}
                   alt={author.name}
                   className="h-10 w-10 rounded-full border-2 border-white/30 object-cover"
                 />
               ) : (
                 <div
-                  className="h-10 w-10 rounded-full border-2 border-white/30 flex items-center justify-center bg-white/20 backdrop-blur-sm"
+                  className="h-10 w-10 rounded-full border-2 border-white/30 flex items-center justify-center bg-white/20"
                 >
                   <span className="text-sm font-bold text-white">
                     {author.initials || author.name.charAt(0)}
@@ -115,7 +113,7 @@ export function ContentCard({
               <div>
                 <p className="text-[13px] font-semibold text-white">{author.name}</p>
                 {readTime && (
-                  <div className="flex items-center gap-1 text-[11px] text-white/70">
+                  <div className="flex items-center gap-1 text-[12px] text-white/70">
                     <Clock className="w-3 h-3" />
                     <span>{readTime}</span>
                   </div>
@@ -125,7 +123,7 @@ export function ContentCard({
           )}
 
           {/* Title */}
-          <h3 className="font-display font-extrabold text-[20px] sm:text-[22px] leading-tight tracking-tight text-white">
+          <h3 className="font-display font-bold text-[20px] sm:text-[22px] leading-tight tracking-[-0.01em] text-white">
             {title}
           </h3>
 
@@ -138,15 +136,6 @@ export function ContentCard({
         </div>
       </div>
 
-      {/* Glow Effect on Hover */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-        <div
-          className="absolute inset-0"
-          style={{
-            boxShadow: `inset 0 0 60px -20px ${accentColor}`,
-          }}
-        />
-      </div>
     </motion.div>
   );
 }

@@ -48,6 +48,7 @@ ai_token_usage = db['ai_token_usage']
 global_events_col = db['global_events']
 global_blogs_col = db['global_blogs']
 global_news_col = db['global_news']
+newsletter_col = db['newsletter_subscribers']
 
 async def ensure_indexes():
     await users.create_index('email', unique=True, sparse=True)
@@ -66,6 +67,9 @@ async def ensure_indexes():
     await db['referral_transactions'].create_index('referred_id')
     await db['admin_audit'].create_index([('at', -1)])
     await db['admin_audit'].create_index([('entity_type', 1), ('at', -1)])
+    await newsletter_col.create_index('email', unique=True)
+    await newsletter_col.create_index('confirm_token_hash', sparse=True)
+    await newsletter_col.create_index('unsubscribe_token', sparse=True)
     # Admin auth support
     await db['password_reset_tokens'].create_index('token_hash')
     await db['password_reset_tokens'].create_index('expires_at', expireAfterSeconds=0)

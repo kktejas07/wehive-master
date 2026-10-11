@@ -12,12 +12,14 @@ Endpoints:
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
+from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
+from config import ADMIN_EMAILS
 from db import db, users, applications
 
-router = APIRouter(prefix="/people", tags=["people-intelligence"])
+router = APIRouter(prefix="/people", tags=["people-intelligence"], dependencies=[Depends(get_current_user)])
 
 
 async def _compute_risk_score(user_id: str) -> dict:
@@ -213,6 +215,13 @@ def _get_recommendation(level: str, factors: dict) -> str:
         return "High risk profile. Manual review required. Address refusal history and profile gaps first."
 
 
+def _require_staff(user: dict) -> None:
+    """Admins and staff consultants may view other users' risk data."""
+    email = (user.get("email") or "").lower()
+    if not (user.get("is_admin") or user.get("is_staff") or email in ADMIN_EMAILS):
+        raise HTTPException(status_code=403, detail="Staff access required")
+
+
 @router.get("/risk-score/me")
 async def my_risk_score(user=Depends(get_current_user)):
     result = await _compute_risk_score(user["_id"])
@@ -221,16 +230,14 @@ async def my_risk_score(user=Depends(get_current_user)):
 
 @router.get("/risk-score/{user_id}")
 async def get_risk_score(user_id: str, user=Depends(get_current_user)):
-    if user.get("role") not in ("admin", "agent"):
-        return {"ok": False, "detail": "Access denied"}
+    _require_staff(user)
     result = await _compute_risk_score(user_id)
     return {"ok": True, **result}
 
 
 @router.get("/risk-factors/{user_id}")
 async def get_risk_factors(user_id: str, user=Depends(get_current_user)):
-    if user.get("role") not in ("admin", "agent"):
-        return {"ok": False, "detail": "Access denied"}
+    _require_staff(user)
     risk = await _compute_risk_score(user_id)
     return {
         "ok": True,
@@ -242,9 +249,7 @@ async def get_risk_factors(user_id: str, user=Depends(get_current_user)):
 
 
 @router.get("/risk-summary")
-async def risk_summary(user=Depends(get_current_user)):
-    if user.get("role") not in ("admin",):
-        return {"ok": False, "detail": "Admin access required"}
+async def risk_summary(user=Depends(get_current_admin_flex)):
 
     all_apps = await applications.find().to_list(1000)
     all_users = await users.find().to_list(500)

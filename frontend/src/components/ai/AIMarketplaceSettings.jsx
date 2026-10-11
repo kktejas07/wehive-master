@@ -175,7 +175,7 @@ export default function AIMarketplaceSettings() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-[hsl(var(--blue-900))]/60">
+      <div className="flex items-center gap-2 text-muted-foreground">
         <Loader2 className="w-4 h-4 animate-spin" />
         Loading AI Marketplace...
       </div>
@@ -185,10 +185,10 @@ export default function AIMarketplaceSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+        <h2 className="font-display font-bold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
           AI Marketplace
         </h2>
-        <p className="mt-1 text-[13.5px] text-[hsl(var(--blue-900))]/55">
+        <p className="mt-1 text-[13.5px] text-muted-foreground">
           Connect any open-source or commercial AI provider. Your data, your choice.
         </p>
       </div>
@@ -216,7 +216,7 @@ export default function AIMarketplaceSettings() {
 
       {myProviders.length > 0 && (
         <div>
-          <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-3">
+          <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-3">
             Connected Providers
           </h3>
           <div className="space-y-2">
@@ -230,7 +230,7 @@ export default function AIMarketplaceSettings() {
                   className={`flex items-center justify-between p-3 rounded-xl border transition ${
                     isActive
                       ? 'bg-emerald-50 border-emerald-200'
-                      : 'bg-white border-black/5'
+                      : 'bg-white border-border'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export default function AIMarketplaceSettings() {
                       <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">
                         {meta?.name || p.provider_id}
                       </div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/50">
+                      <div className="text-[12px] text-muted-foreground">
                         Key: {p.masked_key} · Model: {p.model || 'default'}
                       </div>
                     </div>
@@ -254,7 +254,7 @@ export default function AIMarketplaceSettings() {
                       </button>
                     )}
                     {isActive && (
-                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
+                      <span className="text-[12px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
                         Active
                       </span>
                     )}
@@ -274,7 +274,7 @@ export default function AIMarketplaceSettings() {
       )}
 
       <div>
-        <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-3">
+        <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-3">
           Add Provider
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -289,7 +289,7 @@ export default function AIMarketplaceSettings() {
                 className={`text-left p-4 rounded-xl border transition ${
                   isConnected
                     ? 'bg-emerald-50/50 border-emerald-100 opacity-60 cursor-default'
-                    : 'bg-white border-black/5 hover:border-[hsl(var(--blue-700))]/30 cursor-pointer'
+                    : 'bg-white border-border hover:border-[hsl(var(--blue-700))]/30 cursor-pointer'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -299,7 +299,7 @@ export default function AIMarketplaceSettings() {
                     </div>
                     <div>
                       <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{p.name}</div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/50 mt-0.5">{p.description}</div>
+                      <div className="text-[12px] text-muted-foreground mt-0.5">{p.description}</div>
                     </div>
                   </div>
                   {isConnected && <Check className="w-4 h-4 text-emerald-500" />}
@@ -313,10 +313,10 @@ export default function AIMarketplaceSettings() {
       <Dialog open={modalOpen} onOpenChange={open => !open && closeModal()}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">
+            <DialogTitle className="font-display font-bold text-[18px] text-[hsl(var(--blue-900))]">
               Connect {selectedMeta?.name}
             </DialogTitle>
-            <DialogDescription className="text-[13px] text-[hsl(var(--blue-900))]/55">
+            <DialogDescription className="text-[13px] text-muted-foreground">
               Enter your credentials to connect to {selectedMeta?.name}.
               {selectedMeta?.website && (
                 <a
@@ -334,17 +334,18 @@ export default function AIMarketplaceSettings() {
           <div className="space-y-4 py-2">
             {selectedMeta?.requires_key && (
               <div>
-                <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
+                <label className="block text-[12px] font-bold text-muted-foreground mb-1.5">
                   {selectedMeta.key_label}
                 </label>
                 <div className="relative">
                   <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/30" />
                   <input
                     type="password"
+                    aria-label={selectedMeta.key_label}
                     value={apiKey}
                     onChange={e => setApiKey(e.target.value)}
                     placeholder={selectedMeta.key_placeholder}
-                    className="w-full h-10 pl-9 pr-3 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition"
+                    className="w-full h-10 pl-9 pr-3 rounded-lg border border-slate-300 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition"
                   />
                 </div>
               </div>
@@ -352,7 +353,7 @@ export default function AIMarketplaceSettings() {
 
             {selectedProvider === 'ollama' && (
               <div>
-                <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
+                <label className="block text-[12px] font-bold text-muted-foreground mb-1.5">
                   Base URL
                 </label>
                 <input
@@ -360,22 +361,22 @@ export default function AIMarketplaceSettings() {
                   value={baseUrl}
                   onChange={e => setBaseUrl(e.target.value)}
                   placeholder="http://localhost:11434"
-                  className="w-full h-10 px-3 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition"
+                  className="w-full h-10 px-3 rounded-lg border border-slate-300 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition"
                 />
               </div>
             )}
 
             {selectedMeta?.models?.length > 0 && (
               <div>
-                <label className="block text-[12px] font-bold text-[hsl(var(--blue-900))]/70 mb-1.5">
+                <label htmlFor="aimarketplacesettings-model" className="block text-[12px] font-bold text-muted-foreground mb-1.5">
                   Model
                 </label>
                 <div className="relative">
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/30 pointer-events-none" />
-                  <select
+                  <select id="aimarketplacesettings-model"
                     value={model}
                     onChange={e => setModel(e.target.value)}
-                    className="w-full h-10 px-3 pr-8 rounded-lg border border-black/10 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition bg-white appearance-none"
+                    className="w-full h-10 px-3 pr-8 rounded-lg border border-slate-300 text-[13px] focus:border-[hsl(var(--blue-700))] outline-none transition bg-white appearance-none"
                   >
                     {selectedMeta.models.map(m => (
                       <option key={m} value={m}>{m}</option>
@@ -390,7 +391,7 @@ export default function AIMarketplaceSettings() {
             <button
               onClick={handleTest}
               disabled={testing || (selectedMeta?.requires_key && !apiKey)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-black/10 text-[13px] font-bold text-[hsl(var(--blue-900))]/70 hover:bg-white disabled:opacity-50 transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-300 text-[13px] font-bold text-muted-foreground hover:bg-white disabled:opacity-50 transition"
             >
               {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
               Test

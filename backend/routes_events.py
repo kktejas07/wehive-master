@@ -21,7 +21,7 @@ from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
 from db import global_events_col
 from audit import record as audit_record
-from event_aggregator_agent import fetch_events_from_url, run_aggregator as run_event_aggregator
+from event_aggregator_agent import fetch_events_from_url, scraping_enabled, run_aggregator as run_event_aggregator
 from ai_marketplace import marketplace
 
 router = APIRouter(prefix="/events", tags=["events"])
@@ -175,7 +175,10 @@ async def admin_event_action(event_id: str, payload: GlobalEventAction, user=Dep
 
 @router.post("/scrape/trigger")
 async def admin_trigger_scrape(payload: ScrapeTriggerRequest, user=Depends(get_current_admin_flex)):
-    """Triggers the ScrapeGraphAI pipeline on a specific URL or social media profile."""
+    """Triggers the ScrapeGraphAI pipeline on a specific public URL."""
+    reason = scraping_enabled()
+    if reason:
+        raise HTTPException(status_code=503, detail=f"Event scraping unavailable: {reason}")
     try:
         events = await fetch_events_from_url(payload.url, payload.country_id, payload.platform)
         total_added = 0

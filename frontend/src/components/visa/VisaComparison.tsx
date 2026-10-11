@@ -36,31 +36,31 @@ const COMPARISON_ITEMS = [
 function ComparisonCard({ item, index }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      className="bg-white rounded-2xl border border-black/5 overflow-hidden"
+      transition={{ delay: index * 0.06, duration: 0.3, ease: 'easeOut' }}
+      className="bg-white rounded-2xl border border-[hsl(var(--border))] shadow-sm overflow-hidden"
     >
       <div className="relative aspect-[16/9] overflow-hidden">
-        <img src={item.img} alt={item.title} className="absolute inset-0 h-full w-full object-cover" />
+        <img loading="lazy" decoding="async" src={item.img} alt={item.title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-4 left-4">
           <item.icon className="w-6 h-6 text-white" />
         </div>
       </div>
       <div className="p-5">
-        <h3 className="font-display font-extrabold text-[18px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+        <h3 className="font-display font-bold text-[18px] text-[hsl(var(--blue-900))]">
           {item.title}
         </h3>
         <div className="mt-4 space-y-3">
           <div className="flex items-start gap-3">
             <div className="w-2 h-2 rounded-full bg-red-400 mt-1.5 flex-shrink-0" />
-            <p className="text-[13px] text-[hsl(var(--blue-900))]/60 leading-relaxed">{item.others}</p>
+            <p className="text-[14px] text-muted-foreground leading-relaxed">{item.others}</p>
           </div>
           <div className="flex items-start gap-3">
-            <div className="w-2 h-2 rounded-full bg-[hsl(var(--accent))] mt-1.5 flex-shrink-0" />
-            <p className="text-[13px] text-[hsl(var(--blue-900))]/80 leading-relaxed">{item.atlys}</p>
+            <div className="w-2 h-2 rounded-full bg-emerald-600 mt-1.5 flex-shrink-0" />
+            <p className="text-[14px] text-[hsl(var(--blue-900))] leading-relaxed">{item.atlys}</p>
           </div>
         </div>
       </div>
@@ -70,20 +70,20 @@ function ComparisonCard({ item, index }) {
 
 export default function VisaComparison({ countryName }) {
   return (
-    <section className="py-16 bg-[hsl(var(--soft-bg))]">
+    <section className="py-16 md:py-24 bg-[hsl(var(--soft-bg))]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="font-display font-extrabold text-[28px] sm:text-[38px] tracking-[-0.03em]">
-            <span className="gradient-text-hover">We optimize for approval,</span>
+          <h2 className="font-display font-bold text-[28px] sm:text-[36px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
+            <span>We optimize for approval,</span>
             <br />
-            <span className="gradient-text">not submission</span>
+            <span className="text-[hsl(var(--red-500))]">not submission</span>
           </h2>
-          <p className="mt-3 text-[15px] text-[hsl(var(--blue-900))]/60 max-w-xl mx-auto">
+          <p className="mt-3 text-[15px] text-muted-foreground max-w-xl mx-auto">
             Here&apos;s the comparison between others and We Hive for your {countryName} visa.
           </p>
         </motion.div>

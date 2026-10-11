@@ -126,9 +126,9 @@ export default function ApplicationDetail() {
         onSubmit={onSubmit}
       />
 
-      <section className="py-14">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-7 space-y-6">
+      <section className="py-8 sm:py-12 bg-[hsl(var(--soft-bg))]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-6 lg:gap-8">
+          <div className="lg:col-span-7 min-w-0 space-y-6">
             <ApplicationFormCard
               application={app}
               onUpdated={(form) => setApp((a) => ({ ...a, form_data: form }))}
@@ -141,7 +141,7 @@ export default function ApplicationDetail() {
             />
             <ApplicationTimelineSection app={app} TimelineComponent={ApplicationTimeline} />
           </div>
-          <aside className="lg:col-span-5 space-y-6">
+          <aside className="lg:col-span-5 min-w-0 space-y-6">
             <ConsultantChat applicationId={id} token={token} />
             <WhatsNextCard />
           </aside>

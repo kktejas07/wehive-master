@@ -131,18 +131,10 @@ class LeadCreate(BaseModel):
     message: str
 
 
-class Lead(BaseModel):
-    id: str = Field(default_factory=_uuid)
-    name: str
-    surname: Optional[str] = ''
-    email: str
-    message: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-
 class UniversitySelection(BaseModel):
     university_id: str
     program_id: Optional[str] = None
+
 
 class UniversityApplicationCreate(BaseModel):
     universities: List[UniversitySelection]
@@ -153,23 +145,3 @@ class UniversityApplicationCreate(BaseModel):
 
 
 AuthTokens.model_rebuild()
-
-# ----- Global Events ----- #
-class GlobalEventCreate(BaseModel):
-    name: str
-    country_id: str
-    date: str
-    category: str
-    image_url: Optional[str] = None
-    is_high_risk: bool = False
-
-class GlobalEvent(BaseModel):
-    id: str = Field(default_factory=_uuid)
-    name: str
-    country_id: str
-    date: str
-    category: str
-    image_url: Optional[str] = None
-    status: Literal['pending', 'approved', 'rejected'] = 'pending'
-    is_high_risk: bool = False
-    created_at: datetime = Field(default_factory=datetime.utcnow)

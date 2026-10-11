@@ -47,9 +47,9 @@ export default function ApplicationHero({
   const heroImg = COUNTRIES.find((c) => c.id === app.country_id)?.image;
 
   return (
-    <section className="pt-28 pb-10 bg-[hsl(var(--soft-bg))] border-b border-black/5 aurora-bg aurora-grain">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="flex items-center gap-1.5 text-[13px] text-[hsl(var(--blue-900))]/55">
+    <section className="pt-24 sm:pt-28 pb-8 sm:pb-10 bg-white border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
           <Link to="/account?tab=applications" className="hover:text-[hsl(var(--blue-700))]">My applications</Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-[hsl(var(--blue-900))] font-bold">
@@ -65,15 +65,15 @@ export default function ApplicationHero({
               </div>
             )}
             <div>
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+              <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
                 Application #{app.id.slice(0, 8).toUpperCase()}
               </div>
-              <h1 className="mt-1 font-display font-extrabold text-[34px] sm:text-[48px] leading-[1.0] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+              <h1 className="mt-1 font-display font-bold text-[32px] sm:text-[44px] leading-[1.1] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
                 <span className="text-[28px] sm:text-[40px] mr-2">{country.flag}</span>
                 {country.name}{' '}
-                <span className="text-[hsl(var(--accent))]">{app.visa_type}</span>
+                <span className="text-[hsl(var(--blue-700))]">{app.visa_type}</span>
               </h1>
-              <div className="mt-1 text-[13.5px] text-[hsl(var(--blue-900))]/65">
+              <div className="mt-1 text-[14px] text-muted-foreground">
                 Status: <span className="font-bold capitalize">{(app.status || 'draft').replace('_', ' ')}</span>
                 {' · '}{readyCount}/{requiredDocs.length} docs ready
               </div>
@@ -84,35 +84,35 @@ export default function ApplicationHero({
               data-testid="open-ai-scan-btn"
               onClick={onScan}
               variant="outline"
-              className="rounded-full h-11 px-5 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
+              className="rounded-xl h-11 px-4 font-semibold bg-white border-slate-300 text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))]"
             >
               <Sparkles className="w-4 h-4 mr-1" /> Scan with AI
             </Button>
             <Button
               onClick={onCoverLetter}
               variant="outline"
-              className="rounded-full h-11 px-4 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
+              className="rounded-xl h-11 px-4 font-semibold bg-white border-slate-300 text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))]"
             >
               Cover Letter
             </Button>
             <Button
               onClick={onItinerary}
               variant="outline"
-              className="rounded-full h-11 px-4 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
+              className="rounded-xl h-11 px-4 font-semibold bg-white border-slate-300 text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))]"
             >
               AI Itinerary
             </Button>
             <Button
               onClick={onRiskAnalysis}
               variant="outline"
-              className="rounded-full h-11 px-4 font-bold border-[hsl(var(--accent))]/40 text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5"
+              className="rounded-xl h-11 px-4 font-semibold bg-white border-slate-300 text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))]"
             >
               Risk Analysis
             </Button>
             <Button
               onClick={onDownloadReceipt}
               variant="outline"
-              className="rounded-full h-11 px-5 font-bold border-black/10 hover:border-[hsl(var(--blue-700))]/30"
+              className="rounded-xl h-11 px-4 font-semibold bg-white border-slate-300 text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))]"
             >
               <Download className="w-4 h-4 mr-1" /> Download receipt
             </Button>
@@ -120,14 +120,14 @@ export default function ApplicationHero({
               href={`/track/${app.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full h-11 px-4 font-bold border-black/10 hover:border-[hsl(var(--blue-700))]/30 text-[hsl(var(--blue-900))]/70 transition"
+              className="inline-flex items-center gap-1.5 rounded-xl h-11 px-4 text-[14px] font-semibold bg-white border border-slate-300 hover:border-[hsl(var(--blue-700))]/40 text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors"
             >
               <ExternalLink className="w-4 h-4" /> Track status
             </a>
             <Button
               onClick={onSubmit}
               disabled={!canSubmit || submitting}
-              className="rounded-full btn-accent text-white h-11 px-6 font-bold disabled:opacity-50"
+              className="rounded-xl btn-accent text-white h-11 px-5 font-semibold disabled:opacity-50"
             >
               {submitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

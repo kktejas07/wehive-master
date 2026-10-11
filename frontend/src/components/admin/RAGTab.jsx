@@ -8,7 +8,7 @@ import axios from 'axios';
 
 function StatusBadge({ ok, label }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
       ok ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
     }`}>
       <span className={`w-1.5 h-1.5 rounded-full ${ok ? 'bg-emerald-400' : 'bg-amber-400'}`} />
@@ -125,7 +125,7 @@ export default function RAGTab() {
         title="RAG & Vector Store"
         subtitle="Local Ollama embeddings + ChromaDB. Ingest, search, and ground LLM answers."
         right={
-          <button onClick={refresh} disabled={loading} className="h-9 px-3 rounded-full bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 inline-flex items-center gap-1.5">
+          <button onClick={refresh} disabled={loading} className="h-10 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 inline-flex items-center gap-1.5">
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
         }
@@ -211,11 +211,11 @@ export default function RAGTab() {
           </div>
         )}
         <div className="mt-4 flex flex-wrap gap-2">
-          <button onClick={() => ingest('countries')} disabled={!!ingesting} className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
+          <button onClick={() => ingest('countries')} disabled={!!ingesting} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
             {ingesting === 'countries' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
             Ingest Countries
           </button>
-          <button onClick={() => ingest('universities')} disabled={!!ingesting} className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
+          <button onClick={() => ingest('universities')} disabled={!!ingesting} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
             {ingesting === 'universities' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
             Ingest Universities
           </button>
@@ -239,11 +239,11 @@ export default function RAGTab() {
               <input value={qModel} onChange={e => setQModel(e.target.value)}
                 className="ml-1 h-8 rounded-lg bg-white/5 border border-white/10 px-2 text-[12px] text-white outline-none font-mono" />
             </label>
-            <button onClick={runRetrieve} disabled={retrieving || !query.trim()} className="h-9 px-3 rounded-full bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 disabled:opacity-50 inline-flex items-center gap-1.5">
+            <button onClick={runRetrieve} disabled={retrieving || !query.trim()} className="h-10 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 disabled:opacity-50 inline-flex items-center gap-1.5">
               {retrieving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
               Retrieve
             </button>
-            <button onClick={runQuery} disabled={qBusy || !query.trim()} className="h-9 px-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
+            <button onClick={runQuery} disabled={qBusy || !query.trim()} className="h-10 px-3 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
               {qBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Cpu className="w-3.5 h-3.5" />}
               Ask LLM
             </button>
@@ -251,7 +251,7 @@ export default function RAGTab() {
 
           {retrieval && (
             <div className="mt-3 p-3 rounded-xl bg-white/5 space-y-2">
-              <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Retrieved Context</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Retrieved Context</div>
               {retrieval.chunks?.length ? (
                 retrieval.chunks.map((c, i) => (
                   <div key={i} className="text-[12px] text-slate-200 whitespace-pre-wrap border-l-2 border-emerald-500/30 pl-3">{c}</div>
@@ -265,8 +265,8 @@ export default function RAGTab() {
           {qReply && (
             <div className="mt-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 space-y-2">
               <div className="flex items-center justify-between">
-                <div className="text-[10px] uppercase tracking-wider text-emerald-300 font-bold">LLM Reply</div>
-                <div className="text-[10px] text-slate-400 font-mono">{qReply.provider?.id}/{qReply.provider?.model}</div>
+                <div className="text-[11px] uppercase tracking-wider text-emerald-300 font-bold">LLM Reply</div>
+                <div className="text-[11px] text-slate-400 font-mono">{qReply.provider?.id}/{qReply.provider?.model}</div>
               </div>
               <div className="text-[13px] text-white whitespace-pre-wrap">{qReply.reply}</div>
             </div>

@@ -48,7 +48,7 @@ export default function PricingTab() {
     return (
       <>
         <AdminHeader title="Pricing" />
-        <Panel><Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--accent))]" /></Panel>
+        <Panel><Loader2 className="w-5 h-5 animate-spin text-blue-300" /></Panel>
       </>
     );
   }
@@ -102,7 +102,7 @@ export default function PricingTab() {
       <Panel className="mb-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="inline-flex items-center gap-2">
-            <span className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-[hsl(var(--accent))] text-white"><Banknote className="w-4 h-4" /></span>
+            <span className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-[hsl(var(--blue-700))] text-white"><Banknote className="w-4 h-4" /></span>
             <div>
               <div className="text-[13px] font-bold text-white">Base service fees (per applicant)</div>
               <div className="text-[11.5px] text-slate-400">Charged on top of the embassy/govt fee.</div>
@@ -122,13 +122,13 @@ export default function PricingTab() {
             <label key={vt} className="block">
               <span className="block text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 mb-1.5">{vt}</span>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[13px]">₹</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]">₹</span>
                 <input
                   data-testid={`pricing-base-${vt}`}
                   type="number"
                   value={draft.base_fees[vt] ?? 0}
                   onChange={(e) => setDraft({ ...draft, base_fees: { ...draft.base_fees, [vt]: e.target.value } })}
-                  className="w-full h-10 pl-7 pr-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] text-[14px] text-white outline-none"
+                  className="w-full h-10 pl-7 pr-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--blue-700))] text-[14px] text-white outline-none"
                 />
               </div>
             </label>
@@ -139,24 +139,24 @@ export default function PricingTab() {
       <div className="grid lg:grid-cols-3 gap-4">
         <Panel>
           <div className="text-[13px] font-bold text-white inline-flex items-center gap-2">
-            <Banknote className="w-4 h-4 text-[hsl(var(--accent))]" /> Surcharge
+            <Banknote className="w-4 h-4 text-blue-300" /> Surcharge
           </div>
           <p className="mt-1 text-[12px] text-slate-400">Folded into GST taxable base.</p>
           <div className="mt-3 relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[13px]">{draft.currency === 'INR' ? '₹' : draft.currency === 'USD' ? '$' : draft.currency === 'EUR' ? '€' : '₹'}</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]">{draft.currency === 'INR' ? '₹' : draft.currency === 'USD' ? '$' : draft.currency === 'EUR' ? '€' : '₹'}</span>
             <input
               data-testid="pricing-surcharge"
               type="number"
               value={draft.surcharge_inr ?? 0}
               onChange={(e) => setDraft({ ...draft, surcharge_inr: e.target.value })}
-              className="w-full h-11 pl-7 pr-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] text-[14px] text-white outline-none"
+              className="w-full h-11 pl-7 pr-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--blue-700))] text-[14px] text-white outline-none"
             />
           </div>
         </Panel>
 
         <Panel>
           <div className="text-[13px] font-bold text-white inline-flex items-center gap-2">
-            <Percent className="w-4 h-4 text-[hsl(var(--accent))]" /> GST rate
+            <Percent className="w-4 h-4 text-blue-300" /> GST rate
           </div>
           <p className="mt-1 text-[12px] text-slate-400">Decimal between 0 and 1 (0.18 = 18%).</p>
           <div className="mt-3">
@@ -168,9 +168,9 @@ export default function PricingTab() {
               max="1"
               value={draft.gst_rate ?? 0}
               onChange={(e) => setDraft({ ...draft, gst_rate: e.target.value })}
-              className="w-full h-11 px-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] text-[14px] text-white outline-none"
+              className="w-full h-11 px-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--blue-700))] text-[14px] text-white outline-none"
             />
-            <div className="mt-1.5 text-[11.5px] text-slate-500">
+            <div className="mt-1.5 text-[11.5px] text-slate-400">
               = {(Number(draft.gst_rate || 0) * 100).toFixed(1)}%
             </div>
           </div>
@@ -178,18 +178,18 @@ export default function PricingTab() {
 
         <Panel>
           <div className="text-[13px] font-bold text-white inline-flex items-center gap-2">
-            <Globe className="w-4 h-4 text-[hsl(var(--accent))]" /> Currency
+            <Globe className="w-4 h-4 text-blue-300" /> Currency
           </div>
           <p className="mt-1 text-[12px] text-slate-400">Default currency for all fee displays.</p>
           <div className="mt-3">
             <div className="relative">
-              <Search className="absolute left-3 top-3 w-4 h-4 text-slate-500 pointer-events-none" />
+              <Search className="absolute left-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search currency..."
                 value={draft._currencySearch || ''}
                 onChange={(e) => setDraft({ ...draft, _currencySearch: e.target.value })}
-                className="w-full h-11 pl-9 pr-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--accent))] text-[14px] text-white outline-none"
+                className="w-full h-11 pl-9 pr-3 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--blue-700))] text-[14px] text-white outline-none"
               />
             </div>
             <div className="mt-1.5 max-h-36 overflow-y-auto space-y-0.5 scrollbar-thin">
@@ -203,7 +203,7 @@ export default function PricingTab() {
                   onClick={() => setDraft({ ...draft, currency: c.code, _currencySearch: '' })}
                   className={`w-full text-left px-3 py-2 rounded-lg text-[13px] font-bold transition ${
                     (draft.currency || 'INR') === c.code
-                      ? 'bg-[hsl(var(--accent))]/20 text-white'
+                      ? 'bg-[hsl(var(--blue-700))]/20 text-white'
                       : 'text-slate-300 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -219,19 +219,19 @@ export default function PricingTab() {
       <Panel className="mt-4">
         <div className="flex items-end justify-between gap-3 flex-wrap">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400">Live preview</div>
-            <h3 className="mt-1 font-display font-extrabold text-[20px] text-white">Tourist visa · 1 applicant · no embassy fee</h3>
+            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Live preview</div>
+            <h3 className="mt-1 font-display font-bold text-[20px] text-white">Tourist visa · 1 applicant · no embassy fee</h3>
           </div>
           <div className="text-right">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400 font-bold">Total</div>
-            <div className="text-[28px] font-display font-extrabold text-[hsl(var(--accent))]" data-testid="pricing-preview-total">{inr(sampleTotal)}</div>
+            <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-bold">Total</div>
+            <div className="text-[28px] font-display font-bold text-blue-300" data-testid="pricing-preview-total">{inr(sampleTotal)}</div>
           </div>
         </div>
         <div className="mt-4 grid sm:grid-cols-4 gap-2 text-[12.5px]">
-          <div className="rounded-lg bg-white/5 px-3 py-2"><span className="text-slate-500">Base</span><div className="font-bold text-white">{inr(sampleBase)}</div></div>
-          <div className="rounded-lg bg-white/5 px-3 py-2"><span className="text-slate-500">Surcharge</span><div className="font-bold text-white">{inr(sampleSur)}</div></div>
-          <div className="rounded-lg bg-white/5 px-3 py-2"><span className="text-slate-500">GST taxable</span><div className="font-bold text-white">{inr(sampleTaxable)}</div></div>
-          <div className="rounded-lg bg-white/5 px-3 py-2"><span className="text-slate-500">GST ({(sampleGstRate * 100).toFixed(0)}%)</span><div className="font-bold text-white">{inr(sampleGst)}</div></div>
+          <div className="rounded-lg bg-white/5 px-3 py-2"><span className="text-slate-400">Base</span><div className="font-bold text-white">{inr(sampleBase)}</div></div>
+          <div className="rounded-lg bg-white/5 px-3 py-2"><span className="text-slate-400">Surcharge</span><div className="font-bold text-white">{inr(sampleSur)}</div></div>
+          <div className="rounded-lg bg-white/5 px-3 py-2"><span className="text-slate-400">GST taxable</span><div className="font-bold text-white">{inr(sampleTaxable)}</div></div>
+          <div className="rounded-lg bg-white/5 px-3 py-2"><span className="text-slate-400">GST ({(sampleGstRate * 100).toFixed(0)}%)</span><div className="font-bold text-white">{inr(sampleGst)}</div></div>
         </div>
       </Panel>
 
@@ -240,14 +240,14 @@ export default function PricingTab() {
           data-testid="pricing-save-btn"
           disabled={busy}
           onClick={save}
-          className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white px-5 py-2.5 text-[13.5px] font-bold"
+          className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-60 text-white px-5 py-2.5 text-[13.5px] font-bold"
         >
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /> Save pricing</>}
         </button>
       </div>
 
       {data.updated_at && (
-        <p className="mt-3 text-right text-[11.5px] text-slate-500">
+        <p className="mt-3 text-right text-[11.5px] text-slate-400">
           Last updated: {new Date(data.updated_at).toLocaleString('en-IN')}
         </p>
       )}

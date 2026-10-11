@@ -11,8 +11,8 @@ const FALLBACK_CARDS = [
     badge: 'Student Offer',
     cta_text: 'Apply Now',
     cta_link: '/universities',
-    bg_color: '#0a2c8a',
-    accent_color: '#e1212c',
+    bg_color: '#0A3161',
+    accent_color: '#B31942',
     image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=70',
   },
   {
@@ -47,7 +47,7 @@ function PromoCard({ card, index }) {
       viewport={{ once: true }}
       transition={{ delay: index * 0.1, duration: 0.45 }}
       className="relative rounded-3xl overflow-hidden flex flex-col min-h-[280px] group"
-      style={{ background: card.bg_color || '#0a2c8a' }}
+      style={{ background: card.bg_color || '#0A3161' }}
     >
       {/* Background image overlay */}
       {card.image_url && (
@@ -60,18 +60,18 @@ function PromoCard({ card, index }) {
       {/* Decorative shape */}
       <div
         className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full opacity-15 transition-transform duration-500 group-hover:scale-110"
-        style={{ background: card.accent_color || '#e1212c' }}
+        style={{ background: card.accent_color || '#B31942' }}
       />
       <div
         className="absolute -top-6 -left-6 w-28 h-28 rounded-full opacity-10"
-        style={{ background: card.accent_color || '#e1212c' }}
+        style={{ background: card.accent_color || '#B31942' }}
       />
 
       <div className="relative z-10 flex flex-col flex-1 p-7">
         {card.badge && (
           <span
-            className="self-start inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.14em] mb-4"
-            style={{ background: card.accent_color || '#e1212c', color: '#fff' }}
+            className="self-start inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-[0.14em] mb-4"
+            style={{ background: card.accent_color || '#B31942', color: '#fff' }}
           >
             <Tag className="w-3 h-3" />
             {card.badge}
@@ -116,7 +116,7 @@ export default function PromoCards() {
           className="flex items-end justify-between flex-wrap gap-4 mb-10"
         >
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <Sparkles className="w-3.5 h-3.5" />
               Special Offers
             </div>

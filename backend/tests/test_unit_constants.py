@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 os.environ['MONGO_URL'] = 'mongodb://localhost:27017'
 os.environ['DB_NAME'] = 'wehive_test'
 
-from constants import AppStatus, OtpChannel, BILLABLE_STATUSES, STATUS_LABELS, REFERRAL_REWARD_INR, MIN_DEPOSIT_FOR_REWARD
+from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS, REFERRAL_REWARD_INR
 
 
 class TestAppStatus:
@@ -19,15 +19,6 @@ class TestAppStatus:
 
     def test_is_str_enum(self):
         assert isinstance(AppStatus.DRAFT, str)
-
-
-class TestOtpChannel:
-    def test_values(self):
-        assert OtpChannel.EMAIL.value == 'email'
-        assert OtpChannel.PHONE.value == 'phone'
-        assert OtpChannel.SMS.value == 'sms'
-        assert OtpChannel.WHATSAPP.value == 'whatsapp'
-        assert OtpChannel.AUTO.value == 'auto'
 
 
 class TestBillableStatuses:
@@ -54,6 +45,3 @@ class TestStatusLabels:
 class TestConstants:
     def test_referral_reward(self):
         assert REFERRAL_REWARD_INR == 500
-
-    def test_min_deposit(self):
-        assert MIN_DEPOSIT_FOR_REWARD == 2000

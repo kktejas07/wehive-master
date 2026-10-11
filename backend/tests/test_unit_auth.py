@@ -17,8 +17,6 @@ from auth_utils import (
     mask,
     sign_jwt,
     decode_jwt,
-    gen_otp,
-    otp_expiry,
 )
 from datetime import datetime, timedelta
 
@@ -108,27 +106,3 @@ class TestJWT:
             assert False, "Should have raised"
         except Exception:
             pass
-
-
-class TestGenOtp:
-    def test_default_length(self):
-        otp = gen_otp()
-        assert len(otp) == 6
-        assert otp.isdigit()
-
-    def test_custom_length(self):
-        otp = gen_otp(8)
-        assert len(otp) == 8
-        assert otp.isdigit()
-
-    def test_randomness(self):
-        otps = {gen_otp() for _ in range(100)}
-        assert len(otps) > 90, "OTPs should be mostly unique"
-
-
-class TestOtpExpiry:
-    def test_returns_future_time(self):
-        expiry = otp_expiry()
-        now = datetime.utcnow()
-        assert expiry > now
-        assert expiry < now + timedelta(minutes=15)

@@ -78,7 +78,7 @@ function CategorySection({ category, connectedIds, activeServiceId, onConnect, o
         </div>
         <div className="flex items-center gap-3">
           {connectedCount > 0 && (
-            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
+            <span className="text-[12px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
               {connectedCount} connected
             </span>
           )}
@@ -167,18 +167,18 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
             <div className="text-[12px] text-[hsl(var(--blue-900))]/50 mt-0.5">{svc.description}</div>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {svc.features.map(f => (
-                <span key={f} className="text-[10px] font-semibold bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] px-2 py-0.5 rounded-full">
+                <span key={f} className="text-[12px] font-semibold bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] px-2 py-0.5 rounded-full">
                   {f.replace(/_/g, ' ')}
                 </span>
               ))}
             </div>
             {isDefault && (
-              <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 mt-2 text-[12px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
                 <Check className="w-3 h-3" /> Default
               </span>
             )}
             {svc.powered_by_tagline && (
-              <div className="text-[10px] text-[hsl(var(--blue-900))]/40 mt-1">{svc.powered_by_tagline}</div>
+              <div className="text-[12px] text-[hsl(var(--blue-900))]/40 mt-1">{svc.powered_by_tagline}</div>
             )}
           </div>
         </div>
@@ -226,6 +226,7 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[hsl(var(--blue-900))]/30" />
                 <input
+                  aria-label={svc.key_label}
                   type="password"
                   value={apiKey}
                   onChange={e => setApiKey(e.target.value)}

@@ -14,6 +14,7 @@ import ProgramsTab from '../components/admin/ProgramsTab';
 import PricingTab from '../components/admin/PricingTab';
 import EventsTab from '../components/admin/EventsTab';
 import GlobalEventsTab from '../components/admin/GlobalEventsTab';
+import ContentModerationTab from '../components/admin/ContentModerationTab';
 import SettingsTab from '../components/admin/SettingsTab';
 import DestinationsTab from '../components/admin/DestinationsTab';
 import RequestsTab from '../components/admin/RequestsTab';
@@ -44,7 +45,7 @@ function ProtectedAdmin({ children }) {
   if (loading || !admin) {
     return (
       <div className="min-h-screen bg-[#0b1020] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--accent))]" />
+        <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" />
       </div>
     );
   }
@@ -71,6 +72,7 @@ function AdminRoutes() {
                 <Route path="pricing" element={<PricingTab />} />
                 <Route path="events" element={<EventsTab />} />
                 <Route path="global-events" element={<GlobalEventsTab />} />
+                <Route path="moderation" element={<ContentModerationTab />} />
                 <Route path="requests" element={<RequestsTab />} />
                 <Route path="promotions" element={<PromotionsTab />} />
                 <Route path="promocodes" element={<PromoCodesTab />} />

@@ -46,7 +46,7 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
       
       {/* Header */}
       <div className="mb-6">
-        <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider font-mono flex items-center gap-1">
+        <span className="text-[11px] font-black uppercase text-emerald-600 dark:text-emerald-300 tracking-wider font-mono flex items-center gap-1">
           <Coins className="w-3.5 h-3.5" /> Financial Hub
         </span>
         <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Finance & Budgets</h2>
@@ -55,14 +55,14 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
       {/* Cost-of-Living Calculator Section */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <Coins className="w-4.5 h-4.5 text-blue-900" />
+          <Coins className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Cost-of-Living Calculator</h3>
         </div>
 
         <div className="space-y-3">
           {/* Country Selection */}
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Country</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Country</label>
             <div className="grid grid-cols-5 gap-1.5">
               {Object.keys(COST_DATA).map((k) => (
                 <button
@@ -71,7 +71,7 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
                     setSelectedCountry(k as any);
                     setCustomRent("");
                   }}
-                  className={`py-1.5 rounded-lg text-[10.5px] font-bold border transition ${
+                  className={`py-1.5 rounded-lg text-[11px] font-bold border transition ${
                     selectedCountry === k
                       ? "bg-slate-900 border-slate-900 text-white"
                       : "bg-slate-50 border-slate-200 text-slate-600"
@@ -86,7 +86,7 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
           {/* Budget Grid */}
           <div className="grid grid-cols-2 gap-3 pt-1">
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
-              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Rent / Lodging</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold font-mono">Rent / Lodging</div>
               <div className="mt-1 flex items-baseline gap-1">
                 <span className="text-sm font-bold text-slate-800">{currentCost.currency}</span>
                 <input
@@ -100,21 +100,21 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
             </div>
 
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
-              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Food / Groceries</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold font-mono">Food / Groceries</div>
               <div className="mt-1 text-sm font-bold text-slate-800">
                 {currentCost.currency} {currentCost.food}
               </div>
             </div>
 
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
-              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Local Transit</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold font-mono">Local Transit</div>
               <div className="mt-1 text-sm font-bold text-slate-800">
                 {currentCost.currency} {currentCost.transport}
               </div>
             </div>
 
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
-              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Health Insurance</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold font-mono">Health Insurance</div>
               <div className="mt-1 text-sm font-bold text-slate-800">
                 {currentCost.currency} {currentCost.insurance}
               </div>
@@ -122,14 +122,14 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
           </div>
 
           {/* Sum Banner */}
-          <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3.5 flex justify-between items-center mt-2">
+          <div className="bg-blue-50/50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-xl p-3.5 flex justify-between items-center mt-2">
             <div>
-              <div className="text-[10px] font-bold text-blue-900/60 uppercase tracking-wider">Estimated Monthly Budget</div>
-              <div className="text-lg font-black text-blue-950 mt-0.5">
+              <div className="text-[11px] font-bold text-blue-900/60 uppercase tracking-wider">Estimated Monthly Budget</div>
+              <div className="text-lg font-black text-blue-950 dark:text-blue-300 mt-0.5">
                 {currentCost.currency} {totalMonthlyCost.toLocaleString()}
               </div>
             </div>
-            <Info className="w-4 h-4 text-blue-700 shrink-0" />
+            <Info className="w-4 h-4 text-blue-700 dark:text-blue-300 shrink-0" />
           </div>
         </div>
       </div>
@@ -138,18 +138,18 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
       {currentCost.gic !== "N/A" && (
         <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-            <Landmark className="w-4.5 h-4.5 text-blue-900" />
+            <Landmark className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
             <h3 className="text-xs font-extrabold text-slate-800">Mandatory Blocked Account</h3>
           </div>
 
           <div className="flex justify-between items-center bg-slate-50 p-3.5 rounded-xl border border-slate-200/50">
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-mono">Required Funds</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold font-mono">Required Funds</div>
               <div className="text-md font-extrabold text-slate-800 mt-0.5">{currentCost.gic}</div>
             </div>
             <button 
               onClick={() => alert("Redirecting to Fintiba secure portal...")}
-              className="inline-flex items-center gap-1 rounded-lg bg-slate-900 text-white text-[10px] font-bold px-3 h-8 hover:bg-slate-800 transition"
+              className="inline-flex items-center gap-1 rounded-lg bg-slate-900 text-white text-[11px] font-bold px-3 h-8 hover:bg-slate-800 transition"
             >
               <span>Setup Portal</span>
               <ArrowUpRight className="w-3 h-3" />
@@ -161,22 +161,22 @@ export default function FinanceTab({ onTriggerNotification, colorScheme }: Finan
       {/* Student Loan Application Form */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <Landmark className="w-4.5 h-4.5 text-blue-900" />
+          <Landmark className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Education Loan Desk</h3>
         </div>
 
         {loanStatus === "applied" ? (
-          <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-center space-y-2">
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 rounded-xl text-center space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
-            <h4 className="text-xs font-extrabold text-emerald-800">Loan Application Submitted</h4>
-            <p className="text-[10.5px] text-emerald-700 leading-relaxed">
+            <h4 className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300">Loan Application Submitted</h4>
+            <p className="text-[11px] text-emerald-700 dark:text-emerald-300 leading-relaxed">
               We have dispatched your portfolio to Auxiliary & HDFC bank managers. You will receive contact inside 24 hours.
             </p>
           </div>
         ) : (
           <form onSubmit={handleApplyLoan} className="space-y-3">
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Loan Amount</label>
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Loan Amount</label>
               <input
                 required
                 type="text"

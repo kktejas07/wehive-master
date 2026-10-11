@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
@@ -36,8 +36,16 @@ const TABS = [
 ];
 
 function Tabs({ value, onChange }) {
+  const navRef = useRef(null);
+  // On narrow screens the tabs are a horizontal scroll row; keep the active one in view.
+  useEffect(() => {
+    const el = navRef.current?.querySelector('[aria-current="page"]');
+    const nav = navRef.current;
+    if (!el || !nav || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollLeft = el.offsetLeft - nav.offsetLeft - 16;
+  }, [value]);
   return (
-    <nav className="sticky top-24 space-y-1">
+    <nav ref={navRef} aria-label="Account sections" className="-mx-4 px-4 sm:mx-0 sm:px-0 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible snap-x scroll-px-4 [scrollbar-width:none] pb-1 lg:pb-0 lg:sticky lg:top-24">
       {TABS.map((t) => {
         const Icon = t.Icon;
         const active = value === t.id;
@@ -45,10 +53,11 @@ function Tabs({ value, onChange }) {
           <button
             key={t.id}
             onClick={() => onChange(t.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-bold transition ${
+            aria-current={active ? 'page' : undefined}
+            className={`shrink-0 snap-start lg:w-full flex items-center gap-2.5 lg:gap-3 px-3.5 lg:px-4 min-h-[44px] rounded-xl text-[14px] font-semibold whitespace-nowrap transition-colors duration-200 ${
               active
-                ? 'bg-[hsl(var(--blue-700))] text-white'
-                : 'text-[hsl(var(--blue-900))]/70 hover:bg-[hsl(var(--blue-50))] hover:text-[hsl(var(--blue-900))]'
+                ? 'bg-[hsl(var(--blue-700))] text-white shadow-sm'
+                : 'text-muted-foreground bg-white lg:bg-transparent border border-border lg:border-transparent hover:bg-[hsl(var(--blue-50))] hover:text-[hsl(var(--blue-900))]'
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -108,7 +117,7 @@ function ProfileTab({ user, token, onUpdated }) {
   return (
     <div data-testid="profile-tab">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="font-display font-extrabold text-[28px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+        <h2 className="font-display font-bold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
           Profile
         </h2>
         {!editing ? (
@@ -116,16 +125,16 @@ function ProfileTab({ user, token, onUpdated }) {
             data-testid="profile-edit-btn"
             variant="outline"
             onClick={() => setEditing(true)}
-            className="rounded-full h-10 px-4 font-bold border-black/10 hover:border-[hsl(var(--blue-700))]/30"
+            className="rounded-xl h-11 px-5 font-bold border-slate-300 hover:border-[hsl(var(--blue-700))]/30"
           >
             <Pencil className="w-3.5 h-3.5 mr-1" /> Edit profile
           </Button>
         ) : (
           <div className="flex gap-2">
-            <Button data-testid="profile-cancel-btn" variant="outline" disabled={saving} onClick={onCancel} className="rounded-full h-10 px-4 font-bold border-black/10">
+            <Button data-testid="profile-cancel-btn" variant="outline" disabled={saving} onClick={onCancel} className="rounded-xl h-11 px-5 font-bold border-slate-300">
               <X className="w-3.5 h-3.5 mr-1" /> Cancel
             </Button>
-            <Button data-testid="profile-save-btn" disabled={saving} onClick={onSave} className="rounded-full h-10 px-4 font-bold btn-accent text-white">
+            <Button data-testid="profile-save-btn" disabled={saving} onClick={onSave} className="rounded-xl h-11 px-5 font-bold btn-accent text-white">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (
                 <span className="inline-flex items-center gap-1"><Save className="w-3.5 h-3.5" /> Save</span>
               )}
@@ -144,8 +153,8 @@ function ProfileTab({ user, token, onUpdated }) {
             { id: 'plan',     label: 'Plan',             value: user.is_premium ? 'Premium' : 'Free' },
             { id: 'verified', label: 'Verified channel', value: user.email_verified ? 'Email' : user.phone_verified ? 'Mobile (OTP)' : 'None' },
           ].map((i) => (
-            <div key={i.id} className="rounded-2xl bg-white border border-black/5 p-5" data-testid={`profile-row-${i.id}`}>
-              <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">
+            <div key={i.id} className="rounded-2xl bg-white border border-border p-5" data-testid={`profile-row-${i.id}`}>
+              <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">
                 {i.label}
               </div>
               <div className="mt-1 text-[15px] font-bold text-[hsl(var(--blue-900))]">{i.value}</div>
@@ -166,7 +175,7 @@ function ProfileTab({ user, token, onUpdated }) {
         </div>
       )}
       {!editing && (
-        <div className="mt-8 border-t border-black/5 pt-8">
+        <div className="mt-8 border-t border-border pt-8">
           <AIInsightsPanel />
         </div>
       )}
@@ -176,8 +185,8 @@ function ProfileTab({ user, token, onUpdated }) {
 
 function EditField({ label, value, onChange, placeholder, type = 'text', testid }) {
   return (
-    <label className="block rounded-2xl bg-white border border-black/8 px-5 py-3 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/40 transition">
-      <span className="block text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">{label}</span>
+    <label className="block rounded-2xl bg-white border border-border px-5 py-3 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/40 transition">
+      <span className="block text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">{label}</span>
       <input
         data-testid={testid}
         type={type}
@@ -192,8 +201,8 @@ function EditField({ label, value, onChange, placeholder, type = 'text', testid 
 
 function EditSelect({ label, value, onChange, children, testid }) {
   return (
-    <label className="block rounded-2xl bg-white border border-black/8 px-5 py-3 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/40 transition">
-      <span className="block text-[11px] uppercase tracking-[0.16em] font-bold text-[hsl(var(--blue-900))]/55">{label}</span>
+    <label className="block rounded-2xl bg-white border border-border px-5 py-3 hover:border-[hsl(var(--blue-700))]/25 focus-within:border-[hsl(var(--blue-700))]/40 transition">
+      <span className="block text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">{label}</span>
       <select
         data-testid={testid}
         value={value}
@@ -230,7 +239,7 @@ function ApplicationsTab({ token }) {
         <Link
           key={a.id}
           to={`/account/applications/${a.id}`}
-          className="block rounded-2xl bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 p-5 transition"
+          className="block rounded-2xl bg-white border border-border hover:border-[hsl(var(--blue-700))]/20 p-5 transition"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
@@ -238,11 +247,11 @@ function ApplicationsTab({ token }) {
                 <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
                   {a.country_id.toUpperCase()} · {a.visa_type}
                 </span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold capitalize ${statusColor(a.status)}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold capitalize ${statusColor(a.status)}`}>
                   {(a.status || 'draft').replace('_', ' ')}
                 </span>
               </div>
-              <div className="mt-0.5 text-[12.5px] text-[hsl(var(--blue-900))]/55">
+              <div className="mt-0.5 text-[12.5px] text-muted-foreground">
                 #{a.id?.slice(0, 8).toUpperCase()} · created {new Date(a.created_at).toLocaleDateString()}
               </div>
             </div>
@@ -275,9 +284,9 @@ function PlansTab({ token }) {
   return (
     <div className="grid sm:grid-cols-2 gap-4">
       {items.map((p) => (
-        <Link key={p.id} to={`/holiday/${p.country_id}`} className="rounded-2xl bg-white border border-black/5 p-5 hover:border-[hsl(var(--blue-700))]/20">
+        <Link key={p.id} to={`/holiday/${p.country_id}`} className="rounded-2xl bg-white border border-border p-5 hover:border-[hsl(var(--blue-700))]/20">
           <div className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{p.country_id.toUpperCase()}</div>
-          <div className="mt-1 text-[12.5px] text-[hsl(var(--blue-900))]/55">{p.duration_days} days</div>
+          <div className="mt-1 text-[12.5px] text-muted-foreground">{p.duration_days} days</div>
         </Link>
       ))}
     </div>
@@ -324,10 +333,10 @@ function AIToolsTab({ token, isPremium }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+        <h2 className="font-display font-bold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
           AI Tools
         </h2>
-        <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/55">
+        <p className="mt-1 text-[14px] text-muted-foreground">
           Select an application to use an AI tool. Tools work best after submission.
         </p>
       </div>
@@ -340,25 +349,25 @@ function AIToolsTab({ token, isPremium }) {
         />
       ) : (
         <div className="space-y-3">
-          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">
             Your applications — tap one to use AI tools
           </div>
           {apps.map((a) => (
             <button
               key={a.id}
               onClick={() => openTool(a)}
-              className="w-full flex items-center justify-between gap-4 rounded-2xl bg-white border border-black/5 hover:border-[hsl(var(--blue-700))]/20 p-5 text-left transition"
+              className="w-full flex items-center justify-between gap-4 rounded-2xl bg-white border border-border hover:border-[hsl(var(--blue-700))]/20 p-5 text-left transition"
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
                     {a.country_id?.toUpperCase()} · {a.visa_type}
                   </span>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold capitalize ${statusColor(a.status)}`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold capitalize ${statusColor(a.status)}`}>
                     {(a.status || 'draft').replace('_', ' ')}
                   </span>
                 </div>
-                <div className="mt-0.5 text-[12.5px] text-[hsl(var(--blue-900))]/55">
+                <div className="mt-0.5 text-[12.5px] text-muted-foreground">
                   #{a.id?.slice(0, 8).toUpperCase()}
                 </div>
               </div>
@@ -370,20 +379,20 @@ function AIToolsTab({ token, isPremium }) {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
-          { id: 'cover-letter', label: 'Cover Letter / SOP', Icon: FileText, color: '#0a2c8a', desc: 'Write a professional cover letter' },
-          { id: 'itinerary', label: 'AI Itinerary', Icon: Compass, color: '#f59e0b', desc: 'Plan your day-by-day trip' },
-          { id: 'risk', label: 'Risk Analyser', Icon: Check, color: '#dc2626', desc: 'Check rejection risk before submitting' },
-        ].map(({ id, label, Icon, color, desc }) => (
+          { id: 'cover-letter', label: 'Cover Letter / SOP', Icon: FileText, desc: 'Write a professional cover letter' },
+          { id: 'itinerary', label: 'AI Itinerary', Icon: Compass, desc: 'Plan your day-by-day trip' },
+          { id: 'risk', label: 'Risk Analyser', Icon: Check, desc: 'Check rejection risk before submitting' },
+        ].map(({ id, label, Icon, desc }) => (
           <button
             key={id}
             onClick={() => handleToolClick(id)}
-            className="rounded-2xl border border-black/8 bg-white p-4 text-left hover:border-[hsl(var(--accent))]/30 transition"
+            className="rounded-2xl border border-border bg-white p-4 text-left shadow-sm hover:border-[hsl(var(--blue-700))]/30 hover:shadow-md transition duration-200"
           >
-            <div className="h-10 w-10 rounded-xl inline-flex items-center justify-center mb-3" style={{ background: `${color}15` }}>
-              <Icon className="w-5 h-5" style={{ color }} />
+            <div className="h-10 w-10 rounded-xl inline-flex items-center justify-center mb-3 bg-[hsl(var(--blue-50))]">
+              <Icon className="w-5 h-5 text-[hsl(var(--blue-700))]" />
             </div>
             <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{label}</div>
-            <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-0.5">{desc}</div>
+            <div className="text-[12px] text-muted-foreground mt-0.5">{desc}</div>
           </button>
         ))}
       </div>
@@ -449,20 +458,20 @@ function SettingsTab({ user, token, onUpdated }) {
 
   return (
     <div>
-      <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+      <h2 className="font-display font-bold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
         Profile & avatar
       </h2>
 
       {/* Avatar preview + gender */}
       <div className="mt-6 flex flex-col sm:flex-row gap-6 items-start">
         <div className="flex flex-col items-center gap-2">
-          <span className="h-28 w-28 rounded-3xl overflow-hidden bg-[hsl(var(--blue-50))] ring-2 ring-white shadow-[0_20px_40px_-20px_rgba(10,44,138,0.4)]">
-            <img src={avatarUrl({ seed, gender, style })} alt="avatar preview" className="h-full w-full object-cover" />
+          <span className="h-28 w-28 rounded-2xl overflow-hidden bg-[hsl(var(--blue-50))] ring-1 ring-border shadow-sm">
+            <img loading="lazy" decoding="async" src={avatarUrl({ seed, gender, style })} alt="avatar preview" className="h-full w-full object-cover" />
           </span>
-          <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55">Preview</span>
+          <span className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Preview</span>
         </div>
         <div className="flex-1 w-full">
-          <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-2">
+          <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">
             Choose your hero style
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
@@ -476,13 +485,13 @@ function SettingsTab({ user, token, onUpdated }) {
                     setStyle(p.style);
                   }}
                   className={`relative rounded-2xl bg-white border-2 p-1.5 transition ${
-                    active ? 'border-[hsl(var(--blue-700))] shadow-md' : 'border-black/5 hover:border-[hsl(var(--blue-700))]/30'
+                    active ? 'border-[hsl(var(--blue-700))] shadow-md' : 'border-border hover:border-[hsl(var(--blue-700))]/30'
                   }`}
                 >
                   <span className="block aspect-square rounded-xl overflow-hidden bg-[hsl(var(--blue-50))]">
-                    <img src={avatarUrl({ seed: p.seed, style: p.style })} alt={p.label} className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async" src={avatarUrl({ seed: p.seed, style: p.style })} alt={p.label} className="h-full w-full object-cover" />
                   </span>
-                  <span className="block text-[11px] font-bold mt-1 text-[hsl(var(--blue-900))]/75 truncate">
+                  <span className="block text-[12px] font-bold mt-1 text-muted-foreground truncate">
                     {p.label}
                   </span>
                   {active && (
@@ -496,10 +505,10 @@ function SettingsTab({ user, token, onUpdated }) {
           </div>
 
           <div className="mt-5">
-            <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-2">
+            <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">
               Gender (used to tune avatar)
             </div>
-            <div className="inline-flex p-1 rounded-full bg-[hsl(var(--soft-bg))] border border-black/5">
+            <div className="inline-flex p-1 rounded-full bg-[hsl(var(--soft-bg))] border border-border">
               {[
                 { id: 'male', label: 'Male' },
                 { id: 'female', label: 'Female' },
@@ -509,10 +518,10 @@ function SettingsTab({ user, token, onUpdated }) {
                 <button
                   key={g.id}
                   onClick={() => setGender(g.id)}
-                  className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-bold transition ${
+                  className={`rounded-full px-3.5 min-h-[36px] text-[13px] font-semibold transition-colors ${
                     gender === g.id
                       ? 'bg-white shadow-sm text-[hsl(var(--blue-700))]'
-                      : 'text-[hsl(var(--blue-900))]/60 hover:text-[hsl(var(--blue-900))]'
+                      : 'text-muted-foreground hover:text-[hsl(var(--blue-900))]'
                   }`}
                 >
                   {g.label}
@@ -524,23 +533,23 @@ function SettingsTab({ user, token, onUpdated }) {
       </div>
 
       <div className="mt-8 max-w-md">
-        <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
+        <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-1.5">
           Display name
         </label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full h-12 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] transition"
+          className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] transition"
         />
-        <Button onClick={onSave} disabled={busy} className="mt-4 rounded-full btn-primary text-white h-11 px-6 font-bold">
+        <Button onClick={onSave} disabled={busy} className="mt-4 rounded-xl btn-accent text-white h-11 px-5 font-bold">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save changes'}
         </Button>
       </div>
 
-      <div className="mt-10 pt-8 border-t border-black/8">
+      <div className="mt-10 pt-8 border-t border-border">
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-4 h-4 text-[hsl(var(--accent))]" />
-          <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--accent))]">Open Market AI</span>
+          <Sparkles className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+          <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-700))]">Open Market AI</span>
         </div>
         <OpenMarketAI />
       </div>
@@ -595,31 +604,31 @@ function ReferralsTab({ token }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+        <h2 className="font-display font-bold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
           Referral Program
         </h2>
-        <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/55">
+        <p className="mt-1 text-[14px] text-muted-foreground">
           Share your code — earn ₹500 credit for every friend who applies.
         </p>
       </div>
 
-      <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--accent))] p-6 sm:p-8 text-white">
+      <div className="rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-700))]/15 p-6 sm:p-8 text-[hsl(var(--blue-900))]">
         <div className="flex items-center gap-2 mb-3">
-          <Gift className="w-5 h-5 text-white/70" />
-          <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/70">Your referral code</span>
+          <Gift className="w-5 h-5 text-[hsl(var(--blue-700))]" />
+          <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--blue-700))]">Your referral code</span>
         </div>
         <div className="h-14 flex items-center mb-6">
           {loading ? (
-            <Loader2 className="w-7 h-7 animate-spin text-white/70" />
+            <Loader2 className="w-7 h-7 animate-spin text-[hsl(var(--blue-700))]" />
           ) : (
-            <div className="text-4xl font-display font-extrabold tracking-[0.1em]">{code || '---------'}</div>
+            <div className="text-[32px] sm:text-4xl font-display font-bold tracking-[0.08em] break-all">{code || '---------'}</div>
           )}
         </div>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => handleShare('copy')}
             disabled={loading || !code}
-            className="inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-2.5 text-[13px] font-bold transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-300 hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))] disabled:opacity-50 disabled:cursor-not-allowed h-11 px-5 text-[14px] font-semibold transition-colors"
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             {copied ? 'Copied!' : 'Copy code'}
@@ -627,14 +636,14 @@ function ReferralsTab({ token }) {
           <button
             onClick={() => handleShare('whatsapp')}
             disabled={loading || !code}
-            className="inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-2.5 text-[13px] font-bold transition"
+            className="inline-flex items-center gap-2 rounded-xl btn-accent text-white disabled:opacity-50 disabled:cursor-not-allowed h-11 px-5 text-[14px] font-semibold transition-colors"
           >
             Share on WhatsApp
           </button>
           <button
             onClick={() => handleShare('email')}
             disabled={loading || !code}
-            className="inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-2.5 text-[13px] font-bold transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-300 hover:border-[hsl(var(--blue-700))]/40 hover:text-[hsl(var(--blue-700))] disabled:opacity-50 disabled:cursor-not-allowed h-11 px-5 text-[14px] font-semibold transition-colors"
           >
             Share via Email
           </button>
@@ -642,22 +651,22 @@ function ReferralsTab({ token }) {
       </div>
 
       {stats && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[
             { label: 'Total referrals', value: stats.total_referrals || 0 },
             { label: 'Credits earned', value: `₹${stats.total_earned || 0}` },
             { label: 'Pending', value: `₹${stats.pending_reward || 0}` },
           ].map((s) => (
-            <div key={s.label} className="rounded-2xl bg-white border border-black/5 p-5 text-center">
-              <div className="text-[24px] font-display font-extrabold text-[hsl(var(--blue-900))]">{s.value}</div>
-              <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-1">{s.label}</div>
+            <div key={s.label} className="rounded-2xl bg-white border border-border shadow-sm p-4 sm:p-5">
+              <div className="text-[12px] font-medium text-muted-foreground">{s.label}</div>
+              <div className="mt-1 text-[22px] sm:text-[24px] font-display font-bold tabular-nums text-[hsl(var(--blue-900))]">{s.value}</div>
             </div>
           ))}
         </div>
       )}
 
       <div className="rounded-2xl border border-dashed border-black/15 p-6 text-center">
-        <div className="text-[14px] text-[hsl(var(--blue-900))]/55">
+        <div className="text-[14px] text-muted-foreground">
           <strong>How it works:</strong> Share your code with friends. When they apply and pay, you earn ₹500 credit. Credits can be redeemed on your next visa application.
         </div>
       </div>
@@ -735,17 +744,17 @@ function RequestsTab({ user, token }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="font-display font-extrabold text-[26px] tracking-[-0.025em] text-[hsl(var(--blue-900))]">
+          <h2 className="font-display font-bold text-[24px] sm:text-[28px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
             My Requests
           </h2>
-          <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/55">
+          <p className="mt-1 text-[14px] text-muted-foreground">
             Submit a request to update your profile or ask for information. Admins review and approve each request.
           </p>
         </div>
         {!showForm && (
           <Button
             onClick={() => setShowForm(true)}
-            className="rounded-full btn-primary text-white h-10 px-5 font-bold text-[13px]"
+            className="rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]"
           >
             <Send className="w-3.5 h-3.5 mr-1.5" /> New Request
           </Button>
@@ -757,13 +766,13 @@ function RequestsTab({ user, token }) {
           <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">New Request</div>
 
           <div>
-            <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
+            <label htmlFor="account-request-type" className="block text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1.5">
               Request type
             </label>
-            <select
+            <select id="account-request-type"
               value={form.request_type}
               onChange={(e) => setForm((f) => ({ ...f, request_type: e.target.value }))}
-              className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-bold text-[hsl(var(--blue-900))] bg-white"
+              className="w-full h-11 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-bold text-[hsl(var(--blue-900))] bg-white"
             >
               <option value="profile_update">Profile Update</option>
               <option value="info_request">Information Request</option>
@@ -779,26 +788,27 @@ function RequestsTab({ user, token }) {
                 { key: 'phone', label: 'New Phone', placeholder: user.phone || '+91 9XXXX XXXXX', type: 'tel' },
               ].map(({ key, label, placeholder, type = 'text' }) => (
                 <div key={key}>
-                  <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
+                  <label htmlFor={`account-${key}`} className="block text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1.5">
                     {label}
                   </label>
                   <input
+                    id={`account-${key}`}
                     type={type}
                     value={form[key]}
                     onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
                     placeholder={placeholder}
-                    className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-bold text-[hsl(var(--blue-900))] placeholder:font-normal placeholder:text-[hsl(var(--blue-900))]/35"
+                    className="w-full h-11 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-bold text-[hsl(var(--blue-900))] placeholder:font-normal placeholder:text-[hsl(var(--blue-900))]/35"
                   />
                 </div>
               ))}
               <div>
-                <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
+                <label htmlFor="account-gender" className="block text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1.5">
                   Gender
                 </label>
-                <select
+                <select id="account-gender"
                   value={form.gender}
                   onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value }))}
-                  className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-bold text-[hsl(var(--blue-900))] bg-white"
+                  className="w-full h-11 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] font-bold text-[hsl(var(--blue-900))] bg-white"
                 >
                   <option value="">No change</option>
                   <option value="male">Male</option>
@@ -810,15 +820,15 @@ function RequestsTab({ user, token }) {
           )}
 
           <div>
-            <label className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/55 mb-1.5">
+            <label htmlFor="account-message-to-admin-optional" className="block text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1.5">
               Message to admin (optional)
             </label>
-            <textarea
+            <textarea id="account-message-to-admin-optional"
               value={form.message}
               onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
               placeholder="Describe what you need or why you're making this request…"
               rows={3}
-              className="w-full rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 py-3 text-[14px] text-[hsl(var(--blue-900))] resize-none placeholder:text-[hsl(var(--blue-900))]/35"
+              className="w-full rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 py-3 text-[14px] text-[hsl(var(--blue-900))] resize-none placeholder:text-[hsl(var(--blue-900))]/35"
             />
           </div>
 
@@ -827,14 +837,14 @@ function RequestsTab({ user, token }) {
               variant="outline"
               onClick={() => setShowForm(false)}
               disabled={submitting}
-              className="rounded-full h-10 px-5 font-bold border-black/10"
+              className="rounded-xl h-11 px-5 font-bold border-slate-300"
             >
               <X className="w-3.5 h-3.5 mr-1" /> Cancel
             </Button>
             <Button
               onClick={onSubmit}
               disabled={submitting}
-              className="rounded-full h-10 px-5 font-bold btn-primary text-white"
+              className="rounded-xl h-11 px-5 font-bold btn-accent text-white"
             >
               {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Send className="w-3.5 h-3.5 mr-1" /> Submit</>}
             </Button>
@@ -847,8 +857,8 @@ function RequestsTab({ user, token }) {
       {requests && requests.length === 0 && !showForm && (
         <div className="rounded-2xl bg-white border border-dashed border-black/15 p-10 text-center">
           <ClipboardList className="w-8 h-8 text-[hsl(var(--blue-900))]/25 mx-auto mb-3" />
-          <div className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">No requests yet</div>
-          <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/55">
+          <div className="font-display font-bold text-[18px] text-[hsl(var(--blue-900))]">No requests yet</div>
+          <p className="mt-1 text-[14px] text-muted-foreground">
             Submit a request above and an admin will review it for you.
           </p>
         </div>
@@ -860,19 +870,19 @@ function RequestsTab({ user, token }) {
             const badge = STATUS_BADGE[r.status] || STATUS_BADGE.pending;
             const BadgeIcon = badge.Icon;
             return (
-              <div key={r.id} className="rounded-2xl bg-white border border-black/5 p-5">
+              <div key={r.id} className="rounded-2xl bg-white border border-border p-5">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
                         {REQUEST_TYPE_LABELS[r.request_type] || r.request_type}
                       </span>
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${badge.cls}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-bold ${badge.cls}`}>
                         <BadgeIcon className="w-3 h-3" />
                         {badge.label}
                       </span>
                     </div>
-                    <div className="mt-0.5 text-[12px] text-[hsl(var(--blue-900))]/45">
+                    <div className="mt-0.5 text-[12px] text-muted-foreground">
                       Submitted {new Date(r.created_at).toLocaleDateString()}
                     </div>
                   </div>
@@ -882,7 +892,7 @@ function RequestsTab({ user, token }) {
                   <div className="mt-3 grid sm:grid-cols-2 gap-2">
                     {Object.entries(r.requested_fields).map(([k, v]) => (
                       <div key={k} className="rounded-xl bg-[hsl(var(--soft-bg))] px-4 py-2">
-                        <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-900))]/45">{k}</div>
+                        <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">{k}</div>
                         <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{v}</div>
                       </div>
                     ))}
@@ -890,7 +900,7 @@ function RequestsTab({ user, token }) {
                 )}
 
                 {r.message && (
-                  <div className="mt-3 text-[13px] text-[hsl(var(--blue-900))]/65 italic">"{r.message}"</div>
+                  <div className="mt-3 text-[13px] text-muted-foreground italic">"{r.message}"</div>
                 )}
 
                 {r.admin_note && (
@@ -910,10 +920,10 @@ function RequestsTab({ user, token }) {
 function EmptyState({ title, sub, cta }) {
   return (
     <div className="rounded-2xl bg-white border border-dashed border-black/15 p-10 text-center">
-      <div className="font-display font-extrabold text-[20px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">{title}</div>
-      <p className="mt-1 text-[14px] text-[hsl(var(--blue-900))]/60">{sub}</p>
+      <div className="font-display font-bold text-[20px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">{title}</div>
+      <p className="mt-1 text-[14px] text-muted-foreground">{sub}</p>
       {cta && (
-        <Link to={cta.to} className="mt-5 inline-flex items-center gap-1 rounded-full btn-primary text-white h-10 px-5 font-bold text-[13px]">
+        <Link to={cta.to} className="mt-5 inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">
           {cta.label} <ChevronRight className="w-3.5 h-3.5" />
         </Link>
       )}
@@ -946,16 +956,16 @@ export default function Account() {
   return (
     <div className="bg-white">
       <Navbar />
-      <main data-testid="account-dashboard" className="pt-28 pb-16 bg-[hsl(var(--soft-bg))] min-h-[80vh]">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-12">
+      <main data-testid="account-dashboard" className="pt-24 sm:pt-28 pb-16 bg-[hsl(var(--soft-bg))] min-h-[80vh]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-4 lg:gap-8">
+          <div className="lg:col-span-12 min-w-0">
             <PromoBanner className="mb-2" />
           </div>
-          <aside className="lg:col-span-3">
-            <div className="rounded-2xl bg-white border border-black/5 p-5 mb-4">
+          <aside className="lg:col-span-3 min-w-0">
+            <div className="rounded-2xl bg-white border border-border shadow-sm p-4 lg:p-5 mb-3 lg:mb-4">
               <div className="flex items-center gap-3">
                 <span className="h-12 w-12 rounded-full overflow-hidden bg-[hsl(var(--blue-50))] ring-1 ring-black/5">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={avatarUrl({
                       seed: user.avatar_seed || user.email || user.phone || user.id,
                       gender: user.gender || 'hero',
@@ -969,24 +979,24 @@ export default function Account() {
                   <div className="text-[14px] font-bold text-[hsl(var(--blue-900))] truncate">
                     {user.name || 'Welcome'}
                   </div>
-                  <div className="text-[12px] text-[hsl(var(--blue-900))]/55 truncate">
+                  <div className="text-[12px] text-muted-foreground truncate">
                     {user.email || user.phone}
                   </div>
                 </div>
               </div>
             </div>
             <Tabs value={tab} onChange={(t) => setParams({ tab: t })} />
-            <Link to="/agent" className="mt-3 flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-[hsl(var(--blue-700))]/30 hover:bg-[hsl(var(--blue-50))] transition group">
+            <Link to="/agent" className="mt-3 hidden lg:flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-[hsl(var(--blue-700))]/30 hover:bg-[hsl(var(--blue-50))] transition group">
               <Briefcase className="w-4 h-4 text-[hsl(var(--blue-700))]" />
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Agent Portal</div>
-                <div className="text-[11px] text-[hsl(var(--blue-900))]/50">Manage students & commissions</div>
+                <div className="text-[12px] text-muted-foreground">Manage students & commissions</div>
               </div>
               <ChevronRight className="w-3.5 h-3.5 text-[hsl(var(--blue-900))]/30 group-hover:text-[hsl(var(--blue-700))]" />
             </Link>
           </aside>
-          <section className="lg:col-span-9">
-            <div className="rounded-3xl bg-white border border-black/5 p-8 min-h-[420px]">
+          <section className="lg:col-span-9 min-w-0">
+            <div className="rounded-2xl bg-white border border-border shadow-sm p-5 sm:p-8 min-h-[420px]">
               {tab === 'profile' && <ProfileTab user={user} token={token} onUpdated={refreshUser} />}
               {tab === 'applications' && <ApplicationsTab token={token} />}
               {tab === 'university-apps' && <UniversityAppsTab token={token} />}

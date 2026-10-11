@@ -1,8 +1,6 @@
 import os
 import re
 import jwt
-import secrets
-import string
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import HTTPException, Header, status
@@ -22,9 +20,7 @@ if JWT_SECRET in ('change_me', '', 'secret', 'mysecret', 'jwtsecret'):
         )
     _log.warning('JWT_SECRET is insecure — acceptable only in local dev. Never deploy this.')
 
-JWT_EXPIRES_HOURS = int(os.environ.get('JWT_EXPIRES_HOURS', '24'))
-OTP_LENGTH = int(os.environ.get('OTP_LENGTH', '6'))
-OTP_TTL_MIN = int(os.environ.get('OTP_TTL_MINUTES', '10'))
+from config import JWT_EXPIRES_HOURS  # noqa: E402  (single source for token lifetime)
 
 EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 PHONE_RE = re.compile(r'^\+?\d{10,15}$')
@@ -45,10 +41,6 @@ def normalize_phone(phone: str) -> str:
         # Default to India country code if missing
         p = '+91' + p.lstrip('0')
     return p
-
-
-def gen_otp(length: int = OTP_LENGTH) -> str:
-    return ''.join(secrets.choice(string.digits) for _ in range(length))
 
 
 _RESERVED_CLAIMS = frozenset({'sub', 'exp', 'iat', 'nbf', 'jti', 'iss', 'aud'})
@@ -74,10 +66,6 @@ def decode_jwt(token: str) -> dict:
         raise HTTPException(status_code=401, detail='Token expired')
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail='Invalid token')
-
-
-def otp_expiry() -> datetime:
-    return datetime.utcnow() + timedelta(minutes=OTP_TTL_MIN)
 
 
 def mask(identifier: str) -> str:

@@ -3,6 +3,9 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Newspaper, AlertCircle, RefreshCw, AlertTriangle, X, Sparkles } from 'lucide-react';
 import { API } from '../context/AuthContext';
+import { useDialogA11y } from '../hooks/use-dialog-a11y';
+
+const PAGE = 9;
 
 const Newsroom = ({ countryId }) => {
   const [news, setNews] = useState([]);
@@ -11,27 +14,27 @@ const Newsroom = ({ countryId }) => {
   const [errorState, setErrorState] = useState(null); // { status, message }
   const [category, setCategory] = useState('All');
   const [selectedNews, setSelectedNews] = useState(null);
+  const [visible, setVisible] = useState(PAGE);
+  const dialogProps = useDialogA11y(!!selectedNews, () => setSelectedNews(null));
 
   const CATEGORIES = ["All", "F1", "H1B", "O1", "EB1", "Business", "Travel"];
 
   const getCategoryColor = (cat) => {
     const c = cat?.toLowerCase() || '';
-    if (c.includes('f1') || c.includes('student')) return 'bg-blue-100 text-blue-700 border-blue-200';
-    if (c.includes('h1b') || c.includes('o1') || c.includes('eb1') || c.includes('work')) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-    if (c.includes('business')) return 'bg-purple-100 text-purple-700 border-purple-200';
-    if (c.includes('travel')) return 'bg-amber-100 text-amber-700 border-amber-200';
-    return 'bg-white text-primary border-gray-200';
+    // One calm badge style for every category (no rainbow chips).
+    return c ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] border-[hsl(var(--blue-100))]' : 'bg-white text-[hsl(var(--blue-700))] border-[hsl(var(--border))]';
   };
 
   const getCountryInfo = (cid) => {
     if (!cid) return null;
     const c = cid.toLowerCase();
-    if (c.includes('us') || c.includes('united-states')) return { color: 'bg-blue-600 text-white', label: 'USA 🇺🇸' };
-    if (c.includes('uk') || c.includes('united-kingdom')) return { color: 'bg-red-600 text-white', label: 'UK 🇬🇧' };
-    if (c.includes('australia')) return { color: 'bg-orange-600 text-white', label: 'AUS 🇦🇺' };
-    if (c.includes('canada')) return { color: 'bg-red-500 text-white', label: 'CAN 🇨🇦' };
-    if (c.includes('germany')) return { color: 'bg-yellow-600 text-white', label: 'GER 🇩🇪' };
-    return { color: 'bg-gray-600 text-white', label: cid.toUpperCase().substring(0, 3) };
+    const color = 'bg-white text-[hsl(var(--blue-900))] border border-[hsl(var(--border))]';
+    if (c.includes('us') || c.includes('united-states')) return { color, label: 'USA' };
+    if (c.includes('uk') || c.includes('united-kingdom')) return { color, label: 'UK' };
+    if (c.includes('australia')) return { color, label: 'AUS' };
+    if (c.includes('canada')) return { color, label: 'CAN' };
+    if (c.includes('germany')) return { color, label: 'GER' };
+    return { color, label: cid.toUpperCase().substring(0, 3) };
   };
 
   const getItemDate = (item) => {
@@ -88,31 +91,29 @@ const Newsroom = ({ countryId }) => {
   };
 
   useEffect(() => {
+    setVisible(PAGE);
     fetchNews();
   }, [countryId, category]);
 
   return (
-    <div className="my-16 px-4 max-w-7xl mx-auto">
+    <div className="container-page section">
       {/* AI Digest Hero Banner */}
       {digest && (
         <motion.div 
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="mb-10 bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-100/50 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden"
+          className="mb-10 bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] rounded-2xl p-6 md:p-8"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-            <Sparkles className="w-48 h-48 text-blue-600" />
-          </div>
-          <div className="relative z-10 max-w-4xl">
-            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-600 mb-3 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5" /> AI Daily Briefing
+          <div className="max-w-4xl">
+            <div className="eyebrow mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" aria-hidden="true" /> AI Daily Briefing
             </div>
-            <h3 className="text-2xl font-black text-gray-900 mb-4">{digest.title || "Global Immigration Update"}</h3>
-            <p className="text-gray-700 text-lg leading-relaxed mb-6">{digest.summary}</p>
+            <h3 className="h-card !text-[22px] mb-3">{digest.title || "Global Immigration Update"}</h3>
+            <p className="text-[hsl(var(--blue-900))] text-[16px] md:text-[17px] leading-relaxed mb-5">{digest.summary}</p>
             {digest.key_points && digest.key_points.length > 0 && (
               <ul className="space-y-3">
                 {digest.key_points.map((pt, i) => (
-                  <li key={i} className="flex items-start gap-3 text-gray-800 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0"></span>
+                  <li key={i} className="flex items-start gap-3 text-[15px] text-[hsl(var(--blue-900))]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--blue-700))] mt-2.5 shrink-0" aria-hidden="true"></span>
                     <span>{pt}</span>
                   </li>
                 ))}
@@ -122,20 +123,22 @@ const Newsroom = ({ countryId }) => {
         </motion.div>
       )}
 
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-            <Newspaper className="w-8 h-8 text-primary" />
-            Immigration Newsroom
-          </h2>
-          <p className="text-gray-500 mt-2 text-lg">Real-time policy updates and visa announcements.</p>
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+        <div className="min-w-0">
+          <div className="eyebrow flex items-center gap-2">
+            <Newspaper className="w-4 h-4" aria-hidden="true" /> Newsroom
+          </div>
+          <h2 className="h-section mt-3">Immigration Newsroom</h2>
+          <p className="lead mt-2">Real-time policy updates and visa announcements.</p>
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar snap-x -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
           {CATEGORIES.map(cat => (
             <button
               key={cat}
+              type="button"
               onClick={() => setCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${category === cat || (cat === 'All' && !category) ? 'bg-primary text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              aria-pressed={category === cat || (cat === 'All' && !category)}
+              className={`snap-start shrink-0 h-10 px-4 rounded-full border text-[14px] font-semibold whitespace-nowrap transition-colors duration-200 ${category === cat || (cat === 'All' && !category) ? 'bg-[hsl(var(--blue-50))] border-[hsl(var(--blue-700))] text-[hsl(var(--blue-700))]' : 'bg-white border-[hsl(var(--border))] text-[hsl(var(--blue-900))] hover:border-[hsl(var(--blue-200))]'}`}
             >
               {cat}
             </button>
@@ -143,7 +146,7 @@ const Newsroom = ({ countryId }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 p-6 md:p-8 shadow-sm">
+      <div>
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div
@@ -151,9 +154,9 @@ const Newsroom = ({ countryId }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-20 text-gray-400"
+              className="card-surface max-w-lg mx-auto flex flex-col items-center justify-center px-6 py-10 text-center text-[15px] text-muted-foreground"
             >
-              <RefreshCw className="w-8 h-8 animate-spin mb-4" />
+              <RefreshCw className="w-6 h-6 animate-spin mb-3 text-[hsl(var(--blue-700))]" aria-hidden="true" />
               <p>Fetching latest updates...</p>
             </motion.div>
           ) : errorState ? (
@@ -162,22 +165,22 @@ const Newsroom = ({ countryId }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-20 text-center"
+              className="card-surface max-w-lg mx-auto flex flex-col items-center justify-center px-6 py-10 text-center"
             >
               {errorState.status === 404 ? (
-                <AlertCircle className="w-12 h-12 text-gray-300 mb-4" />
+                <span className="icon-tile mb-3"><AlertCircle className="w-5 h-5" aria-hidden="true" /></span>
               ) : errorState.status === 429 ? (
-                <RefreshCw className="w-12 h-12 text-yellow-500 mb-4" />
+                <span className="icon-tile mb-3"><RefreshCw className="w-5 h-5" aria-hidden="true" /></span>
               ) : (
-                <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
+                <span className="icon-tile mb-3 !bg-red-50 !text-red-700"><AlertTriangle className="w-5 h-5" aria-hidden="true" /></span>
               )}
-              <h3 className="text-xl font-bold text-gray-800 mb-2">
+              <h3 className="h-card mb-2">
                 {errorState.status === 404 ? 'No News Found' : `Error ${errorState.status || ''}`}
               </h3>
-              <p className="text-gray-500 max-w-md">{errorState.message}</p>
+              <p className="text-muted-foreground max-w-md">{errorState.message}</p>
               <button 
                 onClick={fetchNews}
-                className="mt-6 px-6 py-2 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 transition-colors"
+                className="mt-6 h-11 px-5 rounded-xl btn-outline font-semibold"
               >
                 Try Again
               </button>
@@ -188,9 +191,9 @@ const Newsroom = ({ countryId }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-20 text-gray-500"
+              className="card-surface max-w-lg mx-auto flex flex-col items-center justify-center px-6 py-10 text-center text-[15px] text-muted-foreground"
             >
-              <AlertCircle className="w-12 h-12 text-gray-300 mb-4" />
+              <span className="icon-tile mb-3"><AlertCircle className="w-5 h-5" aria-hidden="true" /></span>
               <p>No news items found for this category.</p>
             </motion.div>
           ) : (
@@ -199,41 +202,53 @@ const Newsroom = ({ countryId }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+              className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3"
             >
-              {news.map((item, idx) => (
-                <motion.div
+              {news.slice(0, visible).map((item, idx) => (
+                <motion.button
+                  type="button"
                   key={item.id || idx}
                   onClick={() => setSelectedNews(item)}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="group block p-6 bg-white rounded-2xl hover:bg-gray-50 border border-gray-100 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col h-full"
+                  transition={{ delay: Math.min(idx, 6) * 0.05, duration: 0.25, ease: 'easeOut' }}
+                  className="group text-left p-6 card-surface card-lift hover:border-[hsl(var(--blue-200))] cursor-pointer flex flex-col h-full"
                 >
                   <div className="flex items-center gap-2 mb-4 flex-wrap">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getCategoryColor(item.category)}`}>
+                    <span className={`px-2.5 py-1 rounded-full text-[12px] font-semibold uppercase tracking-[0.08em] border ${getCategoryColor(item.category)}`}>
                       {item.category}
                     </span>
                     {item.country_id && (
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ${getCountryInfo(item.country_id)?.color || 'bg-gray-500 text-white'}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-[12px] font-semibold uppercase tracking-[0.08em] ${getCountryInfo(item.country_id)?.color}`}>
                         {getCountryInfo(item.country_id)?.label || item.country_id.substring(0,3)}
                       </span>
                     )}
-                    <span className="text-xs font-medium text-gray-400 ml-auto">
+                    <span className="text-[12px] font-medium text-muted-foreground ml-auto">
                       {getItemDate(item).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                  <h3 className="text-[18px] font-display font-semibold leading-snug text-[hsl(var(--blue-900))] mb-2 group-hover:text-[hsl(var(--blue-700))] transition-colors duration-200 line-clamp-2">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-gray-600 line-clamp-3 mb-6 flex-grow">
+                  <p className="text-[15px] leading-relaxed text-muted-foreground line-clamp-3 mb-5 flex-grow">
                     {item.content}
                   </p>
-                  <div className="flex items-center text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform mt-auto">
+                  <div className="flex items-center text-[14px] font-semibold text-[hsl(var(--blue-700))] mt-auto">
                     Read full story &rarr;
                   </div>
-                </motion.div>
+                </motion.button>
               ))}
+              {visible < news.length && (
+                <div className="md:col-span-2 lg:col-span-3 flex justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setVisible(v => v + PAGE)}
+                    className="h-11 px-5 rounded-xl btn-outline font-semibold"
+                  >
+                    Show more ({news.length - visible} left)
+                  </button>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -243,57 +258,60 @@ const Newsroom = ({ countryId }) => {
       <AnimatePresence>
         {selectedNews && (
           <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-[hsl(var(--blue-900))]/50"
             onClick={() => setSelectedNews(null)}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col relative"
+              {...dialogProps} className="bg-white rounded-2xl overflow-hidden shadow-xl border border-[hsl(var(--border))] w-full max-w-2xl max-h-[90vh] flex flex-col relative"
             >
               {/* Close button */}
               <button
+                type="button"
+                aria-label="Close"
                 onClick={() => setSelectedNews(null)}
-                className="absolute top-4 right-4 z-10 p-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full transition-colors"
+                className="absolute top-3 right-3 z-10 h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))] transition-colors duration-200"
               >
                 <X className="w-5 h-5" />
               </button>
 
               {/* Content */}
-              <div className="p-8 overflow-y-auto">
-                <div className="flex items-center gap-2 mb-6 flex-wrap pr-8">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getCategoryColor(selectedNews.category)}`}>
+              <div className="p-6 sm:p-8 overflow-y-auto">
+                <div className="flex items-center gap-2 mb-5 flex-wrap pr-10">
+                  <span className={`px-2.5 py-1 rounded-full text-[12px] font-semibold uppercase tracking-[0.08em] border ${getCategoryColor(selectedNews.category)}`}>
                     {selectedNews.category}
                   </span>
                   {selectedNews.country_id && (
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ${getCountryInfo(selectedNews.country_id)?.color || 'bg-gray-500 text-white'}`}>
+                    <span className={`px-2.5 py-1 rounded-full text-[12px] font-semibold uppercase tracking-[0.08em] ${getCountryInfo(selectedNews.country_id)?.color}`}>
                       {getCountryInfo(selectedNews.country_id)?.label || selectedNews.country_id.substring(0,3)}
                     </span>
                   )}
-                  <span className="text-sm font-medium text-gray-400 ml-auto">
+                  <span className="text-sm font-medium text-muted-foreground ml-auto">
                     {getItemDate(selectedNews).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>
                 
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight mb-6">
+                <h2 className="font-display text-[24px] sm:text-[30px] font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight mb-5">
                   {selectedNews.title}
                 </h2>
 
-                <div className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed mb-8">
+                <div className="max-w-none text-[16px] text-[hsl(var(--blue-900))] leading-relaxed mb-8">
                   {selectedNews.content?.split('\n').map((paragraph, i) => (
                     <p key={i} className="mb-4">{paragraph}</p>
                   ))}
                 </div>
 
                 {selectedNews.source_url && !selectedNews.source_url.includes('example.com') && (
-                  <div className="pt-4 border-t border-gray-100 flex justify-end">
+                  <div className="pt-4 border-t border-[hsl(var(--border))] flex justify-end">
                     <a
                       href={selectedNews.source_url.startsWith('http') ? selectedNews.source_url : `https://${selectedNews.source_url}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-95 transition-opacity shadow-md"
+                      className="inline-flex items-center gap-2 h-11 px-5 rounded-xl btn-primary font-semibold text-[14px]"
                     >
                       Read Original Source &rarr;
                     </a>

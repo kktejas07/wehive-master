@@ -29,8 +29,8 @@ Usage
 -----
     pip install httpx motor python-dotenv
     # optional config via env vars (defaults shown):
-    #   MONGODB_URI=mongodb://localhost:27017
-    #   MONGODB_DB=wehive
+    #   MONGO_URL=mongodb://localhost:27017   (or legacy MONGODB_URI)
+    #   DB_NAME=wehive                        (or legacy MONGODB_DB)
     #   UNIVERSITY_API_BASE=http://universities.hipolabs.com
     python backend/seed_universities_external.py
     # or restrict to specific countries:
@@ -54,8 +54,9 @@ from pymongo import UpdateOne
 # Configuration
 # --------------------------------------------------------------------------- #
 
-MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
-MONGODB_DB = os.environ.get("MONGODB_DB", "wehive")
+# Same env vars as the app (db.py); MONGODB_URI / MONGODB_DB kept as legacy overrides.
+MONGODB_URI = os.environ.get("MONGODB_URI") or os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+MONGODB_DB = os.environ.get("MONGODB_DB") or os.environ.get("DB_NAME", "wehive")
 COLLECTION_NAME = "universities_v2"
 
 # Base URL of the external source. Swap this for whatever API you confirm.

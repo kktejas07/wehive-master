@@ -129,12 +129,12 @@ function ApplicantsStepper({ value, onChange }) {
   const dec = () => onChange(Math.max(1, value - 1));
   const inc = () => onChange(Math.min(20, value + 1));
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-[hsl(var(--soft-bg))] border border-black/5 px-4 py-3" data-testid="applicants-stepper">
+    <div className="flex items-center justify-between rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] px-4 py-3" data-testid="applicants-stepper">
       <div className="flex items-center gap-2.5">
         <Users className="w-4 h-4 text-[hsl(var(--blue-700))]" />
         <div>
           <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{t('fee.applicants')}</div>
-          <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55">{t('fee.applicantsSub')}</div>
+          <div className="text-[12px] text-muted-foreground">{t('fee.applicantsSub')}</div>
         </div>
       </div>
       <div className="flex items-center gap-1.5">
@@ -142,7 +142,7 @@ function ApplicantsStepper({ value, onChange }) {
           data-testid="applicants-decrement"
           onClick={dec}
           disabled={value <= 1}
-          className="h-8 w-8 inline-flex items-center justify-center rounded-full bg-white border border-black/8 disabled:opacity-40 hover:border-[hsl(var(--blue-700))]/30"
+          className="h-8 w-8 inline-flex items-center justify-center rounded-full bg-white border border-[hsl(var(--border))] disabled:opacity-40 hover:border-[hsl(var(--blue-700))]/30"
           aria-label="Remove applicant"
         >
           <Minus className="w-3.5 h-3.5" />
@@ -154,7 +154,7 @@ function ApplicantsStepper({ value, onChange }) {
           data-testid="applicants-increment"
           onClick={inc}
           disabled={value >= 20}
-          className="h-8 w-8 inline-flex items-center justify-center rounded-full bg-white border border-black/8 disabled:opacity-40 hover:border-[hsl(var(--blue-700))]/30"
+          className="h-8 w-8 inline-flex items-center justify-center rounded-full bg-white border border-[hsl(var(--border))] disabled:opacity-40 hover:border-[hsl(var(--blue-700))]/30"
           aria-label="Add applicant"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -210,22 +210,22 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
     <div className="space-y-3" data-testid="fee-breakdown">
       <ApplicantsStepper value={applicants} onChange={handleApplicants} />
 
-      <div className="rounded-2xl bg-white border border-black/8 overflow-hidden">
-        <div className="px-5 py-3 border-b border-black/5 flex items-center justify-between">
-          <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
+      <div className="rounded-2xl bg-white border border-[hsl(var(--border))] overflow-hidden">
+        <div className="px-5 py-3 border-b border-[hsl(var(--border))] flex items-center justify-between">
+          <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
             {t('fee.heading')}
           </div>
-          <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{t('fee.currencyNote')}</div>
+          <div className="text-[12px] text-muted-foreground">{t('fee.currencyNote')}</div>
         </div>
 
         {fees.isVisaFree && (
-          <div className="px-5 py-3 bg-emerald-50 border-b border-emerald-200 flex items-center gap-2 text-[12.5px] text-emerald-800" data-testid="visa-free-note">
+          <div className="px-5 py-3 bg-emerald-50 border-b border-emerald-200 flex items-center gap-2 text-[13px] text-emerald-800" data-testid="visa-free-note">
             <BadgeCheck className="w-4 h-4 shrink-0" />
             <span>{t('fee.visaFreeNote')}</span>
           </div>
         )}
 
-        <ul className="divide-y divide-black/5">
+        <ul className="divide-y divide-[hsl(var(--border))]">
           {lines.map((r) => (
             <li
               key={r.id}
@@ -234,7 +234,7 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
             >
               <div>
                 <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{r.label}</div>
-                <div className="text-[12px] text-[hsl(var(--blue-900))]/55 leading-snug mt-0.5">{r.sub}</div>
+                <div className="text-[12px] text-muted-foreground leading-snug mt-0.5">{r.sub}</div>
               </div>
               <div className="text-[15px] font-bold text-[hsl(var(--blue-900))] tabular-nums">
                 {inr(r.amount)}
@@ -242,23 +242,23 @@ export default function FeeBreakdown({ category, country, visaType, onApplicants
             </li>
           ))}
         </ul>
-        <div className="px-5 py-3.5 bg-[hsl(var(--soft-bg))] grid grid-cols-[1fr_auto] gap-3 border-t border-black/5" data-testid="fee-total-row">
+        <div className="px-5 py-3.5 bg-[hsl(var(--soft-bg))] grid grid-cols-[1fr_auto] gap-3 border-t border-[hsl(var(--border))]" data-testid="fee-total-row">
           <div>
-            <div className="text-[15px] font-display font-extrabold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+            <div className="text-[15px] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
               {t('fee.total')}
             </div>
-            <div className="text-[11.5px] text-[hsl(var(--blue-900))]/55 mt-0.5">
+            <div className="text-[12px] text-muted-foreground mt-0.5">
               {t('fee.totalSub').replace('{n}', nStr).replace('{s}', sPlural)}
             </div>
           </div>
-          <div data-testid="fee-total-amount" className="text-[20px] font-display font-extrabold tracking-[-0.02em] text-[hsl(var(--accent))] tabular-nums">
+          <div data-testid="fee-total-amount" className="text-[20px] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-700))] tabular-nums">
             {inr(fees.total)}
           </div>
         </div>
       </div>
 
       {!fees.requiresAppointment && !fees.isVisaFree && (
-        <div className="flex items-start gap-2 text-[11.5px] text-[hsl(var(--blue-900))]/55 px-1">
+        <div className="flex items-start gap-2 text-[12px] text-muted-foreground px-1">
           <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
           <span>{t('fee.noAppointment')}</span>
         </div>

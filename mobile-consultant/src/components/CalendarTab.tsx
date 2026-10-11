@@ -48,7 +48,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
       
       {/* Header */}
       <div className="mb-6">
-        <span className="text-[10px] font-black uppercase text-blue-700 tracking-wider font-mono flex items-center gap-1">
+        <span className="text-[11px] font-black uppercase text-blue-700 dark:text-blue-300 tracking-wider font-mono flex items-center gap-1">
           <Calendar className="w-3 h-3" /> Admission Calendar
         </span>
         <h2 className="text-xl font-black text-slate-800 tracking-tight mt-0.5">Intake & Deadlines</h2>
@@ -57,7 +57,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
       {/* Global Intake Deadlines */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <Calendar className="w-4.5 h-4.5 text-blue-900" />
+          <Calendar className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Target University Deadlines</h3>
         </div>
 
@@ -65,11 +65,11 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
           {DEADLINES.map((dl) => (
             <div key={dl.id} className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl flex justify-between items-center">
               <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{dl.country}</div>
+                <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{dl.country}</div>
                 <h4 className="text-xs font-extrabold text-slate-800 mt-0.5">{dl.school}</h4>
                 <p className="text-[9.5px] text-slate-500">{dl.details} • {dl.date}</p>
               </div>
-              <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full font-mono shrink-0">
+              <span className="text-[11px] font-bold text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-full font-mono shrink-0">
                 {calculateDaysLeft(dl.date)}
               </span>
             </div>
@@ -80,13 +80,13 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
       {/* Test Prep Countdown Tracker */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4 mb-6">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <Clock className="w-4.5 h-4.5 text-blue-900" />
+          <Clock className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Test Prep Tracker</h3>
         </div>
 
         <form onSubmit={handleUpdateIelts} className="space-y-3">
           <div>
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">IELTS / GRE Booking Date</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">IELTS / GRE Booking Date</label>
             <div className="flex gap-2">
               <input
                 required
@@ -97,21 +97,21 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
               />
               <button 
                 type="submit"
-                className="inline-flex items-center gap-1 rounded-lg bg-slate-900 text-white text-[10px] font-bold px-4 h-10 hover:bg-slate-800 transition"
+                className="inline-flex items-center gap-1 rounded-lg bg-slate-900 text-white text-[11px] font-bold px-4 h-10 hover:bg-slate-800 transition"
               >
                 Track
               </button>
             </div>
           </div>
 
-          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex justify-between items-center">
+          <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 rounded-xl p-3 flex justify-between items-center">
             <div>
-              <div className="text-[9px] font-bold text-emerald-900/60 uppercase tracking-wider">Days to Test</div>
-              <div className="text-md font-black text-emerald-950 mt-0.5">
+              <div className="text-[11px] font-bold text-emerald-900/60 uppercase tracking-wider">Days to Test</div>
+              <div className="text-md font-black text-emerald-950 dark:text-emerald-300 mt-0.5">
                 {calculateDaysLeft(ieltsDate)}
               </div>
             </div>
-            <BookOpen className="w-4 h-4 text-emerald-700 shrink-0" />
+            <BookOpen className="w-4 h-4 text-emerald-700 dark:text-emerald-300 shrink-0" />
           </div>
         </form>
       </div>
@@ -119,7 +119,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
       {/* Deadline reminders config toggles */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-          <Bell className="w-4.5 h-4.5 text-blue-900" />
+          <Bell className="w-4.5 h-4.5 text-blue-900 dark:text-blue-300" />
           <h3 className="text-xs font-extrabold text-slate-800">Intake Reminders Config</h3>
         </div>
 
@@ -130,7 +130,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
               type="checkbox"
               checked={notify30}
               onChange={(e) => setNotify30(e.target.checked)}
-              className="h-4.5 w-4.5 rounded border-slate-300 text-blue-900 focus:ring-blue-900"
+              className="h-4.5 w-4.5 rounded border-slate-300 text-blue-900 dark:text-blue-300 focus:ring-blue-900"
             />
           </div>
 
@@ -140,7 +140,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
               type="checkbox"
               checked={notify15}
               onChange={(e) => setNotify15(e.target.checked)}
-              className="h-4.5 w-4.5 rounded border-slate-300 text-blue-900 focus:ring-blue-900"
+              className="h-4.5 w-4.5 rounded border-slate-300 text-blue-900 dark:text-blue-300 focus:ring-blue-900"
             />
           </div>
 
@@ -150,7 +150,7 @@ export default function CalendarTab({ onTriggerNotification, colorScheme }: Cale
               type="checkbox"
               checked={notify7}
               onChange={(e) => setNotify7(e.target.checked)}
-              className="h-4.5 w-4.5 rounded border-slate-300 text-blue-900 focus:ring-blue-900"
+              className="h-4.5 w-4.5 rounded border-slate-300 text-blue-900 dark:text-blue-300 focus:ring-blue-900"
             />
           </div>
         </div>

@@ -13,7 +13,7 @@ export const CONFIG = {
   ENABLE_CONSOLE_DEBUG: true,
 
   // PostHog Configuration
-  POSTHOG_KEY: process.env.REACT_APP_POSTHOG_KEY || 'phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs',
+  POSTHOG_KEY: process.env.REACT_APP_POSTHOG_KEY || '',
   POSTHOG_HOST: process.env.REACT_APP_POSTHOG_HOST || 'https://us.i.posthog.com',
 
   // Sampling Rates

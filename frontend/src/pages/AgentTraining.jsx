@@ -22,7 +22,7 @@ const GUIDES = [
     id: 'uk',
     country: 'United Kingdom',
     flag: '',
-    color: '#3b82f6',
+    color: '#1D4E89',
     topics: [
       { title: 'Student Visa (formerly Tier 4)', type: 'guide', content: 'Apply up to 6 months before your course starts. You need a Confirmation of Acceptance for Studies (CAS) from your university. Biometrics required at a visa centre.' },
       { title: 'Maintenance Funds Required', type: 'table', rows: [['London universities', '£1,334/month up to 9 months'], ['Outside London', '£1,023/month up to 9 months'], ['Funds must be held', '28+ consecutive days before applying']] },
@@ -78,43 +78,41 @@ const GUIDES = [
   },
 ];
 
-const TYPE_COLORS = { guide: '#60a5fa', checklist: '#34d399', table: '#f59e0b' };
 const TYPE_LABELS = { guide: 'Guide', checklist: 'Checklist', table: 'Reference' };
 
 function TopicCard({ topic }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl bg-white/5 border border-white/8 overflow-hidden">
-      <button onClick={() => setOpen(v => !v)} className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-white/5 transition">
+    <div className="rounded-xl bg-white border border-border overflow-hidden">
+      <button onClick={() => setOpen(v => !v)} aria-expanded={open} className="w-full min-h-[48px] flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-[hsl(var(--soft-bg))] transition-colors">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-[9px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 shrink-0"
-            style={{ background: `${TYPE_COLORS[topic.type]}18`, color: TYPE_COLORS[topic.type] }}>
+          <span className="text-[12px] font-semibold rounded-full px-2 py-0.5 shrink-0 bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]">
             {TYPE_LABELS[topic.type]}
           </span>
-          <span className="font-bold text-[13.5px] text-white">{topic.title}</span>
+          <span className="font-semibold text-[14px] text-[hsl(var(--blue-900))]">{topic.title}</span>
         </div>
-        {open ? <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
       </button>
       {open && (
         <div className="px-4 pb-4">
-          {topic.type === 'guide' && <p className="text-[13px] text-slate-300 leading-relaxed">{topic.content}</p>}
+          {topic.type === 'guide' && <p className="text-[14px] text-muted-foreground leading-relaxed">{topic.content}</p>}
           {topic.type === 'checklist' && (
             <ul className="space-y-1.5">
               {topic.items.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-[13px] text-slate-300">
-                  <CheckSquare className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+                <li key={i} className="flex items-start gap-2 text-[14px] text-[hsl(var(--blue-900))]">
+                  <CheckSquare className="w-4 h-4 text-[hsl(var(--blue-700))] mt-0.5 shrink-0" />
                   {item}
                 </li>
               ))}
             </ul>
           )}
           {topic.type === 'table' && (
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <tbody>
                 {topic.rows.map(([k, v], i) => (
-                  <tr key={i} className="border-b border-white/5 last:border-0">
-                    <td className="text-slate-400 font-bold py-1.5 pr-4 w-[45%]">{k}</td>
-                    <td className="text-slate-200 py-1.5">{v}</td>
+                  <tr key={i} className="border-b border-border last:border-0">
+                    <td className="text-muted-foreground font-semibold py-2 pr-4 w-[45%] align-top">{k}</td>
+                    <td className="text-[hsl(var(--blue-900))] py-2">{v}</td>
                   </tr>
                 ))}
               </tbody>
@@ -129,23 +127,23 @@ function TopicCard({ topic }) {
 function CountrySection({ guide }) {
   const [open, setOpen] = useState(false);
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-      className="rounded-2xl bg-white/5 border border-white/8 overflow-hidden">
-      <button onClick={() => setOpen(v => !v)} className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/5 transition text-left">
-        <span className="text-3xl">{guide.flag || <Shield className="w-7 h-7 text-slate-400" />}</span>
-        <div className="flex-1">
-          <div className="font-bold text-[16px] text-white">{guide.country}</div>
-          <div className="text-[12px] text-slate-400">{guide.topics.length} topics</div>
+    <motion.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.25, ease: 'easeOut' }}
+      className="rounded-2xl bg-white border border-border shadow-sm overflow-hidden">
+      <button onClick={() => setOpen(v => !v)} aria-expanded={open} className="w-full flex items-center gap-4 px-4 sm:px-5 py-4 hover:bg-[hsl(var(--soft-bg))] transition-colors text-left">
+        <span className="h-10 w-10 shrink-0 rounded-xl bg-[hsl(var(--blue-50))] inline-flex items-center justify-center text-2xl">{guide.flag || <Shield className="w-5 h-5 text-[hsl(var(--blue-700))]" />}</span>
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-[16px] text-[hsl(var(--blue-900))]">{guide.country}</div>
+          <div className="text-[13px] text-muted-foreground">{guide.topics.length} topics</div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold rounded-full px-3 py-1" style={{ background: `${guide.color}18`, color: guide.color }}>
+          <span className="hidden sm:inline-flex text-[12px] font-semibold rounded-full px-2.5 py-0.5 bg-slate-100 text-slate-700">
             {guide.id === 'compliance' ? 'All markets' : 'Country guide'}
           </span>
-          {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
       </button>
       {open && (
-        <div className="border-t border-white/8 p-4 space-y-2">
+        <div className="border-t border-border bg-[hsl(var(--soft-bg))] p-3 sm:p-4 space-y-2">
           {guide.topics.map((t, i) => <TopicCard key={i} topic={t} />)}
         </div>
       )}
@@ -155,17 +153,17 @@ function CountrySection({ guide }) {
 
 export default function AgentTraining() {
   return (
-    <div className="min-h-screen bg-[#0b1020] text-slate-100">
+    <div className="min-h-screen bg-[hsl(var(--soft-bg))]">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-5 pt-28 pb-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-          <div className="text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3 flex items-center gap-2">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 md:pb-24">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: 'easeOut' }} className="mb-8 sm:mb-10">
+          <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-700))] mb-3 flex items-center gap-2">
             <BookOpen className="w-3.5 h-3.5" /> Agent Knowledge Base
           </div>
-          <h1 className="font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-white">
-            Training &<br />Compliance Hub
+          <h1 className="font-display font-bold text-[32px] sm:text-[44px] leading-[1.1] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+            Training & Compliance Hub
           </h1>
-          <p className="mt-4 text-[16px] text-slate-400 max-w-xl">
+          <p className="mt-3 text-[16px] text-muted-foreground max-w-xl">
             Country-specific visa guides, compliance standards, and application best practices — everything an agent needs to succeed.
           </p>
         </motion.div>

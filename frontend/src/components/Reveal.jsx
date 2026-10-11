@@ -9,10 +9,10 @@ import { motion } from 'framer-motion';
  *   <Reveal index={i}>…</Reveal>
  */
 const OFFSETS = {
-  up:    { y: 24, x: 0 },
-  down:  { y: -24, x: 0 },
-  left:  { y: 0, x: 30 },
-  right: { y: 0, x: -30 },
+  up:    { y: 8, x: 0 },
+  down:  { y: -8, x: 0 },
+  left:  { y: 0, x: 12 },
+  right: { y: 0, x: -12 },
   none:  { y: 0, x: 0 },
 };
 
@@ -22,7 +22,7 @@ export default function Reveal({
   direction = 'up',
   delay = 0,
   index,
-  duration = 0.5,
+  duration = 0.35,
   className = '',
   once = true,
   amount = 0.15,
@@ -30,14 +30,14 @@ export default function Reveal({
 }) {
   const Motion = motion[as] || motion.div;
   const off = OFFSETS[direction] || OFFSETS.up;
-  const finalDelay = index != null ? Math.min(index * 0.06, 0.45) + delay : delay;
+  const finalDelay = index != null ? Math.min(index * 0.05, 0.3) + delay : delay;
 
   return (
     <Motion
       initial={{ opacity: 0, x: off.x, y: off.y }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once, amount }}
-      transition={{ duration, delay: finalDelay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration, delay: finalDelay, ease: 'easeOut' }}
       className={className}
       {...rest}
     >

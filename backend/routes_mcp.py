@@ -16,10 +16,11 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
 from db import db
 
-router = APIRouter(prefix="/mcp", tags=["mcp"])
+router = APIRouter(prefix="/mcp", tags=["mcp"], dependencies=[Depends(get_current_user)])
 
 MCP_SERVERS = [
     {"slug": "figma", "name": "Figma", "category": "Design & UX",
@@ -171,9 +172,7 @@ async def get_mcp_server(slug: str):
 
 
 @router.post("/config")
-async def save_mcp_config(req: MCPConfigRequest, user=Depends(get_current_user)):
-    if user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
+async def save_mcp_config(req: MCPConfigRequest, user=Depends(get_current_admin_flex)):
 
     await db["mcp_configs"].update_one(
         {"user_id": user["_id"]},

@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Loader2, CheckCircle, XCircle, Globe, ShieldAlert, Play } from 'lucide-react';
-import { apiClient } from '../../lib/admin';
+import { apiClient, runAggregators } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
-import { API } from '../../context/AuthContext';
-import axios from 'axios';
 
 export default function GlobalEventsTab() {
   const [events, setEvents] = useState([]);
@@ -55,17 +53,11 @@ export default function GlobalEventsTab() {
           <button
             onClick={async () => {
               setRunningAggregator(true);
-              try {
-                await axios.get(`${API}/public/aggregator-trigger`);
-                toast({ title: 'AI Aggregators Triggered', description: 'Scraping News, Blogs & Events in background.' });
-              } catch (e) {
-                toast({ title: 'Trigger failed', variant: 'destructive' });
-              } finally {
-                setRunningAggregator(false);
-              }
+              toast(await runAggregators());
+              setRunningAggregator(false);
             }}
             disabled={runningAggregator}
-            className="h-9 px-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[12px] font-bold text-white inline-flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition-all disabled:opacity-50"
+            className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white inline-flex items-center gap-1.5 transition disabled:opacity-50"
           >
             {runningAggregator ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
             Run AI Aggregators Now
@@ -125,7 +117,7 @@ export default function GlobalEventsTab() {
             }
           }}
           disabled={scraping}
-          className="h-10 px-4 rounded-lg bg-[hsl(var(--accent))] text-white font-bold disabled:opacity-50 flex items-center gap-2"
+          className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white font-bold disabled:opacity-50 flex items-center gap-2"
         >
           {scraping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
           Trigger Scraper
@@ -138,7 +130,7 @@ export default function GlobalEventsTab() {
             key={s}
             onClick={() => setStatusFilter(s)}
             className={`px-4 py-2 rounded-lg text-sm font-bold capitalize transition-colors ${
-              statusFilter === s ? 'bg-[hsl(var(--accent))] text-white' : 'bg-black/20 text-slate-400 hover:text-white'
+              statusFilter === s ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/20 text-slate-400 hover:text-white'
             }`}
           >
             {s}
@@ -148,16 +140,16 @@ export default function GlobalEventsTab() {
 
       <Panel>
         {loading ? (
-          <div className="p-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-slate-500" /></div>
+          <div className="p-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
         ) : events.length === 0 ? (
-          <div className="p-10 text-center text-slate-500 text-sm">No {statusFilter} events found.</div>
+          <div className="p-10 text-center text-slate-400 text-sm">No {statusFilter} events found.</div>
         ) : (
           <div className="divide-y divide-white/5">
             {events.map(evt => (
               <div key={evt.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
                 <div className="flex items-center gap-4">
                   {evt.image_url ? (
-                    <img src={evt.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-black/40" />
+                    <img loading="lazy" decoding="async" src={evt.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-black/40" />
                   ) : (
                     <div className="w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center">
                       <Globe className="w-5 h-5 text-slate-600" />
@@ -167,7 +159,7 @@ export default function GlobalEventsTab() {
                     <div className="text-sm font-bold text-white flex items-center gap-2">
                       {evt.name}
                       {evt.is_high_risk && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[11px] uppercase tracking-wider">
                           <ShieldAlert className="w-3 h-3" /> High Risk
                         </span>
                       )}

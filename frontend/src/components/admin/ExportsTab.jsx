@@ -6,10 +6,10 @@ import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
 const EXPORTS = [
-  { id: 'users',        title: 'Users',        sub: 'All registered accounts, roles and premium flags.', Icon: Users,     accent: 'text-indigo-300' },
-  { id: 'applications', title: 'Applications', sub: 'Every visa application with customer + revenue.',   Icon: FileStack, accent: 'text-amber-300' },
-  { id: 'countries',    title: 'Countries',    sub: 'All 250 countries, delivery & appointment rules.',  Icon: Globe,     accent: 'text-sky-300' },
-  { id: 'revenue',      title: 'Revenue',      sub: 'Billable apps only (submitted + review + approved).', Icon: Banknote, accent: 'text-emerald-300' },
+  { id: 'users',        title: 'Users',        sub: 'All registered accounts, roles and premium flags.', Icon: Users,     accent: 'text-blue-300' },
+  { id: 'applications', title: 'Applications', sub: 'Every visa application with customer + revenue.',   Icon: FileStack, accent: 'text-blue-300' },
+  { id: 'countries',    title: 'Countries',    sub: 'All 250 countries, delivery & appointment rules.',  Icon: Globe,     accent: 'text-blue-300' },
+  { id: 'revenue',      title: 'Revenue',      sub: 'Billable apps only (submitted + review + approved).', Icon: Banknote, accent: 'text-blue-300' },
 ];
 
 export default function ExportsTab() {
@@ -43,11 +43,11 @@ export default function ExportsTab() {
             <Panel key={x.id}>
               <div className="flex items-center justify-between">
                 <div className="inline-flex items-center gap-3">
-                  <span className={`h-10 w-10 inline-flex items-center justify-center rounded-xl bg-white/5 ${x.accent}`}>
+                  <span className={`h-10 w-10 inline-flex items-center justify-center rounded-xl bg-blue-500/15 ${x.accent}`}>
                     <Icon className="w-5 h-5" />
                   </span>
                   <div>
-                    <div className="text-[15px] font-display font-extrabold text-white">{x.title}</div>
+                    <div className="text-[15px] font-display font-bold text-white">{x.title}</div>
                     <div className="text-[12.5px] text-slate-400 max-w-[260px]">{x.sub}</div>
                   </div>
                 </div>
@@ -55,7 +55,7 @@ export default function ExportsTab() {
                   data-testid={`export-${x.id}-btn`}
                   disabled={isBusy}
                   onClick={() => run(x.id)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-60 text-white px-3.5 py-2 text-[13px] font-bold"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-60 text-white px-3.5 py-2 text-[13px] font-bold"
                 >
                   {isBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download className="w-4 h-4" /> Export</>}
                 </button>

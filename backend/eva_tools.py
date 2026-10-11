@@ -45,10 +45,16 @@ async def get_visa_requirements(country_id: str, visa_type: Optional[str] = None
     data = await lookup_country(country_id)
     if not data:
         return None
-    if visa_type and 'categories' in data:
-        for cat in data['categories']:
-            if cat.get('name', '').lower() == visa_type.lower():
-                return {'country': data['name'], 'visa_type': visa_type, **cat}
+    cats = data.get('categories')
+    if visa_type and cats:
+        # Static data stores categories as {name: {...}}; Mongo docs may use a list of {name, ...}.
+        items = cats.items() if isinstance(cats, dict) else ((c.get('name', ''), c) for c in cats if isinstance(c, dict))
+        wanted = visa_type.strip().lower()
+        for key, cat in items:
+            if not isinstance(cat, dict):
+                continue
+            if wanted in (str(key).lower(), str(cat.get('name', '')).lower()):
+                return {'country': data.get('name'), 'visa_type': key or visa_type, **cat}
     return data
 
 

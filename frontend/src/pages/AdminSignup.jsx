@@ -46,7 +46,7 @@ export default function AdminSignup() {
       footer={
         <>
           Already have an account?{' '}
-          <Link to="/admin/login" className="text-[hsl(var(--accent))] font-bold hover:underline" data-testid="admin-goto-login">
+          <Link to="/admin/login" className="text-[hsl(var(--blue-700))] font-semibold hover:underline" data-testid="admin-goto-login">
             Sign in
           </Link>
         </>

@@ -18,8 +18,11 @@ import re
 import time
 from datetime import datetime
 from typing import Optional
+from urllib.parse import quote
 
 import httpx
+
+from config import FRONTEND_URL, SUPPORT_EMAIL
 
 logger = logging.getLogger("wehive.stark")
 
@@ -33,7 +36,6 @@ WIKIPEDIA_ENABLED = os.environ.get("STARK_WIKIPEDIA", "1") == "1"
 GOOGLE_KNOWLEDGE_ENABLED = os.environ.get("STARK_KNOWLEDGE", "1") == "1"
 GITHUB_ENABLED = os.environ.get("STARK_GITHUB", "1") == "1"
 ARXIV_ENABLED = os.environ.get("STARK_ARXIV", "1") == "1"
-PYPI_ENABLED = os.environ.get("STARK_PYPI", "1") == "1"
 DUCKDUCKGO_ENABLED = os.environ.get("STARK_DDG", "1") == "1"
 BRAVE_SEARCH_ENABLED = os.environ.get("STARK_BRAVE", "1") == "1"
 BRAVE_SEARCH_API_KEY = os.environ.get("BRAVE_SEARCH_API_KEY", "")
@@ -46,7 +48,20 @@ KAGI_API_KEY = os.environ.get("KAGI_API_KEY", "")
 GEMINI_RESEARCH_ENABLED = os.environ.get("STARK_GEMINI_RESEARCH", "0") == "1"
 GOOGLE_AI_MODE_ENABLED = os.environ.get("STARK_GOOGLE_AI", "0") == "1"
 
+# Wikipedia/arXiv/DDG reject or throttle requests without a descriptive UA.
+STARK_USER_AGENT = os.environ.get(
+    "STARK_USER_AGENT", f"WeHiveStark/1.0 (+{FRONTEND_URL}; {SUPPORT_EMAIL})"
+)
+
 _cache: dict[str, tuple[float, dict]] = {}
+
+
+def _client(timeout: float = STARK_TIMEOUT) -> httpx.AsyncClient:
+    return httpx.AsyncClient(
+        timeout=timeout,
+        follow_redirects=True,
+        headers={"User-Agent": STARK_USER_AGENT},
+    )
 
 
 def _cache_get(key: str) -> Optional[dict]:
@@ -71,7 +86,7 @@ def _cache_key(prefix: str, query: str) -> str:
 
 async def _http_get(url: str, params: dict = None, headers: dict = None) -> Optional[dict]:
     try:
-        async with httpx.AsyncClient(timeout=STARK_TIMEOUT) as client:
+        async with _client() as client:
             resp = await client.get(url, params=params, headers=headers)
             resp.raise_for_status()
             return resp.json()
@@ -88,7 +103,7 @@ async def fetch_wikipedia(query: str, lang: str = "en") -> Optional[dict]:
     if cached:
         return cached
 
-    url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{query.replace(' ', '_')}"
+    url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{quote(query.replace(' ', '_'), safe='')}"
     data = await _http_get(url)
     if data and "extract" in data and "title" in data:
         result = {
@@ -331,7 +346,7 @@ async def fetch_serper(query: str, count: int = 5) -> Optional[dict]:
         return cached
 
     try:
-        async with httpx.AsyncClient(timeout=STARK_TIMEOUT) as client:
+        async with _client() as client:
             resp = await client.post(
                 "https://google.serper.dev/search",
                 json={"q": query, "num": min(count, 10)},
@@ -400,7 +415,7 @@ async def fetch_gemini_research(query: str) -> Optional[dict]:
 
     try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GOOGLE_API_KEY}"
-        async with httpx.AsyncClient(timeout=20) as client:
+        async with _client(20) as client:
             resp = await client.post(
                 url,
                 json={
@@ -438,10 +453,10 @@ async def fetch_arxiv(query: str, max_results: int = 5) -> Optional[dict]:
     if cached:
         return cached
 
-    url = "http://export.arxiv.org/api/query"
+    url = "https://export.arxiv.org/api/query"
     params = {"search_query": f"all:{query}", "max_results": max_results}
     try:
-        async with httpx.AsyncClient(timeout=STARK_TIMEOUT) as client:
+        async with _client() as client:
             resp = await client.get(url, params=params)
             resp.raise_for_status()
             text = resp.text
@@ -464,33 +479,6 @@ async def fetch_arxiv(query: str, max_results: int = 5) -> Optional[dict]:
 def _xml_extract(xml: str, tag: str) -> str:
     m = re.search(f"<{tag}[^>]*>(.*?)</{tag}>", xml, re.DOTALL)
     return m.group(1).strip() if m else ""
-
-
-async def fetch_pypi(package: str) -> Optional[dict]:
-    if not PYPI_ENABLED:
-        return None
-    ck = _cache_key("pypi", package)
-    cached = _cache_get(ck)
-    if cached:
-        return cached
-
-    url = f"https://pypi.org/pypi/{package}/json"
-    data = await _http_get(url)
-    if data and "info" in data:
-        info = data["info"]
-        result = {
-            "source": "pypi",
-            "name": info.get("name", ""),
-            "summary": info.get("summary", ""),
-            "version": info.get("version", ""),
-            "license": info.get("license", ""),
-            "url": info.get("package_url", ""),
-            "requires_python": info.get("requires_python", ""),
-            "keywords": info.get("keywords", ""),
-        }
-        _cache_set(ck, result)
-        return result
-    return None
 
 
 async def stark_search(query: str) -> dict:
@@ -603,7 +591,6 @@ def stark_sources_status() -> dict:
         "duckduckgo": {"enabled": DUCKDUCKGO_ENABLED, "free": True},
         "github": {"enabled": GITHUB_ENABLED, "free": True},
         "arxiv": {"enabled": ARXIV_ENABLED, "free": True},
-        "pypi": {"enabled": PYPI_ENABLED, "free": True},
         "brave_search": {"enabled": BRAVE_SEARCH_ENABLED, "free": True, "configured": bool(BRAVE_SEARCH_API_KEY), "tier": "2K queries/month free"},
         "brave_news": {"enabled": BRAVE_SEARCH_ENABLED, "free": True, "configured": bool(BRAVE_SEARCH_API_KEY)},
         "searxng": {"enabled": SEARXNG_ENABLED, "free": True, "configured": True, "tier": "Unlimited (self-hosted)", "instance": SEARXNG_BASE_URL},

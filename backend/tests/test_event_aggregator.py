@@ -1,45 +1,27 @@
-import pytest
-import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
-from event_aggregator_agent import _route_social_media_url, fetch_events_from_url, fetch_events_for_country_fallback
+from unittest.mock import patch, AsyncMock
 
-def test_route_social_media_url():
-    # Test Twitter routing
-    assert _route_social_media_url("https://x.com/TechConnect") == "https://nitter.net/TechConnect"
-    assert _route_social_media_url("https://twitter.com/LondonEvents") == "https://nitter.net/LondonEvents"
-    # Test Instagram routing
-    assert _route_social_media_url("https://instagram.com/timeoutlondon") == "https://www.picuki.com/profile/timeoutlondon"
-    # Test explicit platform forcing
-    assert _route_social_media_url("https://example.com/mytweets", platform="twitter") == "https://nitter.net/mytweets"
-    # Test no change for standard URLs
-    assert _route_social_media_url("https://www.eventbrite.com") == "https://www.eventbrite.com"
+import pytest
+
+from event_aggregator_agent import fetch_events_from_url, scraping_enabled
+
+
+def test_scraping_disabled_without_key(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    assert scraping_enabled() is not None
+
 
 @pytest.mark.asyncio
 @patch('event_aggregator_agent.SCRAPEGRAPH_AVAILABLE', False)
-@patch('event_aggregator_agent.fetch_events_for_country_fallback', new_callable=AsyncMock)
-async def test_fetch_events_from_url_no_scraper(mock_fallback):
-    mock_fallback.return_value = [{"name": "Mock Event"}]
-    events = await fetch_events_from_url("https://example.com", "united-kingdom")
-    assert len(events) == 1
-    assert events[0]["name"] == "Mock Event"
-    mock_fallback.assert_called_once()
+async def test_fetch_events_from_url_no_scraper_returns_nothing():
+    assert await fetch_events_from_url("https://example.com", "united-kingdom") == []
+
 
 @pytest.mark.asyncio
 @patch('event_aggregator_agent.SCRAPEGRAPH_AVAILABLE', True)
-@patch('event_aggregator_agent._openai_available', new_callable=AsyncMock, return_value=True)
+@patch('event_aggregator_agent.SmartScraperGraph', create=True)
 @patch('event_aggregator_agent.asyncio.to_thread', new_callable=AsyncMock)
-async def test_fetch_events_from_url_with_scraper(mock_to_thread, _mock_openai):
-    # Mock ScrapeGraphAI returning valid list
-    mock_to_thread.return_value = [{"name": "Scraped Event", "date": "2026-10-15"}]
+async def test_fetch_events_from_url_with_scraper(mock_to_thread, _graph, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    mock_to_thread.return_value = {"events": [{"name": "Scraped Event", "date": "2026-10-15"}]}
     events = await fetch_events_from_url("https://example.com", "united-kingdom")
-    assert len(events) == 1
-    assert events[0]["name"] == "Scraped Event"
-
-@pytest.mark.asyncio
-async def test_fetch_events_for_country_fallback_never_fabricates():
-    # Scrape-failure fallback must not ask an LLM to invent events.
-    marketplace = MagicMock()
-    marketplace.get_active_provider = AsyncMock()
-    events = await fetch_events_for_country_fallback(marketplace, "Japan")
-    assert events == []
-    marketplace.get_active_provider.assert_not_called()
+    assert events == [{"name": "Scraped Event", "date": "2026-10-15"}]

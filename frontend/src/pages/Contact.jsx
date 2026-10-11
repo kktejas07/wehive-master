@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import { useToast } from '../hooks/use-toast';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
+import { BRAND } from '../data/mock';
 
 const SUBJECTS = [
   { id: 'general', label: 'General inquiry' },
@@ -16,19 +17,27 @@ const SUBJECTS = [
   { id: 'partnership', label: 'Partnership opportunity' },
 ];
 
-function FormField({ label, icon: Icon, children, required }) {
+const FIELD_CLS = 'w-full h-12 rounded-xl border border-[hsl(var(--border))] bg-white pl-11 pr-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors duration-200 hover:border-[hsl(var(--blue-200))] focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20';
+
+const OFFICES = [
+  { id: 'hyd', title: 'Hyderabad', address: 'WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049', map: 'https://maps.google.com/?q=WeHive+Flat+201+Mathrusree+Nagar+Miyapur+Hyderabad+Telangana+500049' },
+  { id: 'bll', title: 'Ballari', address: 'Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103', map: 'https://maps.google.com/?q=Shanti+Plaza+Moka+Road+Gandhi+Nagar+Ballari+Karnataka+583103' },
+  { id: 'ewr', title: 'East Windsor, NJ', address: 'Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512', map: 'https://maps.google.com/?q=Building+B+339+Princeton-Hightstown+Road+East+Windsor+NJ+08512' },
+];
+
+function FormField({ label, children, required }) {
   return (
-    <div>
-      <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--blue-900))]/60 mb-1.5">
-        {label} {required && <span className="text-[hsl(var(--accent))]">*</span>}
-      </label>
+    <label className="block">
+      <span className="block text-[14px] font-semibold text-[hsl(var(--blue-900))] mb-1.5">
+        {label} {required && <span className="text-red-700" aria-hidden="true">*</span>}
+      </span>
       <div className="relative">{children}</div>
-    </div>
+    </label>
   );
 }
 
 function InputIcon({ icon: Icon }) {
-  return <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/40" />;
+  return <Icon aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />;
 }
 
 export default function Contact() {
@@ -67,108 +76,90 @@ export default function Contact() {
   return (
     <div className="bg-white">
       <Navbar />
-      <div className="min-h-[calc(100vh-72px)] pt-28 pb-20 bg-[hsl(var(--soft-bg))]">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+      <main className="min-h-[calc(100vh-72px)] pt-28 md:pt-36 pb-16 md:pb-24 bg-[hsl(var(--soft-bg))]">
+        <div className="container-page">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-            className="text-center mb-12"
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="max-w-2xl mb-10 md:mb-12"
           >
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
-              Fly with WeHive
-            </div>
-            <h1 className="mt-3 font-display font-extrabold text-[38px] sm:text-[52px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
-              <motion.span
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                className="inline-block"
-              >
-                Let's plan your fly
-              </motion.span>
-              <br />
-              <motion.span
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35, duration: 0.5 }}
-                className="inline-block text-[hsl(var(--accent))]"
-              >
-                over a nice coffee
-              </motion.span>
+            <div className="eyebrow">Fly with WeHive</div>
+            <h1 className="h-display mt-4">
+              Let's plan your fly{' '}
+              <span className="text-[hsl(var(--red-500))]">over a nice coffee</span>
             </h1>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.4 }}
-              className="mt-4 text-[16px] text-[hsl(var(--blue-900))]/65 max-w-lg mx-auto"
-            >
+            <p className="lead mt-4 max-w-lg">
               Have a question about your visa or passport? Grab a coffee, and let's chat about your travel dreams.
-            </motion.p>
+            </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-5 gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="lg:col-span-3"
-            >
-              <form onSubmit={handleSubmit} className="rounded-3xl bg-white border border-black/5 shadow-[0_20_60_-20px_rgba(10,44,138,0.15)] p-7 sm:p-9 space-y-5">
+          <div className="grid lg:grid-cols-5 gap-6 lg:gap-8 items-start">
+            <div className="lg:col-span-3">
+              <form onSubmit={handleSubmit} className="card-surface p-6 sm:p-8 space-y-5" noValidate>
                 <div className="grid sm:grid-cols-2 gap-5">
-                  <FormField label="Your name" icon={User} required>
+                  <FormField label="Your name" required>
                     <input
                       value={form.name}
                       onChange={set('name')}
                       placeholder="Priya Sharma"
-                      className="w-full h-12 rounded-xl border border-black/10 pl-11 pr-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 focus:border-[hsl(var(--blue-700))] outline-none transition"
+                      autoComplete="name"
+                      required
+                      className={FIELD_CLS}
                     />
                     <InputIcon icon={User} />
                   </FormField>
-                  <FormField label="Email address" icon={Mail} required>
+                  <FormField label="Email address" required>
                     <input
                       value={form.email}
                       onChange={set('email')}
                       type="email"
                       placeholder="you@example.com"
-                      className="w-full h-12 rounded-xl border border-black/10 pl-11 pr-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 focus:border-[hsl(var(--blue-700))] outline-none transition"
+                      autoComplete="email"
+                      required
+                      className={FIELD_CLS}
                     />
                     <InputIcon icon={Mail} />
                   </FormField>
                 </div>
 
-                <FormField label="Phone number" icon={Phone}>
+                <FormField label="Phone number">
                   <input
                     value={form.phone}
                     onChange={set('phone')}
                     type="tel"
                     placeholder="+91 9XXXX XXXXX"
-                    className="w-full h-12 rounded-xl border border-black/10 pl-11 pr-4 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 focus:border-[hsl(var(--blue-700))] outline-none transition"
+                    autoComplete="tel"
+                    className={FIELD_CLS}
                   />
                   <InputIcon icon={Phone} />
                 </FormField>
 
-                <FormField label="What is this about" icon={MessageSquare} required>
+                <FormField label="What is this about" required>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setSubjectOpen(!subjectOpen)}
-                      className="w-full h-12 rounded-xl border border-black/10 pl-11 pr-10 text-[15px] text-left flex items-center justify-between hover:border-[hsl(var(--blue-700))]/40 transition"
+                      aria-expanded={subjectOpen}
+                      aria-haspopup="listbox"
+                      className={`${FIELD_CLS} pr-10 text-left flex items-center justify-between`}
                     >
-                      <span className={selectedSubject ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/40'}>
+                      <span className={selectedSubject ? 'text-[hsl(var(--blue-900))]' : 'text-muted-foreground'}>
                         {selectedSubject ? selectedSubject.label : 'Select a topic'}
                       </span>
                     </button>
                     <InputIcon icon={MessageSquare} />
-                    <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--blue-900))]/40 transition-transform ${subjectOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown aria-hidden="true" className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none transition-transform duration-200 ${subjectOpen ? 'rotate-180' : ''}`} />
                     {subjectOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-black/10 bg-white shadow-lg z-10 overflow-hidden">
+                      <div role="listbox" className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-[hsl(var(--border))] bg-white shadow-lg z-10 overflow-hidden p-1">
                         {SUBJECTS.map((s) => (
                           <button
                             key={s.id}
                             type="button"
+                            role="option"
+                            aria-selected={form.subject === s.id}
                             onClick={() => { setForm((f) => ({ ...f, subject: s.id })); setSubjectOpen(false); }}
-                            className={`w-full px-4 py-3 text-[14px] text-left hover:bg-[hsl(var(--soft-bg))] transition ${form.subject === s.id ? 'text-[hsl(var(--blue-700))] font-bold' : 'text-[hsl(var(--blue-900))]'}`}
+                            className={`w-full px-3 py-2.5 rounded-lg text-[15px] text-left transition-colors duration-200 hover:bg-[hsl(var(--blue-50))] ${form.subject === s.id ? 'text-[hsl(var(--blue-700))] font-semibold bg-[hsl(var(--blue-50))]' : 'text-[hsl(var(--blue-900))]'}`}
                           >
                             {s.label}
                           </button>
@@ -178,119 +169,87 @@ export default function Contact() {
                   </div>
                 </FormField>
 
-                <FormField label="Your message" icon={MessageSquare} required>
+                <FormField label="Your message" required>
                   <textarea
                     value={form.message}
                     onChange={set('message')}
                     placeholder="Tell us how we can help…"
                     rows={5}
-                    className="w-full rounded-xl border border-black/10 px-4 py-3 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/40 focus:border-[hsl(var(--blue-700))] outline-none transition resize-none"
+                    required
+                    className="w-full rounded-xl border border-[hsl(var(--border))] bg-white px-4 py-3 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors duration-200 hover:border-[hsl(var(--blue-200))] focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20 resize-y"
                   />
                 </FormField>
 
                 <button
                   type="submit"
                   disabled={sending}
-                  className="w-full h-12 rounded-full bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-500))] text-white font-bold text-[15px] transition inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="w-full sm:w-auto h-12 px-6 rounded-xl btn-accent font-semibold text-[15px] inline-flex items-center justify-center gap-2 disabled:opacity-60"
                 >
-                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" aria-hidden="true" />}
                   {sending ? 'Sending…' : 'Send message'}
                 </button>
               </form>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="lg:col-span-2 space-y-5"
-            >
-              <div className="rounded-3xl bg-[hsl(var(--blue-900))] text-white p-6 sm:p-8 relative overflow-hidden">
-                <div className="absolute -top-16 -right-16 h-[200px] w-[200px] rounded-full bg-[hsl(var(--accent))]/20 blur-3xl" />
-                <div className="relative">
-                  <h3 className="font-display font-extrabold text-[22px] tracking-[-0.02em]">Other ways to reach us</h3>
-                  <div className="mt-5 space-y-4">
-                    <a href="tel:+919000734326" className="flex items-center gap-3 text-[14px] hover:text-[hsl(var(--accent))] transition">
-                      <Phone className="w-4 h-4 text-[hsl(var(--accent))] shrink-0" />
-                      +91 90007 34326
+            <aside className="lg:col-span-2 space-y-4">
+              <div className="card-surface p-6">
+                <h2 className="h-card">Other ways to reach us</h2>
+                <ul className="mt-4 space-y-3">
+                  <li>
+                    <a href={`tel:${BRAND.phoneRaw}`} className="flex items-center gap-3 text-[15px] text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
+                      <span className="icon-tile h-9 w-9 rounded-lg"><Phone className="w-4 h-4" aria-hidden="true" /></span>
+                      {BRAND.phone}
                     </a>
-                    <a href="mailto:info@wehive.co.in" className="flex items-center gap-3 text-[14px] hover:text-[hsl(var(--accent))] transition">
-                      <Mail className="w-4 h-4 text-[hsl(var(--accent))] shrink-0" />
-                      info@wehive.co.in
+                  </li>
+                  <li>
+                    <a href={`mailto:${BRAND.email}`} className="flex items-center gap-3 text-[15px] text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
+                      <span className="icon-tile h-9 w-9 rounded-lg"><Mail className="w-4 h-4" aria-hidden="true" /></span>
+                      {BRAND.email}
                     </a>
-                  </div>
-                  <div className="mt-6 pt-5 border-t border-white/10">
-                    <p className="text-[12px] text-white/60">Office hours</p>
-                    <p className="text-[14px] mt-1">Mon – Sat, 9:00 AM – 7:00 PM IST</p>
-                  </div>
+                  </li>
+                </ul>
+                <div className="mt-5 pt-4 border-t border-[hsl(var(--border))]">
+                  <p className="text-[13px] text-muted-foreground">Office hours</p>
+                  <p className="text-[15px] mt-0.5 text-[hsl(var(--blue-900))]">Mon – Sat, 9:00 AM – 7:00 PM IST</p>
                 </div>
               </div>
 
-              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – Hyd</h3>
-                <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
-                  WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049
-                </p>
-                <a
-                  href="https://maps.google.com/?q=WeHive+Flat+201+Mathrusree+Nagar+Miyapur+Hyderabad+Telangana+500049"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
-                >
-                  Open in Maps →
-                </a>
+              <div className="card-surface p-6">
+                <h2 className="h-card">Visit us</h2>
+                <ul className="mt-2 divide-y divide-[hsl(var(--border))]">
+                  {OFFICES.map((o) => (
+                    <li key={o.id} className="py-4 last:pb-0">
+                      <div className="text-[15px] font-semibold text-[hsl(var(--blue-900))]">{o.title}</div>
+                      <p className="mt-1 text-[14px] text-muted-foreground leading-relaxed">{o.address}</p>
+                      <a
+                        href={o.map}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-flex items-center gap-1 text-[14px] link-primary"
+                      >
+                        Open in Maps <span aria-hidden="true">→</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – BLL</h3>
-                <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
-                  Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103
-                </p>
+              <div className="rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] p-6">
+                <h2 className="h-card">Chat with Hive</h2>
+                <p className="mt-1.5 text-[15px] text-muted-foreground">Our AI visa assistant is available 24/7 to answer your questions instantly.</p>
                 <a
-                  href="https://maps.google.com/?q=Shanti+Plaza+Moka+Road+Gandhi+Nagar+Ballari+Karnataka+583103"
+                  href={`https://wa.me/${BRAND.phoneRaw.slice(1)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
-                >
-                  Open in Maps →
-                </a>
-              </div>
-
-              <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
-                <h3 className="font-display font-extrabold text-[18px] text-[hsl(var(--blue-900))]">Visit us – EWR</h3>
-                <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/65 leading-relaxed">
-                  Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512
-                </p>
-                <a
-                  href="https://maps.google.com/?q=Building+B+339+Princeton-Hightstown+Road+East+Windsor+NJ+08512"
-
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
-                >
-                  Open in Maps →
-                </a>
-              </div>
-
-              <div className="rounded-3xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] p-6 sm:p-8">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--blue-700))] text-white text-[14px] font-bold">
-                  H
-                </div>
-                <h3 className="mt-4 font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">Chat with Hive</h3>
-                <p className="mt-1 text-[13px] text-[hsl(var(--blue-900))]/65">Our AI visa assistant is available 24/7 to answer your questions instantly.</p>
-                <a
-                  href="https://wa.me/919000734326"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-600 px-4 py-2 text-[12px] font-bold text-white transition"
+                  className="mt-4 inline-flex items-center justify-center h-11 px-4 rounded-xl btn-outline text-[14px] font-semibold"
                 >
                   Start WhatsApp chat
                 </a>
               </div>
-            </motion.div>
+            </aside>
           </div>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );

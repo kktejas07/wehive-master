@@ -1,11 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Clock, GraduationCap, Coins, Milestone, Landmark, ShieldCheck, Sparkles, Search, X, CloudSun, WifiOff, BookOpen, Volume2, Languages, CheckSquare, Square, VolumeX, Star } from "lucide-react";
+import { ArrowLeft, Clock, GraduationCap, Coins, Milestone, Landmark, ShieldCheck, Sparkles, Search, X, CloudSun, WifiOff, BookOpen, Volume2, Languages, CheckSquare, Square, VolumeX, Star, Snowflake, Cloud, TreePalm, Map as MapIcon, TrendingDown, ChartColumn, TrendingUp, ArrowUpDown, ArrowDownAZ, ArrowUpNarrowWide, ArrowDownWideNarrow, School, Lightbulb, TriangleAlert, Check } from "lucide-react";
+
+// Chip icons (replacing emoji, which render inconsistently and are read aloud by screen readers).
+const CLIMATE_CHIPS = [
+  { id: "All", label: "Any Climate", Icon: CloudSun },
+  { id: "Cold", label: "Cold", Icon: Snowflake },
+  { id: "Temperate", label: "Temperate", Icon: Cloud },
+  { id: "Tropical", label: "Tropical", Icon: TreePalm },
+  { id: "Diverse", label: "Diverse", Icon: MapIcon },
+];
+const COST_CHIPS = [
+  { id: "All", label: "Any Cost", Icon: Coins },
+  { id: "Low", label: "Low", Icon: TrendingDown },
+  { id: "Moderate", label: "Moderate", Icon: ChartColumn },
+  { id: "High", label: "High", Icon: TrendingUp },
+];
+const SORT_CHIPS = [
+  { id: "default", label: "Best Match", Icon: Sparkles },
+  { id: "name", label: "Name (A-Z)", Icon: ArrowDownAZ },
+  { id: "climate", label: "Climate Type", Icon: CloudSun },
+  { id: "cost_low_high", label: "Cost: Low to High", Icon: ArrowUpNarrowWide },
+  { id: "cost_high_low", label: "Cost: High to Low", Icon: ArrowDownWideNarrow },
+];
 import { motion, AnimatePresence } from "motion/react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { CountryInfo } from "../types";
 import { useColorScheme } from "../hooks/useColorScheme";
 import { getCachedCountryGuides, isAppOffline } from "../utils/offlineCache";
 import { InteractiveMap } from "./InteractiveMap";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface Phrase {
   original: string;
@@ -493,6 +516,7 @@ export default function ExploreTab({
   }, [selectedCountryId]);
 
   const [activeCountry, setActiveCountry] = useState<CountryInfo | null>(null);
+  const countryDialog = useDialogA11y(!!activeCountry, () => handleBack());
   const [searchQuery, setSearchQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     try {
@@ -691,10 +715,10 @@ export default function ExploreTab({
         <div className="flex items-center justify-between mb-2.5 opacity-90">
           <div className="flex items-center gap-1.5">
             <div className={`w-4.5 h-4.5 rounded flex items-center justify-center font-bold text-white text-[10px] shadow transition-colors duration-500 ${theme.accentBg}`}>W</div>
-            <span className="text-[10px] font-bold tracking-wider text-blue-100">WEHIVE BRAND PARTNERS</span>
+            <span className="text-[11px] font-bold tracking-wider text-blue-100">WEHIVE BRAND PARTNERS</span>
           </div>
           {offlineActive && (
-            <span className="text-[8px] bg-amber-500/25 text-amber-300 font-mono font-bold border border-amber-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1.5 animate-pulse shadow-sm shadow-amber-950/20">
+            <span className="text-[11px] bg-amber-500/25 text-amber-300 font-mono font-bold border border-amber-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1.5 animate-pulse shadow-sm shadow-amber-950/20">
               <WifiOff className="w-3 h-3 text-amber-400" />
               OFFLINE CACHED
             </span>
@@ -724,7 +748,7 @@ export default function ExploreTab({
                 (e.target as HTMLInputElement).blur();
               }
             }}
-            className="w-full pl-9 pr-9 py-2 bg-white/15 hover:bg-white/20 focus:bg-white text-xs text-slate-100 focus:text-slate-900 placeholder-slate-300 focus:placeholder-slate-400 rounded-xl border border-white/10 focus:border-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+            className="w-full pl-9 pr-9 py-2 bg-white/15 dark:bg-slate-900 hover:bg-white/20 focus:bg-white text-xs text-slate-100 focus:text-slate-900 placeholder-slate-300 focus:placeholder-slate-400 rounded-xl border border-white/10 focus:border-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
           />
           {searchQuery && (
             <button
@@ -749,12 +773,12 @@ export default function ExploreTab({
                 className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-[18px] shadow-2xl z-50 overflow-hidden divide-y divide-slate-100"
               >
                 <div className="px-3.5 py-2.5 bg-slate-50 flex items-center justify-between">
-                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider font-mono">
+                  <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono">
                     Recent Searches
                   </span>
                   <button
                     onMouseDown={(e) => clearAllSearchHistory(e)}
-                    className="text-[9px] font-black text-slate-400 hover:text-red-600 transition-colors cursor-pointer font-mono uppercase"
+                    className="text-[11px] font-black text-slate-400 hover:text-red-600 transition-colors cursor-pointer font-mono uppercase"
                   >
                     Clear All
                   </button>
@@ -796,11 +820,11 @@ export default function ExploreTab({
         <div className="flex items-center justify-between">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-1.5 text-[10px] font-bold text-slate-600 hover:text-slate-900 transition-colors bg-slate-50 border border-slate-200/60 px-2.5 py-1.5 rounded-xl cursor-pointer"
+            className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 hover:text-slate-900 transition-colors bg-slate-50 border border-slate-200/60 px-2.5 py-1.5 rounded-xl cursor-pointer"
           >
             <CloudSun className="w-3.5 h-3.5 text-sky-500" />
             <span>Refine & Sort</span>
-            <span className="w-4.5 h-4.5 rounded-full bg-slate-200 text-[8px] flex items-center justify-center font-bold text-slate-700 font-mono">
+            <span className="w-4.5 h-4.5 rounded-full bg-slate-200 dark:bg-slate-800 text-[8px] flex items-center justify-center font-bold text-slate-700 font-mono">
               {(selectedClimate !== "All" ? 1 : 0) + (selectedCost !== "All" ? 1 : 0) + (sortBy !== "default" ? 1 : 0)}
             </span>
           </button>
@@ -813,7 +837,7 @@ export default function ExploreTab({
                 setSelectedCost("All");
                 setSortBy("default");
               }}
-              className="text-[10px] font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1 cursor-pointer font-mono"
+              className="text-[11px] font-bold text-red-600 dark:text-red-300 hover:text-red-700 transition-colors flex items-center gap-1 cursor-pointer font-mono"
             >
               <X className="w-3 h-3" />
               Reset filters
@@ -825,21 +849,22 @@ export default function ExploreTab({
         <div className={`grid grid-cols-1 gap-3 pt-1 transition-all duration-300 ${showFilters ? "block" : "hidden"}`}>
           {/* Climate Filter */}
           <div className="space-y-1">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1 font-mono">
+            <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider flex items-center gap-1 font-mono">
               <CloudSun className="w-3 h-3 text-sky-500" /> Climate Environment
             </span>
             <div className="flex flex-wrap gap-1">
-              {["All", "Cold", "Temperate", "Tropical", "Diverse"].map((climate) => (
+              {CLIMATE_CHIPS.map(({ id: climate, label, Icon }) => (
                 <button
                   key={climate}
+                  aria-pressed={selectedClimate === climate}
                   onClick={() => setSelectedClimate(climate)}
-                  className={`text-[9px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                     selectedClimate === climate
-                      ? "bg-sky-600 text-white border-sky-600 shadow-xs"
-                      : "bg-slate-50 text-slate-600 border-slate-200/60 hover:bg-slate-100"
+                      ? "bg-blue-900 text-white border-blue-900 shadow-xs"
+                      : "bg-slate-50 text-slate-600 border-slate-200/60 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  {climate === "All" ? "☀️ Any Climate" : climate === "Cold" ? "❄️ Cold" : climate === "Temperate" ? "⛅ Temperate" : climate === "Tropical" ? "🌴 Tropical" : "🗺️ Diverse"}
+                  <Icon className="w-3 h-3" aria-hidden="true" /> {label}
                 </button>
               ))}
             </div>
@@ -847,21 +872,22 @@ export default function ExploreTab({
 
           {/* Cost of Living Filter */}
           <div className="space-y-1">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1 font-mono">
+            <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider flex items-center gap-1 font-mono">
               <Coins className="w-3 h-3 text-emerald-500" /> Cost of Living
             </span>
             <div className="flex flex-wrap gap-1">
-              {["All", "Low", "Moderate", "High"].map((cost) => (
+              {COST_CHIPS.map(({ id: cost, label, Icon }) => (
                 <button
                   key={cost}
+                  aria-pressed={selectedCost === cost}
                   onClick={() => setSelectedCost(cost)}
-                  className={`text-[9px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                     selectedCost === cost
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                      : "bg-slate-50 text-slate-600 border-slate-200/60 hover:bg-slate-100"
+                      ? "bg-blue-900 text-white border-blue-900 shadow-xs"
+                      : "bg-slate-50 text-slate-600 border-slate-200/60 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  {cost === "All" ? "💰 Any Cost" : cost === "Low" ? "📉 Low" : cost === "Moderate" ? "📊 Moderate" : "📈 High"}
+                  <Icon className="w-3 h-3" aria-hidden="true" /> {label}
                 </button>
               ))}
             </div>
@@ -869,27 +895,22 @@ export default function ExploreTab({
 
           {/* Sorting Option */}
           <div className="space-y-1">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1 font-mono">
-              🔄 Sort Destinations By
+            <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider flex items-center gap-1 font-mono">
+              <ArrowUpDown className="w-3 h-3 text-indigo-500" /> Sort Destinations By
             </span>
             <div className="flex flex-wrap gap-1">
-              {[
-                { id: "default", label: "🔍 Best Match" },
-                { id: "name", label: "🔤 Name (A-Z)" },
-                { id: "climate", label: "⛅ Climate Type" },
-                { id: "cost_low_high", label: "💵 Cost: Low to High" },
-                { id: "cost_high_low", label: "💰 Cost: High to Low" }
-              ].map((sortOption) => (
+              {SORT_CHIPS.map((sortOption) => (
                 <button
                   key={sortOption.id}
+                  aria-pressed={sortBy === sortOption.id}
                   onClick={() => setSortBy(sortOption.id)}
-                  className={`text-[9px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                     sortBy === sortOption.id
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                      : "bg-slate-50 text-slate-600 border-slate-200/60 hover:bg-slate-100"
+                      ? "bg-blue-900 text-white border-blue-900 shadow-xs"
+                      : "bg-slate-50 text-slate-600 border-slate-200/60 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  {sortOption.label}
+                  <sortOption.Icon className="w-3 h-3" aria-hidden="true" /> {sortOption.label}
                 </button>
               ))}
             </div>
@@ -902,12 +923,12 @@ export default function ExploreTab({
         <div className="bg-white rounded-[24px] border border-slate-200/50 p-4.5 shadow-sm space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl ${colorScheme === "forced-navy" ? "bg-blue-100 text-blue-600" : "bg-red-50 text-red-600"} flex items-center justify-center shrink-0 shadow-xs`}>
+              <div className={`w-9 h-9 rounded-xl ${colorScheme === "forced-navy" ? "bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300" : "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300"} flex items-center justify-center shrink-0 shadow-xs`}>
                 <Milestone className="w-4.5 h-4.5" />
               </div>
               <div>
                 <h3 className="text-xs font-black text-slate-800">Side-by-Side Comparison</h3>
-                <p className="text-[10px] text-slate-400 font-medium">Select any two destinations and compare index metrics</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Select any two destinations and compare index metrics</p>
               </div>
             </div>
             <button
@@ -934,7 +955,7 @@ export default function ExploreTab({
                 {/* Country Dropdowns */}
                 <div className="grid grid-cols-2 gap-3.5">
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block font-mono">Compare Country A</label>
+                    <label className="text-[11px] font-black uppercase text-slate-400 tracking-wider block font-mono">Compare Country A</label>
                     <select
                       value={compareA}
                       onChange={(e) => {
@@ -945,7 +966,7 @@ export default function ExploreTab({
                           setCompareB(nextOpt);
                         }
                       }}
-                      className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/80 rounded-xl px-2.5 py-2.5 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:outline-none cursor-pointer hover:bg-slate-100/70 transition-colors"
+                      className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/80 dark:border-slate-800 rounded-xl px-2.5 py-2.5 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:outline-none cursor-pointer hover:bg-slate-100/70 transition-colors"
                     >
                       {destinations.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -955,7 +976,7 @@ export default function ExploreTab({
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block font-mono">With Country B</label>
+                    <label className="text-[11px] font-black uppercase text-slate-400 tracking-wider block font-mono">With Country B</label>
                     <select
                       value={compareB}
                       onChange={(e) => {
@@ -966,7 +987,7 @@ export default function ExploreTab({
                           setCompareA(nextOpt);
                         }
                       }}
-                      className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/80 rounded-xl px-2.5 py-2.5 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:outline-none cursor-pointer hover:bg-slate-100/70 transition-colors"
+                      className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/80 dark:border-slate-800 rounded-xl px-2.5 py-2.5 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:outline-none cursor-pointer hover:bg-slate-100/70 transition-colors"
                     >
                       {destinations.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -978,14 +999,14 @@ export default function ExploreTab({
                 </div>
 
                 {compareA === compareB ? (
-                  <div className="text-center p-4 text-[11px] text-amber-700 bg-amber-50 border border-amber-100/60 rounded-xl font-mono font-medium">
-                    ⚠️ Please select two different countries to compare.
+                  <div className="text-center p-4 text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-100/60 dark:border-amber-900/50 rounded-xl font-mono font-medium">
+                    <TriangleAlert className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Please select two different countries to compare.
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {/* Radar Chart Container */}
                     <div className="bg-slate-50 rounded-2xl border border-slate-100 p-3.5 flex flex-col items-center">
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider font-mono mb-2.5">Academic & Visa Index Balance</span>
+                      <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider font-mono mb-2.5">Academic & Visa Index Balance</span>
                       <div className="w-full h-60 min-h-[240px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <RadarChart cx="50%" cy="50%" outerRadius="65%" data={[
@@ -1037,20 +1058,20 @@ export default function ExploreTab({
                           </RadarChart>
                         </ResponsiveContainer>
                       </div>
-                      <p className="text-[8px] text-slate-400 font-mono text-center mt-2 px-3 leading-relaxed">
+                      <p className="text-[11px] text-slate-400 font-mono text-center mt-2 px-3 leading-relaxed">
                         *Values are relative index scores where higher is more favorable (e.g. higher affordability = lower actual costs; higher visa speed = faster processing time).
                       </p>
                     </div>
 
                     {/* Comparison Metrics Table */}
                     <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-xs">
-                      <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-100 p-2.5 text-[9px] font-black uppercase text-slate-400 font-mono tracking-wider">
+                      <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-100 p-2.5 text-[11px] font-black uppercase text-slate-400 font-mono tracking-wider">
                         <div>Metric Index</div>
                         <div className="text-center truncate font-bold text-slate-700">{destinations.find(c => c.id === compareA)?.flag} {destinations.find(c => c.id === compareA)?.name}</div>
                         <div className="text-center truncate font-bold text-slate-700">{destinations.find(c => c.id === compareB)?.flag} {destinations.find(c => c.id === compareB)?.name}</div>
                       </div>
 
-                      <div className="divide-y divide-slate-100 text-[10px]">
+                      <div className="divide-y divide-slate-100 text-[11px]">
                         {/* Tuition */}
                         <div className="grid grid-cols-3 p-2.5 items-center hover:bg-slate-50/40">
                           <div className="font-bold text-slate-500">Tuition Expenses</div>
@@ -1075,8 +1096,8 @@ export default function ExploreTab({
                         {/* Visa Success */}
                         <div className="grid grid-cols-3 p-2.5 items-center hover:bg-slate-50/40">
                           <div className="font-bold text-slate-500">Visa Success</div>
-                          <div className="text-center font-bold text-emerald-600 font-mono">{COMPARISON_DATA[compareA]?.visaSuccessLabel}</div>
-                          <div className="text-center font-bold text-emerald-600 font-mono">{COMPARISON_DATA[compareB]?.visaSuccessLabel}</div>
+                          <div className="text-center font-bold text-emerald-600 dark:text-emerald-300 font-mono">{COMPARISON_DATA[compareA]?.visaSuccessLabel}</div>
+                          <div className="text-center font-bold text-emerald-600 dark:text-emerald-300 font-mono">{COMPARISON_DATA[compareB]?.visaSuccessLabel}</div>
                         </div>
 
                         {/* Stay Duration */}
@@ -1089,10 +1110,10 @@ export default function ExploreTab({
                     </div>
 
                     {/* Summary insights block */}
-                    <div className={`p-3 rounded-2xl border text-[10px] leading-relaxed ${
-                      colorScheme === "forced-navy" ? "bg-blue-50/30 border-blue-100/50 text-blue-900/80" : "bg-red-50/30 border-red-100/50 text-red-900/80"
+                    <div className={`p-3 rounded-2xl border text-[11px] leading-relaxed ${
+                      colorScheme === "forced-navy" ? "bg-blue-50/30 dark:bg-blue-950/40 border-blue-100/50 dark:border-blue-900/50 text-blue-900/80" : "bg-red-50/30 dark:bg-red-950/40 border-red-100/50 dark:border-red-900/50 text-red-900/80"
                     }`}>
-                      <span className="font-black">📊 Index Comparison:</span> 
+                      <span className="font-black"><ChartColumn className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Index Comparison:</span> 
                       {` Comparing `}<strong>{destinations.find(c => c.id === compareA)?.name}</strong>{` and `}<strong>{destinations.find(c => c.id === compareB)?.name}</strong>{` reveals `}<strong>
                         {COMPARISON_DATA[compareA].tuitionScore > COMPARISON_DATA[compareB].tuitionScore ? destinations.find(c => c.id === compareA)?.name : destinations.find(c => c.id === compareB)?.name}
                       </strong>{` is more budget-friendly for tuition fees, whereas `}<strong>
@@ -1119,7 +1140,7 @@ export default function ExploreTab({
 
         {(searchQuery.trim() !== "" || selectedClimate !== "All" || selectedCost !== "All") && (
           <div className="flex items-center justify-between px-1">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider font-mono">
+            <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider font-mono">
               Destinations Found ({searchResults.length})
             </span>
             <button
@@ -1129,7 +1150,7 @@ export default function ExploreTab({
                 setSelectedCost("All");
                 setSortBy("default");
               }}
-              className={`text-[9px] font-bold underline cursor-pointer hover:opacity-80 transition-opacity ${theme.accentText}`}
+              className={`text-[11px] font-bold underline cursor-pointer hover:opacity-80 transition-opacity ${theme.accentText}`}
             >
               Reset all filters
             </button>
@@ -1144,7 +1165,7 @@ export default function ExploreTab({
                 className="bg-white rounded-2xl border border-slate-200/50 shadow-xs overflow-hidden flex flex-col animate-pulse"
               >
                 {/* Simulated Minimal Banner */}
-                <div className="h-28 bg-slate-200/80 relative">
+                <div className="h-28 bg-slate-200/80 dark:bg-slate-800 relative">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-300/40 via-slate-200/10 to-transparent" />
                   <div className="absolute bottom-3.5 left-3.5 flex items-center gap-2">
                     {/* Simulated Flag */}
@@ -1156,8 +1177,8 @@ export default function ExploreTab({
 
                 {/* Simulated Bottom brief info */}
                 <div className="p-3 pb-1.5 flex justify-between items-center">
-                  <div className="h-3 w-28 bg-slate-200/70 rounded-md" />
-                  <div className="h-4.5 w-16 bg-slate-200/70 rounded-md" />
+                  <div className="h-3 w-28 bg-slate-200/70 dark:bg-slate-800 rounded-md" />
+                  <div className="h-4.5 w-16 bg-slate-200/70 dark:bg-slate-800 rounded-md" />
                 </div>
 
                 {/* Simulated Climate & Cost badges */}
@@ -1175,7 +1196,7 @@ export default function ExploreTab({
             </div>
             <div>
               <h3 className="text-xs font-bold text-slate-800">No Destinations Found</h3>
-              <p className="text-[10px] text-slate-400 max-w-[220px] mx-auto mt-1 leading-relaxed">
+              <p className="text-[11px] text-slate-400 max-w-[220px] mx-auto mt-1 leading-relaxed">
                 We couldn't find any matches for your selected search or filters. Try adjusting your climate or cost settings.
               </p>
             </div>
@@ -1186,7 +1207,7 @@ export default function ExploreTab({
                 setSelectedCost("All");
                 setSortBy("default");
               }}
-              className={`px-4 py-1.5 rounded-lg text-[10px] font-bold shadow-xs cursor-pointer transition-colors mx-auto block ${theme.accentBg}`}
+              className={`px-4 py-1.5 rounded-lg text-[11px] font-bold shadow-xs cursor-pointer transition-colors mx-auto block ${theme.accentBg}`}
             >
               Clear All Filters
             </button>
@@ -1225,14 +1246,14 @@ export default function ExploreTab({
                 </div>
 
                 {/* Bottom brief info */}
-                <div className="p-3 pb-1.5 bg-white flex justify-between items-center text-[10px] font-bold text-slate-500">
+                <div className="p-3 pb-1.5 bg-white flex justify-between items-center text-[11px] font-bold text-slate-500">
                   <span className="truncate max-w-[150px]">{c.visaType}</span>
                   <span className={`px-2 py-0.5 rounded border ${
                     colorScheme === "forced-navy" 
-                      ? "bg-blue-50 text-blue-900 border-blue-100" 
+                      ? "bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border-blue-100 dark:border-blue-900/50" 
                       : colorScheme === "forced-red"
                       ? "bg-stone-100 text-stone-800 border-stone-200"
-                      : "bg-blue-50 text-blue-900 border-blue-100"
+                      : "bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 border-blue-100 dark:border-blue-900/50"
                   }`}>
                     {c.workPermit.split(" (")[0]}
                   </span>
@@ -1240,32 +1261,32 @@ export default function ExploreTab({
 
                 {/* Climate & Cost of Living meta-badges */}
                 <div className="px-3 pb-3 pt-0 bg-white flex gap-1.5 flex-wrap">
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-100 flex items-center gap-1">
-                    ⛅ {c.climateType} Climate
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-100 dark:border-sky-900/50 flex items-center gap-1">
+                    <CloudSun className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />{c.climateType} Climate
                   </span>
-                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${
                     c.costOfLivingLevel === "Low"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-900/50"
                       : c.costOfLivingLevel === "Moderate"
-                      ? "bg-amber-50 text-amber-700 border-amber-100"
-                      : "bg-rose-50 text-rose-700 border-rose-100"
+                      ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-900/50"
+                      : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-100 dark:border-rose-900/50"
                   }`}>
-                    💰 {c.costOfLivingLevel} Cost of Living
+                    <Coins className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />{c.costOfLivingLevel} Cost of Living
                   </span>
                 </div>
 
                 {/* Matching search elements if any */}
                 {(result.matchedUniversities.length > 0 || result.matchedCourses.length > 0) && (
-                  <div className="p-3 bg-slate-50/80 border-t border-slate-100/60 space-y-2.5">
+                  <div className="p-3 bg-slate-50/80 dark:bg-slate-900/60 border-t border-slate-100/60 dark:border-slate-800 space-y-2.5">
                     {result.matchedUniversities.length > 0 && (
                       <div className="space-y-1">
-                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block font-mono">Matched Universities:</span>
+                        <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider block font-mono">Matched Universities:</span>
                         <div className="flex flex-wrap gap-1">
                           {result.matchedUniversities.map((uni, uIdx) => (
-                            <span key={uIdx} className={`text-[9px] font-bold px-2 py-0.5 rounded-md border bg-white ${
-                              colorScheme === "forced-navy" ? "text-blue-600 border-blue-100" : "text-red-600 border-red-100"
+                            <span key={uIdx} className={`text-[11px] font-bold px-2 py-0.5 rounded-md border bg-white ${
+                              colorScheme === "forced-navy" ? "text-blue-600 dark:text-blue-300 border-blue-100 dark:border-blue-900/50" : "text-red-600 dark:text-red-300 border-red-100 dark:border-red-900/50"
                             }`}>
-                              🏫 {uni}
+                              <School className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />{uni}
                             </span>
                           ))}
                         </div>
@@ -1273,11 +1294,11 @@ export default function ExploreTab({
                     )}
                     {result.matchedCourses.length > 0 && (
                       <div className="space-y-1">
-                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block font-mono">Matched Programs:</span>
+                        <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider block font-mono">Matched Programs:</span>
                         <div className="flex flex-wrap gap-1">
                           {result.matchedCourses.map((course, cIdx) => (
-                            <span key={cIdx} className="text-[9px] font-bold px-2 py-0.5 rounded-md border bg-white text-slate-700 border-slate-200">
-                              🎓 {course}
+                            <span key={cIdx} className="text-[11px] font-bold px-2 py-0.5 rounded-md border bg-white text-slate-700 border-slate-200">
+                              <GraduationCap className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />{course}
                             </span>
                           ))}
                         </div>
@@ -1312,7 +1333,7 @@ export default function ExploreTab({
               exit={{ scale: 0.92, opacity: 0, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-[85%] border border-slate-100 relative z-10"
+              {...countryDialog} className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-[85%] border border-slate-100 relative z-10"
             >
               {/* Banner / Header */}
               <div className="relative h-36 shrink-0">
@@ -1327,13 +1348,13 @@ export default function ExploreTab({
                     <span className="text-2xl filter drop-shadow-md">{activeCountry.flag}</span>
                     <div>
                       <h2 className="text-md font-black text-white leading-tight">{activeCountry.name}</h2>
-                      <span className="text-[9px] text-blue-200 font-bold uppercase tracking-wider block">WeHive Partner Destination</span>
+                      <span className="text-[11px] text-blue-200 font-bold uppercase tracking-wider block">WeHive Partner Destination</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Close Button */}
-                <button
+                <button aria-label="Close"
                   onClick={handleBack}
                   className="absolute top-3 right-3 p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white cursor-pointer transition-colors z-20"
                 >
@@ -1345,15 +1366,15 @@ export default function ExploreTab({
               <div className="p-4 space-y-4 overflow-y-auto flex-1 text-slate-700">
                 {/* Overview Description */}
                 <div className="space-y-1">
-                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block font-mono">About {activeCountry.name}</span>
+                  <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider block font-mono">About {activeCountry.name}</span>
                   <p className="text-[11px] text-slate-600 leading-relaxed font-medium">{activeCountry.description}</p>
                 </div>
 
                 {/* Climate Info Card (Requested) */}
-                <div className="bg-sky-50/60 border border-sky-100 rounded-xl p-3 space-y-1">
-                  <div className="flex items-center gap-1.5 text-sky-800">
+                <div className="bg-sky-50/60 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/50 rounded-xl p-3 space-y-1">
+                  <div className="flex items-center gap-1.5 text-sky-800 dark:text-sky-300">
                     <CloudSun className="w-4 h-4 text-sky-500 shrink-0" />
-                    <span className="text-[10px] font-bold uppercase tracking-wide">Climate & Living Conditions</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wide">Climate & Living Conditions</span>
                   </div>
                   <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
                     {activeCountry.climate}
@@ -1361,10 +1382,10 @@ export default function ExploreTab({
                 </div>
 
                 {/* Cost of Living Info Card (Requested) */}
-                <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3 space-y-1">
-                  <div className="flex items-center gap-1.5 text-emerald-800">
+                <div className="bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 rounded-xl p-3 space-y-1">
+                  <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
                     <Coins className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span className="text-[10px] font-bold uppercase tracking-wide">Estimated Cost of Living</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wide">Estimated Cost of Living</span>
                   </div>
                   <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
                     {activeCountry.livingCost}
@@ -1375,12 +1396,12 @@ export default function ExploreTab({
                 <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2">
                   <div className="flex items-center gap-1.5 text-slate-800">
                     <Landmark className="w-4 h-4 text-indigo-500 shrink-0" />
-                    <span className="text-[10px] font-bold uppercase tracking-wide">Top Partner Universities</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wide">Top Partner Universities</span>
                   </div>
                   <div className="space-y-1.5 pl-0.5">
                     {activeCountry.universities.map((uni, idx) => (
                       <div key={idx} className="flex items-start gap-1.5 text-[11px] text-slate-600 font-medium leading-tight">
-                        <span className="text-indigo-500 font-black">✓</span>
+                        <Check className="w-3 h-3 mt-0.5 shrink-0 text-indigo-500" aria-hidden="true" />
                         <span>{uni}</span>
                       </div>
                     ))}
@@ -1390,25 +1411,25 @@ export default function ExploreTab({
                 {/* Quick Academic Details (Visa, Intakes, Careers) */}
                 <div className="grid grid-cols-2 gap-2">
                   <div className="bg-white border border-slate-100 p-2.5 rounded-lg">
-                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Visa Type</span>
-                    <span className="text-[10px] font-bold text-slate-700 leading-tight block mt-0.5">{activeCountry.visaType}</span>
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Visa Type</span>
+                    <span className="text-[11px] font-bold text-slate-700 leading-tight block mt-0.5">{activeCountry.visaType}</span>
                   </div>
                   <div className="bg-white border border-slate-100 p-2.5 rounded-lg">
-                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Post-Study Work</span>
-                    <span className="text-[10px] font-bold text-slate-700 leading-tight block mt-0.5">{activeCountry.workPermit.split(" (")[0]}</span>
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Post-Study Work</span>
+                    <span className="text-[11px] font-bold text-slate-700 leading-tight block mt-0.5">{activeCountry.workPermit.split(" (")[0]}</span>
                   </div>
                   <div className="bg-white border border-slate-100 p-2.5 rounded-lg col-span-2">
-                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Main Admissions Intakes</span>
-                    <span className="text-[10px] font-bold text-slate-700 leading-tight block mt-0.5">{activeCountry.intakes}</span>
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Main Admissions Intakes</span>
+                    <span className="text-[11px] font-bold text-slate-700 leading-tight block mt-0.5">{activeCountry.intakes}</span>
                   </div>
                 </div>
 
                 {/* Popular High-Salary Courses */}
                 <div className="space-y-1.5">
-                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block font-mono">In-Demand Careers</span>
+                  <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider block font-mono">In-Demand Careers</span>
                   <div className="flex flex-wrap gap-1">
                     {activeCountry.popularCourses.map((c, idx) => (
-                      <span key={idx} className="bg-slate-50 text-slate-700 text-[9px] font-bold px-2 py-1 rounded-md border border-slate-100">
+                      <span key={idx} className="bg-slate-50 text-slate-700 text-[11px] font-bold px-2 py-1 rounded-md border border-slate-100">
                         {c}
                       </span>
                     ))}
@@ -1436,23 +1457,23 @@ export default function ExploreTab({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <Languages className="w-4 h-4 text-rose-500 shrink-0" />
-                          <span className="text-[10px] font-black uppercase tracking-wide text-slate-800 dark:text-slate-200">Quick Phrases & Slang</span>
+                          <span className="text-[11px] font-black uppercase tracking-wide text-slate-800 dark:text-slate-200">Quick Phrases & Slang</span>
                         </div>
-                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-900/30 font-mono">
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-900/30 font-mono">
                           {phrases.length} Essential Phrases
                         </span>
                       </div>
 
                       {/* Description */}
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-500 leading-tight">
                         Familiarize yourself with crucial vocabulary, student terminology, and pronunciation to help prep for your move!
                       </p>
 
                       {/* Progress Tracker */}
                       <div className="bg-slate-50/70 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800/60 p-3 rounded-xl space-y-1.5 shadow-2xs">
-                        <div className="flex justify-between items-center text-[9px] font-bold">
+                        <div className="flex justify-between items-center text-[11px] font-bold">
                           <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                            🎓 Mastery Level
+                            <GraduationCap className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />Mastery Level
                           </span>
                           <span className="font-mono text-emerald-600 dark:text-emerald-400">
                             {learnedForCountry.length} of {phrases.length} learned ({progressPercent}%)
@@ -1474,7 +1495,7 @@ export default function ExploreTab({
                             <button
                               key={cat}
                               onClick={() => setSelectedPhraseCategory(cat)}
-                              className={`text-[9px] font-bold px-2.5 py-1 rounded-lg border shrink-0 transition-all cursor-pointer ${
+                              className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border shrink-0 transition-all cursor-pointer ${
                                 isActive
                                   ? "bg-rose-600 text-white border-rose-600 shadow-xs"
                                   : "bg-slate-50 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800/50"
@@ -1505,11 +1526,11 @@ export default function ExploreTab({
                                 <div className="space-y-0.5">
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{phrase.original}</span>
-                                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">
+                                    <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 dark:text-slate-500 uppercase tracking-wider font-mono">
                                       {phrase.category}
                                     </span>
                                   </div>
-                                  <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500 italic block">
+                                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-500 italic block">
                                     Pronunciation: <strong className="text-slate-500 dark:text-slate-400 font-semibold font-mono">[{phrase.pronunciation}]</strong>
                                   </span>
                                 </div>
@@ -1521,7 +1542,7 @@ export default function ExploreTab({
                                     className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                                       isSpeaking
                                         ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 animate-pulse"
-                                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+                                        : "bg-white border-slate-200 text-slate-500 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
                                     }`}
                                     title="Listen Pronunciation"
                                   >
@@ -1534,7 +1555,7 @@ export default function ExploreTab({
                                     className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                                       isLearned
                                         ? "bg-emerald-500 border-emerald-500 text-white"
-                                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-300 dark:text-slate-600 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-500"
+                                        : "bg-white border-slate-200 text-slate-500 dark:text-slate-600 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-500"
                                     }`}
                                     title={isLearned ? "Mark as Unlearned" : "Mark as Learned"}
                                   >
@@ -1552,8 +1573,8 @@ export default function ExploreTab({
                               </p>
 
                               {phrase.context && (
-                                <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 bg-slate-50/80 dark:bg-slate-900/30 p-1.5 rounded-lg border border-slate-100/50 dark:border-slate-800/40 italic leading-relaxed">
-                                  💡 {phrase.context}
+                                <p className="text-[11px] text-slate-500 dark:text-slate-500 mt-1 bg-slate-50/80 dark:bg-slate-900/30 p-1.5 rounded-lg border border-slate-100/50 dark:border-slate-800/40 italic leading-relaxed">
+                                  <Lightbulb className="inline w-3 h-3 mr-1 align-[-2px]" aria-hidden="true" />{phrase.context}
                                 </p>
                               )}
                             </div>
@@ -1572,7 +1593,7 @@ export default function ExploreTab({
                     onNavigateToEvaluator();
                     handleBack();
                   }}
-                  className="flex-1 bg-white hover:bg-slate-50 text-slate-800 font-bold text-[10px] py-2.5 rounded-xl border border-slate-200 text-center shadow-xs cursor-pointer transition-colors"
+                  className="flex-1 bg-white hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 font-bold text-[11px] py-2.5 rounded-xl border border-slate-200 text-center shadow-xs cursor-pointer transition-colors"
                 >
                   Assess Eligibility
                 </button>
@@ -1581,7 +1602,7 @@ export default function ExploreTab({
                     onNavigateToChat();
                     handleBack();
                   }}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] py-2.5 rounded-xl text-center shadow-xs cursor-pointer transition-colors"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] py-2.5 rounded-xl text-center shadow-xs cursor-pointer transition-colors"
                 >
                   Consult AI Guide
                 </button>

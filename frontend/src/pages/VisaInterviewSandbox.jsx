@@ -110,17 +110,17 @@ export default function VisaInterviewSandbox() {
   return (
     <div className="min-h-screen bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]">
       <Navbar />
-      <main className="pt-32 pb-24">
+      <main className="pt-28 pb-16 md:pb-24">
         <div className="max-w-4xl mx-auto px-5">
           
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
+            <span className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <Award className="w-3.5 h-3.5" /> Interview Sandbox
             </span>
-            <h1 className="font-display font-extrabold text-[36px] sm:text-[48px] tracking-[-0.03em] text-[hsl(var(--blue-900))] leading-tight">
+            <h1 className="font-display font-bold text-[36px] sm:text-[48px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               Mock Visa Interview Sandbox
             </h1>
-            <p className="mt-2.5 text-[15px] text-[hsl(var(--blue-900))]/65 max-w-lg mx-auto">
+            <p className="mt-2.5 text-[15px] text-muted-foreground max-w-lg mx-auto">
               Practice answering tough embassy questions, record your answers, and receive instant AI performance scorecards.
             </p>
           </div>
@@ -128,27 +128,28 @@ export default function VisaInterviewSandbox() {
           <div className="grid md:grid-cols-12 gap-8 items-start">
             
             {/* Left side - Question and voice response panel */}
-            <div className="md:col-span-8 bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-900/5 space-y-6">
+            <div className="md:col-span-8 bg-white border border-[hsl(var(--border))] rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
               
               {/* Question Header */}
-              <div className="flex justify-between items-center pb-4 border-b border-black/5">
-                <span className="text-[12px] font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/40">
+              <div className="flex justify-between items-center pb-4 border-b border-[hsl(var(--border))]">
+                <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                   Question {currentIdx + 1} of {QUESTIONS.length} ({currentQuestion.category})
                 </span>
                 
                 <button
                   onClick={handleSpeakQuestion}
                   disabled={isSpeaking}
-                  className="p-2 rounded-full bg-[hsl(var(--soft-bg))] hover:bg-black/5 text-[hsl(var(--blue-700))] transition"
+                  className="w-11 h-11 inline-flex items-center justify-center rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] transition-colors"
                   title="Hear question"
+                  aria-label="Hear question"
                 >
                   <Volume2 className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Question Box */}
-              <div className="min-h-[80px] flex items-center justify-center bg-[hsl(var(--soft-bg))]/50 rounded-2xl p-6 border border-black/5 text-center">
-                <p className="text-[18px] font-extrabold text-[hsl(var(--blue-900))] leading-relaxed">
+              <div className="min-h-[80px] flex items-center justify-center bg-[hsl(var(--soft-bg))]/50 rounded-2xl p-6 border border-[hsl(var(--border))] text-center">
+                <p className="text-[18px] font-bold text-[hsl(var(--blue-900))] leading-relaxed">
                   &ldquo;{currentQuestion.text}&rdquo;
                 </p>
               </div>
@@ -161,32 +162,32 @@ export default function VisaInterviewSandbox() {
               {/* User Voice Input Area */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <button
+                  <button aria-label={isListening ? 'Stop recording' : 'Start recording'}
                     onClick={isListening ? stopListening : startListening}
-                    className={`h-12 w-12 rounded-full inline-flex items-center justify-center transition shadow-md ${
+                    className={`h-12 w-12 rounded-full inline-flex items-center justify-center transition-colors shadow-sm ${
                       isListening 
-                        ? 'bg-rose-500 text-white animate-pulse' 
-                        : 'bg-[hsl(var(--blue-900))] text-white hover:opacity-90'
+                        ? 'bg-red-600 text-white motion-safe:animate-pulse' 
+                        : 'bg-[hsl(var(--blue-700))] text-white hover:bg-[hsl(var(--blue-800))]'
                     }`}
                   >
                     {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                   </button>
 
-                  <div className="text-[13px] text-[hsl(var(--blue-900))]/60">
+                  <div className="text-[13px] text-muted-foreground">
                     {isListening ? 'Speak now. Tap mic button when finished.' : 'Tap mic to record your response.'}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-black/5 p-4 min-h-[100px] bg-[hsl(var(--soft-bg))]/30 text-[14px]">
-                  {transcript || <span className="text-[hsl(var(--blue-900))]/35 italic">Your transcribed response will appear here...</span>}
+                <div className="rounded-2xl border border-[hsl(var(--border))] p-4 min-h-[100px] bg-[hsl(var(--soft-bg))]/30 text-[14px]">
+                  {transcript || <span className="text-muted-foreground italic">Your transcribed response will appear here...</span>}
                 </div>
               </div>
 
               {/* Actions Footer */}
-              <div className="flex justify-between items-center pt-4 border-t border-black/5">
+              <div className="flex flex-wrap gap-3 justify-between items-center pt-4 border-t border-[hsl(var(--border))]">
                 <button
                   onClick={() => setTranscript('')}
-                  className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
+                  className="inline-flex items-center gap-1.5 min-h-[44px] text-[14px] font-semibold text-[hsl(var(--blue-700))] hover:underline"
                 >
                   <RotateCcw className="w-4 h-4" /> Reset Answer
                 </button>
@@ -195,14 +196,14 @@ export default function VisaInterviewSandbox() {
                   <button
                     onClick={handleEvaluate}
                     disabled={!transcript.trim() || loadingScore}
-                    className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] text-white text-[13px] font-bold px-6 h-11 hover:opacity-90 disabled:opacity-50 transition"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] text-white text-[14px] font-semibold px-5 h-11 hover:bg-[hsl(var(--accent-hover))] disabled:opacity-50 transition-colors"
                   >
                     {loadingScore ? 'Evaluating...' : 'Get Scorecard'} <ArrowRight className="w-4 h-4" />
                   </button>
                   
                   <button
                     onClick={handleNext}
-                    className="rounded-full border border-black/10 text-[13px] font-bold px-5 h-11 hover:bg-black/5 transition"
+                    className="rounded-xl bg-white border border-[hsl(var(--border))] text-[14px] font-semibold px-5 h-11 hover:border-[hsl(var(--blue-700))] transition-colors"
                   >
                     Skip Question
                   </button>
@@ -220,11 +221,11 @@ export default function VisaInterviewSandbox() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-white border border-black/5 rounded-3xl p-6 shadow-xl shadow-blue-900/5 space-y-6"
+                    className="bg-white border border-[hsl(var(--border))] rounded-2xl p-6 shadow-sm space-y-6"
                   >
-                    <div className="text-center border-b border-black/5 pb-4">
-                      <div className="text-5xl font-black text-[hsl(var(--blue-900))]">{scores.overall}%</div>
-                      <div className="text-[11px] uppercase tracking-wider font-bold text-[hsl(var(--blue-900))]/40 mt-1">
+                    <div className="text-center border-b border-[hsl(var(--border))] pb-4">
+                      <div className="text-5xl font-bold text-[hsl(var(--blue-900))]">{scores.overall}%</div>
+                      <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mt-1">
                         Overall Score
                       </div>
                     </div>
@@ -235,25 +236,25 @@ export default function VisaInterviewSandbox() {
                       <ScoreBar label="Speed & Delivery" score={scores.delivery} />
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-blue-50/40 border border-blue-100/60 flex items-start gap-2.5">
-                      <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                      <p className="text-[12.5px] font-medium text-[hsl(var(--blue-900))]/80 leading-relaxed">
+                    <div className="p-4 rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] flex items-start gap-2.5">
+                      <Sparkles className="w-4 h-4 text-[hsl(var(--blue-700))] shrink-0 mt-0.5" />
+                      <p className="text-[13px] font-medium text-[hsl(var(--blue-900))] leading-relaxed">
                         {scores.advice}
                       </p>
                     </div>
 
                     <button
                       onClick={handleNext}
-                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[hsl(var(--blue-900))] text-white font-bold text-[13px] h-11 hover:opacity-90 transition"
+                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[hsl(var(--blue-700))] text-white font-semibold text-[14px] h-11 hover:bg-[hsl(var(--blue-800))] transition-colors"
                     >
                       Next Question <ArrowRight className="w-4 h-4" />
                     </button>
                   </motion.div>
                 ) : (
-                  <div className="bg-[hsl(var(--blue-900))] text-white rounded-3xl p-6 text-center space-y-4">
-                    <BookOpen className="w-8 h-8 text-[hsl(var(--accent))] mx-auto animate-bounce" />
-                    <h3 className="font-display font-extrabold text-[18px]">Sandbox Guidelines</h3>
-                    <p className="text-[12.5px] text-white/70 leading-relaxed">
+                  <div className="bg-white border border-[hsl(var(--border))] rounded-2xl p-6 text-center space-y-4">
+                    <BookOpen className="w-8 h-8 text-[hsl(var(--blue-700))] mx-auto" />
+                    <h3 className="font-display font-bold text-[18px] text-[hsl(var(--blue-900))]">Sandbox Guidelines</h3>
+                    <p className="text-[14px] text-muted-foreground leading-relaxed">
                       1. Click on the speaker icon to hear the interviewer speak the question.<br/>
                       2. Press the mic to record your verbal response.<br/>
                       3. Click "Get Scorecard" to receive immediate visual ratings and tips.
@@ -264,13 +265,13 @@ export default function VisaInterviewSandbox() {
 
               {/* History Panel */}
               {history.length > 0 && (
-                <div className="bg-white border border-black/5 rounded-3xl p-5 shadow-md">
+                <div className="bg-white border border-[hsl(var(--border))] rounded-2xl p-5 shadow-sm">
                   <h4 className="font-bold text-[13px] text-[hsl(var(--blue-900))] mb-3">Session Progress</h4>
                   <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
                     {history.map((h, i) => (
-                      <div key={i} className="flex justify-between items-center p-2.5 rounded-xl bg-[hsl(var(--soft-bg))]/50 border border-black/5">
+                      <div key={i} className="flex justify-between items-center p-2.5 rounded-xl bg-[hsl(var(--soft-bg))]/50 border border-[hsl(var(--border))]">
                         <span className="text-[12px] truncate max-w-[150px] font-medium">{h.q}</span>
-                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <span className="text-[12px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                           {h.score}%
                         </span>
                       </div>
@@ -293,13 +294,13 @@ export default function VisaInterviewSandbox() {
 function ScoreBar({ label, score }) {
   return (
     <div className="space-y-1.5">
-      <div className="flex justify-between text-[11px] font-bold text-[hsl(var(--blue-900))]/75">
+      <div className="flex justify-between text-[12px] font-semibold text-[hsl(var(--blue-900))]">
         <span>{label}</span>
         <span>{score}%</span>
       </div>
       <div className="h-1.5 w-full bg-[hsl(var(--soft-bg))] rounded-full overflow-hidden">
         <div 
-          className="h-full bg-[hsl(var(--accent))] rounded-full transition-all duration-500" 
+          className="h-full bg-[hsl(var(--blue-700))] rounded-full transition-all duration-300" 
           style={{ width: `${score}%` }}
         />
       </div>

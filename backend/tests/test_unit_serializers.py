@@ -9,7 +9,7 @@ os.environ['JWT_SECRET'] = 'test_secret'
 os.environ['ADMIN_EMAILS'] = 'admin@test.com'
 
 from datetime import datetime
-from serializers import serialize_doc, public_user, public_admin
+from serializers import serialize_doc, public_user
 
 
 class TestSerializeDoc:
@@ -87,28 +87,3 @@ class TestPublicUser:
         result = public_user(u)
         assert isinstance(result['created_at'], str)
         assert isinstance(result['updated_at'], str)
-
-
-class TestPublicAdmin:
-    def test_basic_fields(self):
-        u = {'_id': 'a1', 'email': 'admin@wehive.co.in', 'name': 'Admin'}
-        result = public_admin(u)
-        assert result['id'] == 'a1'
-        assert result['email'] == 'admin@wehive.co.in'
-        assert result['name'] == 'Admin'
-
-    def test_has_password_flag(self):
-        u = {'_id': 'a1', 'password_hash': 'hash123'}
-        result = public_admin(u)
-        assert result['has_password'] is True
-
-    def test_no_password_flag(self):
-        u = {'_id': 'a1'}
-        result = public_admin(u)
-        assert result['has_password'] is False
-
-    def test_staff_roles(self):
-        u = {'_id': 'a1', 'is_staff': True, 'staff_role': 'moderator'}
-        result = public_admin(u)
-        assert result['is_staff'] is True
-        assert result['staff_role'] == 'moderator'

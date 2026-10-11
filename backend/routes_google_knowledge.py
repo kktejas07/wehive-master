@@ -18,9 +18,9 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, Query
 
-from auth_utils import get_current_user_optional
+from auth_utils import get_current_user, get_current_user_optional
 
-router = APIRouter(prefix="/knowledge", tags=["google-knowledge"])
+router = APIRouter(prefix="/knowledge", tags=["google-knowledge"], dependencies=[Depends(get_current_user)])
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 SEARCH_ENGINE_ID = os.environ.get("GOOGLE_CX", "")

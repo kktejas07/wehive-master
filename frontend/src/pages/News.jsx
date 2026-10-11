@@ -5,7 +5,7 @@ import Newsroom from '../components/Newsroom';
 
 export default function News() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-[hsl(var(--soft-bg))]">
       <Navbar />
       <main className="flex-grow pt-24 pb-16">
         <Newsroom />

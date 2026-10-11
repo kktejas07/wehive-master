@@ -14,9 +14,9 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends
 
-from auth_utils import get_current_user_optional
+from auth_utils import get_current_user, get_current_user_optional
 
-router = APIRouter(prefix="/opensource", tags=["open-source"])
+router = APIRouter(prefix="/opensource", tags=["open-source"], dependencies=[Depends(get_current_user)])
 
 OPEN_SOURCE_TOOLS = [
     {
@@ -384,23 +384,24 @@ async def open_source_status():
     ollama_ok = False
     chroma_ok = False
 
+    from ollama_embeddings import OLLAMA_HOST
     try:
         import httpx
         async with httpx.AsyncClient(timeout=3) as client:
-            ollama_resp = await client.get("http://localhost:11434/api/tags")
+            ollama_resp = await client.get(f"{OLLAMA_HOST}/api/tags")
             ollama_ok = ollama_resp.status_code == 200
     except Exception:
         pass
 
     try:
-        from vector_store import _client
-        chroma_ok = _client is not None
+        from vector_store import get_client
+        chroma_ok = get_client() is not None
     except Exception:
         pass
 
     return {
         "ok": True,
-        "ollama": {"running": ollama_ok, "endpoint": "http://localhost:11434"},
+        "ollama": {"running": ollama_ok, "endpoint": OLLAMA_HOST},
         "chromadb": {"available": chroma_ok},
         "integrated_tools": sum(1 for t in OPEN_SOURCE_TOOLS if t["integrated"]),
         "available_tools": len(OPEN_SOURCE_TOOLS),

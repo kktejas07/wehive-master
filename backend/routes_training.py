@@ -22,7 +22,7 @@ from pydantic import BaseModel
 from auth_utils import get_current_user
 from db import db
 
-router = APIRouter(prefix="/training", tags=["training"])
+router = APIRouter(prefix="/training", tags=["training"], dependencies=[Depends(get_current_user)])
 
 TRAINING_CATALOG = [
     {

@@ -4,6 +4,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, apiClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const FIELDS = [
   { key: 'id', label: 'ID', editable: false, type: 'text' },
@@ -119,6 +120,7 @@ export default function UniversitiesTab() {
   };
 
   const closeEditor = () => { setEditing(null); setEditDraft({}); };
+  const dialogProps = useDialogA11y(!!editing, closeEditor);
 
   const updateDraft = (key, value) => {
     setEditDraft(prev => ({ ...prev, [key]: value }));
@@ -249,11 +251,11 @@ export default function UniversitiesTab() {
       {/* ── Search + Filters ── */}
       <div className="flex flex-wrap gap-3 mb-4 items-center">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && search()} placeholder="Search name, country..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-[#111632] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-sky-500" />
         </div>
         <input value={countryFilter} onChange={e => setCountryFilter(e.target.value)} placeholder="Country code (us, gb...)" className="h-10 px-4 rounded-xl bg-[#111632] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-sky-500 w-40" />
-        <button onClick={search} className="h-10 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-[13px] font-bold">Search</button>
+        <button onClick={search} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-bold">Search</button>
         <button onClick={() => { setQuery(''); setCountryFilter(''); setSkip(0); loadList('', '', 0); }} className="h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-[13px] font-bold">Clear</button>
       </div>
 
@@ -267,11 +269,11 @@ export default function UniversitiesTab() {
         <div className="grid sm:grid-cols-2 gap-4 mb-4">
           {/* Seed */}
           <Panel className="!p-4">
-            <h4 className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Upload className="w-3.5 h-3.5 text-sky-300" /> Seed from CSV</h4>
+            <h4 className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Upload className="w-3.5 h-3.5 text-blue-300" /> Seed from CSV</h4>
             <div className="flex flex-wrap gap-2 items-center">
               <input ref={seedRef} type="file" accept=".csv" onChange={e => setSeedFile(e.target.files[0])} className="text-[11px] text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-white/10 file:text-[11px] file:font-bold file:text-slate-200" />
-              <label className="flex items-center gap-1 text-[11px] text-slate-400"><input type="checkbox" checked={seedDryRun} onChange={e => setSeedDryRun(e.target.checked)} className="accent-[hsl(var(--accent))]" /> Dry run</label>
-              <button disabled={!seedFile || seedBusy} onClick={handleSeed} className="inline-flex items-center gap-1 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{seedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileSpreadsheet className="w-3 h-3" />} Go</button>
+              <label className="flex items-center gap-1 text-[11px] text-slate-400"><input type="checkbox" checked={seedDryRun} onChange={e => setSeedDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
+              <button disabled={!seedFile || seedBusy} onClick={handleSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{seedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileSpreadsheet className="w-3 h-3" />} Go</button>
             </div>
             {seedResult && <div className="mt-2 p-2 rounded-lg bg-black/30 text-[11px] font-mono text-slate-300 max-h-24 overflow-y-auto">{JSON.stringify(seedResult, null, 2)}</div>}
           </Panel>
@@ -281,7 +283,7 @@ export default function UniversitiesTab() {
             <h4 className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Database className="w-3.5 h-3.5 text-amber-300" /> Enrich from CSV</h4>
             <div className="flex flex-wrap gap-2 items-center">
               <input ref={enrichRef} type="file" accept=".csv" onChange={e => setEnrichFile(e.target.files[0])} className="text-[11px] text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-white/10 file:text-[11px] file:font-bold file:text-slate-200" />
-              <label className="flex items-center gap-1 text-[11px] text-slate-400"><input type="checkbox" checked={enrichDryRun} onChange={e => setEnrichDryRun(e.target.checked)} className="accent-[hsl(var(--accent))]" /> Dry run</label>
+              <label className="flex items-center gap-1 text-[11px] text-slate-400"><input type="checkbox" checked={enrichDryRun} onChange={e => setEnrichDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
               <button disabled={!enrichFile || enrichBusy} onClick={handleEnrich} className="inline-flex items-center gap-1 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{enrichBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />} Go</button>
             </div>
             {enrichResult && <div className="mt-2 p-2 rounded-lg bg-black/30 text-[11px] font-mono text-slate-300 max-h-24 overflow-y-auto">{JSON.stringify(enrichResult, null, 2)}</div>}
@@ -291,7 +293,7 @@ export default function UniversitiesTab() {
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" /> College Scorecard</h4>
             <div className="flex flex-wrap gap-2 items-center">
-              <label className="flex items-center gap-1 text-[11px] text-slate-400"><input type="checkbox" checked={scDryRun} onChange={e => setScDryRun(e.target.checked)} className="accent-[hsl(var(--accent))]" /> Dry run</label>
+              <label className="flex items-center gap-1 text-[11px] text-slate-400"><input type="checkbox" checked={scDryRun} onChange={e => setScDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
               <button disabled={scBusy} onClick={handleScorecard} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{scBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />} Run</button>
             </div>
             {scResult && <div className="mt-2 p-2 rounded-lg bg-black/30 text-[11px] font-mono text-slate-300 max-h-24 overflow-y-auto">{JSON.stringify(scResult, null, 2)}</div>}
@@ -299,16 +301,16 @@ export default function UniversitiesTab() {
 
           {/* AI Enrichment */}
           <Panel className="!p-4">
-            <h4 className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-purple-300" /> AI Enrich Missing</h4>
-            <p className="text-[10px] text-slate-500 mb-2">Batch-fills template descriptions, courses, facilities for bare universities.</p>
-            <button disabled={aiEnrichBusy} onClick={handleAIEnrich} className="inline-flex items-center gap-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{aiEnrichBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Enrich with AI</button>
+            <h4 className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-blue-300" /> AI Enrich Missing</h4>
+            <p className="text-[11px] text-slate-400 mb-2">Batch-fills template descriptions, courses, facilities for bare universities.</p>
+            <button disabled={aiEnrichBusy} onClick={handleAIEnrich} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{aiEnrichBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Enrich with AI</button>
             {aiEnrichResult && <div className="mt-2 p-2 rounded-lg bg-black/30 text-[11px] font-mono text-slate-300 max-h-24 overflow-y-auto">{JSON.stringify(aiEnrichResult, null, 2)}</div>}
           </Panel>
 
           {/* Re-seed */}
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5 text-red-300" /> Re-seed</h4>
-            <button disabled={reSeedBusy} onClick={handleReSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{reSeedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Re-seed from static</button>
+            <button disabled={reSeedBusy} onClick={handleReSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{reSeedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Re-seed from static</button>
             {reSeedResult && <div className="mt-2 p-2 rounded-lg bg-black/30 text-[11px] font-mono text-slate-300 max-h-24 overflow-y-auto">{JSON.stringify(reSeedResult, null, 2)}</div>}
           </Panel>
         </div>
@@ -317,15 +319,15 @@ export default function UniversitiesTab() {
       {/* ── List ── */}
       <Panel className="overflow-hidden">
         {items === null ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-slate-500" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
         ) : items.length === 0 ? (
-          <div className="text-center py-12 text-slate-500 text-[14px]">No universities found.</div>
+          <div className="text-center py-12 text-slate-400 text-[14px]">No universities found.</div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-[12px]">
                 <thead>
-                  <tr className="border-b border-white/5 text-slate-500 font-semibold uppercase tracking-wider">
+                  <tr className="border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
                     <th className="text-left py-2.5 px-2">Name</th>
                     <th className="text-left py-2.5 px-2">Country</th>
                     <th className="text-right py-2.5 px-2">Rank</th>
@@ -358,7 +360,7 @@ export default function UniversitiesTab() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
-                <div className="text-[12px] text-slate-500">{total} total</div>
+                <div className="text-[12px] text-slate-400">{total} total</div>
                 <div className="flex gap-1">
                   <button disabled={currentPage <= 1} onClick={() => { setSkip(s => Math.max(0, s - limit)); loadList(query, countryFilter, Math.max(0, skip - limit)); }} className="h-8 px-3 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white text-[11px] font-bold">Prev</button>
                   <span className="h-8 px-3 flex items-center text-[12px] text-slate-400">{currentPage} / {totalPages}</span>
@@ -373,16 +375,16 @@ export default function UniversitiesTab() {
       {/* ── Edit Modal ── */}
       {editing && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={closeEditor}>
-          <div className="rounded-2xl bg-[#111632] border border-white/10 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div {...dialogProps} className="rounded-2xl bg-[#111632] border border-white/10 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-[#111632] z-10 flex items-center justify-between p-5 border-b border-white/5">
               <h3 className="text-[16px] font-bold text-white truncate max-w-[400px]">{editDraft.name || 'Edit University'}</h3>
-              <button onClick={closeEditor} className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"><X className="w-4 h-4 text-slate-400" /></button>
+              <button aria-label="Close" onClick={closeEditor} className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"><X className="w-4 h-4 text-slate-400" /></button>
             </div>
 
             <div className="p-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
               {FIELDS.filter(f => f.editable).map(f => (
                 <div key={f.key}>
-                  <label className="block text-[11px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">{f.label}</label>
+                  <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">{f.label}</label>
                   {f.type === 'boolean' ? (
                     <select value={editDraft[f.key] === true ? 'true' : editDraft[f.key] === false ? 'false' : ''} onChange={e => updateDraft(f.key, e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500">
                       <option value="">—</option>
@@ -397,7 +399,7 @@ export default function UniversitiesTab() {
                     <div className="space-y-2">
                       <input type="text" value={editDraft[f.key] || ''} onChange={e => updateDraft(f.key, e.target.value)} placeholder="https://..." className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
                       {editDraft.image_url && (
-                        <img src={editDraft.image_url} alt="" className="w-full h-24 rounded-lg object-cover bg-black/50" onError={e => { e.target.style.display = 'none' }} />
+                        <img loading="lazy" decoding="async" src={editDraft.image_url} alt="" className="w-full h-24 rounded-lg object-cover bg-black/50" onError={e => { e.target.style.display = 'none' }} />
                       )}
                     </div>
                   ) : (
@@ -410,12 +412,12 @@ export default function UniversitiesTab() {
             {/* List fields (courses, intakes, accreditation, facilities) */}
             {['courses', 'popular_courses', 'intakes', 'accreditation', 'facilities'].map(listKey => (
               <div key={listKey} className="px-5 mb-3">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">{listKey.replace(/_/g, ' ')}</label>
-                <div className="flex flex-wrap gap-1.5">
+                <label id={`uni-${listKey}`} className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">{listKey.replace(/_/g, ' ')}</label>
+                <div role="group" aria-labelledby={`uni-${listKey}`} className="flex flex-wrap gap-1.5">
                   {(editDraft[listKey] || []).map((item, i) => (
                     <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-2 py-0.5 text-[11px] text-slate-300">
                       {item}
-                      <button onClick={() => updateDraft(listKey, (editDraft[listKey] || []).filter((_, j) => j !== i))} className="text-slate-500 hover:text-red-400"><X className="w-2.5 h-2.5" /></button>
+                      <button onClick={() => updateDraft(listKey, (editDraft[listKey] || []).filter((_, j) => j !== i))} className="text-slate-400 hover:text-red-400"><X className="w-2.5 h-2.5" /></button>
                     </span>
                   ))}
                   <AddListItem onAdd={v => updateDraft(listKey, [...(editDraft[listKey] || []), v])} />
@@ -425,7 +427,7 @@ export default function UniversitiesTab() {
 
             <div className="sticky bottom-0 bg-[#111632] flex justify-end gap-2 p-5 border-t border-white/5">
               <button onClick={closeEditor} className="h-10 px-5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[13px] font-bold">Cancel</button>
-              <button disabled={saving} onClick={saveEdit} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-xl bg-[hsl(var(--accent))] hover:brightness-110 disabled:opacity-50 text-white text-[13px] font-bold">
+              <button disabled={saving} onClick={saveEdit} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white text-[13px] font-bold">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {saving ? 'Saving...' : 'Save'}
               </button>
@@ -448,7 +450,7 @@ function AddListItem({ onAdd }) {
           <button onClick={() => { if (val.trim()) { onAdd(val.trim()); setVal(''); } }} className="text-emerald-400 hover:text-emerald-300"><Plus className="w-3 h-3" /></button>
         </span>
       ) : (
-        <button onClick={() => setShow(true)} className="text-slate-500 hover:text-slate-300"><Plus className="w-3.5 h-3.5" /></button>
+        <button onClick={() => setShow(true)} className="text-slate-400 hover:text-slate-300"><Plus className="w-3.5 h-3.5" /></button>
       )}
     </span>
   );

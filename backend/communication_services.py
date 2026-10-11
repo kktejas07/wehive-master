@@ -162,7 +162,8 @@ class WhatsAppService:
 
     async def get_community_invite(self) -> str:
         await self._ensure_link()
-        return self._group_invite_link or 'https://chat.whatsapp.com/invite'
+        # No placeholder link: '' tells callers the group invite isn't configured.
+        return self._group_invite_link or ''
 
     async def send_invite_message(self, phone: str, group_name: str = 'We Hive Community') -> dict:
         await self._ensure_link()

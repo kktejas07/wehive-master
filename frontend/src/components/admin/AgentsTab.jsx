@@ -6,6 +6,7 @@ import { useToast } from '../../hooks/use-toast';
 import { API } from '../../context/AuthContext';
 import axios from 'axios';
 import Pagination from './Pagination';
+import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
 const STATUS_FILTERS = [
   { value: '', label: 'All' },
@@ -14,7 +15,6 @@ const STATUS_FILTERS = [
   { value: 'suspended', label: 'Suspended' },
 ];
 
-const TIER_COLORS = { bronze: '#b45309', silver: '#94a3b8', gold: '#f59e0b', platinum: '#a855f7' };
 
 const STATUS_BADGE = {
   pending:   'bg-amber-500/15 text-amber-300',
@@ -23,6 +23,7 @@ const STATUS_BADGE = {
 };
 
 function CommissionModal({ agent, token, onClose, onDone }) {
+  const dialogProps = useDialogA11y(true, onClose);
   const { toast } = useToast();
   const [form, setForm] = useState({ university_name: '', amount_inr: '', commission_type: 'enrollment', note: '' });
   const [busy, setBusy] = useState(false);
@@ -43,7 +44,7 @@ function CommissionModal({ agent, token, onClose, onDone }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-[#111632] rounded-2xl border border-white/10 w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+      <div {...dialogProps} className="bg-[#111632] rounded-2xl border border-white/10 w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
         <div className="font-bold text-white text-[16px]">Record Commission Payment</div>
         <div className="text-[12px] text-slate-400">Agent: <span className="text-white font-bold">{agent.agency_name || agent.name}</span></div>
         {[
@@ -52,13 +53,13 @@ function CommissionModal({ agent, token, onClose, onDone }) {
           { k: 'note', label: 'Note (optional)', placeholder: 'Enrollment confirmation #123' },
         ].map(({ k, label, placeholder, type = 'text' }) => (
           <label key={k} className="block">
-            <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">{label}</span>
+            <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">{label}</span>
             <input type={type} value={form[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} placeholder={placeholder}
-              className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--accent))]/50" />
+              className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50" />
           </label>
         ))}
         <label className="block">
-          <span className="block text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Type</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Type</span>
           <select value={form.commission_type} onChange={e => setForm(f => ({ ...f, commission_type: e.target.value }))}
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none">
             <option value="enrollment">Enrollment</option>
@@ -98,21 +99,21 @@ function AgentCard({ agent, token, onRefresh }) {
   return (
     <div className="rounded-2xl bg-white/5 border border-white/8 overflow-hidden">
       <button onClick={() => setExpanded(v => !v)} className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/5 transition">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[16px] shrink-0" style={{ background: `${TIER_COLORS[tier]}20`, color: TIER_COLORS[tier] }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[16px] shrink-0 bg-blue-500/15 text-blue-300">
           {(agent.agency_name || agent.name || 'A')[0].toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[14px] font-bold text-white">{agent.agency_name || agent.name || '—'}</span>
-            <span className={`text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 ${STATUS_BADGE[status] || 'bg-white/5 text-slate-400'}`}>{status}</span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5" style={{ background: `${TIER_COLORS[tier]}20`, color: TIER_COLORS[tier] }}>{tier}</span>
+            <span className={`text-[11px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 ${STATUS_BADGE[status] || 'bg-white/5 text-slate-400'}`}>{status}</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 bg-white/10 text-slate-200">{tier}</span>
           </div>
           <div className="text-[12px] text-slate-400 mt-0.5 truncate">{agent.email} · {agent.city || '—'}, {(agent.country || '').toUpperCase()}</div>
         </div>
         <div className="flex items-center gap-4 shrink-0 text-right">
           <div className="hidden sm:block">
             <div className="text-[13px] font-bold text-white">{agent.total_students || agent.students_count || 0} students</div>
-            <div className="text-[11px] text-slate-500">₹{((agent.total_commission_inr || agent.total_revenue || 0) / 1000).toFixed(0)}K earned</div>
+            <div className="text-[11px] text-slate-400">₹{((agent.total_commission_inr || agent.total_revenue || 0) / 1000).toFixed(0)}K earned</div>
           </div>
           {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
         </div>
@@ -129,7 +130,7 @@ function AgentCard({ agent, token, onRefresh }) {
             ].map(([l, v, Icon]) => (
               <div key={l} className="rounded-xl bg-white/5 p-3 text-center">
                 <div className="text-[18px] font-bold text-white">{v}</div>
-                <div className="text-[10.5px] text-slate-400 mt-0.5">{l}</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">{l}</div>
               </div>
             ))}
           </div>
@@ -143,32 +144,31 @@ function AgentCard({ agent, token, onRefresh }) {
           <div className="flex flex-wrap gap-2">
             {status === 'pending' && (
               <button onClick={() => patch({ status: 'active' })} disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-[12.5px] font-bold text-white transition disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 h-10 text-[12.5px] font-semibold text-white transition disabled:opacity-50">
                 <CheckCircle className="w-3.5 h-3.5" /> Approve Agent
               </button>
             )}
             {status === 'active' && (
               <button onClick={() => patch({ status: 'suspended' })} disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-red-600/70 hover:bg-red-600 px-4 py-2 text-[12.5px] font-bold text-white transition disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/70 hover:bg-red-600 px-4 h-10 text-[12.5px] font-semibold text-white transition disabled:opacity-50">
                 <XCircle className="w-3.5 h-3.5" /> Suspend
               </button>
             )}
             {status === 'suspended' && (
               <button onClick={() => patch({ status: 'active' })} disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600/70 hover:bg-emerald-600 px-4 py-2 text-[12.5px] font-bold text-white transition disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/70 hover:bg-emerald-600 px-4 h-10 text-[12.5px] font-semibold text-white transition disabled:opacity-50">
                 <CheckCircle className="w-3.5 h-3.5" /> Reactivate
               </button>
             )}
             <button onClick={() => setShowCommModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--accent))] hover:opacity-90 px-4 py-2 text-[12.5px] font-bold text-white transition">
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] px-4 h-10 text-[13px] font-semibold text-white transition">
               <DollarSign className="w-3.5 h-3.5" /> Record Commission
             </button>
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-slate-400">Tier:</span>
               {['bronze','silver','gold','platinum'].map(t => (
                 <button key={t} onClick={() => patch({ tier: t })} disabled={busy}
-                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold capitalize transition ${tier === t ? 'text-white' : 'bg-white/5 text-slate-500 hover:text-white'}`}
-                  style={tier === t ? { background: TIER_COLORS[t] } : {}}>
+                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize transition ${tier === t ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}>
                   {t}
                 </button>
               ))}
@@ -217,16 +217,16 @@ export default function AgentsTab() {
           <div className="flex gap-2 flex-wrap">
             {STATUS_FILTERS.map(f => (
               <button key={f.value} onClick={() => { setStatusFilter(f.value); setSkip(0); }}
-                className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${statusFilter === f.value ? 'bg-[hsl(var(--accent))] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
+                className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${statusFilter === f.value ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
                 {f.label}{f.value === 'pending' && pending > 0 ? ` (${pending})` : ''}
               </button>
             ))}
           </div>
           <div className="flex-1 min-w-[160px]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search agents…"
-                className="w-full h-9 rounded-xl bg-white/5 border border-white/10 pl-8 pr-3 text-[13px] text-white outline-none focus:border-white/20 placeholder:text-slate-600" />
+                className="w-full h-9 rounded-xl bg-white/5 border border-white/10 pl-8 pr-3 text-[13px] text-white outline-none focus:border-white/20 placeholder:text-slate-500" />
             </div>
           </div>
         </div>

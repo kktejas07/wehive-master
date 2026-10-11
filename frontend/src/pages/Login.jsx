@@ -6,8 +6,8 @@ export default function Login() {
   return (
     <div className="bg-white">
       <Navbar />
-      <main className="min-h-screen flex items-center justify-center py-10 pt-24 bg-[hsl(var(--soft-bg))]">
-        <div className="max-w-md mx-auto px-5 w-full">
+      <main className="min-h-screen flex items-center justify-center pt-28 pb-16 bg-[hsl(var(--soft-bg))]">
+        <div className="max-w-[440px] mx-auto px-4 w-full">
           <AuthCard mode="login" />
         </div>
       </main>

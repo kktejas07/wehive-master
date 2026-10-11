@@ -75,25 +75,25 @@ export default function VisaScheduling() {
       <Navbar />
       <main className="pt-28 pb-16">
         <div className="max-w-3xl mx-auto px-5 sm:px-8">
-          <div className="flex items-center gap-1.5 text-[13px] text-[hsl(var(--blue-900))]/55 mb-6">
+          <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mb-6">
             <Link to="/" className="hover:text-[hsl(var(--blue-700))]">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="font-bold text-[hsl(var(--blue-900))]">Visa Appointment Scheduling</span>
           </div>
 
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <Calendar className="w-3.5 h-3.5" /> Schedule Appointment
             </div>
-            <h1 className="font-display font-extrabold text-[32px] sm:text-[40px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <h1 className="font-display font-bold text-[32px] sm:text-[40px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               Book your visa appointment
             </h1>
-            <p className="mt-2 text-[15px] text-[hsl(var(--blue-900))]/60 max-w-xl mx-auto">
+            <p className="mt-2 text-[15px] text-muted-foreground max-w-xl mx-auto">
               Select your embassy location and available time slot.
             </p>
             <Link
               to="/us-visa-slots"
-              className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--accent))] hover:underline"
+              className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
             >
               <Clock className="w-4 h-4" />
               Track Visa Slots — Live Wait Times
@@ -103,25 +103,25 @@ export default function VisaScheduling() {
           <div className="flex items-center justify-center gap-2 mb-8">
             {[1, 2, 3, 4].map(s => (
               <div key={s} className={`flex items-center gap-2 ${s > 1 ? 'ml-2' : ''}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold ${step >= s ? 'bg-[hsl(var(--accent))] text-white' : 'bg-white border border-black/10 text-[hsl(var(--blue-900))]/40'}`}>{s}</div>
-                <div className={`text-[11px] font-bold hidden sm:block ${step >= s ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/40'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold ${step >= s ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white border border-[hsl(var(--border))] text-muted-foreground'}`}>{s}</div>
+                <div className={`text-[12px] font-bold hidden sm:block ${step >= s ? 'text-[hsl(var(--blue-900))]' : 'text-muted-foreground'}`}>
                   {['Select', 'Location', 'Time', 'Confirm'][s - 1]}
                 </div>
-                {s < 4 && <div className={`w-8 h-px ${step > s ? 'bg-[hsl(var(--accent))]' : 'bg-black/10'}`} />}
+                {s < 4 && <div className={`w-8 h-px ${step > s ? 'bg-[hsl(var(--blue-700))]' : 'bg-[hsl(var(--border))]'}`} />}
               </div>
             ))}
           </div>
 
           {!confirmed ? (
-            <div className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8">
+            <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8">
               {step === 1 && (
                 <div className="space-y-4">
-                  <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))]">Select Application</h2>
-                  <p className="text-[13px] text-[hsl(var(--blue-900))]/60">Choose the visa application you want to schedule an appointment for.</p>
+                  <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))] leading-tight">Select Application</h2>
+                  <p className="text-[13px] text-muted-foreground">Choose the visa application you want to schedule an appointment for.</p>
                   {applications.length === 0 ? (
-                    <div className="rounded-2xl border-2 border-dashed border-black/10 p-8 text-center">
-                      <FileText className="w-10 h-10 text-[hsl(var(--blue-900))]/20 mx-auto" />
-                      <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/40">No applications found.</p>
+                    <div className="rounded-2xl border-2 border-dashed border-[hsl(var(--border))] p-8 text-center">
+                      <FileText className="w-10 h-10 text-muted-foreground mx-auto" />
+                      <p className="mt-2 text-[14px] text-muted-foreground">No applications found.</p>
                       <Link to="/student-visa" className="mt-3 inline-flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline">
                         Start an application <ChevronRight className="w-3 h-3" />
                       </Link>
@@ -132,10 +132,10 @@ export default function VisaScheduling() {
                         <button
                           key={app._id}
                           onClick={() => { setAppId(app._id); setCountry(app.country_id || ''); setStep(2); }}
-                          className="w-full text-left p-4 rounded-xl border border-black/5 hover:border-[hsl(var(--blue-700))]/30 transition"
+                          className="w-full text-left p-4 rounded-xl border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] transition"
                         >
                           <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{app.applicant_name || app._id?.slice(0, 8)}</div>
-                          <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{app.visa_type} · {app.country_name || app.country_id}</div>
+                          <div className="text-[12px] text-muted-foreground">{app.visa_type} · {app.country_name || app.country_id}</div>
                         </button>
                       ))}
                     </div>
@@ -145,23 +145,23 @@ export default function VisaScheduling() {
 
               {step === 2 && (
                 <div className="space-y-4">
-                  <button onClick={() => setStep(1)} className="flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline mb-2">
+                  <button onClick={() => setStep(1)} className="flex items-center gap-1 min-h-[44px] text-[14px] font-semibold text-[hsl(var(--blue-700))] hover:underline">
                     <ChevronLeft className="w-4 h-4" /> Back
                   </button>
-                  <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))]">Select Embassy Location</h2>
-                  <p className="text-[13px] text-[hsl(var(--blue-900))]/60">Choose the city where you want to attend your visa interview.</p>
+                  <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))] leading-tight">Select Embassy Location</h2>
+                  <p className="text-[13px] text-muted-foreground">Choose the city where you want to attend your visa interview.</p>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {EMBASSY_CITIES.map(c => (
                       <button
                         key={c.id}
                         onClick={() => { setCity(c.name); setStep(3); }}
-                        className="text-left p-4 rounded-xl border-2 border-black/5 hover:border-[hsl(var(--blue-700))]/30 hover:bg-[hsl(var(--blue-50))] transition"
+                        className="text-left p-4 rounded-xl border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))] hover:bg-[hsl(var(--blue-50))] transition"
                       >
                         <div className="flex items-center gap-3">
                           <Building2 className="w-5 h-5 text-[hsl(var(--blue-700))]" />
                           <div>
                             <div className="font-bold text-[14px] text-[hsl(var(--blue-900))]">{c.name}</div>
-                            <div className="text-[11px] text-[hsl(var(--blue-900))]/55">{country?.toUpperCase()} Embassy</div>
+                            <div className="text-[12px] text-muted-foreground">{country?.toUpperCase()} Embassy</div>
                           </div>
                         </div>
                       </button>
@@ -172,18 +172,18 @@ export default function VisaScheduling() {
 
               {step === 3 && (
                 <div className="space-y-4">
-                  <button onClick={() => setStep(2)} className="flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline mb-2">
+                  <button onClick={() => setStep(2)} className="flex items-center gap-1 min-h-[44px] text-[14px] font-semibold text-[hsl(var(--blue-700))] hover:underline">
                     <ChevronLeft className="w-4 h-4" /> Back
                   </button>
-                  <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))]">Select Date & Time</h2>
-                  <p className="text-[13px] text-[hsl(var(--blue-900))]/60">Available slots at {city} for {country?.toUpperCase()}.</p>
+                  <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))] leading-tight">Select Date & Time</h2>
+                  <p className="text-[13px] text-muted-foreground">Available slots at {city} for {country?.toUpperCase()}.</p>
                   <div>
-                    <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Date</label>
-                    <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full h-11 rounded-xl border border-black/10 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" min={new Date().toISOString().split('T')[0]} />
+                    <label htmlFor="visascheduling-date" className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground block mb-1">Date</label>
+                    <input id="visascheduling-date" type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full h-11 rounded-xl border border-[hsl(var(--border))] focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" min={new Date().toISOString().split('T')[0]} />
                   </div>
                   {date && (
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-2">Available Time Slots</label>
+                      <label className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground block mb-2">Available Time Slots</label>
                       {loading ? (
                         <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" />
                       ) : slots.length > 0 ? (
@@ -192,8 +192,8 @@ export default function VisaScheduling() {
                             <button
                               key={s._id}
                               onClick={() => { setTime(s.time); setStep(4); }}
-                              className={`px-4 py-2.5 rounded-full text-[13px] font-bold border-2 transition ${
-                                time === s.time ? 'bg-[hsl(var(--blue-700))] text-white border-[hsl(var(--blue-700))]' : 'border-black/10 hover:border-[hsl(var(--blue-700))]/30'
+                              className={`px-4 py-2.5 rounded-xl text-[13px] font-bold border-2 transition ${
+                                time === s.time ? 'bg-[hsl(var(--blue-700))] text-white border-[hsl(var(--blue-700))]' : 'border-[hsl(var(--border))] hover:border-[hsl(var(--blue-200))]'
                               }`}
                             >
                               {s.time}
@@ -201,7 +201,7 @@ export default function VisaScheduling() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-[13px] text-[hsl(var(--blue-900))]/40">No slots available for this date.</p>
+                        <p className="text-[13px] text-muted-foreground">No slots available for this date.</p>
                       )}
                     </div>
                   )}
@@ -210,25 +210,25 @@ export default function VisaScheduling() {
 
               {step === 4 && (
                 <div className="space-y-4">
-                  <button onClick={() => setStep(3)} className="flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline mb-2">
+                  <button onClick={() => setStep(3)} className="flex items-center gap-1 min-h-[44px] text-[14px] font-semibold text-[hsl(var(--blue-700))] hover:underline">
                     <ChevronLeft className="w-4 h-4" /> Back
                   </button>
-                  <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))]">Confirm Appointment</h2>
+                  <h2 className="font-bold text-[18px] text-[hsl(var(--blue-900))] leading-tight">Confirm Appointment</h2>
                   <div className="rounded-2xl bg-[hsl(var(--soft-bg))] p-5 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Embassy</span>
+                      <span className="text-[13px] text-muted-foreground">Embassy</span>
                       <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{country?.toUpperCase()} Embassy</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[13px] text-[hsl(var(--blue-900))]/60">City</span>
+                      <span className="text-[13px] text-muted-foreground">City</span>
                       <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{city}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Date</span>
+                      <span className="text-[13px] text-muted-foreground">Date</span>
                       <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{date}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[13px] text-[hsl(var(--blue-900))]/60">Time</span>
+                      <span className="text-[13px] text-muted-foreground">Time</span>
                       <span className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{time}</span>
                     </div>
                   </div>
@@ -236,26 +236,26 @@ export default function VisaScheduling() {
                     <Shield className="w-4 h-4 inline mr-1" />
                     Please arrive 30 minutes early with all original documents and a copy of your appointment confirmation.
                   </div>
-                  <Button onClick={handleBook} disabled={loading} className="w-full h-12 rounded-full btn-accent text-white font-bold">
+                  <Button onClick={handleBook} disabled={loading} className="w-full h-12 rounded-xl btn-accent text-white font-semibold">
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Booking'}
                   </Button>
                 </div>
               )}
             </div>
           ) : (
-            <div className="rounded-3xl bg-white border border-black/5 p-8 text-center">
+            <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8 text-center">
               <div className="inline-flex h-16 w-16 rounded-full bg-emerald-100 items-center justify-center mb-4">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600" />
               </div>
-              <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))]">Appointment Confirmed!</h2>
-              <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/60">
+              <h2 className="font-display font-bold text-[24px] text-[hsl(var(--blue-900))] leading-tight">Appointment Confirmed!</h2>
+              <p className="mt-2 text-[14px] text-muted-foreground">
                 Your visa appointment at <strong>{city}</strong> is scheduled for <strong>{date}</strong> at <strong>{time}</strong>.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Link to="/account?tab=applications" className="inline-flex items-center gap-1.5 rounded-full btn-primary text-white h-11 px-6 font-bold text-[13px]">
+                <Link to="/account?tab=applications" className="inline-flex items-center gap-1.5 rounded-xl btn-primary text-white h-11 px-6 font-bold text-[13px]">
                   View applications <ChevronRight className="w-4 h-4" />
                 </Link>
-                <Link to={`/visa-interview`} className="inline-flex items-center gap-1.5 rounded-full border border-black/10 h-11 px-6 font-bold text-[13px] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--soft-bg))]">
+                <Link to={`/visa-interview`} className="inline-flex items-center gap-1.5 rounded-xl border border-[hsl(var(--border))] h-11 px-6 font-bold text-[13px] text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--soft-bg))]">
                   Prepare for interview
                 </Link>
               </div>

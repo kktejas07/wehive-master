@@ -17,28 +17,28 @@ const SCHOLARSHIP_TYPES = [
     label: 'Merit-based',
     description: 'Awarded based on academic excellence',
     icon: Star,
-    color: 'bg-amber-500',
+    color: 'bg-[hsl(var(--blue-700))]',
   },
   {
     id: 'need',
     label: 'Need-based',
     description: 'Awarded based on financial need',
     icon: DollarSign,
-    color: 'bg-emerald-500',
+    color: 'bg-[hsl(var(--blue-700))]',
   },
   {
     id: 'sports',
     label: 'Sports',
     description: 'For student-athletes',
     icon: TrendingUp,
-    color: 'bg-blue-500',
+    color: 'bg-[hsl(var(--blue-700))]',
   },
   {
     id: 'research',
     label: 'Research',
     description: 'For research-oriented students',
     icon: BookOpen,
-    color: 'bg-violet-500',
+    color: 'bg-[hsl(var(--blue-700))]',
   },
 ];
 
@@ -115,8 +115,8 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
 
   if (compact) {
     return (
-      <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200 p-5">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-bold text-amber-700 mb-2">
+      <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
+        <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-amber-700 mb-2">
           <Sparkles className="w-3.5 h-3.5" /> Scholarship Matcher
         </div>
         <p className="text-[13px] text-amber-800/70 mb-3">
@@ -134,18 +134,18 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="rounded-3xl bg-white border border-black/5 p-6 sm:p-8"
+      className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8"
     >
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-1">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-1">
         <Award className="w-3.5 h-3.5" /> Scholarship Matcher
       </div>
-      <h2 className="font-display font-extrabold text-[24px] text-[hsl(var(--blue-900))] mb-2">
+      <h2 className="font-display font-bold text-[24px] text-[hsl(var(--blue-900))] mb-2 leading-tight">
         Am I eligible?
       </h2>
-      <p className="text-[14px] text-[hsl(var(--blue-900))]/60 mb-6">
+      <p className="text-[14px] text-muted-foreground mb-6">
         Enter your profile to see which universities match you for scholarships.
       </p>
 
@@ -155,41 +155,41 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
             <h3 className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Your Profile</h3>
             <div className="space-y-3">
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">GPA (4.0 scale)</label>
-                <input
+                <label htmlFor="scholarshipmatcher-gpa-4-0-scale" className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground block mb-1">GPA (4.0 scale)</label>
+                <input id="scholarshipmatcher-gpa-4-0-scale"
                   type="range"
                   min="0"
                   max="4.0"
                   step="0.1"
                   value={profile.gpa}
                   onChange={(e) => setProfile(p => ({ ...p, gpa: parseFloat(e.target.value) }))}
-                  className="w-full accent-[hsl(var(--accent))]"
+                  className="w-full accent-[hsl(var(--blue-700))]"
                 />
                 <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] mt-1">{profile.gpa.toFixed(1)}</div>
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">IELTS Score</label>
-                <input
+                <label htmlFor="scholarshipmatcher-ielts-score" className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground block mb-1">IELTS Score</label>
+                <input id="scholarshipmatcher-ielts-score"
                   type="range"
                   min="0"
                   max="9"
                   step="0.5"
                   value={profile.ielts}
                   onChange={(e) => setProfile(p => ({ ...p, ielts: parseFloat(e.target.value) }))}
-                  className="w-full accent-[hsl(var(--accent))]"
+                  className="w-full accent-[hsl(var(--blue-700))]"
                 />
                 <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] mt-1">{profile.ielts.toFixed(1)}</div>
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/55 block mb-1">Work Experience</label>
-                <input
+                <label htmlFor="scholarshipmatcher-work-experience" className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground block mb-1">Work Experience</label>
+                <input id="scholarshipmatcher-work-experience"
                   type="range"
                   min="0"
                   max="10"
                   step="1"
                   value={profile.work_experience_years}
                   onChange={(e) => setProfile(p => ({ ...p, work_experience_years: parseInt(e.target.value) }))}
-                  className="w-full accent-[hsl(var(--accent))]"
+                  className="w-full accent-[hsl(var(--blue-700))]"
                 />
                 <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] mt-1">{profile.work_experience_years} years</div>
               </div>
@@ -205,17 +205,17 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                       type="checkbox"
                       checked={profile[item.key]}
                       onChange={(e) => setProfile(p => ({ ...p, [item.key]: e.target.checked }))}
-                      className="w-4 h-4 accent-[hsl(var(--accent))]"
+                      className="w-4 h-4 accent-[hsl(var(--blue-700))]"
                     />
-                    <span className="text-[13px] text-[hsl(var(--blue-900))]/70">{item.label}</span>
+                    <span className="text-[13px] text-muted-foreground">{item.label}</span>
                   </label>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="mt-4 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200 p-4">
-            <div className="flex items-center gap-2 text-[12px] font-bold text-amber-800">
+          <div className="mt-4 rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-100))] p-4">
+            <div className="flex items-center gap-2 text-[13px] font-semibold text-[hsl(var(--blue-900))]">
               <Calculator className="w-4 h-4" />
               {loading ? 'Loading universities...' : fetchError === true ? `Showing cached data (${stats.total} universities, ${stats.countries} countries)` : `${filtered.length} of ${stats.total} universities match your profile · ${stats.countries} countries`}
             </div>
@@ -224,9 +224,9 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
 
         <div className="lg:col-span-3">
           {loading ? (
-            <div className="rounded-2xl border-2 border-dashed border-black/10 p-8 text-center">
-              <Loader2 className="w-10 h-10 text-[hsl(var(--blue-900))]/30 mx-auto animate-spin" />
-              <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60">
+            <div className="rounded-2xl border-2 border-dashed border-[hsl(var(--border))] p-8 text-center">
+              <Loader2 className="w-10 h-10 text-muted-foreground mx-auto animate-spin" />
+              <p className="mt-3 text-[14px] text-muted-foreground">
                 Loading universities...
               </p>
             </div>
@@ -238,38 +238,38 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
               </p>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-black/10 p-8 text-center">
-              <Award className="w-10 h-10 text-[hsl(var(--blue-900))]/30 mx-auto" />
-              <p className="mt-3 text-[14px] text-[hsl(var(--blue-900))]/60">
+            <div className="rounded-2xl border-2 border-dashed border-[hsl(var(--border))] p-8 text-center">
+              <Award className="w-10 h-10 text-muted-foreground mx-auto" />
+              <p className="mt-3 text-[14px] text-muted-foreground">
                 No scholarship matches yet. Try adjusting your profile.
               </p>
             </div>
           ) : (
             <div className="space-y-3">
               {filtered.slice(0, 10).map((uni) => (
-                <div key={uni.id} className="rounded-2xl border border-black/5 p-4 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition-all">
+                <div key={uni.id} className="rounded-2xl border border-[hsl(var(--border))] p-4 hover:border-[hsl(var(--blue-700))]/20 hover:shadow-sm transition">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(var(--blue-700))] to-[hsl(var(--blue-500))] flex items-center justify-center text-sm font-bold text-white shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-[hsl(var(--blue-700))] flex items-center justify-center text-sm font-bold text-white shrink-0">
                         {uni.short_name?.slice(0, 2)}
                       </div>
                       <div className="min-w-0">
                         <Link to={`/university/${uni.id}`} className="font-bold text-[14px] text-[hsl(var(--blue-900))] hover:underline block truncate">
                           {uni.short_name}
                         </Link>
-                        <div className="text-[12px] text-[hsl(var(--blue-900))]/55">{uni.name}</div>
+                        <div className="text-[12px] text-muted-foreground">{uni.name}</div>
                       </div>
                     </div>
                     <div className="shrink-0 text-center">
-                      <div className={`text-[20px] font-display font-extrabold ${uni.eligibility?.score >= 75 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      <div className={`text-[20px] font-display font-bold ${uni.eligibility?.score >= 75 ? 'text-emerald-600' : 'text-amber-600'}`}>
                         {uni.eligibility?.score}%
                       </div>
-                      <div className="text-[10px] uppercase tracking-[0.1em] font-bold text-[hsl(var(--blue-900))]/40">Match</div>
+                      <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground">Match</div>
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {(uni.eligibility?.reasons || []).slice(0, 3).map(r => (
-                      <span key={r} className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                      <span key={r} className="inline-flex items-center gap-1 text-[12px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
                         <CheckCircle2 className="w-3 h-3" />
                         {r}
                       </span>
@@ -278,14 +278,14 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                   {Array.isArray(uni.scholarships) && uni.scholarships.length > 0 && (
                     <div className="mt-2 space-y-1">
                       {uni.scholarships.slice(0, 2).map((s, i) => (
-                        <div key={i} className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--blue-900))]/70">
+                        <div key={i} className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
                           <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                           <span className="truncate">{s.name || 'Scholarship'}</span>
                           {s.amount && <span className="font-bold text-emerald-600 shrink-0">${s.amount.toLocaleString()}</span>}
                         </div>
                       ))}
                       {uni.scholarships.length > 2 && (
-                        <div className="text-[11px] text-[hsl(var(--blue-900))]/40 pl-5">+{uni.scholarships.length - 2} more</div>
+                        <div className="text-[12px] text-muted-foreground pl-5">+{uni.scholarships.length - 2} more</div>
                       )}
                     </div>
                   )}
@@ -296,7 +296,7 @@ export default function ScholarshipMatcher({ universities, compact = false }) {
                     </div>
                   )}
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-[12px] text-[hsl(var(--blue-900))]/55">
+                    <span className="text-[12px] text-muted-foreground">
                       Tuition: {uni.tuition_usd === 0 ? 'Free' : `$${uni.tuition_usd?.toLocaleString()}`}
                       {uni.living_cost_usd ? ` · Living: $${uni.living_cost_usd?.toLocaleString()}` : ''}
                     </span>

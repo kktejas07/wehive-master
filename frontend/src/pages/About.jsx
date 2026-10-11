@@ -1,7 +1,7 @@
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { ShieldCheck, Globe2, Heart, Compass, Phone, Mail, MapPin } from 'lucide-react';
-import { STATS, BRAND } from '../data/mock';
+import { STATS, BRAND, KEY_STATS } from '../data/mock';
 
 const VALUES = [
   { id: 'v1', icon: ShieldCheck, t: 'Honesty over hype', d: 'If a visa takes 14 days, we say 14 days. We do not promise instant approvals we cannot deliver.' },
@@ -13,14 +13,12 @@ const VALUES = [
 function ValueCard({ v }) {
   const Icon = v.icon;
   return (
-    <div className="rounded-3xl bg-white border border-black/5 p-8 card-lift">
-      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))]">
-        <Icon className="w-5 h-5" />
+    <div className="card-surface card-lift p-6 sm:p-8">
+      <span className="icon-tile">
+        <Icon className="w-5 h-5" aria-hidden="true" />
       </span>
-      <h3 className="mt-5 font-display font-extrabold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
-        {v.t}
-      </h3>
-      <p className="mt-2 text-[15px] leading-relaxed text-[hsl(var(--blue-900))]/65">{v.d}</p>
+      <h3 className="h-card mt-5">{v.t}</h3>
+      <p className="mt-2 text-[16px] leading-relaxed text-muted-foreground">{v.d}</p>
     </div>
   );
 }
@@ -34,26 +32,30 @@ function ContactCard() {
     { id: 'u', Icon: MapPin, label: BRAND.usaAddress },
   ];
   return (
-    <div className="rounded-3xl bg-[hsl(var(--blue-900))] text-white p-8 sm:p-10 relative overflow-hidden">
-      <div className="absolute -top-20 -right-20 h-[260px] w-[260px] rounded-full bg-[hsl(var(--accent))]/25 blur-3xl" />
-      <div className="relative">
-        <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-white/70">Visit us</div>
-        <h3 className="mt-2 font-display font-extrabold text-[28px] tracking-[-0.025em]">
-          Fly with WeHive
-        </h3>
-        <ul className="mt-6 space-y-3">
-          {items.map(({ id, Icon, label, href }) => (
-            <li key={id} className="flex items-start gap-3 text-[15px]">
-              <Icon className="w-4 h-4 mt-1 text-[hsl(var(--accent))] shrink-0" />
-              {href ? (
-                <a href={href} className="hover:underline">{label}</a>
-              ) : (
-                <span>{label}</span>
-              )}
-            </li>
-          ))}
-        </ul>
+    <div className="card-surface p-6 sm:p-10 grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+      <div>
+        <div className="eyebrow">Visit us</div>
+        <h2 className="h-section mt-3">Fly with WeHive</h2>
+        <p className="mt-3 text-[16px] leading-relaxed text-muted-foreground">
+          Drop by one of our offices or reach a counsellor by phone or email.
+        </p>
       </div>
+      <ul className="space-y-4">
+        {items.map(({ id, Icon, label, href }) => (
+          <li key={id} className="flex items-start gap-3 text-[16px] leading-relaxed text-[hsl(var(--blue-900))]">
+            <span className="icon-tile h-9 w-9 rounded-lg">
+              <Icon className="w-4 h-4" aria-hidden="true" />
+            </span>
+            <span className="pt-1.5 min-w-0 break-words">
+              {href ? (
+                <a href={href} className="link-primary">{label}</a>
+              ) : (
+                label
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -62,49 +64,55 @@ export default function About() {
   return (
     <div className="bg-white">
       <Navbar />
-      <section className="pt-32 pb-16 bg-[hsl(var(--soft-bg))] border-b border-black/5">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))]">
-            About {BRAND.name}
+      <section className="pt-28 md:pt-36 pb-16 md:pb-20 bg-[hsl(var(--soft-bg))] border-b border-[hsl(var(--border))]">
+        <div className="container-page">
+          <div className="max-w-3xl">
+            <div className="eyebrow">About {BRAND.name}</div>
+            <h1 className="h-display mt-4">
+              We believe a visa{' '}
+              <span className="text-[hsl(var(--red-500))]">should never</span>{' '}
+              stand between you and a memory.
+            </h1>
+            <p className="lead mt-6 max-w-2xl">
+              {BRAND.name} Immigration Services was founded with a simple
+              promise — bridging dreams and connecting continents. From a small
+              office in Hyderabad we now process visas across {KEY_STATS.countries} countries, with
+              transparent fees, honest timelines, and real human counsellors who
+              stay with you long after the stamp.
+            </p>
           </div>
-          <h1 className="mt-3 font-display font-extrabold text-[44px] sm:text-[72px] leading-[1.02] tracking-[-0.035em] text-[hsl(var(--blue-900))]">
-            We believe a visa{' '}
-            <span className="text-[hsl(var(--accent))]">should never</span>{' '}
-            stand between you and a memory.
-          </h1>
-          <p className="mt-6 text-[18px] leading-relaxed text-[hsl(var(--blue-900))]/65 max-w-2xl">
-            {BRAND.name} Immigration Services was founded with a simple
-            promise — bridging dreams and connecting continents. From a small
-            office in Hyderabad we now process visas across 60+ countries, with
-            transparent fees, honest timelines, and real human counsellors who
-            stay with you long after the stamp.
-          </p>
         </div>
       </section>
 
-      <section className="py-16 bg-white border-b border-black/5">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="py-12 md:py-16 bg-white border-b border-[hsl(var(--border))]">
+        <div className="container-page grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
           {STATS.map((s) => (
-            <div key={s.id}>
-              <div className="font-display font-extrabold text-[44px] sm:text-[54px] leading-none tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <div key={s.id} className="border-l-2 border-[hsl(var(--blue-100))] pl-4">
+              <div className="font-display font-bold text-[36px] sm:text-[44px] leading-none tracking-[-0.02em] text-[hsl(var(--blue-900))]">
                 {s.value}
               </div>
-              <div className="mt-2 text-[13.5px] text-[hsl(var(--blue-900))]/65">{s.label}</div>
+              <div className="mt-2 text-[14px] text-muted-foreground">{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="py-20 bg-[hsl(var(--soft-bg))]">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 grid md:grid-cols-2 gap-6">
-          {VALUES.map((v) => (
-            <ValueCard key={v.id} v={v} />
-          ))}
+      <section className="section section-tint">
+        <div className="container-page">
+          <div className="max-w-2xl">
+            <div className="eyebrow">What we stand for</div>
+            <h2 className="h-section mt-3">Four promises behind every application</h2>
+          </div>
+          <div className="mt-10 grid md:grid-cols-2 gap-4 md:gap-6">
+            {VALUES.map((v) => (
+              <ValueCard key={v.id} v={v} />
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 bg-white">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8">
+      <section className="section bg-white">
+        <div className="container-page">
           <ContactCard />
         </div>
       </section>

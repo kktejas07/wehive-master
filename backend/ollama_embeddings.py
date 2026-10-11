@@ -111,12 +111,6 @@ async def embed_query(text: str, model: Optional[str] = None) -> List[float]:
     return out[0] if out else []
 
 
-def get_model_dim(model: Optional[str] = None) -> int:
-    """Best-effort dimension for a model (from cache or env default)."""
-    m = model or OLLAMA_EMBED_MODEL
-    return _DIM_CACHE.get(m, 768)
-
-
 def reset_availability_cache() -> None:
     """For tests: clear the health check so a re-probe happens."""
     global _available

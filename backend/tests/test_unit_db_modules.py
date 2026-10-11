@@ -4,7 +4,8 @@ audit, eva_tools, storage, ai_marketplace, admin_auth, firebase_utils.
 All database/HTTP calls are mocked. Pure logic is tested directly.
 """
 
-import sys, os
+import os
+import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 os.environ.setdefault("MONGO_URL", "mongodb://localhost:27017")
@@ -443,6 +444,32 @@ class TestEvaTools:
         })):
             result = await get_visa_requirements("ca", "Tourist")
             assert result["visa_type"] == "Tourist"
+
+    @pytest.mark.asyncio
+    async def test_get_visa_requirements_dict_categories(self):
+        # Static data (data.COUNTRIES) keys categories by visa type name.
+        with patch("eva_tools.lookup_country", new=AsyncMock(return_value={
+            "name": "Canada", "categories": {"Tourist": {"fees_inr": 9000}, "Student": {"fees_inr": 12000}}
+        })):
+            result = await get_visa_requirements("ca", "student")
+            assert result["visa_type"] == "Student"
+            assert result["fees_inr"] == 12000
+
+    @pytest.mark.asyncio
+    async def test_get_visa_requirements_real_static_country(self):
+        from data import COUNTRIES
+        c = next(c for c in COUNTRIES if isinstance(c.get("categories"), dict) and c["categories"])
+        vt = next(iter(c["categories"]))
+        result = await get_visa_requirements(c["id"], vt)
+        assert result["visa_type"] == vt
+
+    def test_get_country_does_not_mutate_static_data(self):
+        from data import COUNTRIES, get_country
+        cid = COUNTRIES[0]["id"]
+        got = get_country(cid)
+        got["name"] = "MUTATED"
+        assert COUNTRIES[0]["name"] != "MUTATED"
+        assert "application_fee" not in COUNTRIES[0]
 
     @pytest.mark.asyncio
     async def test_get_visa_requirements_no_country(self):

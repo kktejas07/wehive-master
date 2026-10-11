@@ -58,27 +58,27 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
           {svc.features && svc.features.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1.5">
               {svc.features.map(f => (
-                <span key={f} className="text-[10px] font-semibold bg-white/5 text-slate-400 px-2 py-0.5 rounded-full">
+                <span key={f} className="text-[11px] font-semibold bg-white/5 text-slate-400 px-2 py-0.5 rounded-full">
                   {f.replace(/_/g, ' ')}
                 </span>
               ))}
             </div>
           )}
           {svc.powered_by_tagline && (
-            <div className="text-[10px] text-slate-500 mt-1">{svc.powered_by_tagline}</div>
+            <div className="text-[11px] text-slate-400 mt-1">{svc.powered_by_tagline}</div>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {!isConnected ? (
             <button
               onClick={() => setShowForm(v => !v)}
-              className="text-[11px] font-bold text-[hsl(var(--accent))] hover:text-white px-3 py-1.5 rounded-lg border border-[hsl(var(--accent))]/30 hover:border-[hsl(var(--accent))] transition"
+              className="text-[11px] font-bold text-blue-300 hover:text-white px-3 py-1.5 rounded-lg border border-[hsl(var(--blue-700))]/30 hover:border-[hsl(var(--blue-700))] transition"
             >
               Connect
             </button>
           ) : (
             <>
-              {isDefault && <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">Default</span>}
+              {isDefault && <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">Default</span>}
               {!isDefault && (
                 <button onClick={() => onSetDefault(svc.id)} className="text-[11px] font-bold text-slate-400 hover:text-white px-2 py-1 rounded-lg hover:bg-white/5 transition">Set Default</button>
               )}
@@ -100,9 +100,9 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
             <div>
               <label className="block text-[11px] font-bold text-slate-400 mb-1">{svc.key_label}</label>
               <div className="relative">
-                <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder={svc.key_placeholder}
-                  className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 focus:border-[hsl(var(--accent))]/50 outline-none" />
+                <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <input aria-label={svc.key_label} type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder={svc.key_placeholder}
+                  className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 focus:border-[hsl(var(--blue-700))]/50 outline-none" />
               </div>
             </div>
           )}
@@ -112,7 +112,7 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
               {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />} Test
             </button>
             <button onClick={handleConnect} disabled={connecting || (svc.requires_key && !apiKey)}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[hsl(var(--accent))] text-white text-[11px] font-bold hover:bg-[hsl(var(--accent))]/80 disabled:opacity-40 transition">
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[hsl(var(--blue-700))] text-white text-[11px] font-bold hover:bg-[hsl(var(--blue-700))]/80 disabled:opacity-40 transition">
               {connecting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plug className="w-3 h-3" />} Connect
             </button>
           </div>
@@ -297,9 +297,9 @@ export default function IntegrationsTab() {
 
       {/* OTP Channel */}
       <Panel className="mb-4">
-        <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-slate-400">Active OTP channel</div>
-        <div className="mt-1 text-[22px] font-display font-extrabold text-white capitalize">
-          {(otpData?.otp_channel || 'unknown').replace('_', ' ')}
+        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Active OTP channel</div>
+        <div className="mt-1 text-[22px] font-display font-bold text-white capitalize">
+          {!otpData ? 'Unknown' : otpData.otp_channel ? otpData.otp_channel.replace('_', ' ') : 'Not configured'}
         </div>
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {CHANNELS.map((c) => {
@@ -312,13 +312,13 @@ export default function IntegrationsTab() {
                 onClick={() => setChannel(c.id)}
                 className={`text-left rounded-xl border p-3 transition ${
                   active
-                    ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10'
-                    : 'border-white/10 bg-white/5 hover:border-[hsl(var(--accent))]/50'
+                    ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))]/10'
+                    : 'border-white/10 bg-white/5 hover:border-[hsl(var(--blue-700))]/50'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="text-[13.5px] font-bold text-white">{c.label}</div>
-                  {active && <CheckCircle2 className="w-4 h-4 text-[hsl(var(--accent))]" />}
+                  {active && <CheckCircle2 className="w-4 h-4 text-blue-300" />}
                 </div>
                 <div className="mt-1 text-[12px] text-slate-400">{c.hint}</div>
               </button>
@@ -345,15 +345,15 @@ export default function IntegrationsTab() {
           <div>
             <label className="block text-[11px] font-bold text-slate-400 mb-1">Provider</label>
             <select value={llmProvider} onChange={e => { setLlmProvider(e.target.value); setLlmModel(''); }}
-              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--accent))]/50">
+              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50">
               {providers.length === 0 && <option value="">Loading…</option>}
               {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 mb-1">Model</label>
-            <select value={llmModel} onChange={e => setLlmModel(e.target.value)}
-              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--accent))]/50">
+            <label htmlFor="integrationstab-model" className="block text-[11px] font-bold text-slate-400 mb-1">Model</label>
+            <select id="integrationstab-model" value={llmModel} onChange={e => setLlmModel(e.target.value)}
+              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50">
               {(!llmModel || !(providers.find(p => p.id === llmProvider)?.models || []).includes(llmModel)) && llmModel && (
                 <option value={llmModel}>{llmModel}</option>
               )}
@@ -364,11 +364,11 @@ export default function IntegrationsTab() {
           </div>
         </div>
         <div className="mt-2">
-          <label className="block text-[11px] font-bold text-slate-400 mb-1">API Key</label>
+          <label htmlFor="integrationstab-api-key" className="block text-[11px] font-bold text-slate-400 mb-1">API Key</label>
           <div className="relative">
-            <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-            <input type="password" value={llmKey} onChange={e => setLlmKey(e.target.value)} placeholder={llmConfig?.key ? '(key saved — enter new value to replace)' : 'gsk_...'}
-              className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 outline-none focus:border-[hsl(var(--accent))]/50" />
+            <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <input id="integrationstab-api-key" type="password" value={llmKey} onChange={e => setLlmKey(e.target.value)} placeholder={llmConfig?.key ? '(key saved — enter new value to replace)' : 'gsk_...'}
+              className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 outline-none focus:border-[hsl(var(--blue-700))]/50" />
           </div>
         </div>
         <div className="flex items-center gap-2 mt-3">
@@ -377,7 +377,7 @@ export default function IntegrationsTab() {
             {llmTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />} Test
           </button>
           <button onClick={saveDefaultLlm} disabled={llmSaving || !llmKey.trim()}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[hsl(var(--accent))] text-white text-[11px] font-bold hover:bg-[hsl(var(--accent))]/80 disabled:opacity-40 transition">
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[hsl(var(--blue-700))] text-white text-[11px] font-bold hover:bg-[hsl(var(--blue-700))]/80 disabled:opacity-40 transition">
             {llmSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plug className="w-3 h-3" />} Save
           </button>
         </div>
@@ -400,7 +400,7 @@ export default function IntegrationsTab() {
         {(categories || []).map(cat => (
           <Panel key={cat.id}>
             <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-white/5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{CATEGORY_ICONS[cat.id] || 'API'}</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{CATEGORY_ICONS[cat.id] || 'API'}</span>
               <div>
                 <div className="text-[13.5px] font-bold text-white">{cat.name}</div>
                 <div className="text-[11.5px] text-slate-400">{cat.description}</div>

@@ -4,7 +4,7 @@ import { Globe, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const COUNTRIES_3D = [
-  { id: 'us', name: 'USA', visa: 'Tourist/Business', processing: '3-5 days', color: '#3B82F6' },
+  { id: 'us', name: 'USA', visa: 'Tourist/Business', processing: '3-5 days', color: '#1D4E89' },
   { id: 'uk', name: 'United Kingdom', visa: 'Tourist/Student', processing: '5-10 days', color: '#8B5CF6' },
   { id: 'canada', name: 'Canada', visa: 'Tourist/Student', processing: '7-14 days', color: '#EF4444' },
   { id: 'australia', name: 'Australia', visa: 'Tourist/Work', processing: '5-7 days', color: '#10B981' },
@@ -63,7 +63,7 @@ function CountryCard3D({ country, index }) {
           <h3 className="font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">
             {country.name}
           </h3>
-          <p className="text-[11px] text-[hsl(var(--blue-900))]/60 mt-1">
+          <p className="text-[12px] text-[hsl(var(--blue-900))]/60 mt-1">
             {country.visa} · {country.processing}
           </p>
           <div className="mt-3 flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] group-hover:gap-2 transition-all">
@@ -94,8 +94,8 @@ export default function Marquee3DGrid() {
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(10,44,138,0.05) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(10,44,138,0.05) 1px, transparent 1px)
+              linear-gradient(rgba(10,49,97,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(10,49,97,0.05) 1px, transparent 1px)
             `,
             backgroundSize: '40px 40px',
           }}
@@ -109,7 +109,7 @@ export default function Marquee3DGrid() {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <Globe className="w-3.5 h-3.5" />
             Popular Destinations
           </div>

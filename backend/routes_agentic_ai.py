@@ -15,14 +15,15 @@ Endpoints:
 
 import logging
 import os
-import re
 from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from agents.orchestrator import score_intents
 from auth_utils import get_current_user, get_current_user_optional
+from ollama_embeddings import OLLAMA_HOST
 from rate_limit import RateLimit
 
 router = APIRouter(prefix="/agentic", tags=["agentic-ai"])
@@ -59,44 +60,14 @@ class WorkflowRequest(BaseModel):
     use_stark: bool = True
 
 
-INTENT_PATTERNS = {
-    "visa_qa": [
-        r"\b(visa|visa type|visa requirement|visa fee|visa document|embassy|consulate)\b",
-        r"\b(ds.?160|i.?20|i.?129|i.?797|h.?1b|b.?[12]|f.?1|l.?1)\b",
-        r"\b(appointment|slot|interview|biometrics|stamping)\b",
-    ],
-    "country_info": [
-        r"\b(travel to|visit|go to|tourist|tourism in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)",
-        r"\b(about|tell me about|what is|info on)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)",
-    ],
-    "study_abroad": [
-        r"\b(study|university|college|course|program|degree|master|bachelor|phd)\b",
-        r"\b(scholarship|ielts|toefl|gre|gmat|sat|gpa|acceptance)\b",
-    ],
-    "open_source": [
-        r"\b(open.?source|github|pypi|npm|package|library|framework)\b",
-        r"\b(ollama|chromadb|langchain|llama|mistral)\b",
-        r"\b(model|LLM|embedding|vector|RAG|agent)\b",
-    ],
-    "technical": [
-        r"\b(how does|how do|explain|what is the difference)\b",
-        r"\b(api|code|programming|python|javascript|database)\b",
-    ],
-}
+AI_UNAVAILABLE_MSG = (
+    "Hive's AI assistant is unavailable right now, so I can't give a reliable answer. "
+    "Please try again in a few minutes, or contact the We Hive team for help."
+)
 
 
 def _detect_intents(question: str) -> list[dict]:
-    q_lower = question.lower()
-    detected = []
-    for intent, patterns in INTENT_PATTERNS.items():
-        score = 0
-        for pat in patterns:
-            matches = re.findall(pat, q_lower, re.IGNORECASE)
-            score += len(matches) * 2
-        if score > 0:
-            detected.append({"intent": intent, "score": min(score, 10)})
-    detected.sort(key=lambda x: x["score"], reverse=True)
-    return detected[:3]
+    return score_intents(question)[:3]
 
 
 def _should_delegate_to_stark(question: str, intents: list[dict]) -> bool:
@@ -170,15 +141,18 @@ async def hive_ask(
         }
 
     except Exception as e:
-        logger.warning("Hive marketplace chat failed, using local fallback: %s", e)
-        from local_llm import local_chat_with_info
-        answer, _info = await local_chat_with_info(req.question, "")
+        # marketplace.chat already tried BYOK -> free pool -> local engine.
+        logger.warning("Hive chat unavailable: %s", e)
+        answer = AI_UNAVAILABLE_MSG
+        if stark_context:
+            answer += "\n\nHere is what I found in public sources:\n\n" + stark_context[:1500]
         return {
-            "ok": True,
-            "answer": answer or "",
+            "ok": False,
+            "answer": answer,
             "intents_detected": intents,
             "stark_delegated": delegate_to_stark,
-            "fallback": "local_llm",
+            "stark_context_used": bool(stark_context),
+            "fallback": "unavailable",
         }
 
 
@@ -328,7 +302,7 @@ async def agentic_status():
     try:
         import httpx
         async with httpx.AsyncClient(timeout=3) as client:
-            resp = await client.get("http://localhost:11434/api/tags")
+            resp = await client.get(f"{OLLAMA_HOST}/api/tags")
             ollama_available = resp.status_code == 200
     except Exception:
         pass

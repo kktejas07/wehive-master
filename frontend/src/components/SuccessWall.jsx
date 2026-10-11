@@ -37,7 +37,7 @@ const TESTIMONIALS = [
     year: '2026',
     comment: 'The application portal is a game changer. No traditional agent gives you this level of control and transparency. Handed in my CoS, visa approved in under a month.',
     avatarInitials: 'VS',
-    stampColor: 'rgba(10, 44, 138, 0.8)', // UK Royal Blue
+    stampColor: 'rgba(10, 49, 97, 0.8)', // UK Royal Blue
   },
   {
     id: 4,
@@ -77,7 +77,7 @@ function PassportStamp({ flag, country, type, date, stampColor }) {
 
       {/* Blurred overlay protecting sensitive mock passport details */}
       <div className="absolute inset-0 flex flex-col justify-between p-4 opacity-30 select-none">
-        <div className="flex justify-between text-[8px] font-mono">
+        <div className="flex justify-between text-[12px] font-mono">
           <span>PASSPORT NO: *******</span>
           <span>STAMP NO: 2026-X8</span>
         </div>
@@ -97,15 +97,15 @@ function PassportStamp({ flag, country, type, date, stampColor }) {
         style={{ borderColor: stampColor, color: stampColor, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(2px)' }}>
         
         {/* Visa Type Seal */}
-        <div className="text-[10px] font-bold uppercase tracking-widest font-mono">VERIFIED VISA</div>
+        <div className="text-[12px] font-bold uppercase tracking-widest font-mono">VERIFIED VISA</div>
         
         <div className="flex items-center gap-1.5 my-1">
           <span className="text-2xl">{flag}</span>
           <span className="text-[16px] font-black uppercase tracking-tight font-display">{country}</span>
         </div>
         
-        <div className="text-[9px] font-bold tracking-wide uppercase max-w-[150px] truncate">{type}</div>
-        <div className="text-[8px] font-mono mt-1 opacity-70">ISSUED: JULY {date}</div>
+        <div className="text-[12px] font-bold tracking-wide uppercase max-w-[150px] truncate">{type}</div>
+        <div className="text-[12px] font-mono mt-1 opacity-70">ISSUED: JULY {date}</div>
         
         {/* Hologram details */}
         <div className="absolute bottom-1 right-2 opacity-30 text-[6px] font-mono flex items-center gap-0.5">
@@ -115,13 +115,13 @@ function PassportStamp({ flag, country, type, date, stampColor }) {
 
       {/* Blurred areas blocking personal fields */}
       <div className="absolute top-[20%] left-[10%] w-[35%] h-[20%] bg-white/20 backdrop-blur-[6px] rounded-lg border border-white/30 flex items-center justify-center">
-        <div className="flex items-center gap-0.5 text-[8px] text-[hsl(var(--blue-900))]/40 font-mono font-bold">
+        <div className="flex items-center gap-0.5 text-[12px] text-[hsl(var(--blue-900))]/40 font-mono font-bold">
           <Eye className="w-2.5 h-2.5" /> BLURRED
         </div>
       </div>
       
       <div className="absolute bottom-[20%] right-[10%] w-[40%] h-[15%] bg-white/20 backdrop-blur-[6px] rounded-lg border border-white/30 flex items-center justify-center">
-        <div className="flex items-center gap-0.5 text-[8px] text-[hsl(var(--blue-900))]/40 font-mono font-bold">
+        <div className="flex items-center gap-0.5 text-[12px] text-[hsl(var(--blue-900))]/40 font-mono font-bold">
           <Lock className="w-2.5 h-2.5" /> CLASSIFIED
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function SuccessWall() {
         
         {/* Title */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.2em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <ShieldCheck className="w-3.5 h-3.5" /> Success Wall
           </div>
           <h2 className="font-display font-extrabold text-[28px] sm:text-[40px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
@@ -166,7 +166,7 @@ export default function SuccessWall() {
             <button
               key={btn.id}
               onClick={() => setFilter(btn.id)}
-              className={`rounded-full px-4.5 py-1.5 text-[13px] font-bold transition-all ${
+              className={`rounded-full px-4.5 py-1.5 text-[13px] font-bold transition ${
                 filter === btn.id
                   ? 'bg-[hsl(var(--blue-900))] text-white shadow-sm'
                   : 'bg-[hsl(var(--soft-bg))] text-[hsl(var(--blue-900))]/70 hover:bg-black/5'
@@ -221,15 +221,15 @@ export default function SuccessWall() {
                     </div>
                     <div>
                       <div className="font-extrabold text-[14px] text-[hsl(var(--blue-900))]">{item.name}</div>
-                      <div className="text-[11px] text-[hsl(var(--blue-900))]/50">{item.type}</div>
+                      <div className="text-[12px] text-[hsl(var(--blue-900))]/50">{item.type}</div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <span className="text-[11px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    <span className="text-[12px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                       {item.processingTime}
                     </span>
-                    <span className="block text-[10px] text-[hsl(var(--blue-900))]/40 mt-1 font-mono">{item.year} Verified</span>
+                    <span className="block text-[12px] text-[hsl(var(--blue-900))]/40 mt-1 font-mono">{item.year} Verified</span>
                   </div>
                 </div>
 

@@ -222,7 +222,7 @@ function CountdownTimer({ daysLeft, accent }) {
       ].map((unit, i) => (
         <div key={i} className="bg-white/90 rounded-lg px-2 py-1 text-center min-w-[36px]">
           <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{String(unit.value).padStart(2, '0')}</div>
-          <div className="text-[8px] text-[hsl(var(--blue-900))]/50 font-semibold">{unit.label}</div>
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/50 font-semibold">{unit.label}</div>
         </div>
       ))}
     </div>
@@ -243,10 +243,10 @@ function CountryPreview({ countries, accent }) {
           whileHover={{ scale: 1.1 }}
         >
           <div className={`flex items-center gap-1.5 bg-white/80 rounded-full px-2.5 py-1.5 border border-black/5 ${hoveredIndex === i ? 'ring-2 ring-offset-1' : ''}`}
-            style={{ ringColor: accent.includes('amber') ? '#F59E0B' : accent.includes('blue') ? '#3B82F6' : accent.includes('emerald') ? '#10B981' : '#EC4899' }}
+            style={{ ringColor: accent.includes('amber') ? '#F59E0B' : accent.includes('blue') ? '#1D4E89' : accent.includes('emerald') ? '#10B981' : '#EC4899' }}
           >
             <span className="w-4 h-4 rounded-full bg-[hsl(var(--blue-700))]/20 flex items-center justify-center text-[8px] font-bold text-[hsl(var(--blue-900))]/60">{country.name[0]}</span>
-            <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]">{country.name}</span>
+            <span className="text-[12px] font-semibold text-[hsl(var(--blue-900))]">{country.name}</span>
           </div>
 
           <AnimatePresence>
@@ -257,8 +257,8 @@ function CountryPreview({ countries, accent }) {
                 exit={{ opacity: 0, y: 10, scale: 0.9 }}
                 className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-xl shadow-xl px-3 py-2 whitespace-nowrap z-20 border border-black/5"
               >
-                <div className="text-[11px] font-bold text-[hsl(var(--blue-900))]">{country.name}</div>
-                <div className="text-[10px] text-[hsl(var(--blue-900))]/60">From {country.price}</div>
+                <div className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{country.name}</div>
+                <div className="text-[12px] text-[hsl(var(--blue-900))]/60">From {country.price}</div>
                 <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-white transform rotate-45 border-r border-b border-black/5" />
               </motion.div>
             )}
@@ -315,14 +315,14 @@ function OfferCard({ offer, index, isActive, onSelect }) {
         transition={{ duration: 0.5, delay: index * 0.1 }}
         whileHover={{ y: -6, scale: 1.02, z: 50 }}
         onClick={() => onSelect(offer)}
-        className={`relative rounded-2xl border-2 ${offer.borderColor} ${offer.bgGradient} p-5 sm:p-6 cursor-pointer transition-all duration-300 ${
-          isActive ? 'ring-2 ring-offset-2 ring-[hsl(var(--accent))]' : ''
+        className={`relative rounded-2xl border-2 ${offer.borderColor} ${offer.bgGradient} p-5 sm:p-6 cursor-pointer transition duration-300 ${
+          isActive ? 'ring-2 ring-offset-2 ring-[hsl(var(--blue-700))]' : ''
         }`}
         style={{ transformStyle: 'preserve-3d' }}
       >
         {offer.highlight && (
           <div className="absolute -top-2.5 -right-2.5 z-10">
-            <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r ${offer.gradient} text-white text-[10px] font-bold shadow-lg`}>
+            <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r ${offer.gradient} text-white text-[12px] font-bold shadow-lg`}>
               <BadgeIcon className="w-3 h-3" /> {offer.badge}
             </span>
           </div>
@@ -339,18 +339,18 @@ function OfferCard({ offer, index, isActive, onSelect }) {
             <Icon className="w-5 h-5" />
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${offer.accent}`}>
+            <span className={`text-[12px] font-bold uppercase tracking-wider ${offer.accent}`}>
               {offer.category}
             </span>
             <div className="flex items-center gap-1 bg-white/80 rounded-full px-2 py-0.5">
               <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="text-[10px] font-bold text-[hsl(var(--blue-900))]">{offer.rating}</span>
+              <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{offer.rating}</span>
             </div>
           </div>
         </div>
 
         <div className="relative mb-4 rounded-xl overflow-hidden">
-          <img
+          <img loading="lazy" decoding="async"
             src={offer.image}
             alt={offer.title}
             className="w-full h-28 object-cover"
@@ -359,11 +359,11 @@ function OfferCard({ offer, index, isActive, onSelect }) {
           <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
             <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1">
               <MapPin className={`w-3 h-3 ${offer.accent}`} />
-              <span className="text-[10px] font-bold text-[hsl(var(--blue-900))]">From {offer.priceFrom}</span>
+              <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">From {offer.priceFrom}</span>
             </div>
             <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1">
               <Clock className="w-3 h-3 text-[hsl(var(--blue-900))]/60" />
-              <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]">{offer.processing}</span>
+              <span className="text-[12px] font-semibold text-[hsl(var(--blue-900))]">{offer.processing}</span>
             </div>
           </div>
         </div>
@@ -385,7 +385,7 @@ function OfferCard({ offer, index, isActive, onSelect }) {
             return (
               <div key={i} className="flex items-center gap-1.5 bg-white/80 rounded-lg px-2.5 py-1.5">
                 <PerkIcon className={`w-3.5 h-3.5 ${offer.accent}`} />
-                <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]">{perk.text}</span>
+                <span className="text-[12px] font-semibold text-[hsl(var(--blue-900))]">{perk.text}</span>
               </div>
             );
           })}
@@ -395,12 +395,12 @@ function OfferCard({ offer, index, isActive, onSelect }) {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5 text-[hsl(var(--blue-900))]/40" />
-              <span className="text-[10px] font-semibold text-[hsl(var(--blue-900))]/60">{offer.bookings} booked</span>
+              <span className="text-[12px] font-semibold text-[hsl(var(--blue-900))]/60">{offer.bookings} booked</span>
             </div>
-            <span className="text-[10px] text-[hsl(var(--blue-900))]/40">·</span>
-            <span className="text-[10px] text-[hsl(var(--blue-900))]/60">{offer.reviews.toLocaleString()} reviews</span>
+            <span className="text-[12px] text-[hsl(var(--blue-900))]/40">·</span>
+            <span className="text-[12px] text-[hsl(var(--blue-900))]/60">{offer.reviews.toLocaleString()} reviews</span>
           </div>
-          <div className={`flex items-center gap-1 text-[10px] font-bold ${offer.accent}`}>
+          <div className={`flex items-center gap-1 text-[12px] font-bold ${offer.accent}`}>
             View Details <ArrowRight className="w-3 h-3" />
           </div>
         </div>
@@ -408,7 +408,7 @@ function OfferCard({ offer, index, isActive, onSelect }) {
         {offer.testimonial && (
           <div className="mt-3 flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg px-3 py-2 border border-amber-100">
             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-            <span className="text-[10px] italic text-[hsl(var(--blue-900))]/70">{offer.testimonial}</span>
+            <span className="text-[12px] italic text-[hsl(var(--blue-900))]/70">{offer.testimonial}</span>
           </div>
         )}
       </motion.div>
@@ -435,7 +435,7 @@ function OfferDetailPanel({ offer, onClose }) {
             <Icon className="w-6 h-6" />
           </div>
           <div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${offer.accent}`}>{offer.category}</span>
+            <span className={`text-[12px] font-bold uppercase tracking-wider ${offer.accent}`}>{offer.category}</span>
             <h3 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))]">{offer.title}</h3>
           </div>
         </div>
@@ -449,23 +449,23 @@ function OfferDetailPanel({ offer, onClose }) {
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-white/80 rounded-xl p-4 text-center">
           <div className="text-[18px] font-bold text-[hsl(var(--blue-900))]">{offer.priceFrom}</div>
-          <div className="text-[10px] text-[hsl(var(--blue-900))]/60">Starting price</div>
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/60">Starting price</div>
         </div>
         <div className="bg-white/80 rounded-xl p-4 text-center">
           <div className="text-[18px] font-bold text-[hsl(var(--blue-900))]">{offer.processing}</div>
-          <div className="text-[10px] text-[hsl(var(--blue-900))]/60">Processing time</div>
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/60">Processing time</div>
         </div>
         <div className="bg-white/80 rounded-xl p-4 text-center">
           <div className="flex items-center justify-center gap-1">
             <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             <span className="text-[18px] font-bold text-[hsl(var(--blue-900))]">{offer.rating}</span>
           </div>
-          <div className="text-[10px] text-[hsl(var(--blue-900))]/60">{offer.reviews.toLocaleString()} reviews</div>
+          <div className="text-[12px] text-[hsl(var(--blue-900))]/60">{offer.reviews.toLocaleString()} reviews</div>
         </div>
       </div>
 
       <div className="mb-6">
-        <h4 className="text-[11px] uppercase tracking-wider font-bold text-[hsl(var(--blue-900))]/50 mb-3">Included Perks</h4>
+        <h4 className="text-[12px] uppercase tracking-wider font-bold text-[hsl(var(--blue-900))]/50 mb-3">Included Perks</h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {offer.perks.map((perk, i) => {
             const PerkIcon = perk.icon;
@@ -480,14 +480,14 @@ function OfferDetailPanel({ offer, onClose }) {
       </div>
 
       <div className="mb-6">
-        <h4 className="text-[11px] uppercase tracking-wider font-bold text-[hsl(var(--blue-900))]/50 mb-3">Top Countries</h4>
+        <h4 className="text-[12px] uppercase tracking-wider font-bold text-[hsl(var(--blue-900))]/50 mb-3">Top Countries</h4>
         <div className="flex flex-wrap gap-3">
           {offer.countries.map((country) => (
             <div key={country.name} className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r ${offer.gradient} text-white`}>
               <div className="text-lg font-bold opacity-80">{country.name[0]}</div>
               <div>
                 <div className="text-[12px] font-bold">{country.name}</div>
-                <div className="text-[10px] opacity-80">From {country.price}</div>
+                <div className="text-[12px] opacity-80">From {country.price}</div>
               </div>
             </div>
           ))}
@@ -495,18 +495,18 @@ function OfferDetailPanel({ offer, onClose }) {
       </div>
 
       <div className="flex items-center justify-between pt-4 border-t border-black/10">
-        <div className="flex items-center gap-2 text-[11px] text-[hsl(var(--blue-900))]/50">
+        <div className="flex items-center gap-2 text-[12px] text-[hsl(var(--blue-900))]/50">
           <Clock className="w-4 h-4" />
           <span>Offer valid until {offer.validUntil}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-[11px] text-[hsl(var(--blue-900))]/50 mr-3">
+          <div className="flex items-center gap-1 text-[12px] text-[hsl(var(--blue-900))]/50 mr-3">
             <Users className="w-4 h-4" />
             <span>{offer.bookings} booked</span>
           </div>
           <a
             href={`tel:${BRAND.phoneRaw}`}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r ${offer.gradient} text-white text-[13px] font-bold hover:shadow-lg transition-all`}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r ${offer.gradient} text-white text-[13px] font-bold hover:shadow-lg transition`}
           >
             Book Now <ArrowRight className="w-4 h-4" />
           </a>
@@ -576,7 +576,7 @@ export default function FeaturedOffers() {
       <section className="py-12 sm:py-16 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <Sparkles className="w-3.5 h-3.5" />
               Featured Offers
             </div>
@@ -601,8 +601,8 @@ export default function FeaturedOffers() {
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `
-              radial-gradient(circle at 20% 20%, rgba(10,44,138,0.05) 0%, transparent 20%),
-              radial-gradient(circle at 80% 80%, rgba(225,33,44,0.03) 0%, transparent 20%)
+              radial-gradient(circle at 20% 20%, rgba(10,49,97,0.05) 0%, transparent 20%),
+              radial-gradient(circle at 80% 80%, rgba(179,25,66,0.03) 0%, transparent 20%)
             `,
             backgroundSize: '50px 50px',
           }}
@@ -616,7 +616,7 @@ export default function FeaturedOffers() {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--blue-700))] mb-3">
             <Sparkles className="w-3.5 h-3.5" />
             Featured Offers
           </div>

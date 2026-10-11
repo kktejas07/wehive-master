@@ -17,6 +17,7 @@ import {
   Sparkles,
   Globe,
 } from 'lucide-react';
+import { BRAND } from '../data/mock';
 
 const POPULAR_VISAS = [
   {
@@ -28,7 +29,6 @@ const POPULAR_VISAS = [
     price: '₹15,999',
     rating: 4.8,
     reviews: 2847,
-    gradient: 'from-blue-500 to-blue-700',
     popular: true,
   },
   {
@@ -40,7 +40,6 @@ const POPULAR_VISAS = [
     price: '₹12,499',
     rating: 4.7,
     reviews: 1923,
-    gradient: 'from-purple-500 to-purple-700',
     popular: true,
   },
   {
@@ -52,7 +51,6 @@ const POPULAR_VISAS = [
     price: '₹18,999',
     rating: 4.6,
     reviews: 1456,
-    gradient: 'from-emerald-500 to-emerald-700',
     popular: false,
   },
   {
@@ -64,7 +62,6 @@ const POPULAR_VISAS = [
     price: '₹8,999',
     rating: 4.9,
     reviews: 3102,
-    gradient: 'from-red-500 to-pink-600',
     popular: true,
   },
   {
@@ -76,7 +73,6 @@ const POPULAR_VISAS = [
     price: '₹14,999',
     rating: 4.5,
     reviews: 1678,
-    gradient: 'from-amber-500 to-orange-600',
     popular: false,
   },
   {
@@ -88,7 +84,6 @@ const POPULAR_VISAS = [
     price: '₹6,999',
     rating: 4.8,
     reviews: 4521,
-    gradient: 'from-teal-500 to-teal-700',
     popular: true,
   },
   {
@@ -100,7 +95,6 @@ const POPULAR_VISAS = [
     price: '₹11,999',
     rating: 4.6,
     reviews: 1234,
-    gradient: 'from-yellow-500 to-amber-600',
     popular: false,
   },
   {
@@ -112,7 +106,6 @@ const POPULAR_VISAS = [
     price: '₹4,999',
     rating: 4.9,
     reviews: 3876,
-    gradient: 'from-rose-500 to-red-600',
     popular: true,
   },
 ];
@@ -120,50 +113,49 @@ const POPULAR_VISAS = [
 function VisaCard({ visa, index, onClick }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.08, duration: 0.4 }}
-      whileHover={{ y: -4, scale: 1.02 }}
+      transition={{ delay: index * 0.05, duration: 0.3, ease: 'easeOut' }}
+      whileHover={{ y: -2 }}
       onClick={onClick}
-      className="relative rounded-2xl bg-white border border-black/8 shadow-sm overflow-hidden cursor-pointer group"
+      className="relative rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm overflow-hidden cursor-pointer group"
     >
       {visa.popular && (
         <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--accent))] text-white text-[10px] font-bold">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-700))] text-[12px] font-semibold">
             <Star className="w-3 h-3" /> Popular
           </span>
         </div>
       )}
-      <div className={`h-20 bg-gradient-to-br ${visa.gradient} flex items-center justify-center relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-black/10" />
-        {visa.flag ? <span className="text-5xl">{visa.flag}</span> : <Globe className="w-10 h-10 text-white/60" />}
+      <div className="h-20 bg-[hsl(var(--blue-50))] border-b border-[hsl(var(--border))] flex items-center justify-center relative overflow-hidden">
+        {visa.flag ? <span className="text-5xl">{visa.flag}</span> : <Globe className="w-10 h-10 text-[hsl(var(--blue-700))]" />}
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-display font-extrabold text-[16px] text-[hsl(var(--blue-900))]">{visa.country}</h3>
+          <h3 className="font-display font-bold text-[16px] text-[hsl(var(--blue-900))]">{visa.country}</h3>
           <div className="flex items-center gap-1">
             <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-            <span className="text-[11px] font-bold text-[hsl(var(--blue-900))]">{visa.rating}</span>
+            <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{visa.rating}</span>
           </div>
         </div>
-        <p className="text-[11px] text-[hsl(var(--blue-900))]/60 mt-1">{visa.visaType}</p>
+        <p className="text-[12px] text-muted-foreground mt-1">{visa.visaType}</p>
         <div className="mt-3 flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-[hsl(var(--blue-900))]/50">From</span>
-            <div className="text-[18px] font-display font-extrabold text-[hsl(var(--blue-900))]">{visa.price}</div>
+            <span className="text-[12px] text-muted-foreground">From</span>
+            <div className="text-[18px] font-display font-bold text-[hsl(var(--blue-900))]">{visa.price}</div>
           </div>
           <div className="text-right">
-            <div className="flex items-center gap-1 text-[10px] text-[hsl(var(--blue-900))]/60">
+            <div className="flex items-center gap-1 text-[12px] text-muted-foreground">
               <Clock className="w-3 h-3" />
               {visa.processing}
             </div>
-            <div className="text-[10px] text-[hsl(var(--blue-900))]/40">{visa.reviews.toLocaleString()} reviews</div>
+            <div className="text-[12px] text-muted-foreground">{visa.reviews.toLocaleString()} reviews</div>
           </div>
         </div>
         <Link
           to={`/visa/${visa.id}`}
-          className="mt-3 flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold group-hover:bg-[hsl(var(--blue-800))] transition-colors"
+          className="mt-3 flex items-center justify-center gap-1.5 w-full h-11 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[14px] font-semibold hover:bg-[hsl(var(--blue-800))] transition-colors"
         >
           Apply Now
           <ArrowRight className="w-3.5 h-3.5" />
@@ -183,41 +175,29 @@ export default function MapView() {
       <main className="pt-28 pb-16">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8"
           >
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-[hsl(var(--accent))] mb-3">
+            <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
               <Globe className="w-3.5 h-3.5" />
               Interactive Map
             </div>
-            <h1 className="font-display font-extrabold text-[32px] sm:text-[44px] tracking-[-0.03em] text-[hsl(var(--blue-900))]">
+            <h1 className="font-display font-bold text-[32px] sm:text-[44px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               Explore Visa Destinations
             </h1>
-            <p className="mt-2 text-[14px] text-[hsl(var(--blue-900))]/60 max-w-xl mx-auto">
+            <p className="mt-2 text-[16px] text-muted-foreground max-w-xl mx-auto">
               Click on countries in the 3D globe or browse visa cards below to explore destinations
             </p>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="rounded-[28px] bg-white border border-black/8 shadow-lg overflow-hidden mb-10"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm overflow-hidden mb-10"
           >
-            <div className="relative h-[400px] sm:h-[500px] bg-gradient-to-br from-[hsl(var(--blue-900))] via-[hsl(var(--blue-700))] to-[hsl(var(--blue-900))]">
-              <div className="absolute inset-0">
-                <div
-                  className="absolute inset-0 opacity-20"
-                  style={{
-                    backgroundImage: `
-                      radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 25%),
-                      radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 25%)
-                    `,
-                    backgroundSize: '60px 60px',
-                  }}
-                />
-              </div>
+            <div className="relative h-[400px] sm:h-[500px] bg-[hsl(var(--blue-900))]">
               <div className="absolute inset-0 flex items-center justify-center">
                 <Globe3D
                   markers={POPULAR_VISAS.map((v) => ({
@@ -236,16 +216,13 @@ export default function MapView() {
                 />
               </div>
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                  </span>
-                  <span className="text-white/80 text-[11px] font-semibold">Live Tracking</span>
+                <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5">
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="text-white/80 text-[12px] font-semibold">Live Tracking</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
+                <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5">
                   <Plane className="w-3.5 h-3.5 text-white/80" />
-                  <span className="text-white/80 text-[11px] font-semibold">250+ Countries</span>
+                  <span className="text-white/80 text-[12px] font-semibold">250+ Countries</span>
                 </div>
               </div>
             </div>
@@ -253,14 +230,14 @@ export default function MapView() {
 
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[hsl(var(--accent))]" />
-              <h2 className="font-display font-extrabold text-[22px] text-[hsl(var(--blue-900))]">
+              <ShieldCheck className="w-5 h-5 text-[hsl(var(--blue-700))]" />
+              <h2 className="font-display font-bold text-[22px] text-[hsl(var(--blue-900))] leading-tight">
                 Popular Visa Destinations
               </h2>
             </div>
             <Link
               to="/universities"
-              className="flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline"
+              className="flex items-center gap-1 min-h-[44px] text-[14px] font-semibold text-[hsl(var(--blue-700))] hover:underline"
             >
               View All
               <ArrowRight className="w-4 h-4" />
@@ -274,31 +251,31 @@ export default function MapView() {
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-12 rounded-[24px] bg-gradient-to-r from-[hsl(var(--blue-900))] to-[hsl(var(--blue-700))] p-8 text-center"
+            className="mt-12 rounded-2xl bg-white border border-[hsl(var(--border))] shadow-sm p-6 sm:p-8 text-center"
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
-              <FileText className="w-8 h-8 text-white" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-[hsl(var(--blue-50))] mb-4">
+              <FileText className="w-7 h-7 text-[hsl(var(--blue-700))]" />
             </div>
-            <h3 className="font-display font-extrabold text-[24px] text-white">
+            <h3 className="font-display font-bold text-[24px] text-[hsl(var(--blue-900))]">
               Need Help Choosing a Visa?
             </h3>
-            <p className="mt-2 text-white/70 text-[14px] max-w-md mx-auto">
+            <p className="mt-2 text-muted-foreground text-[16px] max-w-md mx-auto">
               Our experts can help you find the perfect visa for your travel needs
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Link
                 to="/student-visa"
-                className="inline-flex items-center gap-2 rounded-full bg-white text-[hsl(var(--blue-900))] px-6 py-3 text-[14px] font-bold hover:bg-white/90 transition"
+                className="inline-flex items-center gap-2 rounded-xl bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] h-12 px-6 text-[15px] font-semibold hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] transition-colors"
               >
                 <Sparkles className="w-4 h-4" />
                 AI Visa Finder
               </Link>
               <a
-                href="tel:+919113256726"
-                className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] text-white px-6 py-3 text-[14px] font-bold hover:bg-[hsl(var(--red-600))] transition"
+                href={`tel:${BRAND.consultantPhoneRaw}`}
+                className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--accent))] text-white h-12 px-6 text-[15px] font-semibold hover:bg-[hsl(var(--accent-hover))] transition-colors"
               >
                 Call Now
               </a>

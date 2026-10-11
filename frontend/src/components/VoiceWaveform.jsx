@@ -5,7 +5,7 @@ export default function VoiceWaveform({ isActive, isSpeaking, color = 'hsl(var(-
   const bars = Array.from({ length: 15 });
 
   return (
-    <div className="flex items-center justify-center gap-1 h-12 px-4 py-2 bg-[hsl(var(--soft-bg))] rounded-2xl border border-black/5 shadow-inner select-none">
+    <div className="flex items-center justify-center gap-1 h-12 px-4 py-2 bg-[hsl(var(--soft-bg))] rounded-2xl border border-[hsl(var(--border))] shadow-inner select-none">
       {bars.map((_, i) => {
         // Generate random base heights for visual complexity
         const baseHeight = 6 + (i % 3) * 6;
@@ -42,7 +42,7 @@ export default function VoiceWaveform({ isActive, isSpeaking, color = 'hsl(var(-
         );
       })}
       
-      <span className="ml-3 text-[11px] font-mono font-bold uppercase tracking-wider text-[hsl(var(--blue-900))]/50">
+      <span className="ml-3 text-[12px] font-mono font-bold uppercase tracking-[0.14em] text-muted-foreground">
         {isActive ? 'Listening...' : isSpeaking ? 'Speaking...' : 'Standby'}
       </span>
     </div>

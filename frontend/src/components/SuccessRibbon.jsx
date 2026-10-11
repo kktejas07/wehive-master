@@ -34,7 +34,7 @@ function ConfettiExplosion({ active }) {
 
   useEffect(() => {
     if (active) {
-      const colors = ['#E1212C', '#0A2C8A', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899'];
+      const colors = ['#B31942', '#0A3161', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899'];
       const newParticles = Array.from({ length: 80 }, (_, i) => ({
         id: i,
         x: Math.random() * 100,
@@ -67,25 +67,25 @@ function SuccessRibbon({ isVisible, onClose, applicationId, applicantName }) {
       <AnimatePresence>
         {isVisible && (
           <motion.div
-            initial={{ y: -100, opacity: 0 }}
+            initial={{ y: -16, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-            className="fixed top-0 left-0 right-0 z-[9998] bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500 shadow-lg shadow-emerald-500/30"
+            exit={{ y: -16, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="fixed top-0 left-0 right-0 z-[9998] bg-emerald-700 shadow-sm"
           >
             <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', delay: 0.2, damping: 10 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1, duration: 0.2 }}
                   className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center"
                 >
                   <CheckCircle2 className="w-6 h-6 text-white" />
                 </motion.div>
                 <div>
                   <motion.p
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 }}
                     className="text-white font-bold text-[14px]"
@@ -93,7 +93,7 @@ function SuccessRibbon({ isVisible, onClose, applicationId, applicantName }) {
                     Congratulations {applicantName || 'Traveler'}!
                   </motion.p>
                   <motion.p
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 }}
                     className="text-white/80 text-[12px]"
@@ -102,7 +102,7 @@ function SuccessRibbon({ isVisible, onClose, applicationId, applicantName }) {
                   </motion.p>
                 </div>
               </div>
-              <motion.button
+              <motion.button aria-label="Dismiss"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
