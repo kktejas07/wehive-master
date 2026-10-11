@@ -28,7 +28,7 @@ export default function TrustFeatures({ countryName }) {
         <FadeIn>
           <h2 className="font-display font-bold text-[28px] sm:text-[36px] tracking-[-0.02em] text-[hsl(var(--blue-900))] text-center leading-[1.1]">
             Visa application made<br />
-            <span className="text-[hsl(var(--blue-700))]">simple and reliable</span>
+            <span className="text-[hsl(var(--red-500))]">simple and reliable</span>
           </h2>
         </FadeIn>
 

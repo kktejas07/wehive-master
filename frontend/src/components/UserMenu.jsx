@@ -6,7 +6,7 @@ import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useI18n } from '../context/I18nContext';
 import { avatarUrl } from '../lib/avatars';
 
-export default function UserMenu() {
+export default function UserMenu({ light = false }) {
   const { user, logout } = useAuth();
   const { logout: firebaseLogout } = useFirebaseAuth();
   const { t } = useI18n();
@@ -27,13 +27,17 @@ export default function UserMenu() {
       <>
         <button
           onClick={() => navigate('/login')}
-          className="hidden sm:inline-flex items-center h-10 px-3 rounded-lg text-[14px] font-semibold text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))] transition-colors duration-200"
+          className={light
+            ? 'hidden sm:inline-flex items-center h-10 px-3 rounded-lg text-[14px] font-semibold text-white hover:bg-white/10 transition-colors duration-200'
+            : 'hidden sm:inline-flex items-center h-10 px-3 rounded-lg text-[14px] font-semibold text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))] transition-colors duration-200'}
         >
           {t('cta.signIn')}
         </button>
         <button
           onClick={() => navigate('/signup')}
-          className="hidden md:inline-flex items-center h-10 rounded-xl btn-primary text-white px-4 text-[14px] font-semibold"
+          className={light
+            ? 'hidden md:inline-flex items-center h-10 rounded-xl bg-white text-[hsl(var(--blue-900))] hover:bg-[hsl(var(--blue-50))] px-4 text-[14px] font-semibold transition-colors duration-200'
+            : 'hidden md:inline-flex items-center h-10 rounded-xl btn-primary text-white px-4 text-[14px] font-semibold'}
         >
           {t('cta.signUp')}
         </button>

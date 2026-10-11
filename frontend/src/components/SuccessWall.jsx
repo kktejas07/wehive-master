@@ -37,7 +37,7 @@ const TESTIMONIALS = [
     year: '2026',
     comment: 'The application portal is a game changer. No traditional agent gives you this level of control and transparency. Handed in my CoS, visa approved in under a month.',
     avatarInitials: 'VS',
-    stampColor: 'rgba(37, 99, 235, 0.8)', // UK Royal Blue
+    stampColor: 'rgba(10, 49, 97, 0.8)', // UK Royal Blue
   },
   {
     id: 4,

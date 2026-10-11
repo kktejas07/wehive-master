@@ -22,7 +22,7 @@ const GUIDES = [
     id: 'uk',
     country: 'United Kingdom',
     flag: '',
-    color: '#3b82f6',
+    color: '#1D4E89',
     topics: [
       { title: 'Student Visa (formerly Tier 4)', type: 'guide', content: 'Apply up to 6 months before your course starts. You need a Confirmation of Acceptance for Studies (CAS) from your university. Biometrics required at a visa centre.' },
       { title: 'Maintenance Funds Required', type: 'table', rows: [['London universities', '£1,334/month up to 9 months'], ['Outside London', '£1,023/month up to 9 months'], ['Funds must be held', '28+ consecutive days before applying']] },

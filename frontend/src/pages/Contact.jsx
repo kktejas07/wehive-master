@@ -86,7 +86,7 @@ export default function Contact() {
             <div className="eyebrow">Fly with WeHive</div>
             <h1 className="h-display mt-4">
               Let's plan your fly{' '}
-              <span className="text-[hsl(var(--blue-700))]">over a nice coffee</span>
+              <span className="text-[hsl(var(--red-500))]">over a nice coffee</span>
             </h1>
             <p className="lead mt-4 max-w-lg">
               Have a question about your visa or passport? Grab a coffee, and let's chat about your travel dreams.
@@ -143,7 +143,7 @@ export default function Contact() {
                       aria-haspopup="listbox"
                       className={`${FIELD_CLS} pr-10 text-left flex items-center justify-between`}
                     >
-                      <span className={selectedSubject ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/45'}>
+                      <span className={selectedSubject ? 'text-[hsl(var(--blue-900))]' : 'text-muted-foreground'}>
                         {selectedSubject ? selectedSubject.label : 'Select a topic'}
                       </span>
                     </button>

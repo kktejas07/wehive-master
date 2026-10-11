@@ -354,7 +354,7 @@ export default function Navbar({ variant = 'default' }) {
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0">
           <NotificationBell />
           <PhoneBlock />
-          <UserMenu />
+          <UserMenu light={transparent} />
           <a
             href={WHATSAPP_URL}
             target="_blank"

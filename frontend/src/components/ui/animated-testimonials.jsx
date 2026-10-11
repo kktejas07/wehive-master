@@ -12,7 +12,7 @@ const TESTIMONIALS = [
     visaType: "USA Tourist Visa",
     rating: 5,
     avatar: "PS",
-    color: "#2563EB",
+    color: "#0A3161",
   },
   {
     quote:
@@ -22,7 +22,7 @@ const TESTIMONIALS = [
     visaType: "UK Business Visa",
     rating: 5,
     avatar: "RM",
-    color: "#047857",
+    color: "#B31942",
   },
   {
     quote:

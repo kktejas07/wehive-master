@@ -29,7 +29,7 @@ const FALLBACK_INTAKES = [
   {
     country: 'United Kingdom',
     flag: '🇬🇧',
-    color: '#3b82f6',
+    color: '#1D4E89',
     tracks: {
       "Engineering & Masters": [
         { name: 'September / October', months: 'Sep–Dec', apply_start: 'Oct (prev yr)', apply_end: 'Jun', popular: true },
@@ -106,7 +106,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Public universities usually require German proficiency for undergraduate programs.'
   },
   {
-    country: 'France', flag: '🇫🇷', color: '#3b82f6',
+    country: 'France', flag: '🇫🇷', color: '#1D4E89',
     tracks: {
       "Engineering & Masters": [{ name: 'Fall Intake', months: 'Sep-Jan', apply_start: 'Jan', apply_end: 'Apr', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Jan', apply_end: 'May', popular: true }],
@@ -138,7 +138,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Extremely competitive admissions at NUS and NTU.'
   },
   {
-    country: 'Russia', flag: '🇷🇺', color: '#1d4ed8',
+    country: 'Russia', flag: '🇷🇺', color: '#072447',
     tracks: {
       "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'May', apply_end: 'Aug', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'May', apply_end: 'Aug', popular: true }],
@@ -162,7 +162,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'IMAT is required for English-taught medical programs.'
   },
   {
-    country: 'Philippines', flag: '🇵🇭', color: '#2563eb',
+    country: 'Philippines', flag: '🇵🇭', color: '#0A3161',
     tracks: {
       "Engineering & Masters": [{ name: 'First Semester', months: 'Aug-Dec', apply_start: 'Jan', apply_end: 'May', popular: true }],
       MBA: [{ name: 'First Trimester', months: 'Aug', apply_start: 'Feb', apply_end: 'May', popular: true }],
@@ -257,7 +257,7 @@ function CountryCard({ data, activeTrack, setInsightsUni }) {
                 <div><span className="text-muted-foreground font-bold">Apply from:</span> <span className="text-[hsl(var(--blue-900))]">{intake.apply_start}</span></div>
                 <div><span className="text-muted-foreground font-bold">Deadline:</span> <span className="text-[hsl(var(--blue-900))]">{intake.apply_end}</span></div>
               </div>
-              <MonthBar applyStart={intake.apply_start} applyEnd={intake.apply_end} months={intake.months} color={data.color || '#3b82f6'} />
+              <MonthBar applyStart={intake.apply_start} applyEnd={intake.apply_end} months={intake.months} color={data.color || '#1D4E89'} />
             </div>
           ))}
 

@@ -10,7 +10,7 @@ import { COUNTRIES } from '../data/mock';
 
 const OUTCOME_META = {
   VISA_NOT_REQUIRED: { label: 'Visa Not Required', color: '#16a34a', bg: '#dcfce7', icon: CheckCircle2 },
-  EVISA_AVAILABLE:   { label: 'E-Visa Available',   color: '#2563eb', bg: '#dbeafe', icon: Globe },
+  EVISA_AVAILABLE:   { label: 'E-Visa Available',   color: '#0A3161', bg: '#dbeafe', icon: Globe },
   ETA_REQUIRED:      { label: 'ETA Required',        color: '#f59e0b', bg: '#fef3c7', icon: AlertTriangle },
   VISA_ON_ARRIVAL:   { label: 'Visa on Arrival',     color: '#8b5cf6', bg: '#f3e8ff', icon: Info },
   VISA_REQUIRED:     { label: 'Visa Required',       color: '#dc2626', bg: '#fee2e2', icon: XCircle },

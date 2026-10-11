@@ -50,7 +50,7 @@ export default function GlobalEvents() {
             <Compass className="w-3.5 h-3.5" /> Discover
           </div>
           <h1 className="font-display font-bold text-[36px] sm:text-[56px] leading-[1.05] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
-            Global Events <span className="text-[hsl(var(--blue-700))]">Hub</span>
+            Global Events <span className="text-[hsl(var(--red-500))]">Hub</span>
           </h1>
           <p className="mt-4 text-[16px] sm:text-[18px] text-muted-foreground max-w-2xl mx-auto">
             Plan your next journey around the world's biggest festivals, conferences, and cultural moments. Check visa requirements and build a holiday itinerary in one click.

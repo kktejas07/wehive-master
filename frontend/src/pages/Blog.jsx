@@ -152,7 +152,7 @@ export default function Blog() {
                         readTime={story.readTime || '5 min read'}
                         category={story.category}
                         countryId={story.country_id}
-                        accentColor="#2563EB"
+                        accentColor="#0A3161"
                         onClick={() => setSelectedBlog(story)}
                       />
                     </motion.div>

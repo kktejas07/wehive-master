@@ -49,7 +49,7 @@ interface EventItem {
 }
 
 function EventCard({ ev }: { ev: EventItem }) {
-  const accent = ev.accent_color || '#047857';
+  const accent = ev.accent_color || '#B31942';
   const tagLabel = TAG_LABEL[ev.tag || ''] || ev.tag || 'Featured';
   const tagColorClass = TAG_COLOR[ev.tag || ''] || TAG_COLOR.promo;
 
@@ -57,12 +57,12 @@ function EventCard({ ev }: { ev: EventItem }) {
     <Link
       to={ev.cta_url || '#'}
       data-testid={`event-banner-${ev.id}`}
-      className="group relative block aspect-[16/9] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-[0_30px_70px_-30px_rgba(37,99,235,0.4)] hover:shadow-[0_30px_70px_-20px_rgba(4,120,87,0.4)] transition duration-500"
+      className="group relative block aspect-[16/9] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-[0_30px_70px_-30px_rgba(10,49,97,0.4)] hover:shadow-[0_30px_70px_-20px_rgba(179,25,66,0.4)] transition duration-500"
     >
       {/* Background gradient or image */}
       <div
         className="absolute inset-0 z-0"
-        style={{ background: `linear-gradient(135deg, ${accent} 0%, #2563EB 100%)` }}
+        style={{ background: `linear-gradient(135deg, ${accent} 0%, #0A3161 100%)` }}
       />
       
       {/* Background image if available */}
@@ -176,7 +176,7 @@ interface EventsBannerProps {
 
 const FALLBACK_EVENTS: EventItem[] = [
   { id: 'e1', title: 'Summer getaway deals', subtitle: 'Explore visa packages for top summer destinations', tag: 'promo', accent_color: '#f59e0b', cta_label: 'Explore Deals', cta_url: '/visa/sg', highlight: true },
-  { id: 'e2', title: 'Business travel made easy', subtitle: 'Fast-track visas for frequent travellers', tag: 'business', accent_color: '#3b82f6', cta_label: 'Get Business Visa', cta_url: '/visa/us' },
+  { id: 'e2', title: 'Business travel made easy', subtitle: 'Fast-track visas for frequent travellers', tag: 'business', accent_color: '#1D4E89', cta_label: 'Get Business Visa', cta_url: '/visa/us' },
   { id: 'e3', title: 'Student visa offers', subtitle: 'Study abroad with dedicated visa support', tag: 'student', accent_color: '#22c55e', cta_label: 'View Student Visa', cta_url: '/visa/ca' },
   { id: 'e4', title: 'Holiday visa deals', subtitle: 'Plan your perfect getaway with visa-on-arrival destinations', tag: 'holiday', accent_color: '#ec4899', cta_label: 'Browse Holidays', cta_url: '/holiday/th' },
 ];

@@ -91,3 +91,6 @@ chainlit.md
 .kilo/
 .emergent/
 android-sdk/
+
+# local helper scripts
+frontend/_*_mc.mjs

@@ -70,7 +70,7 @@ export default function About() {
             <div className="eyebrow">About {BRAND.name}</div>
             <h1 className="h-display mt-4">
               We believe a visa{' '}
-              <span className="text-[hsl(var(--blue-700))]">should never</span>{' '}
+              <span className="text-[hsl(var(--red-500))]">should never</span>{' '}
               stand between you and a memory.
             </h1>
             <p className="lead mt-6 max-w-2xl">

@@ -54,14 +54,14 @@ export default function PromoBanner({ className = '' }) {
             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
             transition={{ duration: 0.25 }}
             className="relative rounded-2xl overflow-hidden"
-            style={{ background: banner.bg_color || '#2563EB' }}
+            style={{ background: banner.bg_color || '#0A3161' }}
           >
             <div className="relative flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 flex-wrap">
               {/* Badge */}
               {banner.badge && (
                 <span
                   className="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold uppercase tracking-[0.14em]"
-                  style={{ background: banner.accent_color || '#047857', color: '#fff' }}
+                  style={{ background: banner.accent_color || '#B31942', color: '#fff' }}
                 >
                   <Sparkles className="w-3 h-3" />
                   {banner.badge}

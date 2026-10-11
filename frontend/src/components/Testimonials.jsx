@@ -4,7 +4,7 @@ import Reveal from './Reveal';
 
 function TestimonialCard({ t, instance }) {
   return (
-    <article className="shrink-0 w-[360px] sm:w-[420px] rounded-2xl bg-white border border-black/5 p-6 shadow-[0_10px_30px_-20px_rgba(37,99,235,0.25)]">
+    <article className="shrink-0 w-[360px] sm:w-[420px] rounded-2xl bg-white border border-black/5 p-6 shadow-[0_10px_30px_-20px_rgba(10,49,97,0.25)]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1 text-[hsl(var(--blue-700))]">
           {[1, 2, 3, 4, 5].map((i) => (

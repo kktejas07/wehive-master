@@ -145,7 +145,7 @@ export default function EmergencyCare() {
             <FadeIn>
               <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-4">Need help now?</div>
               <h2 className="font-display font-bold text-[28px] sm:text-[36px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-[1.1]">
-                We're here for you, <span className="text-[hsl(var(--blue-700))]">24/7</span>
+                We're here for you, <span className="text-[hsl(var(--red-500))]">24/7</span>
               </h2>
               <p className="mt-4 text-[16px] text-muted-foreground max-w-lg mx-auto leading-relaxed">
                 Call our emergency helpline or send us an email. We'll respond within minutes.

@@ -168,7 +168,7 @@ export default function PromoCodesTab() {
         )}
 
         {promos.length === 0 ? (
-          <div className="text-center py-16 text-white/30">
+          <div className="text-center py-16 text-white/60">
             <Tag className="w-12 h-12 mx-auto mb-3" />
             <p>No promo codes yet. Create your first seasonal promo code above.</p>
           </div>
@@ -193,7 +193,7 @@ export default function PromoCodesTab() {
                       <button onClick={() => handleCopy(p.code)} className="font-mono font-bold text-white hover:text-blue-300 transition inline-flex items-center gap-1.5">
                         {p.code} {copied === p.code ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-white/30" />}
                       </button>
-                      <div className="text-[11px] text-white/30">{p.description}</div>
+                      <div className="text-[11px] text-white/60">{p.description}</div>
                     </td>
                     <td className="py-3 px-4 text-white/60 capitalize">{p.season}</td>
                     <td className="py-3 px-4">

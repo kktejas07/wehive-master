@@ -34,7 +34,7 @@ function ConfettiExplosion({ active }) {
 
   useEffect(() => {
     if (active) {
-      const colors = ['#047857', '#2563EB', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899'];
+      const colors = ['#B31942', '#0A3161', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899'];
       const newParticles = Array.from({ length: 80 }, (_, i) => ({
         id: i,
         x: Math.random() * 100,

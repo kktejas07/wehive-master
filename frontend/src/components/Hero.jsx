@@ -78,7 +78,7 @@ export default function Hero({ filters, onFilters }) {
           Global visa,{' '}
           <TextFlipAnimation
             words={['sorted.', 'fast.', 'easy.', 'done.']}
-            className="text-[hsl(var(--blue-700))]"
+            className="text-[hsl(var(--red-500))]"
             interval={2500}
           />
         </motion.h1>

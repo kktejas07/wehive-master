@@ -358,7 +358,7 @@ export default function UniversityDetail() {
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span className="text-[13px] text-muted-foreground">Scholarships</span>
-                  <span className={`text-[14px] font-bold ${uni.scholarships ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                  <span className={`text-[14px] font-bold ${uni.scholarships ? 'text-emerald-700' : 'text-muted-foreground'}`}>
                     {uni.scholarships ? 'Available' : 'Not available'}
                   </span>
                 </div>

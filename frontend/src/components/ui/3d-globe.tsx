@@ -187,7 +187,7 @@ export function Globe3D({
               transformStyle: 'preserve-3d',
             }}
           >
-            <div className="absolute inset-0 rounded-full bg-[hsl(var(--blue-800))] shadow-[0_0_40px_rgba(37,99,235,0.25)]" />
+            <div className="absolute inset-0 rounded-full bg-[hsl(var(--blue-800))] shadow-[0_0_40px_rgba(10,49,97,0.25)]" />
             <div className="absolute inset-0 rounded-full" style={{ transform: 'translateZ(10px)' }}>
               <svg viewBox="0 0 400 400" className="w-full h-full opacity-30">
                 <ellipse cx="200" cy="200" rx="180" ry="180" fill="none" stroke="white" strokeWidth="0.5" />
@@ -228,7 +228,7 @@ export function Globe3D({
           <div
             className="absolute inset-0 rounded-full pointer-events-none"
             style={{
-              boxShadow: 'inset 0 0 80px rgba(37,99,235,0.3)',
+              boxShadow: 'inset 0 0 80px rgba(10,49,97,0.3)',
               transform: 'translateZ(-20px)',
             }}
           />

@@ -2,9 +2,9 @@ import { Check, Clock, Send, Eye, ShieldCheck, AlertTriangle } from 'lucide-reac
 
 const STATUS_META = {
   draft: { Icon: Clock, color: '#64748b', cls: 'bg-slate-500', label: 'Draft' },
-  submitted: { Icon: Send, color: '#2563EB', cls: 'bg-[hsl(var(--blue-700))]', label: 'Submitted' },
+  submitted: { Icon: Send, color: '#0A3161', cls: 'bg-[hsl(var(--blue-700))]', label: 'Submitted' },
   in_review: { Icon: Eye, color: '#b45309', cls: 'bg-amber-600', label: 'In review' },
-  approved: { Icon: ShieldCheck, color: '#047857', cls: 'bg-emerald-700', label: 'Approved' },
+  approved: { Icon: ShieldCheck, color: '#B31942', cls: 'bg-emerald-700', label: 'Approved' },
   rejected: { Icon: AlertTriangle, color: '#DC2626', cls: 'bg-red-600', label: 'Action needed' },
 };
 

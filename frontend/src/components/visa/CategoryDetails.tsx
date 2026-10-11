@@ -69,7 +69,7 @@ export default function CategoryDetails({
         </div>
         <h1 className="mt-4 font-display font-bold text-[36px] sm:text-[56px] leading-[1.05] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
           <span>{country.name}</span>{' '}
-          <span className="text-[hsl(var(--blue-700))]">{cat.name}.</span>
+          <span className="text-[hsl(var(--red-500))]">{cat.name}.</span>
         </h1>
         <p className="mt-5 text-[17px] leading-relaxed text-muted-foreground max-w-xl">
           Apply in 12 minutes. Approved in {cat.processing_days} days. Backed by{' '}

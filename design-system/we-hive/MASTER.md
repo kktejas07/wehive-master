@@ -15,28 +15,24 @@
 
 ## Global Rules
 
-### Color Palette
+### Color Palette — US flag
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#2563EB` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#3B82F6` | `--color-secondary` |
-| On Secondary | `#000000` | `--color-on-secondary` |
-| Accent/CTA | `#047857` | `--color-accent` |
-| On Accent/CTA | `#FFFFFF` | `--color-on-accent` |
-| Background | `#F8FAFC` | `--color-background` |
-| Foreground | `#0F172A` | `--color-foreground` |
-| Card | `#FFFFFF` | `--color-card` |
-| Card Foreground | `#0F172A` | `--color-card-foreground` |
-| Muted | `#F1F5FD` | `--color-muted` |
-| Muted Foreground | `#475569` | `--color-muted-foreground` |
-| Border | `#E4ECFC` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| On Destructive | `#FFFFFF` | `--color-on-destructive` |
-| Ring | `#2563EB` | `--color-ring` |
+| Role | Hex | Token | Contrast on white |
+|------|-----|-------|-------------------|
+| Primary (Old Glory Blue) | `#0A3161` | `--primary` / `--blue-700` | 12.9:1 |
+| Primary hover | `#072447` | `--blue-800` | 15.5:1 |
+| Primary mid (secondary accents) | `#1D4E89` | `--blue-500` | 8.4:1 |
+| CTA (Old Glory Red) | `#B31942` | `--accent` / `--red-500` | 6.7:1 (white text on it 6.7:1) |
+| CTA hover | `#8E1434` | `--accent-hover` / `--red-600` | 9.1:1 |
+| Ink (text) | `#0B1220` | `--foreground` / `--blue-900` | 18.7:1 |
+| Muted text | `#4A5568` | `--muted-foreground` | 7.5:1 |
+| Background | `#FFFFFF` | `--background` | — |
+| Tint | `#F0F4FA` | `--blue-50` / `--secondary` | — |
+| Page tint | `#F7F9FC` | `--soft-bg` | — |
+| Border | `#E1E7F0` | `--border` | — |
+| Destructive | `#DC2626` | `--destructive` | 4.8:1 |
 
-**Color Notes:** Focus blue + CTA green. CTA darkened from #059669 to #047857 so white button text meets WCAG AA (5.5:1). In code these live as HSL tokens in `frontend/src/index.css`; legacy names `--blue-700` (primary), `--blue-900` (ink) and `--accent` (CTA) are remapped, so prefer the token classes over raw hex.
+**Colour roles:** navy for primary buttons, links, active states and icons; red for the single main call-to-action per view and for one highlight word in a headline; white surfaces. Emerald / amber / red Tailwind shades are reserved for status. On dark (ink or navy) bands, use white text and white or red buttons — never navy on dark. Tokens live in `frontend/src/index.css`; prefer token classes over raw hex.
 
 ### Typography
 

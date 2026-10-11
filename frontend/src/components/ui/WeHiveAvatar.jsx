@@ -1,6 +1,6 @@
 const PALETTES = [
-  { bg: '#2563EB', accent: '#ffffff', hat: '#047857' },
-  { bg: '#047857', accent: '#ffffff', hat: '#2563EB' },
+  { bg: '#0A3161', accent: '#ffffff', hat: '#B31942' },
+  { bg: '#B31942', accent: '#ffffff', hat: '#0A3161' },
   { bg: '#1e3a5f', accent: '#f0f4ff', hat: '#c41e3a' },
   { bg: '#2d1b69', accent: '#f0f0ff', hat: '#e8a020' },
 ];

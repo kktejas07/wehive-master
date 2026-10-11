@@ -83,40 +83,41 @@ code {
 
 @layer base {
   :root {
-    /* We Hive design system — see design-system/we-hive/MASTER.md */
-    --background: 0 0% 100%;             /* #FFFFFF */
-    --foreground: 222 47% 11%;           /* #0F172A */
+    /* We Hive design system (US flag palette) — see design-system/we-hive/MASTER.md
+       Navy #0A3161 primary · Red #B31942 CTA · White · Ink #0B1220 */
+    --background: 0 0% 100%;             
+    --foreground: 220 49% 8%;           
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 49% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;              /* #2563EB */
+    --popover-foreground: 220 49% 8%;
+    --primary: 213 81% 21%;              
     --primary-foreground: 0 0% 100%;
-    --secondary: 214 100% 97%;           /* #EFF6FF */
-    --secondary-foreground: 224 76% 48%;
-    --muted: 210 40% 96%;                /* #F1F5F9 */
-    --muted-foreground: 215 19% 35%;     /* #475569 */
-    --accent: 163 94% 24%;               /* #047857 CTA green (AA with white text) */
+    --secondary: 216 50% 96%;           
+    --secondary-foreground: 213 81% 21%;
+    --muted: 216 45% 96%;                
+    --muted-foreground: 218 17% 35%;     
+    --accent: 344 75% 40%;               
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;            /* #DC2626 */
+    --destructive: 0 72% 51%;            
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;               /* #E2E8F0 */
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --border: 216 33% 91%;               
+    --input: 216 33% 91%;
+    --ring: 213 81% 21%;
     --radius: 0.75rem;
 
     /* Legacy scale names, remapped to the new palette */
-    --blue-50: 214 100% 97%;             /* #EFF6FF */
-    --blue-100: 214 95% 93%;             /* #DBEAFE */
-    --blue-200: 213 97% 87%;             /* #BFDBFE */
-    --blue-500: 217 91% 60%;             /* #3B82F6 */
-    --blue-700: 221 83% 53%;             /* #2563EB primary */
-    --blue-800: 224 76% 48%;             /* #1D4ED8 primary hover */
-    --blue-900: 222 47% 11%;             /* #0F172A ink */
-    --red-500: 0 72% 51%;                /* #DC2626 */
-    --red-600: 0 74% 42%;                /* #B91C1C */
-    --accent-hover: 164 86% 16%;         /* #065F46 */
-    --soft-bg: 210 40% 98%;              /* #F8FAFC */
+    --blue-50: 216 50% 96%;             
+    --blue-100: 214 45% 91%;             
+    --blue-200: 216 43% 84%;             
+    --blue-500: 213 65% 33%;             
+    --blue-700: 213 81% 21%;             
+    --blue-800: 213 82% 15%;             
+    --blue-900: 220 49% 8%;             
+    --red-500: 344 75% 40%;                
+    --red-600: 344 75% 32%;                
+    --accent-hover: 344 75% 32%;         
+    --soft-bg: 216 45% 98%;              
 
     --font-heading: 'Figtree', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
