@@ -83,7 +83,7 @@ const FALLBACK_INTAKES = [
   {
     country: 'New Zealand',
     flag: '🇳🇿',
-    color: '#14b8a6',
+    color: '#1D4E89',
     tracks: {
       "Engineering & Masters": [
         { name: 'Semester 1', months: 'Feb-Jun', apply_start: 'Oct', apply_end: 'Dec', popular: true },
@@ -98,7 +98,7 @@ const FALLBACK_INTAKES = [
     notes: 'Intakes largely mirror Australia due to the southern hemisphere calendar.',
   },
   {
-    country: 'Germany', flag: '🇩🇪', color: '#f59e0b',
+    country: 'Germany', flag: '🇩🇪', color: '#B31942',
     tracks: {
       "Engineering & Masters": [{ name: 'Winter Semester', months: 'Oct-Feb', apply_start: 'May', apply_end: 'Jul', popular: true }],
       MBA: [{ name: 'Winter Intake', months: 'Oct', apply_start: 'Apr', apply_end: 'Jun', popular: true }],
@@ -114,7 +114,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Grande Écoles have earlier deadlines compared to public universities.'
   },
   {
-    country: 'Ireland', flag: '🇮🇪', color: '#22c55e',
+    country: 'Ireland', flag: '🇮🇪', color: '#0A3161',
     tracks: {
       "Engineering & Masters": [{ name: 'Autumn Intake', months: 'Sep-Dec', apply_start: 'Nov', apply_end: 'Jul', popular: true }],
       MBA: [{ name: 'Autumn Intake', months: 'Sep', apply_start: 'Nov', apply_end: 'Jun', popular: true }],
@@ -122,7 +122,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Excellent post-study work visa opportunities attract many international students.'
   },
   {
-    country: 'Netherlands', flag: '🇳🇱', color: '#f97316',
+    country: 'Netherlands', flag: '🇳🇱', color: '#B31942',
     tracks: {
       "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'Oct', apply_end: 'Apr', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Oct', apply_end: 'May', popular: true }],
@@ -154,7 +154,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Large number of English-taught MBBS programs approved by MOE.'
   },
   {
-    country: 'Italy', flag: '🇮🇹', color: '#16a34a',
+    country: 'Italy', flag: '🇮🇹', color: '#0A3161',
     tracks: {
       "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'Nov', apply_end: 'Apr', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Dec', apply_end: 'May', popular: true }],

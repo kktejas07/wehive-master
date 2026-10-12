@@ -23,7 +23,7 @@ const FALLBACK_CARDS = [
     cta_text: 'Upgrade Now',
     cta_link: '/pricing',
     bg_color: '#7c3aed',
-    accent_color: '#f59e0b',
+    accent_color: '#B31942',
     image_url: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=70',
   },
   {
@@ -34,7 +34,7 @@ const FALLBACK_CARDS = [
     cta_text: 'Learn More',
     cta_link: '/',
     bg_color: '#065f46',
-    accent_color: '#34d399',
+    accent_color: '#0A3161',
     image_url: 'https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=600&q=70',
   },
 ];

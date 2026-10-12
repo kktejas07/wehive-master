@@ -175,10 +175,10 @@ interface EventsBannerProps {
 }
 
 const FALLBACK_EVENTS: EventItem[] = [
-  { id: 'e1', title: 'Summer getaway deals', subtitle: 'Explore visa packages for top summer destinations', tag: 'promo', accent_color: '#f59e0b', cta_label: 'Explore Deals', cta_url: '/visa/sg', highlight: true },
+  { id: 'e1', title: 'Summer getaway deals', subtitle: 'Explore visa packages for top summer destinations', tag: 'promo', accent_color: '#B31942', cta_label: 'Explore Deals', cta_url: '/visa/sg', highlight: true },
   { id: 'e2', title: 'Business travel made easy', subtitle: 'Fast-track visas for frequent travellers', tag: 'business', accent_color: '#1D4E89', cta_label: 'Get Business Visa', cta_url: '/visa/us' },
-  { id: 'e3', title: 'Student visa offers', subtitle: 'Study abroad with dedicated visa support', tag: 'student', accent_color: '#22c55e', cta_label: 'View Student Visa', cta_url: '/visa/ca' },
-  { id: 'e4', title: 'Holiday visa deals', subtitle: 'Plan your perfect getaway with visa-on-arrival destinations', tag: 'holiday', accent_color: '#ec4899', cta_label: 'Browse Holidays', cta_url: '/holiday/th' },
+  { id: 'e3', title: 'Student visa offers', subtitle: 'Study abroad with dedicated visa support', tag: 'student', accent_color: '#0A3161', cta_label: 'View Student Visa', cta_url: '/visa/ca' },
+  { id: 'e4', title: 'Holiday visa deals', subtitle: 'Plan your perfect getaway with visa-on-arrival destinations', tag: 'holiday', accent_color: '#B31942', cta_label: 'Browse Holidays', cta_url: '/holiday/th' },
 ];
 
 export default function EventsBanner({

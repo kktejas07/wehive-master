@@ -34,6 +34,8 @@
 
 **Colour roles:** navy for primary buttons, links, active states and icons; red for the single main call-to-action per view and for one highlight word in a headline; white surfaces. Emerald / amber / red Tailwind shades are reserved for status. On dark (ink or navy) bands, use white text and white or red buttons — never navy on dark. Tokens live in `frontend/src/index.css`; prefer token classes over raw hex.
 
+**Enforced in Tailwind:** `frontend/tailwind.config.js` remaps the stock hues — `blue`, `sky`, `indigo`, `cyan`, `teal`, `violet`, `purple` render the navy scale (`700` = `#0A3161`) and `red`, `rose`, `pink`, `fuchsia`, `orange` render the flag-red scale (`600` = `#B31942`). Only `emerald`/`green`/`amber` keep stock values, for status. Don't add other hex accents; use navy, red, white or ink.
+
 ### Typography
 
 - **Heading Font:** Figtree
