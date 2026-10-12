@@ -1,11 +1,11 @@
 import { Check, Clock, Send, Eye, ShieldCheck, AlertTriangle } from 'lucide-react';
 
 const STATUS_META = {
-  draft: { Icon: Clock, color: '#64748b', cls: 'bg-slate-500', label: 'Draft' },
-  submitted: { Icon: Send, color: '#0A3161', cls: 'bg-[hsl(var(--blue-700))]', label: 'Submitted' },
-  in_review: { Icon: Eye, color: '#b45309', cls: 'bg-amber-600', label: 'In review' },
-  approved: { Icon: ShieldCheck, color: '#B31942', cls: 'bg-emerald-700', label: 'Approved' },
-  rejected: { Icon: AlertTriangle, color: '#DC2626', cls: 'bg-red-600', label: 'Action needed' },
+  draft: { Icon: Clock, cls: 'bg-slate-500', label: 'Draft' },
+  submitted: { Icon: Send, cls: 'bg-[hsl(var(--blue-700))]', label: 'Submitted' },
+  in_review: { Icon: Eye, cls: 'bg-amber-600', label: 'In review' },
+  approved: { Icon: ShieldCheck, cls: 'bg-emerald-700', label: 'Approved' },
+  rejected: { Icon: AlertTriangle, cls: 'bg-red-600', label: 'Action needed' },
 };
 
 export default function ApplicationTimeline({ events, currentStatus }) {

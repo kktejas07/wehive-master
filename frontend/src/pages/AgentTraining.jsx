@@ -9,7 +9,6 @@ const GUIDES = [
     id: 'ca',
     country: 'Canada',
     flag: '',
-    color: '#ef4444',
     topics: [
       { title: 'Student Visa (Study Permit) Overview', type: 'guide', content: 'A study permit is required for any course longer than 6 months. Apply online or at the port of entry. Processing times average 8–12 weeks.' },
       { title: 'GIC & Proof of Funds', type: 'checklist', items: ['CAD $10,200 in a GIC', 'First year tuition paid or demonstrated', 'Funds for family members if accompanying', 'Source of funds documentation'] },
@@ -22,7 +21,6 @@ const GUIDES = [
     id: 'uk',
     country: 'United Kingdom',
     flag: '',
-    color: '#1D4E89',
     topics: [
       { title: 'Student Visa (formerly Tier 4)', type: 'guide', content: 'Apply up to 6 months before your course starts. You need a Confirmation of Acceptance for Studies (CAS) from your university. Biometrics required at a visa centre.' },
       { title: 'Maintenance Funds Required', type: 'table', rows: [['London universities', '£1,334/month up to 9 months'], ['Outside London', '£1,023/month up to 9 months'], ['Funds must be held', '28+ consecutive days before applying']] },
@@ -34,7 +32,6 @@ const GUIDES = [
     id: 'au',
     country: 'Australia',
     flag: '',
-    color: '#B31942',
     topics: [
       { title: 'Student Visa (Subclass 500)', type: 'guide', content: 'Apply online via ImmiAccount. Usually granted for the full duration of your course. Must maintain satisfactory progress and attendance.' },
       { title: 'GTE — Genuine Temporary Entrant', type: 'guide', content: 'Officers assess whether you genuinely intend to study and return home. Address home country ties, study history, and study plan clearly in the GTE statement.' },
@@ -46,7 +43,6 @@ const GUIDES = [
     id: 'de',
     country: 'Germany',
     flag: '',
-    color: '#1D4E89',
     topics: [
       { title: 'Student Visa Process', type: 'guide', content: 'Apply at the German embassy in your home country. After arrival, apply for a residence permit at the Ausländerbehörde within 90 days.' },
       { title: 'Blocked Bank Account (Sperrkonto)', type: 'guide', content: 'Required proof of funds. Deposit at least €11,208/year in a blocked account (Coracle, Expatrio, Deutsche Bank). Released in monthly instalments of ~€934.' },
@@ -58,7 +54,6 @@ const GUIDES = [
     id: 'ie',
     country: 'Ireland',
     flag: '',
-    color: '#0A3161',
     topics: [
       { title: 'Study Visa (D Visa)', type: 'guide', content: 'Required for courses over 90 days. Apply online at AVATS. IRP registration required within 90 days of arrival.' },
       { title: 'Financial Requirements', type: 'table', rows: [['Proof of funds', '€7,000 per year minimum'], ['Tuition', 'Must be paid in full before visa'], ['Repatriation', '€2,000 return flight funds']] },
@@ -69,7 +64,6 @@ const GUIDES = [
     id: 'compliance',
     country: 'Compliance & Ethics',
     flag: '',
-    color: '#0A3161',
     topics: [
       { title: 'Agent Code of Conduct', type: 'checklist', items: ['Never misrepresent university programs or costs', 'Disclose all fees charged to students', 'Keep copies of all application documents', 'Never forge or alter documents', 'Report concerns to the institution'] },
       { title: 'ESOS / Registered Agents', type: 'guide', content: 'In Australia, agents must be registered on the Australian Education International (AEI) PRISMS system. In the UK, universities maintain their own approved agent lists. Always verify your registration status.' },

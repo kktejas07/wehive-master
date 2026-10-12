@@ -11,7 +11,6 @@ const FALLBACK_INTAKES = [
   {
     country: 'Canada',
     flag: '🇨🇦',
-    color: '#ef4444',
     tracks: {
       "Engineering & Masters": [
         { name: 'Winter / January', months: 'Jan–Apr', apply_start: 'Sep', apply_end: 'Nov', popular: false },
@@ -29,7 +28,6 @@ const FALLBACK_INTAKES = [
   {
     country: 'United Kingdom',
     flag: '🇬🇧',
-    color: '#1D4E89',
     tracks: {
       "Engineering & Masters": [
         { name: 'September / October', months: 'Sep–Dec', apply_start: 'Oct (prev yr)', apply_end: 'Jun', popular: true },
@@ -46,7 +44,6 @@ const FALLBACK_INTAKES = [
   {
     country: 'USA',
     flag: '🇺🇸',
-    color: '#0ea5e9',
     tracks: {
       "Engineering & Masters": [
         { name: 'Fall Intake', months: 'Aug-Dec', apply_start: 'Nov', apply_end: 'Jan', popular: true },
@@ -65,7 +62,6 @@ const FALLBACK_INTAKES = [
   {
     country: 'Australia',
     flag: '🇦🇺',
-    color: '#eab308',
     tracks: {
       "Engineering & Masters": [
         { name: 'Semester 1', months: 'Feb-Jun', apply_start: 'Sep', apply_end: 'Dec', popular: true },
@@ -83,7 +79,6 @@ const FALLBACK_INTAKES = [
   {
     country: 'New Zealand',
     flag: '🇳🇿',
-    color: '#1D4E89',
     tracks: {
       "Engineering & Masters": [
         { name: 'Semester 1', months: 'Feb-Jun', apply_start: 'Oct', apply_end: 'Dec', popular: true },
@@ -98,7 +93,7 @@ const FALLBACK_INTAKES = [
     notes: 'Intakes largely mirror Australia due to the southern hemisphere calendar.',
   },
   {
-    country: 'Germany', flag: '🇩🇪', color: '#B31942',
+    country: 'Germany', flag: '🇩🇪',
     tracks: {
       "Engineering & Masters": [{ name: 'Winter Semester', months: 'Oct-Feb', apply_start: 'May', apply_end: 'Jul', popular: true }],
       MBA: [{ name: 'Winter Intake', months: 'Oct', apply_start: 'Apr', apply_end: 'Jun', popular: true }],
@@ -106,7 +101,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Public universities usually require German proficiency for undergraduate programs.'
   },
   {
-    country: 'France', flag: '🇫🇷', color: '#1D4E89',
+    country: 'France', flag: '🇫🇷',
     tracks: {
       "Engineering & Masters": [{ name: 'Fall Intake', months: 'Sep-Jan', apply_start: 'Jan', apply_end: 'Apr', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Jan', apply_end: 'May', popular: true }],
@@ -114,7 +109,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Grande Écoles have earlier deadlines compared to public universities.'
   },
   {
-    country: 'Ireland', flag: '🇮🇪', color: '#0A3161',
+    country: 'Ireland', flag: '🇮🇪',
     tracks: {
       "Engineering & Masters": [{ name: 'Autumn Intake', months: 'Sep-Dec', apply_start: 'Nov', apply_end: 'Jul', popular: true }],
       MBA: [{ name: 'Autumn Intake', months: 'Sep', apply_start: 'Nov', apply_end: 'Jun', popular: true }],
@@ -122,7 +117,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Excellent post-study work visa opportunities attract many international students.'
   },
   {
-    country: 'Netherlands', flag: '🇳🇱', color: '#B31942',
+    country: 'Netherlands', flag: '🇳🇱',
     tracks: {
       "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'Oct', apply_end: 'Apr', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Oct', apply_end: 'May', popular: true }],
@@ -130,7 +125,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Highly competitive programs have numerus fixus (fixed quotas) with early deadlines (Jan 15).'
   },
   {
-    country: 'Singapore', flag: '🇸🇬', color: '#dc2626',
+    country: 'Singapore', flag: '🇸🇬',
     tracks: {
       "Engineering & Masters": [{ name: 'August Intake', months: 'Aug-Dec', apply_start: 'Jan', apply_end: 'Mar', popular: true }],
       MBA: [{ name: 'August Intake', months: 'Aug', apply_start: 'Oct', apply_end: 'Mar', popular: true }],
@@ -138,7 +133,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Extremely competitive admissions at NUS and NTU.'
   },
   {
-    country: 'Russia', flag: '🇷🇺', color: '#072447',
+    country: 'Russia', flag: '🇷🇺',
     tracks: {
       "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'May', apply_end: 'Aug', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'May', apply_end: 'Aug', popular: true }],
@@ -146,7 +141,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Popular for affordable medical programs. Preparatory language year often required.'
   },
   {
-    country: 'China', flag: '🇨🇳', color: '#ef4444',
+    country: 'China', flag: '🇨🇳',
     tracks: {
       "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'Feb', apply_end: 'Jun', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Mar', apply_end: 'May', popular: true }],
@@ -154,7 +149,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'Large number of English-taught MBBS programs approved by MOE.'
   },
   {
-    country: 'Italy', flag: '🇮🇹', color: '#0A3161',
+    country: 'Italy', flag: '🇮🇹',
     tracks: {
       "Engineering & Masters": [{ name: 'September Intake', months: 'Sep-Jan', apply_start: 'Nov', apply_end: 'Apr', popular: true }],
       MBA: [{ name: 'September Intake', months: 'Sep', apply_start: 'Dec', apply_end: 'May', popular: true }],
@@ -162,7 +157,7 @@ const FALLBACK_INTAKES = [
     }, notes: 'IMAT is required for English-taught medical programs.'
   },
   {
-    country: 'Philippines', flag: '🇵🇭', color: '#0A3161',
+    country: 'Philippines', flag: '🇵🇭',
     tracks: {
       "Engineering & Masters": [{ name: 'First Semester', months: 'Aug-Dec', apply_start: 'Jan', apply_end: 'May', popular: true }],
       MBA: [{ name: 'First Trimester', months: 'Aug', apply_start: 'Feb', apply_end: 'May', popular: true }],
@@ -173,7 +168,7 @@ const FALLBACK_INTAKES = [
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-function MonthBar({ applyStart, applyEnd, months, color }) {
+function MonthBar({ applyStart, applyEnd, months }) {
   const startIdx = MONTHS.findIndex(m => applyStart?.startsWith(m));
   const endIdx = MONTHS.findIndex(m => applyEnd?.startsWith(m));
 
@@ -257,7 +252,7 @@ function CountryCard({ data, activeTrack, setInsightsUni }) {
                 <div><span className="text-muted-foreground font-bold">Apply from:</span> <span className="text-[hsl(var(--blue-900))]">{intake.apply_start}</span></div>
                 <div><span className="text-muted-foreground font-bold">Deadline:</span> <span className="text-[hsl(var(--blue-900))]">{intake.apply_end}</span></div>
               </div>
-              <MonthBar applyStart={intake.apply_start} applyEnd={intake.apply_end} months={intake.months} color={data.color || '#1D4E89'} />
+              <MonthBar applyStart={intake.apply_start} applyEnd={intake.apply_end} months={intake.months} />
             </div>
           ))}
 
