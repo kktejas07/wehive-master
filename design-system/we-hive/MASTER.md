@@ -9,7 +9,7 @@
 **Project:** We Hive
 **Generated:** 2026-10-11 20:28:04
 **Category:** Travel, visa & study-abroad services
-**Design Dials:** Motion 5/10 (Standard)
+**Design Dials:** Motion 6/10 (Standard+) · Depth: flag-palette gradients
 
 ---
 
@@ -33,6 +33,8 @@
 | Destructive | `#DC2626` | `--destructive` | 4.8:1 |
 
 **Colour roles:** navy for primary buttons, links, active states and icons; red for the single main call-to-action per view and for one highlight word in a headline; white surfaces. Emerald / amber / red Tailwind shades are reserved for status. On dark (ink or navy) bands, use white text and white or red buttons — never navy on dark. Tokens live in `frontend/src/index.css`; prefer token classes over raw hex.
+
+**Elite layer (index.css):** navy and red buttons render as gradients (`--grad-navy`, `--grad-red`) with a coloured glow on hover; every button gets a click ripple (`src/lib/ripple.js`) and a 1px press; cards gain a navy→red gradient edge on hover; `.eyebrow` has a navy→red underline; `.flag-stripe` sits under the navbar and above the footer; `.mesh-bg` / page wrappers carry a soft navy+red glow; `.text-gradient-red` / `.text-gradient-navy` for highlight words. Gradients stay within navy, red, white and ink.
 
 **Enforced in Tailwind:** `frontend/tailwind.config.js` remaps the stock hues — `blue`, `sky`, `indigo`, `cyan`, `teal`, `violet`, `purple` render the navy scale (`700` = `#0A3161`) and `red`, `rose`, `pink`, `fuchsia`, `orange` render the flag-red scale (`600` = `#B31942`). Only `emerald`/`green`/`amber` keep stock values, for status. Don't add other hex accents; use navy, red, white or ink.
 

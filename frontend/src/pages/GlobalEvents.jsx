@@ -44,7 +44,7 @@ export default function GlobalEvents() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-28 pb-12 md:pb-16 bg-white border-b border-[hsl(var(--border))]">
+      <section className="pt-28 pb-12 md:pb-16 mesh-bg border-b border-[hsl(var(--border))]">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 text-center">
           <div className="inline-flex items-center gap-2 text-[hsl(var(--blue-700))] text-[12px] font-bold uppercase tracking-[0.14em] mb-4">
             <Compass className="w-3.5 h-3.5" /> Discover

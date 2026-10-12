@@ -94,7 +94,8 @@ function FooterContact() {
 
 export default function Footer() {
   return (
-    <footer className="relative bg-[hsl(var(--blue-900))] text-white">
+    <footer className="relative text-white bg-[hsl(var(--blue-900))] bg-[radial-gradient(ellipse_80%_60%_at_15%_0%,rgba(29,78,137,0.55),transparent_60%),radial-gradient(ellipse_60%_50%_at_95%_100%,rgba(179,25,66,0.28),transparent_60%),linear-gradient(180deg,#0A3161_0%,#0B1220_70%)]">
+      <div className="flag-stripe" aria-hidden="true" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 pb-24 sm:pb-10">
         <NewsletterSignup />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 mb-12 md:mb-16">

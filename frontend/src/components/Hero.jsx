@@ -81,7 +81,7 @@ function Orbits({ flags }) {
       {RINGS.map((ring, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full border border-[hsl(var(--blue-700))]/15"
+          className={`absolute rounded-full border ${i % 2 ? 'border-[hsl(var(--red-500))]/20 border-dashed' : 'border-[hsl(var(--blue-700))]/20'}`}
           style={{ width: `${ring.size}%`, height: `${ring.size}%`, left: `${(100 - ring.size) / 2}%`, top: `${(100 - ring.size) / 2}%` }}
           animate={{ rotate: 360 * ring.dir }}
           transition={{ duration: ring.duration, repeat: Infinity, ease: 'linear' }}
@@ -110,8 +110,8 @@ function Orbits({ flags }) {
       ))}
 
       {/* Centre counter (does not rotate) */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-[34%] w-[34%] flex-col items-center justify-center rounded-full bg-white border border-[hsl(var(--border))] shadow-lg text-center">
-        <span className="font-display font-bold text-[26px] xl:text-[36px] leading-none tracking-[-0.02em] text-[hsl(var(--blue-700))] tabular-nums">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-[34%] w-[34%] flex-col items-center justify-center rounded-full bg-white text-center shadow-[0_20px_50px_-20px_rgba(10,49,97,0.55),0_0_0_8px_rgba(10,49,97,0.05),0_0_0_16px_rgba(179,25,66,0.04)] border border-transparent [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(135deg,#0A3161,#B31942)_border-box]">
+        <span className="font-display font-bold text-[26px] xl:text-[36px] leading-none tracking-[-0.02em] text-gradient-navy tabular-nums">
           <CountUp to={visas} />+
         </span>
         <span className="mt-1.5 text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--red-500))]">Visas processed</span>
@@ -130,7 +130,12 @@ export default function Hero({ filters, onFilters }) {
   const setF = onFilters || (() => {});
 
   return (
-    <section className="relative z-30 pt-28 pb-14 sm:pt-36 sm:pb-20 overflow-visible bg-gradient-to-b from-white to-[hsl(var(--blue-50))]">
+    <section className="relative z-30 pt-28 pb-14 sm:pt-36 sm:pb-20 overflow-visible bg-white">
+      {/* Mesh backdrop: navy and red glows over a faint dot grid */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_60%_at_85%_35%,rgba(29,78,137,0.16),transparent_70%),radial-gradient(ellipse_45%_45%_at_5%_90%,rgba(179,25,66,0.10),transparent_70%),linear-gradient(180deg,#FFFFFF_0%,hsl(var(--blue-50))_100%)]" />
+        <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(rgba(10,49,97,0.12)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_70%_at_70%_40%,black,transparent)]" />
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] xl:grid-cols-[minmax(0,1fr)_minmax(0,580px)]">
           <div className="text-center lg:text-left">
@@ -153,7 +158,7 @@ export default function Hero({ filters, onFilters }) {
               Global visa,{' '}
               <TextFlipAnimation
                 words={['sorted.', 'fast.', 'easy.', 'done.']}
-                className="text-[hsl(var(--red-500))]"
+                className="text-gradient-red pb-1"
                 interval={2500}
               />
             </motion.h1>
