@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
+import { animate, motion, useReducedMotion } from 'framer-motion';
 import FilterBar, { DEFAULT_FILTERS } from './FilterBar';
 import { COUNTRIES, BRAND, KEY_STATS } from '../data/mock';
 import { useI18n } from '../context/I18nContext';
@@ -10,82 +10,24 @@ import TextFlipAnimation from './ui/TextFlipAnimation';
 
 const EASE = [0.22, 1, 0.36, 1];
 
-// Cinematic background adapted from the MotionSites "Wanderful Hero" prompt.
-// Override with a self-hosted file via REACT_APP_HERO_VIDEO_URL.
-const HERO_VIDEO =
-  process.env.REACT_APP_HERO_VIDEO_URL ||
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260510_060007_60275ce7-030c-4668-a160-8f364ec537d3.mp4';
-
-// The clip is ~10 MB: skip it on phones, data-saver and reduced motion.
-function useHeroVideo(reduce) {
-  const [src, setSrc] = useState(null);
-  useEffect(() => {
-    const saveData = navigator.connection?.saveData;
-    if (!reduce && !saveData && window.matchMedia('(min-width: 768px)').matches) setSrc(HERO_VIDEO);
-  }, [reduce]);
-  return src;
-}
-
-function HeroBackdrop() {
-  const reduce = useReducedMotion();
-  const src = useHeroVideo(reduce);
-  // Mouse parallax: up to ±20px, eased with a spring.
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const x = useSpring(mx, { stiffness: 40, damping: 20 });
-  const y = useSpring(my, { stiffness: 40, damping: 20 });
-  useEffect(() => {
-    if (reduce || !src) return undefined;
-    const onMove = (e) => {
-      mx.set(((e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)) * 20);
-      my.set(((e.clientY - window.innerHeight / 2) / (window.innerHeight / 2)) * 20);
-    };
-    window.addEventListener('mousemove', onMove);
-    return () => window.removeEventListener('mousemove', onMove);
-  }, [reduce, src, mx, my]);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden bg-[hsl(var(--blue-800))]" aria-hidden="true">
-      {src && (
-        <motion.video
-          src={src}
-          autoPlay
-          muted
-          loop
-          playsInline
-          onLoadedMetadata={(e) => { e.currentTarget.playbackRate = 1.25; }}
-          style={{ x, y }}
-          className="absolute inset-0 h-full w-full object-cover scale-[1.08] origin-center"
-        />
-      )}
-      {/* Ink scrim keeps white text above 4.5:1 on any frame */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(var(--blue-900))]/70 via-[hsl(var(--blue-900))]/55 to-[hsl(var(--blue-900))]/85" />
-    </div>
-  );
-}
-
 function TrustPill() {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm px-3.5 py-1.5 text-[13px]">
-      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
-      <span className="text-white font-semibold">{KEY_STATS.visasProcessed} visas processed</span>
-      <span className="text-white/60" aria-hidden="true">·</span>
-      <span className="text-white/80">{KEY_STATS.approvalRate} approval</span>
+    <div className="inline-flex items-center gap-2 rounded-full bg-white border border-[hsl(var(--border))] shadow-sm px-3.5 py-1.5 text-[13px]">
+      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+      <span className="text-[hsl(var(--blue-900))] font-semibold">{KEY_STATS.visasProcessed} visas processed</span>
+      <span className="text-muted-foreground" aria-hidden="true">·</span>
+      <span className="text-muted-foreground">{KEY_STATS.approvalRate} approval</span>
     </div>
   );
-}
-
-function HeroSearch({ query, setQuery }) {
-  return <HeroSearchLive query={query} setQuery={setQuery} />;
 }
 
 function CountrySuggestions({ items, label }) {
   return (
     <div className="mt-6">
-      <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-white/75 mb-3 text-center">
+      <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-muted-foreground mb-3 text-center lg:text-left">
         {label}
       </div>
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex flex-wrap justify-center lg:justify-start gap-2">
         {items.map((c) => (
           <Link
             key={c.id}
@@ -102,84 +44,163 @@ function CountrySuggestions({ items, label }) {
   );
 }
 
+// Orbit visual adapted from the MotionSites "Network Hero" prompt: concentric
+// rings rotate slowly, destination flags ride on them (kept upright), and the
+// centre counts up to the headline visa figure. Framer-motion honours the
+// app-wide <MotionConfig reducedMotion="user">, so it holds still when asked.
+const RINGS = [
+  { size: 42, duration: 30, dir: -1 },
+  { size: 60, duration: 40, dir: 1 },
+  { size: 80, duration: 50, dir: 1 },
+  { size: 100, duration: 60, dir: -1 },
+];
+// [ring index, angle in degrees] for each orbiting flag
+const SLOTS = [[1, 60], [1, 200], [1, 310], [2, 130], [2, 20], [3, 30], [3, 100], [3, 220], [3, 320]];
+
+function CountUp({ to }) {
+  const reduce = useReducedMotion();
+  const [n, setN] = useState(reduce ? to : 0);
+  useEffect(() => {
+    if (reduce) { setN(to); return undefined; }
+    const c = animate(0, to, { duration: 2, delay: 0.6, ease: 'easeOut', onUpdate: (v) => setN(Math.round(v)) });
+    return () => c.stop();
+  }, [to, reduce]);
+  return n.toLocaleString('en-IN');
+}
+
+function Orbits({ flags }) {
+  const visas = parseInt(KEY_STATS.visasProcessed.replace(/\D/g, ''), 10);
+  return (
+    <motion.div
+      className="relative mx-auto aspect-square w-full max-w-[420px] xl:max-w-[580px]"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1.2, delay: 0.2, ease: EASE }}
+      aria-hidden="true"
+    >
+      {RINGS.map((ring, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full border border-[hsl(var(--blue-700))]/15"
+          style={{ width: `${ring.size}%`, height: `${ring.size}%`, left: `${(100 - ring.size) / 2}%`, top: `${(100 - ring.size) / 2}%` }}
+          animate={{ rotate: 360 * ring.dir }}
+          transition={{ duration: ring.duration, repeat: Infinity, ease: 'linear' }}
+        >
+          {SLOTS.map(([r, angle], k) => r === i && flags[k] && (
+            <motion.span
+              key={k}
+              className="absolute flex h-11 w-11 xl:h-14 xl:w-14 -ml-[22px] -mt-[22px] xl:-ml-7 xl:-mt-7 items-center justify-center rounded-full bg-white border border-[hsl(var(--border))] shadow-md text-[22px] xl:text-[28px]"
+              style={{
+                left: `${50 + 50 * Math.cos((angle * Math.PI) / 180)}%`,
+                top: `${50 + 50 * Math.sin((angle * Math.PI) / 180)}%`,
+              }}
+              initial={{ opacity: 0, scale: 0.3 }}
+              animate={{ opacity: 1, scale: 1, rotate: -360 * ring.dir }}
+              transition={{
+                opacity: { duration: 0.6, delay: 0.6 + k * 0.15 },
+                scale: { duration: 0.6, delay: 0.6 + k * 0.15, ease: EASE },
+                rotate: { duration: ring.duration, repeat: Infinity, ease: 'linear' },
+              }}
+              title={flags[k].name}
+            >
+              {flags[k].flag}
+            </motion.span>
+          ))}
+        </motion.div>
+      ))}
+
+      {/* Centre counter (does not rotate) */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-[34%] w-[34%] flex-col items-center justify-center rounded-full bg-white border border-[hsl(var(--border))] shadow-lg text-center">
+        <span className="font-display font-bold text-[26px] xl:text-[36px] leading-none tracking-[-0.02em] text-[hsl(var(--blue-700))] tabular-nums">
+          <CountUp to={visas} />+
+        </span>
+        <span className="mt-1.5 text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--red-500))]">Visas processed</span>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Hero({ filters, onFilters }) {
   const [query, setQuery] = useState('');
   const { t } = useI18n();
-  const top = COUNTRIES.filter((c) => c.popular).slice(0, 6);
+  const popular = COUNTRIES.filter((c) => c.popular);
+  const top = popular.slice(0, 6);
 
   const f = filters || DEFAULT_FILTERS;
   const setF = onFilters || (() => {});
 
   return (
-    <section className="relative z-30 pt-32 pb-16 sm:pt-40 sm:pb-24 overflow-visible bg-[hsl(var(--blue-900))]">
-      <HeroBackdrop />
+    <section className="relative z-30 pt-28 pb-14 sm:pt-36 sm:pb-20 overflow-visible bg-gradient-to-b from-white to-[hsl(var(--blue-50))]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <motion.div
-          className="flex justify-center mb-6"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-        >
-          <TrustPill />
-        </motion.div>
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] xl:grid-cols-[minmax(0,1fr)_minmax(0,580px)]">
+          <div className="text-center lg:text-left">
+            <motion.div
+              className="flex justify-center lg:justify-start mb-6"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+              <TrustPill />
+            </motion.div>
 
-        <motion.h1
-          data-testid="hero-heading"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.05, ease: EASE }}
-          className="text-center mx-auto max-w-4xl font-display font-bold text-[36px] leading-[1.1] sm:text-[48px] lg:text-[56px] lg:leading-[1.05] tracking-[-0.02em] text-white text-balance"
-        >
-          Global visa,{' '}
-          <TextFlipAnimation
-            words={['sorted.', 'fast.', 'easy.', 'done.']}
-            className="text-[#FF9AAF]"
-            interval={2500}
-          />
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
-          className="text-center mx-auto max-w-2xl mt-5 text-[16px] sm:text-[18px] leading-relaxed text-white/80"
-        >
-          {t('hero.sub')}
-        </motion.p>
+            <motion.h1
+              data-testid="hero-heading"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.05, ease: EASE }}
+              className="font-display font-bold text-[36px] leading-[1.1] sm:text-[48px] lg:text-[56px] lg:leading-[1.05] tracking-[-0.02em] text-[hsl(var(--blue-900))] text-balance"
+            >
+              Global visa,{' '}
+              <TextFlipAnimation
+                words={['sorted.', 'fast.', 'easy.', 'done.']}
+                className="text-[hsl(var(--red-500))]"
+                interval={2500}
+              />
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
+              className="mx-auto lg:mx-0 max-w-xl mt-5 text-[16px] sm:text-[18px] leading-relaxed text-muted-foreground"
+            >
+              {t('hero.sub')}
+            </motion.p>
+
+            <motion.div
+              className="mt-8 relative z-30"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15, ease: 'easeOut' }}
+            >
+              <HeroSearchLive query={query} setQuery={setQuery} />
+              {!query && <CountrySuggestions items={top} label={t('hero.suggestions')} />}
+            </motion.div>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-2 text-[14px] text-muted-foreground">
+              <span>Prefer to talk?</span>
+              <a
+                href={`tel:${BRAND.phoneRaw}`}
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-2 font-semibold text-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-800))] hover:underline underline-offset-4 transition-colors"
+              >
+                <Phone className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+                {BRAND.phone}
+              </a>
+            </div>
+          </div>
+
+          <div className="hidden lg:block">
+            <Orbits flags={popular.slice(0, SLOTS.length)} />
+          </div>
+        </div>
 
         <motion.div
-          className="mt-10"
+          className="mt-12"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.15, ease: 'easeOut' }}
+          transition={{ duration: 0.3, delay: 0.25, ease: 'easeOut' }}
         >
           <FilterBar value={f} onChange={setF} />
         </motion.div>
-
-        <motion.div
-          className="mt-8 mx-auto max-w-3xl relative z-30"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2, ease: 'easeOut' }}
-        >
-          <HeroSearch query={query} setQuery={setQuery} />
-          {!query && (
-            <CountrySuggestions
-              items={top}
-              label={t('hero.suggestions')}
-            />
-          )}
-        </motion.div>
-
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-[14px] text-white/75">
-          <span>Prefer to talk?</span>
-          <a
-            href={`tel:${BRAND.phoneRaw}`}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-2 font-semibold text-white hover:underline underline-offset-4 transition-colors"
-          >
-            <Phone className="w-4 h-4" />
-            {BRAND.phone}
-          </a>
-        </div>
       </div>
     </section>
   );
