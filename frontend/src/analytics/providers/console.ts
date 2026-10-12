@@ -9,7 +9,7 @@ class ConsoleProvider implements AnalyticsProvider {
   name = 'console';
 
   init() {
-    console.log('%c[Analytics 📊] Console Debug Provider Active', 'color: #38bdf8; font-weight: bold;');
+    console.info('%c[Analytics 📊] Console Debug Provider Active', 'color: #38bdf8; font-weight: bold;');
   }
 
   logEvent(eventName: string, properties: Record<string, any>) {
@@ -22,22 +22,22 @@ class ConsoleProvider implements AnalyticsProvider {
       'color: #0284c7; font-weight: bold;',
       'color: #94a3b8; font-style: italic;'
     );
-    console.log('%cElement ID:', 'color: #f59e0b;', properties.element_id || 'none');
-    console.log('%cScreen:', 'color: #a855f7;', properties.screen || 'home');
-    console.log('%cPayload:', 'color: #38bdf8;', properties);
+    console.info('%cElement ID:', 'color: #f59e0b;', properties.element_id || 'none');
+    console.info('%cScreen:', 'color: #a855f7;', properties.screen || 'home');
+    console.info('%cPayload:', 'color: #38bdf8;', properties);
     console.groupEnd();
   }
 
   setUserId(userId: string) {
-    console.log('%c[Analytics 📊] Set User ID:', 'color: #10b981;', userId);
+    console.info('%c[Analytics 📊] Set User ID:', 'color: #10b981;', userId);
   }
 
   setUserProperties(traits: UserTraits) {
-    console.log('%c[Analytics 📊] Set User Traits:', 'color: #10b981;', traits);
+    console.info('%c[Analytics 📊] Set User Traits:', 'color: #10b981;', traits);
   }
 
   reset() {
-    console.log('%c[Analytics 📊] Reset User Session', 'color: #ef4444;');
+    console.info('%c[Analytics 📊] Reset User Session', 'color: #ef4444;');
   }
 }
 

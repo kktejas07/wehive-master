@@ -49,7 +49,7 @@ class WebLogger {
         error: '#ef4444',
         fatal: '#dc2626',
       };
-      console.log(
+      console.info(
         `%c[Log ${level.toUpperCase()}] %c${msg}`,
         `color: ${colors[level]}; font-weight: bold;`,
         'color: inherit;',

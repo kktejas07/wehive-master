@@ -1,6 +1,6 @@
 [flake8]
 max-line-length = 120
-exclude = .git,__pycache__,__init__.py,data.py,seed_universities.py,tests,seed_service.py
+exclude = .git,__pycache__,.venv,venv,test_venv,test_uv,__init__.py,data.py,seed_universities.py,tests,seed_service.py
 per-file-ignores =
     # Late imports for circular dependency avoidance (intentional)
     routes_admin.py: E402

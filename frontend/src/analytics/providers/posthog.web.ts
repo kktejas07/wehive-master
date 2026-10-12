@@ -29,7 +29,7 @@ class PostHogWebProvider implements AnalyticsProvider {
           },
         });
         if (process.env.NODE_ENV !== 'production') {
-          console.log('[Analytics Provider 🦔] PostHog Web Provider Initialized');
+          console.info('[Analytics Provider 🦔] PostHog Web Provider Initialized');
         }
       } catch (e) {
         console.warn('[Analytics 🦔] PostHog init error:', e);

@@ -15,7 +15,7 @@ class FirebaseWebProvider implements AnalyticsProvider {
     this.initialized = true;
 
     if (process.env.NODE_ENV !== 'production') {
-      console.log('[Analytics Provider 🔥] Firebase Analytics Web Provider Initialized');
+      console.info('[Analytics Provider 🔥] Firebase Analytics Web Provider Initialized');
     }
   }
 
