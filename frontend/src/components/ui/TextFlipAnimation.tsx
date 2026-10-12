@@ -14,7 +14,7 @@ export default function TextFlipAnimation({ words, className = '', interval = 30
   }, [currentIndex, words.length, interval, reduce]);
 
   return (
-    <span className={`inline-block relative ${className}`} style={{ WebkitTextFillColor: 'initial' }}>
+    <span className="inline-block relative">
       <AnimatePresence mode="wait">
         <motion.span
           key={currentIndex}
@@ -22,7 +22,8 @@ export default function TextFlipAnimation({ words, className = '', interval = 30
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="inline-block"
+          // Colour/gradient classes go on the word itself so background-clip:text works.
+          className={`inline-block ${className}`}
           style={{ 
             display: 'inline-block',
             backfaceVisibility: 'hidden',

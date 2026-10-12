@@ -267,7 +267,7 @@ export default function Pricing() {
   return (
     <div className="bg-white">
       <Navbar />
-      <section className="pt-32 sm:pt-36 pb-12 sm:pb-16 bg-[hsl(var(--soft-bg))] border-b border-[hsl(var(--border))]">
+      <section className="pt-32 sm:pt-36 pb-12 sm:pb-16 mesh-bg border-b border-[hsl(var(--border))]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--blue-700))]">
             Pricing

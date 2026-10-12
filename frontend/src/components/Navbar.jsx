@@ -395,6 +395,7 @@ export default function Navbar({ variant = 'default' }) {
       </div>
 
       <MobileMenu open={open} light={false} />
+      <div className="flag-stripe absolute inset-x-0 bottom-0" aria-hidden="true" />
     </header>
   );
 }
