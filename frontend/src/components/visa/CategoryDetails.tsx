@@ -83,10 +83,10 @@ export default function CategoryDetails({
         )}
 
         <div className="mt-7 flex flex-wrap gap-3">
-          <Button
+          <Button variant="accent"
             onClick={onApply}
             disabled={applying}
-            className="rounded-xl btn-accent text-white h-12 px-6 font-semibold focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
+            className="rounded-xl text-white h-12 px-6 font-semibold focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
             data-testid="visa-apply-btn"
           >
             {applying ? (

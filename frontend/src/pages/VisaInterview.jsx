@@ -203,7 +203,7 @@ export default function VisaInterview() {
                   ))}
                 </div>
                 <div className="mt-6">
-                  <Button onClick={startInterview} className="w-full h-12 rounded-xl btn-accent text-white font-semibold">
+                  <Button variant="accent" onClick={startInterview} className="w-full h-12 rounded-xl text-white font-semibold">
                     Start mock interview <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
@@ -293,7 +293,7 @@ export default function VisaInterview() {
                     <Button variant="ghost" onClick={skipQuestion} className="text-[14px] h-11 rounded-xl">
                       Skip
                     </Button>
-                    <Button onClick={handleNext} className="rounded-xl btn-accent text-white h-11 px-5 font-semibold">
+                    <Button variant="accent" onClick={handleNext} className="rounded-xl text-white h-11 px-5 font-semibold">
                       {currentQ + 1 < total ? 'Next question' : 'See results'}
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>

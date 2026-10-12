@@ -121,12 +121,12 @@ export default function ApplicationFormCard({ application, onUpdated }) {
             >
               <X className="w-3.5 h-3.5 mr-1" /> Cancel
             </Button>
-            <Button
+            <Button variant="accent"
               size="sm"
               onClick={onSave}
               disabled={saving}
               data-testid="form-save-btn"
-              className="rounded-xl h-10 px-4 font-semibold btn-accent text-white"
+              className="rounded-xl h-10 px-4 font-semibold text-white"
             >
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (
                 <span className="inline-flex items-center gap-1"><Save className="w-3.5 h-3.5" /> Save</span>

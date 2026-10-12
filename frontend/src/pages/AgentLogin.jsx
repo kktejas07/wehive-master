@@ -98,7 +98,7 @@ export default function AgentLogin() {
                 </button>
               </div>
             </div>
-            <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl btn-accent text-white font-semibold">
+            <Button variant="accent" type="submit" disabled={loading} className="w-full h-12 rounded-xl text-white font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (mode === 'login' ? 'Sign In' : 'Create Account')}
             </Button>
           </form>

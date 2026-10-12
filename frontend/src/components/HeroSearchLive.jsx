@@ -90,10 +90,10 @@ export default function HeroSearchLive({ query, setQuery }) {
           />
           {loading && <Loader2 className="w-4 h-4 shrink-0 animate-spin text-muted-foreground" aria-hidden="true" />}
         </div>
-        <Button
+        <Button variant="accent"
           onClick={onSubmit}
           data-testid="hero-search-submit"
-          className="shrink-0 w-full sm:w-auto rounded-xl btn-accent text-white h-12 px-4 sm:px-6 font-semibold"
+          className="shrink-0 w-full sm:w-auto rounded-xl text-white h-12 px-4 sm:px-6 font-semibold"
         >
           {t('hero.find')}
           <ArrowRight className="w-4 h-4 ml-1" />

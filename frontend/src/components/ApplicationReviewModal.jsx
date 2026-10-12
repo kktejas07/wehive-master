@@ -259,11 +259,11 @@ export default function ApplicationReviewModal({
               >
                 Cancel
               </button>
-              <Button
+              <Button variant="accent"
                 data-testid="apply-review-confirm"
                 onClick={handleConfirm}
                 disabled={submitting}
-                className="rounded-xl btn-accent text-white h-11 px-5 font-bold"
+                className="rounded-xl text-white h-11 px-5 font-bold"
               >
                 {submitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

@@ -409,6 +409,14 @@ label[class*="focus-within:"]:has(:focus-visible) {
 }
 [role="dialog"][tabindex="-1"]:focus { outline: none; }
 
+/* Press feedback: buttons and button-like links darken a step and sink 1px
+   while pressed (red presses darker red, navy darker navy). Uses `translate`,
+   not `transform`, so Tailwind/framer transforms on the element still apply. */
+:is(button, [role="button"], a[class*="rounded"], input[type="submit"]):not(:disabled):not([aria-disabled="true"]):active {
+  filter: brightness(0.9);
+  translate: 0 1px;
+}
+
 /* Honour the OS "reduce motion" setting for CSS animations/transitions
    (framer-motion is handled by <MotionConfig reducedMotion="user"> in index.js). */
 @media (prefers-reduced-motion: reduce) {

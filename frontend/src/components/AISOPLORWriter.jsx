@@ -179,10 +179,10 @@ export default function AISOPLORWriter({ university, compact = false }) {
             </>
           )}
 
-          <Button
+          <Button variant="accent"
             onClick={handleGenerate}
             disabled={loading || !isAuthed}
-            className="w-full h-12 rounded-xl btn-accent text-white font-bold"
+            className="w-full h-12 rounded-xl text-white font-bold"
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>

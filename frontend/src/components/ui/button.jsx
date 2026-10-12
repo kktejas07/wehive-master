@@ -11,6 +11,9 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground shadow-sm hover:bg-[hsl(var(--blue-800))]",
+        // Main call to action (red); one per view.
+        accent:
+          "bg-[hsl(var(--accent))] text-white shadow-sm hover:bg-[hsl(var(--accent-hover))]",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:

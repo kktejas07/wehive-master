@@ -47,11 +47,11 @@ function PremiumGate({ onUpgrade, upgrading }) {
           </li>
         ))}
       </ul>
-      <Button
+      <Button variant="accent"
         data-testid="scan-upgrade-btn"
         onClick={onUpgrade}
         disabled={upgrading}
-        className="mt-5 rounded-xl btn-accent text-white h-11 px-6 font-bold"
+        className="mt-5 rounded-xl text-white h-11 px-6 font-bold"
       >
         {upgrading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -324,11 +324,11 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
                       >
                         Clear
                       </Button>
-                      <Button
+                      <Button variant="accent"
                         data-testid="scan-start-btn"
                         onClick={onScan}
                         disabled={scanning}
-                        className="flex-1 rounded-xl btn-accent text-white h-10 px-5 font-bold"
+                        className="flex-1 rounded-xl text-white h-10 px-5 font-bold"
                       >
                         {scanning ? (
                           <span className="inline-flex items-center gap-2">

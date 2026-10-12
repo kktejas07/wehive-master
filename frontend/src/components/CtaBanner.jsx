@@ -48,7 +48,7 @@ export default function CtaBanner() {
                 Walk into our Hyderabad office, call us, or start online. Pay only when you are ready to submit.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
-                <Button onClick={handleStartApp} className="rounded-xl btn-accent text-white h-12 px-6 font-semibold">
+                <Button variant="accent" onClick={handleStartApp} className="rounded-xl text-white h-12 px-6 font-semibold">
                   Start my application
                   <ArrowRight className="w-4 h-4 ml-1" aria-hidden="true" />
                 </Button>

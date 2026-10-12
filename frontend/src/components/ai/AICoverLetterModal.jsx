@@ -158,10 +158,10 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
                     </div>
                   </div>
 
-                  <Button
+                  <Button variant="accent"
                     onClick={onGenerate}
                     disabled={generating}
-                    className="w-full rounded-xl btn-accent text-white h-11 font-bold"
+                    className="w-full rounded-xl text-white h-11 font-bold"
                   >
                     {generating ? (
                       <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Generating…</span>
@@ -192,7 +192,7 @@ export default function AICoverLetterModal({ open, onClose, applicationId, count
                       {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                       {copied ? 'Copied!' : 'Copy to clipboard'}
                     </Button>
-                    <Button onClick={handleClose} className="rounded-xl btn-accent text-white h-10 px-5 font-bold">
+                    <Button variant="accent" onClick={handleClose} className="rounded-xl text-white h-10 px-5 font-bold">
                       Done
                     </Button>
                   </div>

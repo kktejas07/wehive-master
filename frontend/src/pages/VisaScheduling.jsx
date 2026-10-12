@@ -236,7 +236,7 @@ export default function VisaScheduling() {
                     <Shield className="w-4 h-4 inline mr-1" />
                     Please arrive 30 minutes early with all original documents and a copy of your appointment confirmation.
                   </div>
-                  <Button onClick={handleBook} disabled={loading} className="w-full h-12 rounded-xl btn-accent text-white font-semibold">
+                  <Button variant="accent" onClick={handleBook} disabled={loading} className="w-full h-12 rounded-xl text-white font-semibold">
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Booking'}
                   </Button>
                 </div>

@@ -180,10 +180,10 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
                     </div>
                   </div>
 
-                  <Button
+                  <Button variant="accent"
                     onClick={onAnalyse}
                     disabled={analysing}
-                    className="w-full rounded-xl btn-accent text-white h-11 font-bold"
+                    className="w-full rounded-xl text-white h-11 font-bold"
                   >
                     {analysing ? (
                       <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Analysing your application…</span>
@@ -256,7 +256,7 @@ export default function AIRiskAnalysisModal({ open, onClose, applicationId }) {
                     </div>
                   )}
 
-                  <Button onClick={handleClose} className="w-full rounded-xl btn-accent text-white h-11 font-bold">
+                  <Button variant="accent" onClick={handleClose} className="w-full rounded-xl text-white h-11 font-bold">
                     Done
                   </Button>
                 </div>

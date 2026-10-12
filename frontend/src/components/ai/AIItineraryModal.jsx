@@ -200,10 +200,10 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                     </div>
                   )}
 
-                  <Button
+                  <Button variant="accent"
                     onClick={onGenerate}
                     disabled={generating}
-                    className="w-full rounded-xl btn-accent text-white h-11 font-bold"
+                    className="w-full rounded-xl text-white h-11 font-bold"
                   >
                     {generating ? (
                       <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Generating your itinerary…</span>
@@ -274,7 +274,7 @@ export default function AIItineraryModal({ open, onClose, applicationId, country
                     </div>
                   )}
 
-                  <Button onClick={handleClose} className="w-full rounded-xl btn-accent text-white h-11 font-bold">
+                  <Button variant="accent" onClick={handleClose} className="w-full rounded-xl text-white h-11 font-bold">
                     Done
                   </Button>
                 </div>

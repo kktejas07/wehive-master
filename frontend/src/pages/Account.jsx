@@ -134,7 +134,7 @@ function ProfileTab({ user, token, onUpdated }) {
             <Button data-testid="profile-cancel-btn" variant="outline" disabled={saving} onClick={onCancel} className="rounded-xl h-11 px-5 font-bold border-slate-300">
               <X className="w-3.5 h-3.5 mr-1" /> Cancel
             </Button>
-            <Button data-testid="profile-save-btn" disabled={saving} onClick={onSave} className="rounded-xl h-11 px-5 font-bold btn-accent text-white">
+            <Button variant="accent" data-testid="profile-save-btn" disabled={saving} onClick={onSave} className="rounded-xl h-11 px-5 font-bold text-white">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (
                 <span className="inline-flex items-center gap-1"><Save className="w-3.5 h-3.5" /> Save</span>
               )}
@@ -541,7 +541,7 @@ function SettingsTab({ user, token, onUpdated }) {
           onChange={(e) => setName(e.target.value)}
           className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[15px] text-[hsl(var(--blue-900))] transition"
         />
-        <Button onClick={onSave} disabled={busy} className="mt-4 rounded-xl btn-accent text-white h-11 px-5 font-bold">
+        <Button variant="accent" onClick={onSave} disabled={busy} className="mt-4 rounded-xl text-white h-11 px-5 font-bold">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save changes'}
         </Button>
       </div>
@@ -841,10 +841,10 @@ function RequestsTab({ user, token }) {
             >
               <X className="w-3.5 h-3.5 mr-1" /> Cancel
             </Button>
-            <Button
+            <Button variant="accent"
               onClick={onSubmit}
               disabled={submitting}
-              className="rounded-xl h-11 px-5 font-bold btn-accent text-white"
+              className="rounded-xl h-11 px-5 font-bold text-white"
             >
               {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Send className="w-3.5 h-3.5 mr-1" /> Submit</>}
             </Button>

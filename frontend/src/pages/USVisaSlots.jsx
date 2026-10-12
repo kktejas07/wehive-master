@@ -1239,10 +1239,10 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
         </div>
       </div>
 
-      <Button
+      <Button variant="accent"
         onClick={onSubscribe}
         disabled={subscribing || selectedVisas.length === 0 || selectedConsulates.length === 0}
-        className="w-full h-12 rounded-xl btn-accent text-white font-bold"
+        className="w-full h-12 rounded-xl text-white font-bold"
       >
         {subscribing ? (
           <Loader2 className="w-4 h-4 animate-spin" />

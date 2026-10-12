@@ -383,8 +383,8 @@ export default function AuthCard({ mode, referralCode }) {
                   </button>
                 )}
               </div>
-              <Button type="submit" data-testid={isSignup ? "signup-submit" : "login-submit"} disabled={emailPwdLoading}
-                className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
+              <Button variant="accent" type="submit" data-testid={isSignup ? "signup-submit" : "login-submit"} disabled={emailPwdLoading}
+                className="w-full h-12 rounded-xl text-white font-semibold text-[15px]">
                 {emailPwdLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isSignup ? 'Create account' : 'Sign in'}
               </Button>
               {verificationSent && (
@@ -435,8 +435,8 @@ export default function AuthCard({ mode, referralCode }) {
                 </button>
 
               </div>
-              <Button disabled={sending} onClick={onSendOtp}
-                className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
+              <Button variant="accent" disabled={sending} onClick={onSendOtp}
+                className="w-full h-12 rounded-xl text-white font-semibold text-[15px]">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send code'}
               </Button>
               <div className="text-center text-[14px] text-muted-foreground">
@@ -451,8 +451,8 @@ export default function AuthCard({ mode, referralCode }) {
       ) : (
         <div className="mt-7 space-y-5">
           <OtpDigits value={otp} onChange={setOtp} />
-          <Button disabled={verifying || otp.length !== 6} onClick={onVerifyOtp}
-            className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
+          <Button variant="accent" disabled={verifying || otp.length !== 6} onClick={onVerifyOtp}
+            className="w-full h-12 rounded-xl text-white font-semibold text-[15px]">
             {verifying ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (

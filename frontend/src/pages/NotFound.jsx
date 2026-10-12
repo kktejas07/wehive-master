@@ -21,7 +21,7 @@ export default function NotFound() {
             The page you're looking for doesn't exist or may have moved.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-            <Button asChild className="btn-accent h-12 px-6 text-[15px]">
+            <Button variant="accent" asChild className="h-12 px-6 text-[15px]">
               <Link to="/">
                 <Home className="w-4 h-4" aria-hidden="true" />
                 Go home

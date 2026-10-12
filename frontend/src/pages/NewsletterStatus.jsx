@@ -83,7 +83,7 @@ export default function NewsletterStatus() {
           {!working && <p className="lead mt-4">{ok ? copy.okBody : state.error}</p>}
           {!working && (
             <div className="mt-8 flex justify-center">
-              <Button asChild className="btn-accent h-12 px-6 text-[15px]">
+              <Button variant="accent" asChild className="h-12 px-6 text-[15px]">
                 <Link to="/">
                   <Home className="w-4 h-4" aria-hidden="true" />
                   Go to We Hive

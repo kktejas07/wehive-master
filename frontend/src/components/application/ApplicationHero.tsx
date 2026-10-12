@@ -124,10 +124,10 @@ export default function ApplicationHero({
             >
               <ExternalLink className="w-4 h-4" /> Track status
             </a>
-            <Button
+            <Button variant="accent"
               onClick={onSubmit}
               disabled={!canSubmit || submitting}
-              className="rounded-xl btn-accent text-white h-11 px-5 font-semibold disabled:opacity-50"
+              className="rounded-xl text-white h-11 px-5 font-semibold disabled:opacity-50"
             >
               {submitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

@@ -191,8 +191,8 @@ export default function AuthModal() {
                   <Phone className="w-4 h-4 inline-block mr-1.5 -mt-0.5" aria-hidden="true" /> WhatsApp
                 </button>
               </div>
-              <Button type="submit" disabled={sending}
-                className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
+              <Button variant="accent" type="submit" disabled={sending}
+                className="w-full h-12 rounded-xl text-white font-semibold text-[15px]">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send code'}
               </Button>
               <div className="text-center text-[14px] text-muted-foreground">
@@ -206,8 +206,8 @@ export default function AuthModal() {
           ) : (
             <div className="mt-7 space-y-5">
               <OtpDigits value={otp} onChange={setOtp} />
-              <Button disabled={verifying || otp.length !== 6} onClick={onVerify}
-                className="w-full h-12 rounded-xl btn-accent text-white font-semibold text-[15px]">
+              <Button variant="accent" disabled={verifying || otp.length !== 6} onClick={onVerify}
+                className="w-full h-12 rounded-xl text-white font-semibold text-[15px]">
                 {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> :
                   <span className="inline-flex items-center gap-1"><Check className="w-4 h-4" /> Verify & continue</span>}
               </Button>
