@@ -118,11 +118,11 @@ function NavLinks({ orientation = 'horizontal', light = false }) {
     };
   }, [openDropdown]);
 
-  const topItem = 'h-10 px-3 text-[14px] font-semibold rounded-lg transition-colors duration-200 inline-flex items-center gap-1.5 cursor-pointer';
+  const topItem = 'h-10 px-2 xl:px-3 text-[14px] font-semibold rounded-lg transition-colors duration-200 inline-flex items-center gap-1.5 cursor-pointer';
 
   if (orientation === 'horizontal') {
     return (
-      <nav aria-label="Main" className="hidden lg:flex items-center gap-1 mx-2 flex-1 justify-center">
+      <nav aria-label="Main" className="hidden lg:flex items-center gap-0.5 xl:gap-1 mx-0 xl:mx-2 flex-1 justify-center">
         {NAV.map((item) => {
           if (item.children) {
             const isOpen = openDropdown === item.id;
@@ -336,14 +336,14 @@ export default function Navbar({ variant = 'default' }) {
         scrolled && 'shadow-sm'
       )}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 lg:gap-6 h-16 sm:h-[72px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 xl:gap-6 h-16 sm:h-[72px]">
         <Link to="/" className="flex items-center shrink-0 rounded-lg" aria-label={`${BRAND.name} home`}>
           <img
             src={BRAND.logo}
             alt={BRAND.name}
             draggable={false}
             className={cn(
-              'w-[120px] h-[40px] sm:w-[144px] sm:h-[48px] object-cover select-none',
+              'w-[120px] h-[40px] sm:w-[144px] sm:h-[48px] lg:w-[120px] lg:h-[40px] xl:w-[144px] xl:h-[48px] object-cover select-none',
               transparent && 'brightness-0 invert'
             )}
           />

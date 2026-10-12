@@ -24,10 +24,20 @@ export default function PromoBanner({ className = '' }) {
   const [visible, setVisible] = useState([]);
 
   useEffect(() => {
-    axios.get(`${API}/promotions?promo_type=banner`)
+    // Live promo codes (public endpoint) shown as dismissible banners.
+    axios.get(`${API}/promotions/active`, { params: { season: 'all' } })
       .then((r) => {
         const dismissed = getDismissed();
-        const active = (r.data || []).filter((b) => !dismissed.includes(b.id));
+        const active = (r.data || [])
+          .map((p) => ({
+            id: p.code,
+            badge: p.discount_percent ? `${p.discount_percent}% off` : p.discount_fixed ? `₹${p.discount_fixed} off` : null,
+            title: p.description,
+            subtitle: `Use code ${p.code} at checkout`,
+            cta_text: 'See plans',
+            cta_link: '/pricing',
+          }))
+          .filter((b) => !dismissed.includes(b.id));
         setBanners(active);
         setVisible(active.map((b) => b.id));
       })

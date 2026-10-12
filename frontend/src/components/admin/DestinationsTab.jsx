@@ -151,7 +151,8 @@ export default function DestinationsTab() {
       const client = adminClient();
       const [destRes, r2Res] = await Promise.all([
         client.get('/destinations'),
-        client.get('/destinations/r2-status'),
+        // R2 may be unconfigured (400); still list destinations without status.
+        client.get('/destinations/r2-status').catch(() => ({ data: {} })),
       ]);
       const dests = destRes.data?.items || [];
       const statusMap = {};
