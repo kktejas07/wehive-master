@@ -19,8 +19,11 @@ applies prompts — it stores proposals as pending for approval via /apply.
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import Any, Optional
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
@@ -109,12 +112,69 @@ async def get_proposals(
         q["kind"] = kind
     cur = (
         db["hive_proposals"]
-        .find(q, {"_id": 0})
+        .find(q)
         .sort("ts", -1)
         .limit(max(1, min(limit, 200)))
     )
-    items = [d async for d in cur]
+    items = []
+    async for d in cur:
+        d["id"] = str(d.pop("_id"))
+        # Older apply logs were saved as "proposed"; they are already live.
+        if (d.get("payload") or {}).get("applied") and d.get("status") == "proposed":
+            d["status"] = "applied"
+        items.append(d)
     return {"ok": True, "count": len(items), "items": items}
+
+
+def _proposal_oid(proposal_id: str) -> ObjectId:
+    try:
+        return ObjectId(proposal_id)
+    except (InvalidId, TypeError):
+        raise HTTPException(404, "Proposal not found")
+
+
+@router.post("/proposals/{proposal_id}/approve")
+async def approve_proposal(proposal_id: str, admin=Depends(get_current_admin_flex)):
+    """Apply a saved prompt-edit proposal. Each proposal can be decided once."""
+    coll = db["hive_proposals"]
+    oid = _proposal_oid(proposal_id)
+    doc = await coll.find_one({"_id": oid})
+    if not doc:
+        raise HTTPException(404, "Proposal not found")
+    if doc.get("kind") != "prompt_edit":
+        raise HTTPException(400, "Only prompt edits can be applied from here.")
+    # Claim it first so two admins can't apply the same proposal.
+    claimed = await coll.update_one(
+        {"_id": oid, "status": "proposed", "payload.applied": {"$ne": True}}, {"$set": {"status": "applying"}})
+    if not claimed.modified_count:
+        raise HTTPException(409, "This proposal has already been decided.")
+    p = doc.get("payload") or {}
+    res = await apply_prompt_edit(
+        agent_id=p.get("agent_id"),
+        new_system=p.get("new_system") or "",
+        proposed_version=p.get("proposed_version"),
+        changes=p.get("changes"),
+    )
+    if not res.get("ok"):
+        await coll.update_one({"_id": oid}, {"$set": {"status": "proposed"}})
+        raise HTTPException(400, res.get("note") or "apply failed")
+    await coll.update_one({"_id": oid}, {"$set": {
+        "status": "applied", "payload.applied": True,
+        "decided_at": datetime.utcnow().isoformat() + "Z", "decided_by": admin.get("email"),
+    }})
+    return res
+
+
+@router.post("/proposals/{proposal_id}/reject")
+async def reject_proposal(proposal_id: str, admin=Depends(get_current_admin_flex)):
+    res = await db["hive_proposals"].update_one(
+        {"_id": _proposal_oid(proposal_id), "status": "proposed", "payload.applied": {"$ne": True}},
+        {"$set": {"status": "rejected", "decided_at": datetime.utcnow().isoformat() + "Z",
+                  "decided_by": admin.get("email")}},
+    )
+    if not res.matched_count:
+        raise HTTPException(409, "This proposal was not found or has already been decided.")
+    return {"ok": True, "status": "rejected"}
 
 
 # ── Mine + propose ────────────────────────────────────────────────────────
@@ -160,7 +220,7 @@ async def propose_tools(body: ProposeToolsBody, _=Depends(get_current_admin_flex
 # ── Apply ─────────────────────────────────────────────────────────────────
 
 @router.post("/apply")
-async def apply_prompt(body: ApplyPromptBody, _=Depends(get_current_admin_flex)):
+async def apply_prompt(body: ApplyPromptBody, admin=Depends(get_current_admin_flex)):
     res = await apply_prompt_edit(
         agent_id=body.agent_id,
         new_system=body.new_system,
@@ -169,6 +229,14 @@ async def apply_prompt(body: ApplyPromptBody, _=Depends(get_current_admin_flex))
     )
     if not res.get("ok"):
         raise HTTPException(400, res.get("note") or "apply failed")
+    if body.proposed_version is not None:
+        # Close the matching saved proposal so it can't be applied twice from history.
+        await db["hive_proposals"].update_many(
+            {"kind": "prompt_edit", "status": "proposed",
+             "payload.agent_id": body.agent_id, "payload.proposed_version": body.proposed_version},
+            {"$set": {"status": "applied", "payload.applied": True,
+                      "decided_at": datetime.utcnow().isoformat() + "Z", "decided_by": admin.get("email")}},
+        )
     return res
 
 

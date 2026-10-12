@@ -65,9 +65,8 @@ function ActionButton({ onClick, loading, children, Icon, tone = 'navy', disable
 }
 
 export default function HiveLearningTab() {
-  const { admin } = useAdminAuth();
+  const { token } = useAdminAuth();
   const { toast } = useToast();
-  const token = admin?.token || admin?.access_token;
 
   const [days, setDays] = useState(7);
   const [stats, setStats] = useState(null);
@@ -90,6 +89,7 @@ export default function HiveLearningTab() {
   const [toolsLoading, setToolsLoading] = useState(false);
 
   const [autoApplying, setAutoApplying] = useState(false);
+  const [deciding, setDeciding] = useState(null);
   const [autoApplyResult, setAutoApplyResult] = useState(null);
 
   const auth = useCallback(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
@@ -119,6 +119,20 @@ export default function HiveLearningTab() {
   useEffect(() => { loadAll(); }, [loadAll]);
 
   // ── Actions ──────────────────────────────────────────────────────────
+
+  const decide = async (p, action) => {
+    if (action === 'approve' && !window.confirm(`Apply this prompt change to ${p.payload?.agent_id}? The agent uses it on its next reply.`)) return;
+    setDeciding(p.id);
+    try {
+      await axios.post(`${API}/hive/learning/proposals/${p.id}/${action}`, {}, auth());
+      toast({ title: action === 'approve' ? 'Proposal applied' : 'Proposal rejected' });
+      await loadAll();
+    } catch (e) {
+      toast({ title: 'Could not update proposal', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    } finally {
+      setDeciding(null);
+    }
+  };
 
   const runMine = async () => {
     setMining(true);
@@ -577,9 +591,10 @@ export default function HiveLearningTab() {
           ) : (
             <ul className="space-y-2 text-[12px] max-h-[420px] overflow-y-auto pr-1">
               {proposals.map((p) => (
-                <li key={p.ts + (p.payload?.agent_id || '')} className="rounded-lg bg-white/5 border border-white/10 p-2.5">
+                <li key={p.id || p.ts} className="rounded-lg bg-white/5 border border-white/10 p-2.5">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <Pill tone={p.payload?.applied ? 'green' : 'slate'}>{p.kind}</Pill>
+                    {p.status && p.status !== 'proposed' && <Pill tone={p.status === 'applied' ? 'green' : 'slate'}>{p.status}</Pill>}
                     {p.payload?.agent_id && <Pill tone="navy">{p.payload.agent_id}</Pill>}
                     {p.payload?.version != null && <Pill tone="slate">v{p.payload.version}</Pill>}
                     <span className="ml-auto text-[11px] text-slate-400 inline-flex items-center gap-1">
@@ -591,6 +606,26 @@ export default function HiveLearningTab() {
                       <summary className="cursor-pointer text-[11px] text-slate-400">View system text</summary>
                       <pre className="mt-1 text-[11px] whitespace-pre-wrap text-slate-300">{p.payload.new_system}</pre>
                     </details>
+                  )}
+                  {p.status === 'proposed' && p.id && (
+                    <div className="mt-2 flex gap-2">
+                      {p.kind === 'prompt_edit' && (
+                        <button
+                          onClick={() => decide(p, 'approve')}
+                          disabled={deciding === p.id}
+                          className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11.5px] font-bold disabled:opacity-60"
+                        >
+                          {deciding === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />} Approve & apply
+                        </button>
+                      )}
+                      <button
+                        onClick={() => decide(p, 'reject')}
+                        disabled={deciding === p.id}
+                        className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-[11.5px] font-bold disabled:opacity-60"
+                      >
+                        <XCircle className="w-3 h-3" /> Reject
+                      </button>
+                    </div>
                   )}
                 </li>
               ))}

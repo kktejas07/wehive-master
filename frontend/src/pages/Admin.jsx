@@ -7,6 +7,8 @@ import UsersTab from '../components/admin/UsersTab';
 import ApplicationsTab from '../components/admin/ApplicationsTab';
 import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
+import AdminsTab from '../components/admin/AdminsTab';
+import NewsletterTab from '../components/admin/NewsletterTab';
 import IntegrationsTab from '../components/admin/IntegrationsTab';
 import ExportsTab from '../components/admin/ExportsTab';
 import UniversitiesTab from '../components/admin/UniversitiesTab';
@@ -78,6 +80,8 @@ function AdminRoutes() {
                 <Route path="promocodes" element={<PromoCodesTab />} />
                 <Route path="agents" element={<AgentsTab />} />
                 <Route path="staff" element={<StaffTab />} />
+                <Route path="admins" element={<AdminsTab />} />
+                <Route path="newsletter" element={<NewsletterTab />} />
                 <Route path="integrations" element={<IntegrationsTab />} />
                 <Route path="exports" element={<ExportsTab />} />
                 <Route path="universities" element={<UniversitiesTab />} />

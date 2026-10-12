@@ -15,6 +15,7 @@ export default function AdminResetPassword() {
   const { resetPassword } = useAdminAuth();
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const isInvite = params.get('invite') === '1';
   const [token, setToken] = useState(params.get('token') || '');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -59,8 +60,10 @@ export default function AdminResetPassword() {
 
   return (
     <AdminAuthShell
-      title="Set a new password"
-      subtitle="Your reset link is single-use and expires 30 minutes after it was sent."
+      title={isInvite ? 'Set your admin password' : 'Set a new password'}
+      subtitle={isInvite
+        ? 'You have been invited as a We Hive admin. Choose a password to sign in. This link works once.'
+        : 'Your reset link is single-use and expires 30 minutes after it was sent.'}
       footer={
         <>
           <Link to="/admin/login" className="text-[hsl(var(--blue-700))] font-semibold hover:underline">
@@ -71,7 +74,7 @@ export default function AdminResetPassword() {
     >
       <form onSubmit={onSubmit} className="space-y-5" data-testid="admin-reset-form">
         <Field
-          label="Reset token"
+          label={isInvite ? "Invite code" : "Reset token"}
           testid="admin-reset-token"
           value={token}
           onChange={setToken}
@@ -85,7 +88,7 @@ export default function AdminResetPassword() {
         <Field label="Confirm password" testid="admin-reset-confirm" type="password" value={confirm} onChange={setConfirm} placeholder="Repeat new password" autoComplete="new-password" />
         <ErrorMessage text={err} />
         <PrimaryButton type="submit" disabled={busy || !token || !password || !confirm} testid="admin-reset-submit">
-          {busy ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Reset password & sign in'}
+          {busy ? <Loader2 className="w-4 h-4 animate-spin inline" /> : isInvite ? 'Set password & sign in' : 'Reset password & sign in'}
         </PrimaryButton>
       </form>
     </AdminAuthShell>

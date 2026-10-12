@@ -422,7 +422,7 @@ async def save_proposal(kind: str, payload: dict) -> dict:
     doc = {
         "kind": kind,
         "payload": payload,
-        "status": "proposed",
+        "status": "applied" if payload.get("applied") else "proposed",
         "ts": datetime.utcnow().isoformat() + "Z",
     }
     await coll.insert_one(doc)
