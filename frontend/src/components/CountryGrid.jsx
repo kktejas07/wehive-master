@@ -210,7 +210,7 @@ function CountryCard({ c, index = 0 }) {
                 navigate(`/holiday/${c.id}`);
               }
             }}
-            className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[12px] font-semibold transition-colors cursor-pointer"
+            className="inline-flex min-h-[40px] items-center gap-1 rounded-full bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-100))] text-[hsl(var(--blue-700))] px-3 py-1.5 text-[12px] font-semibold transition-colors cursor-pointer"
           >
             <Compass className="w-3 h-3" />
             Plan

@@ -575,7 +575,7 @@ export default function StudentVisa() {
               };
 
               return (
-                <div className="mt-6 flex items-center justify-center gap-1.5">
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-1.5">
                   <Button
                     variant="outline"
                     disabled={uniPage === 1}
@@ -592,7 +592,7 @@ export default function StudentVisa() {
                         key={p}
                         variant={p === uniPage ? 'default' : 'outline'}
                         onClick={() => setUniPage(p)}
-                        className={`rounded-xl h-10 w-10 p-0 text-[13px] font-semibold ${p === uniPage ? 'bg-[hsl(var(--blue-700))] text-white' : ''}`}
+                        className={`shrink-0 rounded-xl h-10 w-10 p-0 text-[13px] font-semibold ${p === uniPage ? 'bg-[hsl(var(--blue-700))] text-white' : ''}`}
                       >
                         {p}
                       </Button>
@@ -746,7 +746,7 @@ export default function StudentVisa() {
                     </div>
                   </div>
                   <div className="mt-4 pt-3 border-t border-[hsl(var(--border))]">
-                    <Link to="/universities" className="inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline group-hover:gap-2 transition-all">
+                    <Link to="/universities" className="inline-flex min-h-[40px] items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline group-hover:gap-2 transition-all">
                       Check university requirements <ChevronRight className="w-3 h-3" />
                     </Link>
                   </div>

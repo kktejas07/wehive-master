@@ -328,11 +328,11 @@ export default function SchengenCarousel() {
 
       {/* Bottom Bar: Dots & Caption */}
       <div className="relative z-20 text-center pb-2">
-        <div className="flex justify-center items-center gap-1.5 flex-wrap px-6 max-w-xl mx-auto mb-2.5">
+        <div className="flex justify-center items-center flex-wrap px-6 max-w-xl mx-auto mb-2.5">
           {!reduce && (
             <button
               onClick={() => setUserPaused((v) => !v)}
-              className="mr-1 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 flex items-center justify-center text-white"
+              className="mr-1 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 flex items-center justify-center text-white"
               aria-label={userPaused ? 'Resume slideshow' : 'Pause slideshow'}
             >
               {userPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
@@ -342,13 +342,17 @@ export default function SchengenCarousel() {
             <button
               key={c.id}
               onClick={() => handleSelectCountry(idx)}
-              className={`transition-all duration-200 rounded-full ${
-                idx === active
-                  ? 'w-6 h-2 bg-white'
-                  : 'w-2 h-2 bg-white/30 hover:bg-white/60'
-              }`}
+              // 24px hit area around a small dot (WCAG 2.5.8 target size)
+              className="group/dot h-6 min-w-6 px-[3px] inline-flex items-center justify-center rounded-full"
               aria-label={c.name}
-            />
+              aria-current={idx === active ? 'true' : undefined}
+            >
+              <span
+                className={`block transition-all duration-200 rounded-full ${
+                  idx === active ? 'w-6 h-2 bg-white' : 'w-2 h-2 bg-white/30 group-hover/dot:bg-white/60'
+                }`}
+              />
+            </button>
           ))}
         </div>
 

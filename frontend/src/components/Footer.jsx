@@ -14,10 +14,10 @@ function FooterColumn({ col }) {
       <h2 className={`font-sans ${headingClass}`}>
         {col.title}
       </h2>
-      <ul className="space-y-2.5">
+      <ul className="md:space-y-2.5">
         {col.links.map((link) => (
           <li key={link.id}>
-            <Link to={link.to} className="text-[14px] leading-6 text-white/80 hover:text-white transition-colors duration-200">
+            <Link to={link.to} className="inline-block py-2.5 md:py-0 text-[14px] leading-6 text-white/80 hover:text-white transition-colors duration-200">
               {stripFlags(link.label)}
             </Link>
           </li>
@@ -81,7 +81,7 @@ function FooterContact() {
           <li key={id} className="flex items-start gap-3 text-[14px] leading-6 text-white/80">
             <Icon aria-hidden="true" className="w-4 h-4 mt-1 text-white/60 shrink-0" />
             {href ? (
-              <a href={href} className="hover:text-white transition-colors duration-200 break-words">{label}</a>
+              <a href={href} className="inline-block py-2.5 -my-2.5 md:py-0 md:my-0 hover:text-white transition-colors duration-200 break-words">{label}</a>
             ) : (
               <span>{label}</span>
             )}
