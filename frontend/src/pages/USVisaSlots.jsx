@@ -681,7 +681,7 @@ export default function USVisaSlots() {
   useEffect(() => {
     setLoading(true);
     fetchAll();
-  }, [selectedCountry]);
+  }, [fetchAll]);
 
   useEffect(() => {
     const interval = setInterval(fetchAll, 120000);

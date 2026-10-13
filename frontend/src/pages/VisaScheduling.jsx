@@ -40,7 +40,7 @@ export default function VisaScheduling() {
         .then(r => setApplications(r.data || []))
         .catch(() => {});
     }
-  }, [isAuthed]);
+  }, [isAuthed, token]);
 
   useEffect(() => {
     if (country && date) {

@@ -55,6 +55,7 @@ export function useImpression(
       observer.disconnect();
       if (dwellTimer) clearTimeout(dwellTimer);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fire once per mount; props are read at that moment
   }, [id, enabled, threshold, dwellMs]);
 
   return elementRef;

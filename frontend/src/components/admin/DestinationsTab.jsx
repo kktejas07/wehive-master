@@ -169,7 +169,7 @@ export default function DestinationsTab() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   const handleRefreshR2 = async () => {
     setLoading(true);
@@ -189,7 +189,7 @@ export default function DestinationsTab() {
     }
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const handleSeed = async () => {
     setSeeding(true);

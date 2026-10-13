@@ -43,6 +43,7 @@ export default function PromoCodesTab() {
     } catch {} finally { setLoading(false); }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- load is recreated each render; re-run only when the listed inputs change
   useEffect(() => { load(); }, [skip]);
 
   const handleCreate = async () => {

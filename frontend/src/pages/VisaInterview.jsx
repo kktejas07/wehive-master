@@ -108,6 +108,7 @@ export default function VisaInterview() {
       handleNext();
     }
     return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the countdown tick drives this; handleNext is recreated each render
   }, [active, timeLeft]);
 
   const startInterview = () => {

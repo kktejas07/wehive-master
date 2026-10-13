@@ -29,5 +29,6 @@ export function useScreenAnalytics(screenName: string, props: Record<string, any
         ...props,
       });
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fire once per mount; props are read at that moment
   }, [screenName]);
 }

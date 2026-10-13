@@ -110,6 +110,7 @@ export default function UniversitiesTab() {
   }, [token, query, countryFilter, skip, toast]);
 
   useEffect(() => { loadStats(); }, [loadStats]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- loadList is recreated each render; re-run only when the listed inputs change
   useEffect(() => { loadList(); }, []);
 
   const search = () => { setSkip(0); loadList(query, countryFilter, 0); };

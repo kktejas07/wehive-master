@@ -91,6 +91,12 @@ function GoogleIcon() {
   );
 }
 
+const ALL_TABS = [
+  { id: 'google', label: 'Google', Icon: Chrome, configKey: 'google_enabled' },
+  { id: 'emailpwd', label: 'Email', Icon: Mail, configKey: 'email_password_enabled' },
+  { id: 'otp', label: 'OTP', Icon: MessageSquare, configKey: 'otp_enabled' },
+];
+
 export default function AuthCard({ mode, referralCode }) {
   const { sendOtp, verifyOtp, isAuthed } = useAuth();
   const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent, phoneOtp, verifyPhoneOtpCode, sendPasswordReset } = useFirebaseAuth();
@@ -119,11 +125,6 @@ export default function AuthCard({ mode, referralCode }) {
 
   const isSignup = mode === 'signup';
 
-  const ALL_TABS = [
-    { id: 'google', label: 'Google', Icon: Chrome, configKey: 'google_enabled' },
-    { id: 'emailpwd', label: 'Email', Icon: Mail, configKey: 'email_password_enabled' },
-    { id: 'otp', label: 'OTP', Icon: MessageSquare, configKey: 'otp_enabled' },
-  ];
   const [authConfig, setAuthConfig] = useState(null);
   const allowedTabs = ALL_TABS.map((t) => ({
     ...t,

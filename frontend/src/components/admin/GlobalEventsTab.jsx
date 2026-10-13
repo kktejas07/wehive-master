@@ -29,6 +29,7 @@ export default function GlobalEventsTab() {
 
   useEffect(() => {
     fetchEvents();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchEvents is recreated each render; re-run only when the listed inputs change
   }, [statusFilter]);
 
   const handleAction = async (eventId, action) => {

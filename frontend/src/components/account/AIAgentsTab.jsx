@@ -42,6 +42,7 @@ export default function AIAgentsTab() {
     finally { setLoading(false); }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchStatus is recreated each render; re-run only when the listed inputs change
   useEffect(() => { fetchStatus(); }, [token]);
 
   const runAgents = async () => {

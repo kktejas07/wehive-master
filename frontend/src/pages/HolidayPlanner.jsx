@@ -70,6 +70,7 @@ export default function HolidayPlanner() {
     if (isAuthed) {
       fetchPlan(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchPlan is recreated each render; re-run only when the listed inputs change
   }, [id, isAuthed]);
 
   const onSave = async () => {

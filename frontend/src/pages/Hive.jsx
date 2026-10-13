@@ -177,7 +177,7 @@ function AssistantBlock({ m, onSpeak, speaking, ttsEnabled, checkedAt }) {
 export default function Hive({ inOverlay }) {
   const { token, isAuthed } = useAuth();
   const navigate = useNavigate();
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers = useMemo(() => (token ? { Authorization: `Bearer ${token}` } : {}), [token]);
 
   const [activeAgent, setActiveAgent] = useState('hive_visa');
   const [modelMode, setModelMode] = useState('platform');
@@ -190,6 +190,8 @@ export default function Hive({ inOverlay }) {
   const [error, setError] = useState(null);
   const scroller = useRef(null);
   const recognitionRef = useRef(null);
+  // `send` is defined below; the voice callback reaches it through this ref.
+  const sendRef = useRef(null);
 
   const activeSpec = AGENTS.find((a) => a.id === activeAgent);
   const promptCards = PROMPT_KIT[activeAgent] || [];
@@ -220,14 +222,14 @@ export default function Hive({ inOverlay }) {
       const t = e.results[0][0].transcript;
       setText(t);
       setListening(false);
-      setTimeout(() => send(t), 200);
+      setTimeout(() => sendRef.current?.(t), 200);
     };
     r.onerror = () => setListening(false);
     r.onend = () => setListening(false);
     r.start();
     setListening(true);
     recognitionRef.current = r;
-  }, [activeAgent]);
+  }, []);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
@@ -344,6 +346,7 @@ export default function Hive({ inOverlay }) {
     },
     [text, sending, activeAgent, activeSpec, headers, messages, speak, isAuthed]
   );
+  sendRef.current = send;
 
   const partsMain = (s) => parseAnswerParts(s).main;
 

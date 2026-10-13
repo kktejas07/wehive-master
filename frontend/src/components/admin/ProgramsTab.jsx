@@ -36,6 +36,7 @@ export default function ProgramsTab() {
     } catch { toast({ title: 'Failed to load programs' }); }
   }, [token, query, toast]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- load is recreated each render; re-run only when the listed inputs change
   useEffect(() => { load(); }, []);
 
   const openCreate = () => {

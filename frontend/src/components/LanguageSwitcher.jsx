@@ -39,6 +39,7 @@ export default function LanguageSwitcher({ universityId, fields, onTranslated, t
       })
       .catch(() => { setTranslations({}); onTranslated?.(null); })
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- parent callback; re-translate only when locale/university change
   }, [locale, universityId]);
 
   const current = LANGS.find(l => l.code === locale);

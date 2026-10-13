@@ -93,6 +93,7 @@ const Newsroom = ({ countryId }) => {
   useEffect(() => {
     setVisible(PAGE);
     fetchNews();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNews is recreated each render; re-run only when the listed inputs change
   }, [countryId, category]);
 
   return (

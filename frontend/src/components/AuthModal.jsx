@@ -77,7 +77,7 @@ export default function AuthModal() {
       setStep('input'); setOtp(''); setChannel('email'); setOtpInfo(null);
       form.reset({ name: '', identifier: '' });
     }
-  }, [authOpen, authMode]);
+  }, [authOpen, authMode, form]);
 
   if (!authOpen) return null;
 

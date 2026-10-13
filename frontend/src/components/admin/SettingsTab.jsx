@@ -270,7 +270,7 @@ export default function SettingsTab() {
       }
     };
     fetchAll();
-  }, []);
+  }, [toast]);
 
   const handleFileUpload = async (key, file) => {
     setUploading(key);

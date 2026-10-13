@@ -302,6 +302,7 @@ export default function ThirdPartySettings() {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchData is recreated each render; re-run only when the listed inputs change
   }, [token]);
 
   const handleConnect = async (serviceId, apiKey, baseUrl) => {
