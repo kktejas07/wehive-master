@@ -93,14 +93,14 @@ function CountryCard({ c, index = 0 }) {
         <motion.article
           whileHover={{ y: -2 }}
           transition={{ duration: 0.2 }}
-          className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))] shadow-sm group-hover:shadow-md transition-shadow duration-200"
+          className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[hsl(var(--blue-900))] shadow-sm group-hover:shadow-[0_22px_40px_-18px_rgba(10,49,97,0.65)] transition-shadow duration-200"
         >
           {cardImage ? (
             <img decoding="async"
               src={cardImage}
               alt={c.name}
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08]"
             />
           ) : (
             <div className="absolute inset-0 bg-[hsl(var(--blue-900))]" />

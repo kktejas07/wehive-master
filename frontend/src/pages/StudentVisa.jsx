@@ -263,7 +263,7 @@ export default function StudentVisa() {
           </div>
           <h1 className="font-display font-bold text-[36px] sm:text-[56px] leading-[1.05] tracking-[-0.02em]">
             Study abroad.<br />
-            <span className="text-[hsl(var(--blue-200))]">Sorted.</span>
+            <span className="text-gradient-light">Sorted.</span>
           </h1>
           <p className="mt-4 text-[16px] sm:text-[18px] leading-relaxed text-white/80 max-w-xl">
             Apply for a student visa to the USA, UK, Germany, Italy, Spain and 7 more — with country-specific document review, slot priority, and an on-time guarantee.
