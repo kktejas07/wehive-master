@@ -4,3 +4,6 @@ node_modules
 *.md
 .env
 .env.local
+build
+playwright-report
+test-results

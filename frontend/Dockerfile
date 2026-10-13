@@ -2,8 +2,10 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package.json ./
-RUN yarn install
+# Install exactly the tested versions from the lockfile (npm applies the
+# security overrides in package.json; .npmrc sets legacy-peer-deps).
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci --no-audit --no-fund
 
 COPY . .
 ARG REACT_APP_BACKEND_URL
@@ -11,7 +13,7 @@ ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 ARG REACT_APP_POSTHOG_KEY
 ARG REACT_APP_POSTHOG_HOST=https://us.i.posthog.com
 ENV REACT_APP_POSTHOG_KEY=$REACT_APP_POSTHOG_KEY REACT_APP_POSTHOG_HOST=$REACT_APP_POSTHOG_HOST
-RUN yarn build
+RUN npm run build
 
 # bust docker cache for multi-stage copy
 RUN date +%s > /app/build/build-id.txt
