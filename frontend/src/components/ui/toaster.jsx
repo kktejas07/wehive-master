@@ -36,7 +36,7 @@ export function Toaster() {
           <Toast
             key={id}
             {...props}
-            className="group pointer-events-auto relative flex items-start gap-3 w-[360px] overflow-hidden rounded-2xl backdrop-blur-2xl bg-white/80 border border-white/45 shadow-[0_25px_60px_-25px_rgba(10,49,97,0.45)] p-4 transition-all data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full"
+            className="group pointer-events-auto relative flex items-start gap-3 w-[360px] overflow-hidden rounded-2xl backdrop-blur-2xl bg-white/80 border border-white/45 shadow-[0_25px_60px_-25px_rgba(0,36,125,0.45)] p-4 transition-all data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full"
           >
             <span className={`shrink-0 mt-0.5 ${color}`}>
               <Icon className="w-5 h-5" />

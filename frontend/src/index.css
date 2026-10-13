@@ -6,8 +6,8 @@
    Colour roles
      ink text ........ text-[hsl(var(--blue-900))]   #0B1220
      secondary text .. text-muted-foreground         #4A5568
-     primary/link .... hsl(var(--blue-700)) #0A3161 navy, hover hsl(var(--blue-800))
-     CTA (red) ....... hsl(var(--accent)) #B31942, hover hsl(var(--accent-hover))
+     primary/link .... hsl(var(--blue-700)) #00247D navy, hover hsl(var(--blue-800))
+     CTA (red) ....... hsl(var(--accent)) #CF1426, hover hsl(var(--accent-hover))
                        main call-to-action buttons ONLY
      surfaces ........ white cards, hsl(var(--soft-bg)) page tint,
                        hsl(var(--blue-50)) tint, hsl(var(--border)) hairlines
@@ -84,39 +84,39 @@ code {
 @layer base {
   :root {
     /* We Hive design system (US flag palette) — see design-system/we-hive/MASTER.md
-       Navy #0A3161 primary · Red #B31942 CTA · White · Ink #0B1220 */
+       Royal blue #00247D primary (hover #0A3161) · Red #CF1426 CTA (hover #B31942) · White · Ink #0B1220 */
     --background: 0 0% 100%;             
     --foreground: 220 49% 8%;           
     --card: 0 0% 100%;
     --card-foreground: 220 49% 8%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 49% 8%;
-    --primary: 213 81% 21%;              
+    --primary: 223 100% 25%;              
     --primary-foreground: 0 0% 100%;
-    --secondary: 216 50% 96%;           
-    --secondary-foreground: 213 81% 21%;
+    --secondary: 222 62% 96%;           
+    --secondary-foreground: 223 100% 25%;
     --muted: 216 45% 96%;                
     --muted-foreground: 218 17% 35%;     
-    --accent: 344 75% 40%;               
+    --accent: 354 82% 45%;               
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;            
     --destructive-foreground: 0 0% 100%;
     --border: 216 33% 91%;               
     --input: 216 33% 91%;
-    --ring: 213 81% 21%;
+    --ring: 223 100% 25%;
     --radius: 0.75rem;
 
     /* Legacy scale names, remapped to the new palette */
-    --blue-50: 216 50% 96%;             
-    --blue-100: 214 45% 91%;             
-    --blue-200: 216 43% 84%;             
-    --blue-500: 213 65% 33%;             
-    --blue-700: 213 81% 21%;             
-    --blue-800: 213 82% 15%;             
+    --blue-50: 222 62% 96%;             
+    --blue-100: 222 59% 91%;             
+    --blue-200: 222 58% 82%;             
+    --blue-500: 223 69% 39%;             
+    --blue-700: 223 100% 25%;             
+    --blue-800: 213 81% 21%;             
     --blue-900: 220 49% 8%;             
-    --red-500: 344 75% 40%;                
-    --red-600: 344 75% 32%;                
-    --accent-hover: 344 75% 32%;         
+    --red-500: 354 82% 45%;                
+    --red-600: 344 75% 40%;                
+    --accent-hover: 344 75% 40%;         
     --soft-bg: 216 45% 98%;              
 
     --font-heading: 'Figtree', ui-sans-serif, system-ui, sans-serif;
@@ -274,40 +274,40 @@ code {
    classes, the <Button> variants, or inline hsl(var(--…)) utilities).
    ===================================================================== */
 :root {
-  --grad-navy: linear-gradient(135deg, #2A5C9E 0%, #0A3161 45%, #061F40 100%);
-  --grad-red: linear-gradient(135deg, #D8395F 0%, #B31942 45%, #7E1230 100%);
-  --grad-brand: linear-gradient(90deg, #0A3161 0%, #1D4E89 45%, #B31942 100%);
-  --grad-flag: linear-gradient(90deg, #B31942 0 33.33%, #FFFFFF 33.33% 66.66%, #0A3161 66.66% 100%);
+  --grad-navy: linear-gradient(135deg, #2C4FB0 0%, #00247D 45%, #0A1F55 100%);
+  --grad-red: linear-gradient(135deg, #E5404F 0%, #CF1426 45%, #9E1230 100%);
+  --grad-brand: linear-gradient(90deg, #00247D 0%, #1F45A6 45%, #CF1426 100%);
+  --grad-flag: linear-gradient(90deg, #CF1426 0 33.33%, #FFFFFF 33.33% 66.66%, #00247D 66.66% 100%);
 }
 
 :is(button, a, [role="button"]):is(.btn-primary, .bg-primary, [class*="bg-[hsl(var(--blue-700))]"], [class*="bg-[hsl(var(--primary))]"]):not(:disabled) {
   background-image: var(--grad-navy);
   background-size: 180% 100%;
   background-position: 0% 0;
-  box-shadow: 0 8px 18px -10px rgba(10, 49, 97, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 18px -10px rgba(0,36,125, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   transition: background-position 400ms ease, box-shadow 250ms ease, filter 150ms ease;
 }
 :is(button, a, [role="button"]):is(.btn-accent, [class*="bg-[hsl(var(--accent))]"], [class*="bg-[hsl(var(--red-500))]"]):not(:disabled) {
   background-image: var(--grad-red);
   background-size: 180% 100%;
   background-position: 0% 0;
-  box-shadow: 0 8px 20px -10px rgba(179, 25, 66, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 20px -10px rgba(207,20,38, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transition: background-position 400ms ease, box-shadow 250ms ease, filter 150ms ease;
 }
 :is(button, a, [role="button"]):is(.btn-primary, .bg-primary, [class*="bg-[hsl(var(--blue-700))]"], [class*="bg-[hsl(var(--primary))]"]):not(:disabled):hover {
   background-position: 100% 0;
-  box-shadow: 0 14px 28px -12px rgba(10, 49, 97, 0.8), 0 0 0 4px rgba(10, 49, 97, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 28px -12px rgba(0,36,125, 0.8), 0 0 0 4px rgba(0,36,125, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 :is(button, a, [role="button"]):is(.btn-accent, [class*="bg-[hsl(var(--accent))]"], [class*="bg-[hsl(var(--red-500))]"]):not(:disabled):hover {
   background-position: 100% 0;
-  box-shadow: 0 14px 30px -12px rgba(179, 25, 66, 0.85), 0 0 0 4px rgba(179, 25, 66, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  box-shadow: 0 14px 30px -12px rgba(207,20,38, 0.85), 0 0 0 4px rgba(207,20,38, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 /* Cards: navy-tinted depth and a navy→red gradient edge on hover */
 .card-surface { transition: box-shadow 250ms ease, transform 250ms ease, background 250ms ease; }
 .card-lift:hover,
 .card-surface:hover {
-  box-shadow: 0 18px 36px -18px rgba(10, 49, 97, 0.35);
+  box-shadow: 0 18px 36px -18px rgba(0,36,125, 0.35);
 }
 .card-surface.card-lift:hover,
 a.card-surface:hover,
@@ -317,7 +317,7 @@ button.card-surface:hover {
 }
 .icon-tile {
   background: linear-gradient(135deg, hsl(var(--blue-50)) 0%, #E4ECF7 100%);
-  box-shadow: inset 0 0 0 1px rgba(10, 49, 97, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(0,36,125, 0.08);
 }
 
 /* Section labels get a short navy→red underline */
@@ -334,13 +334,13 @@ button.card-surface:hover {
 
 /* Gradient text helpers */
 .text-gradient-red {
-  background-image: linear-gradient(120deg, #D8395F 0%, #B31942 50%, #8E1434 100%);
+  background-image: linear-gradient(120deg, #E5404F 0%, #CF1426 50%, #B31942 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 .text-gradient-navy {
-  background-image: linear-gradient(120deg, #2A5C9E 0%, #0A3161 60%);
+  background-image: linear-gradient(120deg, #2C4FB0 0%, #00247D 60%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -350,15 +350,15 @@ button.card-surface:hover {
    with a transparent header gets it; .mesh-bg applies it to a section. */
 body {
   background:
-    radial-gradient(ellipse 60% 420px at 85% 0%, rgba(29, 78, 137, 0.12), transparent 70%),
-    radial-gradient(ellipse 45% 360px at 0% 120px, rgba(179, 25, 66, 0.07), transparent 70%),
+    radial-gradient(ellipse 60% 420px at 85% 0%, rgba(31, 69, 166, 0.12), transparent 70%),
+    radial-gradient(ellipse 45% 360px at 0% 120px, rgba(207,20,38, 0.07), transparent 70%),
     hsl(var(--background));
   background-repeat: no-repeat;
 }
 .mesh-bg {
   background:
-    radial-gradient(ellipse 55% 80% at 88% 10%, rgba(29, 78, 137, 0.16), transparent 70%),
-    radial-gradient(ellipse 40% 70% at 0% 100%, rgba(179, 25, 66, 0.09), transparent 70%),
+    radial-gradient(ellipse 55% 80% at 88% 10%, rgba(31, 69, 166, 0.16), transparent 70%),
+    radial-gradient(ellipse 40% 70% at 0% 100%, rgba(207,20,38, 0.09), transparent 70%),
     linear-gradient(180deg, #FFFFFF 0%, hsl(var(--soft-bg)) 100%);
 }
 
@@ -366,8 +366,8 @@ body {
    the same header glow (background-image layers over background-color). */
 :is(div, main):is(.min-h-screen, [class*="min-h-[calc"]):is(.bg-white, [class*="bg-[hsl(var(--soft-bg))]"]) {
   background-image:
-    radial-gradient(ellipse 60% 420px at 85% 0%, rgba(29, 78, 137, 0.12), transparent 70%),
-    radial-gradient(ellipse 45% 360px at 0% 120px, rgba(179, 25, 66, 0.07), transparent 70%);
+    radial-gradient(ellipse 60% 420px at 85% 0%, rgba(31, 69, 166, 0.12), transparent 70%),
+    radial-gradient(ellipse 45% 360px at 0% 120px, rgba(207,20,38, 0.07), transparent 70%);
   background-repeat: no-repeat;
 }
 
@@ -375,12 +375,12 @@ body {
 :is(a, button)[class*="rounded-2xl"][class*="border"][class*="bg-white"]:hover {
   border-color: transparent;
   background: linear-gradient(#fff, #fff) padding-box, var(--grad-brand) border-box;
-  box-shadow: 0 18px 36px -18px rgba(10, 49, 97, 0.35);
+  box-shadow: 0 18px 36px -18px rgba(0,36,125, 0.35);
 }
 
 /* Highlighted words in page headlines render as the red gradient */
 :is(h1, h2) :is([class*="text-[hsl(var(--red-500))]"], [class*="text-[hsl(var(--accent))]"]) {
-  background-image: linear-gradient(120deg, #D8395F 0%, #B31942 50%, #8E1434 100%);
+  background-image: linear-gradient(120deg, #E5404F 0%, #CF1426 50%, #B31942 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -395,8 +395,8 @@ body {
 /* Dark ink/navy bands get the same navy + red glow as the footer */
 section[class*="bg-[hsl(var(--blue-900))]"] {
   background-image:
-    radial-gradient(ellipse 70% 80% at 85% 0%, rgba(29, 78, 137, 0.55), transparent 65%),
-    radial-gradient(ellipse 50% 60% at 0% 100%, rgba(179, 25, 66, 0.28), transparent 65%);
+    radial-gradient(ellipse 70% 80% at 85% 0%, rgba(31, 69, 166, 0.55), transparent 65%),
+    radial-gradient(ellipse 50% 60% at 0% 100%, rgba(207,20,38, 0.28), transparent 65%);
 }
 
 /* Red-white-blue stripe used under the navbar and above the footer */

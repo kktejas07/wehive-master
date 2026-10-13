@@ -402,7 +402,7 @@ async def _send_admin_invite(email: str, raw_token: str, inviter: str) -> tuple[
     <tr><td style="padding:0 32px;text-align:left">
       <p style="font-size:15px;color:#0B1220;margin:0 0 16px 0">Hello,</p>
       <p style="font-size:14px;color:#4A5568;margin:0 0 20px 0;line-height:1.6">{inviter} has made you an admin on We Hive. Set a password to sign in to the admin dashboard.</p>
-      <p style="text-align:center;margin:0 0 20px 0"><a href="{link}" style="display:inline-block;background:#B31942;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Set your password</a></p>
+      <p style="text-align:center;margin:0 0 20px 0"><a href="{link}" style="display:inline-block;background:#CF1426;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Set your password</a></p>
       <p style="font-size:12px;color:#4A5568;margin:0;line-height:1.6">This link works once and expires in 72 hours.</p>
     </td></tr>
     """

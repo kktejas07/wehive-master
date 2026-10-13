@@ -19,11 +19,11 @@
 
 | Role | Hex | Token | Contrast on white |
 |------|-----|-------|-------------------|
-| Primary (Old Glory Blue) | `#0A3161` | `--primary` / `--blue-700` | 12.9:1 |
-| Primary hover | `#072447` | `--blue-800` | 15.5:1 |
-| Primary mid (secondary accents) | `#1D4E89` | `--blue-500` | 8.4:1 |
-| CTA (Old Glory Red) | `#B31942` | `--accent` / `--red-500` | 6.7:1 (white text on it 6.7:1) |
-| CTA hover | `#8E1434` | `--accent-hover` / `--red-600` | 9.1:1 |
+| Primary (royal blue) | `#00247D` | `--primary` / `--blue-700` | 13.6:1 |
+| Primary hover / pressed (Old Glory Blue) | `#0A3161` | `--blue-800` | 12.9:1 |
+| Primary mid (secondary accents) | `#1F45A6` | `--blue-500` | 8.5:1 |
+| CTA (bright red) | `#CF1426` | `--accent` / `--red-500` | 5.6:1 (white text on it 5.6:1) |
+| CTA hover / pressed (Old Glory Red) | `#B31942` | `--accent-hover` / `--red-600` | 6.7:1 |
 | Ink (text) | `#0B1220` | `--foreground` / `--blue-900` | 18.7:1 |
 | Muted text | `#4A5568` | `--muted-foreground` | 7.5:1 |
 | Background | `#FFFFFF` | `--background` | — |
@@ -32,11 +32,11 @@
 | Border | `#E1E7F0` | `--border` | — |
 | Destructive | `#DC2626` | `--destructive` | 4.8:1 |
 
-**Colour roles:** navy for primary buttons, links, active states and icons; red for the single main call-to-action per view and for one highlight word in a headline; white surfaces. Emerald / amber / red Tailwind shades are reserved for status. On dark (ink or navy) bands, use white text and white or red buttons — never navy on dark. Tokens live in `frontend/src/index.css`; prefer token classes over raw hex.
+**Colour roles:** royal blue for primary buttons, links, active states and icons; red for the single main call-to-action per view and for one highlight word in a headline; white surfaces. Emerald / amber / red Tailwind shades are reserved for status. On dark (ink or navy) bands, use white text and white or red buttons — never navy on dark. Tokens live in `frontend/src/index.css`; prefer token classes over raw hex.
 
 **Elite layer (index.css):** navy and red buttons render as gradients (`--grad-navy`, `--grad-red`) with a coloured glow on hover; every button gets a click ripple (`src/lib/ripple.js`) and a 1px press; cards gain a navy→red gradient edge on hover; `.eyebrow` has a navy→red underline; `.flag-stripe` sits under the navbar and above the footer; `.mesh-bg` / page wrappers carry a soft navy+red glow; `.text-gradient-red` / `.text-gradient-navy` for highlight words. Gradients stay within navy, red, white and ink.
 
-**Enforced in Tailwind:** `frontend/tailwind.config.js` remaps the stock hues — `blue`, `sky`, `indigo`, `cyan`, `teal`, `violet`, `purple` render the navy scale (`700` = `#0A3161`) and `red`, `rose`, `pink`, `fuchsia`, `orange` render the flag-red scale (`600` = `#B31942`). Only `emerald`/`green`/`amber` keep stock values, for status. Don't add other hex accents; use navy, red, white or ink.
+**Enforced in Tailwind:** `frontend/tailwind.config.js` remaps the stock hues — `blue`, `sky`, `indigo`, `cyan`, `teal`, `violet`, `purple` render the navy scale (`700` = `#00247D`) and `red`, `rose`, `pink`, `fuchsia`, `orange` render the flag-red scale (`600` = `#CF1426`). Only `emerald`/`green`/`amber` keep stock values, for status. Don't add other hex accents; use navy, red, white or ink.
 
 ### Typography
 
@@ -77,8 +77,8 @@
 Use the classes in `frontend/src/index.css` (add `h-11 px-5 rounded-xl font-semibold`):
 
 ```css
-.btn-primary { background: hsl(var(--primary)); color: #fff; }        /* navy #0A3161 */
-.btn-accent  { background: hsl(var(--accent));  color: #fff; }        /* red #B31942 — one main CTA per view */
+.btn-primary { background: hsl(var(--primary)); color: #fff; }        /* royal blue #00247D, hover #0A3161 */
+.btn-accent  { background: hsl(var(--accent));  color: #fff; }        /* red #CF1426, hover #B31942 — one main CTA per view */
 .btn-outline { background: #fff; border: 1px solid hsl(var(--border)); color: hsl(var(--blue-900)); }
 /* hover: darker shade (--blue-800 / --accent-hover), 150-200ms; focus-visible ring in --ring */
 ```
@@ -102,7 +102,7 @@ Use the classes in `frontend/src/index.css` (add `h-11 px-5 rounded-xl font-semi
 }
 
 .input:focus {
-  border-color: #0A3161;
+  border-color: #00247D;
   outline: none;
   box-shadow: 0 0 0 3px #0A316120;
 }

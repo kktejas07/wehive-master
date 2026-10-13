@@ -4,12 +4,12 @@
 // remapped so every blue-ish class renders Old Glory Blue and every red/pink
 // class renders Old Glory Red. emerald/green/amber stay for status only.
 const NAVY = {
-  50: '#F0F4FA', 100: '#DCE5F2', 200: '#B9CBE5', 300: '#8FADD6', 400: '#5B86C0',
-  500: '#1D4E89', 600: '#143E72', 700: '#0A3161', 800: '#072447', 900: '#0B1220', 950: '#050B16',
+  50: '#EEF2FB', 100: '#DCE4F6', 200: '#B8C8EC', 300: '#8AA4DD', 400: '#4F72C4',
+  500: '#1F45A6', 600: '#0A3196', 700: '#00247D', 800: '#0A3161', 900: '#0B1220', 950: '#050B16',
 };
 const FLAG_RED = {
-  50: '#FDF2F4', 100: '#FBE3E8', 200: '#F5C2CD', 300: '#EC93A6', 400: '#DB5776',
-  500: '#C42A51', 600: '#B31942', 700: '#8E1434', 800: '#6E1028', 900: '#4F0B1D', 950: '#2E0611',
+  50: '#FEF2F3', 100: '#FDE3E5', 200: '#FAC5CA', 300: '#F4949D', 400: '#EA5966',
+  500: '#E0303F', 600: '#CF1426', 700: '#B31942', 800: '#8E1434', 900: '#6E1028', 950: '#2E0611',
 };
 
 module.exports = {

@@ -15,7 +15,7 @@ const EMPTY = {
   cta_label: 'Explore',
   cta_url: '',
   image_url: '',
-  accent_color: '#B31942',
+  accent_color: '#CF1426',
   tag: 'tourist',
   is_published: true,
   sort_order: 0,
@@ -82,7 +82,7 @@ function EventForm({ value, onChange, onCancel, onSave, busy, isNew }) {
         <label className="text-[11px] text-slate-400">
           Accent color
           <div className="mt-0.5 flex gap-2">
-            <input type="color" value={v.accent_color || '#B31942'} onChange={(e) => set('accent_color', e.target.value)}
+            <input type="color" value={v.accent_color || '#CF1426'} onChange={(e) => set('accent_color', e.target.value)}
               className="h-10 w-12 rounded-lg bg-black/40 border border-white/10" />
             <input value={v.accent_color || ''} onChange={(e) => set('accent_color', e.target.value)}
               className="flex-1 h-10 px-3 rounded-lg bg-black/40 border border-white/10 text-[13.5px] text-white font-mono" />
