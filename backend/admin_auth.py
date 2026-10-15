@@ -185,6 +185,7 @@ async def get_current_admin_flex(
     if not user:
         raise HTTPException(401, 'User not found')
     email = (user.get('email') or '').lower()
-    if user.get('is_admin') or email in ADMIN_EMAILS:
+    # The allow-list only counts once the user has proven they own the address.
+    if user.get('is_admin') or (email in ADMIN_EMAILS and user.get('email_verified') is True):
         return user
     raise HTTPException(status_code=403, detail='Admin access required')

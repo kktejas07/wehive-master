@@ -25,6 +25,7 @@ router = APIRouter(prefix='/auth', tags=['auth'])
 # 5 OTP requests per IP per 10 minutes; 10 login attempts per IP per minute.
 _otp_limiter = RateLimit(max_calls=5, window_seconds=600)
 _login_limiter = RateLimit(max_calls=10, window_seconds=60)
+_verify_limiter = RateLimit(max_calls=10, window_seconds=600)
 
 
 class LoginRequest(BaseModel):
@@ -63,6 +64,7 @@ def _public(u: dict) -> PublicUser:
         avatar_seed=u.get('avatar_seed'),
         avatar_style=u.get('avatar_style'),
         is_premium=bool(u.get('is_premium', False)),
+        plan_id=u.get('plan_id'),
         premium_since=u.get('premium_since'),
         is_admin=_is_admin(u),
         is_staff=bool(u.get('is_staff', False)),
@@ -166,7 +168,7 @@ async def send_otp(req: SendOtpRequest, request: Request, _=Depends(_otp_limiter
 
 
 @router.post('/verify-otp', response_model=AuthTokens)
-async def verify_otp(req: VerifyOtpRequest, bg: BackgroundTasks):
+async def verify_otp(req: VerifyOtpRequest, bg: BackgroundTasks, _=Depends(_verify_limiter)):
     from otp_service import consume_otp
 
     kind = req.channel or classify_identifier(req.identifier)
@@ -201,10 +203,9 @@ async def me(user=Depends(get_current_user)):
 
 
 @router.post('/firebase-sync', response_model=AuthTokens)
-async def firebase_sync(req: FirebaseSyncRequest):
-    from firebase_utils import _get_firebase_creds, init_firebase_admin, get_firebase_app
+async def firebase_sync(req: FirebaseSyncRequest, request: Request, _=Depends(_verify_limiter)):
+    from firebase_utils import _get_firebase_creds, init_firebase_admin, verify_firebase_token
     import firebase_admin
-    from firebase_admin import auth
 
     project_id, creds_json = await _get_firebase_creds()
     if not project_id:
@@ -215,13 +216,14 @@ async def firebase_sync(req: FirebaseSyncRequest):
     if not firebase_admin._apps:
         init_firebase_admin(project_id, creds_json)
 
-    try:
-        decoded = auth.verify_id_token(req.id_token)
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f'Invalid Firebase token: {str(e)}')
+    decoded = await verify_firebase_token(req.id_token)
 
     firebase_uid = decoded['uid']
     email = decoded.get('email')
+    # Anyone can create a Firebase password account for any address; only a verified
+    # email may be used to find or claim a WeHive account.
+    if email and decoded.get('email_verified') is not True:
+        raise HTTPException(status_code=403, detail='Email not verified. Check your inbox for the verification link.')
     name = decoded.get('name', '')
     picture = decoded.get('picture')
 
@@ -242,7 +244,7 @@ async def firebase_sync(req: FirebaseSyncRequest):
             }
             await users.insert_one(user)
         else:
-            update = {'updated_at': now, 'firebase_uid': firebase_uid}
+            update = {'updated_at': now, 'firebase_uid': firebase_uid, 'email_verified': True}
             if picture:
                 update['avatar_url'] = picture
             if name and not user.get('name'):
@@ -259,7 +261,7 @@ async def firebase_sync(req: FirebaseSyncRequest):
 
 
 @router.post('/firebase-phone-sync', response_model=AuthTokens)
-async def firebase_phone_sync(req: FirebasePhoneSyncRequest):
+async def firebase_phone_sync(req: FirebasePhoneSyncRequest, _=Depends(_verify_limiter)):
     from firebase_utils import _get_firebase_creds, init_firebase_admin, verify_firebase_token
     import firebase_admin
 

@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from rate_limit import RateLimit
 from pydantic import BaseModel
 from db import db
 from auth_utils import get_current_user
@@ -92,8 +93,12 @@ async def get_active_promos(season: Optional[str] = None, visa_type: Optional[st
     return result
 
 
+# Limits promo-code enumeration.
+_validate_limiter = RateLimit(max_calls=10, window_seconds=600)
+
+
 @router.post('/validate')
-async def validate_promo(code: str = Body(...), visa_type: Optional[str] = Body(None), cart_value: float = Body(0)):
+async def validate_promo(code: str = Body(...), visa_type: Optional[str] = Body(None), cart_value: float = Body(0), _=Depends(_validate_limiter)):
     promo = await db.promo_codes.find_one({'code': code.upper(), 'active': True})
     if not promo:
         raise HTTPException(404, 'Invalid promo code')

@@ -65,6 +65,7 @@ class PublicUser(BaseModel):
     avatar_style: Optional[str] = None
     is_premium: bool = False
     premium_since: Optional[datetime] = None
+    plan_id: Optional[str] = None
     is_admin: bool = False
     is_staff: bool = False
     staff_role: Optional[str] = None

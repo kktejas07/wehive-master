@@ -72,18 +72,18 @@ export default function ReviewsCard({ universityId }) {
         <div className="mb-4 p-4 rounded-xl bg-[hsl(var(--blue-50))] space-y-3">
           <div className="flex items-center gap-1">
             {[1,2,3,4,5].map(n => (
-              <button key={n} onClick={() => setForm(f => ({ ...f, rating: n }))}>
+              <button key={n} type="button" aria-label={`Rate ${n} star${n > 1 ? 's' : ''}`} onClick={() => setForm(f => ({ ...f, rating: n }))}>
                 <Star className={`w-5 h-5 ${n <= form.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />
               </button>
             ))}
           </div>
-          <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Review title" className="w-full h-9 px-3 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
-          <textarea value={form.review_text} onChange={e => setForm(f => ({ ...f, review_text: e.target.value }))} placeholder="Your review..." rows={3} className="w-full px-3 py-2 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))] resize-none" />
+          <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Review title" aria-label="Review title" className="w-full h-9 px-3 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
+          <textarea value={form.review_text} onChange={e => setForm(f => ({ ...f, review_text: e.target.value }))} placeholder="Your review..." aria-label="Your review" rows={3} className="w-full px-3 py-2 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))] resize-none" />
           <div className="grid grid-cols-2 gap-2">
-            <input type="text" value={form.pros} onChange={e => setForm(f => ({ ...f, pros: e.target.value }))} placeholder="Pros" className="h-9 px-3 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
-            <input type="text" value={form.cons} onChange={e => setForm(f => ({ ...f, cons: e.target.value }))} placeholder="Cons" className="h-9 px-3 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
+            <input type="text" value={form.pros} onChange={e => setForm(f => ({ ...f, pros: e.target.value }))} placeholder="Pros" aria-label="Pros" className="h-9 px-3 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
+            <input type="text" value={form.cons} onChange={e => setForm(f => ({ ...f, cons: e.target.value }))} placeholder="Cons" aria-label="Cons" className="h-9 px-3 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
           </div>
-          <input type="text" value={form.program_name} onChange={e => setForm(f => ({ ...f, program_name: e.target.value }))} placeholder="Program (optional)" className="w-full h-9 px-3 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
+          <input type="text" value={form.program_name} onChange={e => setForm(f => ({ ...f, program_name: e.target.value }))} placeholder="Program (optional)" aria-label="Program (optional)" className="w-full h-9 px-3 rounded-lg bg-white border border-[hsl(var(--border))] text-[13px] outline-none focus:border-[hsl(var(--blue-700))]" />
           <button onClick={handleSubmit} disabled={submitting}
             className="w-full h-10 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px]">
             {submitting ? 'Submitting...' : 'Submit review'}

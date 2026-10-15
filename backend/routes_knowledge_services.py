@@ -239,7 +239,8 @@ async def kg_rag_index(user=Depends(get_current_admin_flex)):
         )
         return {"ok": True, "indexed": len(texts), "collection": "kg_entities"}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"KG→RAG indexing failed: {str(e)}")
+        logger.exception("KG→RAG indexing failed")
+        raise HTTPException(status_code=502, detail="KG→RAG indexing failed")
 
 
 @router.get("/rag/status")

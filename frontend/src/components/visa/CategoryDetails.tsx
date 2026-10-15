@@ -87,7 +87,7 @@ export default function CategoryDetails({
             onClick={onApply}
             disabled={applying}
             className="rounded-xl text-white h-12 px-6 font-semibold focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
-            data-testid="visa-apply-btn"
+            data-testid="visa-apply-button"
           >
             {applying ? (
               <Loader2 className="w-4 h-4 animate-spin" />

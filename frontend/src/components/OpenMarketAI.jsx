@@ -30,7 +30,7 @@ function Bubble({ m, onDelete }) {
         <div className={`flex items-center justify-between gap-3 mt-1.5 ${me ? 'text-white/60' : 'text-[hsl(var(--blue-900))]/40'}`}>
           <span className="text-[12px]">{new Date(m.at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           {me && (
-            <button onClick={() => onDelete(m.id)} className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onClick={() => onDelete(m.id)} aria-label="Delete message" className="sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity">
               <Trash2 className="w-3 h-3" />
             </button>
           )}

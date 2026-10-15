@@ -38,9 +38,9 @@ async def get_commission_summary(db, agent_id: str) -> dict:
     total_earned = 0
     pending = 0
     paid = 0
-    cur = db['commissions'].find({'agent_id': agent_id})
+    cur = db['agent_commissions'].find({'agent_id': agent_id})
     async for c in cur:
-        amt = c.get('amount', 0)
+        amt = c.get('amount_inr', 0)
         total_earned += amt
         if c.get('status') == 'pending':
             pending += amt

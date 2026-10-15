@@ -16,12 +16,14 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from auth_utils import get_current_user
+from config import IS_DEV
 from db import db, users, payments
 
 router = APIRouter(prefix='/payments', tags=['payments'])
 logger = logging.getLogger('wehive.payments')
 
-PAYMENT_BYPASS_ENABLED = os.environ.get('PAYMENT_BYPASS_ENABLED', '').lower() in ('1', 'true', 'yes')
+# Bypass grants premium without payment, so it is honoured only in dev/test environments.
+PAYMENT_BYPASS_ENABLED = IS_DEV and os.environ.get('PAYMENT_BYPASS_ENABLED', '').lower() in ('1', 'true', 'yes')
 
 PLANS = {
     'lite': {'name': 'Lite', 'amount_inr': 399, 'description': 'One visa application with expert review'},
@@ -114,8 +116,9 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
                 'user_email': user.get('email') or '',
             },
         })
-    except Exception as e:
-        raise HTTPException(502, f'Failed to create order: {e}')
+    except Exception:
+        logger.exception('Razorpay order creation failed')
+        raise HTTPException(502, 'Failed to create order')
 
     payment_doc = {
         '_id': str(uuid.uuid4()),
@@ -143,17 +146,19 @@ async def create_order(req: CreateOrderRequest, user=Depends(get_current_user)):
 async def verify_payment(req: VerifyRequest, user=Depends(get_current_user), bg: BackgroundTasks = None):
     from settings_service import get_razorpay_keys
 
-    plan = PLANS.get(req.plan_id)
-    if not plan:
-        raise HTTPException(400, 'Invalid plan_id')
-
     doc = await payments.find_one({'razorpay_order_id': req.razorpay_order_id, 'user_id': user['_id']})
     if not doc:
         raise HTTPException(404, 'Order not found')
+    # The plan is whatever the order was created for, not what the client claims now.
+    plan = PLANS.get(doc.get('plan_id'))
+    if not plan:
+        raise HTTPException(400, 'Invalid plan_id')
     if doc.get('status') == 'paid':
         return {'ok': True, 'is_premium': True, 'message': 'Already upgraded'}
 
-    if doc.get('status') == 'mock' or (req.razorpay_order_id or '').startswith('mock-'):
+    if doc.get('status') == 'mock':
+        if not PAYMENT_BYPASS_ENABLED:
+            raise HTTPException(400, 'Mock orders cannot be redeemed')
         now = datetime.utcnow()
         await payments.update_one(
             {'_id': doc['_id']},
@@ -165,7 +170,7 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user), bg:
         )
         await users.update_one(
             {'_id': user['_id']},
-            {'$set': {'is_premium': True, 'premium_since': now, 'updated_at': now}}
+            {'$set': {'is_premium': True, 'plan_id': doc['plan_id'], 'premium_since': now, 'updated_at': now}}
         )
         fresh_payment = await payments.find_one({'_id': doc['_id']})
         fresh_user = await users.find_one({'_id': user['_id']})
@@ -207,7 +212,7 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user), bg:
     )
     await users.update_one(
         {'_id': user['_id']},
-        {'$set': {'is_premium': True, 'premium_since': now, 'updated_at': now}}
+        {'$set': {'is_premium': True, 'plan_id': doc['plan_id'], 'premium_since': now, 'updated_at': now}}
     )
     fresh_payment = await payments.find_one({'_id': doc['_id']})
     fresh_user = await users.find_one({'_id': user['_id']})
@@ -332,6 +337,7 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str = Header(
                 {'_id': doc['user_id']},
                 {'$set': {
                     'is_premium': True,
+                    'plan_id': doc.get('plan_id'),
                     'premium_since': datetime.utcnow(),
                 }}
             )

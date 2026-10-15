@@ -205,7 +205,7 @@ export default function TrackStatus() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="mt-6 grid grid-cols-3 gap-3"
+            className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3"
           >
             {deadlines.map(d => {
               const urgent = d.days <= 7 && d.critical;

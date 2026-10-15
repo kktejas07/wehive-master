@@ -16,6 +16,12 @@ export class ErrorBoundary extends Component {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.state.hasError && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
   handleReload = () => {
     this.setState({ hasError: false, error: null });
     window.location.reload();
@@ -28,6 +34,7 @@ export class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback !== undefined) return this.props.fallback;
       return (
         <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))] p-6">
           <div className="max-w-md w-full text-center space-y-6">

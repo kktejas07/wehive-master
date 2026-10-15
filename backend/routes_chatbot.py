@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from rate_limit import RateLimit
 from pydantic import BaseModel
 
 from ai_marketplace import marketplace
@@ -149,8 +150,12 @@ class ChatSessionItem(BaseModel):
     updated_at: datetime
 
 
+_session_limiter = RateLimit(max_calls=10, window_seconds=600)
+_message_limiter = RateLimit(max_calls=30, window_seconds=600)
+
+
 @router.post("/sessions", response_model=ChatStartResponse)
-async def start_session(req: ChatStartRequest, user=Depends(get_current_user_optional)):
+async def start_session(req: ChatStartRequest, user=Depends(get_current_user_optional), _=Depends(_session_limiter)):
     sid = str(uuid.uuid4())
     now = datetime.utcnow()
     doc = {
@@ -189,7 +194,7 @@ async def list_messages(session_id: str, user=Depends(get_current_user_optional)
         raise HTTPException(404, "Session not found")
     if sess.get("user_id") and (not user or sess["user_id"] != user["_id"]):
         raise HTTPException(403, "Not allowed")
-    cur = chat_messages.find({"session_id": session_id}).sort("created_at", 1)
+    cur = chat_messages.find({"session_id": session_id}).sort("created_at", 1).limit(500)
     return [
         {
             "id": m["_id"],
@@ -202,7 +207,7 @@ async def list_messages(session_id: str, user=Depends(get_current_user_optional)
 
 
 @router.post("/sessions/{session_id}/messages", response_model=ChatMessageResponse)
-async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(get_current_user_optional)):
+async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(get_current_user_optional), _=Depends(_message_limiter)):
     if not req.text or not req.text.strip():
         raise HTTPException(400, "Empty message")
     sess = await chat_sessions.find_one({"_id": session_id})

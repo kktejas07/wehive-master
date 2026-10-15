@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { API } from '../context/AuthContext';
+import { toast } from '../hooks/use-toast';
 import { Loader2, MapPin, Calendar, Compass, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -34,7 +35,7 @@ export default function GlobalEvents() {
           setDigest(r.data.digest);
         }
       })
-      .catch(() => {});
+      .catch(() => { if (mounted) toast({ title: "Couldn't load the events digest" }); });
       
     return () => { mounted = false; };
   }, []);

@@ -161,10 +161,10 @@ class TestPortalAI:
             m = MagicMock(name='applications')
             m.find = MagicMock(return_value=applications_cursor)
             store['applications'] = m
-        if 'commissions' not in store:
-            m = MagicMock(name='commissions')
+        if 'agent_commissions' not in store:
+            m = MagicMock(name='agent_commissions')
             m.find = MagicMock(return_value=MockCursor([]))
-            store['commissions'] = m
+            store['agent_commissions'] = m
         db.__getitem__ = MagicMock(side_effect=lambda key: store.get(key, MagicMock(name=key)))
         return db, store
 
@@ -188,9 +188,9 @@ class TestPortalAI:
             agent_students_cursor=MockCursor([]),
             applications_cursor=MockAppCursor([]),
         )
-        store['commissions'].find = MagicMock(return_value=MockCursor([
-            {"amount": 1000, "status": "paid"},
-            {"amount": 500, "status": "pending"},
+        store['agent_commissions'].find = MagicMock(return_value=MockCursor([
+            {"amount_inr": 1000, "status": "paid"},
+            {"amount_inr": 500, "status": "pending"},
         ]))
         result = await get_commission_summary(db, "agent1")
         assert result["total_earned"] == 1500

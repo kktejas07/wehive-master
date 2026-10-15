@@ -43,7 +43,7 @@ export default function Blog() {
       setError(null);
       try {
         let url = `${API}/blogs?limit=1000`;
-        if (category !== "All") url += `&category=${category}`;
+        if (category !== "All") url += `&category=${encodeURIComponent(category)}`;
         const response = await axios.get(url);
         setBlogs(response.data?.items || response.data || []);
       } catch (err) {

@@ -54,7 +54,7 @@ const Newsroom = ({ countryId }) => {
     try {
       let url = `${API}/news?limit=1000`;
       if (countryId) url += `&country_id=${countryId}`;
-      if (category && category !== "All") url += `&category=${category}`;
+      if (category && category !== "All") url += `&category=${encodeURIComponent(category)}`;
       
       const response = await axios.get(url);
       setNews(response.data?.items || response.data || []);

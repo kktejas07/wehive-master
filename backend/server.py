@@ -20,6 +20,7 @@ from routes_auth import router as auth_router  # noqa: E402
 from routes_users import router as users_router  # noqa: E402
 from routes_countries import router as countries_router  # noqa: E402
 from routes_leads import router as leads_router  # noqa: E402
+from routes_visa_providers import router as visa_providers_router  # noqa: E402
 from routes_apps import router as apps_router  # noqa: E402
 from routes_chatbot import router as chatbot_router  # noqa: E402
 from routes_scan import router as scan_router  # noqa: E402
@@ -104,6 +105,7 @@ async def health():
 
 # Mount routers under /api
 api_router.include_router(auth_router)
+api_router.include_router(visa_providers_router)
 api_router.include_router(users_router)
 api_router.include_router(apps_router)
 api_router.include_router(chatbot_router)

@@ -23,8 +23,10 @@ from db import global_events_col
 from audit import record as audit_record
 from event_aggregator_agent import fetch_events_from_url, scraping_enabled, run_aggregator as run_event_aggregator
 from ai_marketplace import marketplace
+import logging
 
 router = APIRouter(prefix="/events", tags=["events"])
+logger = logging.getLogger("wehive.events")
 
 # --- PUBLIC ROUTES ---
 @router.get("")
@@ -199,7 +201,8 @@ async def admin_trigger_scrape(payload: ScrapeTriggerRequest, user=Depends(get_c
         await audit_record(user['id'], f"Triggered event scrape for {payload.url}", "scrape_trigger", payload.url)
         return {"status": "success", "events_added": total_added}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=500, detail="Request failed")
 
 @router.post("/run_aggregator")
 async def admin_run_aggregator(user=Depends(get_current_admin_flex)):
@@ -209,4 +212,5 @@ async def admin_run_aggregator(user=Depends(get_current_admin_flex)):
         await audit_record(user['id'], "Triggered full event aggregator", "aggregator_trigger", "events")
         return {"status": "success", "message": "Event aggregator started"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=500, detail="Request failed")

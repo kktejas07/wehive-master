@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AdminAuthProvider, useAdminAuth } from '../context/AdminAuthContext';
 import AdminShell from '../components/admin/AdminShell';
 import OverviewTab from '../components/admin/OverviewTab';
@@ -92,7 +92,7 @@ function AdminRoutes() {
                 <Route path="agents-v2" element={<AgentsV2Tab />} />
                 <Route path="hive-learning" element={<HiveLearningTab />} />
                 <Route path="destinations" element={<DestinationsTab />} />
-                <Route path="*" element={<OverviewTab />} />
+                <Route path="*" element={<Navigate to="/admin" replace />} />
               </Routes>
             </AdminShell>
           </ProtectedAdmin>

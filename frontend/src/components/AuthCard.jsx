@@ -99,7 +99,7 @@ const ALL_TABS = [
 
 export default function AuthCard({ mode, referralCode }) {
   const { sendOtp, verifyOtp, isAuthed } = useAuth();
-  const { loginWithGoogle, loginWithEmail, signupWithEmail, firebaseUser, verificationSent, phoneOtp, verifyPhoneOtpCode, sendPasswordReset } = useFirebaseAuth();
+  const { loginWithGoogle, loginWithEmail, signupWithEmail, verificationSent, phoneOtp, verifyPhoneOtpCode, sendPasswordReset } = useFirebaseAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -141,6 +141,7 @@ export default function AuthCard({ mode, referralCode }) {
         return true;
       });
       if (firstEnabled) setTab(firstEnabled.id);
+    // Auth config is optional: on failure all tabs stay enabled (the default).
     }).catch(() => {});
   }, []);
 
@@ -172,7 +173,7 @@ export default function AuthCard({ mode, referralCode }) {
       navigate(nextUrl, { replace: true });
     } catch (e) {
       if (e.code !== 'auth/popup-closed-by-user') {
-        toast({ title: 'Google sign-in failed', description: e.message });
+        toast({ title: 'Google sign-in failed', description: e.response?.data?.detail || e.message });
       }
     } finally {
       setGoogleLoading(false);
@@ -195,8 +196,8 @@ export default function AuthCard({ mode, referralCode }) {
         await signupWithEmail(identifier, password, name);
         toast({ title: 'Verification email sent', description: 'Check your email to verify your account.' });
       } else {
-        await loginWithEmail(identifier, password);
-        if (firebaseUser && !firebaseUser.emailVerified) {
+        const user = await loginWithEmail(identifier, password);
+        if (!user.emailVerified) {
           toast({ title: 'Verify your email', description: 'Please verify your email address.' });
         } else {
           toast({ title: 'Our Ambition. Our Guidance. No Frontiers', description: 'Signed in with email.' });
@@ -215,7 +216,7 @@ export default function AuthCard({ mode, referralCode }) {
         'auth/invalid-credential': 'Invalid email or password. Please try again.',
         'auth/network-request-failed': 'Network error. Please check your connection.',
       };
-      toast({ title: messages[code] || 'Auth failed', description: messages[code] ? '' : e.message });
+      toast({ title: messages[code] || 'Auth failed', description: messages[code] ? '' : (e.response?.data?.detail || e.message) });
     } finally {
       setEmailPwdLoading(false);
     }

@@ -10,6 +10,8 @@ import base64 as _b64
 import csv
 import io
 import os
+import re
+from upload_limits import read_capped
 import uuid
 import threading
 from datetime import datetime, timedelta
@@ -281,7 +283,7 @@ async def admin_list_users(
 ):
     filt: dict = {}
     if q:
-        rx = {'$regex': q, '$options': 'i'}
+        rx = {'$regex': re.escape(q), '$options': 'i'}
         filt['$or'] = [{'email': rx}, {'phone': rx}, {'name': rx}]
     if role == 'premium':
         filt['is_premium'] = True
@@ -409,7 +411,7 @@ async def admin_list_applications(
     if status and status != 'all':
         filt['status'] = status
     if q:
-        rx = {'$regex': q, '$options': 'i'}
+        rx = {'$regex': re.escape(q), '$options': 'i'}
         filt['$or'] = [{'country_id': rx}, {'visa_type': rx}, {'_id': rx}]
 
     total = await applications.count_documents(filt)
@@ -487,7 +489,7 @@ async def admin_list_countries(
 ):
     filt: dict = {}
     if q:
-        rx = {'$regex': q, '$options': 'i'}
+        rx = {'$regex': re.escape(q), '$options': 'i'}
         filt['$or'] = [{'name': rx}, {'id': rx}, {'iso2': rx}]
     total = await countries_col.count_documents(filt)
     cur = countries_col.find(filt, {'_id': 0}).sort('name', 1).skip(skip).limit(limit)
@@ -637,7 +639,7 @@ async def admin_list_events(
     if tag and tag != 'all':
         filt['tag'] = tag
     if q:
-        rx = {'$regex': q, '$options': 'i'}
+        rx = {'$regex': re.escape(q), '$options': 'i'}
         filt['$or'] = [{'title': rx}, {'subtitle': rx}, {'description': rx}]
     total = await events_col.count_documents(filt)
     cur = events_col.find(filt).sort([('sort_order', 1), ('created_at', -1)]).skip(skip).limit(limit)
@@ -891,7 +893,7 @@ async def admin_upload_branding(
     bucket = r2_cfg.get('bucket', '')
     ext = file.filename.rsplit('.', 1)[-1] if '.' in (file.filename or '') else 'png'
     obj_key = f'{BRANDING_BUCKET_KEY}/{key}.{ext}'
-    content = await file.read()
+    content = await read_capped(file, 10)
     s3.put_object(
         Bucket=bucket,
         Key=obj_key,
@@ -1324,7 +1326,7 @@ async def admin_upload_destination(
         raise HTTPException(404, f'Country "{country}" not found in manifest')
 
     filename = entry['filename']
-    content = await file.read()
+    content = await read_capped(file, 10)
     key = f'destinations/{filename}'
 
     client.put_object(Bucket=bucket, Key=key, Body=content, ContentType=file.content_type or 'image/webp', ServerSideEncryption='AES256')

@@ -285,8 +285,8 @@ function DocumentsTab({ token }) {
   useEffect(() => {
     axios.get(`${API}/agent/students`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => setStudents(r.data?.items || []))
-      .catch(() => {});
-  }, [token]);
+      .catch(() => toast({ title: 'Could not load students', description: 'Please refresh and try again.' }));
+  }, [token, toast]);
 
   useEffect(() => {
     if (!selectedStudent) return;

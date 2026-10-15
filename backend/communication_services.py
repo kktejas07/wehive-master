@@ -40,7 +40,7 @@ class TelegramService:
         if not self.base_url:
             return {'ok': False, 'error': 'Telegram bot token not configured — set in Admin → Settings → Notifications'}
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=15) as client:
             try:
                 response = await client.post(
                     f'{self.base_url}/sendMessage',
@@ -70,7 +70,7 @@ class TelegramService:
         await self._ensure_token()
         if not self.base_url:
             return {'ok': False, 'error': 'Telegram bot token not configured'}
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=15) as client:
             response = await client.get(f'{self.base_url}/getUpdates', timeout=10.0)
             return response.json()
 
@@ -103,7 +103,7 @@ class DiscordService:
         if embeds:
             payload['embeds'] = embeds
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=15) as client:
             try:
                 response = await client.post(
                     self._webhook_url,

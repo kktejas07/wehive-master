@@ -31,8 +31,10 @@ class RateLimit:
 
     def _key(self, request: Request) -> str:
         if self.by == 'ip':
+            # Right-most entry is the one appended by our reverse proxy; entries to its
+            # left are client-supplied and trivially spoofable.
             forwarded = request.headers.get('X-Forwarded-For', '')
-            ip = forwarded.split(',')[0].strip() if forwarded else (request.client.host if request.client else 'unknown')
+            ip = forwarded.split(',')[-1].strip() if forwarded else (request.client.host if request.client else 'unknown')
             return ip
         return 'global'
 

@@ -20,8 +20,10 @@ from typing import Optional
 
 from auth_utils import get_current_user, get_current_user_optional
 from db import db
+import logging
 
 router = APIRouter(prefix="/gen", tags=["gen-ai"], dependencies=[Depends(get_current_user)])
+logger = logging.getLogger("wehive.gen_ai")
 
 
 class TextGenRequest(BaseModel):
@@ -121,7 +123,8 @@ async def generate_text(
         else:
             response = {"content": llm(req.prompt) if callable(llm) else "LLM unavailable"}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Generation failed: {str(e)}")
+        logger.exception("Generation failed")
+        raise HTTPException(status_code=502, detail="Generation failed")
 
     content = response.get("content", "") if isinstance(response, dict) else str(response)
 
@@ -170,7 +173,8 @@ async def translate_text(
         else:
             response = {"content": req.text}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Translation failed: {str(e)}")
+        logger.exception("Translation failed")
+        raise HTTPException(status_code=502, detail="Translation failed")
 
     translated = response.get("content", "") if isinstance(response, dict) else str(response)
 
@@ -212,7 +216,8 @@ async def summarize_text(
         else:
             response = {"content": req.text[:req.max_length]}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Summarization failed: {str(e)}")
+        logger.exception("Summarization failed")
+        raise HTTPException(status_code=502, detail="Summarization failed")
 
     summary = response.get("content", "") if isinstance(response, dict) else str(response)
 
@@ -311,7 +316,8 @@ async def generate_speech(
                 }
             raise HTTPException(status_code=502, detail=f"TTS failed: {resp.text}")
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Speech generation failed: {str(e)}")
+        logger.exception("Speech generation failed")
+        raise HTTPException(status_code=502, detail="Speech generation failed")
 
 
 @router.get("/models")

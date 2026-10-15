@@ -35,14 +35,18 @@ def init_firebase_admin(project_id: str, creds_json: str):
         _firebase_app = firebase_admin.initialize_app(cred, {'projectId': project_id})
         logger.info('Firebase Admin SDK initialized')
         return _firebase_app
-    except Exception as e:
+    except Exception:
         logger.exception('Failed to initialize Firebase Admin SDK')
-        raise HTTPException(status_code=503, detail=f'Firebase init failed: {str(e)}')
+        raise HTTPException(status_code=503, detail='Firebase init failed')
 
 
 def get_firebase_app():
     global _firebase_app
     if _firebase_app is not None:
+        return _firebase_app
+    import firebase_admin
+    if firebase_admin._apps:
+        _firebase_app = firebase_admin.get_app()
         return _firebase_app
     raise HTTPException(status_code=503, detail='Firebase not initialized — call init_firebase_admin first')
 
@@ -51,7 +55,7 @@ async def verify_firebase_token(id_token: str) -> dict:
     app = get_firebase_app()
     from firebase_admin import auth
     try:
-        decoded = auth.verify_id_token(id_token)
-        return decoded
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f'Invalid Firebase token: {str(e)}')
+        return auth.verify_id_token(id_token, check_revoked=True)
+    except Exception:
+        logger.warning('Firebase token verification failed', exc_info=True)
+        raise HTTPException(status_code=401, detail='Invalid Firebase token')

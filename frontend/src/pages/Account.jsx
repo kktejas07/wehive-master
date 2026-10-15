@@ -574,16 +574,19 @@ function ReferralsTab({ token }) {
           try {
             const createRes = await axios.post(`${API}/referrals/code`, {}, { headers: { Authorization: `Bearer ${token}` } });
             referralCode = createRes.data.code;
-          } catch {}
+          } catch {
+            toast({ title: 'Could not create your referral code', description: 'Please try again later.' });
+          }
         }
         setCode(referralCode);
       })
-      .catch(() => {})
+      .catch(() => toast({ title: 'Could not load your referral code', description: 'Please try again later.' }))
       .finally(() => setLoading(false));
+    // Stats are supplementary; the code above is what the user acts on.
     axios.get(`${API}/referrals/stats`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => setStats(r.data))
       .catch(() => {});
-  }, [token]);
+  }, [token, toast]);
 
   const handleShare = async (medium) => {
     if (!code) return;

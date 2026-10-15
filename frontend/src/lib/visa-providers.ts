@@ -180,25 +180,6 @@ export function adaptSimpleVisaEligibility(
   };
 }
 
-export function makeSherpaProvider(apiKey: string): VisaProvider {
-  return {
-    id: "sherpa",
-    async getRequirements(input) {
-      const res = await fetch("https://api.joinsherpa.io/v2/trips", {
-        method: "POST",
-        headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          citizenship: input.nationality,
-          destination: input.destination,
-          travelDate: input.travelDate,
-        }),
-      });
-      if (!res.ok) throw new Error(`Sherpa ${res.status}`);
-      return adaptSherpaTrips(await res.json(), input);
-    },
-  };
-}
-
 export function makeSimpleVisaProvider(apiKey: string, base = "https://api.simplevisa.com"): VisaProvider {
   return {
     id: "simplevisa",
