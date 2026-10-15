@@ -69,7 +69,7 @@ export default function EmergencyCare() {
                 </div>
               </FadeIn>
               <FadeIn delay={0.2}>
-                <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   {[
                     { value: '250+', label: 'Countries Supported' },
                     { value: '50+', label: 'Government Partners' },

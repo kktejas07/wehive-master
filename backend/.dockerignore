@@ -8,3 +8,11 @@ tests/
 *.md
 .venv
 venv/
+test_venv/
+test_uv/
+coverage_html/
+uploads/
+*.log
+.mypy_cache
+.env.*
+!.env.example

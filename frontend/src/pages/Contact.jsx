@@ -158,7 +158,8 @@ export default function Contact() {
                             type="button"
                             role="option"
                             aria-selected={form.subject === s.id}
-                            onClick={() => { setForm((f) => ({ ...f, subject: s.id })); setSubjectOpen(false); }}
+                            // preventDefault: the wrapping <label> would otherwise re-click the toggle (Safari reopens the list)
+                            onClick={(e) => { e.preventDefault(); setForm((f) => ({ ...f, subject: s.id })); setSubjectOpen(false); }}
                             className={`w-full px-3 py-2.5 rounded-lg text-[15px] text-left transition-colors duration-200 hover:bg-[hsl(var(--blue-50))] ${form.subject === s.id ? 'text-[hsl(var(--blue-700))] font-semibold bg-[hsl(var(--blue-50))]' : 'text-[hsl(var(--blue-900))]'}`}
                           >
                             {s.label}

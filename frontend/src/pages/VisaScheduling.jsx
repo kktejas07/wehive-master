@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -23,6 +23,8 @@ const EMBASSY_CITIES = [
 export default function VisaScheduling() {
   const { token, isAuthed } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState(1);
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
@@ -38,22 +40,33 @@ export default function VisaScheduling() {
     if (isAuthed) {
       axios.get(`${API}/users/me/applications`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => setApplications(r.data || []))
-        .catch(() => {});
+        .catch(() => toast({ title: 'Could not load your applications', description: 'Please refresh and try again.' }));
     }
-  }, [isAuthed, token]);
+  }, [isAuthed, token, toast]);
 
   useEffect(() => {
     if (country && date) {
       setLoading(true);
       axios.get(`${API}/visa-scheduling/slots/${country}`, { params: { date } })
         .then(r => setSlots(r.data || []))
-        .catch(() => setSlots([]))
+        .catch(() => {
+          setSlots([]);
+          toast({ title: 'Could not load appointment slots', description: 'Please try again.' });
+        })
         .finally(() => setLoading(false));
     }
-  }, [country, date]);
+  }, [country, date, toast]);
 
   const handleBook = async () => {
-    if (!isAuthed || !appId || !date || !time) return;
+    if (!isAuthed) {
+      navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+    if (!appId) {
+      toast({ title: 'Select an application', description: 'Choose the application this appointment is for.' });
+      return;
+    }
+    if (!date || !time) return;
     setLoading(true);
     try {
       const slot = slots.find(s => s.date === date && s.time === time);

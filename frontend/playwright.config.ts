@@ -1,61 +1,28 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
+ * Web + mobile-web E2E. Runs against the production build (`npm run build` first) served
+ * on :3002; all backend calls are mocked in e2e/fixtures.ts.
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
   testDir: './e2e',
-  /* Run tests in files in parallel */
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI */
-  workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use */
-  reporter: 'html',
-  /* Shared settings for all the projects below */
+  workers: process.env.CI ? 2 : undefined,
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'html',
   use: {
-    /* Base URL to use in actions like `await page.goto('/')` */
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3002',
-
-    /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',
-
-    /* Screenshot on failure */
     screenshot: 'only-on-failure',
   },
-
-  /* Configure projects for major browsers */
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-
-    /* Test against mobile viewports */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    { name: 'desktop-chrome', use: { ...devices['Desktop Chrome'] } },
+    { name: 'desktop-safari', use: { ...devices['Desktop Safari'] } },
+    { name: 'mobile-android', use: { ...devices['Pixel 7'] } },
+    { name: 'mobile-ios', use: { ...devices['iPhone 14'] } },
   ],
-
-  /* Run local static server before starting the tests */
   webServer: {
     command: 'npx serve -s build -l 3002',
     url: 'http://localhost:3002',

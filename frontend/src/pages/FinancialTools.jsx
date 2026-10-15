@@ -93,10 +93,10 @@ function LiveCurrencyConverter() {
       
       <div className="grid grid-cols-[1fr,auto,1fr] items-center gap-4">
         <div className="space-y-3">
-          <select value={base} onChange={e => setBase(e.target.value)} className="w-full h-11 rounded-xl bg-white border border-[hsl(var(--border))] px-4 text-[14px] font-bold">
+          <select value={base} onChange={e => setBase(e.target.value)} aria-label="From currency" className="w-full h-11 rounded-xl bg-white border border-[hsl(var(--border))] px-4 text-[14px] font-bold">
             {currencies.map(c => <option key={c}>{c}</option>)}
           </select>
-          <input type="number" value={amount} onChange={e => setAmount(+e.target.value)} className="w-full h-11 rounded-xl bg-white border border-[hsl(var(--border))] px-4 text-[15px] font-bold text-right outline-none" />
+          <input type="number" value={amount} onChange={e => setAmount(+e.target.value)} aria-label="Amount" className="w-full h-11 rounded-xl bg-white border border-[hsl(var(--border))] px-4 text-[15px] font-bold text-right outline-none" />
         </div>
         
         <button aria-label="Refresh exchange rate" onClick={fetchRate} className="w-10 h-10 rounded-full bg-[hsl(var(--soft-bg))] flex items-center justify-center hover:bg-[hsl(var(--blue-50))] transition">
@@ -104,7 +104,7 @@ function LiveCurrencyConverter() {
         </button>
 
         <div className="space-y-3">
-          <select value={target} onChange={e => setTarget(e.target.value)} className="w-full h-11 rounded-xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] px-4 text-[14px] font-bold">
+          <select value={target} onChange={e => setTarget(e.target.value)} aria-label="To currency" className="w-full h-11 rounded-xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] px-4 text-[14px] font-bold">
             {currencies.map(c => <option key={c}>{c}</option>)}
           </select>
           <div className="w-full h-11 rounded-xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] px-4 flex items-center justify-end text-[15px] font-bold text-[hsl(var(--blue-900))]">
@@ -172,6 +172,7 @@ function AIFinancialAdvisor() {
           value={query} 
           onChange={e => setQuery(e.target.value)}
           placeholder="Ask a financial question..."
+          aria-label="Ask a financial question"
           className="w-full h-12 rounded-xl bg-white border border-[hsl(var(--border))] pl-4 pr-12 text-[14px] outline-none focus:border-[hsl(var(--blue-700))]/50"
         />
         <button aria-label="Ask question" type="submit" disabled={loading} className="absolute right-1.5 top-1.5 w-9 h-9 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white flex items-center justify-center disabled:opacity-50">

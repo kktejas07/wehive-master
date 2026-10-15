@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, FileText, ChevronRight, AlertTriangle } from 'lucide-react';
 import Navbar from '../components/Navbar';
@@ -31,6 +31,7 @@ import CategorySuggestions from '../components/visa/CategorySuggestions';
 export default function VisaDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthed } = useAuth();
   const [country, setCountry] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -123,13 +124,11 @@ export default function VisaDetail() {
 
   const onApply = () => {
     if (!isAuthed) {
-      navigate('/signup');
+      navigate(`/signup?next=${encodeURIComponent(location.pathname + location.search)}`);
       return;
     }
     setReviewOpen(true);
   };
-
-  const applying = false;
 
   return (
     <div className="bg-white">
@@ -142,7 +141,7 @@ export default function VisaDetail() {
             <CategoryTabs categories={country.categories} value={type} onChange={setType} />
           </div>
           <div className="mt-8">
-            {cat && <CategoryDetails cat={cat} country={country} onApply={onApply} applying={applying} typeId={type} applicants={applicants} />}
+            {cat && <CategoryDetails cat={cat} country={country} onApply={onApply} typeId={type} applicants={applicants} />}
           </div>
         </div>
       </section>
@@ -160,7 +159,6 @@ export default function VisaDetail() {
             <div className="mt-8">
               <Button
                 onClick={onApply}
-                disabled={applying}
                 variant="outline"
                 className="rounded-xl bg-white border border-[hsl(var(--border))] text-[hsl(var(--blue-900))] hover:bg-white hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] h-12 px-5 font-semibold"
               >

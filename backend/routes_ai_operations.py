@@ -28,8 +28,11 @@ from pydantic import BaseModel, Field
 
 from auth_utils import get_current_user
 from ollama_embeddings import OLLAMA_HOST
+from upload_limits import read_capped
+import logging
 
 router = APIRouter(prefix="/ai", tags=["ai-operations"])
+logger = logging.getLogger("wehive.ai_operations")
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
@@ -167,7 +170,8 @@ async def ai_briefing(req: BriefingRequest, user=Depends(get_current_user)):
         return {"ok": True, "topic": req.topic, "format": req.format, "briefing": content}
 
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=502, detail="Request failed")
 
 
 @router.post("/resume-screening")
@@ -197,7 +201,8 @@ async def resume_screening(req: ResumeScreeningRequest, user=Depends(get_current
         return {"ok": True, **result}
 
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=502, detail="Request failed")
 
 
 def _pdf_text(contents: bytes) -> str:
@@ -223,7 +228,7 @@ async def resume_screening_upload(
     job_description: Optional[str] = Form(None),
     user=Depends(get_current_user),
 ):
-    contents = await file.read()
+    contents = await read_capped(file, 25)
 
     if file.filename and file.filename.lower().endswith(".pdf"):
         text = _pdf_text(contents)
@@ -267,7 +272,8 @@ async def performance_review(req: PerformanceReviewRequest, user=Depends(get_cur
         return {"ok": True, "employee": req.employee_name, **result}
 
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=502, detail="Request failed")
 
 
 @router.get("/status")
@@ -349,7 +355,7 @@ async def vision_ocr(
     language: Optional[str] = Form("en"),
     user=Depends(get_current_user),
 ):
-    contents = await file.read()
+    contents = await read_capped(file, 25)
     image_b64 = base64.b64encode(contents).decode("utf-8")
 
     try:
@@ -363,7 +369,8 @@ async def vision_ocr(
         )
         return {"ok": True, "text": text, "file": file.filename}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=502, detail="Request failed")
 
 
 @router.post("/vision/classify")
@@ -372,7 +379,7 @@ async def vision_classify(
     labels: Optional[str] = Form(None),
     user=Depends(get_current_user),
 ):
-    contents = await file.read()
+    contents = await read_capped(file, 25)
     image_b64 = base64.b64encode(contents).decode("utf-8")
 
     label_list = [lb.strip() for lb in labels.split(",")] if labels else ["passport", "visa", "id_card", "bank_statement", "other"]
@@ -396,7 +403,8 @@ async def vision_classify(
             result = {"classification": "other", "confidence": 50}
         return {"ok": True, "file": file.filename, **result}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=502, detail="Request failed")
 
 
 @router.post("/vision/parse-resume")
@@ -404,7 +412,7 @@ async def vision_parse_resume(
     file: UploadFile = File(...),
     user=Depends(get_current_user),
 ):
-    contents = await file.read()
+    contents = await read_capped(file, 25)
 
     if file.filename and file.filename.lower().endswith(".pdf"):
         text = _pdf_text(contents)
@@ -433,7 +441,8 @@ async def vision_parse_resume(
             result = {"name": "", "error": "Could not parse", "raw": content}
         return {"ok": True, **result}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=502, detail="Request failed")
 
 
 @router.post("/speech/transcribe")
@@ -445,7 +454,7 @@ async def speech_transcribe(
     if not OPENAI_API_KEY:
         raise HTTPException(status_code=503, detail="Set OPENAI_API_KEY for transcription")
 
-    contents = await file.read()
+    contents = await read_capped(file, 25)
     try:
         files = {"file": (file.filename or "audio.mp3", contents, file.content_type or "audio/mpeg")}
         data = {"model": "whisper-1", "language": language}
@@ -460,7 +469,8 @@ async def speech_transcribe(
                 return {"ok": True, "text": resp.json().get("text", "")}
             raise HTTPException(status_code=502, detail=f"Transcription failed: {resp.text}")
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=502, detail="Request failed")
 
 
 @router.post("/translate")
@@ -474,7 +484,8 @@ async def translate(req: TranslateRequest, user=Depends(get_current_user)):
         )
         return {"ok": True, "source": req.source_lang, "target": req.target_lang, "translated": translated}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.exception("Request failed")
+        raise HTTPException(status_code=502, detail="Request failed")
 
 
 @router.post("/next-steps")

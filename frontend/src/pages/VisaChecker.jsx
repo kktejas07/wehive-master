@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import {
   Search, IdCard, Globe, Calendar, ArrowRight,
   CheckCircle2, XCircle, AlertCircle, AlertTriangle, Info, Clock, Loader2,
@@ -7,6 +8,7 @@ import {
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { COUNTRIES } from '../data/mock';
+import { API } from '../lib/apiBase';
 
 const OUTCOME_META = {
   VISA_NOT_REQUIRED: { label: 'Visa Not Required', color: '#16a34a', bg: '#dcfce7', icon: CheckCircle2 },
@@ -163,15 +165,19 @@ export default function VisaChecker() {
     setResult(null);
 
     try {
-      const { makeSherpaProvider } = await import('../lib/visa-providers');
-      const apiKey = process.env.REACT_APP_SHERPA_API_KEY || '';
-      const provider = makeSherpaProvider(apiKey);
-      const res = await provider.getRequirements({
+      const input = {
         nationality: nationality.toUpperCase(),
         destination: destination.toUpperCase(),
         travelDate: travelDate || undefined,
+      };
+      // Sherpa is called via the backend proxy so the API key never ships in the bundle.
+      const response = await axios.post(`${API}/visa-providers/sherpa/trips`, {
+        citizenship: input.nationality,
+        destination: input.destination,
+        travelDate: input.travelDate,
       });
-      setResult(res);
+      const { adaptSherpaTrips } = await import('../lib/visa-providers');
+      setResult(adaptSherpaTrips(response.data, input));
       setIsFallback(false);
     } catch (err) {
       setError('Visa provider unavailable. Showing estimated requirements.');
@@ -239,7 +245,7 @@ export default function VisaChecker() {
 
             <div>
               <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-2">Travel Date (optional)</div>
-              <input type="date" value={travelDate} onChange={e => setTravelDate(e.target.value)}
+              <input type="date" value={travelDate} onChange={e => setTravelDate(e.target.value)} aria-label="Travel date"
                 min={new Date().toISOString().split('T')[0]}
                 className="w-full h-11 rounded-xl border border-[hsl(var(--border))] px-4 text-[14px] text-[hsl(var(--blue-900))] outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20" />
             </div>

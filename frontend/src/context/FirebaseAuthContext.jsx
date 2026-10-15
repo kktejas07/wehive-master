@@ -30,46 +30,45 @@ export function FirebaseAuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  const syncWithBackend = useCallback(async (user) => {
-    try {
-      const idToken = await getFirebaseIdToken();
-      if (!idToken) return null;
+  // Throws on failure so callers can surface the error instead of reporting a
+  // successful sign-in with no backend session.
+  const syncWithBackend = useCallback(async () => {
+    const idToken = await getFirebaseIdToken();
+    if (!idToken) throw new Error('Could not get a Firebase ID token');
 
-      const res = await axios.post(
-        `${API}/auth/firebase-sync`,
-        { id_token: idToken }
-      );
-      const { access_token, user: backendUser } = res.data;
-      // Hand the token to AuthContext directly so isAuthed flips immediately —
-      // writing only to localStorage left AuthContext's live state stale until
-      // the next full page reload (see F1 in playwright/REPORT.md).
-      setAuthToken(access_token);
-      return { access_token, user: backendUser };
-    } catch (_e) {
-      return null;
-    }
+    const res = await axios.post(
+      `${API}/auth/firebase-sync`,
+      { id_token: idToken }
+    );
+    const { access_token, user: backendUser } = res.data;
+    // Hand the token to AuthContext directly so isAuthed flips immediately —
+    // writing only to localStorage left AuthContext's live state stale until
+    // the next full page reload (see F1 in playwright/REPORT.md).
+    setAuthToken(access_token);
+    return { access_token, user: backendUser };
   }, [setAuthToken]);
 
   const loginWithGoogle = useCallback(async () => {
     const user = await firebaseAuth.google();
-    await syncWithBackend(user);
+    await syncWithBackend();
     return user;
   }, [syncWithBackend]);
 
+  // No backend session until the email is verified (firebase-sync rejects unverified accounts).
   const signupWithEmail = useCallback(async (email, password, name) => {
     const user = await firebaseAuth.emailSignup(email, password, name);
     setVerificationSent(true);
-    await syncWithBackend(user);
     return user;
-  }, [syncWithBackend]);
+  }, []);
 
   const loginWithEmail = useCallback(async (email, password) => {
     const user = await firebaseAuth.emailLogin(email, password);
     if (!user.emailVerified) {
       await firebaseAuth.sendVerification(user);
       setVerificationSent(true);
+      return user;
     }
-    await syncWithBackend(user);
+    await syncWithBackend();
     return user;
   }, [syncWithBackend]);
 

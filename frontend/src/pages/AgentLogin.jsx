@@ -87,18 +87,18 @@ export default function AgentLogin() {
             )}
             <div>
               <label htmlFor="agentlogin-email" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Email</label>
-              <input id="agentlogin-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="agent@example.com" />
+              <input id="agentlogin-email" data-testid="agent-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="agent@example.com" />
             </div>
             <div>
               <label htmlFor="agentlogin-password" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Password</label>
               <div className="relative">
-                <input id="agentlogin-password" type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[14px]" placeholder="••••••••" />
+                <input id="agentlogin-password" data-testid="agent-password" type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 pr-12 text-[14px]" placeholder="••••••••" />
                 <button type="button" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? 'Hide password' : 'Show password'} className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-[hsl(var(--blue-900))]">
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            <Button variant="accent" type="submit" disabled={loading} className="w-full h-12 rounded-xl text-white font-semibold">
+            <Button variant="accent" type="submit" data-testid="agent-submit" disabled={loading} className="w-full h-12 rounded-xl text-white font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (mode === 'login' ? 'Sign In' : 'Create Account')}
             </Button>
           </form>

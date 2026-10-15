@@ -108,6 +108,7 @@ export default function UserMenu({ light = false }) {
               firebaseLogout();
               logout();
             }}
+            data-testid="usermenu-signout"
             className="w-full text-left flex items-center gap-2.5 rounded-xl px-3 py-2.5 mt-1 text-[14px] text-[hsl(var(--blue-900))] hover:text-red-700 hover:bg-red-50 transition-colors duration-200"
           >
             <LogOut className="w-4 h-4" />

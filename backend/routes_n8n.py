@@ -18,8 +18,10 @@ from pydantic import BaseModel
 
 from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
+import logging
 
 router = APIRouter(prefix="/n8n", tags=["n8n-automation"], dependencies=[Depends(get_current_user)])
+logger = logging.getLogger("wehive.n8n")
 
 N8N_BASE_URL = os.environ.get("N8N_BASE_URL", "http://localhost:5678")
 N8N_API_KEY = os.environ.get("N8N_API_KEY", "")
@@ -128,7 +130,8 @@ async def trigger_workflow(req: TriggerWorkflowRequest, user=Depends(get_current
                 "triggered_at": datetime.utcnow().isoformat(),
             }
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"n8n trigger failed: {str(e)}")
+        logger.exception("n8n trigger failed")
+        raise HTTPException(status_code=502, detail="n8n trigger failed")
 
 
 @router.get("/status")

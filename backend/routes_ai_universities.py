@@ -6,6 +6,7 @@ import re
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from rate_limit import RateLimit
 from pydantic import BaseModel
 
 from admin_auth import get_current_admin_flex
@@ -23,8 +24,12 @@ class RecommenderProfile(BaseModel):
     scholarships_only: bool = False; preferences: str = ""
 
 
+# Anonymous LLM calls cost money: 10 per IP per 10 minutes, shared across these endpoints.
+_llm_limiter = RateLimit(max_calls=10, window_seconds=600)
+
+
 @router.post("/recommend")
-async def recommend(profile: RecommenderProfile):
+async def recommend(profile: RecommenderProfile, _=Depends(_llm_limiter)):
     flt = {"tuition_usd": {"$lte": profile.budget}}
     if profile.country: flt["country"] = profile.country.lower()
     if profile.preferred_courses: flt["courses"] = {"$in": [c.lower() for c in profile.preferred_courses]}
@@ -62,7 +67,7 @@ class QuestionBody(BaseModel):
 
 
 @router.post("/{uid}/ask")
-async def ask(uid: str, body: QuestionBody):
+async def ask(uid: str, body: QuestionBody, _=Depends(_llm_limiter)):
     doc = await universities_col.find_one({"id": uid}, {"_id": 0})
     if not doc: raise HTTPException(404)
     doc = normalize_university(dict(doc))
@@ -81,7 +86,7 @@ class ScholarshipProfile(BaseModel):
 
 
 @router.post("/scholarship-match")
-async def scholarship_match(profile: ScholarshipProfile):
+async def scholarship_match(profile: ScholarshipProfile, _=Depends(_llm_limiter)):
     flt = {"scholarships": True}
     if profile.country: flt["country"] = profile.country.lower()
     if profile.field_of_study: flt["courses"] = {"$in": [profile.field_of_study.lower()]}
@@ -111,7 +116,7 @@ class AcceptanceQuery(BaseModel):
 
 
 @router.post("/{uid}/acceptance-probability")
-async def acceptance_prob(uid: str, body: AcceptanceQuery):
+async def acceptance_prob(uid: str, body: AcceptanceQuery, _=Depends(_llm_limiter)):
     doc = await universities_col.find_one({"id": uid}, {"_id": 0})
     if not doc: raise HTTPException(404)
     uni = {"name": doc.get("name"), "rank": doc.get("rank"), "acceptance_rate": doc.get("acceptance_rate"),

@@ -56,7 +56,7 @@ export function Toaster() {
           </Toast>
         );
       })}
-      <ToastViewport className="fixed bottom-4 right-4 z-[110] flex max-h-screen w-full flex-col gap-2 p-0 sm:bottom-4 sm:right-4 sm:top-auto sm:flex-col-reverse md:max-w-[420px]" />
+      <ToastViewport className="fixed top-auto bottom-4 right-4 z-[110] flex max-h-screen w-full flex-col gap-2 p-0 sm:bottom-4 sm:right-4 sm:top-auto sm:flex-col-reverse md:max-w-[420px]" />
     </ToastProvider>
   );
 }

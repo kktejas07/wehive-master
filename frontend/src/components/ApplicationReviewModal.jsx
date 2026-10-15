@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   X, Calendar, User as UserIcon, Phone, Mail,
   ShieldCheck, Loader2, ArrowRight, MapPin,
@@ -39,6 +39,7 @@ export default function ApplicationReviewModal({
   const dialogProps = useDialogA11y(open, onClose);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const minDate = todayPlus(1);
   const [travelDate, setTravelDate] = useState(todayPlus(21));
@@ -69,8 +70,16 @@ export default function ApplicationReviewModal({
       toast({ title: 'Please share an email or mobile number' });
       return false;
     }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast({ title: 'Please enter a valid email address' });
+      return false;
+    }
     if (!travelDate) {
       toast({ title: 'Please pick a tentative travel date' });
+      return false;
+    }
+    if (travelDate < minDate) {
+      toast({ title: 'Travel date must be in the future' });
       return false;
     }
     return true;
@@ -79,7 +88,7 @@ export default function ApplicationReviewModal({
   const handleConfirm = async () => {
     if (!isAuthed) {
       onClose?.();
-      navigate('/signup');
+      navigate(`/signup?next=${encodeURIComponent(location.pathname + location.search)}`);
       return;
     }
     if (!validate()) return;

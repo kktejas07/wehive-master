@@ -26,6 +26,7 @@ export default function ApplicationDetail() {
   const [app, setApp] = useState(null);
   const [country, setCountry] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [docs, setDocs] = useState([]);
   const [scanOpen, setScanOpen] = useState(false);
@@ -38,15 +39,31 @@ export default function ApplicationDetail() {
   }, [authLoading, isAuthed, navigate]);
 
   const refresh = async () => {
+    let r;
     try {
-      const r = await axios.get(`${API}/users/me/applications/${id}`, {
+      r = await axios.get(`${API}/users/me/applications/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setApp(r.data);
+    } catch (e) {
+      const status = e?.response?.status;
+      if (status === 404 || status === 403) {
+        navigate('/account?tab=applications', { replace: true });
+      } else {
+        setLoadError(true);
+        toast({ title: 'Could not load application', description: 'Please try again.' });
+      }
+      setLoading(false);
+      return;
+    }
+    setLoadError(false);
+    setApp(r.data);
+    try {
       const cr = await axios.get(`${API}/countries/${r.data.country_id}`);
       setCountry(cr.data);
     } catch {
-      navigate('/account?tab=applications', { replace: true });
+      // Country details are secondary — fall back to a minimal shape so the page still renders.
+      setCountry((c) => c || { id: r.data.country_id, name: r.data.country_id?.toUpperCase() || 'Destination', flag: '' });
+      toast({ title: 'Could not load destination details', description: 'Some document requirements may be missing.' });
     } finally {
       setLoading(false);
     }
@@ -94,6 +111,25 @@ export default function ApplicationDetail() {
       toast({ title: 'Could not download receipt' });
     }
   };
+
+  if (loadError && !app) {
+    return (
+      <div className="bg-white">
+        <Navbar />
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
+          <p className="text-[16px] font-semibold text-[hsl(var(--blue-900))]">We couldn&rsquo;t load this application.</p>
+          <button
+            type="button"
+            onClick={() => { setLoading(true); refresh(); }}
+            className="rounded-xl btn-accent text-white h-11 px-6 font-semibold"
+          >
+            Try again
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (loading || !app || !country) {
     return (

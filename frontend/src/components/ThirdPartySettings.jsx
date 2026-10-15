@@ -216,7 +216,7 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
         <div className="mt-4 bg-[hsl(var(--soft-bg))] rounded-xl border border-black/5 p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Connect {svc.name}</h4>
-            <button onClick={() => setShowForm(false)} className="p-1 rounded hover:bg-black/5 transition">
+            <button onClick={() => setShowForm(false)} aria-label="Close" className="p-1 rounded hover:bg-black/5 transition">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>

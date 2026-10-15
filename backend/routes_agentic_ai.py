@@ -171,7 +171,8 @@ async def stark_search(req: StarkSearchRequest, user=Depends(get_current_user)):
             **result,
         }
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Stark search failed: {str(e)}")
+        logger.exception("Stark search failed")
+        raise HTTPException(status_code=502, detail="Stark search failed")
 
 
 @router.post("/stark/research")
@@ -192,7 +193,8 @@ async def stark_research_endpoint(req: StarkSearchRequest, user=Depends(get_curr
             "rag_context": rag_context,
         }
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Stark research failed: {str(e)}")
+        logger.exception("Stark research failed")
+        raise HTTPException(status_code=502, detail="Stark research failed")
 
 
 @router.get("/stark/context")
@@ -212,7 +214,8 @@ async def get_stark_context(q: str, user=Depends(get_current_user)):
             "query": q,
         }
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Context generation failed: {str(e)}")
+        logger.exception("Context generation failed")
+        raise HTTPException(status_code=502, detail="Context generation failed")
 
 
 @router.post("/workflow")
@@ -284,7 +287,8 @@ async def run_workflow(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Workflow failed: {str(e)}")
+        logger.exception("Workflow failed")
+        raise HTTPException(status_code=502, detail="Workflow failed")
 
 
 @router.get("/status")

@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API, useAuth } from '../context/AuthContext';
 import { FAQS, BRAND } from '../data/mock';
+import { toast } from '../hooks/use-toast';
 
 const CATEGORIES = [
   { id: 'getting-started', label: 'Getting started', icon: Rocket },
@@ -73,7 +74,7 @@ function HiveChat({ token }) {
     if (!token) return;
     axios.post(`${API}/chatbot/sessions`, { title: 'Help center chat' }, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => setSessionId(r.data.session_id))
-      .catch(() => {});
+      .catch(() => toast({ title: 'Chat is unavailable right now', description: 'Please try again later or contact us.' }));
   }, [token]);
 
   useEffect(() => {

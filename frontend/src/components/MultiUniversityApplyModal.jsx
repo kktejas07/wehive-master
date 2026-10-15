@@ -61,7 +61,7 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
             <GraduationCap className="w-5 h-5 text-[hsl(var(--blue-700))]" />
             <h2 className="text-[18px] font-display font-bold leading-tight">Apply to {universities.length} universit{universities.length === 1 ? 'y' : 'ies'}</h2>
           </div>
-          <button onClick={onClose} disabled={submitting} className="text-muted-foreground hover:text-[hsl(var(--blue-900))] p-1">
+          <button onClick={onClose} disabled={submitting} aria-label="Close" className="text-muted-foreground hover:text-[hsl(var(--blue-900))] p-1">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>

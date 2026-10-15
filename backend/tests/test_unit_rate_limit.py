@@ -118,15 +118,13 @@ class TestRateLimitIsolation:
         limiter(req_a)  # uses 203.0.113.1 as key
         limiter(req_b)  # different key — should not raise
 
-    def test_forwarded_for_comma_list_uses_first(self):
-        """When X-Forwarded-For is a comma list, use the leftmost (client) IP."""
+    def test_forwarded_for_comma_list_uses_proxy_appended_ip(self):
+        """Use the right-most X-Forwarded-For entry (added by our proxy); left entries are client-spoofable."""
         limiter = RateLimit(max_calls=1, window_seconds=60)
-        req = _make_request('10.0.0.1', forwarded='1.2.3.4, 5.6.7.8, 9.10.11.12')
-        limiter(req)  # key should be '1.2.3.4'
-        # Second request from same real IP should be blocked
-        req2 = _make_request('10.0.0.1', forwarded='1.2.3.4')
+        limiter(_make_request('10.0.0.1', forwarded='1.2.3.4, 9.10.11.12'))  # key '9.10.11.12'
+        # Spoofing a fresh left-most IP must not reset the limit for the same real client.
         with pytest.raises(HTTPException) as exc:
-            limiter(req2)
+            limiter(_make_request('10.0.0.1', forwarded='8.8.8.8, 9.10.11.12'))
         assert exc.value.status_code == 429
 
 

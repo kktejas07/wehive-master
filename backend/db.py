@@ -1,3 +1,4 @@
+import logging
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -35,7 +36,7 @@ universities_col = db['universities_v2']
 promotions_col = db['promotions']
 agents_col = db['agents']
 agent_students_col = db['agent_students']
-commissions_col = db['commissions']
+commissions_col = db['agent_commissions']
 usvisa_slots_col = db['usvisa_slots']
 usvisa_subscriptions_col = db['usvisa_subscriptions']
 training_enrollments_col = db['training_enrollments']
@@ -88,8 +89,17 @@ async def ensure_indexes():
     await agents_col.create_index('status')
     await agent_students_col.create_index([('agent_id', 1), ('created_at', -1)])
     await agent_students_col.create_index('email', sparse=True)
-    await commissions_col.create_index([('agent_id', 1), ('created_at', -1)])
-    await commissions_col.create_index([('status', 1), ('created_at', -1)])
+    await commissions_col.create_index([('agent_id', 1), ('recorded_at', -1)])
+    try:
+        await agents_col.create_index('email', unique=True, sparse=True)
+    except Exception:
+        logging.getLogger('wehive.db').exception('agents.email unique index failed (duplicate emails?)')
+    await db['applications'].create_index('agent_id', sparse=True)
+    await db['agent_documents'].create_index([('student_id', 1), ('uploaded_at', -1)])
+    await db['agent_otps'].create_index('phone')
+    await db['agent_otps'].create_index('expires_at', expireAfterSeconds=0)
+    await db['chat_sessions'].create_index('user_id', sparse=True)
+    await db['chat_messages'].create_index([('session_id', 1), ('created_at', 1)])
     await db['profile_change_requests'].create_index([('user_id', 1), ('created_at', -1)])
     await db['profile_change_requests'].create_index([('status', 1), ('created_at', -1)])
     await usvisa_slots_col.create_index([('consulate', 1), ('visa_type', 1), ('check_date', -1)])

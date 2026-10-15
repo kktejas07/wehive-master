@@ -371,7 +371,7 @@ export default function UniversityDetail() {
                 <ExternalLink className="w-5 h-5 text-[hsl(var(--blue-700))]" />
                 <div>
                   <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] group-hover:text-[hsl(var(--blue-700))]">Visit official website</div>
-                  <div className="text-[12px] text-muted-foreground truncate max-w-[200px]">{uni.website}</div>
+                  <div className="text-[12px] text-muted-foreground truncate max-w-[min(200px,55vw)]">{uni.website}</div>
                 </div>
               </a>
             )}

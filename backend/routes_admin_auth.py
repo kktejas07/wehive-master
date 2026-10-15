@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks
+from rate_limit import RateLimit
 from pydantic import BaseModel, EmailStr, Field
 
 from admin_auth import (
@@ -285,8 +286,12 @@ async def admin_login(req: LoginRequest):
 
 
 # ---------- forgot password ----------
+# Password-reset emails and token guesses: 5 per IP per 15 minutes.
+_reset_limiter = RateLimit(max_calls=5, window_seconds=900)
+
+
 @router.post('/forgot-password')
-async def admin_forgot(req: ForgotRequest):
+async def admin_forgot(req: ForgotRequest, _=Depends(_reset_limiter)):
     email = req.email.lower().strip()
     # Always respond the same way to avoid email enumeration
     ok_response = {'ok': True, 'message': 'If an admin account exists for this email, a reset link has been sent.'}
@@ -316,7 +321,7 @@ async def admin_forgot(req: ForgotRequest):
 
 # ---------- reset password ----------
 @router.post('/reset-password')
-async def admin_reset(req: ResetRequest):
+async def admin_reset(req: ResetRequest, _=Depends(_reset_limiter)):
     issue = password_strength_issue(req.new_password)
     if issue:
         raise HTTPException(400, issue)

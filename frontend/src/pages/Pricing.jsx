@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API, useAuth } from '../context/AuthContext';
 import { BRAND } from '../data/mock';
+import { useToast } from '../hooks/use-toast';
 
 function loadRazorpayCDN() {
   return new Promise((resolve) => {
@@ -59,6 +60,7 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
       </div>
       <button
         type="button"
+        data-testid={`plan-cta-${plan.id}`}
         onClick={handleSubscribe}
         disabled={loading || current}
         className={`mt-6 w-full shrink-0 rounded-xl h-12 px-5 font-semibold transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-80 ${
@@ -106,6 +108,7 @@ const PLAN_FEATURES = {
 
 export default function Pricing() {
   const { user, token, isAuthed, refreshUser } = useAuth();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
@@ -136,7 +139,8 @@ export default function Pricing() {
     });
   }, []);
 
-  const isCurrentPlan = (id) => user?.is_premium;
+  // /auth/me doesn't expose which plan was bought yet, so no card is marked current until it does.
+  const isCurrentPlan = (id) => !!user?.is_premium && user?.plan_id === id;
 
   const handleSubscribe = async (selectedPlanId, setLoadingCb) => {
     if (!isAuthed) {
@@ -182,7 +186,7 @@ export default function Pricing() {
           email: user?.email || '',
           contact: user?.phone || '',
         },
-        theme: { color: 'hsl(var(--blue-700))' },
+        theme: { color: '#00247D' },
       };
 
       try {
@@ -203,6 +207,7 @@ export default function Pricing() {
       }
     } catch (e) {
       setLoadingCb(false);
+      toast({ title: 'Could not start payment', description: e.response?.data?.detail || 'Please try again.' });
     }
   };
 

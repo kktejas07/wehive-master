@@ -114,7 +114,7 @@ export default function ConsultantChat({ applicationId, token }) {
                   <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Book a 1:1 video call</div>
                   <div className="text-[12px] text-muted-foreground">Free for application holders</div>
                 </div>
-                <button onClick={() => setShowBooking(false)} className="p-1 hover:bg-black/5 rounded-full">
+                <button onClick={() => setShowBooking(false)} aria-label="Close booking" className="p-1 hover:bg-black/5 rounded-full">
                   <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
@@ -202,6 +202,7 @@ export default function ConsultantChat({ applicationId, token }) {
               }
             }}
             placeholder="Type your question…"
+            aria-label="Message your consultant"
             className="flex-1 h-11 rounded-full border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px] text-[hsl(var(--blue-900))] transition"
           />
           <button aria-label="Send message"

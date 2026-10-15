@@ -553,6 +553,7 @@ export default function Hive({ inOverlay }) {
                   }
                 }}
                 placeholder={`Ask ${activeSpec?.label || 'Hive'} about visas, trips, or documents…`}
+                aria-label="Message Hive"
                 className="flex-1 min-w-0 h-11 rounded-full border border-[hsl(var(--border))] focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 outline-none px-4 text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] bg-white"
               />
               <button

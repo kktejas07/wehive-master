@@ -83,6 +83,12 @@ function ScrollToTop() {
   return null;
 }
 
+// Resets the error boundary on navigation so one crashed page doesn't stick.
+function RouteErrorBoundary({ children }) {
+  const { pathname } = useLocation();
+  return <ErrorBoundary resetKey={pathname}>{children}</ErrorBoundary>;
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -94,7 +100,8 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Suspense fallback={<RouteFallback />}>
-        <Routes location={location} key={location.pathname}>
+        {/* Keyed by top-level section so sub-navigation (e.g. /admin/*) doesn't remount the section */}
+        <Routes location={location} key={location.pathname.split('/')[1]}>
           <Route path="/" element={<PageTransition><Home /></PageTransition>} />
           <Route path="/visa/:id" element={<PageTransition><VisaDetail /></PageTransition>} />
           <Route path="/holiday/:id" element={<PageTransition><HolidayPlanner /></PageTransition>} />
@@ -154,10 +161,12 @@ function App() {
                 <FirebaseAuthProvider>
                   <PricingLoader />
                   <ScrollToTop />
-                  <ErrorBoundary>
+                  <RouteErrorBoundary>
                     <AnimatedRoutes />
+                  </RouteErrorBoundary>
+                  <ErrorBoundary fallback={null}>
+                    <ChatbotWidget />
                   </ErrorBoundary>
-                  <ChatbotWidget />
                   <Toaster />
                 </FirebaseAuthProvider>
               </AuthProvider>

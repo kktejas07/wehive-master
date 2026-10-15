@@ -1,25 +1,30 @@
 """Agent portal routes — authentication, dashboard, student management."""
+import re
 import secrets
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, Body, UploadFile, File, Form, Header
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, Header
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from auth_utils import decode_jwt, create_access_token, verify_password, hash_password
 from admin_auth import get_current_admin_flex
 from db import db
 from constants import DEFAULT_AGENT_COMMISSION_RATE
+from rate_limit import RateLimit
+from routes_apps import MAX_UPLOAD_BYTES, ALLOWED_MIME, _detect_mime
 
 router = APIRouter(prefix='/agent', tags=['agent'])
 
+_auth_limiter = RateLimit(max_calls=10, window_seconds=600)
+
 
 class AgentSignupRequest(BaseModel):
-    name: str
-    email: str
-    phone: str
-    password: str
-    agency_name: Optional[str] = None
+    name: str = Field(min_length=1, max_length=120)
+    email: EmailStr
+    phone: str = Field(min_length=6, max_length=20)
+    password: str = Field(min_length=8, max_length=128)
+    agency_name: Optional[str] = Field(default=None, max_length=200)
 
 class AgentLoginRequest(BaseModel):
     email: str
@@ -32,6 +37,39 @@ class AgentVerifyOTPRequest(BaseModel):
     phone: str
     otp: str
 
+class StudentCreate(BaseModel):
+    name: str = Field(default='', max_length=120)
+    email: str = Field(default='', max_length=254)
+    phone: str = Field(default='', max_length=20)
+    country: str = Field(default='', max_length=80)
+    course: str = Field(default='', max_length=200)
+    education_level: str = Field(default='', max_length=80)
+    notes: str = Field(default='', max_length=2000)
+
+class TransferRequest(BaseModel):
+    application_id: str
+    target_agent_id: str
+
+class AgentSettingsUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=120)
+    agency_name: Optional[str] = Field(default=None, max_length=200)
+    phone: Optional[str] = Field(default=None, min_length=6, max_length=20)
+
+class AdminAgentUpdate(BaseModel):
+    status: Optional[str] = Field(default=None, pattern='^(active|inactive|suspended|pending)$')
+    tier: Optional[str] = Field(default=None, max_length=40)
+    commission_rate: Optional[float] = Field(default=None, ge=0, le=100)
+    verified: Optional[bool] = None
+    blacklisted: Optional[bool] = None
+    fine: Optional[float] = Field(default=None, ge=0)
+    specializations: Optional[List[str]] = None
+
+class CommissionCreate(BaseModel):
+    university_name: str = Field(default='', max_length=200)
+    amount_inr: int = Field(ge=0)
+    commission_type: str = Field(default='enrollment', max_length=40)
+    note: str = Field(default='', max_length=1000)
+
 
 async def get_current_agent(authorization: Optional[str] = Header(default=None)):
     if not authorization or not authorization.lower().startswith('bearer '):
@@ -39,16 +77,19 @@ async def get_current_agent(authorization: Optional[str] = Header(default=None))
     token = authorization.split(' ', 1)[1].strip()
     payload = decode_jwt(token)
     email = payload.get('sub')
-    if not email:
+    # User/admin tokens share the signing secret, so the role claim is what makes this an agent token.
+    if not email or payload.get('role') != 'agent':
         raise HTTPException(401, 'Invalid agent credentials')
     agent = await db.agents.find_one({'email': email})
     if not agent:
         raise HTTPException(401, 'Invalid agent credentials')
+    if agent.get('blacklisted') or agent.get('status', 'active') != 'active':
+        raise HTTPException(403, 'Account is suspended')
     return agent
 
 
 @router.post('/signup')
-async def agent_signup(req: AgentSignupRequest):
+async def agent_signup(req: AgentSignupRequest, _=Depends(_auth_limiter)):
     existing = await db.agents.find_one({'$or': [{'email': req.email}, {'phone': req.phone}]})
     if existing:
         raise HTTPException(400, 'Agent already exists with this email or phone')
@@ -77,18 +118,18 @@ async def agent_signup(req: AgentSignupRequest):
 
 
 @router.post('/login')
-async def agent_login(req: AgentLoginRequest):
+async def agent_login(req: AgentLoginRequest, _=Depends(_auth_limiter)):
     agent = await db.agents.find_one({'email': req.email})
     if not agent or not verify_password(req.password, agent['password']):
         raise HTTPException(401, 'Invalid email or password')
-    if agent.get('blacklisted'):
+    if agent.get('blacklisted') or agent.get('status', 'active') != 'active':
         raise HTTPException(403, 'Account is suspended')
     token = create_access_token({'sub': agent['email'], 'role': 'agent'})
     return {'token': token, 'agent': {k: v for k, v in agent.items() if k != 'password'}}
 
 
 @router.post('/send-otp')
-async def agent_send_otp(req: AgentSendOTPRequest):
+async def agent_send_otp(req: AgentSendOTPRequest, _=Depends(_auth_limiter)):
     from config import IS_DEV
     if not IS_DEV:
         # No SMS provider is wired for agents; never hand the code back in production.
@@ -103,7 +144,7 @@ async def agent_send_otp(req: AgentSendOTPRequest):
 
 
 @router.post('/verify-otp')
-async def agent_verify_otp(req: AgentVerifyOTPRequest):
+async def agent_verify_otp(req: AgentVerifyOTPRequest, _=Depends(_auth_limiter)):
     record = await db.agent_otps.find_one({'phone': req.phone, 'otp': req.otp})
     if not record or record['expires_at'] < datetime.utcnow():
         raise HTTPException(400, 'Invalid or expired OTP')
@@ -141,9 +182,9 @@ async def agent_students(
     query = {'agent_id': agent['_id']}
     if search:
         query['$or'] = [
-            {'name': {'$regex': search, '$options': 'i'}},
-            {'email': {'$regex': search, '$options': 'i'}},
-            {'phone': {'$regex': search, '$options': 'i'}},
+            {'name': {'$regex': re.escape(search), '$options': 'i'}},
+            {'email': {'$regex': re.escape(search), '$options': 'i'}},
+            {'phone': {'$regex': re.escape(search), '$options': 'i'}},
         ]
     total = await db.agent_students.count_documents(query)
     students = await db.agent_students.find(query).sort('created_at', -1).skip(skip).limit(limit).to_list(limit)
@@ -151,17 +192,11 @@ async def agent_students(
 
 
 @router.post('/students')
-async def add_student(data: dict = Body(...), agent=Depends(get_current_agent)):
+async def add_student(data: StudentCreate, agent=Depends(get_current_agent)):
     student = {
         '_id': str(uuid.uuid4()),
         'agent_id': agent['_id'],
-        'name': data.get('name', ''),
-        'email': data.get('email', ''),
-        'phone': data.get('phone', ''),
-        'country': data.get('country', ''),
-        'course': data.get('course', ''),
-        'education_level': data.get('education_level', ''),
-        'notes': data.get('notes', ''),
+        **data.model_dump(),
         'status': 'active',
         'created_at': datetime.utcnow(),
         'updated_at': datetime.utcnow(),
@@ -182,8 +217,8 @@ async def agent_applications(
         query['status'] = status
     if search:
         query['$or'] = [
-            {'applicant_name': {'$regex': search, '$options': 'i'}},
-            {'application_id': {'$regex': search, '$options': 'i'}},
+            {'applicant_name': {'$regex': re.escape(search), '$options': 'i'}},
+            {'application_id': {'$regex': re.escape(search), '$options': 'i'}},
         ]
     apps = await db.applications.find(query).sort('created_at', -1).to_list(999)
     result = []
@@ -219,11 +254,13 @@ async def agent_application_detail(
 
 @router.post('/applications/transfer')
 async def transfer_application(
-    data: dict = Body(...),
+    data: TransferRequest,
     agent=Depends(get_current_agent),
 ):
-    app_id = data.get('application_id')
-    target_agent_id = data.get('target_agent_id')
+    app_id = data.application_id
+    target_agent_id = data.target_agent_id
+    if not await db.agents.find_one({'_id': target_agent_id, 'status': 'active', 'blacklisted': {'$ne': True}}, {'_id': 1}):
+        raise HTTPException(404, 'Target agent not found')
     app = await db.applications.find_one({'_id': app_id, 'agent_id': agent['_id']})
     if not app:
         raise HTTPException(404, 'Application not found')
@@ -254,10 +291,16 @@ async def upload_student_document(
     student = await db.agent_students.find_one({'_id': student_id, 'agent_id': agent['_id']})
     if not student:
         raise HTTPException(404, 'Student not found')
-    content = await file.read()
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, f'File exceeds {MAX_UPLOAD_BYTES // (1024 * 1024)}MB limit')
+    detected = _detect_mime(content)
+    if detected is None or detected not in ALLOWED_MIME:
+        raise HTTPException(415, 'Unsupported file type. Only PDF, JPEG, PNG, and WEBP are allowed.')
     upload_dir = os.path.join(os.path.dirname(__file__), 'uploads', 'agent_docs')
     os.makedirs(upload_dir, exist_ok=True)
-    filename = f"{uuid.uuid4()}_{file.filename}"
+    # Stored name never includes the client-supplied filename (path traversal).
+    filename = str(uuid.uuid4())
     filepath = os.path.join(upload_dir, filename)
     with open(filepath, 'wb') as f:
         f.write(content)
@@ -267,7 +310,7 @@ async def upload_student_document(
         'agent_id': agent['_id'],
         'doc_type': doc_type,
         'note': note,
-        'filename': file.filename,
+        'filename': os.path.basename(file.filename or '')[:200],
         'stored_filename': filename,
         'status': 'pending',
         'uploaded_at': datetime.utcnow(),
@@ -282,9 +325,8 @@ async def agent_settings(agent=Depends(get_current_agent)):
 
 
 @router.put('/settings')
-async def update_agent_settings(data: dict = Body(...), agent=Depends(get_current_agent)):
-    allowed = {'name', 'agency_name', 'phone'}
-    updates = {k: v for k, v in data.items() if k in allowed}
+async def update_agent_settings(data: AgentSettingsUpdate, agent=Depends(get_current_agent)):
+    updates = data.model_dump(exclude_none=True)
     if updates:
         updates['updated_at'] = datetime.utcnow()
         await db.agents.update_one({'_id': agent['_id']}, {'$set': updates})
@@ -310,11 +352,10 @@ async def admin_list_agents(
 @router.patch('/admin/agents/{agent_id}')
 async def admin_update_agent(
     agent_id: str,
-    data: dict = Body(...),
+    data: AdminAgentUpdate,
     _admin=Depends(get_current_admin_flex),
 ):
-    allowed = {'status', 'tier', 'commission_rate', 'verified', 'blacklisted', 'fine', 'specializations'}
-    updates = {k: v for k, v in data.items() if k in allowed}
+    updates = data.model_dump(exclude_none=True)
     if not updates:
         raise HTTPException(400, 'No valid fields to update')
     updates['updated_at'] = datetime.utcnow()
@@ -327,16 +368,15 @@ async def admin_update_agent(
 @router.post('/admin/agents/{agent_id}/commissions')
 async def admin_record_commission(
     agent_id: str,
-    data: dict = Body(...),
+    data: CommissionCreate,
     _admin=Depends(get_current_admin_flex),
 ):
+    if not await db.agents.find_one({'_id': agent_id}, {'_id': 1}):
+        raise HTTPException(404, 'Agent not found')
     commission = {
         '_id': str(uuid.uuid4()),
         'agent_id': agent_id,
-        'university_name': data.get('university_name', ''),
-        'amount_inr': int(data.get('amount_inr', 0)),
-        'commission_type': data.get('commission_type', 'enrollment'),
-        'note': data.get('note', ''),
+        **data.model_dump(),
         'recorded_at': datetime.utcnow(),
     }
     await db.agent_commissions.insert_one(commission)

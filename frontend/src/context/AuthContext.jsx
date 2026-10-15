@@ -88,8 +88,11 @@ export function AuthProvider({ children }) {
   // writing to localStorage and leaving this context's live state stale until reload.
   const setAuthToken = useCallback((newToken) => {
     localStorage.setItem(TOKEN_KEY, newToken);
+    if (newToken === token) return;
+    // fetchMe clears this once /auth/me resolves, so PrivateRoute waits instead of redirecting.
+    setLoading(true);
     setToken(newToken);
-  }, []);
+  }, [token]);
 
   const value = {
     user,

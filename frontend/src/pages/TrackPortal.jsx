@@ -60,6 +60,7 @@ export default function TrackPortal() {
                 <div className="relative">
                   <input
                     id="trackportal-app-id"
+                    data-testid="track-input"
                     required
                     type="text"
                     placeholder="Application ID, e.g. us-student-101"
@@ -71,6 +72,7 @@ export default function TrackPortal() {
                 </div>
                 <button
                   type="submit"
+                  data-testid="track-submit"
                   className="sm:absolute sm:right-2 sm:top-2 h-12 sm:h-10 px-6 rounded-xl btn-accent text-white font-semibold text-[15px] sm:text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--accent))]"
                 >
                   Track Status

@@ -4,6 +4,7 @@ from __future__ import annotations
 import json as _json
 import logging
 import os
+import re
 from datetime import datetime
 from typing import Any, Optional
 
@@ -17,6 +18,7 @@ from audit import record as audit_record
 from db import db
 from seed_service import seed_from_csv_bytes, enrich_from_csv_bytes, enrich_scorecard
 from seed_universities import seed as seed_universities
+from upload_limits import read_capped
 
 router = APIRouter(prefix="/admin/universities", tags=["admin-universities"])
 universities_col = db["universities_v2"]
@@ -51,7 +53,7 @@ async def get_stats(_=Depends(_admin)):
 async def seed_csv(file: UploadFile = File(...), dry_run: bool = Form(False), admin=Depends(_admin)):
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(400, "Must be a CSV file")
-    result = await seed_from_csv_bytes(await file.read(), file.filename, dry_run=dry_run)
+    result = await seed_from_csv_bytes(await read_capped(file), file.filename, dry_run=dry_run)
     if "error" in result: raise HTTPException(400, result["error"])
     await audit_record(admin, "seed_from_csv" if not dry_run else "seed_from_csv_dryrun", "universities", file.filename,
         extra={"rows": result["rows"], "dry_run": dry_run})
@@ -67,7 +69,7 @@ async def enrich_csv(file: UploadFile = File(...), threshold: int = Form(88),
     overrides = _json.loads(column_overrides) if column_overrides else {}
     if not isinstance(overrides, dict):
         raise HTTPException(400, "column_overrides must be a JSON object, e.g. {\"rank\": \"My Rank\"}")
-    result = await enrich_from_csv_bytes(await file.read(), file.filename, threshold=threshold,
+    result = await enrich_from_csv_bytes(await read_capped(file), file.filename, threshold=threshold,
         insert_missing=insert_missing, dry_run=dry_run, column_overrides=overrides)
     if "error" in result: raise HTTPException(400, result["error"])
     await audit_record(admin, "enrich" if not dry_run else "enrich_dryrun", "universities", file.filename,
@@ -102,7 +104,7 @@ async def re_seed(admin=Depends(_admin)):
 async def list_all(q: Optional[str] = Query(None), country: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=500), skip: int = Query(0, ge=0), _=Depends(_admin)):
     flt = {}
-    if q: flt["$or"] = [{"name": {"$regex": q, "$options": "i"}}, {"short_name": {"$regex": q, "$options": "i"}}, {"id": {"$regex": q, "$options": "i"}}]
+    if q: flt["$or"] = [{"name": {"$regex": re.escape(q), "$options": "i"}}, {"short_name": {"$regex": re.escape(q), "$options": "i"}}, {"id": {"$regex": re.escape(q), "$options": "i"}}]
     if country: flt["country"] = {"$in": [c.strip() for c in country.lower().split(",") if c.strip()]}
     cursor = universities_col.find(flt).sort("name", 1).skip(skip).limit(limit)
     items = [d async for d in cursor]
