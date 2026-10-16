@@ -61,7 +61,7 @@ from routes_learning_resources import router as learning_resources_router  # noq
 from routes_people_intelligence import router as people_intelligence_router  # noqa: E402
 from routes_gen_ai import router as gen_ai_router  # noqa: E402
 from routes_open_source import router as open_source_router  # noqa: E402
-from routes_google_knowledge import router as google_knowledge_router  # noqa: E402
+from routes_google_knowledge import router as google_knowledge_router, public_router as google_knowledge_public_router  # noqa: E402
 from routes_agentic_ai import router as agentic_ai_router  # noqa: E402
 from routes_ai_operations import router as ai_operations_router  # noqa: E402
 from routes_mcp import router as mcp_router  # noqa: E402
@@ -150,6 +150,7 @@ api_router.include_router(learning_resources_router)
 api_router.include_router(people_intelligence_router)
 api_router.include_router(gen_ai_router)
 api_router.include_router(open_source_router)
+api_router.include_router(google_knowledge_public_router)
 api_router.include_router(google_knowledge_router)
 api_router.include_router(agentic_ai_router)
 api_router.include_router(ai_operations_router)

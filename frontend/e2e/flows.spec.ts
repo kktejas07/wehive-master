@@ -1,4 +1,4 @@
-import { test, expect, isCollapsedNav } from './fixtures';
+import { test, expect, isCollapsedNav, signIn } from './fixtures';
 
 test('home hero renders', async ({ page }) => {
   await page.goto('/');
@@ -93,4 +93,43 @@ test('unknown admin sub-path redirects to the admin overview', async ({ page, ap
   await page.addInitScript(() => window.localStorage.setItem('wehive_admin_token', 'e2e-admin-token'));
   await page.goto('/admin/does-not-exist');
   await expect(page).toHaveURL(/\/admin$/);
+});
+
+test.describe('Google Knowledge Graph', () => {
+  const KG = {
+    name: 'University of Toronto', description: 'Public university in Toronto, Canada',
+    detail: 'The University of Toronto is a public research university.', url: 'https://en.wikipedia.org/wiki/University_of_Toronto',
+    image: '', types: ['CollegeOrUniversity'],
+  };
+
+  test('home search shows a Knowledge Graph card', async ({ page, api }) => {
+    api
+      .on('GET', /^\/countries$/, [])
+      .on('GET', /^\/knowledge\/public\/lookup$/, { entity: KG });
+    await page.goto('/');
+    await page.getByTestId('hero-search-input').fill('University of Toronto');
+    const card = page.getByTestId('hero-search-knowledge');
+    await expect(card).toContainText('Public university in Toronto, Canada');
+    await expect(card.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', KG.url);
+  });
+
+  test('home search works without a Knowledge Graph result', async ({ page, api }) => {
+    api.on('GET', /^\/countries$/, [{ id: 'ca', name: 'Canada', visa_types: ['Tourist'] }]);
+    await page.goto('/');
+    await page.getByTestId('hero-search-input').fill('Canada');
+    await expect(page.getByTestId('hero-search-result-ca')).toBeVisible();
+    await expect(page.getByTestId('hero-search-knowledge')).toHaveCount(0);
+  });
+
+  test('travel planner shows the destination card', async ({ page, api }) => {
+    await signIn(page, api);
+    api.on('GET', /^\/travel\/planner$/, {
+      cached: false,
+      itinerary: [{ day: 1, theme: 'Arrival', activities: ['Beach walk'] }],
+      destination: { name: 'Barbados', description: 'Island country', detail: 'Barbados is an island country in the Caribbean.', url: 'https://en.wikipedia.org/wiki/Barbados', image: '' },
+    });
+    await page.goto('/holiday/bb');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Barbados');
+    await expect(page.getByTestId('planner-destination-card')).toContainText('island country in the Caribbean');
+  });
 });

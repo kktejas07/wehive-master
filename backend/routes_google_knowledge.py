@@ -2,14 +2,16 @@
 other Google open knowledge services.
 
 Endpoints:
-  GET  /api/knowledge/search       — Search Google Knowledge Graph
-  GET  /api/knowledge/entity/{id}  — Get entity by Knowledge Graph ID
-  GET  /api/knowledge/enrich       — Enrich a topic with Google Knowledge data
-  GET  /api/knowledge/google-trends — Get Google Trends data for a topic
-  GET  /api/knowledge/wikidata     — Search Wikidata for entity info
-  GET  /api/knowledge/status       — Check Knowledge API configuration
+  GET  /api/knowledge/search          — Search Google Knowledge Graph
+  GET  /api/knowledge/entity/{id}     — Get entity by Knowledge Graph ID
+  GET  /api/knowledge/enrich          — Enrich a topic with Google Knowledge data
+  GET  /api/knowledge/google-trends   — Get Google Trends data for a topic
+  GET  /api/knowledge/wikidata        — Search Wikidata for entity info
+  GET  /api/knowledge/status          — Check Knowledge API configuration
+  GET  /api/knowledge/public/lookup   — Public, rate-limited single-entity lookup (site search)
 """
 
+import logging
 import os
 import time
 from datetime import datetime
@@ -18,17 +20,21 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, Query
 
-from auth_utils import get_current_user, get_current_user_optional
+import google_kg
+from auth_utils import get_current_user
+from rate_limit import RateLimit
 
 router = APIRouter(prefix="/knowledge", tags=["google-knowledge"], dependencies=[Depends(get_current_user)])
+public_router = APIRouter(prefix="/knowledge/public", tags=["google-knowledge"])
+logger = logging.getLogger("wehive.google_knowledge")
 
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 SEARCH_ENGINE_ID = os.environ.get("GOOGLE_CX", "")
+_NOT_CONFIGURED = "GOOGLE_API_KEY not configured"
 
 _cache: dict[str, tuple[float, dict]] = {}
 
 
-def _kcache(key: str, val: dict, ttl: int = 3600):
+def _kcache(key: str, val: dict):
     _cache[key] = (time.time(), val)
     if len(_cache) > 200:
         oldest = min(_cache, key=lambda k: _cache[k][0])
@@ -48,148 +54,29 @@ def _kget(key: str) -> Optional[dict]:
 async def knowledge_search(
     q: str = Query(..., min_length=2),
     limit: int = Query(5, ge=1, le=10),
-    languages: str = "en",
+    types: Optional[str] = None,
 ):
-    if not GOOGLE_API_KEY:
-        return {
-            "ok": True,
-            "source": "stark_fallback",
-            "query": q,
-            "entities": [],
-            "note": "GOOGLE_API_KEY not configured — using Stark agent fallback",
-        }
-
-    ck = f"kg:{q}:{languages}:{limit}"
-    cached = _kget(ck)
-    if cached:
-        return {"ok": True, "source": "google_knowledge_graph", "cached": True, **cached}
-
-    try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(
-                "https://kgsearch.googleapis.com/v1/entities:search",
-                params={
-                    "query": q,
-                    "key": GOOGLE_API_KEY,
-                    "limit": limit,
-                    "languages": languages,
-                    "indent": "false",
-                },
-            )
-            if resp.status_code != 200:
-                return {"ok": False, "detail": f"Knowledge Graph API error: {resp.status_code}"}
-
-            data = resp.json()
-
-            entities = []
-            for item in data.get("itemListElement", []):
-                result = item.get("result", {})
-                entities.append({
-                    "kg_id": result.get("@id", ""),
-                    "name": result.get("name", ""),
-                    "description": result.get("description", ""),
-                    "detailed_description": {
-                        "article": (result.get("detailedDescription", {}) or {}).get("articleBody", ""),
-                        "url": (result.get("detailedDescription", {}) or {}).get("url", ""),
-                        "license": (result.get("detailedDescription", {}) or {}).get("license", ""),
-                    },
-                    "url": result.get("url", result.get("detailedDescription", {}).get("url", "") if result.get("detailedDescription") else ""),
-                    "image": (result.get("image", {}) or {}).get("contentUrl", ""),
-                    "types": result.get("@type", []) if isinstance(result.get("@type"), list) else [result.get("@type", "")],
-                    "score": item.get("resultScore", 0),
-                })
-
-            result_dict = {"query": q, "entities": entities, "total": len(entities)}
-            _kcache(ck, result_dict)
-            return {"ok": True, "source": "google_knowledge_graph", **result_dict}
-
-    except Exception as e:
-        return {"ok": False, "detail": str(e)}
+    if not google_kg.configured():
+        return {"ok": True, "source": "none", "query": q, "entities": [], "note": _NOT_CONFIGURED}
+    entities = await google_kg.search(q, limit=limit, types=types)
+    return {"ok": True, "source": "google_knowledge_graph", "query": q, "entities": entities, "total": len(entities)}
 
 
 @router.get("/entity/{entity_id:path}")
 async def get_entity(entity_id: str):
-    if not GOOGLE_API_KEY:
-        return {"ok": False, "detail": "GOOGLE_API_KEY not configured"}
-    if not entity_id.startswith("/"):
-        entity_id = f"/{entity_id}"
-    if "kg:" in entity_id and not entity_id.startswith("/"):
-        entity_id = f"/{entity_id}"
-
-    ck = f"kg:entity:{entity_id}"
-    cached = _kget(ck)
-    if cached:
-        return {"ok": True, "source": "google_knowledge_graph", "cached": True, **cached}
-
-    try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(
-                "https://kgsearch.googleapis.com/v1/entities:search",
-                params={"ids": entity_id, "key": GOOGLE_API_KEY, "limit": 1},
-            )
-            if resp.status_code != 200:
-                return {"ok": False, "detail": f"Knowledge Graph API error: {resp.status_code}"}
-
-            data = resp.json()
-            items = data.get("itemListElement", [])
-            if not items:
-                return {"ok": False, "detail": "Entity not found"}
-
-            item = items[0]
-            result = item.get("result", {})
-            entity = {
-                "kg_id": result.get("@id", ""),
-                "name": result.get("name", ""),
-                "description": result.get("description", ""),
-                "detailed_description": {
-                    "article": (result.get("detailedDescription", {}) or {}).get("articleBody", ""),
-                    "url": (result.get("detailedDescription", {}) or {}).get("url", ""),
-                },
-                "url": result.get("url", ""),
-                "image": (result.get("image", {}) or {}).get("contentUrl", ""),
-                "types": result.get("@type", []),
-                "score": item.get("resultScore", 0),
-            }
-            _kcache(ck, {"entity": entity})
-            return {"ok": True, "source": "google_knowledge_graph", "entity": entity}
-
-    except Exception as e:
-        return {"ok": False, "detail": str(e)}
+    if not google_kg.configured():
+        return {"ok": False, "detail": _NOT_CONFIGURED}
+    entities = await google_kg.search(ids=entity_id if entity_id.startswith("/") else f"/{entity_id}", limit=1)
+    if not entities:
+        return {"ok": False, "detail": "Entity not found"}
+    return {"ok": True, "source": "google_knowledge_graph", "entity": entities[0]}
 
 
 @router.get("/enrich")
-async def enrich_topic(
-    q: str = Query(..., min_length=2),
-    user=Depends(get_current_user_optional),
-):
-    """Enrich a topic using Google Knowledge Graph + Stark agent fallback."""
-
-    kg_result = None
-    if GOOGLE_API_KEY:
-        try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                resp = await client.get(
-                    "https://kgsearch.googleapis.com/v1/entities:search",
-                    params={"query": q, "key": GOOGLE_API_KEY, "limit": 3},
-                )
-                if resp.status_code == 200:
-                    kg_result = resp.json()
-        except Exception:
-            pass
-
-    entities = []
-    sources = []
-    if kg_result:
-        sources.append("google_knowledge_graph")
-        for item in kg_result.get("itemListElement", []):
-            r = item.get("result", {})
-            entities.append({
-                "name": r.get("name", ""),
-                "description": r.get("description", ""),
-                "detail": (r.get("detailedDescription", {}) or {}).get("articleBody", ""),
-                "url": r.get("url", ""),
-                "image": (r.get("image", {}) or {}).get("contentUrl", ""),
-            })
+async def enrich_topic(q: str = Query(..., min_length=2)):
+    """Enrich a topic using Google Knowledge Graph + Wikipedia/DuckDuckGo fallback."""
+    entities = await google_kg.search(q, limit=3)
+    sources = ["google_knowledge_graph"] if entities else []
 
     try:
         from agents.stark_agent import fetch_wikipedia, fetch_duckduckgo_instant
@@ -211,7 +98,7 @@ async def enrich_topic(
                 "url": ddg.get("abstract_url", ""),
             })
     except Exception:
-        pass
+        logger.warning("Enrichment fallback failed", exc_info=True)
 
     return {
         "ok": True,
@@ -228,12 +115,11 @@ async def google_trends(
     geo: str = "IN",
 ):
     """Search Google Custom Search for recent trends/web results."""
-
-    api_key = GOOGLE_API_KEY
+    api_key = os.environ.get("GOOGLE_API_KEY", "")
     cx = SEARCH_ENGINE_ID
 
     if not api_key:
-        return {"ok": False, "detail": "GOOGLE_API_KEY not configured"}
+        return {"ok": False, "detail": _NOT_CONFIGURED}
     if not cx:
         return {
             "ok": True,
@@ -252,33 +138,27 @@ async def google_trends(
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.get(
                 "https://www.googleapis.com/customsearch/v1",
-                params={
-                    "q": q,
-                    "key": api_key,
-                    "cx": cx,
-                    "num": 5,
-                },
+                params={"q": q, "key": api_key, "cx": cx, "num": 5},
             )
-            if resp.status_code != 200:
-                return {"ok": False, "detail": f"Custom Search API error: {resp.status_code}"}
+        if resp.status_code != 200:
+            return {"ok": False, "detail": f"Custom Search API error: {resp.status_code}"}
 
-            data = resp.json()
-            results = [
-                {
-                    "title": r.get("title", ""),
-                    "snippet": r.get("snippet", ""),
-                    "url": r.get("link", ""),
-                    "display_url": r.get("displayLink", ""),
-                }
-                for r in data.get("items", [])
-            ]
-
-            result_dict = {"query": q, "geo": geo, "results": results, "total": len(results)}
-            _kcache(ck, result_dict)
-            return {"ok": True, "source": "google_custom_search", **result_dict}
-
+        results = [
+            {
+                "title": r.get("title", ""),
+                "snippet": r.get("snippet", ""),
+                "url": r.get("link", ""),
+                "display_url": r.get("displayLink", ""),
+            }
+            for r in resp.json().get("items", [])
+        ]
+        result_dict = {"query": q, "geo": geo, "results": results, "total": len(results)}
+        _kcache(ck, result_dict)
+        return {"ok": True, "source": "google_custom_search", **result_dict}
     except Exception as e:
-        return {"ok": False, "detail": str(e)}
+        # Type only: httpx messages include the request URL, which carries the API key.
+        logger.warning("Custom Search call failed: %s", type(e).__name__)
+        return {"ok": False, "detail": "Custom Search unavailable"}
 
 
 @router.get("/wikidata")
@@ -287,7 +167,6 @@ async def wikidata_search(
     limit: int = Query(5, ge=1, le=10),
 ):
     """Search Wikidata for entity information."""
-
     ck = f"wd:{q}:{limit}"
     cached = _kget(ck)
     if cached:
@@ -305,51 +184,58 @@ async def wikidata_search(
                     "format": "json",
                 },
             )
-            if search_resp.status_code != 200:
-                return {"ok": False, "detail": "Wikidata API error"}
+        if search_resp.status_code != 200:
+            return {"ok": False, "detail": "Wikidata API error"}
 
-            data = search_resp.json()
-            entities = [
-                {
-                    "id": e.get("id", ""),
-                    "label": e.get("label", ""),
-                    "description": e.get("description", ""),
-                    "url": e.get("concepturi", ""),
-                }
-                for e in data.get("search", [])
-            ]
-
-            result_dict = {"query": q, "entities": entities, "total": len(entities)}
-            _kcache(ck, result_dict)
-            return {"ok": True, "source": "wikidata", **result_dict}
-
-    except Exception as e:
-        return {"ok": False, "detail": str(e)}
+        entities = [
+            {
+                "id": e.get("id", ""),
+                "label": e.get("label", ""),
+                "description": e.get("description", ""),
+                "url": e.get("concepturi", ""),
+            }
+            for e in search_resp.json().get("search", [])
+        ]
+        result_dict = {"query": q, "entities": entities, "total": len(entities)}
+        _kcache(ck, result_dict)
+        return {"ok": True, "source": "wikidata", **result_dict}
+    except Exception:
+        logger.warning("Wikidata call failed", exc_info=True)
+        return {"ok": False, "detail": "Wikidata unavailable"}
 
 
 @router.get("/status")
 async def knowledge_status():
-    google_ok = False
-    if GOOGLE_API_KEY:
-        try:
-            async with httpx.AsyncClient(timeout=5) as client:
-                resp = await client.get(
-                    "https://kgsearch.googleapis.com/v1/entities:search",
-                    params={"query": "test", "key": GOOGLE_API_KEY, "limit": 1},
-                )
-                google_ok = resp.status_code == 200
-        except Exception:
-            pass
-
+    configured = google_kg.configured()
     return {
         "ok": True,
         "google_knowledge_graph": {
-            "configured": bool(GOOGLE_API_KEY),
-            "connected": google_ok,
+            "configured": configured,
+            "connected": configured and bool(await google_kg.search("Google", limit=1)),
         },
         "google_custom_search": {
-            "configured": bool(GOOGLE_API_KEY and SEARCH_ENGINE_ID),
+            "configured": bool(configured and SEARCH_ENGINE_ID),
         },
         "wikidata": {"available": True, "free": True},
         "checked_at": datetime.utcnow().isoformat(),
     }
+
+
+# Anonymous visitors can trigger this from the home search box, so it is cached and rate-limited.
+_public_limiter = RateLimit(max_calls=30, window_seconds=300)
+
+
+@public_router.get("/lookup")
+async def public_lookup(q: str = Query(..., min_length=3, max_length=80), _=Depends(_public_limiter)):
+    """The best-matching Knowledge Graph entity for a search query, trimmed for display."""
+    e = await google_kg.lookup(q.strip())
+    if not e:
+        return {"entity": None}
+    return {"entity": {
+        "name": e["name"],
+        "description": e["description"],
+        "detail": e["detail"][:300],
+        "url": e["detail_url"] or e["url"],
+        "image": e["image"],
+        "types": e["types"],
+    }}
