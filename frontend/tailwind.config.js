@@ -1,15 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 
-// US-flag palette (design-system/we-hive/MASTER.md). Stock Tailwind hues are
-// remapped so every blue-ish class renders Old Glory Blue and every red/pink
-// class renders Old Glory Red. emerald/green/amber stay for status only.
+// We Hive brand palette (see --wehive-* in src/index.css). Stock Tailwind hues are
+// remapped so every blue-ish class renders brand blue and every red/pink class
+// renders brand red. emerald/green/amber stay for status only.
+// Anchors: 50 ice blue, 100 sky mist, 500 electric blue, 700 royal blue, 900 midnight navy.
 const NAVY = {
-  50: '#EEF2FB', 100: '#DCE4F6', 200: '#B8C8EC', 300: '#8AA4DD', 400: '#4F72C4',
-  500: '#1F45A6', 600: '#0A3196', 700: '#00247D', 800: '#0A3161', 900: '#0B1220', 950: '#050B16',
+  50: '#EEF1FF', 100: '#E9EEFF', 200: '#C9D2FF', 300: '#9AA8FF', 400: '#5B6BFF',
+  500: '#0518FE', 600: '#0216D9', 700: '#011CB5', 800: '#071790', 900: '#0B1240', 950: '#060A26',
 };
+// 400 signal red (decoration only, 3.99:1 on white); 500 festive red is the lightest text-safe red.
 const FLAG_RED = {
-  50: '#FEF2F3', 100: '#FDE3E5', 200: '#FAC5CA', 300: '#F4949D', 400: '#EA5966',
-  500: '#E0303F', 600: '#CF1426', 700: '#B31942', 800: '#8E1434', 900: '#6E1028', 950: '#2E0611',
+  50: '#FFF1F0', 100: '#FFDFDD', 200: '#FFBDB9', 300: '#FF8A84', 400: '#FF0302',
+  500: '#E10600', 600: '#C80500', 700: '#B80500', 800: '#8F0400', 900: '#660300', 950: '#3A0200',
 };
 
 module.exports = {
@@ -32,6 +34,7 @@ module.exports = {
   		colors: {
   			blue: NAVY, sky: NAVY, indigo: NAVY, cyan: NAVY, teal: NAVY, violet: NAVY, purple: NAVY,
   			red: FLAG_RED, rose: FLAG_RED, pink: FLAG_RED, fuchsia: FLAG_RED, orange: FLAG_RED,
+  			marigold: 'hsl(var(--marigold))',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

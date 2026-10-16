@@ -4,10 +4,10 @@
    hsl(var(--token))). Owned by the shell; ask before editing.
 
    Colour roles
-     ink text ........ text-[hsl(var(--blue-900))]   #0B1220
+     ink text ........ text-[hsl(var(--blue-900))]   #0B1240
      secondary text .. text-muted-foreground         #4A5568
-     primary/link .... hsl(var(--blue-700)) #00247D navy, hover hsl(var(--blue-800))
-     CTA (red) ....... hsl(var(--accent)) #CF1426, hover hsl(var(--accent-hover))
+     primary/link .... hsl(var(--blue-700)) #011CB5 navy, hover hsl(var(--blue-800))
+     CTA (red) ....... hsl(var(--accent)) #E10600, hover hsl(var(--accent-hover))
                        main call-to-action buttons ONLY
      surfaces ........ white cards, hsl(var(--soft-bg)) page tint,
                        hsl(var(--blue-50)) tint, hsl(var(--border)) hairlines
@@ -83,41 +83,55 @@ code {
 
 @layer base {
   :root {
-    /* We Hive design system (US flag palette) — see design-system/we-hive/MASTER.md
-       Royal blue #00247D primary (hover #0A3161) · Red #CF1426 CTA (hover #B31942) · White · Ink #0B1220 */
-    --background: 0 0% 100%;             
-    --foreground: 220 49% 8%;           
+    /* We Hive brand palette (hex values in --wehive-* below). Text-bearing reds use festive red
+       #E10600 (4.97:1 on white); signal red #FF0302 is only 3.99:1, so it is decoration-only.
+       Muted text is slate darkened to #5C6384 to stay AA on the ice-blue page background. */
+    --wehive-royal-blue: #011CB5;
+    --wehive-signal-red: #FF0302;
+    --wehive-festive-red: #E10600;
+    --wehive-midnight-navy: #0B1240;
+    --wehive-electric-blue: #0518FE;
+    --wehive-marigold: #FFC531;
+    --wehive-ice-blue: #EEF1FF;
+    --wehive-sky-mist: #E9EEFF;
+    --wehive-slate: #6B7399;
+    --wehive-white: #FFFFFF;
+
+    --background: 0 0% 100%;
+    --foreground: 232 71% 15%;            /* midnight navy */
     --card: 0 0% 100%;
-    --card-foreground: 220 49% 8%;
+    --card-foreground: 232 71% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 49% 8%;
-    --primary: 223 100% 25%;              
+    --popover-foreground: 232 71% 15%;
+    --primary: 231 99% 36%;               /* royal blue */
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 62% 96%;           
-    --secondary-foreground: 223 100% 25%;
-    --muted: 216 45% 96%;                
-    --muted-foreground: 218 17% 35%;     
-    --accent: 354 82% 45%;               
+    --secondary: 229 100% 97%;            /* ice blue */
+    --secondary-foreground: 231 99% 36%;
+    --muted: 226 100% 96%;                /* sky mist */
+    --muted-foreground: 230 18% 44%;      /* slate, AA-adjusted */
+    --accent: 2 100% 44%;                 /* festive red */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;            
+    --destructive: 2 100% 44%;
     --destructive-foreground: 0 0% 100%;
-    --border: 216 33% 91%;               
-    --input: 216 33% 91%;
-    --ring: 223 100% 25%;
+    --border: 228 60% 90%;
+    --input: 228 60% 90%;
+    --ring: 231 99% 36%;
     --radius: 0.75rem;
 
-    /* Legacy scale names, remapped to the new palette */
-    --blue-50: 222 62% 96%;             
-    --blue-100: 222 59% 91%;             
-    --blue-200: 222 58% 82%;             
-    --blue-500: 223 69% 39%;             
-    --blue-700: 223 100% 25%;             
-    --blue-800: 213 81% 21%;             
-    --blue-900: 220 49% 8%;             
-    --red-500: 354 82% 45%;                
-    --red-600: 344 75% 40%;                
-    --accent-hover: 344 75% 40%;         
-    --soft-bg: 216 45% 98%;              
+    /* Legacy scale names, mapped to the brand palette */
+    --blue-50: 229 100% 97%;              /* ice blue */
+    --blue-100: 226 100% 96%;             /* sky mist */
+    --blue-200: 229 100% 89%;
+    --blue-500: 235 99% 51%;              /* electric blue */
+    --blue-700: 231 99% 36%;              /* royal blue */
+    --blue-800: 232 85% 26%;
+    --blue-900: 232 71% 15%;              /* midnight navy */
+    --red-500: 2 100% 44%;                /* festive red */
+    --red-600: 2 100% 38%;
+    --signal-red: 0 100% 50%;             /* decoration only */
+    --marigold: 43 100% 60%;              /* highlights; pair with navy text */
+    --accent-hover: 2 100% 38%;
+    --soft-bg: 229 100% 97%;              /* ice blue */
 
     --font-heading: 'Figtree', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
@@ -274,40 +288,41 @@ code {
    classes, the <Button> variants, or inline hsl(var(--…)) utilities).
    ===================================================================== */
 :root {
-  --grad-navy: linear-gradient(135deg, #2C4FB0 0%, #00247D 45%, #0A1F55 100%);
-  --grad-red: linear-gradient(135deg, #E5404F 0%, #CF1426 45%, #9E1230 100%);
-  --grad-brand: linear-gradient(90deg, #00247D 0%, #1F45A6 45%, #CF1426 100%);
-  --grad-flag: linear-gradient(90deg, #CF1426 0 33.33%, #FFFFFF 33.33% 66.66%, #00247D 66.66% 100%);
+  --grad-navy: linear-gradient(135deg, #0518FE 0%, #011CB5 45%, #0B1240 100%);
+  /* Red buttons carry white text, so their gradient never goes lighter than festive red. */
+  --grad-red: linear-gradient(135deg, #E10600 0%, #C80500 45%, #9E0400 100%);
+  --grad-brand: linear-gradient(90deg, #011CB5 0%, #0518FE 45%, #FF0302 100%);
+  --grad-flag: linear-gradient(90deg, #FF0302 0 33.33%, #FFFFFF 33.33% 66.66%, #011CB5 66.66% 100%);
 }
 
 :is(button, a, [role="button"]):is(.btn-primary, .bg-primary, [class*="bg-[hsl(var(--blue-700))]"], [class*="bg-[hsl(var(--primary))]"]):not(:disabled) {
   background-image: var(--grad-navy);
   background-size: 180% 100%;
   background-position: 0% 0;
-  box-shadow: 0 8px 18px -10px rgba(0,36,125, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 18px -10px rgba(1,28,181, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   transition: background-position 400ms ease, box-shadow 250ms ease, filter 150ms ease;
 }
 :is(button, a, [role="button"]):is(.btn-accent, [class*="bg-[hsl(var(--accent))]"], [class*="bg-[hsl(var(--red-500))]"]):not(:disabled) {
   background-image: var(--grad-red);
   background-size: 180% 100%;
   background-position: 0% 0;
-  box-shadow: 0 8px 20px -10px rgba(207,20,38, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 20px -10px rgba(225,6,0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transition: background-position 400ms ease, box-shadow 250ms ease, filter 150ms ease;
 }
 :is(button, a, [role="button"]):is(.btn-primary, .bg-primary, [class*="bg-[hsl(var(--blue-700))]"], [class*="bg-[hsl(var(--primary))]"]):not(:disabled):hover {
   background-position: 100% 0;
-  box-shadow: 0 14px 28px -12px rgba(0,36,125, 0.8), 0 0 0 4px rgba(0,36,125, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 28px -12px rgba(1,28,181, 0.8), 0 0 0 4px rgba(1,28,181, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 :is(button, a, [role="button"]):is(.btn-accent, [class*="bg-[hsl(var(--accent))]"], [class*="bg-[hsl(var(--red-500))]"]):not(:disabled):hover {
   background-position: 100% 0;
-  box-shadow: 0 14px 30px -12px rgba(207,20,38, 0.85), 0 0 0 4px rgba(207,20,38, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  box-shadow: 0 14px 30px -12px rgba(225,6,0, 0.85), 0 0 0 4px rgba(225,6,0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 /* Cards: navy-tinted depth and a navy→red gradient edge on hover */
 .card-surface { transition: box-shadow 250ms ease, transform 250ms ease, background 250ms ease; }
 .card-lift:hover,
 .card-surface:hover {
-  box-shadow: 0 18px 36px -18px rgba(0,36,125, 0.35);
+  box-shadow: 0 18px 36px -18px rgba(1,28,181, 0.35);
 }
 .card-surface.card-lift:hover,
 a.card-surface:hover,
@@ -317,7 +332,7 @@ button.card-surface:hover {
 }
 .icon-tile {
   background: linear-gradient(135deg, hsl(var(--blue-50)) 0%, #E4ECF7 100%);
-  box-shadow: inset 0 0 0 1px rgba(0,36,125, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(1,28,181, 0.08);
 }
 
 /* Section labels get a short navy→red underline */
@@ -334,13 +349,13 @@ button.card-surface:hover {
 
 /* Gradient text helpers */
 .text-gradient-red {
-  background-image: linear-gradient(120deg, #E5404F 0%, #CF1426 50%, #B31942 100%);
+  background-image: linear-gradient(120deg, #FF0302 0%, #E10600 50%, #B80500 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 .text-gradient-navy {
-  background-image: linear-gradient(120deg, #2C4FB0 0%, #00247D 60%);
+  background-image: linear-gradient(120deg, #0518FE 0%, #011CB5 60%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -351,14 +366,14 @@ button.card-surface:hover {
 body {
   background:
     radial-gradient(ellipse 60% 420px at 85% 0%, rgba(31, 69, 166, 0.12), transparent 70%),
-    radial-gradient(ellipse 45% 360px at 0% 120px, rgba(207,20,38, 0.07), transparent 70%),
+    radial-gradient(ellipse 45% 360px at 0% 120px, rgba(225,6,0, 0.07), transparent 70%),
     hsl(var(--background));
   background-repeat: no-repeat;
 }
 .mesh-bg {
   background:
     radial-gradient(ellipse 55% 80% at 88% 10%, rgba(31, 69, 166, 0.16), transparent 70%),
-    radial-gradient(ellipse 40% 70% at 0% 100%, rgba(207,20,38, 0.09), transparent 70%),
+    radial-gradient(ellipse 40% 70% at 0% 100%, rgba(225,6,0, 0.09), transparent 70%),
     linear-gradient(180deg, #FFFFFF 0%, hsl(var(--soft-bg)) 100%);
 }
 
@@ -367,7 +382,7 @@ body {
 :is(div, main):is(.min-h-screen, [class*="min-h-[calc"]):is(.bg-white, [class*="bg-[hsl(var(--soft-bg))]"]) {
   background-image:
     radial-gradient(ellipse 60% 420px at 85% 0%, rgba(31, 69, 166, 0.12), transparent 70%),
-    radial-gradient(ellipse 45% 360px at 0% 120px, rgba(207,20,38, 0.07), transparent 70%);
+    radial-gradient(ellipse 45% 360px at 0% 120px, rgba(225,6,0, 0.07), transparent 70%);
   background-repeat: no-repeat;
 }
 
@@ -375,12 +390,12 @@ body {
 :is(a, button)[class*="rounded-2xl"][class*="border"][class*="bg-white"]:hover {
   border-color: transparent;
   background: linear-gradient(#fff, #fff) padding-box, var(--grad-brand) border-box;
-  box-shadow: 0 18px 36px -18px rgba(0,36,125, 0.35);
+  box-shadow: 0 18px 36px -18px rgba(1,28,181, 0.35);
 }
 
 /* Highlighted words in page headlines render as the red gradient */
 :is(h1, h2) :is([class*="text-[hsl(var(--red-500))]"], [class*="text-[hsl(var(--accent))]"]) {
-  background-image: linear-gradient(120deg, #E5404F 0%, #CF1426 50%, #B31942 100%);
+  background-image: linear-gradient(120deg, #FF0302 0%, #E10600 50%, #B80500 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -396,7 +411,7 @@ body {
 section[class*="bg-[hsl(var(--blue-900))]"] {
   background-image:
     radial-gradient(ellipse 70% 80% at 85% 0%, rgba(31, 69, 166, 0.55), transparent 65%),
-    radial-gradient(ellipse 50% 60% at 0% 100%, rgba(207,20,38, 0.28), transparent 65%);
+    radial-gradient(ellipse 50% 60% at 0% 100%, rgba(225,6,0, 0.28), transparent 65%);
 }
 
 /* Red-white-blue stripe used under the navbar and above the footer */
