@@ -100,6 +100,8 @@ async def ensure_indexes():
     await db['agent_otps'].create_index('expires_at', expireAfterSeconds=0)
     await db['chat_sessions'].create_index('user_id', sparse=True)
     await db['chat_messages'].create_index([('session_id', 1), ('created_at', 1)])
+    await db['applications'].create_index([('assigned_to', 1), ('status', 1)])
+    await db['application_internal_notes'].create_index([('application_id', 1), ('at', -1)])
     await db['profile_change_requests'].create_index([('user_id', 1), ('created_at', -1)])
     await db['profile_change_requests'].create_index([('status', 1), ('created_at', -1)])
     await usvisa_slots_col.create_index([('consulate', 1), ('visa_type', 1), ('check_date', -1)])

@@ -27,6 +27,7 @@ from routes_scan import router as scan_router  # noqa: E402
 from routes_flights import router as flights_router  # noqa: E402
 from routes_admin import router as admin_router  # noqa: E402
 from routes_admin_backoffice import router as admin_backoffice_router  # noqa: E402
+from routes_admin_cases import router as admin_cases_router  # noqa: E402
 from routes_admin_auth import router as admin_auth_router, ensure_seed_admin  # noqa: E402
 from routes_public import router as public_router  # noqa: E402
 from routes_events import router as events_router  # noqa: E402
@@ -116,6 +117,7 @@ api_router.include_router(countries_router)
 api_router.include_router(leads_router)
 api_router.include_router(admin_router)
 api_router.include_router(admin_backoffice_router)
+api_router.include_router(admin_cases_router)
 api_router.include_router(admin_auth_router)
 api_router.include_router(public_router)
 api_router.include_router(events_router)

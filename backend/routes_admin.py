@@ -402,13 +402,20 @@ async def admin_create_staff(payload: StaffCreate, admin=Depends(get_current_adm
 # ---------- applications ----------
 @router.get('/applications')
 async def admin_list_applications(
-    _=Depends(get_current_admin),
+    admin=Depends(get_current_admin),
     status: Optional[str] = None,
     q: Optional[str] = None,
+    assigned: Optional[str] = Query(None, description="'me', 'unassigned' or a staff user id"),
     limit: int = Query(50, ge=1, le=500),
     skip: int = Query(0, ge=0),
 ):
     filt: dict = {}
+    if assigned == 'me':
+        filt['assigned_to'] = admin['_id']
+    elif assigned == 'unassigned':
+        filt['assigned_to'] = None
+    elif assigned:
+        filt['assigned_to'] = assigned
     if status and status != 'all':
         filt['status'] = status
     if q:
