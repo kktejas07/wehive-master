@@ -75,3 +75,17 @@ export function downloadCsv(passedToken, kind) {
       URL.revokeObjectURL(href);
     });
 }
+
+// Case-management alerts (GET /admin/alerts, /admin/applications/{id}/case).
+export const SEVERITY_PILL = {
+  critical: 'bg-red-500/15 text-red-300 border-red-500/30',
+  warning: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  info: 'bg-blue-500/15 text-blue-200 border-blue-500/30',
+};
+export const ALERT_KIND_LABEL = {
+  stale: 'Stale',
+  appointment: 'Appointments',
+  travel_soon: 'Travel soon',
+  passport_expiring: 'Passport expiring',
+  documents_pending: 'Docs to review',
+};

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Loader2, Search, FileStack, Globe, AlertTriangle } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, inr, STATUS_COLORS } from '../../lib/admin';
@@ -14,7 +15,7 @@ const label = (s) => (s || 'draft').replace('_', ' ');
 
 // Confirms a status change; the optional note is stored on the application and the
 // backend notifies the applicant of the new status.
-function StatusDialog({ change, busy, onCancel, onConfirm }) {
+export function StatusDialog({ change, busy, onCancel, onConfirm }) {
   const [note, setNote] = useState('');
   const dialogProps = useDialogA11y(!!change, onCancel);
   if (!change) return null;
@@ -32,7 +33,7 @@ function StatusDialog({ change, busy, onCancel, onConfirm }) {
           Mark as {label(status)}?
         </h3>
         <p className="mt-1.5 text-[13px] text-slate-400">
-          {app.user?.name || app.primary_applicant?.name || 'The applicant'} will be notified of this status change
+          {app.applicant?.name || app.user?.name || app.primary_applicant?.name || 'The applicant'} will be notified of this status change
           {' '}(#{app.id.slice(0, 8).toUpperCase()}: {label(app.status)} → {label(status)}).
         </p>
         <label htmlFor="app-status-note" className="block mt-4 text-[12px] font-semibold text-slate-300 mb-1">Note (optional)</label>
@@ -73,8 +74,15 @@ export default function ApplicationsTab() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(null);
   const [change, setChange] = useState(null);
+  const [assigned, setAssigned] = useState('');
+  const [staff, setStaff] = useState([]);
 
-  useEffect(() => { setSkip(0); }, [dq, status]);
+  useEffect(() => { setSkip(0); }, [dq, status, assigned]);
+
+  useEffect(() => {
+    adminClient(token).get('/staff/workload').then((r) => setStaff(r.data.staff || [])).catch(() => {});
+  }, [token]);
+  const staffName = (sid) => { const s = staff.find((x) => x.id === sid); return s ? s.name || s.email : null; };
 
   const seq = useRef(0);
   const load = useCallback(async () => {
@@ -83,7 +91,7 @@ export default function ApplicationsTab() {
     setError('');
     try {
       const r = await adminClient(token).get('/applications', {
-        params: { status: status === 'all' ? undefined : status, q: dq || undefined, limit: PAGE_SIZE, skip },
+        params: { status: status === 'all' ? undefined : status, q: dq || undefined, assigned: assigned || undefined, limit: PAGE_SIZE, skip },
       });
       if (id !== seq.current) return;
       setItems(r.data.items);
@@ -93,7 +101,7 @@ export default function ApplicationsTab() {
       setItems([]);
       setError(e?.response?.data?.detail || e.message);
     }
-  }, [token, status, dq, skip]);
+  }, [token, status, dq, assigned, skip]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -141,6 +149,18 @@ export default function ApplicationsTab() {
               <option key={s} value={s}>{s.replace('_', ' ')}</option>
             ))}
           </select>
+          <select
+            data-testid="admin-apps-assigned-filter"
+            aria-label="Filter by assignee"
+            value={assigned}
+            onChange={(e) => setAssigned(e.target.value)}
+            className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white max-w-[220px]"
+          >
+            <option value="">All assignees</option>
+            <option value="me">Assigned to me</option>
+            <option value="unassigned">Unassigned</option>
+            {staff.map((s) => <option key={s.id} value={s.id}>{s.name || s.email}</option>)}
+          </select>
         </div>
       </Panel>
 
@@ -151,6 +171,7 @@ export default function ApplicationsTab() {
               <th className="px-5 py-3">Application</th>
               <th className="px-5 py-3">Customer</th>
               <th className="px-5 py-3">Travel</th>
+              <th className="px-5 py-3">Assigned</th>
               <th className="px-5 py-3">Revenue</th>
               <th className="px-5 py-3">Status</th>
               <th className="px-5 py-3 text-right">Update</th>
@@ -158,26 +179,26 @@ export default function ApplicationsTab() {
           </thead>
           <tbody>
             {items === null && (
-              <tr><td colSpan={6} className="px-5 py-10 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
+              <tr><td colSpan={7} className="px-5 py-10 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
             )}
             {error && (
-              <tr><td colSpan={6} className="px-5 py-10 text-center text-red-300" role="alert">
+              <tr><td colSpan={7} className="px-5 py-10 text-center text-red-300" role="alert">
                 <AlertTriangle className="w-4 h-4 inline mr-1.5" /> Could not load applications: {error}{' '}
                 <button onClick={load} className="underline text-slate-200 ml-1">Retry</button>
               </td></tr>
             )}
             {!error && items?.length === 0 && (
-              <tr><td colSpan={6} className="px-5 py-10 text-center text-slate-400">
+              <tr><td colSpan={7} className="px-5 py-10 text-center text-slate-400">
                 <FileStack className="w-5 h-5 inline mr-2" /> No applications found.
               </td></tr>
             )}
             {items?.map((a) => (
               <tr key={a.id} data-testid={`admin-app-row-${a.id}`} className="border-t border-white/5 hover:bg-white/5">
                 <td className="px-5 py-3">
-                  <div className="font-bold text-white inline-flex items-center gap-1.5">
+                  <Link to={`/admin/applications/${a.id}`} className="font-bold text-white inline-flex items-center gap-1.5 hover:underline">
                     <span>{a.country?.flag || <Globe className="w-4 h-4 text-slate-400" />}</span>
                     {a.country?.name || a.country_id?.toUpperCase()} · {a.visa_type}
-                  </div>
+                  </Link>
                   <div className="text-[11px] text-slate-400 font-mono">#{a.id.slice(0, 8).toUpperCase()}</div>
                 </td>
                 <td className="px-5 py-3 text-slate-300">
@@ -188,6 +209,9 @@ export default function ApplicationsTab() {
                   <div>{a.travel_date || '—'}</div>
                   <div className="text-[11px] text-slate-400">{a.applicants} applicant{a.applicants > 1 ? 's' : ''}</div>
                 </td>
+                <td className="px-5 py-3 text-[12.5px]" data-testid={`admin-app-assignee-${a.id}`}>
+                  {a.assigned_to ? <span className="text-slate-200">{staffName(a.assigned_to) || 'Staff member'}</span> : <span className="text-slate-500">Unassigned</span>}
+                </td>
                 <td className="px-5 py-3 font-bold text-emerald-300">{inr(a.revenue_inr)}</td>
                 <td className="px-5 py-3">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-bold ${STATUS_COLORS[a.status] || STATUS_COLORS.draft}`}>
@@ -195,7 +219,14 @@ export default function ApplicationsTab() {
                   </span>
                 </td>
                 <td className="px-5 py-3">
-                  <div className="flex items-center justify-end">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Link
+                      to={`/admin/applications/${a.id}`}
+                      data-testid={`case-open-${a.id}`}
+                      className="h-8 inline-flex items-center px-2.5 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[12px] font-semibold"
+                    >
+                      Open
+                    </Link>
                     <select
                       data-testid={`admin-app-status-${a.id}`}
                       disabled={busy === a.id}

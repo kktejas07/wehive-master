@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight, History, Pencil, Plus, Trash2, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight, History, Pencil, Plus, Trash2, Play, AlertTriangle } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, inr, runAggregators } from '../../lib/admin';
+import { adminClient, inr, runAggregators, SEVERITY_PILL, ALERT_KIND_LABEL } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
@@ -47,6 +48,69 @@ function SparkBars({ data, metric = 'applications', accent = 'hsl(var(--blue-500
   );
 }
 
+const SEVERITY_DOT = { critical: 'bg-red-400', warning: 'bg-amber-400', info: 'bg-blue-300' };
+
+// Cases that need action soon (GET /admin/alerts), critical first.
+function NeedsAttention({ token }) {
+  const [mine, setMine] = useState(false);
+  const [data, setData] = useState(null);
+  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    setData(null);
+    setErr('');
+    adminClient(token)
+      .get('/alerts', { params: { mine } })
+      .then((r) => setData(r.data))
+      .catch((e) => setErr(e?.response?.data?.detail || e.message));
+  }, [token, mine]);
+
+  return (
+    <Panel className="mb-6">
+      <div data-testid="admin-needs-attention" className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2 text-[15px] font-display font-bold text-white">
+          <AlertTriangle className="w-4 h-4 text-amber-300" /> Needs attention
+          {data && <span className="text-[12px] font-semibold text-slate-400 tabular-nums">{data.total}</span>}
+        </div>
+        <label className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-300 cursor-pointer">
+          <input data-testid="alerts-mine-toggle" type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} className="accent-[hsl(var(--blue-700))]" />
+          Mine only
+        </label>
+      </div>
+      {data && Object.keys(data.counts || {}).length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {Object.entries(data.counts).map(([k, n]) => (
+            <span key={k} data-testid={`alerts-count-${k}`} className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11.5px] font-semibold text-slate-300">
+              {ALERT_KIND_LABEL[k] || k} <span className="tabular-nums text-white">{n}</span>
+            </span>
+          ))}
+        </div>
+      )}
+      {!data && !err && <Loader2 className="w-4 h-4 animate-spin text-blue-300" />}
+      {err && <p className="text-[13px] text-red-300">Could not load alerts: {err}</p>}
+      {data?.items.length === 0 && <p className="text-[13px] text-slate-400">Nothing needs attention right now.</p>}
+      <ul className="divide-y divide-white/5">
+        {data?.items.slice(0, 8).map((a, i) => (
+          <li key={`${a.application_id}-${a.kind}-${i}`}>
+            <Link
+              to={`/admin/applications/${a.application_id}`}
+              data-testid={`alert-link-${a.application_id}-${a.kind}`}
+              className="flex items-center gap-3 py-2.5 hover:bg-white/5 rounded-lg px-2 -mx-2"
+            >
+              <span className={`h-2 w-2 rounded-full shrink-0 ${SEVERITY_DOT[a.severity] || SEVERITY_DOT.info}`} />
+              <div className="flex-1 min-w-0">
+                <div className="text-[13.5px] font-semibold text-white truncate">{a.message}</div>
+                <div className="text-[12px] text-slate-400 truncate">{[a.applicant, a.country, a.visa_type].filter(Boolean).join(' · ')}</div>
+              </div>
+              <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.1em] ${SEVERITY_PILL[a.severity] || SEVERITY_PILL.info}`}>{a.severity}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Panel>
+  );
+}
+
 export default function OverviewTab() {
   const { token } = useAdminAuth();
   const [data, setData] = useState(null);
@@ -63,20 +127,24 @@ export default function OverviewTab() {
 
   if (err) {
     return (
-      <>
+      // Same element shape as the loaded view so NeedsAttention keeps its state (no refetch).
+      <div>
         <AdminHeader title="Overview" />
+        <NeedsAttention token={token} />
         <Panel>
           <div className="text-[14px] text-red-300" data-testid="admin-metrics-error">{err}</div>
         </Panel>
-      </>
+      </div>
     );
   }
   if (!data) {
     return (
-      <>
+      // Same element shape as the loaded view so NeedsAttention keeps its state (no refetch).
+      <div>
         <AdminHeader title="Overview" />
+        <NeedsAttention token={token} />
         <Panel><Loader2 className="w-5 h-5 animate-spin text-blue-300" /></Panel>
-      </>
+      </div>
     );
   }
 
@@ -102,6 +170,8 @@ export default function OverviewTab() {
           </button>
         }
       />
+
+      <NeedsAttention token={token} />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard

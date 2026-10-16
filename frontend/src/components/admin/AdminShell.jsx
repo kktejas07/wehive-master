@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient } from '../../lib/admin';
@@ -54,6 +54,22 @@ export default function AdminShell({ children }) {
   const [pwError, setPwError] = useState('');
 
   const user = admin;
+  const [critical, setCritical] = useState(0);
+  useEffect(() => {
+    adminClient()
+      .get('/alerts')
+      .then((r) => setCritical((r.data.items || []).filter((a) => a.severity === 'critical').length))
+      .catch(() => {});
+  }, []);
+  const badge = (t) => t.id === 'applications' && critical > 0 && (
+    <span
+      data-testid={`admin-nav-applications-critical${t.mobile ? '-m' : ''}`}
+      title={`${critical} critical alert${critical === 1 ? '' : 's'}`}
+      className={`${t.mobile ? 'ml-1.5' : 'ml-auto'} min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[11px] font-bold tabular-nums`}
+    >
+      {critical}
+    </span>
+  );
   const tabs = TABS.filter((t) => !t.superOnly || admin?.is_super_admin);
 
   const handlePasswordChange = async () => {
@@ -96,6 +112,7 @@ export default function AdminShell({ children }) {
                 >
                   <Icon className="w-4 h-4" />
                   {t.label}
+                  {badge(t)}
                 </NavLink>
               );
             })}
@@ -164,6 +181,7 @@ export default function AdminShell({ children }) {
                   }`}
                 >
                   {t.label}
+                  {badge({ ...t, mobile: true })}
                 </NavLink>
               );
             })}

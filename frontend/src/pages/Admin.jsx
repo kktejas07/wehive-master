@@ -5,6 +5,7 @@ import AdminShell, { Panel } from '../components/admin/AdminShell';
 import OverviewTab from '../components/admin/OverviewTab';
 import UsersTab from '../components/admin/UsersTab';
 import ApplicationsTab from '../components/admin/ApplicationsTab';
+import ApplicationCase from '../components/admin/ApplicationCase';
 import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import AdminsTab from '../components/admin/AdminsTab';
@@ -89,6 +90,7 @@ function AdminRoutes() {
                 <Route index element={<OverviewTab />} />
                 <Route path="users" element={<UsersTab />} />
                 <Route path="applications" element={<ApplicationsTab />} />
+                <Route path="applications/:id" element={<ApplicationCase />} />
                 <Route path="countries" element={<CountriesTab />} />
                 <Route path="pricing" element={<PricingTab />} />
                 <Route path="events" element={<EventsTab />} />

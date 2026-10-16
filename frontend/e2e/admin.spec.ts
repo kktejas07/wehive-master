@@ -83,3 +83,94 @@ test('a 401 from an admin call ends the session and redirects to login', async (
   await expect(page).toHaveURL(/\/admin\/login\?next=%2Fadmin%2Fpayments$/);
   expect(await page.evaluate(() => window.localStorage.getItem('wehive_admin_token'))).toBeNull();
 });
+
+const CASE = {
+  id: 'app-1', status: 'submitted', country_id: 'ca', country_name: 'Canada', visa_type: 'Tourist', travel_date: '2026-10-24',
+  applicants: 1, fee_inr: 4999, assigned_to: null, assignee: null, agent: null, form_data: { passport_number: 'Z1234567' },
+  visa_appointment: { date: '2026-10-18', time: '10:00', embassy: 'VFS', city: 'Delhi' },
+  timeline: [{ id: 't1', status: 'submitted', label: 'Application submitted', at: '2026-10-01T10:00:00Z' }],
+  documents: [{ _id: 'doc-1', doc_type: 'passport', filename: 'passport.pdf', mime: 'application/pdf', status: 'uploaded', uploaded_at: '2026-10-02T10:00:00Z' }],
+  messages: [{ _id: 'm1', from: 'user', name: 'Priya', text: 'Is my passport scan OK?', at: '2026-10-03T10:00:00Z' }],
+  applicant: { id: 'u1', name: 'Priya Sharma', email: 'priya@example.com', phone: '+91 90000 00000', is_premium: false, joined_at: '2026-09-01T10:00:00Z' },
+  internal_notes: [],
+  scans: [{ id: 'sc1', kind: 'passport', created_at: '2026-10-02T11:00:00Z', extracted: { surname: 'SHARMA', issuer_verification: { found: true, name: 'Passport Seva' } } }],
+  alerts: [{ kind: 'appointment', severity: 'critical', due: '2026-10-18', message: 'Embassy appointment in 2 day(s)' }],
+};
+
+async function openCase(page: Page, api: ApiMock) {
+  await adminSignIn(page, api);
+  api
+    .on('GET', /^\/admin\/applications\/app-1\/case$/, CASE)
+    .on('GET', /^\/admin\/staff\/workload$/, { staff: [{ id: 's-1', name: 'Asha', email: 'asha@example.com', staff_role: 'consultant', open_cases: 2 }], unassigned_open: 1 });
+  await page.goto('/admin/applications/app-1');
+  await expect(page.getByTestId('admin-case')).toBeVisible();
+}
+
+test('case page renders alerts and every section', async ({ page, api }) => {
+  await openCase(page, api);
+  await expect(page.getByRole('heading', { name: 'Priya Sharma' })).toBeVisible();
+  await expect(page.getByTestId('case-alert-appointment')).toContainText('Embassy appointment in 2 day(s)');
+  await expect(page.getByRole('tabpanel')).toContainText('Z1234567');
+
+  await page.getByTestId('case-tab-documents').click();
+  await expect(page.getByTestId('case-doc-status-doc-1')).toHaveText('uploaded');
+  await page.getByTestId('case-tab-messages').click();
+  await expect(page.getByText('Is my passport scan OK?')).toBeVisible();
+  await page.getByTestId('case-tab-notes').click();
+  await expect(page.getByTestId('case-notes-private')).toContainText('Only visible to staff');
+  await page.getByTestId('case-tab-timeline').click();
+  await expect(page.getByText('Application submitted')).toBeVisible();
+  await page.getByTestId('case-tab-scans').click();
+  await expect(page.getByTestId('case-scan-sc1')).toContainText('Issuer verified: Passport Seva');
+});
+
+test('rejecting a document requires a reason', async ({ page, api }) => {
+  await openCase(page, api);
+  api.on('PATCH', /^\/admin\/applications\/app-1\/documents\/doc-1$/, { ok: true, status: 'rejected' });
+  await page.getByTestId('case-tab-documents').click();
+  await page.getByTestId('case-doc-reject-doc-1').click();
+
+  await expect(page.getByTestId('case-doc-submit-doc-1')).toBeDisabled();
+  await page.getByTestId('case-doc-reason-doc-1').fill('Scan is blurry');
+  await page.getByTestId('case-doc-submit-doc-1').click();
+  await expect.poll(() => api.calls.find((c) => c.method === 'PATCH')?.body).toEqual({ status: 'rejected', reason: 'Scan is blurry' });
+});
+
+test('internal note is posted and shown', async ({ page, api }) => {
+  await openCase(page, api);
+  api.on('POST', /^\/admin\/applications\/app-1\/internal-notes$/, { id: 'n1', text: 'Called the embassy', by: 'e2e.admin@example.com', at: '2026-10-04T10:00:00Z' });
+  await page.getByTestId('case-tab-notes').click();
+  await page.getByTestId('case-note-input').fill('Called the embassy');
+  await page.getByTestId('case-note-submit').click();
+
+  await expect(page.getByText('Called the embassy')).toBeVisible();
+  expect(api.calls.find((c) => c.method === 'POST')?.body).toEqual({ text: 'Called the embassy' });
+});
+
+test('assign dropdown calls the assign endpoint', async ({ page, api }) => {
+  await openCase(page, api);
+  api.on('PATCH', /^\/admin\/applications\/app-1\/assign$/, { ok: true, assignee: { id: 's-1', name: 'Asha', email: 'asha@example.com', staff_role: 'consultant' } });
+  const select = page.getByTestId('case-assign-select');
+  await expect(select.locator('option', { hasText: 'Asha (2 open)' })).toHaveCount(1);
+  await select.selectOption('s-1');
+
+  await expect.poll(() => api.calls.find((c) => c.method === 'PATCH')?.body).toEqual({ staff_id: 's-1' });
+  await expect(select).toHaveValue('s-1');
+});
+
+test('overview alerts link to the case page', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  api
+    .on('GET', /^\/admin\/alerts$/, {
+      items: [{ kind: 'appointment', severity: 'critical', due: '2026-10-18', message: 'Embassy appointment in 2 day(s)', application_id: 'app-1', status: 'submitted', country: 'Canada', visa_type: 'Tourist', applicant: 'Priya Sharma', assigned_to: null }],
+      counts: { appointment: 1 }, total: 1,
+    })
+    .on('GET', /^\/admin\/applications\/app-1\/case$/, CASE);
+  await page.goto('/admin');
+
+  await expect(page.getByTestId('alerts-count-appointment')).toContainText('1');
+  await expect(page.getByTestId('admin-nav-applications-critical')).toHaveText('1');
+  await page.getByTestId('alert-link-app-1-appointment').click();
+  await expect(page).toHaveURL(/\/admin\/applications\/app-1$/);
+  await expect(page.getByTestId('case-alert-appointment')).toBeVisible();
+});
