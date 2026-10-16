@@ -24,9 +24,14 @@ export default function StaffTab() {
 
   const load = useCallback(async () => {
     setItems(null);
-    const r = await adminClient(token).get('/users', { params: { role: 'staff', limit: 200 } });
-    setItems(r.data.items);
-  }, [token]);
+    try {
+      const r = await adminClient(token).get('/users', { params: { role: 'staff', limit: 200 } });
+      setItems(r.data.items);
+    } catch (e) {
+      setItems([]);
+      toast({ title: 'Could not load staff', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    }
+  }, [token, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -49,16 +54,24 @@ export default function StaffTab() {
   };
 
   const updateRole = async (u, newRole) => {
-    await adminClient(token).patch(`/users/${u.id}`, { staff_role: newRole });
-    toast({ title: `Role updated` });
-    await load();
+    try {
+      await adminClient(token).patch(`/users/${u.id}`, { staff_role: newRole });
+      toast({ title: 'Role updated' });
+      await load();
+    } catch (e) {
+      toast({ title: 'Could not update role', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    }
   };
 
   const demote = async (u) => {
     if (!window.confirm(`Remove staff privileges from ${u.email}?`)) return;
-    await adminClient(token).patch(`/users/${u.id}`, { is_staff: false, staff_role: null });
-    toast({ title: 'Staff removed' });
-    await load();
+    try {
+      await adminClient(token).patch(`/users/${u.id}`, { is_staff: false, staff_role: null });
+      toast({ title: 'Staff removed' });
+      await load();
+    } catch (e) {
+      toast({ title: 'Could not remove staff', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    }
   };
 
   return (

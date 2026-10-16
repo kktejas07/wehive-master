@@ -61,14 +61,23 @@ export default function PromoCodesTab() {
   };
 
   const handleToggle = async (code) => {
-    await axios.put(`${API}/promotions/${code}/toggle`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
-    load();
+    try {
+      await axios.put(`${API}/promotions/${encodeURIComponent(code)}/toggle`, {}, { headers: { Authorization: `Bearer ${adminToken}` } });
+      load();
+    } catch (err) {
+      toast({ title: 'Could not toggle', description: err.response?.data?.detail || err.message, variant: 'destructive' });
+    }
   };
 
   const handleDelete = async (code) => {
-    await axios.delete(`${API}/promotions/${code}`, { headers: { Authorization: `Bearer ${adminToken}` } });
-    toast({ title: 'Promo code deleted' });
-    load();
+    if (!window.confirm(`Delete promo code ${code}? This cannot be undone.`)) return;
+    try {
+      await axios.delete(`${API}/promotions/${encodeURIComponent(code)}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+      toast({ title: 'Promo code deleted' });
+      load();
+    } catch (err) {
+      toast({ title: 'Could not delete', description: err.response?.data?.detail || err.message, variant: 'destructive' });
+    }
   };
 
   const handleCopy = (code) => {

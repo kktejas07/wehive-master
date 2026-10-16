@@ -1,9 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Loader2, Search, ShieldCheck, Trash2, Crown, UserCog } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { Loader2, Search, Trash2, Crown, UserCog, AlertTriangle } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
+import Pagination from './Pagination';
 import { useToast } from '../../hooks/use-toast';
+import { useDebouncedValue } from '../../hooks/use-debounced-value';
+
+const PAGE_SIZE = 25;
 
 function Chip({ children, color = 'slate' }) {
   const map = {
@@ -21,20 +26,37 @@ function Chip({ children, color = 'slate' }) {
 }
 
 export default function UsersTab() {
-  const { token } = useAdminAuth();
+  const { token, admin } = useAdminAuth();
+  const isSuper = !!admin?.is_super_admin;
   const { toast } = useToast();
   const [items, setItems] = useState(null);
   const [total, setTotal] = useState(0);
   const [q, setQ] = useState('');
+  const dq = useDebouncedValue(q.trim());
   const [role, setRole] = useState('all');
+  const [skip, setSkip] = useState(0);
+  const [error, setError] = useState('');
   const [busy, setBusy] = useState(null);
 
+  useEffect(() => { setSkip(0); }, [dq, role]);
+
+  const seq = useRef(0);
   const load = useCallback(async () => {
+    const id = ++seq.current;
     setItems(null);
-    const r = await adminClient(token).get('/users', { params: { q: q || undefined, role, limit: 100 } });
-    setItems(r.data.items);
-    setTotal(r.data.total);
-  }, [token, q, role]);
+    setError('');
+    try {
+      const r = await adminClient(token).get('/users', { params: { q: dq || undefined, role, limit: PAGE_SIZE, skip } });
+      if (id !== seq.current) return;
+      setItems(r.data.items);
+      setTotal(r.data.total);
+    } catch (e) {
+      if (id !== seq.current) return;
+      setItems([]);
+      setError(e?.response?.data?.detail || e.message);
+      toast({ title: 'Could not load users', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    }
+  }, [token, dq, role, skip, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -45,7 +67,7 @@ export default function UsersTab() {
       toast({ title: label });
       await load();
     } catch (e) {
-      toast({ title: 'Failed', description: e?.response?.data?.detail || e.message });
+      toast({ title: 'Failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
     } finally {
       setBusy(null);
     }
@@ -59,7 +81,7 @@ export default function UsersTab() {
       toast({ title: 'User deleted' });
       await load();
     } catch (e) {
-      toast({ title: 'Failed', description: e?.response?.data?.detail || e.message });
+      toast({ title: 'Failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
     } finally {
       setBusy(null);
     }
@@ -95,6 +117,10 @@ export default function UsersTab() {
             <option value="admin">Admins</option>
           </select>
         </div>
+        <p className="mt-3 text-[12px] text-slate-400">
+          Admin rights are granted and revoked in the{' '}
+          <Link to="/admin/admins" className="text-blue-300 hover:underline">Admins</Link> tab.
+        </p>
       </Panel>
 
       <Panel className="mt-4 overflow-x-auto p-0">
@@ -112,7 +138,13 @@ export default function UsersTab() {
             {items === null && (
               <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
             )}
-            {items?.length === 0 && (
+            {error && (
+              <tr><td colSpan={5} className="px-5 py-10 text-center text-red-300" role="alert">
+                <AlertTriangle className="w-4 h-4 inline mr-1.5" /> Could not load users: {error}{' '}
+                <button onClick={load} className="underline text-slate-200 ml-1">Retry</button>
+              </td></tr>
+            )}
+            {!error && items?.length === 0 && (
               <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400">No users match.</td></tr>
             )}
             {items?.map((u) => (
@@ -154,28 +186,26 @@ export default function UsersTab() {
                     >
                       <UserCog className="w-3 h-3" /> {u.is_staff ? 'Unstaff' : 'Staff'}
                     </button>
-                    <button
-                      data-testid={`toggle-admin-${u.id}`}
-                      disabled={busy === u.id}
-                      onClick={() => patch(u, { is_admin: !u.is_admin }, u.is_admin ? 'Admin removed' : 'Admin granted')}
-                      className="inline-flex items-center gap-1 rounded-lg bg-white/5 hover:bg-white/10 px-2.5 py-1.5 text-[11.5px] font-bold text-red-300"
-                    >
-                      <ShieldCheck className="w-3 h-3" /> {u.is_admin ? 'Unadmin' : 'Admin'}
-                    </button>
-                    <button
-                      data-testid={`delete-user-${u.id}`}
-                      disabled={busy === u.id}
-                      onClick={() => del(u)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1.5 text-[11.5px] font-bold text-red-300"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                    {isSuper && (
+                      <button
+                        data-testid={`delete-user-${u.id}`}
+                        disabled={busy === u.id}
+                        onClick={() => del(u)}
+                        aria-label={`Delete ${u.email || u.phone || 'user'}`}
+                        className="inline-flex items-center gap-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1.5 text-[11.5px] font-bold text-red-300"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        {total > 0 && (
+          <div className="px-5 pb-3"><Pagination skip={skip} limit={PAGE_SIZE} total={total} onPageChange={setSkip} /></div>
+        )}
       </Panel>
     </div>
   );

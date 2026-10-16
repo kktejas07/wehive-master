@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { API } from './AuthContext';
+import { handleAdminAuthError, setAdminUnauthorizedHandler } from '../lib/admin';
 
 const TOKEN_KEY = 'wehive_admin_token';
 const AdminAuthCtx = createContext(null);
@@ -79,6 +80,17 @@ export function AdminAuthProvider({ children }) {
     setToken(null);
     setAdmin(null);
   }, []);
+
+  // Central 401 handling: tabs call either adminClient()/apiClient() (interceptor built in)
+  // or the global axios with the admin bearer token, so watch both.
+  useEffect(() => {
+    setAdminUnauthorizedHandler(logout);
+    const id = axios.interceptors.response.use(undefined, handleAdminAuthError);
+    return () => {
+      setAdminUnauthorizedHandler(null);
+      axios.interceptors.response.eject(id);
+    };
+  }, [logout]);
 
   const refresh = useCallback(async () => {
     if (token) await fetchMe(token);

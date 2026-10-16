@@ -18,9 +18,9 @@ function StatusBadge({ ok, label }) {
 }
 
 export default function RAGTab() {
-  const { admin } = useAdminAuth();
+  const { admin, token } = useAdminAuth();
+  const isSuper = !!admin?.is_super_admin;
   const { toast } = useToast();
-  const token = admin?.token || admin?.access_token;
 
   const [status, setStatus] = useState(null);
   const [collections, setCollections] = useState([]);
@@ -70,7 +70,7 @@ export default function RAGTab() {
 
   const wipeCollection = async (name) => {
     if (!token) return;
-    if (!confirm(`Wipe all chunks in "${name}"?`)) return;
+    if (!window.confirm(`Wipe all chunks in "${name}"?`)) return;
     try {
       await axios.delete(`${API}/rag/collections/${name}`, { headers: { Authorization: `Bearer ${token}` } });
       toast({ title: `Wiped ${name}` });
@@ -203,9 +203,11 @@ export default function RAGTab() {
                   <div className="text-[13px] font-mono text-white">{c.name}</div>
                   <div className="text-[11px] text-slate-400">{c.count} chunks</div>
                 </div>
-                <button onClick={() => wipeCollection(c.name)} className="px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 hover:bg-red-500/25 text-[11px] font-bold inline-flex items-center gap-1">
-                  <Trash2 className="w-3 h-3" /> Wipe
-                </button>
+                {isSuper && (
+                  <button onClick={() => wipeCollection(c.name)} data-testid={`rag-wipe-${c.name}`} className="px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 hover:bg-red-500/25 text-[11px] font-bold inline-flex items-center gap-1">
+                    <Trash2 className="w-3 h-3" /> Wipe
+                  </button>
+                )}
               </div>
             ))}
           </div>

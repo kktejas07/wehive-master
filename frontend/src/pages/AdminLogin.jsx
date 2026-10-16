@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import AdminAuthShell, { Field, PrimaryButton, ErrorMessage } from '../components/admin/AdminAuthShell';
@@ -14,14 +14,18 @@ function formatDetail(d) {
 export default function AdminLogin() {
   const { login, isAuthed } = useAdminAuth();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const raw = params.get('next') || '';
+  // Only follow in-app admin paths (no open redirect).
+  const next = raw.startsWith('/admin') && !raw.startsWith('/admin/login') ? raw : '/admin';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
   useEffect(() => {
-    if (isAuthed) navigate('/admin', { replace: true });
-  }, [isAuthed, navigate]);
+    if (isAuthed) navigate(next, { replace: true });
+  }, [isAuthed, navigate, next]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +33,7 @@ export default function AdminLogin() {
     setBusy(true);
     try {
       await login({ email: email.trim(), password });
-      navigate('/admin', { replace: true });
+      navigate(next, { replace: true });
     } catch (ex) {
       setErr(formatDetail(ex?.response?.data?.detail) || ex.message);
     } finally {

@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
   Key, User, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
+  Inbox, CreditCard, History,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
@@ -15,6 +16,8 @@ const TABS = [
   { id: 'overview',     to: '/admin',               label: 'Overview',     Icon: LayoutDashboard, testid: 'admin-nav-overview' },
   { id: 'users',        to: '/admin/users',         label: 'Users',        Icon: UsersIcon,       testid: 'admin-nav-users' },
   { id: 'applications', to: '/admin/applications',  label: 'Applications', Icon: FileStack,       testid: 'admin-nav-applications' },
+  { id: 'leads',        to: '/admin/leads',         label: 'Leads',        Icon: Inbox,           testid: 'admin-nav-leads' },
+  { id: 'payments',     to: '/admin/payments',      label: 'Payments',     Icon: CreditCard,      testid: 'admin-nav-payments' },
   { id: 'countries',    to: '/admin/countries',     label: 'Countries',    Icon: Globe,           testid: 'admin-nav-countries' },
   { id: 'pricing',      to: '/admin/pricing',       label: 'Pricing',      Icon: Banknote,        testid: 'admin-nav-pricing' },
   { id: 'events',       to: '/admin/events',        label: 'Hero Events',  Icon: Megaphone,       testid: 'admin-nav-events' },
@@ -25,9 +28,9 @@ const TABS = [
   { id: 'promocodes',  to: '/admin/promocodes',    label: 'Promo Codes',   Icon: Tag,             testid: 'admin-nav-promocodes' },
   { id: 'agents',       to: '/admin/agents',        label: 'Agents',       Icon: Briefcase,       testid: 'admin-nav-agents' },
   { id: 'staff',        to: '/admin/staff',         label: 'Staff',        Icon: UserCog,         testid: 'admin-nav-staff' },
-  { id: 'admins',       to: '/admin/admins',        label: 'Admins',       Icon: ShieldCheck,     testid: 'admin-nav-admins' },
+  { id: 'admins',       to: '/admin/admins',        label: 'Admins',       Icon: ShieldCheck,     testid: 'admin-nav-admins', superOnly: true },
   { id: 'newsletter',   to: '/admin/newsletter',    label: 'Newsletter',   Icon: Mail,            testid: 'admin-nav-newsletter' },
-  { id: 'integrations', to: '/admin/integrations',  label: 'Integrations', Icon: Plug,            testid: 'admin-nav-integrations' },
+  { id: 'integrations', to: '/admin/integrations',  label: 'Integrations', Icon: Plug,            testid: 'admin-nav-integrations', superOnly: true },
   { id: 'universities', to: '/admin/universities',  label: 'Universities', Icon: Building2,       testid: 'admin-nav-universities' },
   { id: 'programs',     to: '/admin/programs',      label: 'Programs',     Icon: BookOpen,        testid: 'admin-nav-programs' },
   { id: 'exports',      to: '/admin/exports',       label: 'Exports',      Icon: Download,        testid: 'admin-nav-exports' },
@@ -36,7 +39,8 @@ const TABS = [
   { id: 'prompts',      to: '/admin/prompts',       label: 'Prompts',      Icon: FileText,         testid: 'admin-nav-prompts' },
   { id: 'agents-v2',    to: '/admin/agents-v2',     label: 'Agents V2',    Icon: Bot,              testid: 'admin-nav-agents-v2' },
   { id: 'hive-learning', to: '/admin/hive-learning', label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning' },
-  { id: 'settings',     to: '/admin/settings',      label: 'Settings',     Icon: Settings,        testid: 'admin-nav-settings' },
+  { id: 'audit',        to: '/admin/audit',         label: 'Audit log',    Icon: History,         testid: 'admin-nav-audit' },
+  { id: 'settings',     to: '/admin/settings',      label: 'Settings',     Icon: Settings,        testid: 'admin-nav-settings', superOnly: true },
 ];
 
 export default function AdminShell({ children }) {
@@ -50,6 +54,7 @@ export default function AdminShell({ children }) {
   const [pwError, setPwError] = useState('');
 
   const user = admin;
+  const tabs = TABS.filter((t) => !t.superOnly || admin?.is_super_admin);
 
   const handlePasswordChange = async () => {
     if (pwForm.new !== pwForm.confirm) { setPwError('Passwords do not match'); return; }
@@ -74,7 +79,7 @@ export default function AdminShell({ children }) {
           </Link>
 
           <nav aria-label="Admin sections" className="mt-8 space-y-0.5 flex-1">
-            {TABS.map((t) => {
+            {tabs.map((t) => {
               const Icon = t.Icon;
               const active = pathname === t.to || (t.id !== 'overview' && pathname.startsWith(t.to));
               return (
@@ -147,7 +152,7 @@ export default function AdminShell({ children }) {
         <main className="p-5 sm:p-8 lg:p-10 max-w-full overflow-y-auto relative z-10 admin-scrollbar">
           {/* Mobile tab pill bar */}
           <nav aria-label="Admin sections" className="lg:hidden flex overflow-x-auto snap-x scroll-px-5 [scrollbar-width:none] gap-1.5 mb-5 -mx-5 px-5">
-            {TABS.map((t) => {
+            {tabs.map((t) => {
               const active = pathname === t.to || (t.id !== 'overview' && pathname.startsWith(t.to));
               return (
                 <NavLink
