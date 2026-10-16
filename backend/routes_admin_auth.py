@@ -31,7 +31,7 @@ from admin_auth import (
     generate_reset_token, hash_token,
     is_locked_out, record_failed_attempt, clear_attempts,
     send_reset_email_or_log,
-    get_current_admin_flex,
+    get_current_admin_flex, get_super_admin, is_super_admin,
 )
 from audit import record as audit_record
 from config import ADMIN_EMAILS, IS_DEV, FRONTEND_URL as SITE_URL
@@ -54,6 +54,7 @@ def _public_admin(u: dict) -> dict:
         'email': u.get('email'),
         'phone': u.get('phone'),
         'is_admin': bool(u.get('is_admin', False)),
+        'is_super_admin': is_super_admin(u),
         'is_staff': bool(u.get('is_staff', False)),
         'staff_role': u.get('staff_role'),
         'is_premium': bool(u.get('is_premium', False)),
@@ -272,7 +273,7 @@ async def admin_login(req: LoginRequest):
             raise HTTPException(429, 'Too many failed attempts. Your account is locked for 15 minutes.')
         raise HTTPException(401, f'Invalid email or password. {attempts_left} attempt(s) remaining.')
 
-    if not user.get('is_admin') and email not in ADMIN_EMAILS:
+    if not user.get('is_admin') and not (email in ADMIN_EMAILS and user.get('email_verified') is True):
         raise HTTPException(403, 'This account is not authorised for admin access.')
 
     # Promote to admin if email is allow-listed but flag wasn't set
@@ -427,7 +428,7 @@ async def list_admins(_admin=Depends(get_current_admin_flex)):
 
 
 @router.post('/admins')
-async def add_admin(req: AdminInviteRequest, admin=Depends(get_current_admin_flex)):
+async def add_admin(req: AdminInviteRequest, admin=Depends(get_super_admin)):
     """Promote an existing account, or create one, and email a set-password
     invite when the account has no password yet. Calling it again for an
     admin who hasn't set a password re-sends the invite."""
@@ -488,7 +489,7 @@ async def add_admin(req: AdminInviteRequest, admin=Depends(get_current_admin_fle
 
 
 @router.delete('/admins/{user_id}')
-async def remove_admin(user_id: str, admin=Depends(get_current_admin_flex)):
+async def remove_admin(user_id: str, admin=Depends(get_super_admin)):
     if user_id == admin['_id']:
         raise HTTPException(400, "You can't remove your own admin access.")
     user = await users.find_one({'_id': user_id})

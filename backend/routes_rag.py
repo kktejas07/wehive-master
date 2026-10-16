@@ -26,7 +26,7 @@ from pydantic import BaseModel
 
 from auth_utils import get_current_user
 from db import db
-from admin_auth import get_current_admin_flex
+from admin_auth import get_current_admin_flex, get_super_admin
 
 logger = logging.getLogger("wehive.routes_rag")
 
@@ -255,7 +255,7 @@ async def ingest_mongo(req: MongoIngestRequest, _=Depends(get_current_admin_flex
 
 
 @router.delete("/collections/{name}")
-async def delete_collection(name: str, _=Depends(get_current_admin_flex)):
+async def delete_collection(name: str, _=Depends(get_super_admin)):
     """Wipe a single collection."""
     from vector_store import delete_documents
 
@@ -264,7 +264,7 @@ async def delete_collection(name: str, _=Depends(get_current_admin_flex)):
 
 
 @router.post("/documents/delete")
-async def delete_documents_endpoint(req: DeleteDocsRequest, _=Depends(get_current_admin_flex)):
+async def delete_documents_endpoint(req: DeleteDocsRequest, _=Depends(get_super_admin)):
     """Delete documents by ids or metadata filter."""
     from vector_store import delete_documents
 

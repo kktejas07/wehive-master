@@ -20,7 +20,7 @@ from typing import Optional
 
 import bcrypt
 import jwt
-from fastapi import HTTPException, Header
+from fastapi import Depends, HTTPException, Header
 
 from config import ADMIN_EMAILS, JWT_SECRET, JWT_ALG, ADMIN_JWT_EXPIRES_HOURS, RESET_TOKEN_TTL_MIN
 
@@ -189,3 +189,15 @@ async def get_current_admin_flex(
     if user.get('is_admin') or (email in ADMIN_EMAILS and user.get('email_verified') is True):
         return user
     raise HTTPException(status_code=403, detail='Admin access required')
+
+
+def is_super_admin(user: dict) -> bool:
+    """Super admins are the env-managed ADMIN_EMAILS accounts (bootstrapped on startup)."""
+    return (user.get('email') or '').lower() in ADMIN_EMAILS
+
+
+async def get_super_admin(user=Depends(get_current_admin_flex)):
+    """Gate for secrets, admin management and destructive ops; invited admins get 403."""
+    if not is_super_admin(user):
+        raise HTTPException(status_code=403, detail='Only a super admin can do this.')
+    return user
