@@ -1,8 +1,8 @@
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient } from '../../lib/admin';
+import { adminClient, canWrite, ROLE_NAMES } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
@@ -74,6 +74,9 @@ export default function AdminShell({ children }) {
     </span>
   );
   const tabs = TABS.filter((t) => !t.superOnly || admin?.is_super_admin);
+  const mustEnrol = !!admin?.two_factor_required;
+  const role = admin?.admin_role;
+  const limited = admin && !canWrite(admin, 'manage');
 
   const handlePasswordChange = async () => {
     if (pwForm.new !== pwForm.confirm) { setPwError('Passwords do not match'); return; }
@@ -189,7 +192,20 @@ export default function AdminShell({ children }) {
               );
             })}
           </nav>
-          {children}
+          {mustEnrol && (
+            <div role="alert" data-testid="admin-2fa-required" className="mb-5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-[13px] text-amber-100">
+              Two-factor sign-in is required for every admin. Turn it on below to unlock the rest of the panel.
+            </div>
+          )}
+          {!mustEnrol && limited && (
+            <div data-testid="admin-role-banner" className="mb-5 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-[12.5px] text-slate-300">
+              You're signed in as <span className="font-semibold text-white">{ROLE_NAMES[role] || role}</span>
+              {role === 'viewer' ? ' — you can view everything but not change it.' : role === 'support'
+                ? ' — you can work on applications, leads and document review; everything else is view-only.'
+                : ' — you can manage payments, pricing and promo codes; everything else is view-only.'}
+            </div>
+          )}
+          {mustEnrol && !pathname.startsWith('/admin/security') ? <Navigate to="/admin/security" replace /> : children}
         </main>
       </div>
 

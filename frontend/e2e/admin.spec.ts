@@ -388,3 +388,22 @@ test('super admin changes another admin role', async ({ page, api }) => {
   await page.getByTestId('admin-admins-role-a-2').selectOption('viewer');
   await expect.poll(() => api.calls.find((c) => c.method === 'PATCH')?.body).toEqual({ admin_role: 'viewer' });
 });
+
+test('viewer role sees a read-only banner and no write controls', async ({ page, api }) => {
+  await adminSignIn(page, api, { ...ADMIN, is_super_admin: false, admin_role: 'viewer' });
+  api.on('GET', /^\/admin\/users\/u-42\/profile$/, { user: PROFILE_USER, applications: [], payments: [], paid_total_inr: 0, history: [] });
+  await page.goto('/admin/users/u-42');
+
+  await expect(page.getByTestId('admin-role-banner')).toContainText('Viewer');
+  await expect(page.getByTestId('admin-user-profile')).toContainText('Ravi Kumar');
+  await expect(page.getByTestId('suspend-user')).toHaveCount(0);
+});
+
+test('when 2FA is required, every page sends the admin to My security', async ({ page, api }) => {
+  await adminSignIn(page, api, { ...ADMIN, totp_enabled: false, two_factor_required: true });
+  await page.goto('/admin/payments');
+
+  await expect(page).toHaveURL(/\/admin\/security$/);
+  await expect(page.getByTestId('admin-2fa-required')).toBeVisible();
+  await expect(page.getByTestId('2fa-start')).toBeVisible();
+});

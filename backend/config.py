@@ -16,6 +16,8 @@ JWT_ALG = os.environ.get('JWT_ALG', 'HS256')
 # User session tokens vs. admin console tokens (admin sessions are deliberately shorter).
 JWT_EXPIRES_HOURS = int(os.environ.get('JWT_EXPIRES_HOURS', '24'))
 ADMIN_JWT_EXPIRES_HOURS = int(os.environ.get('ADMIN_JWT_EXPIRES_HOURS', '12'))
+# When on, an admin without two-factor can only reach the enrolment endpoints until they set it up.
+ADMIN_REQUIRE_2FA = os.environ.get('ADMIN_REQUIRE_2FA', '').lower() in ('1', 'true', 'yes')
 
 RESET_TOKEN_TTL_MIN = int(os.environ.get('RESET_TOKEN_TTL_MINUTES', '30'))
 

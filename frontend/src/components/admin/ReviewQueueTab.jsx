@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, ShieldAlert, Check, Flag, AlertTriangle } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, SEVERITY_PILL } from '../../lib/admin';
+import { adminClient, SEVERITY_PILL, canWrite } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
@@ -10,7 +10,7 @@ const STATES = [['open', 'To review'], ['suspicious', 'Marked suspicious'], ['cl
 const fmt = (iso) => (iso ? new Date(iso + (iso.endsWith('Z') ? '' : 'Z')).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—');
 const label = (s) => (s || 'document').replace(/_/g, ' ');
 
-function ReviewRow({ item, token, onDecided }) {
+function ReviewRow({ item, token, onDecided, readOnly }) {
   const { toast } = useToast();
   const [flagging, setFlagging] = useState(false);
   const [note, setNote] = useState('');
@@ -58,7 +58,7 @@ function ReviewRow({ item, token, onDecided }) {
             </div>
           )}
         </div>
-        {!item.review && !flagging && (
+        {!item.review && !flagging && !readOnly && (
           <div className="flex gap-2">
             <button disabled={busy} onClick={() => decide('cleared')} data-testid={`review-clear-${item.id}`}
               className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 px-3 py-1.5 text-[12px] font-bold text-emerald-200 disabled:opacity-50">
@@ -89,7 +89,7 @@ function ReviewRow({ item, token, onDecided }) {
 }
 
 export default function ReviewQueueTab() {
-  const { token } = useAdminAuth();
+  const { token, admin } = useAdminAuth();
   const [state, setState] = useState('open');
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
@@ -130,7 +130,7 @@ export default function ReviewQueueTab() {
           <div className="px-5 py-10 text-center text-slate-400"><ShieldAlert className="w-5 h-5 inline mr-2" />Nothing here.</div>
         )}
         {data && data.items.length > 0 && (
-          <ul>{data.items.map((i) => <ReviewRow key={i.id} item={i} token={token} onDecided={state === 'open' ? remove : load} />)}</ul>
+          <ul>{data.items.map((i) => <ReviewRow key={i.id} item={i} token={token} readOnly={!canWrite(admin, 'cases')} onDecided={state === 'open' ? remove : load} />)}</ul>
         )}
       </Panel>
     </div>

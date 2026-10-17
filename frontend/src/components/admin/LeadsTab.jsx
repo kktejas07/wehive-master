@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Loader2, Search, Inbox, Download, Mail, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, downloadCsv } from '../../lib/admin';
+import { adminClient, downloadCsv, canWrite } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import Pagination from './Pagination';
 import { useToast } from '../../hooks/use-toast';
@@ -19,7 +19,8 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
 
 export default function LeadsTab() {
-  const { token } = useAdminAuth();
+  const { token, admin } = useAdminAuth();
+  const readOnly = !canWrite(admin, 'cases');
   const { toast } = useToast();
   const [status, setStatus] = useState('new');
   const [q, setQ] = useState('');
@@ -171,7 +172,7 @@ export default function LeadsTab() {
                       id={`lead-status-${l.id}`}
                       data-testid={`admin-lead-status-${l.id}`}
                       value={l.status || 'new'}
-                      disabled={busy}
+                      disabled={busy || readOnly}
                       onChange={(e) => patch(l, { status: e.target.value }, `Marked as ${e.target.value}`)}
                       className="h-9 px-2 rounded-lg bg-white/5 border border-white/10 text-[13px] text-white"
                     >

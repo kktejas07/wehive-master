@@ -89,3 +89,15 @@ export const ALERT_KIND_LABEL = {
   passport_expiring: 'Passport expiring',
   documents_pending: 'Docs to review',
 };
+
+// Mirrors admin_auth.role_allows on the server (the server is what actually enforces it):
+// everyone can view; "cases" = applications, leads, document review, profile requests;
+// "finance" = payments, pricing, promo codes; anything else needs a manager.
+const ROLE_AREAS = { support: ['cases'], finance: ['finance'], viewer: [] };
+export function canWrite(admin, area = 'manage') {
+  if (!admin) return false;
+  const role = admin.admin_role || 'manager';
+  if (admin.is_super_admin || role === 'super_admin' || role === 'manager') return true;
+  return (ROLE_AREAS[role] || []).includes(area);
+}
+export const ROLE_NAMES = { super_admin: 'Super admin', manager: 'Manager', support: 'Support', finance: 'Finance', viewer: 'Viewer' };

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Loader2, ArrowLeft, AlertTriangle, Ban, RotateCcw } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, inr, STATUS_COLORS } from '../../lib/admin';
+import { adminClient, inr, STATUS_COLORS, canWrite } from '../../lib/admin';
 import { Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
@@ -56,7 +56,7 @@ function SuspendForm({ onSubmit, onCancel, busy }) {
 
 export default function UserProfile() {
   const { id } = useParams();
-  const { token } = useAdminAuth();
+  const { token, admin } = useAdminAuth();
   const { toast } = useToast();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -129,7 +129,7 @@ export default function UserProfile() {
             {u.is_premium && <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300">Premium</span>}
           </div>
         </div>
-        {!u.is_super_admin && (
+        {!u.is_super_admin && canWrite(admin, 'manage') && (
           u.suspended ? (
             <button
               data-testid="unsuspend-user"

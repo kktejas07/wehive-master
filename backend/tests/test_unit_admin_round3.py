@@ -18,7 +18,7 @@ import routes_admin_refunds as refunds  # noqa: E402
 import routes_newsletter_campaigns as camp  # noqa: E402
 import totp  # noqa: E402
 
-RFC_SECRET = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'  # "12345678901234567890"
+RFC_SECRET = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'  # "12345678901234567890" — RFC 6238 test vector  verify:allow-secret
 
 
 # ── TOTP ──────────────────────────────────────────────────────────────────────
@@ -333,3 +333,24 @@ def test_mrz_date_century():
     assert review._mrz_date('310101', future=True) == date(2031, 1, 1)
     assert review._mrz_date('xx0101', future=True) is None
     assert (date.today() - timedelta(days=1)) < date.today()
+
+
+# ── mandatory 2FA ─────────────────────────────────────────────────────────────
+@pytest.mark.asyncio
+async def test_required_2fa_only_allows_enrolment(monkeypatch):
+    import config
+    import db
+    monkeypatch.setattr(config, 'ADMIN_REQUIRE_2FA', True)
+    monkeypatch.setattr(db, 'users', _users({'_id': 'a1', 'is_admin': True, 'email': 'a@x.com'}))
+    tok = f'Bearer {admin_auth.sign_admin_jwt("a1")}'
+
+    def req(method, path):
+        return MagicMock(method=method, url=MagicMock(path=path))
+
+    with pytest.raises(HTTPException) as exc:
+        await admin_auth.get_current_admin_flex(tok, req('GET', '/api/admin/metrics'))
+    assert exc.value.detail == admin_auth.TWO_FACTOR_SETUP_REQUIRED
+    for path in ('/api/admin-auth/me', '/api/admin-auth/2fa/setup', '/api/admin-auth/2fa/enable'):
+        assert (await admin_auth.get_current_admin_flex(tok, req('POST', path)))['_id'] == 'a1'
+    monkeypatch.setattr(config, 'ADMIN_REQUIRE_2FA', False)
+    assert (await admin_auth.get_current_admin_flex(tok, req('GET', '/api/admin/metrics')))['_id'] == 'a1'

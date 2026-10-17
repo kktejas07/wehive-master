@@ -24,6 +24,7 @@ import re
 
 from fastapi import Depends, HTTPException, Header, Request
 
+import config
 from config import ADMIN_EMAILS, JWT_SECRET, JWT_ALG, ADMIN_JWT_EXPIRES_HOURS, RESET_TOKEN_TTL_MIN
 
 
@@ -209,12 +210,22 @@ def role_allows(role: Optional[str], method: str, path: str) -> bool:
     return bool(rx and rx.search(path))
 
 
+TWO_FACTOR_SETUP_REQUIRED = 'Two-factor authentication is required. Turn it on in My security to continue.'
+_ENROLMENT_PATHS = re.compile(r'^/admin-auth/(me|2fa/setup|2fa/enable|change-password)$|^/admin/me$')
+
+
+def needs_2fa_enrolment(user: dict) -> bool:
+    return config.ADMIN_REQUIRE_2FA and not user.get('totp_enabled')
+
+
 async def get_current_admin_flex(
     authorization: Optional[str] = Header(default=None),
     request: Request = None,  # injected by FastAPI; None when called directly
 ):
     """Resolve the admin, then apply their role to this request (see ADMIN_ROLES)."""
     user = await _resolve_admin(authorization)
+    if request is not None and needs_2fa_enrolment(user) and not _ENROLMENT_PATHS.search(re.sub(r'^/api', '', request.url.path)):
+        raise HTTPException(403, TWO_FACTOR_SETUP_REQUIRED)
     if request is not None and not is_super_admin(user) and not role_allows(user.get('admin_role'), request.method, request.url.path):
         role = user.get('admin_role')
         raise HTTPException(403, f'Your admin role ({role}) can view this but not change it.')

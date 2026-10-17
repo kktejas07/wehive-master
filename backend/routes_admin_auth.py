@@ -31,7 +31,7 @@ from admin_auth import (
     generate_reset_token, hash_token,
     is_locked_out, record_failed_attempt, clear_attempts,
     send_reset_email_or_log,
-    get_current_admin_flex, get_super_admin, is_super_admin, ADMIN_ROLES,
+    get_current_admin_flex, get_super_admin, is_super_admin, ADMIN_ROLES, needs_2fa_enrolment,
 )
 from audit import record as audit_record
 from config import ADMIN_EMAILS, IS_DEV, FRONTEND_URL as SITE_URL
@@ -60,6 +60,7 @@ def _public_admin(u: dict) -> dict:
         'is_premium': bool(u.get('is_premium', False)),
         'has_password': bool(u.get('password_hash')),
         'totp_enabled': bool(u.get('totp_enabled')),
+        'two_factor_required': needs_2fa_enrolment(u),
         'admin_role': 'super_admin' if is_super_admin(u) else (u.get('admin_role') or 'manager'),
         'recovery_codes_left': len(u.get('totp_recovery') or []) if u.get('totp_enabled') else 0,
         'password_updated_at': u.get('password_updated_at').isoformat() if isinstance(u.get('password_updated_at'), datetime) else u.get('password_updated_at'),

@@ -4,7 +4,7 @@ import {
   Loader2, ArrowLeft, AlertTriangle, FileText, Eye, Check, X, RotateCcw, Send, Lock, ShieldCheck, ShieldAlert, ExternalLink,
 } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, inr, STATUS_COLORS, SEVERITY_PILL } from '../../lib/admin';
+import { adminClient, inr, STATUS_COLORS, SEVERITY_PILL, canWrite } from '../../lib/admin';
 import { Panel } from './AdminShell';
 import { StatusDialog } from './ApplicationsTab';
 import { useToast } from '../../hooks/use-toast';
@@ -75,7 +75,7 @@ function Overview({ c }) {
   );
 }
 
-function Documents({ c, token, onChanged }) {
+function Documents({ c, token, onChanged, readOnly }) {
   const { toast } = useToast();
   const [review, setReview] = useState(null); // { docId, status }
   const [reason, setReason] = useState('');
@@ -139,6 +139,7 @@ function Documents({ c, token, onChanged }) {
                 <button data-testid={`case-doc-view-${d._id}`} onClick={() => view(d)} className={`${btn} bg-white/5 hover:bg-white/10 text-slate-200`}>
                   <Eye className="w-3.5 h-3.5" /> View
                 </button>
+                {!readOnly && <>
                 <button data-testid={`case-doc-approve-${d._id}`} disabled={busy === d._id || d.status === 'approved'} onClick={() => submit(d, 'approved')} className={`${btn} bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300`}>
                   <Check className="w-3.5 h-3.5" /> Approve
                 </button>
@@ -148,6 +149,7 @@ function Documents({ c, token, onChanged }) {
                 <button data-testid={`case-doc-reupload-${d._id}`} disabled={busy === d._id} onClick={() => { setReview({ docId: d._id, status: 'reupload_requested' }); setReason(''); }} className={`${btn} bg-amber-500/10 hover:bg-amber-500/20 text-amber-300`}>
                   <RotateCcw className="w-3.5 h-3.5" /> Request re-upload
                 </button>
+                </>}
               </div>
             </div>
             {open && (
@@ -188,7 +190,7 @@ function Composer({ testid, placeholder, cta, busy, onSubmit }) {
   );
 }
 
-function Messages({ c, token, setCase }) {
+function Messages({ c, token, setCase, readOnly }) {
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
   const send = async (text) => {
@@ -221,13 +223,13 @@ function Messages({ c, token, setCase }) {
           );
         })}
       </ul>
-      <Composer testid="case-message" placeholder="Reply to the applicant…" cta="Send" busy={busy} onSubmit={send} />
+      {!readOnly && <Composer testid="case-message" placeholder="Reply to the applicant…" cta="Send" busy={busy} onSubmit={send} />}
       <p className="mt-1.5 text-[11.5px] text-slate-500">The applicant is notified of every reply.</p>
     </Panel>
   );
 }
 
-function Notes({ c, token, setCase }) {
+function Notes({ c, token, setCase, readOnly }) {
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
   const add = async (text) => {
@@ -257,7 +259,7 @@ function Notes({ c, token, setCase }) {
           </li>
         ))}
       </ul>
-      <Composer testid="case-note" placeholder="Add an internal note…" cta="Add note" busy={busy} onSubmit={add} />
+      {!readOnly && <Composer testid="case-note" placeholder="Add an internal note…" cta="Add note" busy={busy} onSubmit={add} />}
     </Panel>
   );
 }
@@ -330,6 +332,7 @@ export default function ApplicationCase() {
   const [staff, setStaff] = useState([]);
   const [change, setChange] = useState(null);
   const [busy, setBusy] = useState(false);
+  const readOnly = !canWrite(admin, 'cases');
 
   const load = useCallback(async () => {
     setError(null);
@@ -419,7 +422,7 @@ export default function ApplicationCase() {
             </span>
           </div>
         </div>
-        <div className="flex flex-wrap items-end gap-2">
+        <fieldset disabled={readOnly} className="flex flex-wrap items-end gap-2 disabled:opacity-60">
           <label className="text-[11px] font-semibold text-slate-400">
             <span className="block mb-1">Status</span>
             <select
@@ -451,7 +454,7 @@ export default function ApplicationCase() {
               Assign to me
             </button>
           )}
-        </div>
+        </fieldset>
       </div>
 
       {c.alerts?.length > 0 && (
@@ -481,9 +484,9 @@ export default function ApplicationCase() {
 
       <div role="tabpanel">
         {tab === 'overview' && <Overview c={c} />}
-        {tab === 'documents' && <Documents c={c} token={token} onChanged={load} />}
-        {tab === 'messages' && <Messages c={c} token={token} setCase={setCase} />}
-        {tab === 'notes' && <Notes c={c} token={token} setCase={setCase} />}
+        {tab === 'documents' && <Documents c={c} token={token} onChanged={load} readOnly={readOnly} />}
+        {tab === 'messages' && <Messages c={c} token={token} setCase={setCase} readOnly={readOnly} />}
+        {tab === 'notes' && <Notes c={c} token={token} setCase={setCase} readOnly={readOnly} />}
         {tab === 'timeline' && <Timeline c={c} />}
         {tab === 'scans' && <Scans c={c} />}
       </div>

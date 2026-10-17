@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, Search, Trash2, Crown, UserCog, AlertTriangle } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient } from '../../lib/admin';
+import { adminClient, canWrite } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import Pagination from './Pagination';
 import { useToast } from '../../hooks/use-toast';
@@ -28,6 +28,7 @@ function Chip({ children, color = 'slate' }) {
 export default function UsersTab() {
   const { token, admin } = useAdminAuth();
   const isSuper = !!admin?.is_super_admin;
+  const canManage = canWrite(admin, 'manage');
   const { toast } = useToast();
   const [items, setItems] = useState(null);
   const [total, setTotal] = useState(0);
@@ -172,6 +173,7 @@ export default function UsersTab() {
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                    {canManage && <>
                     <button
                       data-testid={`toggle-premium-${u.id}`}
                       disabled={busy === u.id}
@@ -188,6 +190,7 @@ export default function UsersTab() {
                     >
                       <UserCog className="w-3 h-3" /> {u.is_staff ? 'Unstaff' : 'Staff'}
                     </button>
+                    </>}
                     {isSuper && (
                       <button
                         data-testid={`delete-user-${u.id}`}
