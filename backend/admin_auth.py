@@ -20,8 +20,11 @@ from typing import Optional
 
 import bcrypt
 import jwt
-from fastapi import HTTPException, Header
+import re
 
+from fastapi import Depends, HTTPException, Header, Request
+
+import config
 from config import ADMIN_EMAILS, JWT_SECRET, JWT_ALG, ADMIN_JWT_EXPIRES_HOURS, RESET_TOKEN_TTL_MIN
 
 
@@ -48,14 +51,43 @@ def password_strength_issue(pw: str) -> Optional[str]:
 
 
 # ---------- tokens ----------
-def sign_admin_jwt(user_id: str) -> str:
+def sign_admin_jwt(user_id: str, mfa: bool = False) -> str:
     payload = {
         'sub': user_id,
         'role': 'admin',
         'exp': datetime.utcnow() + timedelta(hours=ADMIN_JWT_EXPIRES_HOURS),
         'iat': datetime.utcnow(),
     }
+    if mfa:
+        payload['mfa'] = True  # issued after a second factor; required once 2FA is on
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+
+
+# The half-way token between password and 2FA code. Signed with a derived key so it can never be
+# accepted as a user or admin session token.
+MFA_TOKEN_MINUTES = 5
+
+
+def _mfa_key() -> str:
+    return hashlib.sha256(f'{JWT_SECRET}|admin-mfa'.encode()).hexdigest()
+
+
+def sign_mfa_token(user_id: str) -> str:
+    now = datetime.utcnow()
+    return jwt.encode({'sub': user_id, 'purpose': 'admin_mfa', 'iat': now,
+                       'exp': now + timedelta(minutes=MFA_TOKEN_MINUTES)}, _mfa_key(), algorithm='HS256')
+
+
+def decode_mfa_token(token: str) -> str:
+    try:
+        payload = jwt.decode(token, _mfa_key(), algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail='The sign-in took too long. Enter your password again.')
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail='Invalid sign-in session. Enter your password again.')
+    if payload.get('purpose') != 'admin_mfa':
+        raise HTTPException(status_code=401, detail='Invalid sign-in session.')
+    return payload['sub']
 
 
 def decode_admin_jwt(token: str) -> dict:
@@ -148,9 +180,59 @@ async def send_reset_email_or_log(to_email: str, raw_token: str, frontend_url: s
 
 
 # ---------- dependency ----------
+# ---------- admin roles ----------
+# Every admin can read everything in the panel; writes depend on the role. Super admins
+# (ADMIN_EMAILS) and admins without a role ("manager", the pre-roles behaviour) can write anywhere
+# their endpoint allows. Paths are relative to /api.
+ADMIN_ROLES = {
+    'manager': 'Full access (except super-admin settings)',
+    'support': 'Applications, cases, leads, document review, profile requests',
+    'finance': 'Payments, pricing and promo codes',
+    'viewer': 'Read-only',
+}
+_ANY_ROLE_WRITES = re.compile(
+    r'^/admin-auth/(change-password|2fa/|login)|^/admin/(me|change-password)$'
+    r'|^/rag/(retrieve|query)$|^/newsletter/admin/campaigns/(preview|test)$'  # POSTs that only read
+)
+_ROLE_WRITES = {
+    'support': re.compile(r'^/admin/(applications|leads|review-queue|profile-requests)(/|$)'),
+    'finance': re.compile(r'^/admin/(payments|pricing)(/|$)|^/promotions/'),
+}
+
+
+def role_allows(role: Optional[str], method: str, path: str) -> bool:
+    path = re.sub(r'^/api', '', path)
+    if method in ('GET', 'HEAD', 'OPTIONS') or not role or role == 'manager':
+        return True
+    if _ANY_ROLE_WRITES.search(path):
+        return True
+    rx = _ROLE_WRITES.get(role)
+    return bool(rx and rx.search(path))
+
+
+TWO_FACTOR_SETUP_REQUIRED = 'Two-factor authentication is required. Turn it on in My security to continue.'
+_ENROLMENT_PATHS = re.compile(r'^/admin-auth/(me|2fa/setup|2fa/enable|change-password)$|^/admin/me$')
+
+
+def needs_2fa_enrolment(user: dict) -> bool:
+    return config.ADMIN_REQUIRE_2FA and not user.get('totp_enabled')
+
+
 async def get_current_admin_flex(
     authorization: Optional[str] = Header(default=None),
+    request: Request = None,  # injected by FastAPI; None when called directly
 ):
+    """Resolve the admin, then apply their role to this request (see ADMIN_ROLES)."""
+    user = await _resolve_admin(authorization)
+    if request is not None and needs_2fa_enrolment(user) and not _ENROLMENT_PATHS.search(re.sub(r'^/api', '', request.url.path)):
+        raise HTTPException(403, TWO_FACTOR_SETUP_REQUIRED)
+    if request is not None and not is_super_admin(user) and not role_allows(user.get('admin_role'), request.method, request.url.path):
+        role = user.get('admin_role')
+        raise HTTPException(403, f'Your admin role ({role}) can view this but not change it.')
+    return user
+
+
+async def _resolve_admin(authorization: Optional[str]):
     """Accept either:
        • an admin JWT (role=admin)
        • a regular user OTP JWT whose email is in ADMIN_EMAILS
@@ -163,18 +245,22 @@ async def get_current_admin_flex(
         raise HTTPException(status_code=401, detail='Not authenticated')
     token = authorization.split(' ', 1)[1].strip()
 
-    # Try admin JWT first
+    # Try admin JWT first. A valid admin token is judged on its own rules — its errors are final.
     try:
         payload = decode_admin_jwt(token)
-        if payload.get('role') == 'admin':
-            user = await users.find_one({'_id': payload['sub']})
-            if not user:
-                raise HTTPException(401, 'Admin account not found')
-            if not user.get('is_admin'):
-                raise HTTPException(403, 'Admin privileges revoked')
-            return user
     except HTTPException:
-        pass
+        payload = None
+    if payload and payload.get('role') == 'admin':
+        user = await users.find_one({'_id': payload['sub']})
+        if not user:
+            raise HTTPException(401, 'Admin account not found')
+        if not user.get('is_admin'):
+            raise HTTPException(403, 'Admin privileges revoked')
+        if user.get('suspended'):
+            raise HTTPException(403, 'Account suspended')
+        if user.get('totp_enabled') and not payload.get('mfa'):
+            raise HTTPException(401, 'Two-factor sign-in required — please log in again.')
+        return user
 
     # Fall back to user OTP JWT + ADMIN_EMAILS allow-list
     try:
@@ -184,8 +270,25 @@ async def get_current_admin_flex(
     user = await users.find_one({'_id': payload['sub']})
     if not user:
         raise HTTPException(401, 'User not found')
+    if user.get('suspended'):
+        raise HTTPException(403, 'Account suspended')
+    if user.get('totp_enabled'):
+        # A student OTP session must not skip the admin second factor.
+        raise HTTPException(403, 'Two-factor is on for this admin — sign in at /admin/login.')
     email = (user.get('email') or '').lower()
     # The allow-list only counts once the user has proven they own the address.
     if user.get('is_admin') or (email in ADMIN_EMAILS and user.get('email_verified') is True):
         return user
     raise HTTPException(status_code=403, detail='Admin access required')
+
+
+def is_super_admin(user: dict) -> bool:
+    """Super admins are the env-managed ADMIN_EMAILS accounts (bootstrapped on startup)."""
+    return (user.get('email') or '').lower() in ADMIN_EMAILS
+
+
+async def get_super_admin(user=Depends(get_current_admin_flex)):
+    """Gate for secrets, admin management and destructive ops; invited admins get 403."""
+    if not is_super_admin(user):
+        raise HTTPException(status_code=403, detail='Only a super admin can do this.')
+    return user

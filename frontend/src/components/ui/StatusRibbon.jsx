@@ -11,7 +11,7 @@ const STYLES = {
   error: { bar: 'bg-[hsl(var(--red-500))]', Icon: AlertCircle, role: 'alert', live: 'assertive' },
 };
 
-const CONFETTI_COLOURS = ['#CF1426', '#00247D', '#FFFFFF', '#CF1426', '#00247D'];
+const CONFETTI_COLOURS = ['#E10600', '#011CB5', '#FFFFFF', '#E10600', '#011CB5'];
 
 function Confetti() {
   const pieces = useMemo(

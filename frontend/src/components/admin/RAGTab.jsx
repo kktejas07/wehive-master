@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Database, Loader2, RefreshCw, Trash2, Search, FileText, Server, Cpu } from 'lucide-react';
+import { Database, Loader2, RefreshCw, Trash2, Search, FileText, Server, Cpu, Upload } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
@@ -18,9 +18,9 @@ function StatusBadge({ ok, label }) {
 }
 
 export default function RAGTab() {
-  const { admin } = useAdminAuth();
+  const { admin, token } = useAdminAuth();
+  const isSuper = !!admin?.is_super_admin;
   const { toast } = useToast();
-  const token = admin?.token || admin?.access_token;
 
   const [status, setStatus] = useState(null);
   const [collections, setCollections] = useState([]);
@@ -68,9 +68,28 @@ export default function RAGTab() {
     }
   };
 
+  const [uploading, setUploading] = useState(false);
+  const uploadDoc = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !token) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const r = await axios.post(`${API}/admin/rag/upload`, form, { headers: { Authorization: `Bearer ${token}` } });
+      toast({ title: `Added ${file.name}`, description: `${r.data.result?.chunks ?? 0} chunks · the chatbot can now answer from it` });
+      await refresh();
+    } catch (err) {
+      toast({ title: 'Upload failed', description: err?.response?.data?.detail || err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const wipeCollection = async (name) => {
     if (!token) return;
-    if (!confirm(`Wipe all chunks in "${name}"?`)) return;
+    if (!window.confirm(`Wipe all chunks in "${name}"?`)) return;
     try {
       await axios.delete(`${API}/rag/collections/${name}`, { headers: { Authorization: `Bearer ${token}` } });
       toast({ title: `Wiped ${name}` });
@@ -203,9 +222,11 @@ export default function RAGTab() {
                   <div className="text-[13px] font-mono text-white">{c.name}</div>
                   <div className="text-[11px] text-slate-400">{c.count} chunks</div>
                 </div>
-                <button onClick={() => wipeCollection(c.name)} className="px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 hover:bg-red-500/25 text-[11px] font-bold inline-flex items-center gap-1">
-                  <Trash2 className="w-3 h-3" /> Wipe
-                </button>
+                {isSuper && (
+                  <button onClick={() => wipeCollection(c.name)} data-testid={`rag-wipe-${c.name}`} className="px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 hover:bg-red-500/25 text-[11px] font-bold inline-flex items-center gap-1">
+                    <Trash2 className="w-3 h-3" /> Wipe
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -219,7 +240,18 @@ export default function RAGTab() {
             {ingesting === 'universities' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
             Ingest Universities
           </button>
+          <label
+            data-testid="rag-upload"
+            className={`h-10 px-4 rounded-lg bg-white/10 hover:bg-white/15 text-[12px] font-semibold text-white inline-flex items-center gap-1.5 cursor-pointer focus-within:ring-2 focus-within:ring-blue-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+          >
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            Upload document
+            <input type="file" accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" onChange={uploadDoc} className="sr-only" disabled={uploading} />
+          </label>
         </div>
+        <p className="mt-2 text-[12px] text-slate-400">
+          PDF, .txt or .md up to 20 MB — visa guides, embassy checklists, FAQs. Uploads go to <span className="font-mono">wehive_kb</span>, which the chatbot searches first.
+        </p>
       </Panel>
 
       <Panel>

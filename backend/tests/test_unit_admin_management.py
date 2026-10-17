@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 import routes_admin_auth  # noqa: E402
 import routes_hive_learning  # noqa: E402
-from admin_auth import get_current_admin_flex  # noqa: E402
+from admin_auth import get_current_admin_flex, get_super_admin  # noqa: E402
 from server import app  # noqa: E402
 
 ENV_ADMIN = "owner@example.com"
@@ -130,9 +130,12 @@ def env(monkeypatch):
     monkeypatch.setattr(routes_admin_auth, "ADMIN_EMAILS", {ENV_ADMIN})
     monkeypatch.setattr(routes_admin_auth, "_send_admin_invite", fake_send)
     monkeypatch.setattr(routes_admin_auth, "audit_record", fake_audit)
+    # Managing admins is super-admin only; these tests exercise that flow as a super admin.
     app.dependency_overrides[get_current_admin_flex] = lambda: dict(ME)
+    app.dependency_overrides[get_super_admin] = lambda: dict(ME)
     yield SimpleNamespace(client=TestClient(app), users=users, tokens=tokens, sent=sent, audit=audit)
     app.dependency_overrides.pop(get_current_admin_flex, None)
+    app.dependency_overrides.pop(get_super_admin, None)
 
 
 def test_admin_endpoints_require_admin():

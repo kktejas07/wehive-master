@@ -61,7 +61,8 @@ from routes_chatbot import RE_COUNTRY_CODE, RE_STUDENT_KEYWORDS, RE_VISA_KEYWORD
 class TestChatbotHelpers:
     @pytest.mark.asyncio
     async def test_gather_context_empty(self):
-        with patch("routes_chatbot.lookup_country", new=AsyncMock(return_value=None)):
+        with patch("routes_chatbot.lookup_country", new=AsyncMock(return_value=None)), \
+                patch("routes_chatbot._rag_context", new=AsyncMock(return_value="")):
             result = await _gather_context("Hello")
             assert result == ""
 

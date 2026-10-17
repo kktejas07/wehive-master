@@ -18,7 +18,7 @@ from constants import REFERRAL_REWARD_INR
 from rate_limit import RateLimit
 import uuid
 
-from config import ADMIN_EMAILS, OTP_TTL_MIN, IS_DEV
+from config import ADMIN_EMAILS, OTP_TTL_MIN, IS_DEV, SUPPORT_EMAIL
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -167,6 +167,14 @@ async def send_otp(req: SendOtpRequest, request: Request, _=Depends(_otp_limiter
     )
 
 
+SUSPENDED_DETAIL = f'This account has been suspended. Contact {SUPPORT_EMAIL} if you think this is a mistake.'
+
+
+def _ensure_not_suspended(user: dict) -> None:
+    if user.get('suspended'):
+        raise HTTPException(status_code=403, detail=SUSPENDED_DETAIL)
+
+
 @router.post('/verify-otp', response_model=AuthTokens)
 async def verify_otp(req: VerifyOtpRequest, bg: BackgroundTasks, _=Depends(_verify_limiter)):
     from otp_service import consume_otp
@@ -180,6 +188,7 @@ async def verify_otp(req: VerifyOtpRequest, bg: BackgroundTasks, _=Depends(_veri
         raise HTTPException(status_code=400, detail=result['error'])
 
     user, is_new = await _find_or_create_user(identifier, channel, req.name or '', req.referral_code or '')
+    _ensure_not_suspended(user)
     token = sign_jwt(user['_id'])
 
     if is_new and result.get('purpose') == 'signup':
@@ -256,6 +265,7 @@ async def firebase_sync(req: FirebaseSyncRequest, request: Request, _=Depends(_v
         if not user:
             raise HTTPException(status_code=400, detail='No email associated with Firebase account')
 
+    _ensure_not_suspended(user)
     token = sign_jwt(user['_id'])
     return AuthTokens(access_token=token, user=_public(user))
 

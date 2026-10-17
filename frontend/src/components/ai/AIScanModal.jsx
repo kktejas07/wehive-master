@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Upload, Loader2, X, Check, AlertTriangle, Crown } from 'lucide-react';
+import { Sparkles, Upload, Loader2, X, Check, AlertTriangle, Crown, ShieldCheck } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAuth, API } from '../../context/AuthContext';
 import { useToast } from '../../hooks/use-toast';
@@ -68,6 +68,31 @@ function PremiumGate({ onUpgrade, upgrading }) {
   );
 }
 
+// Issuer looked up in Google Knowledge Graph by the backend (absent when no KG key is configured).
+function IssuerVerification({ v }) {
+  if (!v) return null;
+  if (!v.found) {
+    return (
+      <div data-testid="scan-issuer-unverified" className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 text-[13px] text-amber-800">
+        <div className="flex items-center gap-2 font-bold"><AlertTriangle className="w-4 h-4" aria-hidden="true" /> Issuer not found</div>
+        <p className="mt-1">We couldn't match “{v.query}” to a known organisation. Double-check the issuer before submitting.</p>
+      </div>
+    );
+  }
+  return (
+    <div data-testid="scan-issuer-verified" className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-[13px] text-emerald-800">
+      <div className="flex items-center gap-2 font-bold"><ShieldCheck className="w-4 h-4" aria-hidden="true" /> Issuer recognised: {v.name}</div>
+      {v.description && <p className="mt-1">{v.description}</p>}
+      {v.url && (
+        <a href={v.url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block font-semibold underline underline-offset-2 break-all">
+          {v.url}
+        </a>
+      )}
+      <p className="mt-1 text-[12px] opacity-80">Source: Google Knowledge Graph</p>
+    </div>
+  );
+}
+
 function ExtractionView({ data, onConfirm, onRetry }) {
   if (!data) return null;
   const warnings = data.warnings || [];
@@ -106,6 +131,8 @@ function ExtractionView({ data, onConfirm, onRetry }) {
           ))}
         </dl>
       </div>
+
+      <IssuerVerification v={data.issuer_verification} />
 
       {warnings.length > 0 && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4">

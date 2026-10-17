@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight, History, Pencil, Plus, Trash2, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Loader2, TrendingUp, Users, FileStack, Banknote, Globe, ArrowUpRight, History, Pencil, Plus, Trash2, Play, AlertTriangle } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, inr, runAggregators } from '../../lib/admin';
+import { adminClient, inr, runAggregators, SEVERITY_PILL, ALERT_KIND_LABEL } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
@@ -47,6 +48,148 @@ function SparkBars({ data, metric = 'applications', accent = 'hsl(var(--blue-500
   );
 }
 
+const SEVERITY_DOT = { critical: 'bg-red-400', warning: 'bg-amber-400', info: 'bg-blue-300' };
+
+// Cases that need action soon (GET /admin/alerts), critical first.
+function NeedsAttention({ token }) {
+  const [mine, setMine] = useState(false);
+  const [data, setData] = useState(null);
+  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    setData(null);
+    setErr('');
+    adminClient(token)
+      .get('/alerts', { params: { mine } })
+      .then((r) => setData(r.data))
+      .catch((e) => setErr(e?.response?.data?.detail || e.message));
+  }, [token, mine]);
+
+  return (
+    <Panel className="mb-6">
+      <div data-testid="admin-needs-attention" className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2 text-[15px] font-display font-bold text-white">
+          <AlertTriangle className="w-4 h-4 text-amber-300" /> Needs attention
+          {data && <span className="text-[12px] font-semibold text-slate-400 tabular-nums">{data.total}</span>}
+        </div>
+        <label className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-300 cursor-pointer">
+          <input data-testid="alerts-mine-toggle" type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} className="accent-[hsl(var(--blue-700))]" />
+          Mine only
+        </label>
+      </div>
+      {data && Object.keys(data.counts || {}).length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {Object.entries(data.counts).map(([k, n]) => (
+            <span key={k} data-testid={`alerts-count-${k}`} className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11.5px] font-semibold text-slate-300">
+              {ALERT_KIND_LABEL[k] || k} <span className="tabular-nums text-white">{n}</span>
+            </span>
+          ))}
+        </div>
+      )}
+      {!data && !err && <Loader2 className="w-4 h-4 animate-spin text-blue-300" />}
+      {err && <p className="text-[13px] text-red-300">Could not load alerts: {err}</p>}
+      {data?.items.length === 0 && <p className="text-[13px] text-slate-400">Nothing needs attention right now.</p>}
+      <ul className="divide-y divide-white/5">
+        {data?.items.slice(0, 8).map((a, i) => (
+          <li key={`${a.application_id}-${a.kind}-${i}`}>
+            <Link
+              to={`/admin/applications/${a.application_id}`}
+              data-testid={`alert-link-${a.application_id}-${a.kind}`}
+              className="flex items-center gap-3 py-2.5 hover:bg-white/5 rounded-lg px-2 -mx-2"
+            >
+              <span className={`h-2 w-2 rounded-full shrink-0 ${SEVERITY_DOT[a.severity] || SEVERITY_DOT.info}`} />
+              <div className="flex-1 min-w-0">
+                <div className="text-[13.5px] font-semibold text-white truncate">{a.message}</div>
+                <div className="text-[12px] text-slate-400 truncate">{[a.applicant, a.country, a.visa_type].filter(Boolean).join(' · ')}</div>
+              </div>
+              <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.1em] ${SEVERITY_PILL[a.severity] || SEVERITY_PILL.info}`}>{a.severity}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Panel>
+  );
+}
+
+const FUNNEL_RANGES = [[30, '30 days'], [90, '90 days'], [365, '12 months']];
+
+// Signup cohort for the chosen window → how far each user got. Revenue here is real paid orders,
+// unlike the "Revenue (est.)" card which is computed from application fees.
+function Funnel({ token }) {
+  const [days, setDays] = useState(90);
+  const [data, setData] = useState(null);
+  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    let live = true;
+    setData(null);
+    setErr('');
+    adminClient(token).get('/funnel', { params: { days } })
+      .then((r) => live && setData(r.data))
+      .catch((e) => live && setErr(e?.response?.data?.detail || e.message));
+    return () => { live = false; };
+  }, [token, days]);
+
+  const top = data?.steps?.[0]?.count || 0;
+  return (
+    <Panel className="mt-5" >
+      <div className="flex items-center justify-between gap-3 flex-wrap" data-testid="admin-funnel">
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Conversion funnel</div>
+          <div className="text-[12px] text-slate-400 mt-0.5">Users who signed up in the window, and how far they got</div>
+        </div>
+        <div className="flex gap-1" role="group" aria-label="Funnel window">
+          {FUNNEL_RANGES.map(([d, l]) => (
+            <button
+              key={d}
+              onClick={() => setDays(d)}
+              aria-pressed={days === d}
+              className={`h-8 px-3 rounded-lg text-[12px] font-bold ${days === d ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 text-slate-300 hover:text-white'}`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+      {err && <div className="mt-4 text-[13px] text-red-300" role="alert">Could not load funnel: {err}</div>}
+      {!data && !err && <div className="py-8 text-center"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></div>}
+      {data && (
+        <div className="mt-4 grid lg:grid-cols-3 gap-5">
+          <ol className="lg:col-span-2 space-y-2.5">
+            {data.steps.map((s) => (
+              <li key={s.key} data-testid={`funnel-${s.key}`}>
+                <div className="flex justify-between text-[12.5px]">
+                  <span className="text-slate-200">{s.label}</span>
+                  <span className="text-white font-bold">
+                    {s.count.toLocaleString('en-IN')}
+                    {s.from_previous != null && <span className="text-slate-400 font-normal"> · {s.from_previous}% of previous</span>}
+                  </span>
+                </div>
+                <div className="mt-1 h-2.5 rounded-full bg-white/5 overflow-hidden">
+                  <div className="h-full rounded-full bg-[hsl(var(--blue-500))]" style={{ width: `${top ? Math.max(2, (100 * s.count) / top) : 0}%` }} />
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="space-y-2">
+            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Paid revenue</div>
+            <div className="text-[26px] font-display font-bold text-white" data-testid="funnel-paid-revenue">{inr(data.revenue.paid_inr)}</div>
+            <div className="text-[12px] text-slate-400">
+              {data.revenue.paid_count} orders · avg {inr(data.revenue.avg_order_inr)}
+            </div>
+            {data.revenue.by_plan.slice(0, 4).map((p) => (
+              <div key={p.plan_id} className="flex justify-between text-[12.5px] border-t border-white/5 pt-1.5">
+                <span className="text-slate-300">{p.plan_id}</span>
+                <span className="text-white">{inr(p.amount_inr)} <span className="text-slate-400">· {p.count}</span></span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
 export default function OverviewTab() {
   const { token } = useAdminAuth();
   const [data, setData] = useState(null);
@@ -63,20 +206,24 @@ export default function OverviewTab() {
 
   if (err) {
     return (
-      <>
+      // Same element shape as the loaded view so NeedsAttention keeps its state (no refetch).
+      <div>
         <AdminHeader title="Overview" />
+        <NeedsAttention token={token} />
         <Panel>
           <div className="text-[14px] text-red-300" data-testid="admin-metrics-error">{err}</div>
         </Panel>
-      </>
+      </div>
     );
   }
   if (!data) {
     return (
-      <>
+      // Same element shape as the loaded view so NeedsAttention keeps its state (no refetch).
+      <div>
         <AdminHeader title="Overview" />
+        <NeedsAttention token={token} />
         <Panel><Loader2 className="w-5 h-5 animate-spin text-blue-300" /></Panel>
-      </>
+      </div>
     );
   }
 
@@ -102,6 +249,8 @@ export default function OverviewTab() {
           </button>
         }
       />
+
+      <NeedsAttention token={token} />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
@@ -137,6 +286,8 @@ export default function OverviewTab() {
           accent="bg-blue-500"
         />
       </div>
+
+      <Funnel token={token} />
 
       <div className="grid lg:grid-cols-3 gap-4 mt-5">
         <Panel className="lg:col-span-2">

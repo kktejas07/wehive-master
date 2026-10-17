@@ -11,11 +11,13 @@ from typing import Optional, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from pymongo.errors import DuplicateKeyError
 
 from auth_utils import get_current_user
 from admin_auth import get_current_admin_flex
 from db import users, profile_change_requests
 from serializers import serialize_doc
+from audit import record as audit_record
 
 router = APIRouter(tags=['profile-requests'])
 
@@ -117,6 +119,19 @@ async def admin_review_request(request_id: str, body: AdminReviewRequest, admin=
     now = datetime.utcnow()
     new_status = 'approved' if body.action == 'approve' else 'rejected'
 
+    # Apply the change before marking the request approved, so a conflict leaves it pending.
+    if new_status == 'approved' and doc.get('requested_fields'):
+        update_fields = {k: v for k, v in doc['requested_fields'].items() if v is not None}
+        if update_fields:
+            user = await users.find_one({'_id': doc['user_id']}, {'email': 1}) or {}
+            if 'email' in update_fields and str(update_fields['email']).lower() != (user.get('email') or '').lower():
+                update_fields['email_verified'] = False  # new address must be re-verified
+            update_fields['updated_at'] = now
+            try:
+                await users.update_one({'_id': doc['user_id']}, {'$set': update_fields})
+            except DuplicateKeyError:
+                raise HTTPException(409, 'That email or phone already belongs to another account.')
+
     await profile_change_requests.update_one(
         {'_id': request_id},
         {'$set': {
@@ -128,11 +143,7 @@ async def admin_review_request(request_id: str, body: AdminReviewRequest, admin=
         }},
     )
 
-    if new_status == 'approved' and doc.get('requested_fields'):
-        update_fields = {k: v for k, v in doc['requested_fields'].items() if v is not None}
-        if update_fields:
-            update_fields['updated_at'] = now
-            await users.update_one({'_id': doc['user_id']}, {'$set': update_fields})
-
+    await audit_record(admin, new_status, 'profile_request', request_id,
+                       extra={'user_id': doc['user_id'], 'fields': sorted(doc.get('requested_fields') or {})})
     updated = await profile_change_requests.find_one({'_id': request_id})
     return _serialize(updated)

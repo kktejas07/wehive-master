@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Loader2, Users, FileStack, Globe, Banknote } from 'lucide-react';
+import { Download, Loader2, Users, FileStack, Globe, Banknote, Building2, Inbox } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { downloadCsv } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -10,6 +10,8 @@ const EXPORTS = [
   { id: 'applications', title: 'Applications', sub: 'Every visa application with customer + revenue.',   Icon: FileStack, accent: 'text-blue-300' },
   { id: 'countries',    title: 'Countries',    sub: 'All 250 countries, delivery & appointment rules.',  Icon: Globe,     accent: 'text-blue-300' },
   { id: 'revenue',      title: 'Revenue',      sub: 'Billable apps only (submitted + review + approved).', Icon: Banknote, accent: 'text-blue-300' },
+  { id: 'universities', title: 'Universities', sub: 'University catalogue with locations and rankings.', Icon: Building2, accent: 'text-blue-300' },
+  { id: 'leads',        title: 'Leads',        sub: 'Contact-form enquiries with status and notes.',    Icon: Inbox,     accent: 'text-blue-300' },
 ];
 
 export default function ExportsTab() {

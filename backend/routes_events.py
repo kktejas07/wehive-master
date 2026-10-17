@@ -172,7 +172,7 @@ async def admin_event_action(event_id: str, payload: GlobalEventAction, user=Dep
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Event not found")
         
-    await audit_record(user['id'], f"{payload.action.capitalize()}d global event {event_id}", "global_event", event_id)
+    await audit_record(user, payload.action, "global_event", event_id)
     return {"status": "success", "event_id": event_id, "new_status": new_status}
 
 @router.post("/scrape/trigger")
@@ -198,7 +198,7 @@ async def admin_trigger_scrape(payload: ScrapeTriggerRequest, user=Depends(get_c
             await global_events_col.insert_one(doc)
             total_added += 1
         
-        await audit_record(user['id'], f"Triggered event scrape for {payload.url}", "scrape_trigger", payload.url)
+        await audit_record(user, "trigger", "scrape", payload.url)
         return {"status": "success", "events_added": total_added}
     except Exception as e:
         logger.exception("Request failed")
@@ -209,7 +209,7 @@ async def admin_run_aggregator(user=Depends(get_current_admin_flex)):
     """Trigger the full event aggregator pipeline (admin only)."""
     try:
         asyncio.create_task(run_event_aggregator())
-        await audit_record(user['id'], "Triggered full event aggregator", "aggregator_trigger", "events")
+        await audit_record(user, "trigger", "event_aggregator", "events")
         return {"status": "success", "message": "Event aggregator started"}
     except Exception as e:
         logger.exception("Request failed")

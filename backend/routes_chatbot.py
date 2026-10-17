@@ -3,6 +3,7 @@
 Eva uses Agentic RAG: looks up real data before answering.
 """
 
+import asyncio
 import logging
 import os
 import re
@@ -14,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from rate_limit import RateLimit
 from pydantic import BaseModel
 
+import google_kg
 from ai_marketplace import marketplace
 from auth_utils import get_current_user_optional
 from config import SUPPORT_PHONE
@@ -69,6 +71,8 @@ RE_STUDENT_KEYWORDS = re.compile(
 RE_VISA_KEYWORDS = re.compile(
     r"(visa|tourist|business|work|fee|requirement|document|processing|embassy|appointment)", re.I
 )
+# Vector-store collections filled by /api/rag/ingest/* and /api/kg/rag/index.
+RAG_COLLECTIONS = ["wehive_kb", "wehive_countries", "wehive_universities", "kg_entities"]
 
 
 async def _gather_context(user_prompt: str) -> str:
@@ -120,7 +124,19 @@ async def _gather_context(user_prompt: str) -> str:
                 f"Application fee: ₹{fee_data.get('fee_inr', 'N/A')} (embassy: ₹{fee_data.get('embassy_fee', 'N/A')})"
             )
 
+    snippets.extend(s for s in await asyncio.gather(_rag_context(user_prompt), google_kg.context_for(user_prompt)) if s)
     return "\n\n".join(snippets) if snippets else ""
+
+
+async def _rag_context(user_prompt: str) -> str:
+    """Top chunks from the vector store (countries, universities, cached KG entities)."""
+    from agent_framework import _retrieve_rag_context
+    try:
+        text = await asyncio.wait_for(_retrieve_rag_context(user_prompt, RAG_COLLECTIONS, k=3), timeout=8)
+    except Exception:
+        logger.warning("RAG retrieval failed", exc_info=True)
+        return ""
+    return f"From our knowledge base:\n{text}" if text else ""
 
 
 class ChatStartRequest(BaseModel):

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Save, RotateCcw, Percent, Banknote, Globe, Search } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, inr } from '../../lib/admin';
+import { adminClient, inr, canWrite } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
@@ -25,7 +25,7 @@ const CURRENCIES = [
 const VISA_TYPES = ['Tourist', 'Business', 'Student', 'Work', 'Transit', 'Medical'];
 
 export default function PricingTab() {
-  const { token } = useAdminAuth();
+  const { token, admin } = useAdminAuth();
   const { toast } = useToast();
   const [data, setData] = useState(null);
   const [draft, setDraft] = useState(null);
@@ -238,7 +238,8 @@ export default function PricingTab() {
       <div className="mt-5 flex justify-end gap-2">
         <button
           data-testid="pricing-save-btn"
-          disabled={busy}
+          disabled={busy || !canWrite(admin, 'finance')}
+          title={canWrite(admin, 'finance') ? undefined : 'Your role can view pricing but not change it'}
           onClick={save}
           className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-60 text-white px-5 py-2.5 text-[13.5px] font-bold"
         >

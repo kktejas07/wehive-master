@@ -25,7 +25,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from admin_auth import get_current_admin_flex
+from admin_auth import get_current_admin_flex, get_super_admin
 from config import ADMIN_EMAILS, DESTINATION_IMAGE_BASE_URLS, IS_DEV
 from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS
 from audit import record as audit_record, recent as audit_recent
@@ -51,7 +51,7 @@ async def get_current_admin(user=Depends(get_current_admin_flex)):
 
 
 def _public_user(u: dict) -> dict:
-    return public_user(u, include_admin_flag=True)
+    return {**public_user(u, include_admin_flag=True), 'suspended': bool(u.get('suspended'))}
 
 
 def _serialize_app(a: dict) -> dict:
@@ -119,7 +119,7 @@ async def admin_update_me(payload: UpdateProfileBody, user=Depends(get_current_a
 
 @router.put('/change-password')
 async def admin_change_password(payload: ChangePasswordBody, user=Depends(get_current_admin)):
-    from auth_utils import verify_password, hash_password, password_strength_issue
+    from admin_auth import verify_password, hash_password, password_strength_issue
     if not verify_password(payload.current_password, user.get('password_hash', '')):
         raise HTTPException(400, 'Current password is incorrect')
     issue = password_strength_issue(payload.new_password)
@@ -127,8 +127,9 @@ async def admin_change_password(payload: ChangePasswordBody, user=Depends(get_cu
         raise HTTPException(400, issue)
     await db.users.update_one(
         {'_id': user['_id']},
-        {'$set': {'password_hash': hash_password(payload.new_password)}},
+        {'$set': {'password_hash': hash_password(payload.new_password), 'password_updated_at': datetime.utcnow()}},
     )
+    await audit_record(user, 'change_password', 'admin', user['_id'])
     return {'ok': True}
 
 
@@ -277,7 +278,7 @@ async def ai_anomalies(_=Depends(get_current_admin)):
 async def admin_list_users(
     _=Depends(get_current_admin),
     q: Optional[str] = Query(None),
-    role: Optional[Literal['all', 'premium', 'staff', 'admin']] = 'all',
+    role: Optional[Literal['all', 'premium', 'staff', 'admin', 'suspended']] = 'all',
     limit: int = Query(50, ge=1, le=500),
     skip: int = Query(0, ge=0),
 ):
@@ -289,11 +290,11 @@ async def admin_list_users(
         filt['is_premium'] = True
     elif role == 'staff':
         filt['is_staff'] = True
+    elif role == 'suspended':
+        filt['suspended'] = True
     elif role == 'admin':
-        filt['$or'] = (filt.get('$or') or []) + [
-            {'is_admin': True},
-            {'email': {'$in': list(ADMIN_EMAILS)}},
-        ]
+        is_admin = {'$or': [{'is_admin': True}, {'email': {'$in': list(ADMIN_EMAILS)}}]}
+        filt = {'$and': [filt, is_admin]} if filt else is_admin  # search AND admin, not OR
 
     total = await users.count_documents(filt)
     cur = users.find(filt).sort('created_at', -1).skip(skip).limit(limit)
@@ -305,7 +306,6 @@ class UserPatch(BaseModel):
     name: Optional[str] = None
     is_premium: Optional[bool] = None
     is_staff: Optional[bool] = None
-    is_admin: Optional[bool] = None
     staff_role: Optional[str] = None
 
 
@@ -335,7 +335,7 @@ async def admin_update_user(user_id: str, patch: UserPatch, admin=Depends(get_cu
 
 
 @router.delete('/users/{user_id}')
-async def admin_delete_user(user_id: str, admin=Depends(get_current_admin)):
+async def admin_delete_user(user_id: str, admin=Depends(get_super_admin)):
     if user_id == admin['_id']:
         raise HTTPException(400, 'You cannot delete your own admin account')
     u = await users.find_one({'_id': user_id})
@@ -369,7 +369,7 @@ class StaffCreate(BaseModel):
 
 
 @router.post('/staff')
-async def admin_create_staff(payload: StaffCreate, _=Depends(get_current_admin)):
+async def admin_create_staff(payload: StaffCreate, admin=Depends(get_current_admin)):
     email = payload.email.strip().lower()
     now = datetime.utcnow()
     existing = await users.find_one({'email': email})
@@ -395,24 +395,34 @@ async def admin_create_staff(payload: StaffCreate, _=Depends(get_current_admin))
         'updated_at': now,
     }
     await users.insert_one(new_user)
+    await audit_record(admin, 'create', 'staff', new_user['_id'], extra={'email': new_user.get('email'), 'staff_role': new_user.get('staff_role')})
     return _public_user(new_user)
 
 
 # ---------- applications ----------
 @router.get('/applications')
 async def admin_list_applications(
-    _=Depends(get_current_admin),
+    admin=Depends(get_current_admin),
     status: Optional[str] = None,
     q: Optional[str] = None,
+    assigned: Optional[str] = Query(None, description="'me', 'unassigned' or a staff user id"),
     limit: int = Query(50, ge=1, le=500),
     skip: int = Query(0, ge=0),
 ):
     filt: dict = {}
+    if assigned == 'me':
+        filt['assigned_to'] = admin['_id']
+    elif assigned == 'unassigned':
+        filt['assigned_to'] = None
+    elif assigned:
+        filt['assigned_to'] = assigned
     if status and status != 'all':
         filt['status'] = status
     if q:
         rx = {'$regex': re.escape(q), '$options': 'i'}
-        filt['$or'] = [{'country_id': rx}, {'visa_type': rx}, {'_id': rx}]
+        applicant_ids = [u['_id'] async for u in users.find({'$or': [{'name': rx}, {'email': rx}, {'phone': rx}]}, {'_id': 1}).limit(200)]
+        filt['$or'] = [{'country_id': rx}, {'visa_type': rx}, {'_id': rx},
+                       {'primary_applicant.name': rx}, {'primary_applicant.email': rx}, {'user_id': {'$in': applicant_ids}}]
 
     total = await applications.count_documents(filt)
     cur = applications.find(filt).sort('created_at', -1).skip(skip).limit(limit)
@@ -469,6 +479,10 @@ async def admin_update_application(application_id: str, patch: AppPatch, admin=D
 
     await applications.update_one({'_id': application_id}, {'$set': update})
     fresh = await applications.find_one({'_id': application_id})
+    if 'status' in update and app.get('user_id'):
+        # Same in-app notification the applicant gets when they submit (routes_apps.submit).
+        from routes_chatbot import notify_status_change
+        await notify_status_change(app['user_id'], application_id, update['status'])
     if 'status' in update or patch.note:
         await audit_record(
             admin, 'update', 'application', application_id,
@@ -811,7 +825,7 @@ class IntegrationSettings(BaseModel):
 
 
 @router.patch('/integrations')
-async def admin_update_integrations(payload: IntegrationSettings, _=Depends(get_current_admin)):
+async def admin_update_integrations(payload: IntegrationSettings, admin=Depends(get_super_admin)):
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
     if not update:
         raise HTTPException(400, 'Nothing to update')
@@ -823,19 +837,32 @@ async def admin_update_integrations(payload: IntegrationSettings, _=Depends(get_
     # Apply to process env so new OTPs use the new channel without a restart
     for k, v in update.items():
         os.environ[k] = str(v)
+    await audit_record(admin, 'update', 'integrations', 'integrations', extra={'keys': sorted(update)})
     return {'ok': True, **update}
+
+
+SECRET_MASK = '••••••••'
+_SECRET_HINTS = ('secret', 'password', 'token', 'key', 'credential', 'private', 'auth')
+
+
+def _mask_secrets(config: dict) -> dict:
+    """Never send stored secrets back to the browser; non-secret fields (ids, hosts, flags) stay readable."""
+    def secret(k: str) -> bool:
+        k = k.lower()
+        return any(h in k for h in _SECRET_HINTS) and not k.endswith(('_id', 'key_id')) and k not in ('auth_methods',)
+    return {k: (SECRET_MASK if secret(k) and isinstance(v, str) and v else v) for k, v in (config or {}).items()}
 
 
 ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'default_llm', 'together', 'postal', 'openwa', 'email'}
 
 
 @router.get('/settings/{namespace}')
-async def admin_get_settings(namespace: str, _=Depends(get_current_admin)):
+async def admin_get_settings(namespace: str, _=Depends(get_super_admin)):
     if namespace not in ALLOWED_NAMESPACES:
         raise HTTPException(400, f'Invalid namespace. Allowed: {", ".join(sorted(ALLOWED_NAMESPACES))}')
     from settings_service import get_all
     config = await get_all(namespace)
-    return {'configured': bool(config), 'config': config}
+    return {'configured': bool(config), 'config': _mask_secrets(config)}
 
 
 class NamespaceSettings(BaseModel):
@@ -843,13 +870,17 @@ class NamespaceSettings(BaseModel):
 
 
 @router.put('/settings/{namespace}')
-async def admin_update_settings(namespace: str, payload: NamespaceSettings, _=Depends(get_current_admin)):
+async def admin_update_settings(namespace: str, payload: NamespaceSettings, admin=Depends(get_super_admin)):
     if namespace not in ALLOWED_NAMESPACES:
         raise HTTPException(400, f'Invalid namespace. Allowed: {", ".join(sorted(ALLOWED_NAMESPACES))}')
-    from settings_service import set_all
+    from settings_service import get_all, set_all
     if not payload.config:
         raise HTTPException(400, 'Nothing to update')
-    await set_all(namespace, payload.config)
+    stored = await get_all(namespace)
+    # The UI round-trips masked values; keep the stored secret wherever the mask comes back unchanged.
+    config = {k: (stored.get(k) if v == SECRET_MASK and k in stored else v) for k, v in payload.config.items()}
+    await set_all(namespace, config)
+    await audit_record(admin, 'update', 'settings', namespace, extra={'keys': sorted(config)})
     return {'ok': True}
 
 
@@ -1418,7 +1449,7 @@ async def admin_regenerate_destination(
 @router.delete('/destinations/r2-image')
 async def admin_delete_r2_destination(
     country: str = Query(..., description='Country name'),
-    _=Depends(get_current_admin),
+    _=Depends(get_super_admin),
 ):
     """Delete a destination image from R2."""
     cfg = await _get_r2_settings()

@@ -37,9 +37,10 @@ export default function AdminResetPassword() {
     }
     setBusy(true);
     try {
-      await resetPassword({ token: token.trim(), new_password: password });
+      const data = await resetPassword({ token: token.trim(), new_password: password });
       setDone(true);
-      setTimeout(() => navigate('/admin', { replace: true }), 1500);
+      // With 2FA on, a reset link alone doesn't sign you in: finish at the login page.
+      setTimeout(() => navigate(data?.mfa_required ? '/admin/login' : '/admin', { replace: true }), 1500);
     } catch (ex) {
       setErr(formatDetail(ex?.response?.data?.detail) || ex.message);
     } finally {

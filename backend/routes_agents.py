@@ -13,6 +13,7 @@ from db import db
 from constants import DEFAULT_AGENT_COMMISSION_RATE
 from rate_limit import RateLimit
 from routes_apps import MAX_UPLOAD_BYTES, ALLOWED_MIME, _detect_mime
+from audit import record as audit_record
 
 router = APIRouter(prefix='/agent', tags=['agent'])
 
@@ -353,7 +354,7 @@ async def admin_list_agents(
 async def admin_update_agent(
     agent_id: str,
     data: AdminAgentUpdate,
-    _admin=Depends(get_current_admin_flex),
+    admin=Depends(get_current_admin_flex),
 ):
     updates = data.model_dump(exclude_none=True)
     if not updates:
@@ -362,6 +363,7 @@ async def admin_update_agent(
     result = await db.agents.update_one({'_id': agent_id}, {'$set': updates})
     if result.matched_count == 0:
         raise HTTPException(404, 'Agent not found')
+    await audit_record(admin, 'update', 'agent', agent_id, after={k: v for k, v in updates.items() if k != 'updated_at'})
     return {'message': 'Agent updated'}
 
 
@@ -369,7 +371,7 @@ async def admin_update_agent(
 async def admin_record_commission(
     agent_id: str,
     data: CommissionCreate,
-    _admin=Depends(get_current_admin_flex),
+    admin=Depends(get_current_admin_flex),
 ):
     if not await db.agents.find_one({'_id': agent_id}, {'_id': 1}):
         raise HTTPException(404, 'Agent not found')
@@ -384,6 +386,7 @@ async def admin_record_commission(
         {'_id': agent_id},
         {'$inc': {'total_revenue': commission['amount_inr']}, '$set': {'updated_at': datetime.utcnow()}},
     )
+    await audit_record(admin, 'create', 'commission', commission['_id'], extra={'agent_id': agent_id, 'amount_inr': commission['amount_inr']})
     return {'message': 'Commission recorded', 'commission': commission}
 
 

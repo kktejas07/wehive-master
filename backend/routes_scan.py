@@ -16,6 +16,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 
+import google_kg
 from ai_marketplace import marketplace
 from auth_utils import get_current_user
 from db import applications, scans
@@ -265,6 +266,27 @@ async def scan_passport(
     )
 
 
+async def _verify_issuer(issuer) -> Optional[dict]:
+    """Check the document's issuer (university, bank, employer, airline...) against Google Knowledge Graph.
+
+    None when there is no issuer or no KG key; `found: False` means KG has no matching organisation,
+    which is a prompt for a manual check, not proof of forgery.
+    """
+    if not isinstance(issuer, str) or len(issuer.strip()) < 3 or not google_kg.configured():
+        return None
+    e = await google_kg.lookup(issuer.strip())
+    if not e:
+        return {'source': 'google_knowledge_graph', 'query': issuer, 'found': False}
+    return {
+        'source': 'google_knowledge_graph',
+        'query': issuer,
+        'found': True,
+        'name': e['name'],
+        'description': e['description'],
+        'url': e['url'] or e['detail_url'],
+    }
+
+
 @router.post('/document', response_model=ScanResponse)
 async def scan_document(
     file: UploadFile = File(...),
@@ -277,6 +299,9 @@ async def scan_document(
     prompt = build_prompt_with_hint(DOCUMENT_PROMPT, hint or '')
     raw = await _call_ai_vision(user['_id'], prompt, content, file.content_type or 'image/jpeg')
     extracted = _parse_json(raw)
+    verification = await _verify_issuer(extracted.get('issued_by'))
+    if verification:
+        extracted['issuer_verification'] = verification
 
     result = {
         '_id': str(uuid.uuid4()),

@@ -2,14 +2,32 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 import logging
 from typing import Optional
 
+import google_kg
 from ai_marketplace import marketplace
 from auth_utils import get_current_user
 from db import db
+from eva_tools import lookup_country
 
 router = APIRouter(prefix="/travel", tags=["travel"])
 logger = logging.getLogger("wehive.travel")
 
 travel_cache = db["travel_planner_cache"]
+
+
+async def _destination(country: str) -> tuple[str, Optional[dict]]:
+    """Display name for a country id/name, plus its Knowledge Graph card (None without a KG key)."""
+    data = await lookup_country(country)
+    name = (data or {}).get("name") or country
+    e = await google_kg.lookup(name, types="Country") or await google_kg.lookup(name)
+    card = e and {
+        "name": e["name"],
+        "description": e["description"],
+        "detail": e["detail"][:500],
+        "url": e["detail_url"] or e["url"],
+        "image": e["image"],
+    }
+    return name, card
+
 
 @router.get("/planner")
 async def travel_planner(
@@ -21,15 +39,17 @@ async def travel_planner(
 ):
     """Generates a day-by-day travel itinerary using an AI Agent."""
     cache_key = f"{country.lower()}_{days}_{preferences.lower()}"
+    name, destination = await _destination(country)
 
     if not refresh:
         cached = await travel_cache.find_one({"_id": cache_key})
         if cached:
-            return {"itinerary": cached["itinerary"], "cached": True}
+            return {"itinerary": cached["itinerary"], "cached": True, "destination": destination}
 
+    grounding = f"\nVerified facts about the destination (Google Knowledge Graph): {destination['detail'] or destination['description']}\n" if destination else ""
     prompt = f"""You are an elite AI Travel Agent.
-Create a detailed, day-by-day itinerary for a {days}-day trip to {country}.
-The traveler's preferences are: {preferences}.
+Create a detailed, day-by-day itinerary for a {days}-day trip to {name}.
+The traveler's preferences are: {preferences}.{grounding}
 
 Structure the response as a JSON array where each object represents a day.
 Example Format:
@@ -67,7 +87,7 @@ Return ONLY valid JSON (no markdown fences, no prose)."""
             upsert=True
         )
 
-        return {"itinerary": itinerary, "cached": False}
+        return {"itinerary": itinerary, "cached": False, "destination": destination}
 
     except Exception as e:
         logger.error(f"Error generating travel plan: {e}")

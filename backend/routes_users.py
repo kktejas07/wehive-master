@@ -19,6 +19,11 @@ async def update_me(req: UpdateProfileRequest, user=Depends(get_current_user)):
     update = {k: v for k, v in req.model_dump(exclude_none=True).items()}
     if not update:
         raise HTTPException(400, 'Nothing to update')
+    if 'email' in update:
+        update['email'] = update['email'].lower()
+        # A new address is unproven until it is verified again (email OTP / Firebase sync).
+        if update['email'] != (user.get('email') or '').lower():
+            update['email_verified'] = False
     update['updated_at'] = datetime.utcnow()
     try:
         await users.update_one({'_id': user['_id']}, {'$set': update})

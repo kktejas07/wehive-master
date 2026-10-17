@@ -186,7 +186,7 @@ export default function Pricing() {
           email: user?.email || '',
           contact: user?.phone || '',
         },
-        theme: { color: '#00247D' },
+        theme: { color: '#011CB5' },
       };
 
       try {

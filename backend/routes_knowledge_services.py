@@ -11,16 +11,14 @@ Endpoints:
   GET  /api/kg/rag/status            KG→RAG bridge status
 """
 
-import hashlib
 import logging
-import os
-import time
 from datetime import datetime
 from typing import Optional
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+import google_kg
 from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user, get_current_user_optional
 from db import db
@@ -28,87 +26,17 @@ from db import db
 router = APIRouter(prefix="/kg", tags=["knowledge-graph-services"], dependencies=[Depends(get_current_user)])
 logger = logging.getLogger("wehive.kg_services")
 
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
-KG_CACHE_TTL = int(os.environ.get("KG_CACHE_TTL", "604800"))
-
-_kg_cache: dict[str, tuple[float, dict]] = {}
-
-
-def _kg_cache_key(query: str, prefix: str = "kg") -> str:
-    return f"{prefix}:{hashlib.md5(query.encode()).hexdigest()[:12]}"
-
-
-def _kg_cache_get(key: str) -> Optional[dict]:
-    if key in _kg_cache:
-        ts, val = _kg_cache[key]
-        if time.time() - ts < KG_CACHE_TTL:
-            return val
-        del _kg_cache[key]
-    return None
-
-
-def _kg_cache_set(key: str, val: dict):
-    _kg_cache[key] = (time.time(), val)
-    if len(_kg_cache) > 1000:
-        oldest = min(_kg_cache, key=lambda k: _kg_cache[k][0])
-        del _kg_cache[oldest]
-
-
-async def _call_kg_api(query: str, limit: int = 5, types: Optional[str] = None) -> Optional[dict]:
-    if not GOOGLE_API_KEY:
-        return None
-    params = {"query": query, "key": GOOGLE_API_KEY, "limit": limit, "languages": "en"}
-    if types:
-        params["types"] = types
-    try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(
-                "https://kgsearch.googleapis.com/v1/entities:search",
-                params=params,
-            )
-            if resp.status_code == 200:
-                return resp.json()
-    except Exception as e:
-        logger.debug("KG API error: %s", e)
-    return None
-
-
-def _parse_kg_response(data: dict) -> list[dict]:
-    entities = []
-    for item in data.get("itemListElement", []):
-        result = item.get("result", {})
-        entities.append({
-            "kg_id": result.get("@id", ""),
-            "name": result.get("name", ""),
-            "description": result.get("description", ""),
-            "detail": (result.get("detailedDescription", {}) or {}).get("articleBody", ""),
-            "detail_url": (result.get("detailedDescription", {}) or {}).get("url", ""),
-            "url": result.get("url", ""),
-            "image": (result.get("image", {}) or {}).get("contentUrl", ""),
-            "types": result.get("@type", []),
-            "score": item.get("resultScore", 0),
-        })
-    return entities
-
-
 @router.get("/search")
 async def kg_search(
     q: str = Query(..., min_length=2),
     limit: int = Query(5, ge=1, le=10),
     types: Optional[str] = None,
 ):
-    ck = _kg_cache_key(f"{q}:{types or ''}:{limit}")
-    cached = _kg_cache_get(ck)
-    if cached:
-        return {"ok": True, "source": "kg_cache", "cached": True, **cached}
-
-    data = await _call_kg_api(q, limit, types)
-    if not data:
+    if not google_kg.configured():
         return {"ok": True, "source": "none", "query": q, "entities": [], "note": "KG API unavailable — no key configured"}
 
-    entities = _parse_kg_response(data)
+    entities = await google_kg.search(q, limit, types)
     result = {"query": q, "entities": entities, "total": len(entities)}
-    _kg_cache_set(ck, result)
     await _store_in_mongo(q, entities)
 
     return {"ok": True, "source": "google_kg", **result}
@@ -123,11 +51,9 @@ async def kg_enrich(
 
     sources = []
 
-    data = await _call_kg_api(q, limit=3)
-    entities = []
-    if data:
+    entities = await google_kg.search(q, limit=3)
+    if entities:
         sources.append("google_kg")
-        entities = _parse_kg_response(data)
 
     wiki_data = None
     if not entities or len(entities) < 2:
@@ -169,15 +95,11 @@ async def kg_disambiguate(
 ):
     """Disambiguate an entity name using KG + context hints."""
 
-    candidates = []
-    data = await _call_kg_api(q, limit=10)
-    if data:
-        candidates = _parse_kg_response(data)
+    candidates = await google_kg.search(q, limit=10)
 
-    if context and GOOGLE_API_KEY:
-        data2 = await _call_kg_api(f"{q} {context}", limit=5)
-        if data2:
-            extra = _parse_kg_response(data2)
+    if context:
+        extra = await google_kg.search(f"{q} {context}", limit=5)
+        if extra:
             candidates = extra + [c for c in candidates if c["kg_id"] not in {e["kg_id"] for e in extra}]
 
     resolved = candidates[0] if candidates else None
@@ -197,15 +119,15 @@ async def kg_cache_stats(user=Depends(get_current_admin_flex)):
     mongo_count = await db["kg_entity_cache"].count_documents({})
     return {
         "ok": True,
-        "in_memory_entries": len(_kg_cache),
+        "in_memory_entries": len(google_kg._cache),
         "mongo_entries": mongo_count,
-        "cache_ttl_seconds": KG_CACHE_TTL,
+        "cache_ttl_seconds": google_kg.CACHE_TTL,
     }
 
 
 @router.post("/cache/clear")
 async def kg_cache_clear(user=Depends(get_current_admin_flex)):
-    _kg_cache.clear()
+    google_kg._cache.clear()
     deleted = await db["kg_entity_cache"].delete_many({})
     return {"ok": True, "memory_cleared": True, "mongo_deleted": deleted.deleted_count}
 
@@ -218,7 +140,7 @@ async def kg_rag_index(user=Depends(get_current_admin_flex)):
         return {"ok": True, "indexed": 0, "note": "No KG entities in cache"}
 
     try:
-        from rag_ingest import ingest_texts
+        from rag_ingest import ingest_text_documents
 
         texts = []
         for e in entities:
@@ -232,10 +154,10 @@ async def kg_rag_index(user=Depends(get_current_admin_flex)):
                 "text": " ".join(p for p in parts if p)[:800],
             })
 
-        await ingest_texts(
+        await ingest_text_documents(
             "kg_entities",
             texts,
-            metadata={"source": "google_knowledge_graph", "indexed_at": datetime.utcnow().isoformat()},
+            extra_metadata={"source": "google_knowledge_graph", "indexed_at": datetime.utcnow().isoformat()},
         )
         return {"ok": True, "indexed": len(texts), "collection": "kg_entities"}
     except Exception as e:
@@ -263,7 +185,7 @@ async def kg_rag_status():
         "ok": True,
         "kg_cache_entities": entity_count,
         "rag_collection_exists": chroma_ok,
-        "kg_api_configured": bool(GOOGLE_API_KEY),
+        "kg_api_configured": google_kg.configured(),
         "checked_at": datetime.utcnow().isoformat(),
     }
 

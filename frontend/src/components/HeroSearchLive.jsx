@@ -23,6 +23,7 @@ export default function HeroSearchLive({ query, setQuery }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [entity, setEntity] = useState(null);
   const inputRef = useRef(null);
   const boxRef = useRef(null);
 
@@ -37,6 +38,18 @@ export default function HeroSearchLive({ query, setQuery }) {
       .then((r) => { if (!ignore) { setResults(r.data || []); setActive(0); } })
       .catch(() => { if (!ignore) setResults([]); })
       .finally(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
+  }, [q]);
+
+  // Google Knowledge Graph card for the query; silently absent when the backend has no KG key.
+  useEffect(() => {
+    let ignore = false;
+    setEntity(null);
+    if (q.length < 3) return;
+    axios
+      .get(`${API}/knowledge/public/lookup`, { params: { q } })
+      .then((r) => { if (!ignore) setEntity(r.data?.entity || null); })
+      .catch(() => {});
     return () => { ignore = true; };
   }, [q]);
 
@@ -105,7 +118,24 @@ export default function HeroSearchLive({ query, setQuery }) {
           data-testid="hero-search-popover"
           className="absolute left-0 right-0 mt-2 rounded-2xl bg-white border border-[hsl(var(--border))] shadow-lg overflow-hidden z-[70]"
         >
-          {results.length === 0 && !loading && (
+          {entity && (
+            <div data-testid="hero-search-knowledge" className="flex gap-3 px-4 py-3 border-b border-[hsl(var(--border))] bg-[hsl(var(--soft-bg))]">
+              {entity.image && <img src={entity.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" loading="lazy" />}
+              <div className="min-w-0 text-[13px]">
+                <div className="font-semibold text-[hsl(var(--blue-900))]">
+                  {entity.name}{entity.description && <span className="font-normal text-muted-foreground"> · {entity.description}</span>}
+                </div>
+                {entity.detail && <p className="mt-0.5 text-muted-foreground line-clamp-2">{entity.detail}</p>}
+                <div className="mt-0.5 text-[11px] text-muted-foreground">
+                  Google Knowledge Graph
+                  {entity.url && (
+                    <> · <a href={entity.url} target="_blank" rel="noopener noreferrer" onMouseDown={(e) => e.stopPropagation()} className="font-semibold text-[hsl(var(--blue-700))] hover:underline">Learn more</a></>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          {results.length === 0 && !loading && !entity && (
             <div className="px-5 py-6 text-center text-[14px] text-muted-foreground">
               {t('hero.noMatch').replace('{q}', q)}
             </div>

@@ -26,7 +26,7 @@ from pydantic import BaseModel
 
 from auth_utils import get_current_user
 from db import db
-from admin_auth import get_current_admin_flex
+from admin_auth import get_current_admin_flex, get_super_admin
 
 logger = logging.getLogger("wehive.routes_rag")
 
@@ -141,12 +141,11 @@ async def rag_query(req: QueryRequest, user=Depends(get_current_admin_flex)):
     """RAG-augmented Q&A: retrieve chunks, then call the LLM with them as context."""
     from agent_framework import _retrieve_rag_context, _llm_call
 
+    import google_kg
+
     user_id = user.get("_id", "") if isinstance(user, dict) else ""
     rag_text = await _retrieve_rag_context(req.query, req.collections, k=req.k)
-    if rag_text:
-        context_block = f"Retrieved context from our knowledge base:\n{rag_text}"
-    else:
-        context_block = "(no context retrieved from vector store)"
+    kg_text = await google_kg.context_for(req.query)
 
     sys_prompt = req.system_prompt or (
         "You are Hive, We Hive's helpful assistant. Answer using the retrieved "
@@ -155,7 +154,9 @@ async def rag_query(req: QueryRequest, user=Depends(get_current_admin_flex)):
         "where to find it. Use ₹ for INR and $ for USD."
     )
     if rag_text:
-        sys_prompt += "\n\n" + context_block
+        sys_prompt += f"\n\nRetrieved context from our knowledge base:\n{rag_text}"
+    if kg_text:
+        sys_prompt += "\n\n" + kg_text
 
     user_prompt = req.query
     try:
@@ -171,11 +172,12 @@ async def rag_query(req: QueryRequest, user=Depends(get_current_admin_flex)):
             "ok": True,
             "reply": reply,
             "context": rag_text,
+            "kg_context": kg_text,
             "provider": info,
         }
-    except Exception as e:
-        logger.exception("RAG query LLM call failed: %s", e)
-        raise HTTPException(500, f"LLM call failed: {e}")
+    except Exception:
+        logger.exception("RAG query LLM call failed")
+        raise HTTPException(500, "LLM call failed")
 
 
 # ── Admin-only ingestion endpoints ──────────────────────────────────────────
@@ -253,7 +255,7 @@ async def ingest_mongo(req: MongoIngestRequest, _=Depends(get_current_admin_flex
 
 
 @router.delete("/collections/{name}")
-async def delete_collection(name: str, _=Depends(get_current_admin_flex)):
+async def delete_collection(name: str, _=Depends(get_super_admin)):
     """Wipe a single collection."""
     from vector_store import delete_documents
 
@@ -262,7 +264,7 @@ async def delete_collection(name: str, _=Depends(get_current_admin_flex)):
 
 
 @router.post("/documents/delete")
-async def delete_documents_endpoint(req: DeleteDocsRequest, _=Depends(get_current_admin_flex)):
+async def delete_documents_endpoint(req: DeleteDocsRequest, _=Depends(get_super_admin)):
     """Delete documents by ids or metadata filter."""
     from vector_store import delete_documents
 

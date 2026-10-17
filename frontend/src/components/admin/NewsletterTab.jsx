@@ -4,6 +4,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { apiClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import Pagination from './Pagination';
+import NewsletterCompose from './NewsletterCompose';
 import { useToast } from '../../hooks/use-toast';
 
 const PAGE_SIZE = 50;
@@ -50,8 +51,10 @@ export default function NewsletterTab() {
     <div data-testid="admin-newsletter-tab">
       <AdminHeader
         title="Newsletter"
-        subtitle="People who signed up in the site footer. Only confirmed subscribers should get newsletters."
+        subtitle="Write and send newsletters to confirmed subscribers, and see who signed up in the site footer."
       />
+
+      <NewsletterCompose />
 
       <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Filter subscribers">
         {FILTERS.map((f) => {

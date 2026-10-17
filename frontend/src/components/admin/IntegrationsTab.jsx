@@ -253,6 +253,7 @@ export default function IntegrationsTab() {
   };
 
   const handleDisconnect = async (serviceId) => {
+    if (!window.confirm(`Disconnect ${serviceId}? Features using it will stop working until it is reconnected.`)) return;
     try {
       await apiClient(token).delete(`/third-party/admin/disconnect/${serviceId}`);
       toast({ title: 'Disconnected' });

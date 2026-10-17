@@ -51,8 +51,12 @@ function Tooltip({ text }) {
   );
 }
 
+// Stored secrets come back from the API as this mask; sending it back unchanged keeps the stored value.
+const SECRET_MASK = '\u2022'.repeat(8);
+
 function SecretField({ label, tooltip, value, onChange }) {
   const [show, setShow] = useState(false);
+  const masked = value === SECRET_MASK;
   return (
     <label className="block">
       <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
@@ -61,8 +65,9 @@ function SecretField({ label, tooltip, value, onChange }) {
       </span>
       <div className="relative">
         <input
-          type={show ? 'text' : 'password'}
+          type={show && !masked ? 'text' : 'password'}
           value={value}
+          onFocus={(e) => masked && e.target.select()}
           onChange={(e) => onChange(e.target.value)}
           className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--blue-700))] focus:bg-black/40 text-[14px] text-white placeholder:text-slate-500 outline-none transition pr-10"
         />
@@ -75,6 +80,7 @@ function SecretField({ label, tooltip, value, onChange }) {
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
+      {masked && <span className="mt-1 block text-[11px] text-slate-500">Saved. Type a new value to replace it.</span>}
     </label>
   );
 }
@@ -301,6 +307,13 @@ export default function SettingsTab() {
     setSettings((prev) => ({ ...prev, [ns]: { ...prev[ns], [key]: val } }));
 
   const handleSave = async () => {
+    const sa = ns === 'firebase' ? settings.firebase?.service_account_key : '';
+    if (sa && sa !== SECRET_MASK) {
+      try { JSON.parse(sa); } catch {
+        toast({ title: 'Service Account Key must be valid JSON', variant: 'destructive' });
+        return;
+      }
+    }
     setSaving(ns);
     try {
       const client = adminClient();
@@ -326,11 +339,11 @@ export default function SettingsTab() {
         if (vals.from_address) postalCfg.from_address = vals.from_address;
         if (vals.from_name) postalCfg.from_name = vals.from_name;
 
-        await client.put(`/settings/email`, { config: emailCfg });
-        await client.put(`/settings/smtp`, { config: smtpCfg });
-        await client.put(`/settings/postal`, { config: postalCfg });
+        // The API rejects an empty config, so only save the namespaces that have values.
+        const parts = [['email', emailCfg], ['smtp', smtpCfg], ['postal', postalCfg]].filter(([, cfg]) => Object.keys(cfg).length);
+        for (const [name, cfg] of parts) await client.put(`/settings/${name}`, { config: cfg });
         toast({ title: 'Email settings saved', variant: 'success' });
-      } else {
+      } else if (Object.keys(settings[ns] || {}).length) {
         await client.put(`/settings/${ns}`, { config: settings[ns] });
         toast({ title: `${meta.label} settings saved`, variant: 'success' });
       }

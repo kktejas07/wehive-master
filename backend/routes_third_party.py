@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from third_party_services import SERVICE_CATEGORIES
 from auth_utils import get_current_user
-from admin_auth import get_current_admin_flex
+from admin_auth import get_current_admin_flex, get_super_admin
 from db import db
 
 router = APIRouter(prefix="/third-party", tags=["third-party"])
@@ -214,7 +214,7 @@ async def admin_get_services(_=Depends(get_current_admin_flex)):
 
 
 @router.post("/admin/connect")
-async def admin_connect_service(req: ConnectServiceRequest, user=Depends(get_current_admin_flex)):
+async def admin_connect_service(req: ConnectServiceRequest, user=Depends(get_super_admin)):
     """Admin: connect (or update) a platform-level third-party service."""
     svc = _resolve_service(req.service_id)
     if svc["requires_key"] and not req.api_key:
@@ -248,7 +248,7 @@ async def admin_connect_service(req: ConnectServiceRequest, user=Depends(get_cur
 
 
 @router.post("/admin/set-default")
-async def admin_set_default(req: SetDefaultRequest, user=Depends(get_current_admin_flex)):
+async def admin_set_default(req: SetDefaultRequest, user=Depends(get_super_admin)):
     """Admin: set the default service for the platform."""
     svc = _resolve_service(req.service_id)
     doc = await _get_platform_doc()
@@ -262,7 +262,7 @@ async def admin_set_default(req: SetDefaultRequest, user=Depends(get_current_adm
 
 
 @router.delete("/admin/disconnect/{service_id}")
-async def admin_disconnect_service(service_id: str, user=Depends(get_current_admin_flex)):
+async def admin_disconnect_service(service_id: str, user=Depends(get_super_admin)):
     """Admin: disconnect a platform-level service."""
     svc = _resolve_service(service_id)
     doc = await _get_platform_doc()

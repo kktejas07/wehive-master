@@ -123,14 +123,14 @@ export default function PromotionsTab() {
       await axios.delete(`${API}/promotions/${encodeURIComponent(code)}`, { headers });
       toast({ title: 'Deleted' });
       load();
-    } catch { toast({ title: 'Could not delete.' }); }
+    } catch (e) { toast({ title: 'Could not delete.', description: e?.response?.data?.detail || e.message, variant: 'destructive' }); }
   };
 
   const toggle = async (promo) => {
     try {
       await axios.put(`${API}/promotions/${encodeURIComponent(promo.code)}/toggle`, {}, { headers });
       load();
-    } catch { toast({ title: 'Could not toggle.' }); }
+    } catch (e) { toast({ title: 'Could not toggle.', description: e?.response?.data?.detail || e.message, variant: 'destructive' }); }
   };
 
   return (

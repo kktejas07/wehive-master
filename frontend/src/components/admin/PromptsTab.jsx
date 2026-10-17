@@ -100,9 +100,8 @@ function PromptEditor({ initial, onSave, onCancel, saving }) {
 }
 
 export default function PromptsTab() {
-  const { admin } = useAdminAuth();
+  const { token } = useAdminAuth();
   const { toast } = useToast();
-  const token = admin?.token;
 
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(false);

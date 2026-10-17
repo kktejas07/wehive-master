@@ -47,6 +47,7 @@ export default function HolidayPlanner() {
   const [duration, setDuration] = useState(5);
   const [preferences, setPreferences] = useState("Budget friendly, cultural");
   const [isCached, setIsCached] = useState(false);
+  const [destination, setDestination] = useState(null);
 
   const fetchPlan = async (refresh = false) => {
     if (!isAuthed) return;
@@ -58,6 +59,7 @@ export default function HolidayPlanner() {
       );
       setData(res.data.itinerary);
       setIsCached(res.data.cached);
+      setDestination(res.data.destination || null);
     } catch (err) {
       toast({ title: 'Error', description: 'Failed to generate AI travel plan.', variant: 'destructive' });
       setData(null);
@@ -120,7 +122,7 @@ export default function HolidayPlanner() {
                 <Sparkles className="w-3.5 h-3.5" /> AI Agent Planner
               </div>
               <h1 className="font-display font-bold text-[36px] sm:text-[48px] tracking-[-0.02em] leading-tight capitalize">
-                {id} Itinerary
+                {destination?.name || id} Itinerary
               </h1>
             </div>
             {isCached && data && (
@@ -130,6 +132,26 @@ export default function HolidayPlanner() {
             )}
           </div>
         </div>
+
+        {destination && (
+          <div data-testid="planner-destination-card" className="bg-white rounded-2xl border border-[hsl(var(--border))] p-5 mb-6 shadow-sm flex gap-4 items-start">
+            {destination.image && (
+              <img src={destination.image} alt={destination.name} className="w-16 h-16 rounded-xl object-cover shrink-0" loading="lazy" />
+            )}
+            <div className="min-w-0">
+              <div className="text-[15px] font-bold">{destination.name}
+                {destination.description && <span className="font-medium text-muted-foreground"> · {destination.description}</span>}
+              </div>
+              {destination.detail && <p className="mt-1 text-[14px] text-muted-foreground leading-relaxed">{destination.detail}</p>}
+              <div className="mt-2 text-[12px] text-muted-foreground">
+                Source: Google Knowledge Graph
+                {destination.url && (
+                  <> · <a href={destination.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-[hsl(var(--blue-700))] hover:underline">Learn more</a></>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Configuration Panel */}
         <div className="bg-white rounded-2xl border border-[hsl(var(--border))] p-6 mb-8 shadow-sm">

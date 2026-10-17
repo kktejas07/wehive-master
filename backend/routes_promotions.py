@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from audit import record as audit_record
 from rate_limit import RateLimit
 from pydantic import BaseModel
 from db import db
@@ -45,6 +46,7 @@ async def create_promo(req: CreatePromoRequest, admin=Depends(get_current_admin)
         'created_at': datetime.utcnow(),
     }
     await db.promo_codes.insert_one(promo)
+    await audit_record(admin, 'create', 'promo_code', promo['code'])
     return promo
 
 
@@ -132,7 +134,10 @@ async def redeem_promo(code: str = Body(...), user=Depends(get_current_user)):
 
 @router.delete('/{code}')
 async def delete_promo(code: str, admin=Depends(get_current_admin)):
-    await db.promo_codes.delete_one({'code': code.upper()})
+    result = await db.promo_codes.delete_one({'code': code.upper()})
+    if not result.deleted_count:
+        raise HTTPException(404, 'Promo code not found')
+    await audit_record(admin, 'delete', 'promo_code', code.upper())
     return {'message': 'Promo code deleted'}
 
 
@@ -141,8 +146,10 @@ async def toggle_promo(code: str, admin=Depends(get_current_admin)):
     promo = await db.promo_codes.find_one({'code': code.upper()})
     if not promo:
         raise HTTPException(404, 'Promo code not found')
-    await db.promo_codes.update_one({'_id': promo['_id']}, {'$set': {'active': not promo.get('active', True)}})
-    return {'active': not promo.get('active', True)}
+    active = not promo.get('active', True)
+    await db.promo_codes.update_one({'_id': promo['_id']}, {'$set': {'active': active}})
+    await audit_record(admin, 'update', 'promo_code', promo['code'], before={'active': not active}, after={'active': active})
+    return {'active': active}
 
 
 # Seasons configuration

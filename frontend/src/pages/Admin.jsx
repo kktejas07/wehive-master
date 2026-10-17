@@ -1,10 +1,15 @@
 import { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AdminAuthProvider, useAdminAuth } from '../context/AdminAuthContext';
-import AdminShell from '../components/admin/AdminShell';
+import AdminShell, { Panel } from '../components/admin/AdminShell';
 import OverviewTab from '../components/admin/OverviewTab';
 import UsersTab from '../components/admin/UsersTab';
 import ApplicationsTab from '../components/admin/ApplicationsTab';
+import ApplicationCase from '../components/admin/ApplicationCase';
+import UserProfile from '../components/admin/UserProfile';
+import HealthTab from '../components/admin/HealthTab';
+import SecurityTab from '../components/admin/SecurityTab';
+import ReviewQueueTab from '../components/admin/ReviewQueueTab';
 import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import AdminsTab from '../components/admin/AdminsTab';
@@ -27,11 +32,14 @@ import RAGTab from '../components/admin/RAGTab';
 import PromptsTab from '../components/admin/PromptsTab';
 import AgentsV2Tab from '../components/admin/AgentsV2Tab';
 import HiveLearningTab from '../components/admin/HiveLearningTab';
+import LeadsTab from '../components/admin/LeadsTab';
+import PaymentsTab from '../components/admin/PaymentsTab';
+import AuditTab from '../components/admin/AuditTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
 import AdminResetPassword from './AdminResetPassword';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldAlert } from 'lucide-react';
 
 function ProtectedAdmin({ children }) {
   const { admin, loading } = useAdminAuth();
@@ -40,9 +48,10 @@ function ProtectedAdmin({ children }) {
 
   useEffect(() => {
     if (!loading && !admin) {
-      navigate('/admin/login', { replace: true, state: { from: location.pathname } });
+      const next = location.pathname + location.search;
+      navigate(`/admin/login?next=${encodeURIComponent(next)}`, { replace: true, state: { from: location.pathname } });
     }
-  }, [loading, admin, navigate, location.pathname]);
+  }, [loading, admin, navigate, location.pathname, location.search]);
 
   if (loading || !admin) {
     return (
@@ -52,6 +61,21 @@ function ProtectedAdmin({ children }) {
     );
   }
   return children;
+}
+
+function SuperOnly({ children }) {
+  const { admin } = useAdminAuth();
+  if (admin?.is_super_admin) return children;
+  return (
+    <div data-testid="admin-super-only">
+      <Panel className="max-w-lg">
+        <div className="flex items-center gap-3 text-slate-300 text-[14px]">
+          <ShieldAlert className="w-5 h-5 text-amber-300 shrink-0" />
+          Only a super admin can access this.
+        </div>
+      </Panel>
+    </div>
+  );
 }
 
 function AdminRoutes() {
@@ -69,7 +93,9 @@ function AdminRoutes() {
               <Routes>
                 <Route index element={<OverviewTab />} />
                 <Route path="users" element={<UsersTab />} />
+                <Route path="users/:id" element={<UserProfile />} />
                 <Route path="applications" element={<ApplicationsTab />} />
+                <Route path="applications/:id" element={<ApplicationCase />} />
                 <Route path="countries" element={<CountriesTab />} />
                 <Route path="pricing" element={<PricingTab />} />
                 <Route path="events" element={<EventsTab />} />
@@ -80,13 +106,19 @@ function AdminRoutes() {
                 <Route path="promocodes" element={<PromoCodesTab />} />
                 <Route path="agents" element={<AgentsTab />} />
                 <Route path="staff" element={<StaffTab />} />
-                <Route path="admins" element={<AdminsTab />} />
+                <Route path="admins" element={<SuperOnly><AdminsTab /></SuperOnly>} />
                 <Route path="newsletter" element={<NewsletterTab />} />
-                <Route path="integrations" element={<IntegrationsTab />} />
+                <Route path="integrations" element={<SuperOnly><IntegrationsTab /></SuperOnly>} />
                 <Route path="exports" element={<ExportsTab />} />
+                <Route path="leads" element={<LeadsTab />} />
+                <Route path="payments" element={<PaymentsTab />} />
+                <Route path="audit" element={<AuditTab />} />
+                <Route path="health" element={<HealthTab />} />
+                <Route path="security" element={<SecurityTab />} />
+                <Route path="review" element={<ReviewQueueTab />} />
                 <Route path="universities" element={<UniversitiesTab />} />
                 <Route path="programs" element={<ProgramsTab />} />
-                <Route path="settings" element={<SettingsTab />} />
+                <Route path="settings" element={<SuperOnly><SettingsTab /></SuperOnly>} />
                 <Route path="rag" element={<RAGTab />} />
                 <Route path="prompts" element={<PromptsTab />} />
                 <Route path="agents-v2" element={<AgentsV2Tab />} />

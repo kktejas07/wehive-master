@@ -28,7 +28,7 @@ export function installRipple() {
     dot.style.width = dot.style.height = `${size}px`;
     dot.style.left = `${e.clientX - rect.left - size / 2}px`;
     dot.style.top = `${e.clientY - rect.top - size / 2}px`;
-    dot.style.background = isDark(el) ? 'rgba(255,255,255,0.55)' : 'rgba(0,36,125,0.18)';
+    dot.style.background = isDark(el) ? 'rgba(255,255,255,0.55)' : 'rgba(1,28,181,0.18)';
     host.appendChild(dot);
     el.appendChild(host);
     dot.addEventListener('animationend', () => host.remove());

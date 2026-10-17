@@ -226,9 +226,8 @@ function RunPanel({ agent, token, onClose }) {
 }
 
 export default function AgentsV2Tab() {
-  const { admin } = useAdminAuth();
+  const { token } = useAdminAuth();
   const { toast } = useToast();
-  const token = admin?.token;
 
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(false);
