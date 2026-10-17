@@ -29,6 +29,8 @@ from routes_admin import router as admin_router  # noqa: E402
 from routes_admin_backoffice import router as admin_backoffice_router  # noqa: E402
 from routes_admin_cases import router as admin_cases_router  # noqa: E402
 from routes_admin_ops import router as admin_ops_router  # noqa: E402
+from routes_admin_refunds import router as admin_refunds_router  # noqa: E402
+from routes_admin_doc_review import router as admin_doc_review_router  # noqa: E402
 from routes_admin_auth import router as admin_auth_router, ensure_seed_admin  # noqa: E402
 from routes_public import router as public_router  # noqa: E402
 from routes_events import router as events_router  # noqa: E402
@@ -53,6 +55,7 @@ from routes_ai_universities import router as ai_universities_router  # noqa: E40
 from routes_programs import router as programs_router, admin_router as admin_programs_router  # noqa: E402
 from routes_reviews import router as reviews_router  # noqa: E402
 from routes_newsletter import router as newsletter_router  # noqa: E402
+from routes_newsletter_campaigns import router as newsletter_campaigns_router, mark_interrupted_on_boot  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
 from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
 from routes_rag import router as rag_router  # noqa: E402
@@ -120,6 +123,8 @@ api_router.include_router(admin_router)
 api_router.include_router(admin_backoffice_router)
 api_router.include_router(admin_cases_router)
 api_router.include_router(admin_ops_router)
+api_router.include_router(admin_refunds_router)
+api_router.include_router(admin_doc_review_router)
 api_router.include_router(admin_auth_router)
 api_router.include_router(public_router)
 api_router.include_router(events_router)
@@ -145,6 +150,7 @@ api_router.include_router(programs_router)
 api_router.include_router(admin_programs_router)
 api_router.include_router(reviews_router)
 api_router.include_router(newsletter_router)
+api_router.include_router(newsletter_campaigns_router)
 api_router.include_router(i18n_router)
 api_router.include_router(agents_ai_router)
 api_router.include_router(rag_router)
@@ -284,6 +290,7 @@ async def on_startup():
     try:
         await ensure_indexes()
         await ensure_seed_admin()
+        await mark_interrupted_on_boot()
         count = await countries_v2.estimated_document_count()
         if count == 0:
             logger.info('Countries collection empty — seeding …')

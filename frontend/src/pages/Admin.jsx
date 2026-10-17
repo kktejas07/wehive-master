@@ -8,6 +8,8 @@ import ApplicationsTab from '../components/admin/ApplicationsTab';
 import ApplicationCase from '../components/admin/ApplicationCase';
 import UserProfile from '../components/admin/UserProfile';
 import HealthTab from '../components/admin/HealthTab';
+import SecurityTab from '../components/admin/SecurityTab';
+import ReviewQueueTab from '../components/admin/ReviewQueueTab';
 import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import AdminsTab from '../components/admin/AdminsTab';
@@ -112,6 +114,8 @@ function AdminRoutes() {
                 <Route path="payments" element={<PaymentsTab />} />
                 <Route path="audit" element={<AuditTab />} />
                 <Route path="health" element={<HealthTab />} />
+                <Route path="security" element={<SecurityTab />} />
+                <Route path="review" element={<ReviewQueueTab />} />
                 <Route path="universities" element={<UniversitiesTab />} />
                 <Route path="programs" element={<ProgramsTab />} />
                 <Route path="settings" element={<SuperOnly><SettingsTab /></SuperOnly>} />

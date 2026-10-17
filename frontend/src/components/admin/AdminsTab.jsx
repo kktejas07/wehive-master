@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, UserPlus, ShieldCheck, Trash2, Mail, Copy } from 'lucide-react';
+import { Loader2, UserPlus, ShieldCheck, Trash2, Mail, Copy, ShieldOff } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { apiClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -11,6 +11,8 @@ const errText = (e) => {
   if (Array.isArray(d) && d.length) return d[0]?.loc?.includes('email') ? 'Enter a valid email address.' : d[0].msg;
   return e.message;
 };
+
+const ROLE_LABEL = { manager: 'Manager', support: 'Support', finance: 'Finance', viewer: 'Viewer' };
 
 function StatusPill({ a }) {
   if (a.env_managed) return <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11.5px] font-semibold text-slate-200">Server setting</span>;
@@ -26,11 +28,14 @@ export default function AdminsTab() {
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState(null);
+  const [role, setRole] = useState('manager');
+  const [roles, setRoles] = useState({});
 
   const load = useCallback(async () => {
     try {
       const r = await apiClient(token).get('/admin-auth/admins');
       setItems(r.data.items);
+      setRoles(r.data.roles || {});
     } catch (e) {
       setItems([]);
       toast({ title: 'Could not load admins', description: errText(e) });
@@ -43,7 +48,7 @@ export default function AdminsTab() {
     setBusy(true);
     setLink(null);
     try {
-      const { data } = await apiClient(token).post('/admin-auth/admins', { email: targetEmail, name: targetName || null });
+      const { data } = await apiClient(token).post('/admin-auth/admins', { email: targetEmail, name: targetName || null, admin_role: role });
       if (!data.invited) toast({ title: 'Admin added', description: `${targetEmail} can now sign in to the dashboard.` });
       else if (data.email_sent) toast({ title: 'Invite sent', description: `${targetEmail} will get an email to set their password.` });
       else {
@@ -70,6 +75,27 @@ export default function AdminsTab() {
     }
   };
 
+  const changeRole = async (a, adminRole) => {
+    try {
+      await apiClient(token).patch(`/admin-auth/admins/${a.id}/role`, { admin_role: adminRole });
+      toast({ title: `${a.email} is now ${ROLE_LABEL[adminRole]}` });
+      await load();
+    } catch (e) {
+      toast({ title: 'Could not change role', description: errText(e) });
+    }
+  };
+
+  const resetTwoFactor = async (a) => {
+    if (!window.confirm(`Turn off two-factor for ${a.email}? Do this only after confirming who they are — they can sign in with just a password until they set it up again.`)) return;
+    try {
+      await apiClient(token).delete(`/admin-auth/admins/${a.id}/2fa`);
+      toast({ title: 'Two-factor reset', description: a.email });
+      await load();
+    } catch (e) {
+      toast({ title: 'Could not reset two-factor', description: errText(e) });
+    }
+  };
+
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(link.url);
@@ -83,13 +109,13 @@ export default function AdminsTab() {
     <div data-testid="admin-admins-tab">
       <AdminHeader
         title="Admins"
-        subtitle="People with full access to this dashboard. Add an existing user by email, or invite someone new to set a password."
+        subtitle="People who can open this dashboard. Pick a role to limit what they can change; everyone can view."
       />
 
       <Panel className="mb-4">
         <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-3">Add an admin</div>
         <form
-          className="grid sm:grid-cols-[1fr_1fr_auto] gap-3"
+          className="grid sm:grid-cols-[1fr_1fr_auto_auto] gap-3"
           onSubmit={(e) => { e.preventDefault(); if (email.trim()) invite(email.trim(), name.trim()); }}
         >
           <input
@@ -110,6 +136,15 @@ export default function AdminsTab() {
             aria-label="Name"
             className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white placeholder:text-slate-500"
           />
+          <select
+            data-testid="admin-admins-role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            aria-label="Role"
+            className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white"
+          >
+            {Object.keys(ROLE_LABEL).map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
+          </select>
           <button
             data-testid="admin-admins-add-btn"
             type="submit"
@@ -119,6 +154,11 @@ export default function AdminsTab() {
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <><UserPlus className="w-3.5 h-3.5" /> Add admin</>}
           </button>
         </form>
+        {Object.keys(roles).length > 0 && (
+          <ul className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-0.5 text-[12px] text-slate-400">
+            {Object.entries(roles).map(([k, v]) => <li key={k}><span className="font-semibold text-slate-200">{ROLE_LABEL[k]}</span> — {v}</li>)}
+          </ul>
+        )}
         <p className="mt-3 text-[11.5px] text-slate-400">
           New admins get an email with a link to set their password. The link works once and expires in 72 hours.
         </p>
@@ -141,6 +181,7 @@ export default function AdminsTab() {
           <thead>
             <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 bg-white/5">
               <th className="px-5 py-3">Admin</th>
+              <th className="px-5 py-3">Role</th>
               <th className="px-5 py-3">Status</th>
               <th className="px-5 py-3">Added</th>
               <th className="px-5 py-3 text-right">Actions</th>
@@ -148,10 +189,10 @@ export default function AdminsTab() {
           </thead>
           <tbody>
             {items === null && (
-              <tr><td colSpan={4} className="px-5 py-10 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
+              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
             )}
             {items?.length === 0 && (
-              <tr><td colSpan={4} className="px-5 py-10 text-center text-slate-400">
+              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400">
                 <ShieldCheck className="w-5 h-5 inline mr-2" /> No admins found.
               </td></tr>
             )}
@@ -163,7 +204,27 @@ export default function AdminsTab() {
                     <div className="font-bold text-white">{a.name || '—'}{isMe && <span className="ml-2 text-[11.5px] font-semibold text-slate-400">(you)</span>}</div>
                     <div className="text-[12px] text-slate-400">{a.email || '—'}</div>
                   </td>
-                  <td className="px-5 py-3"><StatusPill a={a} /></td>
+                  <td className="px-5 py-3">
+                    {a.env_managed ? (
+                      <span className="text-[12.5px] font-semibold text-slate-200">Super admin</span>
+                    ) : (
+                      <select
+                        data-testid={`admin-admins-role-${a.id}`}
+                        value={a.admin_role || 'manager'}
+                        onChange={(e) => changeRole(a, e.target.value)}
+                        aria-label={`Role for ${a.email}`}
+                        className="h-8 px-2 rounded-lg bg-white/5 border border-white/10 text-[12.5px] text-white"
+                      >
+                        {Object.keys(ROLE_LABEL).map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
+                      </select>
+                    )}
+                  </td>
+                  <td className="px-5 py-3">
+                    <div className="flex flex-wrap gap-1.5 items-center">
+                      <StatusPill a={a} />
+                      {a.totp_enabled && <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-[11.5px] font-semibold text-blue-200">2FA</span>}
+                    </div>
+                  </td>
                   <td className="px-5 py-3 text-slate-400 text-[12.5px]">
                     {a.created_at ? new Date(a.created_at).toLocaleDateString('en-IN') : '—'}
                   </td>
@@ -176,6 +237,15 @@ export default function AdminsTab() {
                           className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/15 px-2.5 py-1.5 text-[11.5px] font-bold text-white disabled:opacity-60"
                         >
                           <Mail className="w-3 h-3" /> Resend invite
+                        </button>
+                      )}
+                      {a.totp_enabled && !isMe && (
+                        <button
+                          data-testid={`admin-admins-reset-2fa-${a.id}`}
+                          onClick={() => resetTwoFactor(a)}
+                          className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/15 px-2.5 py-1.5 text-[11.5px] font-bold text-white"
+                        >
+                          <ShieldOff className="w-3 h-3" /> Reset 2FA
                         </button>
                       )}
                       {!a.env_managed && !isMe && (

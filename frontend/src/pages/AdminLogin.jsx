@@ -12,7 +12,7 @@ function formatDetail(d) {
 }
 
 export default function AdminLogin() {
-  const { login, isAuthed } = useAdminAuth();
+  const { login, verifyTwoFactor, isAuthed } = useAdminAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const raw = params.get('next') || '';
@@ -22,6 +22,9 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [mfaToken, setMfaToken] = useState(null);
+  const [code, setCode] = useState('');
+  const [useRecovery, setUseRecovery] = useState(false);
 
   useEffect(() => {
     if (isAuthed) navigate(next, { replace: true });
@@ -32,7 +35,12 @@ export default function AdminLogin() {
     setErr('');
     setBusy(true);
     try {
-      await login({ email: email.trim(), password });
+      const data = await login({ email: email.trim(), password });
+      if (data?.mfa_required) {
+        setMfaToken(data.mfa_token);
+        setCode('');
+        return;
+      }
       navigate(next, { replace: true });
     } catch (ex) {
       setErr(formatDetail(ex?.response?.data?.detail) || ex.message);
@@ -40,6 +48,47 @@ export default function AdminLogin() {
       setBusy(false);
     }
   };
+
+  const onVerify = async (e) => {
+    e.preventDefault();
+    setErr('');
+    setBusy(true);
+    try {
+      await verifyTwoFactor({ mfaToken, code: code.trim() });
+      navigate(next, { replace: true });
+    } catch (ex) {
+      const status = ex?.response?.status;
+      setErr(formatDetail(ex?.response?.data?.detail) || ex.message);
+      // The ticket expired or was rejected: start over from the password.
+      if (status === 401 && /password again/i.test(String(ex?.response?.data?.detail))) setMfaToken(null);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (mfaToken) {
+    return (
+      <AdminAuthShell title="Two-factor check" subtitle={useRecovery ? 'Enter one of your saved recovery codes. Each works once.' : 'Enter the 6-digit code from your authenticator app.'}>
+        <form onSubmit={onVerify} className="space-y-5" data-testid="admin-2fa-form">
+          {useRecovery ? (
+            <Field label="Recovery code" testid="admin-2fa-code" value={code} onChange={setCode} placeholder="xxxxx-xxxxx" autoComplete="off" />
+          ) : (
+            <Field label="Authentication code" testid="admin-2fa-code" value={code} onChange={(v) => setCode(v.replace(/\D/g, '').slice(0, 6))} placeholder="123456" autoComplete="one-time-code" />
+          )}
+          <ErrorMessage text={err} />
+          <PrimaryButton type="submit" disabled={busy || (useRecovery ? code.trim().length < 10 : code.length !== 6)} testid="admin-2fa-submit">
+            {busy ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Verify and sign in'}
+          </PrimaryButton>
+          <div className="flex justify-between text-[14px]">
+            <button type="button" onClick={() => { setUseRecovery((r) => !r); setCode(''); setErr(''); }} className="font-medium text-[hsl(var(--blue-700))] hover:underline">
+              {useRecovery ? 'Use authenticator code' : 'Use a recovery code'}
+            </button>
+            <button type="button" onClick={() => { setMfaToken(null); setErr(''); }} className="text-slate-600 hover:underline">Back</button>
+          </div>
+        </form>
+      </AdminAuthShell>
+    );
+  }
 
   return (
     <AdminAuthShell

@@ -18,7 +18,7 @@ import logging
 import os
 import uuid
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks
 from rate_limit import RateLimit
@@ -27,11 +27,11 @@ from pydantic import BaseModel, EmailStr, Field
 from admin_auth import (
     MAX_ATTEMPTS,
     hash_password, verify_password, password_strength_issue,
-    sign_admin_jwt, decode_admin_jwt,
+    sign_admin_jwt, decode_admin_jwt, sign_mfa_token, decode_mfa_token,
     generate_reset_token, hash_token,
     is_locked_out, record_failed_attempt, clear_attempts,
     send_reset_email_or_log,
-    get_current_admin_flex, get_super_admin, is_super_admin,
+    get_current_admin_flex, get_super_admin, is_super_admin, ADMIN_ROLES,
 )
 from audit import record as audit_record
 from config import ADMIN_EMAILS, IS_DEV, FRONTEND_URL as SITE_URL
@@ -59,6 +59,9 @@ def _public_admin(u: dict) -> dict:
         'staff_role': u.get('staff_role'),
         'is_premium': bool(u.get('is_premium', False)),
         'has_password': bool(u.get('password_hash')),
+        'totp_enabled': bool(u.get('totp_enabled')),
+        'admin_role': 'super_admin' if is_super_admin(u) else (u.get('admin_role') or 'manager'),
+        'recovery_codes_left': len(u.get('totp_recovery') or []) if u.get('totp_enabled') else 0,
         'password_updated_at': u.get('password_updated_at').isoformat() if isinstance(u.get('password_updated_at'), datetime) else u.get('password_updated_at'),
         'created_at': u.get('created_at').isoformat() if isinstance(u.get('created_at'), datetime) else u.get('created_at'),
     }
@@ -281,7 +284,17 @@ async def admin_login(req: LoginRequest):
         await users.update_one({'_id': user['_id']}, {'$set': {'is_admin': True}})
         user['is_admin'] = True
 
+    if user.get('suspended'):
+        raise HTTPException(403, 'This admin account has been suspended.')
+
     await clear_attempts(login_attempts, identifier)
+    return _session_or_mfa(user)
+
+
+def _session_or_mfa(user: dict) -> dict:
+    """Password step done: either the session, or a short-lived ticket for the 2FA step."""
+    if user.get('totp_enabled'):
+        return {'mfa_required': True, 'mfa_token': sign_mfa_token(user['_id'])}
     token = sign_admin_jwt(user['_id'])
     return {'access_token': token, 'token_type': 'bearer', 'user': _public_admin(user)}
 
@@ -353,8 +366,9 @@ async def admin_reset(req: ResetRequest, _=Depends(_reset_limiter)):
     await clear_attempts(login_attempts, f'admin:{rec["email"]}')
 
     user = await users.find_one({'_id': rec['user_id']})
-    token = sign_admin_jwt(user['_id'])
-    return {'access_token': token, 'token_type': 'bearer', 'user': _public_admin(user)}
+    if user.get('suspended'):
+        raise HTTPException(403, 'Password updated, but this admin account is suspended.')
+    return _session_or_mfa(user)  # a reset link must not bypass the second factor
 
 
 # ---------- change password ----------
@@ -390,9 +404,17 @@ async def admin_me(admin=Depends(get_current_admin_flex)):
 INVITE_TTL = timedelta(hours=72)
 
 
+AdminRole = Literal['manager', 'support', 'finance', 'viewer']
+
+
 class AdminInviteRequest(BaseModel):
     email: EmailStr
     name: Optional[str] = Field(None, max_length=80)
+    admin_role: AdminRole = 'manager'
+
+
+class RoleRequest(BaseModel):
+    admin_role: AdminRole
 
 
 def _admin_row(u: dict) -> dict:
@@ -424,7 +446,7 @@ async def _send_admin_invite(email: str, raw_token: str, inviter: str) -> tuple[
 @router.get('/admins')
 async def list_admins(_admin=Depends(get_current_admin_flex)):
     cur = users.find({'$or': [{'is_admin': True}, {'email': {'$in': list(ADMIN_EMAILS)}}]}).sort('created_at', 1)
-    return {'items': [_admin_row(u) async for u in cur]}
+    return {'items': [_admin_row(u) async for u in cur], 'roles': ADMIN_ROLES}
 
 
 @router.post('/admins')
@@ -440,7 +462,7 @@ async def add_admin(req: AdminInviteRequest, admin=Depends(get_super_admin)):
 
     if user:
         uid = user['_id']
-        await users.update_one({'_id': uid}, {'$set': {'is_admin': True, 'updated_at': now}})
+        await users.update_one({'_id': uid}, {'$set': {'is_admin': True, 'admin_role': req.admin_role, 'updated_at': now}})
     else:
         uid = str(uuid.uuid4())
         await users.insert_one({
@@ -448,6 +470,7 @@ async def add_admin(req: AdminInviteRequest, admin=Depends(get_super_admin)):
             'email': email,
             'name': (req.name or '').strip() or email.split('@')[0],
             'is_admin': True,
+            'admin_role': req.admin_role,
             'is_staff': False,
             'is_premium': False,
             'email_verified': False,
@@ -483,7 +506,7 @@ async def add_admin(req: AdminInviteRequest, admin=Depends(get_super_admin)):
                 logger.info('DEV admin invite link: %s', link)
 
     await audit_record(admin, 'update' if user else 'create', 'admin', uid,
-                       extra={'email': email, 'granted': 'admin', 'invited': invited})
+                       extra={'email': email, 'granted': 'admin', 'role': req.admin_role, 'invited': invited})
     return {'ok': True, 'admin': _admin_row(fresh), 'invited': invited,
             'email_sent': email_sent, 'invite_link': invite_link}
 
@@ -505,4 +528,157 @@ async def remove_admin(user_id: str, admin=Depends(get_super_admin)):
     await users.update_one({'_id': user_id}, {'$set': {'is_admin': False, 'updated_at': now}})
     await password_reset_tokens.update_many({'user_id': user_id, 'used_at': None}, {'$set': {'used_at': now}})
     await audit_record(admin, 'delete', 'admin', user_id, extra={'email': email, 'revoked': 'admin'})
+    return {'ok': True}
+
+
+@router.patch('/admins/{user_id}/role')
+async def set_admin_role(user_id: str, req: RoleRequest, admin=Depends(get_super_admin)):
+    user = await users.find_one({'_id': user_id})
+    if not user or not user.get('is_admin'):
+        raise HTTPException(404, 'Admin not found.')
+    if is_super_admin(user):
+        raise HTTPException(400, 'Super admins always have full access.')
+    before = user.get('admin_role') or 'manager'
+    await users.update_one({'_id': user_id}, {'$set': {'admin_role': req.admin_role, 'updated_at': datetime.utcnow()}})
+    await audit_record(admin, 'update', 'admin', user_id, before={'admin_role': before}, after={'admin_role': req.admin_role},
+                       extra={'email': user.get('email')})
+    return {'ok': True, 'admin': _admin_row(await users.find_one({'_id': user_id}))}
+
+
+# ---------- two-factor (TOTP) ----------
+class MfaLoginRequest(BaseModel):
+    mfa_token: str
+    code: str = Field(..., min_length=6, max_length=12)
+
+
+class CodeRequest(BaseModel):
+    code: str = Field(..., min_length=6, max_length=12)
+
+
+class DisableMfaRequest(BaseModel):
+    password: str
+    code: str = Field(..., min_length=6, max_length=12)
+
+
+async def _check_second_factor(user: dict, code: str, *, allow_recovery: bool = True) -> None:
+    """Verify a TOTP or (single-use) recovery code. Locks out after MAX_ATTEMPTS failures."""
+    import totp
+    from byok_vault import decrypt_key
+    ident = f'mfa:{user["_id"]}'
+    locked, seconds = await is_locked_out(login_attempts, ident)
+    if locked:
+        raise HTTPException(429, f'Too many wrong codes. Try again in {max(1, seconds // 60)} minute(s).')
+
+    if allow_recovery and totp.looks_like_recovery(code):
+        digest = totp.hash_recovery(code)
+        res = await users.update_one({'_id': user['_id'], 'totp_recovery': digest}, {'$pull': {'totp_recovery': digest}})
+        if res.modified_count:
+            await clear_attempts(login_attempts, ident)
+            await audit_record(user, 'use_recovery_code', 'admin', user['_id'])
+            return
+    else:
+        secret = decrypt_key(user['totp_secret'])
+        step = totp.verify(secret, code, last_step=int(user.get('totp_last_step') or -1))
+        # Conditional write: two requests with the same code can't both win.
+        if step is not None and (await users.update_one(
+                {'_id': user['_id'], '$or': [{'totp_last_step': None}, {'totp_last_step': {'$lt': step}}]},
+                {'$set': {'totp_last_step': step}})).modified_count:
+            await clear_attempts(login_attempts, ident)
+            return
+    await record_failed_attempt(login_attempts, ident)
+    raise HTTPException(401, 'That code is not valid. Check your authenticator app and try again.')
+
+
+# Per-IP cap on top of the per-account lockout in _check_second_factor.
+_mfa_limiter = RateLimit(max_calls=10, window_seconds=300)
+
+
+@router.post('/login/2fa')
+async def admin_login_2fa(req: MfaLoginRequest, _=Depends(_mfa_limiter)):
+    user = await users.find_one({'_id': decode_mfa_token(req.mfa_token)})
+    if not user or not user.get('is_admin') or not user.get('totp_enabled'):
+        raise HTTPException(401, 'Invalid sign-in session. Enter your password again.')
+    if user.get('suspended'):
+        raise HTTPException(403, 'This admin account has been suspended.')
+    await _check_second_factor(user, req.code)
+    user = await users.find_one({'_id': user['_id']})
+    return {'access_token': sign_admin_jwt(user['_id'], mfa=True), 'token_type': 'bearer', 'user': _public_admin(user)}
+
+
+@router.post('/2fa/setup')
+async def admin_2fa_setup(admin=Depends(get_current_admin_flex)):
+    """Start enrolment: a fresh secret (shown once) that becomes active only after /2fa/enable."""
+    import totp
+    from byok_vault import encrypt_key
+    if admin.get('totp_enabled'):
+        raise HTTPException(409, 'Two-factor is already on. Turn it off first to enrol a new device.')
+    secret = totp.generate_secret()
+    await users.update_one({'_id': admin['_id']}, {'$set': {'totp_pending': encrypt_key(secret), 'totp_pending_at': datetime.utcnow()}})
+    return {'secret': secret, 'otpauth_uri': totp.otpauth_uri(secret, admin.get('email') or admin['_id'])}
+
+
+@router.post('/2fa/enable')
+async def admin_2fa_enable(req: CodeRequest, admin=Depends(get_current_admin_flex)):
+    import totp
+    from byok_vault import decrypt_key
+    if admin.get('totp_enabled'):
+        raise HTTPException(409, 'Two-factor is already on.')
+    pending, started = admin.get('totp_pending'), admin.get('totp_pending_at')
+    if not pending or not isinstance(started, datetime) or datetime.utcnow() - started > timedelta(minutes=15):
+        raise HTTPException(400, 'Setup expired. Start again.')
+    step = totp.verify(decrypt_key(pending), req.code)
+    if step is None:
+        raise HTTPException(400, 'That code does not match. Make sure the phone clock is correct and try the newest code.')
+    codes, hashes = totp.new_recovery_codes()
+    await users.update_one({'_id': admin['_id']}, {
+        '$set': {'totp_enabled': True, 'totp_secret': pending, 'totp_last_step': step,
+                 'totp_recovery': hashes, 'totp_enabled_at': datetime.utcnow()},
+        '$unset': {'totp_pending': '', 'totp_pending_at': ''},
+    })
+    await audit_record(admin, 'enable_2fa', 'admin', admin['_id'])
+    fresh = await users.find_one({'_id': admin['_id']})
+    # Old sessions lack the mfa claim and stop working; hand this browser a new one.
+    return {'recovery_codes': codes, 'access_token': sign_admin_jwt(admin['_id'], mfa=True), 'user': _public_admin(fresh)}
+
+
+@router.post('/2fa/recovery-codes')
+async def admin_2fa_new_recovery_codes(req: CodeRequest, admin=Depends(get_current_admin_flex)):
+    import totp
+    if not admin.get('totp_enabled'):
+        raise HTTPException(400, 'Two-factor is not on.')
+    await _check_second_factor(admin, req.code, allow_recovery=False)
+    codes, hashes = totp.new_recovery_codes()
+    await users.update_one({'_id': admin['_id']}, {'$set': {'totp_recovery': hashes}})
+    await audit_record(admin, 'regenerate_recovery_codes', 'admin', admin['_id'])
+    return {'recovery_codes': codes}
+
+
+@router.post('/2fa/disable')
+async def admin_2fa_disable(req: DisableMfaRequest, admin=Depends(get_current_admin_flex)):
+    if not admin.get('totp_enabled'):
+        raise HTTPException(400, 'Two-factor is not on.')
+    if not admin.get('password_hash') or not verify_password(req.password, admin['password_hash']):
+        raise HTTPException(401, 'Password is incorrect.')
+    await _check_second_factor(admin, req.code)
+    await users.update_one({'_id': admin['_id']}, {
+        '$set': {'totp_enabled': False},
+        '$unset': {'totp_secret': '', 'totp_last_step': '', 'totp_recovery': '', 'totp_enabled_at': ''},
+    })
+    await audit_record(admin, 'disable_2fa', 'admin', admin['_id'])
+    return {'ok': True, 'access_token': sign_admin_jwt(admin['_id'])}
+
+
+@router.delete('/admins/{user_id}/2fa')
+async def admin_2fa_reset(user_id: str, admin=Depends(get_super_admin)):
+    """Lost phone and recovery codes: a super admin clears another admin's 2FA."""
+    if user_id == admin['_id']:
+        raise HTTPException(400, 'Use your recovery codes, or ask another super admin.')
+    target = await users.find_one({'_id': user_id})
+    if not target or not target.get('totp_enabled'):
+        raise HTTPException(404, 'This admin does not have two-factor turned on.')
+    await users.update_one({'_id': user_id}, {
+        '$set': {'totp_enabled': False},
+        '$unset': {'totp_secret': '', 'totp_last_step': '', 'totp_recovery': '', 'totp_enabled_at': ''},
+    })
+    await audit_record(admin, 'reset_2fa', 'admin', user_id, extra={'email': target.get('email')})
     return {'ok': True}

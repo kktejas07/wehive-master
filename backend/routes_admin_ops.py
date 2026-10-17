@@ -70,6 +70,7 @@ async def admin_user_profile(user_id: str, _=Depends(get_current_admin_flex)):
         'id': p['_id'],
         'plan_id': p.get('plan_id'),
         'amount_inr': p.get('amount_inr', 0),
+        'refunded_inr': p.get('refunded_inr', 0),
         'status': p.get('status'),
         'razorpay_payment_id': p.get('razorpay_payment_id'),
         'created_at': _iso(p.get('created_at')),
@@ -85,7 +86,7 @@ async def admin_user_profile(user_id: str, _=Depends(get_current_admin_flex)):
         'user': _user_out(u),
         'applications': apps,
         'payments': pays,
-        'paid_total_inr': sum(p['amount_inr'] or 0 for p in pays if p['status'] == 'paid'),
+        'paid_total_inr': sum((p['amount_inr'] or 0) - (p['refunded_inr'] or 0) for p in pays if p['status'] in PAID_STATES),
         'history': history,
     }
 
@@ -137,6 +138,9 @@ async def admin_unsuspend_user(user_id: str, admin=Depends(get_current_admin_fle
 
 
 # ---------- funnel ----------
+PAID_STATES = ['paid', 'partially_refunded', 'refunded']
+NET_AMOUNT = {'$subtract': ['$amount_inr', {'$ifNull': ['$refunded_inr', 0]}]}  # revenue after refunds
+
 def _funnel_steps(counts: dict) -> list[dict]:
     """Ordered steps with conversion from the previous step and from the top (percent, 1dp)."""
     order = [('signups', 'Signed up'), ('started', 'Started an application'), ('submitted', 'Submitted'),
@@ -163,19 +167,19 @@ async def admin_funnel(_=Depends(get_current_admin_flex), days: int = Query(90, 
     started = await applications.distinct('user_id', cohort_filter)
     submitted = await applications.distinct('user_id', {**cohort_filter, 'status': {'$ne': AppStatus.DRAFT.value}})
     approved = await applications.distinct('user_id', {**cohort_filter, 'status': AppStatus.APPROVED.value})
-    paid = await payments.distinct('user_id', {**cohort_filter, 'status': 'paid'})
+    paid = await payments.distinct('user_id', {**cohort_filter, 'status': {'$in': PAID_STATES}})
     steps = _funnel_steps({'signups': len(cohort), 'started': len(started), 'submitted': len(submitted),
                            'paid': len(paid), 'approved': len(approved)})
 
     by_month = [{'month': r['_id'], 'amount_inr': r['amount'], 'count': r['count']} async for r in payments.aggregate([
-        {'$match': {'status': 'paid', 'created_at': {'$gte': since}}},
+        {'$match': {'status': {'$in': PAID_STATES}, 'created_at': {'$gte': since}}},
         {'$group': {'_id': {'$dateToString': {'format': '%Y-%m', 'date': '$created_at'}},
-                    'amount': {'$sum': '$amount_inr'}, 'count': {'$sum': 1}}},
+                    'amount': {'$sum': NET_AMOUNT}, 'count': {'$sum': 1}}},
         {'$sort': {'_id': 1}},
     ])]
     by_plan = [{'plan_id': r['_id'] or 'unknown', 'amount_inr': r['amount'], 'count': r['count']} async for r in payments.aggregate([
-        {'$match': {'status': 'paid', 'created_at': {'$gte': since}}},
-        {'$group': {'_id': '$plan_id', 'amount': {'$sum': '$amount_inr'}, 'count': {'$sum': 1}}},
+        {'$match': {'status': {'$in': PAID_STATES}, 'created_at': {'$gte': since}}},
+        {'$group': {'_id': '$plan_id', 'amount': {'$sum': NET_AMOUNT}, 'count': {'$sum': 1}}},
         {'$sort': {'amount': -1}},
     ])]
     total = sum(m['amount_inr'] for m in by_month)

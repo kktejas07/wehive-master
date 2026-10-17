@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
   Key, User, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
-  Inbox, CreditCard, History, Activity,
+  Inbox, CreditCard, History, Activity, ScanSearch, Lock,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
@@ -16,6 +16,7 @@ const TABS = [
   { id: 'overview',     to: '/admin',               label: 'Overview',     Icon: LayoutDashboard, testid: 'admin-nav-overview' },
   { id: 'users',        to: '/admin/users',         label: 'Users',        Icon: UsersIcon,       testid: 'admin-nav-users' },
   { id: 'applications', to: '/admin/applications',  label: 'Applications', Icon: FileStack,       testid: 'admin-nav-applications' },
+  { id: 'review',       to: '/admin/review',        label: 'Doc review',   Icon: ScanSearch,      testid: 'admin-nav-review' },
   { id: 'leads',        to: '/admin/leads',         label: 'Leads',        Icon: Inbox,           testid: 'admin-nav-leads' },
   { id: 'payments',     to: '/admin/payments',      label: 'Payments',     Icon: CreditCard,      testid: 'admin-nav-payments' },
   { id: 'countries',    to: '/admin/countries',     label: 'Countries',    Icon: Globe,           testid: 'admin-nav-countries' },
@@ -41,6 +42,7 @@ const TABS = [
   { id: 'hive-learning', to: '/admin/hive-learning', label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning' },
   { id: 'health',       to: '/admin/health',        label: 'System health', Icon: Activity,       testid: 'admin-nav-health' },
   { id: 'audit',        to: '/admin/audit',         label: 'Audit log',    Icon: History,         testid: 'admin-nav-audit' },
+  { id: 'security',     to: '/admin/security',      label: 'My security',  Icon: Lock,            testid: 'admin-nav-security' },
   { id: 'settings',     to: '/admin/settings',      label: 'Settings',     Icon: Settings,        testid: 'admin-nav-settings', superOnly: true },
 ];
 

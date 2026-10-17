@@ -129,6 +129,9 @@ async def admin_list_payments(
             'user': {'id': p.get('user_id'), 'name': u.get('name'), 'email': u.get('email'), 'phone': u.get('phone')},
             'plan_id': p.get('plan_id'),
             'amount_inr': p.get('amount_inr', 0),
+            'refunded_inr': p.get('refunded_inr', 0),
+            'refunds': [{'amount_inr': r.get('amount_inr'), 'status': r.get('status'), 'reason': r.get('reason'),
+                         'by': r.get('by'), 'at': _iso(r.get('at'))} for r in p.get('refunds', [])],
             'status': p.get('status'),
             'razorpay_order_id': p.get('razorpay_order_id'),
             'razorpay_payment_id': p.get('razorpay_payment_id'),
@@ -136,10 +139,13 @@ async def admin_list_payments(
             'updated_at': _iso(p.get('updated_at')),
         })
     paid = [r async for r in payments.aggregate([
-        {'$match': {'status': 'paid'}},
-        {'$group': {'_id': None, 'amount': {'$sum': '$amount_inr'}, 'count': {'$sum': 1}}},
+        {'$match': {'status': {'$in': ['paid', 'partially_refunded', 'refunded']}}},
+        {'$group': {'_id': None, 'amount': {'$sum': '$amount_inr'}, 'refunded': {'$sum': {'$ifNull': ['$refunded_inr', 0]}},
+                    'count': {'$sum': 1}}},
     ])]
-    totals = {'paid_inr': paid[0]['amount'] if paid else 0, 'paid_count': paid[0]['count'] if paid else 0}
+    row = paid[0] if paid else {'amount': 0, 'refunded': 0, 'count': 0}
+    # paid_inr is net of refunds
+    totals = {'paid_inr': row['amount'] - row['refunded'], 'refunded_inr': row['refunded'], 'paid_count': row['count']}
     return {'items': items, 'total': total, 'totals': totals, 'limit': limit, 'skip': skip}
 
 

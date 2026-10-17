@@ -262,3 +262,129 @@ test('overview funnel switches window', async ({ page, api }) => {
   ]);
   await expect(page.getByRole('button', { name: '12 months' })).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('admin login asks for the 2FA code when it is on', async ({ page, api }) => {
+  api
+    .on('POST', /^\/admin-auth\/login$/, { mfa_required: true, mfa_token: 'ticket-1' })
+    .on('POST', /^\/admin-auth\/login\/2fa$/, { access_token: 'mfa-session', token_type: 'bearer', user: ADMIN })
+    .on('GET', /^\/admin-auth\/me$/, ADMIN);
+  await page.goto('/admin/login');
+  await page.getByTestId('admin-login-email').fill(ADMIN.email);
+  await page.getByTestId('admin-login-password').fill('Correct-horse-1');
+  await page.getByTestId('admin-login-submit').click();
+
+  const submit = page.getByTestId('admin-2fa-submit');
+  await expect(page.getByTestId('admin-2fa-form')).toBeVisible();
+  await page.getByTestId('admin-2fa-code').fill('12a34 56');
+  await expect(page.getByTestId('admin-2fa-code')).toHaveValue('123456');
+  await submit.click();
+
+  await expect.poll(() => api.calls.find((c) => c.path === '/admin-auth/login/2fa')?.body).toEqual({ mfa_token: 'ticket-1', code: '123456' });
+  await expect(page).toHaveURL(/\/admin$/);
+  expect(await page.evaluate(() => localStorage.getItem('wehive_admin_token'))).toBe('mfa-session');
+});
+
+test('turning on 2FA shows a QR code and then recovery codes', async ({ page, api }) => {
+  await adminSignIn(page, api, { ...ADMIN, totp_enabled: false });
+  api
+    .on('POST', /^\/admin-auth\/2fa\/setup$/, { secret: 'JBSWY3DPEHPK3PXP', otpauth_uri: 'otpauth://totp/We%20Hive%20Admin:e2e?secret=JBSWY3DPEHPK3PXP' }) // verify:allow-secret (public demo TOTP key)
+    .on('POST', /^\/admin-auth\/2fa\/enable$/, {
+      recovery_codes: ['aaaaa-11111', 'bbbbb-22222'], access_token: 'new-mfa-token', user: { ...ADMIN, totp_enabled: true, recovery_codes_left: 2 },
+    });
+  await page.goto('/admin/security');
+
+  await expect(page.getByTestId('2fa-status')).toContainText('off');
+  await page.getByTestId('2fa-start').click();
+  await expect(page.getByTestId('2fa-secret')).toHaveText('JBSWY3DPEHPK3PXP');
+  await expect(page.getByAltText('QR code for your authenticator app')).toBeVisible();
+  await page.getByLabel(/Enter the 6-digit code/).fill('654321');
+  api.on('GET', /^\/admin-auth\/me$/, { ...ADMIN, totp_enabled: true, recovery_codes_left: 2 });
+  await page.getByTestId('2fa-enable').click();
+
+  await expect(page.getByTestId('recovery-codes')).toContainText('aaaaa-11111');
+  await expect(page.getByTestId('2fa-status')).toContainText('on');
+});
+
+test('super admin refunds part of a payment', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  const PAY = {
+    id: 'pay-9', user: { id: 'u1', name: 'Rahul', email: 'rahul@example.com' }, plan_id: 'premium', amount_inr: 4999, refunded_inr: 0,
+    status: 'paid', razorpay_order_id: 'order_x', razorpay_payment_id: 'pay_x', created_at: '2026-10-02T10:00:00Z',
+  };
+  api
+    .on('GET', /^\/admin\/payments$/, { items: [PAY], total: 1, totals: { paid_inr: 4999, paid_count: 1 }, limit: 25, skip: 0 })
+    .on('POST', /^\/admin\/payments\/pay-9\/refund$/, { id: 'pay-9', status: 'partially_refunded', refunded_inr: 1000, premium_revoked: false });
+  await page.goto('/admin/payments');
+
+  await page.getByTestId('refund-pay-9').click();
+  const dialog = page.getByTestId('refund-dialog');
+  await expect(dialog.getByLabel(/Amount/)).toHaveValue('4999');
+  await dialog.getByLabel(/Amount/).fill('6000');
+  await dialog.getByLabel(/Reason/).fill('Duplicate charge');
+  await expect(page.getByTestId('refund-submit')).toBeDisabled();
+  await dialog.getByLabel(/Amount/).fill('1000');
+  await page.getByTestId('refund-submit').click();
+
+  await expect.poll(() => api.calls.find((c) => c.method === 'POST')?.body)
+    .toEqual({ amount_inr: 1000, reason: 'Duplicate charge', revoke_premium: true });
+  await expect(dialog).toBeHidden();
+});
+
+test('newsletter send needs an explicit confirmation with the audience size', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  api
+    .on('GET', /^\/newsletter\/subscribers$/, { items: [], total: 0, counts: { active: 3 }, page: 1, limit: 50, pages: 0 })
+    .on('GET', /^\/newsletter\/admin\/campaigns$/, { items: [], active_subscribers: 3 })
+    .on('POST', /^\/newsletter\/admin\/campaigns$/, { id: 'c1', subject: 'October visa news', status: 'sending', recipients: 3, sent: 0, failed: 0 });
+  await page.goto('/admin/newsletter');
+
+  await page.getByLabel('Subject').fill('October visa news');
+  await page.getByLabel('Message').fill('Schengen appointments open on **Monday**.');
+  await page.getByTestId('newsletter-send').click();
+  await expect(page.getByTestId('newsletter-confirm')).toContainText('3 confirmed subscribers');
+  await page.getByTestId('newsletter-confirm-send').click();
+
+  await expect.poll(() => api.calls.find((c) => c.method === 'POST')?.body).toEqual({
+    subject: 'October visa news', body: 'Schengen appointments open on **Monday**.', expected_recipients: 3,
+  });
+});
+
+test('document review flags a scan as suspicious with a note', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  api
+    .on('GET', /^\/admin\/review-queue$/, {
+      items: [{
+        id: 'scan-1', kind: 'passport', document: 'passport', title: 'Anna Eriksson', severity: 'critical', score: 5,
+        flags: [{ kind: 'mrz_checksum', severity: 'critical', message: 'MRZ check digits fail for: passport number' }],
+        user: { id: 'u1', name: 'Rahul Verma' }, application_id: 'app-1', review: null, created_at: '2026-10-16T10:00:00',
+      }],
+      total: 1, counts: { critical: 1, warning: 0, info: 0 },
+    })
+    .on('PATCH', /^\/admin\/review-queue\/scan-1$/, { id: 'scan-1', review: { decision: 'suspicious' } });
+  await page.goto('/admin/review');
+
+  const row = page.getByTestId('review-item-scan-1');
+  await expect(row).toContainText('MRZ check digits fail');
+  await expect(row.getByRole('link', { name: 'open case' })).toHaveAttribute('href', '/admin/applications/app-1');
+  await page.getByTestId('review-flag-scan-1').click();
+  await row.getByLabel(/What looks wrong/).fill('Check digit off by one');
+  await row.getByRole('button', { name: 'Mark suspicious' }).click();
+
+  await expect.poll(() => api.calls.find((c) => c.method === 'PATCH')?.body).toEqual({ decision: 'suspicious', note: 'Check digit off by one' });
+  await expect(row).toBeHidden();
+});
+
+test('super admin changes another admin role', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  api
+    .on('GET', /^\/admin-auth\/admins$/, {
+      items: [ADMIN, { id: 'a-2', name: 'Sam', email: 'sam@example.com', is_admin: true, has_password: true, admin_role: 'manager', totp_enabled: true }],
+      roles: { manager: 'Full access', support: 'Cases', finance: 'Money', viewer: 'Read-only' },
+    })
+    .on('PATCH', /^\/admin-auth\/admins\/a-2\/role$/, { ok: true });
+  await page.goto('/admin/admins');
+
+  await expect(page.getByTestId('admin-admins-reset-2fa-a-2')).toBeVisible();
+  await page.getByTestId('admin-admins-role-a-2').selectOption('viewer');
+  await expect.poll(() => api.calls.find((c) => c.method === 'PATCH')?.body).toEqual({ admin_role: 'viewer' });
+});

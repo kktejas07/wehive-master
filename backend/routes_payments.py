@@ -23,6 +23,8 @@ router = APIRouter(prefix='/payments', tags=['payments'])
 logger = logging.getLogger('wehive.payments')
 
 # Bypass grants premium without payment, so it is honoured only in dev/test environments.
+# Orders in these states are final: callbacks/webhooks must never flip them back to "paid".
+SETTLED = {'paid', 'refunded', 'partially_refunded'}
 PAYMENT_BYPASS_ENABLED = IS_DEV and os.environ.get('PAYMENT_BYPASS_ENABLED', '').lower() in ('1', 'true', 'yes')
 
 PLANS = {
@@ -155,6 +157,8 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user), bg:
         raise HTTPException(400, 'Invalid plan_id')
     if doc.get('status') == 'paid':
         return {'ok': True, 'is_premium': True, 'message': 'Already upgraded'}
+    if doc.get('status') in SETTLED - {'paid'}:
+        raise HTTPException(409, 'This payment was refunded. Start a new checkout to upgrade again.')
 
     if doc.get('status') == 'mock':
         if not PAYMENT_BYPASS_ENABLED:
@@ -194,7 +198,7 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user), bg:
     ).hexdigest()
     if not hmac.compare_digest(generated, req.razorpay_signature):
         await payments.update_one(
-            {'_id': doc['_id']},
+            {'_id': doc['_id'], 'status': {'$nin': list(SETTLED)}},
             {'$set': {'status': 'failed', 'razorpay_payment_id': req.razorpay_payment_id, 'updated_at': datetime.utcnow()}}
         )
         failed_doc = await payments.find_one({'_id': doc['_id']})
@@ -202,14 +206,20 @@ async def verify_payment(req: VerifyRequest, user=Depends(get_current_user), bg:
         raise HTTPException(400, 'Invalid signature')
 
     now = datetime.utcnow()
-    await payments.update_one(
-        {'_id': doc['_id']},
+    moved = await payments.update_one(
+        {'_id': doc['_id'], 'status': {'$nin': list(SETTLED)}},
         {'$set': {
             'razorpay_payment_id': req.razorpay_payment_id,
             'status': 'paid',
             'updated_at': now,
         }}
     )
+    if not moved.modified_count:
+        # The webhook (or a refund) got there first; report the real state instead of re-granting.
+        latest = await payments.find_one({'_id': doc['_id']}) or {}
+        if latest.get('status') != 'paid':
+            raise HTTPException(409, 'This payment was refunded. Start a new checkout to upgrade again.')
+        return {'ok': True, 'is_premium': True, 'message': 'Already upgraded'}
     await users.update_one(
         {'_id': user['_id']},
         {'$set': {'is_premium': True, 'plan_id': doc['plan_id'], 'premium_since': now, 'updated_at': now}}
@@ -315,6 +325,10 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str = Header(
 
     event = payload.get('event', '')
     payload_data = payload.get('payload', {})
+    if event in ('refund.processed', 'refund.failed'):
+        from routes_admin_refunds import apply_refund_webhook
+        await apply_refund_webhook(event, payload_data.get('refund', {}).get('entity', {}))
+        return {'ok': True}
     payment_entity = payload_data.get('payment', {}).get('entity', {})
     order_id = payment_entity.get('order_id') or payload_data.get('order', {}).get('entity', {}).get('id') or ''
     payment_id = payment_entity.get('id')
@@ -324,7 +338,7 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str = Header(
     if event in ('payment.success', 'payment.captured', 'order.paid'):
         # Only transition non-paid orders, so retries never double-grant.
         doc = await payments.find_one_and_update(
-            {'razorpay_order_id': order_id, 'status': {'$ne': 'paid'}},
+            {'razorpay_order_id': order_id, 'status': {'$nin': list(SETTLED)}},
             {'$set': {
                 'razorpay_payment_id': payment_id,
                 'status': 'paid',
@@ -347,7 +361,7 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str = Header(
                 bg.add_task(_send_payment_email, fresh_user, plan, doc, True)
     elif event == 'payment.failed':
         doc = await payments.find_one_and_update(
-            {'razorpay_order_id': order_id, 'status': {'$ne': 'paid'}},
+            {'razorpay_order_id': order_id, 'status': {'$nin': list(SETTLED)}},
             {'$set': {'status': 'failed', 'updated_at': datetime.utcnow()}},
             return_document=True,
         )
