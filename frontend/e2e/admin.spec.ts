@@ -407,3 +407,21 @@ test('when 2FA is required, every page sends the admin to My security', async ({
   await expect(page.getByTestId('admin-2fa-required')).toBeVisible();
   await expect(page.getByTestId('2fa-start')).toBeVisible();
 });
+
+test('leads inbox shows the enquiry purpose and contact shortcuts', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  api.on('GET', /^\/admin\/leads$/, {
+    items: [{ ...LEAD, id: 'lead-7', type: 'enquiry', purpose: 'student_f1', destination: 'United States', phone: '+919876543210',
+      message: 'Student (F-1 / study) visa enquiry for United States' }],
+    total: 1, new: 1, limit: 25, skip: 0,
+  });
+  await page.goto('/admin/leads');
+
+  await expect(page.getByTestId('admin-lead-purpose-lead-7')).toHaveText('Student / F-1 · United States');
+  await page.getByTestId('admin-lead-row-lead-7').getByRole('button').first().click();
+  await expect(page.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', 'https://wa.me/919876543210');
+  await Promise.all([
+    page.waitForRequest(/\/admin\/leads\?.*purpose=business/),
+    page.getByTestId('admin-leads-purpose').selectOption('business'),
+  ]);
+});

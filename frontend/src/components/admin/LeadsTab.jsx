@@ -16,6 +16,11 @@ const PILL = {
   closed: 'bg-white/10 text-slate-300',
 };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const PURPOSE_LABEL = {
+  tourist: 'Tourist', business: 'Business', student_f1: 'Student / F-1', work: 'Work',
+  family: 'Family visit', immigration: 'Immigration / PR', transit: 'Transit', other: 'Other',
+};
+const waLink = (phone) => `https://wa.me/${(phone || '').replace(/\D/g, '')}`;
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
 
 export default function LeadsTab() {
@@ -23,6 +28,7 @@ export default function LeadsTab() {
   const readOnly = !canWrite(admin, 'cases');
   const { toast } = useToast();
   const [status, setStatus] = useState('new');
+  const [purpose, setPurpose] = useState('all');
   const [q, setQ] = useState('');
   const dq = useDebouncedValue(q.trim());
   const [skip, setSkip] = useState(0);
@@ -33,21 +39,21 @@ export default function LeadsTab() {
   const [busy, setBusy] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  useEffect(() => { setSkip(0); }, [dq, status]);
+  useEffect(() => { setSkip(0); }, [dq, status, purpose]);
 
   const seq = useRef(0);
   const load = useCallback(async () => {
     const id = ++seq.current;
     setError('');
     try {
-      const r = await adminClient(token).get('/leads', { params: { status, q: dq || undefined, limit: PAGE_SIZE, skip } });
+      const r = await adminClient(token).get('/leads', { params: { status, purpose, q: dq || undefined, limit: PAGE_SIZE, skip } });
       if (id === seq.current) setData(r.data);
     } catch (e) {
       if (id !== seq.current) return;
       setData({ items: [], total: 0 });
       setError(e?.response?.data?.detail || e.message);
     }
-  }, [token, status, dq, skip]);
+  }, [token, status, purpose, dq, skip]);
 
   useEffect(() => { setData(null); load(); }, [load]);
 
@@ -114,13 +120,23 @@ export default function LeadsTab() {
             );
           })}
         </div>
+        <select
+          data-testid="admin-leads-purpose"
+          aria-label="Filter by trip purpose"
+          value={purpose}
+          onChange={(e) => setPurpose(e.target.value)}
+          className="h-9 px-2 rounded-xl bg-white/5 border border-white/10 text-[13px] text-white"
+        >
+          <option value="all">All purposes</option>
+          {Object.entries(PURPOSE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
         <div className="relative flex-1 min-w-[220px]">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             data-testid="admin-leads-search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name, email or message…"
+            placeholder="Search name, email, phone, country or message…"
             className="w-full h-9 pl-9 pr-3 rounded-xl bg-white/5 border border-white/10 focus:border-[hsl(var(--blue-700))] text-[13.5px] text-white placeholder:text-slate-500 outline-none"
           />
         </div>
@@ -155,6 +171,11 @@ export default function LeadsTab() {
                     <span className="font-bold text-white">{l.name || '—'}</span>
                     <span className="text-[12.5px] text-slate-400 break-all">{l.email}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${PILL[l.status] || PILL.closed}`}>{cap(l.status || 'new')}</span>
+                    {l.purpose && (
+                      <span data-testid={`admin-lead-purpose-${l.id}`} className="rounded-full px-2 py-0.5 text-[11px] font-semibold bg-blue-500/15 text-blue-200">
+                        {PURPOSE_LABEL[l.purpose] || l.purpose}{l.destination ? ` · ${l.destination}` : ''}
+                      </span>
+                    )}
                   </div>
                   {!expanded && <div className="mt-0.5 text-[12.5px] text-slate-400 truncate">{l.message}</div>}
                 </div>
@@ -185,6 +206,16 @@ export default function LeadsTab() {
                     >
                       <Mail className="w-3.5 h-3.5" /> Reply by email
                     </a>
+                    {l.phone && (
+                      <>
+                        <a href={`tel:${l.phone}`} className="inline-flex items-center h-9 px-3.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-[13px] font-semibold">
+                          Call {l.phone}
+                        </a>
+                        <a href={waLink(l.phone)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center h-9 px-3.5 rounded-lg bg-emerald-600/80 hover:bg-emerald-600 text-white text-[13px] font-semibold">
+                          WhatsApp
+                        </a>
+                      </>
+                    )}
                   </div>
 
                   <div>
