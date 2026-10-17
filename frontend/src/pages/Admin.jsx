@@ -6,6 +6,8 @@ import OverviewTab from '../components/admin/OverviewTab';
 import UsersTab from '../components/admin/UsersTab';
 import ApplicationsTab from '../components/admin/ApplicationsTab';
 import ApplicationCase from '../components/admin/ApplicationCase';
+import UserProfile from '../components/admin/UserProfile';
+import HealthTab from '../components/admin/HealthTab';
 import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import AdminsTab from '../components/admin/AdminsTab';
@@ -89,6 +91,7 @@ function AdminRoutes() {
               <Routes>
                 <Route index element={<OverviewTab />} />
                 <Route path="users" element={<UsersTab />} />
+                <Route path="users/:id" element={<UserProfile />} />
                 <Route path="applications" element={<ApplicationsTab />} />
                 <Route path="applications/:id" element={<ApplicationCase />} />
                 <Route path="countries" element={<CountriesTab />} />
@@ -108,6 +111,7 @@ function AdminRoutes() {
                 <Route path="leads" element={<LeadsTab />} />
                 <Route path="payments" element={<PaymentsTab />} />
                 <Route path="audit" element={<AuditTab />} />
+                <Route path="health" element={<HealthTab />} />
                 <Route path="universities" element={<UniversitiesTab />} />
                 <Route path="programs" element={<ProgramsTab />} />
                 <Route path="settings" element={<SuperOnly><SettingsTab /></SuperOnly>} />

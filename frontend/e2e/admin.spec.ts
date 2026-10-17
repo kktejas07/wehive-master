@@ -174,3 +174,91 @@ test('overview alerts link to the case page', async ({ page, api }) => {
   await expect(page).toHaveURL(/\/admin\/applications\/app-1$/);
   await expect(page.getByTestId('case-alert-appointment')).toBeVisible();
 });
+
+const PROFILE_USER = {
+  id: 'u-42', name: 'Ravi Kumar', email: 'ravi@example.com', phone: '+919900000000', is_admin: false, is_super_admin: false,
+  is_staff: false, is_premium: true, email_verified: true, suspended: false, created_at: '2026-01-05T10:00:00Z',
+};
+
+test('user profile shows history and suspends with a reason', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  api
+    .on('GET', /^\/admin\/users\/u-42\/profile$/, {
+      user: PROFILE_USER,
+      applications: [{ id: 'app-9', country_name: 'Japan', visa_type: 'Tourist', status: 'submitted', created_at: '2026-09-01T10:00:00Z' }],
+      payments: [{ id: 'p1', plan_id: 'premium', amount_inr: 4999, status: 'paid', created_at: '2026-09-01T10:00:00Z' }],
+      paid_total_inr: 4999,
+      history: [],
+    })
+    .on('POST', /^\/admin\/users\/u-42\/suspend$/, { ...PROFILE_USER, suspended: true, suspended_reason: 'Chargeback fraud', suspended_at: '2026-10-17T10:00:00Z' });
+  await page.goto('/admin/users/u-42');
+
+  const profile = page.getByTestId('admin-user-profile');
+  await expect(profile).toContainText('Ravi Kumar');
+  await expect(profile).toContainText('Japan');
+  await expect(profile).toContainText('4,999');
+  await expect(profile.getByRole('link', { name: /Japan/ })).toHaveAttribute('href', '/admin/applications/app-9');
+
+  await page.getByTestId('suspend-user').click();
+  const submit = page.getByRole('button', { name: 'Suspend account' });
+  await expect(submit).toBeDisabled();
+  await page.getByLabel(/Reason/).fill('Chargeback fraud');
+  api.on('GET', /^\/admin\/users\/u-42\/profile$/, {
+    user: { ...PROFILE_USER, suspended: true, suspended_reason: 'Chargeback fraud', suspended_at: '2026-10-17T10:00:00Z' },
+    applications: [], payments: [], paid_total_inr: 0,
+    history: [{ at: '2026-10-17T10:00:00Z', admin_email: ADMIN.email, action: 'suspend', extra: { reason: 'Chargeback fraud' } }],
+  });
+  await submit.click();
+
+  await expect.poll(() => api.calls.find((c) => c.method === 'POST')?.body).toEqual({ reason: 'Chargeback fraud' });
+  await expect(page.getByTestId('user-suspended-chip')).toBeVisible();
+  await expect(page.getByTestId('unsuspend-user')).toBeVisible();
+  await expect(profile).toContainText('“Chargeback fraud”');
+});
+
+test('system health lists services and their fixes', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  api.on('GET', /^\/admin\/health$/, {
+    overall: 'missing',
+    checked_at: '2026-10-17T10:00:00',
+    services: [
+      { id: 'mongo', name: 'MongoDB', status: 'ok', detail: '', action: '' },
+      { id: 'sherpa', name: 'Visa requirements (Sherpa)', status: 'missing', detail: '', action: 'Set SHERPA_API_KEY' },
+    ],
+  });
+  await page.goto('/admin/health');
+
+  await expect(page.getByTestId('health-overall')).toContainText('1 item(s) need attention');
+  await expect(page.getByTestId('health-mongo')).toContainText('OK');
+  await expect(page.getByTestId('health-sherpa')).toContainText('Set SHERPA_API_KEY');
+});
+
+test('overview funnel switches window', async ({ page, api }) => {
+  await adminSignIn(page, api);
+  const funnel = (n: number) => ({
+    days: 90,
+    steps: [
+      { key: 'signups', label: 'Signed up', count: n, from_previous: null, from_top: 100 },
+      { key: 'paid', label: 'Paid', count: 5, from_previous: 10, from_top: 5 },
+    ],
+    revenue: { paid_inr: 24995, paid_count: 5, avg_order_inr: 4999, by_month: [], by_plan: [{ plan_id: 'premium', amount_inr: 24995, count: 5 }] },
+  });
+  api
+    .on('GET', /^\/admin\/metrics$/, {
+      users: { total: 100, premium: 5, staff: 1, new_30d: 10, new_7d: 2 },
+      applications: { total: 20, draft: 5, submitted: 5, in_review: 5, approved: 4, rejected: 1, new_30d: 6 },
+      revenue: { total_inr: 0, last_30d_inr: 0, currency: 'INR' },
+      countries: { total: 10, no_visa: 2 }, leads: { total: 0 }, saved_plans: { total: 0 },
+      trend: [], top_countries: [], recent_activity: [],
+    })
+    .on('GET', /^\/admin\/funnel$/, funnel(100));
+  await page.goto('/admin');
+
+  await expect(page.getByTestId('funnel-signups')).toContainText('100');
+  await expect(page.getByTestId('funnel-paid-revenue')).toContainText('24,995');
+  await Promise.all([
+    page.waitForRequest(/\/admin\/funnel\?days=365$/),
+    page.getByRole('button', { name: '12 months' }).click(),
+  ]);
+  await expect(page.getByRole('button', { name: '12 months' })).toHaveAttribute('aria-pressed', 'true');
+});

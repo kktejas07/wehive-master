@@ -91,7 +91,7 @@ export default function UsersTab() {
     <div data-testid="admin-users-tab">
       <AdminHeader
         title="Users"
-        subtitle={`${total} total users. Toggle premium, promote staff or remove bad actors.`}
+        subtitle={`${total} total users. Open a user for their full history or to suspend the account.`}
       />
       <Panel>
         <div className="flex items-center gap-3 flex-wrap">
@@ -115,6 +115,7 @@ export default function UsersTab() {
             <option value="premium">Premium only</option>
             <option value="staff">Staff</option>
             <option value="admin">Admins</option>
+            <option value="suspended">Suspended</option>
           </select>
         </div>
         <p className="mt-3 text-[12px] text-slate-400">
@@ -150,7 +151,7 @@ export default function UsersTab() {
             {items?.map((u) => (
               <tr key={u.id} data-testid={`admin-user-row-${u.id}`} className="border-t border-white/5 hover:bg-white/5">
                 <td className="px-5 py-3">
-                  <div className="font-bold text-white">{u.name || '—'}</div>
+                  <Link to={`/admin/users/${u.id}`} data-testid={`admin-user-link-${u.id}`} className="font-bold text-white hover:underline">{u.name || u.email || u.phone || '—'}</Link>
                   <div className="text-[11px] text-slate-400 font-mono">{u.id.slice(0, 8)}…</div>
                 </td>
                 <td className="px-5 py-3 text-slate-300">
@@ -159,6 +160,7 @@ export default function UsersTab() {
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex flex-wrap gap-1.5">
+                    {u.suspended && <Chip color="red">Suspended</Chip>}
                     {u.is_admin && <Chip color="red">Admin</Chip>}
                     {u.is_staff && <Chip color="indigo">Staff {u.staff_role ? `· ${u.staff_role}` : ''}</Chip>}
                     {u.is_premium && <Chip color="amber">Premium</Chip>}

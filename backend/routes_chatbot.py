@@ -72,7 +72,7 @@ RE_VISA_KEYWORDS = re.compile(
     r"(visa|tourist|business|work|fee|requirement|document|processing|embassy|appointment)", re.I
 )
 # Vector-store collections filled by /api/rag/ingest/* and /api/kg/rag/index.
-RAG_COLLECTIONS = ["wehive_countries", "wehive_universities", "kg_entities"]
+RAG_COLLECTIONS = ["wehive_kb", "wehive_countries", "wehive_universities", "kg_entities"]
 
 
 async def _gather_context(user_prompt: str) -> str:

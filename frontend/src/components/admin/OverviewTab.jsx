@@ -111,6 +111,85 @@ function NeedsAttention({ token }) {
   );
 }
 
+const FUNNEL_RANGES = [[30, '30 days'], [90, '90 days'], [365, '12 months']];
+
+// Signup cohort for the chosen window → how far each user got. Revenue here is real paid orders,
+// unlike the "Revenue (est.)" card which is computed from application fees.
+function Funnel({ token }) {
+  const [days, setDays] = useState(90);
+  const [data, setData] = useState(null);
+  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    let live = true;
+    setData(null);
+    setErr('');
+    adminClient(token).get('/funnel', { params: { days } })
+      .then((r) => live && setData(r.data))
+      .catch((e) => live && setErr(e?.response?.data?.detail || e.message));
+    return () => { live = false; };
+  }, [token, days]);
+
+  const top = data?.steps?.[0]?.count || 0;
+  return (
+    <Panel className="mt-5" >
+      <div className="flex items-center justify-between gap-3 flex-wrap" data-testid="admin-funnel">
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Conversion funnel</div>
+          <div className="text-[12px] text-slate-400 mt-0.5">Users who signed up in the window, and how far they got</div>
+        </div>
+        <div className="flex gap-1" role="group" aria-label="Funnel window">
+          {FUNNEL_RANGES.map(([d, l]) => (
+            <button
+              key={d}
+              onClick={() => setDays(d)}
+              aria-pressed={days === d}
+              className={`h-8 px-3 rounded-lg text-[12px] font-bold ${days === d ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 text-slate-300 hover:text-white'}`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+      {err && <div className="mt-4 text-[13px] text-red-300" role="alert">Could not load funnel: {err}</div>}
+      {!data && !err && <div className="py-8 text-center"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></div>}
+      {data && (
+        <div className="mt-4 grid lg:grid-cols-3 gap-5">
+          <ol className="lg:col-span-2 space-y-2.5">
+            {data.steps.map((s) => (
+              <li key={s.key} data-testid={`funnel-${s.key}`}>
+                <div className="flex justify-between text-[12.5px]">
+                  <span className="text-slate-200">{s.label}</span>
+                  <span className="text-white font-bold">
+                    {s.count.toLocaleString('en-IN')}
+                    {s.from_previous != null && <span className="text-slate-400 font-normal"> · {s.from_previous}% of previous</span>}
+                  </span>
+                </div>
+                <div className="mt-1 h-2.5 rounded-full bg-white/5 overflow-hidden">
+                  <div className="h-full rounded-full bg-[hsl(var(--blue-500))]" style={{ width: `${top ? Math.max(2, (100 * s.count) / top) : 0}%` }} />
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="space-y-2">
+            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Paid revenue</div>
+            <div className="text-[26px] font-display font-bold text-white" data-testid="funnel-paid-revenue">{inr(data.revenue.paid_inr)}</div>
+            <div className="text-[12px] text-slate-400">
+              {data.revenue.paid_count} orders · avg {inr(data.revenue.avg_order_inr)}
+            </div>
+            {data.revenue.by_plan.slice(0, 4).map((p) => (
+              <div key={p.plan_id} className="flex justify-between text-[12.5px] border-t border-white/5 pt-1.5">
+                <span className="text-slate-300">{p.plan_id}</span>
+                <span className="text-white">{inr(p.amount_inr)} <span className="text-slate-400">· {p.count}</span></span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
 export default function OverviewTab() {
   const { token } = useAdminAuth();
   const [data, setData] = useState(null);
@@ -207,6 +286,8 @@ export default function OverviewTab() {
           accent="bg-blue-500"
         />
       </div>
+
+      <Funnel token={token} />
 
       <div className="grid lg:grid-cols-3 gap-4 mt-5">
         <Panel className="lg:col-span-2">

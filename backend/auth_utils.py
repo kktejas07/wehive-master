@@ -90,6 +90,8 @@ async def get_current_user(authorization: Optional[str] = Header(default=None)):
     user = await users.find_one({'_id': user_id})
     if not user:
         raise HTTPException(status_code=401, detail='User not found')
+    if user.get('suspended'):
+        raise HTTPException(status_code=403, detail='Account suspended. Contact support.')
     return user
 
 

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Database, Loader2, RefreshCw, Trash2, Search, FileText, Server, Cpu } from 'lucide-react';
+import { Database, Loader2, RefreshCw, Trash2, Search, FileText, Server, Cpu, Upload } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
@@ -65,6 +65,25 @@ export default function RAGTab() {
       toast({ title: 'Ingest failed', description: e?.response?.data?.detail || e.message });
     } finally {
       setIngesting('');
+    }
+  };
+
+  const [uploading, setUploading] = useState(false);
+  const uploadDoc = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !token) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const r = await axios.post(`${API}/admin/rag/upload`, form, { headers: { Authorization: `Bearer ${token}` } });
+      toast({ title: `Added ${file.name}`, description: `${r.data.result?.chunks ?? 0} chunks · the chatbot can now answer from it` });
+      await refresh();
+    } catch (err) {
+      toast({ title: 'Upload failed', description: err?.response?.data?.detail || err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -221,7 +240,18 @@ export default function RAGTab() {
             {ingesting === 'universities' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
             Ingest Universities
           </button>
+          <label
+            data-testid="rag-upload"
+            className={`h-10 px-4 rounded-lg bg-white/10 hover:bg-white/15 text-[12px] font-semibold text-white inline-flex items-center gap-1.5 cursor-pointer focus-within:ring-2 focus-within:ring-blue-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+          >
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            Upload document
+            <input type="file" accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" onChange={uploadDoc} className="sr-only" disabled={uploading} />
+          </label>
         </div>
+        <p className="mt-2 text-[12px] text-slate-400">
+          PDF, .txt or .md up to 20 MB — visa guides, embassy checklists, FAQs. Uploads go to <span className="font-mono">wehive_kb</span>, which the chatbot searches first.
+        </p>
       </Panel>
 
       <Panel>

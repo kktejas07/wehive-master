@@ -172,6 +172,8 @@ async def get_current_admin_flex(
                 raise HTTPException(401, 'Admin account not found')
             if not user.get('is_admin'):
                 raise HTTPException(403, 'Admin privileges revoked')
+            if user.get('suspended'):
+                raise HTTPException(403, 'Account suspended')
             return user
     except HTTPException:
         pass
@@ -184,6 +186,8 @@ async def get_current_admin_flex(
     user = await users.find_one({'_id': payload['sub']})
     if not user:
         raise HTTPException(401, 'User not found')
+    if user.get('suspended'):
+        raise HTTPException(403, 'Account suspended')
     email = (user.get('email') or '').lower()
     # The allow-list only counts once the user has proven they own the address.
     if user.get('is_admin') or (email in ADMIN_EMAILS and user.get('email_verified') is True):

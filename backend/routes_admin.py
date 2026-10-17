@@ -51,7 +51,7 @@ async def get_current_admin(user=Depends(get_current_admin_flex)):
 
 
 def _public_user(u: dict) -> dict:
-    return public_user(u, include_admin_flag=True)
+    return {**public_user(u, include_admin_flag=True), 'suspended': bool(u.get('suspended'))}
 
 
 def _serialize_app(a: dict) -> dict:
@@ -278,7 +278,7 @@ async def ai_anomalies(_=Depends(get_current_admin)):
 async def admin_list_users(
     _=Depends(get_current_admin),
     q: Optional[str] = Query(None),
-    role: Optional[Literal['all', 'premium', 'staff', 'admin']] = 'all',
+    role: Optional[Literal['all', 'premium', 'staff', 'admin', 'suspended']] = 'all',
     limit: int = Query(50, ge=1, le=500),
     skip: int = Query(0, ge=0),
 ):
@@ -290,11 +290,11 @@ async def admin_list_users(
         filt['is_premium'] = True
     elif role == 'staff':
         filt['is_staff'] = True
+    elif role == 'suspended':
+        filt['suspended'] = True
     elif role == 'admin':
-        filt['$or'] = (filt.get('$or') or []) + [
-            {'is_admin': True},
-            {'email': {'$in': list(ADMIN_EMAILS)}},
-        ]
+        is_admin = {'$or': [{'is_admin': True}, {'email': {'$in': list(ADMIN_EMAILS)}}]}
+        filt = {'$and': [filt, is_admin]} if filt else is_admin  # search AND admin, not OR
 
     total = await users.count_documents(filt)
     cur = users.find(filt).sort('created_at', -1).skip(skip).limit(limit)

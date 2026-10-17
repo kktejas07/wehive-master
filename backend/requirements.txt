@@ -563,6 +563,8 @@ pyparsing==3.3.2
     # via
     #   -r backend/requirements.txt
     #   httplib2
+pypdf==5.1.0
+    # via -r backend/requirements.txt (admin knowledge-base PDF uploads)
 pypika==0.51.1
     # via chromadb
 pyproject-hooks==1.2.0
