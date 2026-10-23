@@ -61,7 +61,7 @@ export default function ContentModerationTab() {
     <div className="space-y-6" data-testid="admin-moderation">
       <AdminHeader
         title="Content Moderation"
-        subtitle="Review feed items and community posts. Approved items go live on the site."
+        subtitle="Review feed items and community posts. News and blog items not reviewed within 12 hours go live automatically, so reject anything you don't want before then."
       />
 
       <div className="flex gap-2" role="group" aria-label="Content type">

@@ -72,8 +72,8 @@ export default function CategoryDetails({
           <span className="text-[hsl(var(--red-500))]">{cat.name}.</span>
         </h1>
         <p className="mt-5 text-[17px] leading-relaxed text-muted-foreground max-w-xl">
-          Apply in 12 minutes. Approved in {cat.processing_days} days. Backed by{' '}
-          {BRAND.name}'s on-time guarantee — refund if we are even a day late.
+          Apply online with {BRAND.name}: we check your documents before they reach the embassy,
+          which makes the decision.
         </p>
 
         {country.delivery?.same_day && (

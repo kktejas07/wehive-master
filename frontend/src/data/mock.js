@@ -543,21 +543,18 @@ export const COUNTRIES = [
   },
 ];
 
-// Single source for the headline numbers quoted across the site.
-// (StatsStrip.tsx animates numeric copies — keep it in step.)
+// Headline facts quoted across the site. Only numbers WeHive can back up:
+// no invented visa counts, approval rates, ratings or press.
 export const KEY_STATS = {
-  visasProcessed: '12,000+',
-  countries: '60+',
-  approvalRate: '98.6%',
-  onTimeRate: '98.6%',
-  rating: '4.9',
+  universities: '200+',
+  offices: '5',
+  countries: '190+',
 };
 
 export const STATS = [
-  { id: 'visas', value: '12K+', label: 'Visas processed' },
-  { id: 'countries', value: KEY_STATS.countries, label: 'Countries supported' },
-  { id: 'approval', value: KEY_STATS.approvalRate, label: 'Approval rate' },
-  { id: 'rating', value: `${KEY_STATS.rating} / 5`, label: 'Customer rating' },
+  { id: 'universities', value: KEY_STATS.universities, label: 'Partner universities' },
+  { id: 'offices', value: KEY_STATS.offices, label: 'Offices in India and the US' },
+  { id: 'countries', value: KEY_STATS.countries, label: 'Countries in our visa guide' },
 ];
 
 export const STEPS = [
@@ -592,22 +589,13 @@ export const SERVICES = [
 
 export const FEATURES = [
   { id: 'aidoc', title: 'Document review by experts', desc: 'Every passport, photo and bank statement is reviewed by a senior consultant before submission.', icon: 'ScanLine' },
-  { id: 'guarantee', title: 'On‑time guarantee', desc: 'If your visa is late through our fault, we refund the full service fee. No fine print.', icon: 'ShieldCheck' },
+  { id: 'timelines', title: 'Real timelines', desc: 'We show each embassy\'s own processing times, with the source, so you plan with real numbers instead of promises.', icon: 'ShieldCheck' },
   { id: 'humans', title: 'Real humans, walk‑in welcome', desc: 'Drop into our Hyderabad office anytime Mon–Sat. Calls answered in under three rings.', icon: 'Headphones' },
   { id: 'secure', title: 'Bank‑grade security', desc: 'Encrypted vault for every document. We delete originals 30 days after a successful visa.', icon: 'Lock' },
 ];
 
-export const TESTIMONIALS = [
-  { id: 't1', name: 'Priya Sharma', role: 'IT Engineer, Bangalore', quote: 'We Hive turned my U.S. B1/B2 around in 11 days. The mock interview was the closest thing to the real consulate I could ask for.', avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=srgb&fm=jpg&q=80&w=200', country: 'USA' },
-  { id: 't2', name: 'Marcus Bennett', role: 'Senior Consultant', quote: 'Sixth Schengen of my life — first time it actually felt simple. Wehive handled everything from documents to embassy slots.', avatar: 'https://images.unsplash.com/photo-1629425733761-caae3b5f2e50?crop=entropy&cs=srgb&fm=jpg&q=80&w=200', country: 'France' },
-  { id: 't3', name: 'Aisha Rahman', role: 'Travel writer, Hyderabad', quote: 'Tracking was the killer feature. Each checkpoint cleared in real time on the dashboard.', avatar: 'https://images.unsplash.com/photo-1627161683077-e34782c24d81?crop=entropy&cs=srgb&fm=jpg&q=80&w=200', country: 'UK' },
-  { id: 't4', name: 'Daniel Cho', role: 'Product Manager', quote: 'Three of us applied for a Tokyo offsite. Wehive coordinated all of it. Zero spreadsheets.', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&q=80&w=200', country: 'Japan' },
-  { id: 't5', name: 'Rohan Mehta', role: 'Founder, Mehta & Co', quote: 'My UAE visa was approved in 38 hours. The Wehive team made the entire process feel premium.', avatar: 'https://images.pexels.com/photos/31880922/pexels-photo-31880922.jpeg?auto=compress&cs=tinysrgb&w=200', country: 'UAE' },
-  { id: 't6', name: 'Elena Russo', role: 'Photographer', quote: 'Wedding in Tuscany three weeks away — Schengen done in nine days. Lifesavers.', avatar: 'https://images.pexels.com/photos/31880869/pexels-photo-31880869.jpeg?auto=compress&cs=tinysrgb&w=200', country: 'Italy' },
-];
-
 export const FAQS = [
-  { id: 'q1', q: 'How does the on‑time guarantee work?', a: 'If your visa is delayed beyond the date we promised — and the delay is on our side — we refund the entire We Hive service fee. No paperwork required from you.' },
+  { id: 'q1', q: 'How long will my visa take?', a: 'It depends on the country and the embassy, which makes the decision. Each visa page shows the typical time and where that figure comes from: the government\'s own figure where one is published, EU law for Schengen visas, or our estimate. Apply well before you travel.' },
   { id: 'q2', q: 'Which documents do I need to upload?', a: 'It varies by destination — typically a passport scan, recent photo and bank statements from the last 3 months. Our portal lists the exact requirements once you pick a country.' },
   { id: 'q3', q: 'Is my data safe with We Hive?', a: 'Yes. All uploads are encrypted, stored in a SOC 2 vault and permanently erased 30 days after your visa is approved.' },
   { id: 'q4', q: 'Can I apply for my whole family in one go?', a: 'Absolutely. Add up to eight applicants per case. Documents, payments and tracking stay in one place.' },
@@ -615,14 +603,12 @@ export const FAQS = [
   { id: 'q6', q: 'What if my visa is rejected?', a: 'In the rare case of refusal not caused by misrepresentation, we refund 100% of the We Hive service fee and rebook a new appointment for free.' },
 ];
 
-export const PRESS = ['TechCrunch', 'Forbes', 'Bloomberg', 'The Verge', 'Wired', 'Condé Nast Traveler'];
-
 // Pricing constants — extracted for clarity (review fix)
 export const PRICING = { LITE: 399, STANDARD: 799, CONCIERGE: 1099 };
 
 export const PLANS = [
   { id: 'lite', name: 'Lite', price: PRICING.LITE, tag: 'For occasional travel', features: ['One visa application', 'Document review by an expert', 'Email support', '7–10 day processing'] },
-  { id: 'standard', name: 'Standard', price: PRICING.STANDARD, tag: 'Most popular', highlighted: true, features: ['Everything in Lite', 'Priority chat support', 'On‑time guarantee', 'Up to 4 applicants', 'Real‑time tracking'] },
+  { id: 'standard', name: 'Standard', price: PRICING.STANDARD, tag: 'Most popular', highlighted: true, features: ['Everything in Lite', 'Priority chat support', 'Appointment & deadline reminders', 'Up to 4 applicants', 'Real‑time tracking'] },
   { id: 'concierge', name: 'Concierge', price: PRICING.CONCIERGE, tag: 'White‑glove service', features: ['Everything in Standard', 'Dedicated visa specialist', 'Same‑day rush eligible', 'Up to 8 applicants', 'Phone support, 24/7'] },
 ];
 

@@ -253,6 +253,24 @@ def _source_result(outcome) -> dict:
     return res
 
 
+# News, blog posts and events that no admin has reviewed within this many hours
+# are published automatically. Rejecting earlier keeps an item off the site.
+PUBLISH_AFTER_HOURS = int(os.environ.get("PUBLISH_AFTER_HOURS", "12"))
+
+
+async def publish_overdue(hours: int = PUBLISH_AFTER_HOURS) -> dict:
+    from db import global_blogs_col, global_events_col, global_news_col
+    cutoff = datetime.utcnow() - timedelta(hours=hours)
+    out = {}
+    for name, col in (("news", global_news_col), ("blogs", global_blogs_col), ("events", global_events_col)):
+        res = await col.update_many(
+            {"status": "pending", "created_at": {"$lte": cutoff}},
+            {"$set": {"status": "approved", "auto_published_at": datetime.utcnow()}},
+        )
+        out[name] = res.modified_count
+    return out
+
+
 async def run_aggregator_cycle(trigger: str = "scheduler", run_id: Optional[str] = None) -> dict:
     """Run events, news, blogs and intakes once (each isolated) and record the
     outcome in aggregator_runs. Concurrent cycles are serialised."""
@@ -293,6 +311,13 @@ async def run_aggregator_cycle(trigger: str = "scheduler", run_id: Optional[str]
                 outcome = e
             results[name] = _source_result(outcome)
             logger.info("Aggregator: %s -> %s", name, results[name]["status"])
+
+        try:
+            published = await publish_overdue()
+            if any(published.values()):
+                logger.info("Published items unreviewed for %dh: %s", PUBLISH_AFTER_HOURS, published)
+        except Exception as e:
+            logger.warning("Overdue publishing failed: %s", e)
 
         statuses = {r["status"] for r in results.values()}
         if "error" in statuses:

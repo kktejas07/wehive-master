@@ -23,7 +23,6 @@ import GuidedFormSection from '../components/visa/GuidedFormSection';
 import InterviewPrep from '../components/visa/InterviewPrep';
 import EligibilityChecker from '../components/visa/EligibilityChecker';
 import TrustFeatures from '../components/visa/TrustFeatures';
-import OnTimeGuarantee from '../components/OnTimeGuarantee';
 import HowItWorks from '../components/HowItWorks';
 import ETATracker from '../components/visa/ETATracker';
 import CategorySuggestions from '../components/visa/CategorySuggestions';
@@ -184,7 +183,6 @@ export default function VisaDetail() {
 
       <ETATracker country={country} />
       <TrustFeatures countryName={country.name} />
-      <OnTimeGuarantee />
       <HowItWorks />
       <VisaFaqSection countryName={country.name} />
       <VisaComparison countryName={country.name} />
