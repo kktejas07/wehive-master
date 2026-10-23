@@ -15,6 +15,7 @@ Endpoints:
 
 import logging
 import os
+from admin_auth import get_current_admin_flex
 from datetime import datetime
 from typing import Optional
 
@@ -292,7 +293,7 @@ async def run_workflow(
 
 
 @router.get("/status")
-async def agentic_status():
+async def agentic_status(_admin=Depends(get_current_admin_flex)):
     from agents.stark_agent import stark_sources_status
 
     marketplace_available = False

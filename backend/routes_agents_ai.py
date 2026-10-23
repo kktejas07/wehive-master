@@ -60,7 +60,16 @@ async def _insert_alert_as_notification(user_id: str, alert: dict):
     }
     title = title_map.get(alert_type, f"🤖 Agent: {alert_type.replace('_', ' ').title()}")
 
-    await notifications_col.insert_one({
+    # The agents re-detect the same condition every hourly run; without this the
+    # user got the same alert 24 times a day.
+    if await notifications_col.find_one({
+        "user_id": user_id, "type": alert_type,
+        "application_id": alert.get("application_id"), "body": alert.get("message", ""),
+        "created_at": {"$gte": datetime.utcnow() - timedelta(hours=24)},
+    }, {"_id": 1}):
+        return
+
+    doc = {
         "_id": str(__import__("uuid").uuid4()),
         "user_id": user_id,
         "type": alert_type,
@@ -71,7 +80,10 @@ async def _insert_alert_as_notification(user_id: str, alert: dict):
         "action_link": alert.get("action_link"),
         "read": False,
         "created_at": datetime.utcnow(),
-    })
+    }
+    await notifications_col.insert_one(doc)
+    from notify import _publish
+    _publish(user_id, doc)
 
 
 @router.post("/run")
@@ -196,6 +208,11 @@ async def _scheduler_loop():
                     uid = alert.get("user_id")
                     if uid:
                         await _insert_alert_as_notification(uid, alert)
+            try:
+                from reminders import send_due_reminders
+                await send_due_reminders(db)
+            except Exception as e:
+                logger.exception("Reminders failed: %s", e)
             logger.info("Scheduler: agents complete")
         except Exception as e:
             logger.exception("Scheduler error: %s", e)

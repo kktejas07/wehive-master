@@ -8,6 +8,7 @@ Endpoints:
   GET  /api/opensource/status      — Check availability of open-source services
 """
 
+import logging
 import os
 from datetime import datetime
 from typing import Optional
@@ -376,7 +377,8 @@ async def search_github_projects(
                 return {"ok": True, "query": q, "count": len(repos), "repos": repos}
             return {"ok": True, "query": q, "count": 0, "repos": [], "note": "GitHub API rate limited"}
     except Exception as e:
-        return {"ok": False, "detail": str(e)}
+        logging.getLogger("wehive.open_source").warning("GitHub search failed: %s", e)
+        return {"ok": False, "detail": "Search is unavailable right now."}
 
 
 @router.get("/status")

@@ -62,10 +62,22 @@ export default function NotificationBell() {
     let retryDelay = 5000;
     let active = true;
 
-    const connect = () => {
+    const connect = async () => {
       if (!active) return;
-      esRef.current = new EventSource(`${API}/notifications/stream?token=${token}`, {
-      });
+      // EventSource can't send headers; trade the login token for a one-time
+      // ticket so the token never appears in a URL (it used to, and the server
+      // ignored it, so live updates never arrived).
+      let ticket;
+      try {
+        const r = await axios.post(`${API}/notifications/stream-ticket`, null, { headers: { Authorization: `Bearer ${token}` } });
+        ticket = r.data.ticket;
+      } catch {
+        if (active) setTimeout(connect, retryDelay);
+        retryDelay = Math.min(retryDelay * 2, 30000);
+        return;
+      }
+      if (!active) return;
+      esRef.current = new EventSource(`${API}/notifications/stream?ticket=${encodeURIComponent(ticket)}`);
       esRef.current.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data);

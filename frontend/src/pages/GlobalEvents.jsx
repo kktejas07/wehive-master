@@ -6,9 +6,10 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { API } from '../context/AuthContext';
 import { toast } from '../hooks/use-toast';
-import { Loader2, MapPin, Calendar, Compass, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
+import { MapPin, Calendar, Compass, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { destination } from '../lib/destinations';
+import WeHiveLoader from '../components/WeHiveLoader';
 
 export default function GlobalEvents() {
   const [events, setEvents] = useState([]);
@@ -91,9 +92,7 @@ export default function GlobalEvents() {
           )}
 
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--blue-700))]" />
-            </div>
+            <WeHiveLoader label="Finding upcoming events" className="py-20" />
           ) : error ? (
             <div className="text-center py-20 text-muted-foreground">
               We couldn't load events right now. Please refresh the page or try again later.

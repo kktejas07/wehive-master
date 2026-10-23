@@ -642,7 +642,7 @@ export default function USVisaSlots() {
   const fetchAll = useCallback(async () => {
     try {
       const [summaryRes, statusRes] = await Promise.all([
-        axios.get(`${API}/usvisa/slots/summary`, { params: { country: selectedCountry } }),
+        axios.get(`${API}/usvisa/slots/summary`, { params: { country: selectedCountry }, headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API}/usvisa/status`),
       ]);
       setSummary(summaryRes.data);
@@ -650,7 +650,7 @@ export default function USVisaSlots() {
       setStatus(statusRes.data);
 
       if (statusRes.data.last_slot_detected_at) {
-        const slotsRes = await axios.get(`${API}/usvisa/slots`, { params: { limit: 50 } });
+        const slotsRes = await axios.get(`${API}/usvisa/slots`, { params: { limit: 50 }, headers: { Authorization: `Bearer ${token}` } });
         setSlots(slotsRes.data.slots || []);
       }
     } catch (err) {
@@ -676,7 +676,7 @@ export default function USVisaSlots() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCountry]);
+  }, [selectedCountry, token]);
 
   useEffect(() => {
     setLoading(true);
@@ -1001,7 +1001,7 @@ export default function USVisaSlots() {
                 <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto mb-1.5" />
                 <h3 className="font-bold text-[14px] text-emerald-800">You're subscribed!</h3>
                 <p className="mt-0.5 text-[12px] text-emerald-700">
-                  You will receive in-app notifications when {meta.adj} visa slots become available.
+                  When an opening is reported for your consulates, you'll get an alert in WeHive, plus email or WhatsApp if they're on in your account Settings.
                 </p>
                 <div className="mt-3 flex flex-wrap justify-center gap-2">
                   <Button

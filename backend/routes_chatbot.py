@@ -27,21 +27,20 @@ router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
 
 async def notify_status_change(user_id: str, application_id: str, status: str) -> None:
-    """Notify user about an application status change via chatbot."""
-    from db import notifications_col
-    now = datetime.utcnow()
-    await notifications_col.insert_one(
-        {
-            "_id": str(uuid.uuid4()),
-            "user_id": user_id,
-            "application_id": application_id,
-            "type": "status_change",
-            "status": status,
-            "message": f"Your application status has been updated to: {status}",
-            "created_at": now,
-            "read": False,
-        }
+    """Tell the user their application status changed: in-app, email, and WhatsApp
+    when they opted in (see notify.py)."""
+    from notify import notify_user
+    label = status.replace("_", " ").capitalize()
+    await notify_user(
+        user_id,
+        title=f"Application update: {label}",
+        body=f"Your application status is now: {label}.",
+        kind="status_change",
+        link=f"/account/applications/{application_id}",
+        application_id=application_id,
     )
+
+
 marketplace.db = db
 
 chat_sessions = db["chat_sessions"]

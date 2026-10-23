@@ -577,6 +577,12 @@ label[class*="focus-within:"]:has(:focus-visible) {
   translate: 0 1px;
 }
 
+/* WeHiveLoader: plane orbits the globe; globe breathes. */
+@keyframes wh-orbit { to { transform: rotate(360deg); } }
+@keyframes wh-pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.wh-orbit { transform-box: view-box; transform-origin: 48px 48px; animation: wh-orbit 1.8s linear infinite; }
+.wh-pulse { animation: wh-pulse 1.8s ease-in-out infinite; }
+
 /* Honour the OS "reduce motion" setting for CSS animations/transitions
    (framer-motion is handled by <MotionConfig reducedMotion="user"> in index.js). */
 @media (prefers-reduced-motion: reduce) {

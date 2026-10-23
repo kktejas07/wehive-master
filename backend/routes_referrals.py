@@ -9,6 +9,8 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+
+from admin_auth import get_current_admin_flex
 from pydantic import BaseModel
 
 from auth_utils import get_current_user
@@ -126,8 +128,9 @@ async def claim_referral(req: ClaimRequest, user=Depends(get_current_user)):
 
 
 @router.post('/reward')
-async def process_reward(referred_user_id: str, user=Depends(get_current_user)):
-    """Called internally when a referred user makes their first payment. Credits referrer."""
+async def process_reward(referred_user_id: str, _admin=Depends(get_current_admin_flex)):
+    """Credits the referrer once a referred user pays. Admin/internal only: any signed-in
+    user could previously mark any referral as earned."""
     referred = await users.find_one({'_id': referred_user_id})
     if not referred:
         raise HTTPException(404, 'User not found')

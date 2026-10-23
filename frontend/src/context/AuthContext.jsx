@@ -94,6 +94,13 @@ export function AuthProvider({ children }) {
     setToken(newToken);
   }, [token]);
 
+  // Send a signed-out visitor to sign in (or sign up) and back to this page after.
+  // Callers already used openAuth() but it was never provided, so their buttons threw.
+  const openAuth = useCallback((mode = 'login') => {
+    const here = window.location.pathname + window.location.search;
+    window.location.assign(`/${mode === 'signup' ? 'signup' : 'login'}?next=${encodeURIComponent(here)}`);
+  }, []);
+
   const value = {
     user,
     token,
@@ -105,6 +112,7 @@ export function AuthProvider({ children }) {
     logout,
     refreshUser,
     setAuthToken,
+    openAuth,
   };
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;

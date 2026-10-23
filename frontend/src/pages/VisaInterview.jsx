@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { API, useAuth } from '../context/AuthContext';
+import WeHiveLoader from '../components/WeHiveLoader';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import {
-  Mic, MicOff, ChevronRight, Loader2, Clock, CheckCircle2,
+  Mic, MicOff, ChevronRight, Clock, CheckCircle2,
   XCircle, AlertCircle, RefreshCw, Award, Shield, ChevronLeft,
   BarChart3, Star, FileText, MessageSquare, Sparkles, Flag,
 } from 'lucide-react';
@@ -356,10 +357,7 @@ export default function VisaInterview() {
           )}
 
           {phase === 'scoring' && (
-            <div className="py-20 flex flex-col items-center text-muted-foreground" role="status">
-              <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--blue-700))] mb-3" />
-              Reviewing your answers…
-            </div>
+            <WeHiveLoader label="Reviewing your answers" className="py-20" />
           )}
 
           {phase === 'results' && scoring?.error && (

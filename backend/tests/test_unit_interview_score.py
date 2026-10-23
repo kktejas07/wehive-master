@@ -16,6 +16,7 @@ import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 import routes_interview_score as scoring  # noqa: E402
+from auth_utils import get_current_user  # noqa: E402
 from server import app  # noqa: E402
 
 client = TestClient(app)
@@ -30,6 +31,19 @@ Q_FUND = "How will you fund your education and living expenses?"
 @pytest.fixture(autouse=True)
 def _no_rate_limit(monkeypatch):
     monkeypatch.setenv("RATE_LIMIT_DISABLED", "1")
+
+
+@pytest.fixture(autouse=True)
+def _signed_in():
+    app.dependency_overrides[get_current_user] = lambda: {"_id": "u1"}
+    yield
+    app.dependency_overrides.pop(get_current_user, None)
+
+
+def test_scoring_requires_sign_in():
+    app.dependency_overrides.pop(get_current_user, None)
+    r = client.post("/api/interview/score", json={"items": [{"question": "Why?", "answer": "x"}]})
+    assert r.status_code == 401
 
 
 def test_rubric_is_deterministic_and_rewards_a_better_answer():

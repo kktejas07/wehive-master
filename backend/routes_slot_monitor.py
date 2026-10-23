@@ -45,6 +45,7 @@ class SubscribeRequest(BaseModel):
 
 @router.get("/slots")
 async def get_slots(
+    _user=Depends(get_current_user),  # slot data is for signed-in users
     consulate: Optional[str] = None,
     visa_type: Optional[str] = None,
     limit: int = Query(100, ge=1, le=500),
@@ -71,6 +72,7 @@ async def get_slots(
 
 @router.get("/slots/summary")
 async def get_slots_summary(
+    _user=Depends(get_current_user),
     hours: int = Query(24, ge=1, le=720),
     country: str = Query(
         "usa",
