@@ -22,6 +22,8 @@ from auth_utils import get_current_user, get_current_user_optional
 from db import db
 import logging
 
+from rate_limit import RateLimit  # noqa: E402
+
 router = APIRouter(prefix="/gen", tags=["gen-ai"], dependencies=[Depends(get_current_user)])
 logger = logging.getLogger("wehive.gen_ai")
 
@@ -72,6 +74,18 @@ def _get_llm():
             return None
 
 
+_gen_limiter = RateLimit(max_calls=20, window_seconds=600)
+
+
+async def _chat(user: dict, system_prompt: str, user_prompt: str, max_tokens: int) -> dict:
+    """marketplace.chat takes (user_id, system_prompt, user_prompt, max_tokens) and returns
+    text; these handlers used to pass OpenAI-style messages/temperature, so every call failed."""
+    from ai_marketplace import marketplace
+    text = await marketplace.chat(user_id=user["_id"], system_prompt=system_prompt,
+                                  user_prompt=user_prompt, max_tokens=max_tokens)
+    return {"content": text or ""}
+
+
 STYLE_PROMPTS = {
     "creative": "Be imaginative, use vivid language, and think outside the box.",
     "formal": "Use formal, professional language. Maintain a polished and respectful tone.",
@@ -97,7 +111,8 @@ GEN_MODELS = [
 @router.post("/text")
 async def generate_text(
     req: TextGenRequest,
-    user=Depends(get_current_user_optional),
+    user=Depends(get_current_user),
+    _=Depends(_gen_limiter),
 ):
     llm = _get_llm()
     if not llm:
@@ -107,21 +122,8 @@ async def generate_text(
     if req.style and req.style in STYLE_PROMPTS:
         system_prompt += f"\n\nStyle: {STYLE_PROMPTS[req.style]}"
 
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": req.prompt},
-    ]
-
     try:
-        if hasattr(llm, "chat"):
-            response = await llm.chat(
-                messages=messages,
-                model=req.model,
-                max_tokens=req.max_tokens,
-                temperature=req.temperature,
-            )
-        else:
-            response = {"content": llm(req.prompt) if callable(llm) else "LLM unavailable"}
+        response = await _chat(user, system_prompt, req.prompt, req.max_tokens)
     except Exception as e:
         logger.exception("Generation failed")
         raise HTTPException(status_code=502, detail="Generation failed")
@@ -149,7 +151,8 @@ async def generate_text(
 @router.post("/translate")
 async def translate_text(
     req: TranslateRequest,
-    user=Depends(get_current_user_optional),
+    user=Depends(get_current_user),
+    _=Depends(_gen_limiter),
 ):
     llm = _get_llm()
     if not llm:
@@ -162,16 +165,8 @@ async def translate_text(
         f"Preserve all formatting, line breaks, and special characters."
     )
 
-    messages = [
-        {"role": "system", "content": system},
-        {"role": "user", "content": req.text},
-    ]
-
     try:
-        if hasattr(llm, "chat"):
-            response = await llm.chat(messages=messages, max_tokens=len(req.text) * 2, temperature=0.3)
-        else:
-            response = {"content": req.text}
+        response = await _chat(user, system, req.text, min(len(req.text) * 2, 4000))
     except Exception as e:
         logger.exception("Translation failed")
         raise HTTPException(status_code=502, detail="Translation failed")
@@ -190,7 +185,8 @@ async def translate_text(
 @router.post("/summarize")
 async def summarize_text(
     req: SummarizeRequest,
-    user=Depends(get_current_user_optional),
+    user=Depends(get_current_user),
+    _=Depends(_gen_limiter),
 ):
     llm = _get_llm()
     if not llm:
@@ -205,16 +201,8 @@ async def summarize_text(
         f"Return ONLY the summary, nothing else."
     )
 
-    messages = [
-        {"role": "system", "content": system},
-        {"role": "user", "content": req.text},
-    ]
-
     try:
-        if hasattr(llm, "chat"):
-            response = await llm.chat(messages=messages, max_tokens=min(req.max_length * 2, 1024), temperature=0.3)
-        else:
-            response = {"content": req.text[:req.max_length]}
+        response = await _chat(user, system, req.text, min(req.max_length * 2, 1024))
     except Exception as e:
         logger.exception("Summarization failed")
         raise HTTPException(status_code=502, detail="Summarization failed")

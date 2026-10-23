@@ -78,16 +78,13 @@ async def book_appointment(
     if not app:
         raise HTTPException(404, 'Application not found')
 
-    slot = await db.visa_slots.find_one({
-        '_id': req.slot_id,
-        'date': req.date,
-        'time': req.time,
-        'booked': False,
-    })
+    # Claim the slot in one atomic update, so two users can't book the same slot.
+    slot = await db.visa_slots.find_one_and_update(
+        {'_id': req.slot_id, 'date': req.date, 'time': req.time, 'booked': False},
+        {'$set': {'booked': True, 'booked_by': user['_id'], 'application_id': req.application_id, 'booked_at': datetime.utcnow()}},
+    )
     if not slot:
         raise HTTPException(400, 'Slot not available')
-
-    await db.visa_slots.update_one({'_id': req.slot_id}, {'$set': {'booked': True, 'booked_by': user['_id'], 'application_id': req.application_id, 'booked_at': datetime.utcnow()}})
     await db.applications.update_one({'_id': req.application_id}, {'$set': {
         'visa_appointment': {'date': req.date, 'time': req.time, 'embassy': req.embassy, 'city': req.city, 'slot_id': req.slot_id},
         'status': 'appointment_scheduled',

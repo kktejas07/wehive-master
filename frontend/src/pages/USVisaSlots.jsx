@@ -642,7 +642,7 @@ export default function USVisaSlots() {
   const fetchAll = useCallback(async () => {
     try {
       const [summaryRes, statusRes] = await Promise.all([
-        axios.get(`${API}/usvisa/slots/summary`, { params: { country: selectedCountry } }),
+        axios.get(`${API}/usvisa/slots/summary`, { params: { country: selectedCountry }, headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API}/usvisa/status`),
       ]);
       setSummary(summaryRes.data);
@@ -650,7 +650,7 @@ export default function USVisaSlots() {
       setStatus(statusRes.data);
 
       if (statusRes.data.last_slot_detected_at) {
-        const slotsRes = await axios.get(`${API}/usvisa/slots`, { params: { limit: 50 } });
+        const slotsRes = await axios.get(`${API}/usvisa/slots`, { params: { limit: 50 }, headers: { Authorization: `Bearer ${token}` } });
         setSlots(slotsRes.data.slots || []);
       }
     } catch (err) {
@@ -676,7 +676,7 @@ export default function USVisaSlots() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCountry]);
+  }, [selectedCountry, token]);
 
   useEffect(() => {
     setLoading(true);

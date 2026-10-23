@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException
+from rate_limit import RateLimit
 from db import db, universities_col
 from ai_marketplace import marketplace
 import json
@@ -17,8 +18,11 @@ async def get_intake_calendar():
     intakes = [doc async for doc in cursor]
     return {"intakes": intakes}
 
-@router.get("/recommendations")
-async def get_university_recommendations(country: str, track: str):
+_llm_limiter = RateLimit(max_calls=10, window_seconds=600)
+
+
+@router.get("/recommendations", dependencies=[Depends(_llm_limiter)])
+async def get_university_recommendations(country: str = Query(max_length=60), track: str = Query(max_length=60)):
     """Recommends top universities for a given country and track."""
     # Attempt to query local DB first for speed
     cl = country.lower()
@@ -56,7 +60,7 @@ async def get_university_recommendations(country: str, track: str):
         
     return {"universities": unis}
 
-@router.get("/insights")
+@router.get("/insights", dependencies=[Depends(_llm_limiter)])
 async def get_university_insights(university: str, country: str, track: str):
     """Uses LLM to dynamically generate admission insights and FAQs."""
     prompt = f"""
