@@ -71,14 +71,14 @@ async def test_settings_put_keeps_secret_when_mask_round_trips(monkeypatch):
 
 # ── email change must be re-verified ──────────────────────────────────────────
 @pytest.mark.asyncio
-async def test_email_change_resets_verification(monkeypatch):
-    coll = MagicMock(update_one=AsyncMock(), find_one=AsyncMock(return_value={'_id': 'u1', 'email': 'boss@example.com'}))
+async def test_email_change_waits_for_verification(monkeypatch):
+    coll = MagicMock(update_one=AsyncMock(), find_one=AsyncMock(side_effect=[None, {'_id': 'u1', 'email': 'me@example.com'}]))
     monkeypatch.setattr(routes_users, 'users', coll)
     from models import UpdateProfileRequest
     await routes_users.update_me(UpdateProfileRequest(email='Boss@Example.com'),
                                  user={'_id': 'u1', 'email': 'me@example.com', 'email_verified': True})
     update = coll.update_one.await_args.args[1]['$set']
-    assert update['email'] == 'boss@example.com' and update['email_verified'] is False
+    assert 'email' not in update and update['pending_email'] == 'boss@example.com'
 
 
 def test_user_patch_cannot_grant_admin():

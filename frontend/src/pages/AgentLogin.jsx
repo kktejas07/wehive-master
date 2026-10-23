@@ -3,18 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
-import {
-  LogIn, UserPlus, Loader2, Shield, Eye, EyeOff,
-} from 'lucide-react';
+import { Loader2, Shield, Eye, EyeOff } from 'lucide-react';
+
+// Agent accounts are created by WeHive admins (Admin → Agents); there is no
+// public registration, so customers' applications only reach vetted agents.
 
 export default function AgentLogin() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [agency, setAgency] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
@@ -24,9 +21,7 @@ export default function AgentLogin() {
     setError('');
     setLoading(true);
     try {
-      const endpoint = mode === 'login' ? `${API}/agent/login` : `${API}/agent/signup`;
-      const payload = mode === 'login' ? { email, password } : { name, email, phone, password, agency_name: agency };
-      const r = await axios.post(endpoint, payload);
+      const r = await axios.post(`${API}/agent/login`, { email, password });
       localStorage.setItem('agent_token', r.data.token);
       localStorage.setItem('agent_data', JSON.stringify(r.data.agent));
       navigate('/agent');
@@ -45,46 +40,15 @@ export default function AgentLogin() {
             <Shield className="w-6 h-6 text-[hsl(var(--blue-700))]" />
           </div>
           <h1 className="text-[28px] sm:text-[32px] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">Agent Portal</h1>
-          <p className="text-muted-foreground mt-1 text-[15px]">{mode === 'login' ? 'Sign in to manage your students' : 'Create your agent account'}</p>
+          <p className="text-muted-foreground mt-1 text-[15px]">Sign in to manage your students</p>
         </div>
 
         <div className="rounded-2xl bg-white border border-border p-6 sm:p-8 shadow-sm">
-          <div className="flex mb-6 bg-[hsl(var(--soft-bg))] border border-border rounded-xl p-1">
-            <button
-              onClick={() => { setMode('login'); setError(''); }}
-              className={`flex-1 min-h-[40px] rounded-lg text-[14px] font-semibold transition-colors ${mode === 'login' ? 'bg-white text-[hsl(var(--blue-900))] shadow-sm' : 'text-muted-foreground'}`}
-            >
-              <LogIn className="w-4 h-4 inline mr-1.5" /> Sign In
-            </button>
-            <button
-              onClick={() => { setMode('signup'); setError(''); }}
-              className={`flex-1 min-h-[40px] rounded-lg text-[14px] font-semibold transition-colors ${mode === 'signup' ? 'bg-white text-[hsl(var(--blue-900))] shadow-sm' : 'text-muted-foreground'}`}
-            >
-              <UserPlus className="w-4 h-4 inline mr-1.5" /> Register
-            </button>
-          </div>
-
           {error && (
             <div className="mb-4 rounded-xl bg-red-50 border border-red-200 p-3 text-[13px] text-red-700 text-center">{error}</div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === 'signup' && (
-              <>
-                <div>
-                  <label htmlFor="agentlogin-full-name" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Full Name</label>
-                  <input id="agentlogin-full-name" value={name} onChange={e => setName(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your name" />
-                </div>
-                <div>
-                  <label htmlFor="agentlogin-phone" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Phone</label>
-                  <input id="agentlogin-phone" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="+91 98765 43210" />
-                </div>
-                <div>
-                  <label htmlFor="agentlogin-agency-name-optional" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Agency Name (Optional)</label>
-                  <input id="agentlogin-agency-name-optional" value={agency} onChange={e => setAgency(e.target.value)} className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="Your agency" />
-                </div>
-              </>
-            )}
             <div>
               <label htmlFor="agentlogin-email" className="text-[13px] font-semibold text-[hsl(var(--blue-900))] block mb-1.5">Email</label>
               <input id="agentlogin-email" data-testid="agent-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full h-12 rounded-xl border border-slate-300 focus:border-[hsl(var(--blue-700))] outline-none px-4 text-[14px]" placeholder="agent@example.com" />
@@ -99,11 +63,15 @@ export default function AgentLogin() {
               </div>
             </div>
             <Button variant="accent" type="submit" data-testid="agent-submit" disabled={loading} className="w-full h-12 rounded-xl text-white font-semibold">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (mode === 'login' ? 'Sign In' : 'Create Account')}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign In'}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <p className="mt-5 text-center text-[13px] text-muted-foreground">
+            Agent accounts are created by WeHive. Want to partner with us? Write to{' '}
+            <a href="mailto:info@wehive.co.in" className="text-[hsl(var(--blue-700))] font-semibold hover:underline">info@wehive.co.in</a>.
+          </p>
+          <div className="mt-4 text-center">
             <Link to="/" className="text-[14px] text-[hsl(var(--blue-700))] hover:underline font-semibold">
               Back to WeHive
             </Link>

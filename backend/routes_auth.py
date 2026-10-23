@@ -8,8 +8,9 @@ from models import (
     SendOtpRequest, SendOtpResponse, VerifyOtpRequest, AuthTokens, PublicUser,
     FirebaseSyncRequest, FirebasePhoneSyncRequest,
 )
+import premium
 from auth_utils import (
-    classify_identifier, normalize_phone, sign_jwt, mask,
+    claim_contact, classify_identifier, normalize_phone, sign_jwt, mask,
     get_current_user,
 )
 from admin_auth import verify_password
@@ -49,7 +50,7 @@ def _is_admin(u: dict) -> bool:
     if u.get('is_admin'):
         return True
     email = (u.get('email') or '').lower()
-    return email in ADMIN_EMAILS
+    return email in ADMIN_EMAILS and u.get('email_verified') is True
 
 
 def _public(u: dict) -> PublicUser:
@@ -71,13 +72,16 @@ def _public(u: dict) -> PublicUser:
         staff_role=u.get('staff_role'),
         notify_email=u.get('notify_email', True),
         notify_whatsapp=bool(u.get('notify_whatsapp', False)),
+        premium_free_left=premium.free_left(u),
+        pending_email=u.get('pending_email'),
+        pending_phone=u.get('pending_phone'),
         created_at=u.get('created_at', datetime.utcnow()),
     )
 
 
 async def _find_or_create_user(identifier: str, kind: str, name: str = '', referral_code: str = ''):
     field = 'email' if kind == 'email' else 'phone'
-    user = await users.find_one({field: identifier})
+    user = await claim_contact(users, field, identifier)
     now = datetime.utcnow()
     is_new = False
     if not user:
@@ -241,7 +245,7 @@ async def firebase_sync(req: FirebaseSyncRequest, request: Request, _=Depends(_v
     now = datetime.utcnow()
 
     if email:
-        user = await users.find_one({'email': email})
+        user = await claim_contact(users, 'email', email)
         if not user:
             user = {
                 '_id': str(uuid.uuid4()),

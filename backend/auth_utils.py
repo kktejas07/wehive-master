@@ -111,3 +111,17 @@ def create_access_token(data: dict) -> str:
         raise ValueError('create_access_token requires a "sub" key in data')
     extra = {k: v for k, v in data.items() if k != 'sub'}
     return sign_jwt(data['sub'], extra)
+
+
+async def claim_contact(users, field: str, value: str):
+    """The account that owns this email/phone, or None.
+
+    A record that holds the address without having verified it (and that no admin
+    created) does not own it: the address is detached from that record so the
+    person who just proved ownership never inherits someone else's account and
+    an attacker cannot pre-claim an admin's email."""
+    user = await users.find_one({field: value})
+    if not user or user.get(f'{field}_verified') is True or user.get('is_admin'):
+        return user
+    await users.update_one({'_id': user['_id']}, {'$unset': {field: ''}, '$set': {f'{field}_verified': False}})
+    return None

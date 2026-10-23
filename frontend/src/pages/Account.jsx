@@ -91,12 +91,13 @@ function ProfileTab({ user, token, onUpdated }) {
   const onSave = async () => {
     setSaving(true);
     try {
-      await axios.put(
+      const r = await axios.put(
         `${API}/users/me`,
         { name: name.trim(), email: email.trim() || null, phone: phone.trim() || null, gender: gender || null },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast({ title: 'Profile saved' });
+      const pending = r.data?.pending_email || r.data?.pending_phone;
+      toast({ title: 'Profile saved', description: pending ? 'Confirm your new contact details with a code below.' : undefined });
       setEditing(false);
       onUpdated?.();
     } catch (e) {
@@ -177,11 +178,73 @@ function ProfileTab({ user, token, onUpdated }) {
           </EditSelect>
         </div>
       )}
+      {!editing && ['email', 'phone'].map((kind) => user[`pending_${kind}`] && (
+        <PendingContact key={kind} kind={kind} value={user[`pending_${kind}`]} token={token} onDone={onUpdated} />
+      ))}
       {!editing && (
         <div className="mt-8 border-t border-border pt-8">
           <AIInsightsPanel />
         </div>
       )}
+    </div>
+  );
+}
+
+// A new email/phone only replaces the old one after the user enters the code sent to it.
+function PendingContact({ kind, value, token, onDone }) {
+  const { toast } = useToast();
+  const [sent, setSent] = useState(false);
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const headers = { Authorization: `Bearer ${token}` };
+  const label = kind === 'email' ? 'email' : 'mobile number';
+
+  const send = async () => {
+    setBusy(true);
+    try {
+      const r = await axios.post(`${API}/users/me/contact/send-code`, { kind }, { headers });
+      setSent(true);
+      toast({ title: 'Code sent', description: `Sent to ${r.data.masked}.${r.data.dev_code ? ` Dev code: ${r.data.dev_code}` : ''}` });
+    } catch (e) {
+      toast({ title: 'Could not send code', description: e?.response?.data?.detail || 'Please try again.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirm = async () => {
+    setBusy(true);
+    try {
+      await axios.post(`${API}/users/me/contact/confirm`, { kind, code }, { headers });
+      toast({ title: `New ${label} confirmed` });
+      onDone?.();
+    } catch (e) {
+      toast({ title: 'Code not accepted', description: e?.response?.data?.detail || 'Please try again.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:p-5" data-testid={`pending-${kind}`}>
+      <p className="text-[14px] text-[hsl(var(--blue-900))]">
+        Confirm your new {label} <strong>{value}</strong>. It replaces the current one once you enter the code we send to it.
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {sent && (
+          <input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" maxLength={8}
+            aria-label="Verification code" placeholder="Code"
+            className="h-11 w-32 rounded-xl border border-slate-300 px-3 text-[15px] font-bold tracking-widest" />
+        )}
+        {sent ? (
+          <Button variant="accent" disabled={busy || code.trim().length < 4} onClick={confirm} className="rounded-xl h-11 px-5 font-bold text-white">
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
+          </Button>
+        ) : null}
+        <Button variant="outline" disabled={busy} onClick={send} className="rounded-xl h-11 px-5 font-bold border-slate-300">
+          {sent ? 'Resend code' : 'Send code'}
+        </Button>
+      </div>
     </div>
   );
 }

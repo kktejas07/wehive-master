@@ -166,7 +166,8 @@ def test_invite_new_email_creates_admin_and_sends_single_use_link(env):
 
 
 def test_promote_existing_user(env):
-    env.users.docs.append({"_id": "u1", "email": "user@example.com", "is_admin": False})
+    # Only an account that verified the address is promoted (an unverified holder could be a squatter).
+    env.users.docs.append({"_id": "u1", "email": "user@example.com", "is_admin": False, "email_verified": True})
     r = env.client.post("/api/admin-auth/admins", json={"email": "user@example.com"})
     assert r.status_code == 200 and r.json()["invited"] is True
     assert env.users.docs[-1]["is_admin"] is True
