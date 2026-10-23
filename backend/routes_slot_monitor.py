@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
+from adapters.state_dept_wait_times import OFFICIAL_URL
 from auth_utils import get_current_user
 from db import usvisa_slots_col, usvisa_subscriptions_col
 
@@ -82,8 +83,9 @@ async def get_slots_summary(
         ),
     ),
 ):
-    from slot_monitor import get_wait_times_for_display
-    data = get_wait_times_for_display(country)
+    from slot_monitor import get_wait_times_for_display, load_official_wait_times
+    official = await load_official_wait_times() if country == "usa" else None
+    data = get_wait_times_for_display(country, official)
 
     summary = {}
     consulates_with_data = 0
@@ -99,6 +101,8 @@ async def get_slots_summary(
             consulates_with_data += 1
 
         summary[cid] = {
+            "source": cdata.get("source"),
+            "is_estimate": cdata.get("is_estimate", True),
             "name": cdata["name"],
             "city": cdata["city"],
             "jurisdiction": cdata.get("jurisdiction", ""),
@@ -130,7 +134,11 @@ async def get_slots_summary(
     return {
         "ok": True,
         "since_hours": hours,
-        "source": "wait_time_estimates",
+        # "official_wait_times": US State Department figures; otherwise hand-maintained estimates.
+        "source": "official_wait_times" if official else "wait_time_estimates",
+        "source_name": "US State Department" if official else None,
+        "source_url": OFFICIAL_URL if official else None,
+        "updated": official.get("updated") if official else None,
         "overall": overall,
         "consulates": summary,
     }

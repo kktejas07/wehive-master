@@ -730,14 +730,8 @@ async def admin_integrations(_=Depends(get_current_admin)):
     overrides = await settings_col.find_one({'_id': 'integrations'}) or {}
     otp_channel = overrides.get('OTP_CHANNEL', os.environ.get('OTP_CHANNEL', 'mock' if IS_DEV else ''))
 
-    # Check both DB settings and env vars for SMTP/Twilio config
-    twilio_cfg = await _get_settings('twilio')
+    # Check both DB settings and env vars for SMTP config
     smtp_cfg = await _get_settings('smtp')
-
-    twilio_sid = twilio_cfg.get('account_sid') or os.environ.get('TWILIO_ACCOUNT_SID', '')
-    twilio_token = twilio_cfg.get('auth_token') or os.environ.get('TWILIO_AUTH_TOKEN', '')
-    twilio_wa = twilio_cfg.get('whatsapp_from') or os.environ.get('TWILIO_WHATSAPP_FROM', '')
-    twilio_sms = twilio_cfg.get('sms_from') or os.environ.get('TWILIO_SMS_FROM', '')
 
     smtp_user = smtp_cfg.get('user') or os.environ.get('SMTP_USER', '')
     smtp_pwd = smtp_cfg.get('password') or os.environ.get('SMTP_PASSWORD', '')
@@ -765,18 +759,8 @@ async def admin_integrations(_=Depends(get_current_admin)):
         'otp_channel': otp_channel,
         'services': [
             {
-                'id': 'twilio',
-                'name': 'Twilio (WhatsApp + SMS OTP)',
-                'status': 'configured' if twilio_sid and twilio_token else 'mock',
-                'details': {
-                    'account_sid': _mask(twilio_sid, 6),
-                    'whatsapp_from': twilio_wa or '—',
-                },
-                'action': 'Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in backend/.env',
-            },
-            {
                 'id': 'openwa',
-                'name': 'OpenWA (WhatsApp API)',
+                'name': 'OpenWA (WhatsApp OTP + notifications)',
                 'status': 'configured' if openwa_ok else 'missing',
                 'details': {
                     'api_url': openwa_api_url or '—',
@@ -821,7 +805,7 @@ async def admin_integrations(_=Depends(get_current_admin)):
 
 
 class IntegrationSettings(BaseModel):
-    OTP_CHANNEL: Optional[Literal['mock', 'twilio_sms', 'twilio_whatsapp', 'whatsapp', 'email', 'auto']] = None
+    OTP_CHANNEL: Optional[Literal['mock', 'whatsapp', 'email', 'auto']] = None
 
 
 @router.patch('/integrations')
@@ -853,7 +837,7 @@ def _mask_secrets(config: dict) -> dict:
     return {k: (SECRET_MASK if secret(k) and isinstance(v, str) and v else v) for k, v in (config or {}).items()}
 
 
-ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'default_llm', 'together', 'postal', 'openwa', 'email'}
+ALLOWED_NAMESPACES = {'firebase', 'razorpay', 'smtp', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'default_llm', 'together', 'postal', 'openwa', 'email'}
 
 
 @router.get('/settings/{namespace}')

@@ -295,16 +295,6 @@ PROVIDER_REGISTRY: dict[str, dict] = {
         "category": "llm",
     },
     # ── API Tools (non-LLM) ──────────────────────────────────────────────────────
-    "twilio": {
-        "name": "Twilio SMS",
-        "description": "Send SMS and WhatsApp messages for OTP, alerts, and notifications",
-        "website": "https://twilio.com", "requires_key": True,
-        "key_label": "Account SID", "key_placeholder": "AC...",
-        "base_url": "https://api.twilio.com",
-        "docs": "https://www.twilio.com/docs",
-        "powered_by_tagline": "Powered by Twilio",
-        "pricing_tier": PRICING_TIER_FREE_PAID, "category": "communication",
-    },
     "sendgrid": {
         "name": "SendGrid Email",
         "description": "Transactional email delivery for application updates and receipts",

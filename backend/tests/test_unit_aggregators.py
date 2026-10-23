@@ -301,9 +301,10 @@ def test_moderation_requires_admin(kind):
 @pytest.mark.asyncio
 async def test_slot_wait_times_marked_estimate_without_visahq_key():
     import slot_monitor
-    with patch("adapters.visahq_adapter.VISA_HQ_API_KEY", ""):
-        results, is_estimate = await slot_monitor._fetch_wait_times()
-    assert is_estimate is True and results["mumbai"]["f1"]
+    with patch("adapters.visahq_adapter.VISA_HQ_API_KEY", ""), \
+            patch.object(slot_monitor, "load_official_wait_times", new=AsyncMock(return_value=None)):
+        results, is_estimate, source = await slot_monitor._fetch_wait_times()
+    assert is_estimate is True and source == "estimate" and results["mumbai"]["f1"]
     display = slot_monitor.get_wait_times_for_display("usa")
     assert all(c["is_estimate"] for c in display.values())
 

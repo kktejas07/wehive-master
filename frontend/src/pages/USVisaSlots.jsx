@@ -756,7 +756,8 @@ export default function USVisaSlots() {
 
   const meta = COUNTRY_META[selectedCountry] || COUNTRY_META['usa'];
   // No live source configured: the backend (or the offline fallback) serves published estimates.
-  const estimatesOnly = summary?.source === 'wait_time_estimates' || status?.mode === 'wait_time_estimates';
+  const official = summary?.source === 'official_wait_times';
+  const estimatesOnly = !official && (summary?.source === 'wait_time_estimates' || status?.mode === 'wait_time_estimates');
   const consulateOrder = getConsulatesForCountry(selectedCountry);
 
   if (loading) {
@@ -794,7 +795,7 @@ export default function USVisaSlots() {
 
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-3">
-              <RefreshCw className="w-3.5 h-3.5" /> {estimatesOnly ? 'Published Wait Times' : 'Live Wait Times'}
+              <RefreshCw className="w-3.5 h-3.5" /> {official ? 'Official Wait Times' : estimatesOnly ? 'Published Wait Times' : 'Live Wait Times'}
             </div>
             <h1 className="font-display font-bold text-[32px] sm:text-[44px] tracking-[-0.02em] text-[hsl(var(--blue-900))] leading-tight">
               {meta.label} Visa Appointment Slots
@@ -809,10 +810,14 @@ export default function USVisaSlots() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className={`w-2.5 h-2.5 rounded-full ${estimatesOnly ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{estimatesOnly ? 'Estimates' : 'Live'}</span>
+                <span className="text-[13px] font-bold text-[hsl(var(--blue-900))]">{official ? 'Official' : estimatesOnly ? 'Estimates' : 'Live'}</span>
               </div>
               <div className="text-[12px] text-muted-foreground">
-                {estimatesOnly ? 'Published consulate estimates, not live availability' : 'Wait times refreshed regularly'}
+                {official ? (
+                  <>Next available appointment from the{' '}
+                    <a href={summary.source_url} target="_blank" rel="noopener noreferrer" className="underline">US State Department</a>
+                    {summary.updated ? `, updated ${summary.updated}` : ''}. Updated monthly; not live slot openings.</>
+                ) : estimatesOnly ? 'Published consulate estimates, not live availability' : 'Wait times refreshed regularly'}
               </div>
             </div>
             <Button
@@ -924,7 +929,7 @@ export default function USVisaSlots() {
               if (!data) return null;
               const available = data.total_slots > 0;
               // Without a live data source the backend serves published estimates.
-              const isEstimate = data.is_estimate || data.source === 'estimate' || estimatesOnly;
+              const isEstimate = !official && (data.is_estimate || data.source === 'estimate' || estimatesOnly);
               const bookingUrl = data.booking_url || FALLBACK_COUNTRIES[selectedCountry]?.[cid]?.booking_url || '#';
               return (
                 <div
