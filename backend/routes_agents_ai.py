@@ -69,7 +69,7 @@ async def _insert_alert_as_notification(user_id: str, alert: dict):
     }, {"_id": 1}):
         return
 
-    await notifications_col.insert_one({
+    doc = {
         "_id": str(__import__("uuid").uuid4()),
         "user_id": user_id,
         "type": alert_type,
@@ -80,7 +80,10 @@ async def _insert_alert_as_notification(user_id: str, alert: dict):
         "action_link": alert.get("action_link"),
         "read": False,
         "created_at": datetime.utcnow(),
-    })
+    }
+    await notifications_col.insert_one(doc)
+    from notify import _publish
+    _publish(user_id, doc)
 
 
 @router.post("/run")

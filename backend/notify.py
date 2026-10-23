@@ -38,6 +38,14 @@ def _email_html(title: str, body: str, url: Optional[str]) -> str:
     return _wrap_html(html.escape(title), content)
 
 
+def _publish(user_id: str, doc: dict) -> None:
+    try:
+        from routes_notifications import publish
+        publish(user_id, doc)
+    except Exception as e:  # live push is best effort
+        logger.debug("Live push failed: %s", e)
+
+
 async def notify_user(
     user_id: str,
     *,
@@ -59,7 +67,7 @@ async def notify_user(
     if not user:
         return {"skipped": "no such user"}
 
-    await notifications_col.insert_one({
+    doc = {
         "_id": str(uuid.uuid4()),
         "user_id": user_id,
         "type": kind,
@@ -71,7 +79,9 @@ async def notify_user(
         "dedupe_key": dedupe_key,
         "read": False,
         "created_at": datetime.utcnow(),
-    })
+    }
+    await notifications_col.insert_one(doc)
+    _publish(user_id, doc)
     sent = {"app": True}
     url = f"{FRONTEND_URL}{link}" if link and link.startswith("/") else link
 

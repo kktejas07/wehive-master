@@ -19,6 +19,7 @@ Endpoints:
 
 import base64
 import os
+from admin_auth import get_current_admin_flex
 from datetime import datetime
 from typing import Optional
 
@@ -139,7 +140,8 @@ async def smart_search(req: SmartSearchRequest, user=Depends(get_current_user)):
         return {"ok": True, "query": req.query, **parsed}
 
     except Exception as e:
-        return {"ok": False, "detail": str(e)}
+        logger.warning("Smart search failed: %s", e)
+        return {"ok": False, "detail": "Search is unavailable right now. Please try again."}
 
 
 @router.get("/smart-search/schema")
@@ -277,7 +279,7 @@ async def performance_review(req: PerformanceReviewRequest, user=Depends(get_cur
 
 
 @router.get("/status")
-async def ai_status():
+async def ai_status(_admin=Depends(get_current_admin_flex)):
     ollama_ok = False
     chroma_ok = False
     kg_ok = False
@@ -329,7 +331,7 @@ async def ai_status():
 
 
 @router.get("/providers")
-async def list_ai_providers():
+async def list_ai_providers(_admin=Depends(get_current_admin_flex)):
     try:
         from ai_marketplace import PROVIDER_REGISTRY
         providers = [

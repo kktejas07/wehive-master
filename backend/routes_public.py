@@ -6,13 +6,17 @@ banners) without requiring an admin login.
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from db import db
 from pricing import load_pricing
+from rate_limit import RateLimit
 from serializers import serialize_event
 
 router = APIRouter(prefix='/public', tags=['public'])
+
+# Tracking needs only the application ID, so cap lookups per IP to stop ID guessing.
+_track_limiter = RateLimit(max_calls=30, window_seconds=600)
 
 settings_col = db['settings']
 events_col = db['events']
@@ -31,7 +35,7 @@ async def public_pricing():
     }
 
 
-@router.get('/track/{application_id}')
+@router.get('/track/{application_id}', dependencies=[Depends(_track_limiter)])
 async def track_application(application_id: str):
     """Public endpoint to track an application's status — no auth required."""
     app = await applications_col.find_one({'_id': application_id})

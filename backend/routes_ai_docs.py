@@ -16,7 +16,10 @@ from pydantic import BaseModel
 from ai_marketplace import marketplace
 from auth_utils import get_current_user
 from db import applications
+from rate_limit import RateLimit
 from serializers import serialize_doc
+
+_ai_doc_limiter = RateLimit(max_calls=10, window_seconds=600)  # each call is an LLM request
 
 router = APIRouter(prefix='/apps', tags=['ai-docs'])
 logger = logging.getLogger('wehive.ai-docs')
@@ -112,7 +115,7 @@ async def _call_ai(user_id: str, prompt: str, session_id: str) -> str:
 
 
 # ---------- Cover Letter / SOP ----------
-@router.post('/{application_id}/cover-letter')
+@router.post('/{application_id}/cover-letter', dependencies=[Depends(_ai_doc_limiter)])
 async def generate_cover_letter(
     application_id: str,
     req: CoverLetterRequest,
@@ -167,7 +170,7 @@ Do NOT invent specific details. Use placeholders like [COMPANY NAME] where real 
 
 
 # ---------- AI Itinerary Enhancer ----------
-@router.get('/{application_id}/ai-itinerary')
+@router.get('/{application_id}/ai-itinerary', dependencies=[Depends(_ai_doc_limiter)])
 async def generate_ai_itinerary(
     application_id: str,
     days: int = Query(default=7, ge=3, le=30),
@@ -257,7 +260,7 @@ Rules:
 
 
 # ---------- Rejection Risk Analyser ----------
-@router.post('/{application_id}/risk-analysis')
+@router.post('/{application_id}/risk-analysis', dependencies=[Depends(_ai_doc_limiter)])
 async def analyse_rejection_risk(
     application_id: str,
     req: RiskAnalysisRequest,
