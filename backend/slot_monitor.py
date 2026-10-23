@@ -15,7 +15,7 @@ Wait-time data stored in MongoDB (usvisa_slots).
 import asyncio
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from db import usvisa_slots_col
@@ -424,7 +424,69 @@ async def _run_slot_check():
             await telegram.send_message(TELEGRAM_CHANNEL_ID, summary)
         _notifications_sent += 1
 
+    try:
+        alerted = await dispatch_slot_alerts()
+        _notifications_sent += alerted
+        if alerted:
+            logger.info("Slot alerts sent to %d subscribers", alerted)
+    except Exception as e:
+        logger.warning("Slot alert dispatch failed: %s", e)
+
     logger.info("Slot check complete (wait_times + Telegram)")
+
+
+async def dispatch_slot_alerts(max_age_hours: int = 48) -> int:
+    """Alert subscribers about slot openings reported since the last run.
+
+    Only real sightings (Telegram channel reports) trigger alerts. The daily
+    wait-time rows are estimates, not openings, so they never do. Each report
+    is marked `notified` once handled, so no user is alerted twice for it.
+    Returns the number of users alerted.
+    """
+    from db import usvisa_slots_col, usvisa_subscriptions_col
+    from notify import notify_user
+
+    since = datetime.utcnow() - timedelta(hours=max_age_hours)
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    reports = await usvisa_slots_col.find({
+        "source": "telegram_channel", "notified": False, "detected_at": {"$gte": since},
+    }).to_list(length=500)
+    if not reports:
+        return 0
+
+    names = {c["id"]: c["name"] for c in US_CONSULATES_INDIA}
+    visa_names = {v["id"]: v["name"] for v in VISA_TYPES}
+    alerted = 0
+    async for sub in usvisa_subscriptions_col.find({}):
+        matches = [
+            r for r in reports
+            if r.get("consulate") in (sub.get("consulates") or [])
+            and (r.get("visa_type") in (sub.get("visa_types") or []) or r.get("visa_type") in (None, "", "unknown"))
+            and (not r.get("date") or r["date"] >= today)
+        ]
+        if not matches:
+            continue
+        lines = [
+            f"{visa_names.get(r.get('visa_type'), 'Visa')} at {names.get(r['consulate'], r['consulate'])}"
+            + (f" on {r['date']}" if r.get("date") else "")
+            for r in matches[:5]
+        ]
+        more = f" and {len(matches) - 5} more" if len(matches) > 5 else ""
+        await notify_user(
+            sub["user_id"],
+            title="US visa slot reported",
+            body="New openings reported: " + "; ".join(lines) + more
+                 + ". Openings go fast; book on the official site if one suits you.",
+            kind="slot_alert",
+            link="/us-visa-slots",
+            dedupe_key="slot:" + sub["user_id"] + ":" + ",".join(sorted(r["_id"] for r in matches))[:180],
+        )
+        alerted += 1
+
+    await usvisa_slots_col.update_many(
+        {"_id": {"$in": [r["_id"] for r in reports]}}, {"$set": {"notified": True}},
+    )
+    return alerted
 
 
 async def _slot_monitor_loop():

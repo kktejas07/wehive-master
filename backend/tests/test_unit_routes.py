@@ -111,10 +111,14 @@ class TestChatbotHelpers:
 
     @pytest.mark.asyncio
     async def test_notify_status_change(self):
-        with patch("db.notifications_col") as mock_col:
+        with patch("db.notifications_col") as mock_col, patch("db.users") as mock_users:
+            mock_col.find_one = AsyncMock(return_value=None)
             mock_col.insert_one = AsyncMock()
+            mock_users.find_one = AsyncMock(return_value={"_id": "user1"})  # no email/phone: in-app only
             await notify_status_change("user1", "app1", "in_review")
-            assert mock_col.insert_one.called
+            doc = mock_col.insert_one.await_args.args[0]
+            assert doc["type"] == "status_change" and doc["application_id"] == "app1"
+            assert doc["action_link"] == "/account/applications/app1"
 
     def test_re_compiled(self):
         assert RE_COUNTRY_CODE.search("US")

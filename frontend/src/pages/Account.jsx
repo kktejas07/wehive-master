@@ -6,10 +6,12 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot, ClipboardList, Clock, CheckCircle, XCircle, Send, Briefcase, GraduationCap } from 'lucide-react';
+import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot, ClipboardList, Clock, CheckCircle, XCircle, Send, Briefcase, GraduationCap, Receipt } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
 import { statusColor } from '../lib/utils';
 import ScansTab from '../components/account/ScansTab';
+import PaymentsTab from '../components/account/PaymentsTab';
+import NotificationSettings from '../components/account/NotificationSettings';
 import PromoBanner from '../components/PromoBanner';
 import AICoverLetterModal from '../components/ai/AICoverLetterModal';
 import AIItineraryModal from '../components/ai/AIItineraryModal';
@@ -32,6 +34,7 @@ const TABS = [
   { id: 'plans', label: 'Saved plans', Icon: Compass },
   { id: 'ai-marketplace', label: 'AI Marketplace', Icon: Bot },
   { id: 'requests', label: 'My Requests', Icon: ClipboardList },
+  { id: 'payments', label: 'Payments', Icon: Receipt },
   { id: 'settings', label: 'Settings', Icon: Settings },
 ];
 
@@ -546,6 +549,8 @@ function SettingsTab({ user, token, onUpdated }) {
         </Button>
       </div>
 
+      <NotificationSettings user={user} token={token} onUpdated={onUpdated} />
+
       <div className="mt-10 pt-8 border-t border-border">
         <div className="flex items-center gap-2 mb-4">
           <Sparkles className="w-4 h-4 text-[hsl(var(--blue-700))]" />
@@ -1010,6 +1015,7 @@ export default function Account() {
               {tab === 'ai-agents' && <AIAgentsTab />}
               {tab === 'ai-marketplace' && <AIMarketplaceSettings />}
               {tab === 'requests' && <RequestsTab user={user} token={token} />}
+              {tab === 'payments' && <PaymentsTab token={token} />}
               {tab === 'settings' && <SettingsTab user={user} token={token} onUpdated={refreshUser} />}
             </div>
           </section>

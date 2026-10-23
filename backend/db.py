@@ -62,6 +62,7 @@ async def ensure_indexes():
     await payments.create_index([('user_id', 1)])
     await payments.create_index([('razorpay_order_id', 1)], sparse=True)
     await notifications_col.create_index([('user_id', 1), ('created_at', -1)])
+    await notifications_col.create_index('dedupe_key', sparse=True)  # notify.py: send-once reminders and alerts
     await referrals_col.create_index('user_id')
     await referrals_col.create_index('code', unique=True)
     await db['referral_transactions'].create_index('referrer_id')

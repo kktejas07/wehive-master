@@ -69,6 +69,8 @@ def _public(u: dict) -> PublicUser:
         is_admin=_is_admin(u),
         is_staff=bool(u.get('is_staff', False)),
         staff_role=u.get('staff_role'),
+        notify_email=u.get('notify_email', True),
+        notify_whatsapp=bool(u.get('notify_whatsapp', False)),
         created_at=u.get('created_at', datetime.utcnow()),
     )
 
