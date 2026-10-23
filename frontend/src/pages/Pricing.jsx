@@ -102,7 +102,7 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
 // bullets live here.
 const PLAN_FEATURES = {
   lite: ['One visa application', 'Document review by expert', 'Email support', '7–10 day processing'],
-  standard: ['Everything in Lite', 'Priority chat support', 'On-time guarantee', 'Up to 4 applicants', 'Real-time tracking'],
+  standard: ['Everything in Lite', 'Priority chat support', 'Appointment & deadline reminders', 'Up to 4 applicants', 'Real-time tracking'],
   concierge: ['Everything in Standard', 'Dedicated visa specialist', 'Same-day rush eligible', 'Up to 8 applicants', '24/7 phone support'],
 };
 

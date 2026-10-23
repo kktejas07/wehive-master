@@ -269,7 +269,8 @@ class TestIntegrations:
         body = r.json()
         assert 'otp_channel' in body and 'services' in body
         ids = {svc['id'] for svc in body['services']}
-        assert {'twilio', 'smtp', 'ai_marketplace'}.issubset(ids)
+        assert {'openwa', 'smtp', 'ai_marketplace'}.issubset(ids)
+        assert 'twilio' not in ids
         for svc in body['services']:
             details = svc.get('details') or {}
             for v in details.values():

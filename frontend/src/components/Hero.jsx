@@ -14,9 +14,9 @@ function TrustPill() {
   return (
     <div className="inline-flex items-center gap-2 rounded-full bg-white border border-[hsl(var(--border))] shadow-sm px-3.5 py-1.5 text-[13px]">
       <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-      <span className="text-[hsl(var(--blue-900))] font-semibold">{KEY_STATS.visasProcessed} visas processed</span>
+      <span className="text-[hsl(var(--blue-900))] font-semibold">{KEY_STATS.universities} partner universities</span>
       <span className="text-muted-foreground" aria-hidden="true">·</span>
-      <span className="text-muted-foreground">{KEY_STATS.approvalRate} approval</span>
+      <span className="text-muted-foreground">{KEY_STATS.offices} offices in India &amp; the US</span>
     </div>
   );
 }
@@ -69,7 +69,7 @@ function CountUp({ to }) {
 }
 
 function Orbits({ flags }) {
-  const visas = parseInt(KEY_STATS.visasProcessed.replace(/\D/g, ''), 10);
+  const universities = parseInt(KEY_STATS.universities.replace(/\D/g, ''), 10);
   return (
     <motion.div
       className="relative mx-auto aspect-square w-full max-w-[420px] xl:max-w-[580px]"
@@ -112,9 +112,9 @@ function Orbits({ flags }) {
       {/* Centre counter (does not rotate) */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-[34%] w-[34%] flex-col items-center justify-center rounded-full bg-white text-center shadow-[0_20px_50px_-20px_rgba(1,28,181,0.55),0_0_0_8px_rgba(1,28,181,0.05),0_0_0_16px_rgba(225,6,0,0.04)] border border-transparent [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(135deg,#011CB5,#E10600)_border-box]">
         <span className="font-display font-bold text-[26px] xl:text-[36px] leading-none tracking-[-0.02em] text-gradient-navy tabular-nums">
-          <CountUp to={visas} />+
+          <CountUp to={universities} />+
         </span>
-        <span className="mt-1.5 text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--red-500))]">Visas processed</span>
+        <span className="mt-1.5 text-[12px] uppercase tracking-[0.14em] font-semibold text-[hsl(var(--red-500))]">Partner universities</span>
       </div>
     </motion.div>
   );

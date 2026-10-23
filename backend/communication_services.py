@@ -6,7 +6,7 @@ server restart.
  
 Telegram: Send messages via bot API (free, no per-message cost)
 Discord: Send notifications via webhooks (free)
-WhatsApp: Send messages via OpenWA (primary) or Twilio (fallback)
+WhatsApp: Send messages via OpenWA
 """
 
 import logging

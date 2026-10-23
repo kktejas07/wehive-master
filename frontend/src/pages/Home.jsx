@@ -10,7 +10,6 @@ import DealsSection from '../components/DealsSection';
 import Newsroom from '../components/Newsroom';
 import StatsStrip from '../components/StatsStrip';
 import AIServices from '../components/ai/AIServices';
-import OnTimeGuarantee from '../components/OnTimeGuarantee';
 import LiveTickerMarquee from '../components/LiveTickerMarquee';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
@@ -30,7 +29,7 @@ export default function Home() {
   return (
     <div className="bg-white">
       <Navbar />
-      {/* Hero → proof → destinations/services → how it works → guarantee → extras → FAQ → CTA */}
+      {/* Hero → proof → destinations/services → how it works → extras → FAQ → CTA */}
       <Hero filters={filters} onFilters={setFilters} />
       <LiveTickerMarquee />
       <CountryGrid filters={filters} />
@@ -38,7 +37,6 @@ export default function Home() {
       <SchengenCarousel />
       <AIServices />
       <HowItWorks />
-      <OnTimeGuarantee />
       <DealsSection />
       <Newsroom />
       <Faq />

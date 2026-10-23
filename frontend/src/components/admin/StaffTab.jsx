@@ -116,7 +116,7 @@ export default function StaffTab() {
           </button>
         </div>
         <p className="mt-3 text-[11.5px] text-slate-400">
-          Staff log in with mock OTP (or real Twilio/SMTP once configured) using the email above.
+          Staff log in with mock OTP (or a real code by email or WhatsApp once SMTP / OpenWA is configured) using the email above.
         </p>
       </Panel>
 

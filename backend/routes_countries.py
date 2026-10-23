@@ -57,6 +57,29 @@ async def _get_one(country_id: str) -> Optional[dict]:
     return static_get(country_id)
 
 
+async def _corrected(items: list[dict]) -> list[dict]:
+    """Apply visa_rules (requirement for Indian passports, decision time and its
+    basis) to stored country documents. Official figures exist for only a few
+    destinations, so those are looked up once."""
+    import visa_rules
+    try:
+        await visa_rules.refresh_overrides()
+    except Exception as e:
+        logger.warning('Visa rule overrides unavailable: %s', e)
+    official = {}
+    for iso2 in visa_rules.OFFICIAL_CORRIDOR:
+        try:
+            official[iso2] = await visa_rules.load_official(iso2)
+        except Exception as e:
+            logger.warning('Official visa time for %s unavailable: %s', iso2, e)
+    out = []
+    for c in items:
+        iso2 = (c.get('iso2') or ('GB' if c.get('id') == 'uk' else c.get('id') or '')).upper()
+        parent = visa_rules.TERRITORIES.get(iso2, (iso2, None))[0]
+        out.append(visa_rules.apply({**c, 'iso2': iso2}, official.get(parent)))
+    return out
+
+
 @router.get('')
 async def list_countries(
     q: Optional[str] = Query(None, description='Search by country name'),
@@ -66,7 +89,7 @@ async def list_countries(
     no_visa: Optional[bool] = Query(None, description='Show only no-visa-required countries'),
     limit: Optional[int] = Query(None, ge=1, le=500),
 ) -> List[dict]:
-    items = await _all_countries()
+    items = await _corrected(await _all_countries())
     if q:
         ql = q.lower().strip()
         items = [c for c in items if ql in (c.get('name') or '').lower()]
@@ -112,6 +135,13 @@ async def country_detail(country_id: str):
     c = await _get_one(country_id)
     if not c:
         raise HTTPException(404, 'Country not found')
+    c = (await _corrected([c]))[0]
+    try:  # rules this applicant must follow (kept current by the visa rules agent)
+        import visa_rules
+        iso2 = c.get('iso2') or ''
+        c['applicant_rules'] = visa_rules.applicant_rules(iso2, await visa_rules.load_detail(iso2))
+    except Exception:
+        c['applicant_rules'] = []
     c['application_fee'] = FLAT_APPLICATION_FEE_INR
     c['embassy_fee'] = round((c.get('fees_usd') or 0) * USD_TO_INR)
     c['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
