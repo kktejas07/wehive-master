@@ -59,28 +59,11 @@ REST_API = 'https://restcountries.com/v3.1/all?fields=name,cca2,cca3,flag,flags,
 CACHE_PATH = ROOT / '.countries_cache.json'
 
 # Indian passport holders — visa-free / visa-on-arrival lists (simplified snapshot).
-VISA_FREE_FOR_INDIANS = {
-    'NP', 'BT', 'MV', 'MU', 'FJ', 'GD', 'HT', 'JM', 'MO', 'MS', 'KN', 'VC',
-    'TT', 'DO', 'BB', 'BS', 'SR', 'ID', 'TH', 'MY', 'VU', 'WS', 'SN', 'RW',
-    'BW', 'KE', 'TZ', 'UG', 'ZW', 'ET', 'MZ', 'CV', 'GN', 'SL', 'MG', 'SC',
-    'DJ', 'BF', 'GM', 'KM', 'GW', 'BI', 'TG', 'TL', 'KH', 'LA', 'MM', 'IR',
-    'JO', 'LB', 'QA', 'PW', 'MH', 'FM', 'TV', 'CK', 'NU', 'PK', 'MN', 'UZ',
-    'KG', 'TJ', 'KZ',
-}
-
-# Countries where Indians need a visa but it's an easy eVisa
-EVISA_FOR_INDIANS = {
-    'AU', 'NZ', 'SG', 'AE', 'BH', 'OM', 'KW', 'SA', 'EG', 'ZM', 'CI', 'GA',
-    'TR', 'AZ', 'AM', 'GE', 'LK', 'VN', 'RU', 'UA', 'BY', 'MD', 'ST', 'BJ',
-    'CM', 'CD', 'LS', 'NA', 'ZW', 'MW', 'NG',
-}
-
-# Schengen-area countries — all use the Schengen Short-Stay visa
-SCHENGEN = {
-    'AT', 'BE', 'BG', 'HR', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU',
-    'IS', 'IT', 'LV', 'LI', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO',
-    'SK', 'SI', 'ES', 'SE', 'CH',
-}
+# Derived from visa_rules (the single, checked list of requirements for Indian passports).
+import visa_rules as _vr  # noqa: E402
+VISA_FREE_FOR_INDIANS = {iso for iso, r in _vr.REQUIREMENTS.items() if r == _vr.F}
+EVISA_FOR_INDIANS = {iso for iso, r in _vr.REQUIREMENTS.items() if r in (_vr.E, _vr.EA)}
+SCHENGEN = set(_vr.SCHENGEN)
 
 # ISO-2 -> hand-written entry from data.COUNTRIES (case-insensitive)
 MANUAL_BY_ISO2: Dict[str, Dict[str, Any]] = {}
@@ -171,17 +154,11 @@ def _normalize(rec: Dict[str, Any]) -> Dict[str, Any] | None:
     region = rec.get('region') or 'Other'
     cats = _synth_categories(iso2, region)
     tourist = cats.get('Tourist')
-    visa_required = iso2 not in VISA_FREE_FOR_INDIANS
 
-    same_day = iso2 in {'AE', 'SG', 'TH', 'LK'}
-    if iso2 in VISA_FREE_FOR_INDIANS:
-        standard_days, rush_days = 0, 0
-    elif iso2 in EVISA_FOR_INDIANS:
-        standard_days, rush_days = 5, 2
-    elif iso2 in SCHENGEN:
-        standard_days, rush_days = 12, 5
-    else:
-        standard_days, rush_days = 15, 7
+    rules = _vr.processing(iso2)
+    visa_required = rules['requirement'] != _vr.F
+    time = rules['time'] or {}
+    standard_days, rush_days, same_day = time.get('max_days', 0), time.get('min_days', 0), False
 
     slug = iso2.lower()
     doc = {

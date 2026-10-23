@@ -30,9 +30,9 @@ export default function VisaPricingCard({
   const fees = computeFees({ category, applicants, country, visaType });
   const isFast = processing === 'fast';
 
-  const standardDays = country?.delivery?.standard_days || 7;
-  const deliveryDays = isFast ? Math.max(1, standardDays - 1) : standardDays;
-  const deliveryLabel = deliveryDateLabel(deliveryDays);
+  // The embassy sets the decision time; WeHive can only speed up our own handling.
+  const time = country?.processing?.time;
+  const standardDays = time?.max_days ?? country?.delivery?.standard_days ?? 7;
   const standardLabel = deliveryDateLabel(standardDays);
 
   const fastPremium = isFast ? FAST_TRACK_PREMIUM_PER * applicants : 0;
@@ -75,7 +75,7 @@ export default function VisaPricingCard({
           }`}
         >
           <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${processing === 'standard' ? 'text-[hsl(var(--blue-700))]' : 'text-muted-foreground'}`} />
-          <span>Guaranteed by {standardLabel}</span>
+          <span>Usually by {standardLabel}{time?.basis === 'estimate' ? ' (est.)' : ''}</span>
         </button>
         <button
           onClick={() => setProcessing('fast')}
@@ -86,14 +86,14 @@ export default function VisaPricingCard({
           }`}
         >
           <Zap className={`w-3.5 h-3.5 shrink-0 ${processing === 'fast' ? 'text-amber-500' : 'text-muted-foreground'}`} />
-          <span>1 day faster</span>
+          <span>Priority handling</span>
         </button>
       </div>
 
       {isFast && (
         <div className="bg-amber-50 border-b border-amber-100 px-4 py-2 flex items-center gap-2 text-[12px] text-amber-800">
           <Zap className="w-3 h-3 text-amber-500 shrink-0" />
-          Fast Track: +{inr(FAST_TRACK_PREMIUM_PER)} per traveller · Guaranteed by {deliveryLabel}
+          Fast Track: +{inr(FAST_TRACK_PREMIUM_PER)} per traveller · WeHive prepares and submits your file first. The embassy's decision time doesn't change.
         </div>
       )}
 
@@ -179,7 +179,7 @@ export default function VisaPricingCard({
             <div className="flex-1">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">Pay on {deliveryLabel}</div>
+                  <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">Pay when your visa is issued</div>
                   <div className="text-[12px] text-muted-foreground underline decoration-dotted cursor-default mt-0.5">
                     Wehive Fees{isFast ? ' + Fast Track' : ''}
                   </div>

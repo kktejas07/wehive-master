@@ -534,6 +534,9 @@ async def admin_update_country(country_id: str, patch: CountryPatch, admin=Depen
         raise HTTPException(400, 'Nothing to update')
     if 'no_visa' in update:
         update['visa_required'] = not update['no_visa']
+    # Fields set by hand here win over the automatic visa rules (visa_rules.apply).
+    update['admin_overrides'] = sorted(set(existing.get('admin_overrides') or [])
+                                       | ({'delivery', 'no_visa', 'visa_required'} & set(update)))
     # Keep visa_types in sync with categories so the public /countries API
     # and filter dropdowns reflect admin changes immediately.
     if 'categories' in update and isinstance(update['categories'], dict):

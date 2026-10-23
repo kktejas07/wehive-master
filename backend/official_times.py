@@ -58,6 +58,18 @@ def to_days(value: Optional[str]) -> Optional[float]:
     return (low + high) / 2 * {"day": 1, "week": 7, "month": 30}[m.group(3)]
 
 
+def to_days_range(value: Optional[str]) -> tuple[int, int]:
+    """'6-8 weeks' -> (42, 56); '29 days' -> (29, 29)."""
+    m = re.search(r"(\d+(?:\.\d+)?)\s*(?:-|to|–)?\s*(\d+(?:\.\d+)?)?\s*(?:working\s+)?(day|week|month)",
+                  (value or "").lower())
+    if not m:
+        return (0, 0)
+    unit = {"day": 1, "week": 7, "month": 30}[m.group(3)]
+    low = float(m.group(1))
+    high = float(m.group(2)) if m.group(2) else low
+    return (round(low * unit), round(high * unit))
+
+
 async def _alert_drops(corridor: str, drops: list, updated: Optional[str]) -> int:
     """Notify this country's subscribers whose visa types got faster."""
     from db import usvisa_subscriptions_col
