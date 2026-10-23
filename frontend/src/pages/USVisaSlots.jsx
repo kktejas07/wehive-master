@@ -1001,7 +1001,7 @@ export default function USVisaSlots() {
                 <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto mb-1.5" />
                 <h3 className="font-bold text-[14px] text-emerald-800">You're subscribed!</h3>
                 <p className="mt-0.5 text-[12px] text-emerald-700">
-                  You will receive in-app notifications when {meta.adj} visa slots become available.
+                  When an opening is reported for your consulates, you'll get an alert in WeHive, plus email or WhatsApp if they're on in your account Settings.
                 </p>
                 <div className="mt-3 flex flex-wrap justify-center gap-2">
                   <Button

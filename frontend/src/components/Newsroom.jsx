@@ -5,6 +5,7 @@ import { Newspaper, AlertCircle, RefreshCw, AlertTriangle, X, Sparkles } from 'l
 import { API } from '../context/AuthContext';
 import { useDialogA11y } from '../hooks/use-dialog-a11y';
 import { destination } from '../lib/destinations';
+import WeHiveLoader from './WeHiveLoader';
 
 const PAGE = 9;
 
@@ -151,8 +152,7 @@ const Newsroom = ({ countryId }) => {
               exit={{ opacity: 0 }}
               className="card-surface max-w-lg mx-auto flex flex-col items-center justify-center px-6 py-10 text-center text-[15px] text-muted-foreground"
             >
-              <RefreshCw className="w-6 h-6 animate-spin mb-3 text-[hsl(var(--blue-700))]" aria-hidden="true" />
-              <p>Fetching latest updates...</p>
+              <WeHiveLoader label="Fetching latest updates" />
             </motion.div>
           ) : errorState ? (
             <motion.div

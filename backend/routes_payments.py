@@ -392,6 +392,7 @@ async def my_subscription(user=Depends(get_current_user)):
         payments_list.append({
             'id': p['_id'],
             'plan_id': p.get('plan_id'),
+            'plan_name': PLANS.get(p.get('plan_id') or '', {}).get('name'),
             'amount_inr': p.get('amount_inr', p.get('amount_usd')),
             'status': p.get('status'),
             'created_at': p.get('created_at').isoformat() if p.get('created_at') else None,

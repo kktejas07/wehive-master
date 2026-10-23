@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { API, useAuth } from '../context/AuthContext';
 import { DESTINATIONS, destination } from '../lib/destinations';
+import WeHiveLoader from '../components/WeHiveLoader';
 
 // Signed-in users share success stories, visa interview experiences and events.
 // Everything is reviewed by the WeHive team before it appears.
@@ -96,7 +97,7 @@ function Feed({ path, visaType, render, empty }) {
       .then(r => setData({ items: r.data.items || [], loading: false }))
       .catch(() => setData({ items: [], loading: false }));
   }, [path, visaType]);
-  if (data.loading) return <div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" /></div>;
+  if (data.loading) return <WeHiveLoader label="Loading posts" className="py-10" />;
   if (!data.items.length) return <p className="py-10 text-center text-muted-foreground text-[14px]">{empty}</p>;
   return <div className="space-y-4">{data.items.map(render)}</div>;
 }
