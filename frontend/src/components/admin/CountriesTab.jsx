@@ -5,6 +5,7 @@ import { adminClient, inr } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 import Pagination from './Pagination';
+import VisaRulesAgentPanel from './VisaRulesAgentPanel';
 
 const VISA_TYPES = ['Tourist', 'Business', 'Student', 'Work', 'Transit', 'Medical'];
 
@@ -339,6 +340,7 @@ export default function CountriesTab() {
         title="Countries"
         subtitle={`${items?.length ?? '—'} countries. Add / edit visa types, fees, validity, delivery times and document checklists.`}
       />
+      <VisaRulesAgentPanel token={token} />
       <Panel>
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />

@@ -62,6 +62,10 @@ async def _corrected(items: list[dict]) -> list[dict]:
     basis) to stored country documents. Official figures exist for only a few
     destinations, so those are looked up once."""
     import visa_rules
+    try:
+        await visa_rules.refresh_overrides()
+    except Exception as e:
+        logger.warning('Visa rule overrides unavailable: %s', e)
     official = {}
     for iso2 in visa_rules.OFFICIAL_CORRIDOR:
         try:

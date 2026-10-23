@@ -86,6 +86,36 @@ async def _insert_alert_as_notification(user_id: str, alert: dict):
     _publish(user_id, doc)
 
 
+@router.post("/visa-rules/run")
+async def run_visa_rules_now(_admin=Depends(get_current_admin_flex)):
+    """Run the visa rules agent now (normally daily)."""
+    from agents.visa_rules_agent import run as run_visa_rules
+    result = await run_visa_rules(force=True, trigger="admin")
+    return {k: (v.isoformat() if isinstance(v, datetime) else v) for k, v in result.items()}
+
+
+@router.get("/visa-rules/changes")
+async def visa_rule_changes(_admin=Depends(get_current_admin_flex)):
+    """Recent requirement changes found by the agent, and its last run."""
+    meta = await db["visa_rules_agent"].find_one({"_id": "meta"}) or {}
+    items = []
+    async for c in db["visa_rule_changes"].find({}).sort("detected_at", -1).limit(100):
+        c["id"] = c.pop("_id")
+        c["detected_at"] = c["detected_at"].isoformat() if isinstance(c.get("detected_at"), datetime) else c.get("detected_at")
+        items.append(c)
+    last = meta.get("last_result") or {}
+    last = {k: (v.isoformat() if isinstance(v, datetime) else v) for k, v in last.items()}
+    return {"items": items, "last_run": last}
+
+
+@router.post("/visa-rules/changes/{change_id}/apply")
+async def apply_visa_rule_change(change_id: str, _admin=Depends(get_current_admin_flex)):
+    from agents.visa_rules_agent import apply_held
+    if not await apply_held(change_id):
+        raise HTTPException(404, "Change not found or already applied")
+    return {"ok": True}
+
+
 @router.post("/run")
 async def trigger_agents(_admin=Depends(get_current_admin_flex)):
     """Run all agents now (admin only — agents scan every user's data).
@@ -213,6 +243,11 @@ async def _scheduler_loop():
                 await send_due_reminders(db)
             except Exception as e:
                 logger.exception("Reminders failed: %s", e)
+            try:  # once a day: visa rules and official decision times
+                from agents.visa_rules_agent import run as run_visa_rules
+                await run_visa_rules()
+            except Exception as e:
+                logger.exception("Visa rules agent failed: %s", e)
             logger.info("Scheduler: agents complete")
         except Exception as e:
             logger.exception("Scheduler error: %s", e)

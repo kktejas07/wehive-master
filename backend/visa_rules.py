@@ -120,6 +120,32 @@ def _range_label(lo: int, hi: int) -> str:
     return f"{lo}–{hi} days"
 
 
+# Requirement changes found by the visa rules agent (agents/visa_rules_agent.py),
+# stored in db.visa_rule_overrides and loaded here. They win over REQUIREMENTS.
+_OVERRIDES: dict = {}
+_OVERRIDES_LOADED_AT: float = 0.0
+OVERRIDES_TTL_SECONDS = 600
+# Decisions made in code on purpose; the agent never changes these.
+PINNED = {"AU", "NZ", "SG", "AE", "TR", "IN"}
+
+
+async def refresh_overrides(force: bool = False) -> dict:
+    """Load agent overrides from the DB (cached for 10 minutes)."""
+    import time
+    global _OVERRIDES, _OVERRIDES_LOADED_AT
+    if not force and time.monotonic() - _OVERRIDES_LOADED_AT < OVERRIDES_TTL_SECONDS:
+        return _OVERRIDES
+    from db import db
+    _OVERRIDES = {d["_id"]: d["requirement"] async for d in db["visa_rule_overrides"].find({})
+                  if d.get("requirement") in REQUIREMENT_LABELS}
+    _OVERRIDES_LOADED_AT = time.monotonic()
+    return _OVERRIDES
+
+
+def current_requirement(iso2: str) -> Optional[str]:
+    return _OVERRIDES.get(iso2) or REQUIREMENTS.get(iso2)
+
+
 def classify(iso2: str) -> dict:
     """Requirement, Schengen membership, parent and note for a destination (no times)."""
     iso2 = (iso2 or "").upper()
@@ -139,7 +165,7 @@ def classify(iso2: str) -> dict:
     if iso2 in SCHENGEN_ACCESS:
         return {"requirement": V, "schengen": True, "parent": SCHENGEN_ACCESS[iso2],
                 "note": "Not in Schengen, but you enter through it: a Schengen visa is what you need."}
-    req = REQUIREMENTS.get(iso2)
+    req = current_requirement(iso2)
     if req is None:
         return {"requirement": V, "schengen": False, "parent": None,
                 "note": "Requirements not confirmed: WeHive will check before you apply."}
