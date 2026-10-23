@@ -19,14 +19,13 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
 from ai_marketplace import marketplace
-from auth_utils import get_current_user_optional
+from auth_utils import get_current_user
 from rate_limit import RateLimit
 
 router = APIRouter(prefix="/interview", tags=["interview"])
 logger = logging.getLogger("wehive.interview_score")
 
 CRITERIA = ("clarity", "specificity", "confidence", "preparation")
-ANON_USER_ID = "interview_simulator_anon"
 _score_limiter = RateLimit(max_calls=12, window_seconds=600)
 
 
@@ -158,9 +157,9 @@ async def score_interview(
     body: ScoreRequest,
     request: Request,
     _=Depends(_score_limiter),
-    user=Depends(get_current_user_optional),
+    user=Depends(get_current_user),  # the simulator is for signed-in users
 ):
-    user_id = (user or {}).get("_id") or ANON_USER_ID
+    user_id = user["_id"]
     items = await _ai_scores(user_id, body)
     method = "ai"
     if items is None:
