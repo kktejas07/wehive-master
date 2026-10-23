@@ -1,6 +1,7 @@
 """Global News Aggregator Agent.
 
-Pulls immigration / visa news from official public RSS/Atom feeds over plain
+Pulls immigration / visa news from official public RSS/Atom feeds, plus
+Google News search feeds for destinations with no official feed, over plain
 HTTP (no LLM, no API key) and stores each item as a *pending* news document
 with its real source URL and published date. Items are deduplicated by URL.
 Nothing is generated or invented: if a feed is unreachable the error is
@@ -16,6 +17,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote_plus
 
 import httpx
 
@@ -56,6 +58,34 @@ NEWS_FEEDS: List[Dict[str, Any]] = [
         "country_id": "usa",
         "category": "Travel",
     },
+]
+
+
+def google_news_feed(query: str) -> str:
+    """Public Google News RSS search (no key): last-7-day headlines from many publishers."""
+    return ("https://news.google.com/rss/search?q=" + quote_plus(f"{query} when:7d")
+            + "&hl=en-IN&gl=IN&ceid=IN:en")
+
+
+# Global coverage: one search per destination, so the newsroom isn't limited to
+# the countries that publish an official feed. source_name is the real publisher.
+GLOBAL_NEWS_QUERIES: Dict[str, str] = {
+    "usa": "F-1 visa OR H-1B OR green card",
+    "united-kingdom": "UK student visa OR UK skilled worker visa",
+    "canada": "Canada study permit OR Express Entry",
+    "australia": "Australia student visa OR Australia immigration",
+    "new-zealand": "New Zealand visa OR New Zealand immigration",
+    "ireland": "Ireland student visa OR Ireland immigration",
+    "germany": "Germany student visa OR Opportunity Card OR EU Blue Card",
+    "europe": "Schengen visa",
+    "uae": "UAE visa OR UAE golden visa",
+    "singapore": "Singapore student pass OR Singapore work pass",
+    "japan": "Japan student visa OR Japan work visa",
+    "global": "international students visa policy",
+}
+NEWS_FEEDS += [
+    {"name": f"Google News ({country})", "url": google_news_feed(query), "country_id": country}
+    for country, query in GLOBAL_NEWS_QUERIES.items()
 ]
 
 _ATOM = "{http://www.w3.org/2005/Atom}"
@@ -124,6 +154,7 @@ def parse_feed(xml_bytes: bytes) -> List[Dict[str, Any]]:
             "summary": _clean_text(_text(it.find("description"))),
             "published": _parse_date(_text(it.find("pubDate")) or _text(it.find(f"{_DC}date"))),
             "author": _clean_text(_text(it.find(f"{_DC}creator")), 120),
+            "publisher": _clean_text(_text(it.find("source")), 120),
             "categories": [_text(c) for c in it.findall("category") if _text(c)],
         })
 
@@ -141,6 +172,7 @@ def parse_feed(xml_bytes: bytes) -> List[Dict[str, Any]]:
             "summary": _clean_text(summary),
             "published": _parse_date(published),
             "author": _clean_text(_text(entry.find(f"{_ATOM}author/{_ATOM}name")), 120),
+            "publisher": "",
             "categories": [c.get("term", "") for c in entry.findall(f"{_ATOM}category") if c.get("term")],
         })
 
@@ -262,15 +294,19 @@ async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc)
 
 def _news_doc(feed: Dict[str, Any], item: Dict[str, Any]) -> Dict[str, Any]:
     published = item["published"]
+    publisher = item.get("publisher") or ""
+    title = item["title"]
+    if publisher and title.endswith(f" - {publisher}"):  # Google News appends the publisher
+        title = title[: -len(publisher) - 3]
     return {
-        "title": item["title"],
+        "title": title,
         "country_id": feed["country_id"],
         "date": published.strftime("%Y-%m-%d") if published else None,
         "published_at": published,
         "category": feed.get("category") or classify_category(f"{item['title']} {item['summary']}"),
         "content": item["summary"],
         "source_url": item["url"],
-        "source_name": feed["name"],
+        "source_name": publisher or feed["name"],
         "source": "rss",
     }
 

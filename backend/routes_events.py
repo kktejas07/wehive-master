@@ -14,7 +14,7 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Optional, Literal
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Header
 from pydantic import BaseModel
 
 from admin_auth import get_current_admin_flex
@@ -40,9 +40,13 @@ async def public_events(
     upcoming_only: bool = Query(True, description="Filter for upcoming events (date >= today)"),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=1000),
-    sort: str = Query("created_at", description="Sort field"),
-    order: str = Query("desc", regex="^(asc|desc)$"),
+    sort: str = Query("date", regex="^(date|created_at|name)$", description="Sort field"),
+    order: str = Query("asc", regex="^(asc|desc)$", description="Default: soonest event first"),
+    authorization: Optional[str] = Header(default=None),
 ):
+    # Pending / rejected events are moderation data: admins only (same as news & blogs).
+    if status and status != "approved":
+        await get_current_admin_flex(authorization)
     filt = {'status': status or 'approved'}
     if country:
         filt['country_id'] = country

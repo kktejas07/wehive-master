@@ -31,7 +31,7 @@ async def get_blogs(
     period: Optional[str] = Query(None, description="'old' or 'new' relative filter"),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=1000),
-    sort: str = Query("created_at"),
+    sort: str = Query("published_at", regex="^(published_at|created_at|date|title)$"),
     order: str = Query("desc", regex="^(asc|desc)$"),
     authorization: Optional[str] = Header(default=None),
 ):
@@ -45,10 +45,13 @@ async def get_blogs(
 
     if date_from or date_to:
         date_filt = {}
-        if date_from:
-            date_filt['$gte'] = datetime.fromisoformat(date_from)
-        if date_to:
-            date_filt['$lte'] = datetime.fromisoformat(date_to) + timedelta(days=1)
+        try:
+            if date_from:
+                date_filt['$gte'] = datetime.fromisoformat(date_from)
+            if date_to:
+                date_filt['$lte'] = datetime.fromisoformat(date_to) + timedelta(days=1)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="date_from/date_to must be ISO dates (YYYY-MM-DD)")
         filt['created_at'] = date_filt
 
     if period == 'new':
@@ -63,7 +66,8 @@ async def get_blogs(
         
     try:
         total = await global_blogs_col.count_documents(filt)
-        cursor = global_blogs_col.find(filt).sort(sort, sort_dir).skip(skip).limit(limit)
+        # Newest published first; ingestion time breaks ties (and orders items with no published date).
+        cursor = global_blogs_col.find(filt).sort([(sort, sort_dir), ("created_at", sort_dir)]).skip(skip).limit(limit)
         docs = await cursor.to_list(length=limit)
         return {
             'items': [serialize_doc(doc) for doc in docs],
