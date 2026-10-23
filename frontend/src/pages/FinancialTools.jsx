@@ -4,7 +4,7 @@ import { DollarSign, Calculator, TrendingUp, CreditCard, ChevronRight, Globe, Ch
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
-import { API } from '../context/AuthContext';
+import { API, useAuth } from '../context/AuthContext';
 
 // ── Proof of Funds Estimator ──────────────────────────────────────────────────
 
@@ -119,6 +119,7 @@ function LiveCurrencyConverter() {
 // ── AI Financial Advisor ──────────────────────────────────────────────────────
 
 function AIFinancialAdvisor() {
+  const { token } = useAuth();
   const [query, setQuery] = useState('');
   const [chat, setChat] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -133,7 +134,8 @@ function AIFinancialAdvisor() {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API}/financials/insights`, { query: userMsg });
+      // /financials/insights requires sign-in; the token was never sent, so every question failed.
+      const res = await axios.post(`${API}/financials/insights`, { query: userMsg }, { headers: { Authorization: `Bearer ${token}` } });
       setChat(prev => [...prev, { role: 'ai', content: res.data.insight }]);
     } catch (e) {
       setChat(prev => [...prev, { role: 'ai', content: "Sorry, I couldn't fetch an answer right now. Please try again." }]);

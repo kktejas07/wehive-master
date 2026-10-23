@@ -478,13 +478,13 @@ export default function Hive({ inOverlay }) {
                   </p>
                   <div className="flex items-center justify-center gap-3">
                     <Button
-                      onClick={() => navigate('/signup')}
+                      onClick={() => navigate('/signup?next=/hive')}
                       className="rounded-xl btn-accent font-semibold h-11 px-5 text-white"
                     >
                       Create account
                     </Button>
                     <Button
-                      onClick={() => navigate('/login')}
+                      onClick={() => navigate('/login?next=/hive')}
                       variant="outline"
                       className="rounded-xl font-semibold h-11 px-5 bg-white text-[hsl(var(--blue-900))]"
                     >
