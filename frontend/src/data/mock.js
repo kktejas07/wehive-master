@@ -603,15 +603,6 @@ export const FAQS = [
   { id: 'q6', q: 'What if my visa is rejected?', a: 'In the rare case of refusal not caused by misrepresentation, we refund 100% of the We Hive service fee and rebook a new appointment for free.' },
 ];
 
-// Pricing constants — extracted for clarity (review fix)
-export const PRICING = { LITE: 399, STANDARD: 799, CONCIERGE: 1099 };
-
-export const PLANS = [
-  { id: 'lite', name: 'Lite', price: PRICING.LITE, tag: 'For occasional travel', features: ['One visa application', 'Document review by an expert', 'Email support', '7–10 day processing'] },
-  { id: 'standard', name: 'Standard', price: PRICING.STANDARD, tag: 'Most popular', highlighted: true, features: ['Everything in Lite', 'Priority chat support', 'Appointment & deadline reminders', 'Up to 4 applicants', 'Real‑time tracking'] },
-  { id: 'concierge', name: 'Concierge', price: PRICING.CONCIERGE, tag: 'White‑glove service', features: ['Everything in Standard', 'Dedicated visa specialist', 'Same‑day rush eligible', 'Up to 8 applicants', 'Phone support, 24/7'] },
-];
-
 // Footer columns with stable IDs (review fix)
 export const FOOTER_COLS = [
   { id: 'visas', title: 'Destinations & Visas', links: [
