@@ -29,7 +29,7 @@ PAYMENT_BYPASS_ENABLED = IS_DEV and os.environ.get('PAYMENT_BYPASS_ENABLED', '')
 
 PLANS = {
     'lite': {'name': 'Lite', 'amount_inr': 399, 'description': 'One visa application with expert review'},
-    'standard': {'name': 'Standard', 'amount_inr': 799, 'description': 'Most popular — priority support, on-time guarantee'},
+    'standard': {'name': 'Standard', 'amount_inr': 799, 'description': 'Most popular — priority support and faster document review'},
     'concierge': {'name': 'Concierge', 'amount_inr': 1099, 'description': 'Dedicated specialist, 24/7 phone support'},
 }
 

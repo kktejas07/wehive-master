@@ -22,6 +22,56 @@ const STATUS_BADGE = {
   suspended: 'bg-red-500/15 text-red-300',
 };
 
+// Agents are created here only: there is no public agent signup.
+function AddAgentModal({ token, onClose, onDone }) {
+  const dialogProps = useDialogA11y(true, onClose);
+  const { toast } = useToast();
+  const [form, setForm] = useState({ name: '', email: '', phone: '', agency_name: '', password: '' });
+  const [busy, setBusy] = useState(false);
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await axios.post(`${API}/agent/admin/agents`, form, { headers: { Authorization: `Bearer ${token}` } });
+      toast({ title: 'Agent created', description: `Share the sign-in details with ${form.name} securely.` });
+      onDone();
+      onClose();
+    } catch (err) {
+      toast({ title: 'Could not create agent', description: err?.response?.data?.detail?.toString() || 'Check the details.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const fields = [
+    ['name', 'Full name', 'text', true], ['email', 'Email', 'email', true], ['phone', 'Phone', 'tel', true],
+    ['agency_name', 'Agency (optional)', 'text', false], ['password', 'Temporary password (8+ characters)', 'password', true],
+  ];
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+      <form {...dialogProps} onSubmit={submit} className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-white/10 p-6 space-y-3">
+        <h3 className="text-white font-bold text-[18px]">Add agent</h3>
+        {fields.map(([k, label, type, required]) => (
+          <div key={k}>
+            <label htmlFor={`add-agent-${k}`} className="block text-[12px] text-slate-400 mb-1">{label}</label>
+            <input id={`add-agent-${k}`} type={type} required={required} minLength={k === 'password' ? 8 : undefined}
+              value={form[k]} onChange={set(k)}
+              className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[14px] text-white outline-none focus:border-white/25" />
+          </div>
+        ))}
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className="h-10 px-4 rounded-lg bg-white/5 text-slate-300 text-sm font-semibold">Cancel</button>
+          <button type="submit" disabled={busy} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50">
+            {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />} Create agent
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 function CommissionModal({ agent, token, onClose, onDone }) {
   const dialogProps = useDialogA11y(true, onClose);
   const { toast } = useToast();
@@ -143,7 +193,7 @@ function AgentCard({ agent, token, onRefresh }) {
 
           <div className="flex flex-wrap gap-2">
             {status === 'pending' && (
-              <button onClick={() => patch({ status: 'active' })} disabled={busy}
+              <button onClick={() => patch({ status: 'active', verified: true })} disabled={busy}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 h-10 text-[12.5px] font-semibold text-white transition disabled:opacity-50">
                 <CheckCircle className="w-3.5 h-3.5" /> Approve Agent
               </button>
@@ -155,7 +205,7 @@ function AgentCard({ agent, token, onRefresh }) {
               </button>
             )}
             {status === 'suspended' && (
-              <button onClick={() => patch({ status: 'active' })} disabled={busy}
+              <button onClick={() => patch({ status: 'active', verified: true })} disabled={busy}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/70 hover:bg-emerald-600 px-4 h-10 text-[12.5px] font-semibold text-white transition disabled:opacity-50">
                 <CheckCircle className="w-3.5 h-3.5" /> Reactivate
               </button>
@@ -185,7 +235,8 @@ function AgentCard({ agent, token, onRefresh }) {
 export default function AgentsTab() {
   const { token } = useAdminAuth();
   const [items, setItems] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('pending');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [adding, setAdding] = useState(false);
   const [q, setQ] = useState('');
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
@@ -211,7 +262,14 @@ export default function AgentsTab() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Agent Partners" subtitle={`Manage recruitment agent registrations, approvals, and commission payments${pending > 0 ? ` · ${pending} pending approval` : ''}`} />
+      <AdminHeader title="Agent Partners" subtitle={`Agents are added by admins only; only active, verified agents receive applications${pending > 0 ? ` · ${pending} pending approval` : ''}`} />
+      <div className="flex justify-end">
+        <button type="button" onClick={() => setAdding(true)} data-testid="add-agent-btn"
+          className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2">
+          <Plus className="w-4 h-4" aria-hidden="true" /> Add agent
+        </button>
+      </div>
+      {adding && <AddAgentModal token={token} onClose={() => setAdding(false)} onDone={load} />}
       <Panel>
         <div className="flex flex-wrap items-center gap-3 p-4 border-b border-white/5">
           <div className="flex gap-2 flex-wrap">

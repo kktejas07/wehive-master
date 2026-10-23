@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Upload, Loader2, X, Check, AlertTriangle, Crown, ShieldCheck } from 'lucide-react';
@@ -22,7 +23,7 @@ const FIELD_LABELS = {
   issuing_authority: 'Issuing authority',
 };
 
-function PremiumGate({ onUpgrade, upgrading }) {
+function PremiumGate({ onUpgrade }) {
   return (
     <div className="rounded-2xl border border-[hsl(var(--blue-700))]/30 bg-[hsl(var(--soft-bg))] p-6 sm:p-7 text-center" data-testid="scan-premium-gate">
       <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--blue-700))]/10 mb-3">
@@ -50,19 +51,16 @@ function PremiumGate({ onUpgrade, upgrading }) {
       <Button variant="accent"
         data-testid="scan-upgrade-btn"
         onClick={onUpgrade}
-        disabled={upgrading}
         className="mt-5 rounded-xl text-white h-11 px-6 font-bold"
       >
-        {upgrading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
+        {(
           <span className="inline-flex items-center gap-1.5">
-            <Crown className="w-4 h-4" /> Upgrade to Premium
+            <Crown className="w-4 h-4" /> See Premium plans
           </span>
         )}
       </Button>
       <div className="mt-2 text-[12px] text-muted-foreground">
-        Demo mode — no payment required
+        You have used your free scans. Premium unlocks unlimited AI scanning.
       </div>
     </div>
   );
@@ -165,10 +163,12 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
   const [mode, setMode] = useState('passport'); // passport | document
   const [file, setFile] = useState(null);
   const [scanning, setScanning] = useState(false);
-  const [upgrading, setUpgrading] = useState(false);
   const [result, setResult] = useState(null);
 
   const isPremium = !!user?.is_premium;
+  const freeLeft = user?.premium_free_left ?? 0;
+  const canScan = isPremium || freeLeft > 0;
+  const navigate = useNavigate();
 
   const reset = () => {
     setFile(null);
@@ -182,19 +182,10 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
   };
   const dialogProps = useDialogA11y(open, handleClose);
 
-  const onUpgrade = async () => {
-    setUpgrading(true);
-    try {
-      await axios.post(`${API}/users/me/upgrade`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      await refreshUser();
-      toast({ title: 'Welcome to Premium', description: 'AI scanning is now unlocked.' });
-    } catch (e) {
-      toast({ title: 'Could not upgrade', description: e?.response?.data?.detail || 'Please try again.' });
-    } finally {
-      setUpgrading(false);
-    }
+  // Premium is bought on the plans page (Razorpay); there is no free upgrade.
+  const onUpgrade = () => {
+    handleClose();
+    navigate('/pricing');
   };
 
   const onPick = (f) => {
@@ -223,11 +214,13 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
         headers: { Authorization: `Bearer ${token}` },
       });
       setResult(r.data.extracted || {});
+      if (!isPremium) refreshUser?.();
     } catch (e) {
       const detail = e?.response?.data?.detail;
       const status = e?.response?.status;
       if (status === 402 && !user?.is_premium) {
-        toast({ title: 'Premium required', description: detail });
+        toast({ title: 'Free scans used up', description: detail });
+        refreshUser?.();
       } else if (status === 402) {
         // Budget exhausted on server side
         toast({ title: 'AI credits exhausted', description: detail || 'Please try again later.' });
@@ -296,12 +289,18 @@ export default function AIScanModal({ open, onClose, applicationId, onApplied })
             </header>
 
             <div className="px-5 sm:px-7 py-5 max-h-[70vh] overflow-y-auto">
-              {!isPremium ? (
-                <PremiumGate onUpgrade={onUpgrade} upgrading={upgrading} />
+              {!canScan ? (
+                <PremiumGate onUpgrade={onUpgrade} />
               ) : result ? (
                 <ExtractionView data={result} onConfirm={onConfirm} onRetry={reset} />
               ) : (
                 <div className="space-y-4">
+                  {!isPremium && (
+                    <div className="rounded-xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] px-4 py-2.5 text-[13px] text-[hsl(var(--blue-900))] flex flex-wrap items-center justify-between gap-2" data-testid="scan-free-left">
+                      <span><strong>{freeLeft}</strong> free scan{freeLeft === 1 ? '' : 's'} left. Premium scans are unlimited.</span>
+                      <button type="button" onClick={onUpgrade} className="font-semibold text-[hsl(var(--blue-700))] hover:underline">See plans</button>
+                    </div>
+                  )}
                   <div className="inline-flex rounded-full bg-[hsl(var(--soft-bg))] p-1 text-[12.5px] font-bold">
                     {[
                       ['passport', 'Passport'],

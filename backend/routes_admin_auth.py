@@ -24,6 +24,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks
 from rate_limit import RateLimit
 from pydantic import BaseModel, EmailStr, Field
 
+from auth_utils import claim_contact
 from admin_auth import (
     MAX_ATTEMPTS,
     hash_password, verify_password, password_strength_issue,
@@ -183,7 +184,9 @@ async def admin_signup(req: SignupRequest, bg: BackgroundTasks = None,
     # Signup requires an authenticated admin, or a one-time bootstrap when no
     # password-holding admin exists yet and ADMIN_BOOTSTRAP_TOKEN matches.
     if authorization:
-        await get_current_admin_flex(authorization)
+        # Only a super admin may create admin logins; a viewer/editor role may not.
+        if not is_super_admin(await get_current_admin_flex(authorization)):
+            raise HTTPException(403, 'Only a super admin can create admin accounts.')
     else:
         bootstrap = os.environ.get('ADMIN_BOOTSTRAP_TOKEN', '')
         if not (bootstrap and req.bootstrap_token
@@ -199,7 +202,7 @@ async def admin_signup(req: SignupRequest, bg: BackgroundTasks = None,
         raise HTTPException(400, issue)
 
     now = datetime.utcnow()
-    existing = await users.find_one({'email': email})
+    existing = await claim_contact(users, 'email', email)
     is_new_admin = False
     if existing and existing.get('password_hash'):
         raise HTTPException(409, 'An admin account already exists for this email. Use login or forgot password.')
@@ -457,7 +460,7 @@ async def add_admin(req: AdminInviteRequest, admin=Depends(get_super_admin)):
     admin who hasn't set a password re-sends the invite."""
     email = req.email.lower().strip()
     now = datetime.utcnow()
-    user = await users.find_one({'email': email})
+    user = await claim_contact(users, 'email', email)
     if user and user.get('is_admin') and user.get('password_hash'):
         raise HTTPException(409, 'This person is already an admin.')
 

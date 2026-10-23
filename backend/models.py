@@ -71,6 +71,9 @@ class PublicUser(BaseModel):
     staff_role: Optional[str] = None
     notify_email: bool = True
     notify_whatsapp: bool = False
+    premium_free_left: int = 0  # free tries of premium AI tools left (premium.py)
+    pending_email: Optional[str] = None  # waiting for a code before it replaces email
+    pending_phone: Optional[str] = None
     created_at: datetime
 
 

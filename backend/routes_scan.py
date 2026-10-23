@@ -18,6 +18,7 @@ from pydantic import BaseModel
 
 import google_kg
 from ai_marketplace import marketplace
+import premium
 from auth_utils import get_current_user
 from db import applications, scans
 import storage as r2
@@ -118,11 +119,8 @@ class ScanResponse(BaseModel):
 
 # ---------- helpers ---------- #
 def _ensure_premium(user: dict):
-    if not user.get('is_premium'):
-        raise HTTPException(
-            status_code=402,
-            detail='AI Scanning is available on the Premium plan. Upgrade to unlock.',
-        )
+    """Premium, or one of the free tries left (see premium.py)."""
+    premium.ensure_access(user, 'AI scanning')
 
 
 def _parse_json(text: str) -> dict:
@@ -256,6 +254,7 @@ async def scan_passport(
             },
         )
 
+    await premium.record_use(user)
     return ScanResponse(
         id=result['_id'],
         kind='passport',
@@ -334,6 +333,7 @@ async def scan_document(
             }}},
         )
 
+    await premium.record_use(user)
     return ScanResponse(
         id=result['_id'],
         kind='document',
@@ -412,4 +412,5 @@ async def validate_documents(req: ValidateRequest, user=Depends(get_current_user
         uploaded_docs=[d.dict() for d in req.documents],
         passport_expiry=req.passport_expiry,
     )
+    await premium.record_use(user)
     return result
