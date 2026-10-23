@@ -8,11 +8,10 @@ nothing is written or invented here; admins approve items before they appear.
 
 import asyncio
 import logging
-import os
 from typing import Any, Dict, List
 
 from db import global_blogs_col
-from news_aggregator_agent import classify_category, upsert_feed_items
+from news_aggregator_agent import approve_trusted_backlog, auto_approve_all, classify_category, upsert_feed_items
 
 logger = logging.getLogger("wehive.blog_aggregator")
 
@@ -20,9 +19,9 @@ CATEGORIES = ["F1", "H1B", "O1", "EB1", "Business", "Travel"]
 
 # Verified to return RSS XML (Oct 2026).
 BLOG_FEEDS: List[Dict[str, Any]] = [
-    {"name": "The PIE News", "url": "https://thepienews.com/feed/", "country_id": "global"},
-    {"name": "ICEF Monitor", "url": "https://monitor.icef.com/feed/", "country_id": "global"},
-    {"name": "Study International", "url": "https://www.studyinternational.com/feed/", "country_id": "global"},
+    {"name": "The PIE News", "url": "https://thepienews.com/feed/", "country_id": "global", "trusted": True},
+    {"name": "ICEF Monitor", "url": "https://monitor.icef.com/feed/", "country_id": "global", "trusted": True},
+    {"name": "Study International", "url": "https://www.studyinternational.com/feed/", "country_id": "global", "trusted": True},
 ]
 
 _GENERIC_AUTHORS = {"", "admin", "editor", "staff"}
@@ -59,9 +58,12 @@ async def run_aggregator() -> Dict[str, Any]:
 
 
 async def run_auto_approval():
-    """Approve pending blogs only when AGGREGATOR_AUTO_APPROVE is explicitly enabled."""
-    if os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() not in ("1", "true", "yes"):
-        logger.info("AGGREGATOR_AUTO_APPROVE disabled; leaving pending blogs for admin review.")
+    """Publish pending posts from the (all trusted) blog feeds; anything else only
+    when AGGREGATOR_AUTO_APPROVE is enabled."""
+    n = await approve_trusted_backlog(global_blogs_col, BLOG_FEEDS)
+    if n:
+        logger.info("Published %d pending blog posts from trusted feeds.", n)
+    if not auto_approve_all():
         return
     result = await global_blogs_col.update_many({"status": "pending"}, {"$set": {"status": "approved"}})
     logger.info("Auto-approved %d pending blogs.", result.modified_count)

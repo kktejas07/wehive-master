@@ -36,17 +36,20 @@ MAX_ITEMS_PER_FEED = int(os.environ.get("NEWS_MAX_ITEMS_PER_FEED", "20"))
 NEWS_FEEDS: List[Dict[str, Any]] = [
     {
         "name": "USCIS",
+        "trusted": True,  # official government feed: publish without review
         "url": "https://www.uscis.gov/news/rss-feed/59144",
         "country_id": "usa",
     },
     {
         "name": "UK Visas and Immigration (GOV.UK)",
+        "trusted": True,  # official government feed: publish without review
         "url": "https://www.gov.uk/search/news-and-communications.atom"
                "?organisations%5B%5D=uk-visas-and-immigration",
         "country_id": "united-kingdom",
     },
     {
         "name": "Immigration, Refugees and Citizenship Canada",
+        "trusted": True,  # official government feed: publish without review
         "url": "https://api.io.canada.ca/io-server/gc/news/en/v2"
                "?dept=departmentofcitizenshipandimmigration&type=newsreleases"
                "&sort=publishedDate&orderBy=desc&pick=50&format=atom&atomtitle=IRCC",
@@ -54,6 +57,7 @@ NEWS_FEEDS: List[Dict[str, Any]] = [
     },
     {
         "name": "U.S. Department of State - Travel Advisories",
+        "trusted": True,  # official government feed: publish without review
         "url": "https://travel.state.gov/_res/rss/TAsTWs.xml",
         "country_id": "usa",
         "category": "Travel",
@@ -235,7 +239,7 @@ async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc)
     """Fetch every feed and upsert its items into `col`, deduplicated by source_url.
 
     `to_doc(feed, item)` maps a parsed item to the stored fields. New items are
-    inserted with status 'pending'; an existing URL whose title/date changed is
+    inserted as 'approved' for trusted feeds, else 'pending'; an existing URL whose title/date changed is
     refreshed without touching its moderation status.
     Returns {"inserted", "updated", "skipped", "errors": [...], "feeds": {...}}.
     """
@@ -270,7 +274,10 @@ async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc)
                         )
                         fstats["updated"] += 1
                     continue
-                res = await col.insert_one({**fields, "status": "pending", "created_at": datetime.utcnow()})
+                # Official government feeds and named publishers go live straight away;
+                # open search results (Google News) wait for an admin.
+                status = "approved" if feed.get("trusted") or auto_approve_all() else "pending"
+                res = await col.insert_one({**fields, "status": status, "created_at": datetime.utcnow()})
                 fstats["inserted"] += 1
                 vector_ids.append(str(res.inserted_id))
                 vector_docs.append(f"{fields['title']} {item['summary']}")
@@ -319,10 +326,29 @@ async def run_aggregator() -> Dict[str, Any]:
     return stats
 
 
+def auto_approve_all() -> bool:
+    return os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() in ("1", "true", "yes")
+
+
+async def approve_trusted_backlog(col, feeds: List[Dict[str, Any]]) -> int:
+    """Publish items already waiting from trusted feeds (e.g. the backlog from
+    before trusted feeds were auto-published)."""
+    trusted = [f["name"] for f in feeds if f.get("trusted")]
+    if not trusted:
+        return 0
+    result = await col.update_many({"status": "pending", "source_name": {"$in": trusted}},
+                                   {"$set": {"status": "approved"}})
+    return result.modified_count
+
+
 async def run_auto_approval():
-    """Approve pending news only when AGGREGATOR_AUTO_APPROVE is explicitly enabled."""
-    if os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() not in ("1", "true", "yes"):
-        logger.info("AGGREGATOR_AUTO_APPROVE disabled; leaving pending news for admin review.")
+    """Publish pending items from trusted feeds; everything else only when
+    AGGREGATOR_AUTO_APPROVE is enabled."""
+    n = await approve_trusted_backlog(global_news_col, NEWS_FEEDS)
+    if n:
+        logger.info("Published %d pending news items from trusted feeds.", n)
+    if not auto_approve_all():
+        logger.info("AGGREGATOR_AUTO_APPROVE disabled; other pending news stays for admin review.")
         return
     result = await global_news_col.update_many({"status": "pending"}, {"$set": {"status": "approved"}})
     logger.info("Auto-approved %d pending news items.", result.modified_count)
