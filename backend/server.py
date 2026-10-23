@@ -55,6 +55,7 @@ from routes_ai_universities import router as ai_universities_router  # noqa: E40
 from routes_programs import router as programs_router, admin_router as admin_programs_router  # noqa: E402
 from routes_reviews import router as reviews_router  # noqa: E402
 from routes_community import router as community_router  # noqa: E402
+from routes_interview_score import router as interview_score_router  # noqa: E402
 from routes_newsletter import router as newsletter_router  # noqa: E402
 from routes_newsletter_campaigns import router as newsletter_campaigns_router, mark_interrupted_on_boot  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
@@ -151,6 +152,7 @@ api_router.include_router(programs_router)
 api_router.include_router(admin_programs_router)
 api_router.include_router(reviews_router)
 api_router.include_router(community_router)
+api_router.include_router(interview_score_router)
 api_router.include_router(newsletter_router)
 api_router.include_router(newsletter_campaigns_router)
 api_router.include_router(i18n_router)

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { API } from '../context/AuthContext';
+import { API, useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
@@ -100,6 +100,8 @@ export default function VisaInterview() {
   const [timeLeft, setTimeLeft] = useState(120);
   const [active, setActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [scoring, setScoring] = useState(null); // { method, total, criteria, items } from /interview/score
+  const { token } = useAuth();
 
   // ?visa=<type> (from Community "Practice these") preselects the set and real questions.
   const [visaParam] = useState(() => new URLSearchParams(window.location.search).get('visa'));
@@ -140,42 +142,49 @@ export default function VisaInterview() {
     setPhase('interview');
     setCurrentQ(0);
     setResults([]);
+    setScoring(null);
     setAnswer('');
     setTimeLeft(120);
     setActive(true);
   };
 
-  const handleNext = useCallback(() => {
-    const score = Math.min(100, Math.floor(Math.random() * 40) + 40 + (answer.length > 50 ? 20 : 0) + (answer.length > 150 ? 20 : 0));
-    const newResults = [...results, { question: currentQData?.question, answer, score }];
-    setResults(newResults);
-
-    if (currentQ + 1 < total) {
-      setCurrentQ(q => q + 1);
-      setAnswer('');
-      setTimeLeft(120);
-    } else {
-      setPhase('results');
-      setActive(false);
+  // Answers are scored server-side once the interview ends (AI, or a transparent
+  // rule-based rubric when no AI model is available). Nothing here is random.
+  const finish = async (allResults) => {
+    setActive(false);
+    setPhase('scoring');
+    try {
+      const r = await axios.post(`${API}/interview/score`, {
+        visa: practisingReal ? bank?.label : INTERVIEW_QUESTIONS[country]?.name,
+        items: allResults.map(x => ({ question: x.question, answer: x.answer === '(skipped)' ? '' : x.answer })),
+      }, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
+      setScoring(r.data);
+    } catch {
+      setScoring({ error: true });
     }
-  }, [currentQ, total, currentQData, answer, results]);
+    setPhase('results');
+  };
 
-  const skipQuestion = () => {
-    const newResults = [...results, { question: currentQData?.question, answer: '(skipped)', score: 0 }];
+  const advance = (entry) => {
+    const newResults = [...results, entry];
     setResults(newResults);
     if (currentQ + 1 < total) {
       setCurrentQ(q => q + 1);
       setAnswer('');
       setTimeLeft(120);
     } else {
-      setPhase('results');
-      setActive(false);
+      finish(newResults);
     }
   };
 
-  const totalScore = results.length > 0
-    ? Math.round(results.reduce((s, r) => s + r.score, 0) / results.length)
-    : 0;
+  const handleNext = useCallback(() => {
+    advance({ question: currentQData?.question, answer: answer.trim() || '(skipped)' });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- advance closes over the same state
+  }, [currentQ, total, currentQData, answer, results]);
+
+  const skipQuestion = () => advance({ question: currentQData?.question, answer: '(skipped)' });
+
+  const totalScore = scoring?.total ?? 0;
   const scoreInfo = getScoreLabel(totalScore);
 
   return (
@@ -346,14 +355,32 @@ export default function VisaInterview() {
             </div>
           )}
 
-          {phase === 'results' && (
+          {phase === 'scoring' && (
+            <div className="py-20 flex flex-col items-center text-muted-foreground" role="status">
+              <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--blue-700))] mb-3" />
+              Reviewing your answers…
+            </div>
+          )}
+
+          {phase === 'results' && scoring?.error && (
+            <div className="max-w-xl mx-auto text-center rounded-2xl bg-white border border-[hsl(var(--border))] p-8">
+              <AlertCircle className="w-8 h-8 text-amber-600 mx-auto mb-3" />
+              <p className="text-[15px] text-[hsl(var(--blue-900))]">We couldn't score this interview right now. Please try again.</p>
+              <Button onClick={() => finish(results)} className="mt-4 rounded-xl">Retry scoring</Button>
+            </div>
+          )}
+
+          {phase === 'results' && !scoring?.error && (
             <div className="max-w-3xl mx-auto">
               <div className="text-center mb-8">
                 <div className={`inline-flex h-20 w-20 rounded-2xl items-center justify-center mb-4 ${totalScore >= 75 ? 'bg-emerald-100' : totalScore >= 50 ? 'bg-amber-100' : 'bg-red-100'}`}>
                   {totalScore >= 75 ? <CheckCircle2 className="w-10 h-10 text-emerald-600" /> : totalScore >= 50 ? <AlertCircle className="w-10 h-10 text-amber-600" /> : <XCircle className="w-10 h-10 text-red-600" />}
                 </div>
                 <h2 className="font-display font-bold text-[32px] text-[hsl(var(--blue-900))] leading-tight">Interview Complete</h2>
-                <div className="mt-2 text-[15px] text-muted-foreground">{INTERVIEW_QUESTIONS[country]?.name}</div>
+                <div className="mt-2 text-[15px] text-muted-foreground">{practisingReal ? bank?.label : INTERVIEW_QUESTIONS[country]?.name}</div>
+                <div className="mt-1 text-[12px] text-muted-foreground">
+                  {scoring?.method === 'ai' ? 'Scored by WeHive AI' : 'Scored with our answer rubric (AI scoring unavailable right now)'}
+                </div>
               </div>
 
               <div className="rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8 mb-6 text-center">
@@ -366,7 +393,7 @@ export default function VisaInterview() {
                   {SCORE_CRITERIA.map(c => (
                     <div key={c.key} className="text-center">
                       <div className="text-[20px] font-display font-bold text-[hsl(var(--blue-900))]">
-                        {Math.min(100, Math.floor(totalScore * (0.8 + Math.random() * 0.4)))}
+                        {scoring?.criteria?.[c.key] ?? 0}
                       </div>
                       <div className="text-[12px] text-muted-foreground uppercase tracking-[0.14em]">{c.label}</div>
                     </div>
@@ -378,7 +405,8 @@ export default function VisaInterview() {
                 <h3 className="font-bold text-[16px] text-[hsl(var(--blue-900))] mb-4">Question Review</h3>
                 <div className="space-y-3">
                   {results.map((r, i) => {
-                    const s = r.score;
+                    const item = scoring?.items?.[i];
+                    const s = item?.score ?? 0;
                     return (
                       <div key={i} className="rounded-xl border border-[hsl(var(--border))] p-4">
                         <div className="flex items-start justify-between gap-3">
@@ -389,6 +417,9 @@ export default function VisaInterview() {
                             )}
                             {r.answer === '(skipped)' && (
                               <div className="mt-1 text-[12px] italic text-muted-foreground">Skipped</div>
+                            )}
+                            {item?.feedback && (
+                              <div className="mt-2 text-[12px] text-[hsl(var(--blue-700))]">{item.feedback}</div>
                             )}
                           </div>
                           <div className={`text-[18px] font-display font-bold shrink-0 ${s >= 75 ? 'text-emerald-600' : s >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
