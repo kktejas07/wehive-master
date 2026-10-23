@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
+import ReportSlotForm from '../components/ReportSlotForm';
 import { useToast } from '../hooks/use-toast';
 import { format, parseISO, isValid } from 'date-fns';
 import {
@@ -37,6 +38,7 @@ const COUNTRY_META = {
   thailand: { flag: '🇹🇭', label: 'Thailand', adj: 'Thailand' },
   japan: { flag: '🇯🇵', label: 'Japan', adj: 'Japan' },
   'south-korea': { flag: '🇰🇷', label: 'South Korea', adj: 'South Korean' },
+  ireland: { flag: '🇮🇪', label: 'Ireland', adj: 'Irish' },
 };
 
 const CONSULATE_ORDER_US = ['mumbai', 'delhi', 'chennai', 'kolkata', 'hyderabad'];
@@ -470,6 +472,18 @@ const FALLBACK_COUNTRIES = {
       total_slots: 3, earliest_date: "5-10d",
     },
   },
+  ireland: {
+    india: {
+      name: "All India", city: "All VFS centres",
+      jurisdiction: "Decided at the Embassy of Ireland, New Delhi",
+      booking_url: "https://visa.vfsglobal.com/ind/en/irl/",
+      visa_types: {
+        visitor_ie: { name: "Visit (short stay)", label: "Tourist, Business", wait_time: "N/A", available: false, count: 0, earliest_date: "N/A" },
+        student_ie: { name: "Study", label: "Study", wait_time: "N/A", available: false, count: 0, earliest_date: "N/A" },
+      },
+      total_slots: 0, earliest_date: "N/A",
+    },
+  },
 };
 
 function getConsulatesForCountry(country) {
@@ -520,6 +534,7 @@ const COUNTRY_VISA_TYPES = {
   canada: [
     { id: 'visitor_ca', label: 'Visitor (TRV)' },
     { id: 'student_ca', label: 'Student Permit' },
+    { id: 'work_ca', label: 'Work Permit' },
   ],
   australia: [
     { id: 'visitor_au', label: 'Visitor (600)' },
@@ -547,6 +562,10 @@ const COUNTRY_VISA_TYPES = {
     { id: 'tourist_kr', label: 'Tourist Visa' },
     { id: 'student_kr', label: 'Student Visa' },
     { id: 'work_kr', label: 'Work Visa' },
+  ],
+  ireland: [
+    { id: 'visitor_ie', label: 'Visit (short stay)' },
+    { id: 'student_ie', label: 'Study' },
   ],
 };
 
@@ -607,6 +626,9 @@ const COUNTRY_CONSOLATE_LABELS = {
     { id: 'delhi', label: 'Delhi' },
     { id: 'chennai', label: 'Chennai' },
     { id: 'kolkata', label: 'Kolkata' },
+  ],
+  ireland: [
+    { id: 'india', label: 'All India (VFS)' },
   ],
 };
 
@@ -690,17 +712,19 @@ export default function USVisaSlots() {
 
   useEffect(() => {
     if (isAuthed) {
+      // One subscription per country.
       axios.get(`${API}/usvisa/subscription`, {
+        params: { country: selectedCountry },
         headers: { Authorization: `Bearer ${token}` },
       }).then(r => {
+        setSubscribed(!!r.data.subscribed);
         if (r.data.subscribed) {
-          setSubscribed(true);
           setSelectedVisas(r.data.subscription.visa_types);
           setSelectedConsulates(r.data.subscription.consulates);
         }
       }).catch(() => {});
     }
-  }, [isAuthed, token]);
+  }, [isAuthed, token, selectedCountry]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -717,6 +741,7 @@ export default function USVisaSlots() {
     setSubscribing(true);
     try {
       await axios.post(`${API}/usvisa/subscribe`, {
+        country: selectedCountry,
         visa_types: selectedVisas,
         consulates: selectedConsulates,
         channel: 'in_app',
@@ -735,10 +760,11 @@ export default function USVisaSlots() {
     if (!isAuthed) return;
     try {
       await axios.delete(`${API}/usvisa/subscription`, {
+        params: { country: selectedCountry },
         headers: { Authorization: `Bearer ${token}` },
       });
       setSubscribed(false);
-      toast({ title: 'Unsubscribed', description: 'You will no longer receive visa slot alerts.' });
+      toast({ title: 'Unsubscribed', description: `You will no longer receive ${meta.adj} visa alerts.` });
     } catch (err) {
       toast({ title: 'Error', description: 'Failed to unsubscribe.' });
     }
@@ -845,6 +871,7 @@ export default function USVisaSlots() {
                 { id: 'thailand', flag: '🇹🇭', label: 'Thailand' },
                 { id: 'japan', flag: '🇯🇵', label: 'Japan' },
                 { id: 'south-korea', flag: '🇰🇷', label: 'South Korea' },
+                { id: 'ireland', flag: '🇮🇪', label: 'Ireland' },
               ].map(c => (
                 <button
                   key={c.id}
@@ -986,6 +1013,16 @@ export default function USVisaSlots() {
 
           {/* ── End of gated content ── */}
           </>
+          )}
+
+          {isAuthed && (
+            <ReportSlotForm
+              country={selectedCountry}
+              countryName={meta.label}
+              consulates={COUNTRY_CONSOLATE_LABELS[selectedCountry] || COUNTRY_CONSOLATE_LABELS['usa']}
+              visas={COUNTRY_VISA_TYPES[selectedCountry] || COUNTRY_VISA_TYPES['usa']}
+              token={token}
+            />
           )}
 
           {/* Notification Subscription */}

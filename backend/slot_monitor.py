@@ -290,6 +290,24 @@ CORRIDORS = {
     },
 }
 
+# Ireland: every Indian application is decided at the Embassy in New Delhi, so one
+# national entry. No hand-made estimates: figures come from the embassy (official_times).
+CORRIDORS["ireland"] = {
+    "id": "ireland", "name": "Ireland", "flag": "🇮🇪",
+    "from_country": "in", "to_country": "ie",
+    "booking_url": "https://visa.vfsglobal.com/ind/en/irl/",
+    "consulates": [
+        {"id": "india", "name": "All India", "city": "All VFS centres",
+         "jurisdiction": "Decided at the Embassy of Ireland, New Delhi"},
+    ],
+    "visa_types": [
+        {"id": "visitor_ie", "name": "Visit (short stay)", "label": "Tourist, Business"},
+        {"id": "student_ie", "name": "Study", "label": "Study"},
+    ],
+    "wait_times": {},
+}
+CORRIDORS["canada"]["visa_types"].append({"id": "work_ca", "name": "Work Permit", "label": "Work"})
+
 _scheduler_task: Optional[asyncio.Task] = None
 _last_check: Optional[str] = None
 
@@ -380,6 +398,8 @@ async def refresh_official_wait_times(force: bool = False) -> dict:
         names = {c["id"]: c["city"] for c in US_CONSULATES_INDIA}
         visa_names = {v["id"]: v["name"] for v in VISA_TYPES}
         async for sub in usvisa_subscriptions_col.find({}):
+            if _sub_country(sub) != "usa":
+                continue
             mine = [d for d in drops if d[0] in (sub.get("consulates") or []) and d[1] in (sub.get("visa_types") or [])]
             if not mine:
                 continue
@@ -549,12 +569,16 @@ async def _run_slot_check():
     logger.info("Slot check complete (wait_times + Telegram)")
 
 
+def _sub_country(sub: dict) -> str:
+    return sub.get("country") or "usa"  # pre-per-country subscriptions were US
+
+
 async def dispatch_slot_alerts(max_age_hours: int = 48) -> int:
     """Alert subscribers about slot openings reported since the last run.
 
-    Only real sightings (Telegram channel reports) trigger alerts. The daily
-    wait-time rows are estimates, not openings, so they never do. Each report
-    is marked `notified` once handled, so no user is alerted twice for it.
+    Openings come from Telegram channel reports (US) and from WeHive users'
+    reports once an admin approves them (any country). Wait-time rows are not
+    openings and never alert. Each report is marked `notified` once handled.
     Returns the number of users alerted.
     """
     from db import usvisa_slots_col, usvisa_subscriptions_col
@@ -563,32 +587,37 @@ async def dispatch_slot_alerts(max_age_hours: int = 48) -> int:
     since = datetime.utcnow() - timedelta(hours=max_age_hours)
     today = datetime.utcnow().strftime("%Y-%m-%d")
     reports = await usvisa_slots_col.find({
-        "source": "telegram_channel", "notified": False, "detected_at": {"$gte": since},
+        "notified": False, "detected_at": {"$gte": since},
+        "$or": [{"source": "telegram_channel"}, {"source": "user_report", "status": "approved"}],
     }).to_list(length=500)
     if not reports:
         return 0
 
-    names = {c["id"]: c["name"] for c in US_CONSULATES_INDIA}
-    visa_names = {v["id"]: v["name"] for v in VISA_TYPES}
     alerted = 0
     async for sub in usvisa_subscriptions_col.find({}):
+        country = _sub_country(sub)
+        corridor = CORRIDORS.get(country, CORRIDORS["usa"])
         matches = [
             r for r in reports
-            if r.get("consulate") in (sub.get("consulates") or [])
+            if (r.get("country") or "usa") == country
+            and r.get("consulate") in (sub.get("consulates") or [])
             and (r.get("visa_type") in (sub.get("visa_types") or []) or r.get("visa_type") in (None, "", "unknown"))
             and (not r.get("date") or r["date"] >= today)
         ]
         if not matches:
             continue
+        names = {c["id"]: c["city"] for c in corridor["consulates"]}
+        visa_names = {v["id"]: v["name"] for v in corridor["visa_types"]}
         lines = [
             f"{visa_names.get(r.get('visa_type'), 'Visa')} at {names.get(r['consulate'], r['consulate'])}"
             + (f" on {r['date']}" if r.get("date") else "")
+            + (" (reported by a WeHive member)" if r.get("source") == "user_report" else "")
             for r in matches[:5]
         ]
         more = f" and {len(matches) - 5} more" if len(matches) > 5 else ""
         await notify_user(
             sub["user_id"],
-            title="US visa slot reported",
+            title=f"{corridor['name']} visa slot reported",
             body="New openings reported: " + "; ".join(lines) + more
                  + ". Openings go fast; book on the official site if one suits you.",
             kind="slot_alert",

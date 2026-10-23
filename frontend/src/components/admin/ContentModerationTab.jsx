@@ -11,6 +11,7 @@ const KINDS = {
   blogs: 'Blogs',
   'community/stories': 'Success stories',
   'community/interviews': 'Interview experiences',
+  'usvisa/reports': 'Slot reports',
 };
 const LIMIT = 20;
 

@@ -2,11 +2,17 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
+import uuid
+from datetime import date as date_type
+from typing import Literal
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
+
+from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
 from db import usvisa_slots_col, usvisa_subscriptions_col
+from rate_limit import RateLimit
 
 router = APIRouter(prefix="/usvisa", tags=["usvisa-slots"])
 
@@ -37,6 +43,7 @@ WHATSAPP_NUMBER = os.environ.get("WHATSAPP_VISA_NUMBER", "+91 9000734326")
 
 
 class SubscribeRequest(BaseModel):
+    country: str = "usa"  # corridor id; one subscription per user per country
     visa_types: list[str] = ["b1b2"]
     consulates: list[str] = ["mumbai", "delhi", "chennai", "kolkata", "hyderabad"]
     channel: str = "in_app"
@@ -52,7 +59,8 @@ async def get_slots(
     hours: int = Query(24, ge=1, le=720),
 ):
     since = datetime.utcnow() - timedelta(hours=hours)
-    q: dict = {"detected_at": {"$gte": since}}
+    # User reports appear only after an admin approves them.
+    q: dict = {"detected_at": {"$gte": since}, "status": {"$nin": ["pending", "rejected"]}}
 
     if consulate:
         q["consulate"] = consulate
@@ -179,38 +187,59 @@ async def get_monitor_status():
     }
 
 
+def _sub_filter(user_id: str, country: str) -> dict:
+    """A user's subscription for one country. Subscriptions saved before
+    per-country alerts have no country and are US ones."""
+    if country == "usa":
+        return {"user_id": user_id, "$or": [{"country": "usa"}, {"country": {"$exists": False}}]}
+    return {"user_id": user_id, "country": country}
+
+
+def _check_country(country: str) -> dict:
+    from slot_monitor import CORRIDORS
+    corridor = CORRIDORS.get(country)
+    if not corridor:
+        raise HTTPException(400, f"Unknown country: {country}")
+    return corridor
+
+
 @router.post("/subscribe")
 async def subscribe(
     req: SubscribeRequest,
     user=Depends(get_current_user),
 ):
-    await usvisa_subscriptions_col.update_one(
-        {"user_id": user["_id"]},
-        {"$set": {
-            "user_id": user["_id"],
-            "visa_types": req.visa_types,
-            "consulates": req.consulates,
-            "channel": req.channel,
-            "telegram_chat_id": req.telegram_chat_id,
-            "updated_at": datetime.utcnow(),
-        }},
-        upsert=True,
-    )
-    return {"ok": True, "message": "Subscribed to US visa slot alerts"}
+    corridor = _check_country(req.country)
+    valid_visas = {v["id"] for v in corridor["visa_types"]}
+    valid_centres = {c["id"] for c in corridor["consulates"]}
+    visa_types = [v for v in req.visa_types if v in valid_visas]
+    consulates = [c for c in req.consulates if c in valid_centres]
+    if not visa_types or not consulates:
+        raise HTTPException(400, "Pick at least one visa type and visa centre for this country.")
+    await usvisa_subscriptions_col.delete_many(_sub_filter(user["_id"], req.country))
+    await usvisa_subscriptions_col.insert_one({
+        "user_id": user["_id"],
+        "country": req.country,
+        "visa_types": visa_types,
+        "consulates": consulates,
+        "channel": req.channel,
+        "telegram_chat_id": req.telegram_chat_id,
+        "updated_at": datetime.utcnow(),
+    })
+    return {"ok": True, "message": f"Subscribed to {corridor['name']} visa alerts"}
 
 
 @router.get("/subscription")
-async def get_subscription(user=Depends(get_current_user)):
-    sub = await usvisa_subscriptions_col.find_one({"user_id": user["_id"]})
+async def get_subscription(country: str = "usa", user=Depends(get_current_user)):
+    sub = await usvisa_subscriptions_col.find_one(_sub_filter(user["_id"], country))
     if not sub:
         return {"ok": True, "subscribed": False}
     return {"ok": True, "subscribed": True, "subscription": _serialize_sub(sub)}
 
 
 @router.delete("/subscription")
-async def unsubscribe(user=Depends(get_current_user)):
-    await usvisa_subscriptions_col.delete_many({"user_id": user["_id"]})
-    return {"ok": True, "message": "Unsubscribed from US visa slot alerts"}
+async def unsubscribe(country: str = "usa", user=Depends(get_current_user)):
+    await usvisa_subscriptions_col.delete_many(_sub_filter(user["_id"], country))
+    return {"ok": True, "message": "Unsubscribed from visa alerts for this country"}
 
 
 @router.get("/telegram-groups")
@@ -246,6 +275,80 @@ async def list_corridors_endpoint():
     return {"ok": True, "corridors": list_corridors()}
 
 
+# ---------- slot reports from users ----------
+
+_report_limiter = RateLimit(max_calls=5, window_seconds=3600)
+
+
+class SlotReport(BaseModel):
+    country: str = Field("usa", max_length=40)
+    consulate: str = Field(max_length=40)
+    visa_type: str = Field(max_length=40)
+    date: date_type  # the appointment date the user saw open
+    note: str = Field("", max_length=200)
+
+
+@router.post("/reports", status_code=201)
+async def report_slot(req: SlotReport, user=Depends(get_current_user), _=Depends(_report_limiter)):
+    """A signed-in user reports an open appointment they just saw. It is held for
+    admin review; once approved, subscribers for that centre and visa are alerted."""
+    from routes_community import check_text
+    corridor = _check_country(req.country)
+    centre = next((c for c in corridor["consulates"] if c["id"] == req.consulate), None)
+    visa = next((v for v in corridor["visa_types"] if v["id"] == req.visa_type), None)
+    if not centre or not visa:
+        raise HTTPException(400, "Pick a visa centre and visa type for this country.")
+    today = datetime.utcnow().date()
+    if not today <= req.date <= today + timedelta(days=366):
+        raise HTTPException(400, "The slot date must be today or within the next year.")
+    check_text(req.note)
+    doc = {
+        "_id": str(uuid.uuid4()),
+        "source": "user_report", "status": "pending", "notified": False,
+        "country": req.country, "consulate": centre["id"], "city": centre["city"],
+        "consulate_name": centre["name"], "visa_type": visa["id"], "visa_name": visa["name"],
+        "date": req.date.isoformat(), "note": req.note.strip(),
+        "reported_by": user["_id"], "detected_at": datetime.utcnow(),
+    }
+    await usvisa_slots_col.insert_one(doc)
+    return {"ok": True, "id": doc["_id"], "status": "pending"}
+
+
+@router.get("/reports/pending")
+async def pending_reports(page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100),
+                          _admin=Depends(get_current_admin_flex)):
+    """Admin review queue, shaped like the other moderation queues."""
+    from slot_monitor import CORRIDORS
+    q = {"source": "user_report", "status": "pending"}
+    total = await usvisa_slots_col.count_documents(q)
+    docs = await usvisa_slots_col.find(q).sort("detected_at", 1).skip((page - 1) * limit).to_list(limit)
+    items = [{
+        "id": d["_id"],
+        "title": f"{d.get('visa_name')} slot on {d.get('date')} at {d.get('city')}",
+        "source_name": f"{CORRIDORS.get(d.get('country'), {}).get('name', d.get('country'))} · user report",
+        "date": str(d.get("detected_at", ""))[:16],
+        "content": d.get("note") or "",
+    } for d in docs]
+    return {"items": items, "total": total, "page": page, "pages": (total + limit - 1) // limit}
+
+
+@router.post("/reports/{report_id}/{action}")
+async def moderate_report(report_id: str, action: Literal["approve", "reject"],
+                          admin=Depends(get_current_admin_flex)):
+    res = await usvisa_slots_col.update_one(
+        {"_id": report_id, "source": "user_report", "status": "pending"},
+        {"$set": {"status": "approved" if action == "approve" else "rejected",
+                  "detected_at": datetime.utcnow(), "moderated_by": str(admin.get("_id") or "admin")}},
+    )
+    if res.matched_count == 0:
+        raise HTTPException(404, "Report not found or already reviewed")
+    alerted = 0
+    if action == "approve":  # slots go fast: alert now, not at the next monitor run
+        from slot_monitor import dispatch_slot_alerts
+        alerted = await dispatch_slot_alerts()
+    return {"ok": True, "status": "approved" if action == "approve" else "rejected", "alerted": alerted}
+
+
 def _serialize_slots(slots: list[dict]) -> list[dict]:
     result = []
     for s in slots:
@@ -261,12 +364,15 @@ def _serialize_slots(slots: list[dict]) -> list[dict]:
             "time": s.get("time", ""),
             "day_of_week": s.get("day_of_week", ""),
             "detected_at": str(s.get("detected_at", "")),
+            "source": s.get("source", ""),
+            "country": s.get("country", "usa"),
         })
     return result
 
 
 def _serialize_sub(sub: dict) -> dict:
     return {
+        "country": sub.get("country", "usa"),
         "visa_types": sub.get("visa_types", []),
         "consulates": sub.get("consulates", []),
         "channel": sub.get("channel", "in_app"),

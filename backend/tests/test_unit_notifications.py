@@ -153,7 +153,8 @@ async def test_slot_alerts_match_subscriptions_and_mark_reports():
     assert alerted == 1
     assert nu.await_args.args[0] == "u1"
     assert "Hyderabad" in nu.await_args.kwargs["body"] and "2099-01-10" in nu.await_args.kwargs["body"]
-    assert slots.find.call_args.args[0]["source"] == "telegram_channel"  # estimates never alert
+    sources = slots.find.call_args.args[0]["$or"]  # estimates never alert; user reports only once approved
+    assert {"source": "telegram_channel"} in sources and {"source": "user_report", "status": "approved"} in sources
     marked = slots.update_many.await_args.args[0]["_id"]["$in"]
     assert sorted(marked) == ["r1", "r2"]
 
