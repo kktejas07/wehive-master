@@ -126,10 +126,10 @@ async def test_official_figures_preferred_over_estimates():
     assert (is_estimate, source) == (False, "state_dept")
     assert results["hyderabad"]["f1"] == "1 Month"
     display = slot_monitor.get_wait_times_for_display("usa", official)
-    assert display["hyderabad"]["source"] == "state_dept" and not display["hyderabad"]["is_estimate"]
+    assert display["hyderabad"]["source"] == "official" and not display["hyderabad"]["is_estimate"]
     assert display["hyderabad"]["wait_times"]["f1"]["wait"] == "1 Month"
-    # other corridors are unaffected
-    assert all(c["is_estimate"] for c in slot_monitor.get_wait_times_for_display("uk", official).values())
+    # a corridor without official figures keeps its estimates
+    assert all(c["is_estimate"] for c in slot_monitor.get_wait_times_for_display("uk").values())
 
 
 @pytest.mark.asyncio

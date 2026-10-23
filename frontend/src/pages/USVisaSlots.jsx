@@ -814,9 +814,9 @@ export default function USVisaSlots() {
               </div>
               <div className="text-[12px] text-muted-foreground">
                 {official ? (
-                  <>Next available appointment from the{' '}
-                    <a href={summary.source_url} target="_blank" rel="noopener noreferrer" className="underline">US State Department</a>
-                    {summary.updated ? `, updated ${summary.updated}` : ''}. Updated monthly; not live slot openings.</>
+                  <>{summary.metric === 'processing_time' ? 'Processing time after you apply' : 'Next available appointment'}, from the{' '}
+                    <a href={summary.source_url} target="_blank" rel="noopener noreferrer" className="underline">{summary.source_name}</a>
+                    {summary.updated ? `, updated ${summary.updated}` : ''}. Not live slot openings.</>
                 ) : estimatesOnly ? 'Published consulate estimates, not live availability' : 'Wait times refreshed regularly'}
               </div>
             </div>
@@ -961,6 +961,9 @@ export default function USVisaSlots() {
                             hasData ? 'text-[hsl(var(--blue-900))]' : 'text-[hsl(var(--blue-900))]/25'
                           }`}>
                             {hasData ? vtData.wait_time : '—'}
+                            {official && hasData && vtData.estimate && (
+                              <span className="ml-1 text-[11px] font-semibold text-amber-700" title="Not covered by the official source; published estimate">est.</span>
+                            )}
                           </span>
                         </div>
                       );

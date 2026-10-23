@@ -322,7 +322,22 @@ async def load_official_wait_times() -> Optional[dict]:
     async for d in db["usvisa_official_waits"].find({"consulate": {"$exists": True}}):
         posts.setdefault(d["consulate"], {})[d["visa_type"]] = d["value"]
         updated = d.get("updated") or updated
-    return {"updated": updated, "posts": posts} if posts else None
+    if not posts:
+        return None
+    from adapters import state_dept_wait_times as sd
+    return {"updated": updated, "posts": posts, "source_name": sd.SOURCE_LABEL,
+            "source_url": sd.OFFICIAL_URL, "metric": "next_available_appointment"}
+
+
+async def load_official_for(country: str) -> Optional[dict]:
+    """Official figures for any corridor (US per consulate; others per country)."""
+    if country == "usa":
+        return await load_official_wait_times()
+    import official_times
+    corridor = CORRIDORS.get(country)
+    if not corridor:
+        return None
+    return await official_times.load(country, [c["id"] for c in corridor["consulates"]])
 
 
 async def refresh_official_wait_times(force: bool = False) -> dict:
@@ -465,6 +480,12 @@ async def _run_slot_check():
     except Exception as e:
         logger.warning("Official wait-time refresh failed: %s", e)
 
+    try:
+        import official_times
+        await official_times.refresh_all()
+    except Exception as e:
+        logger.warning("Official processing-time refresh failed: %s", e)
+
     wait_times, is_estimate, source = await _fetch_wait_times()
 
     if wait_times:
@@ -599,11 +620,19 @@ def start_slot_monitor():
         logger.info("US visa slot monitor scheduler started")
 
 
+def _display_wait(corridor: dict, official: Optional[dict], cid: str, vt: dict) -> dict:
+    value = (official or {}).get("posts", {}).get(cid, {}).get(vt["id"])
+    if value:
+        return {"visa": vt["label"], "wait": value, "estimate": False}
+    return {"visa": vt["label"], "wait": corridor["wait_times"].get(vt["id"], {}).get(cid, "N/A"), "estimate": True}
+
+
 def get_wait_times_for_display(country: str = "usa", official: Optional[dict] = None) -> dict:
-    """Per-consulate wait times for a corridor. `official` (from
-    load_official_wait_times) replaces the hand-maintained US figures."""
+    """Per-consulate wait times for a corridor. `official` (from load_official_for)
+    replaces the hand-maintained figures; a visa type the official source doesn't
+    cover keeps its estimate, flagged per entry."""
     corridor = CORRIDORS.get(country, CORRIDORS["usa"])
-    use_official = bool(official) and corridor["id"] == "usa"
+    use_official = bool(official)
     result = {}
     for consul in corridor["consulates"]:
         cid = consul["id"]
@@ -613,17 +642,11 @@ def get_wait_times_for_display(country: str = "usa", official: Optional[dict] = 
             "jurisdiction": consul.get("jurisdiction", ""),
             "booking_url": corridor["booking_url"],
             # Official figures when available; otherwise hand-maintained estimates.
-            "source": "state_dept" if use_official else "estimate",
+            "source": "official" if use_official else "estimate",
             "is_estimate": not use_official,
             "updated": official.get("updated") if use_official else None,
-            "wait_times": {
-                vt["id"]: {
-                    "visa": vt["label"],
-                    "wait": (official["posts"].get(cid, {}).get(vt["id"], "N/A") if use_official
-                             else corridor["wait_times"].get(vt["id"], {}).get(cid, "N/A")),
-                }
-                for vt in corridor["visa_types"]
-            },
+            "wait_times": {vt["id"]: _display_wait(corridor, official if use_official else None, cid, vt)
+                           for vt in corridor["visa_types"]},
         }
     return result
 

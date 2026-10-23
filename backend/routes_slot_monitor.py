@@ -5,7 +5,6 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
-from adapters.state_dept_wait_times import OFFICIAL_URL
 from auth_utils import get_current_user
 from db import usvisa_slots_col, usvisa_subscriptions_col
 
@@ -83,8 +82,8 @@ async def get_slots_summary(
         ),
     ),
 ):
-    from slot_monitor import get_wait_times_for_display, load_official_wait_times
-    official = await load_official_wait_times() if country == "usa" else None
+    from slot_monitor import get_wait_times_for_display, load_official_for
+    official = await load_official_for(country)
     data = get_wait_times_for_display(country, official)
 
     summary = {}
@@ -117,6 +116,7 @@ async def get_slots_summary(
                 "name": vt_data.get("visa", vt_id.upper()),
                 "label": vt_data.get("visa", ""),
                 "wait_time": wait_str,
+                "estimate": vt_data.get("estimate", True),
                 "available": wait_str != "N/A",
                 "count": 1 if wait_str != "N/A" else 0,
                 "earliest_date": wait_str,
@@ -134,10 +134,12 @@ async def get_slots_summary(
     return {
         "ok": True,
         "since_hours": hours,
-        # "official_wait_times": US State Department figures; otherwise hand-maintained estimates.
+        # "official_wait_times": government-published figures; otherwise hand-maintained estimates.
         "source": "official_wait_times" if official else "wait_time_estimates",
-        "source_name": "US State Department" if official else None,
-        "source_url": OFFICIAL_URL if official else None,
+        "source_name": official.get("source_name") if official else None,
+        "source_url": official.get("source_url") if official else None,
+        # "next_available_appointment" (US) or "processing_time" (decision time after applying)
+        "metric": official.get("metric") if official else None,
         "updated": official.get("updated") if official else None,
         "overall": overall,
         "consulates": summary,
