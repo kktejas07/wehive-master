@@ -62,44 +62,90 @@ def test_diff_ignores_pinned_and_unchanged():
 
 
 def _db(meta=None):
-    cols = {name: MagicMock() for name in ("visa_rules_agent", "visa_rule_changes", "visa_rule_overrides")}
+    cols = {name: MagicMock() for name in ("visa_rules_agent", "visa_rule_changes", "visa_rule_overrides",
+                                           "visa_rule_details")}
     cols["visa_rules_agent"].find_one = AsyncMock(return_value=meta)
     cols["visa_rules_agent"].update_one = AsyncMock()
     cols["visa_rule_changes"].insert_one = AsyncMock()
+    cols["visa_rule_changes"].update_one = AsyncMock()
     cols["visa_rule_overrides"].update_one = AsyncMock()
+    cols["visa_rule_overrides"].delete_one = AsyncMock()
+    cols["visa_rule_details"].update_one = AsyncMock()
     return cols
 
 
 def _parsed(n_rows, changes):
     reqs = {iso: (code, "x") for iso, code in changes.items()}
-    return {"rows": n_rows, "requirements": reqs, "unmatched": []}
+    details = {iso: {"allowed_stay": "30 days", "notes": ""} for iso in changes}
+    return {"rows": n_rows, "requirements": reqs, "details": details, "unmatched": []}
+
+
+def _run_patches(cols, parsed):
+    from contextlib import ExitStack
+    stack = ExitStack()
+    stack.enter_context(patch("db.db", cols))
+    stack.enter_context(patch.object(agent, "fetch", new=AsyncMock(return_value=parsed)))
+    stack.enter_context(patch.object(vr, "refresh_overrides", new=AsyncMock()))
+    stack.enter_context(patch("official_times.refresh_all", new=AsyncMock(return_value={})))
+    stack.enter_context(patch("slot_monitor.refresh_official_wait_times", new=AsyncMock()))
+    stack.enter_context(patch.object(agent, "report", new=AsyncMock()))
+    return stack
+
+
+def test_parse_reads_allowed_stay_and_notes():
+    out = agent.parse(_page([("Thailand", "Visa not required")]))
+    assert out["details"]["TH"] == {"allowed_stay": "30 days", "notes": ""}
 
 
 @pytest.mark.asyncio
-async def test_small_healthy_change_set_applies_automatically():
+async def test_every_change_applies_automatically_on_a_good_read():
+    many = {iso: vr.E for iso in ["TH", "MY", "QA", "MU", "FJ", "SN", "RW", "JM", "HT", "KZ", "BB"]}
     cols = _db()
-    with patch("db.db", cols), patch.object(agent, "fetch", new=AsyncMock(return_value=_parsed(190, {"TH": vr.E}))), \
-         patch.object(vr, "refresh_overrides", new=AsyncMock()), \
-         patch("official_times.refresh_all", new=AsyncMock(return_value={})), \
-         patch("slot_monitor.refresh_official_wait_times", new=AsyncMock()):
-        out = await agent.run(force=True)
-    assert (out["status"], out["applied"], out["held"]) == ("ok", 1, 0)
-    cols["visa_rule_overrides"].update_one.assert_awaited_once()
+    with _run_patches(cols, _parsed(190, many)):
+        out = await agent.run(force=True, trigger="admin")
+        agent.report.assert_awaited_once()
+    assert (out["status"], out["rows"], out["applied"]) == ("ok", 190, 11)
+    assert out["summary"] == "Visa rules check: 190 countries read, 11 change(s) applied."
+    assert cols["visa_rule_overrides"].update_one.await_count == 11
+    assert cols["visa_rule_details"].update_one.await_count == 11
     assert cols["visa_rule_changes"].insert_one.await_args.args[0]["status"] == "applied"
 
 
 @pytest.mark.asyncio
-async def test_large_or_suspicious_runs_are_held_for_review():
-    many = {iso: vr.E for iso in ["TH", "MY", "QA", "MU", "FJ", "SN", "RW", "JM", "HT", "KZ", "BB"]}
-    for rows, changes in ((190, many), (40, {"TH": vr.E})):
-        cols = _db()
-        with patch("db.db", cols), patch.object(agent, "fetch", new=AsyncMock(return_value=_parsed(rows, changes))), \
-             patch.object(vr, "refresh_overrides", new=AsyncMock()), \
-             patch("official_times.refresh_all", new=AsyncMock(return_value={})), \
-             patch("slot_monitor.refresh_official_wait_times", new=AsyncMock()):
-            out = await agent.run(force=True)
-        assert out["applied"] == 0 and out["held"] == len(changes)
-        cols["visa_rule_overrides"].update_one.assert_not_awaited()
+async def test_bad_read_changes_nothing():
+    cols = _db()
+    with _run_patches(cols, _parsed(40, {"TH": vr.E})):
+        out = await agent.run(force=True)
+    assert (out["status"], out["applied"]) == ("parse_suspect", 0)
+    assert "only 40 countries" in out["summary"]
+    cols["visa_rule_overrides"].update_one.assert_not_awaited()
+    cols["visa_rule_details"].update_one.assert_not_awaited()
+
+
+def test_summary_with_no_changes():
+    assert agent.summary({"status": "ok", "rows": 192}, []) == "Visa rules check: 192 countries read, no changes."
+
+
+@pytest.mark.asyncio
+async def test_report_emails_admins():
+    with patch("config.ADMIN_EMAILS", {"a@wehive.co.in"}), \
+         patch("email_service.send_email", new=AsyncMock(return_value=True)) as mail:
+        await agent.report({"status": "ok", "rows": 190},
+                           [{"iso2": "TH", "old": vr.F, "new": vr.E, "wording": "eVisa"}])
+    to, subject = mail.await_args.args[:2]
+    assert to == "a@wehive.co.in" and "190 countries read, 1 change(s)" in subject
+    assert "TH: No visa needed -> Apply online (eVisa)" in mail.await_args.kwargs["text_body"]
+
+
+@pytest.mark.asyncio
+async def test_undo_restores_the_previous_rule():
+    cols = _db()
+    cols["visa_rule_changes"].find_one = AsyncMock(return_value={"_id": "c1", "iso2": "TH", "old": vr.F,
+                                                                 "new": vr.E, "status": "applied"})
+    with patch("db.db", cols), patch.object(vr, "refresh_overrides", new=AsyncMock()):
+        assert await agent.undo("c1") is True
+    cols["visa_rule_overrides"].delete_one.assert_awaited_once()  # TH's code default is visa-free
+    assert cols["visa_rule_changes"].update_one.await_args.args[1] == {"$set": {"status": "undone"}}
 
 
 @pytest.mark.asyncio
@@ -109,7 +155,7 @@ async def test_runs_once_a_day_and_survives_source_errors():
         assert await agent.run() == {"skipped": "ran recently"}
     cols = _db()
     with patch("db.db", cols), patch.object(agent, "fetch", new=AsyncMock(side_effect=RuntimeError("down"))), \
-         patch.object(vr, "refresh_overrides", new=AsyncMock()):
+         patch.object(vr, "refresh_overrides", new=AsyncMock()), patch.object(agent, "report", new=AsyncMock()):
         out = await agent.run(force=True)
     assert out["status"] == "source_error"
     cols["visa_rule_overrides"].update_one.assert_not_awaited()

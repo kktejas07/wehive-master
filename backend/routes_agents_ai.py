@@ -116,6 +116,15 @@ async def apply_visa_rule_change(change_id: str, _admin=Depends(get_current_admi
     return {"ok": True}
 
 
+@router.post("/visa-rules/changes/{change_id}/undo")
+async def undo_visa_rule_change(change_id: str, _admin=Depends(get_current_admin_flex)):
+    """Revert an automatic change: the country goes back to its previous rule."""
+    from agents.visa_rules_agent import undo
+    if not await undo(change_id):
+        raise HTTPException(404, "Change not found or not applied")
+    return {"ok": True}
+
+
 @router.post("/run")
 async def trigger_agents(_admin=Depends(get_current_admin_flex)):
     """Run all agents now (admin only — agents scan every user's data).

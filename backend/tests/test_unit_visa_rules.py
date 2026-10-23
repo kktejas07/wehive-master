@@ -92,3 +92,34 @@ def test_countries_api_returns_corrected_data():
         r = TestClient(app).get("/api/countries/pk")
     body = r.json()
     assert body["no_visa"] is False and body["processing"]["requirement"] == "restricted"
+
+
+# ---------------------------------------------------------------- applicant rules
+
+def _texts(rules, basis):
+    return [r["text"] for r in rules if r["basis"] == basis]
+
+
+def test_schengen_rules_rest_on_eu_law():
+    rules = vr.applicant_rules("FR")
+    law = _texts(rules, "law")
+    assert any("€30,000" in t for t in law) and any("90 days in any 180" in t for t in law)
+    assert all(r["source_url"] == vr.EU_VISA_CODE[1] for r in rules if r["basis"] == "law")
+    assert vr.applicant_rules("AX") == rules  # Åland follows Finland: same Schengen rules
+    assert not _texts(rules, "official")
+
+
+def test_official_rules_for_us_uk_canada():
+    assert any("DS-160" in t for t in _texts(vr.applicant_rules("US"), "official"))
+    assert any("TB test" in t for t in _texts(vr.applicant_rules("GB"), "official"))
+    assert any("biometrics" in t for t in _texts(vr.applicant_rules("CA"), "official"))
+    assert any("DS-160" in t for t in _texts(vr.applicant_rules("GU"), "official"))  # US territory
+
+
+def test_agent_details_come_first_and_restricted_has_none():
+    rules = vr.applicant_rules("TH", {"allowed_stay": "60 days", "notes": "Proof of funds may be asked."})
+    assert rules[0] == {"text": "Allowed stay: 60 days.", "basis": "source",
+                        "source_name": vr.REQUIREMENTS_SOURCE[0], "source_url": vr.REQUIREMENTS_SOURCE[1]}
+    assert rules[1]["text"] == "Proof of funds may be asked."
+    assert any("return ticket" in t for t in _texts(rules, "guidance"))
+    assert vr.applicant_rules("PK") == [] and vr.applicant_rules("IN") == []

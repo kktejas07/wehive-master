@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bot, Loader2, Play, Check } from 'lucide-react';
+import { Bot, Loader2, Play, Check, Undo2 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
 import { Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
 // The Visa Rules Agent re-checks every country's visa requirement for Indian
-// passports once a day and refreshes official decision times. Small batches of
-// changes apply automatically; big batches wait here for an admin.
+// passports at server start and once a day, refreshes official decision times and
+// each country's allowed stay / conditions. Every change applies automatically on
+// a good read (about 190 countries); an admin can undo any of them here.
 const LABEL = {
   visa_free: 'No visa', on_arrival: 'On arrival', evisa: 'eVisa', evisa_or_on_arrival: 'eVisa / on arrival',
   visa: 'Visa required', restricted: 'Restricted', not_applicable: 'N/A',
@@ -26,9 +27,8 @@ export default function VisaRulesAgentPanel({ token }) {
     setBusy(true);
     try {
       const r = await adminClient(token).post('/agents/visa-rules/run');
-      toast({ title: 'Visa rules checked', description: r.data.status === 'ok'
-        ? `${r.data.changes} change(s): ${r.data.applied} applied, ${r.data.held} held for review.`
-        : `Source problem: ${r.data.error || r.data.status}. Nothing changed.` });
+      toast({ title: 'Visa rules checked', description: r.data.summary
+        || (r.data.status === 'source_error' ? `Source unavailable: ${r.data.error}. Nothing changed.` : r.data.status) });
       load();
     } catch {
       toast({ title: 'Run failed', variant: 'destructive' });
@@ -37,12 +37,12 @@ export default function VisaRulesAgentPanel({ token }) {
     }
   };
 
-  const apply = async (id) => {
+  const act = async (id, action) => {
     try {
-      await adminClient(token).post(`/agents/visa-rules/changes/${id}/apply`);
+      await adminClient(token).post(`/agents/visa-rules/changes/${id}/${action}`);
       load();
     } catch {
-      toast({ title: 'Could not apply', variant: 'destructive' });
+      toast({ title: action === 'undo' ? 'Could not undo' : 'Could not apply', variant: 'destructive' });
     }
   };
 
@@ -53,12 +53,15 @@ export default function VisaRulesAgentPanel({ token }) {
         <div>
           <div className="flex items-center gap-2 font-bold text-white"><Bot className="w-4 h-4" aria-hidden="true" /> Visa Rules Agent</div>
           <p className="text-[12.5px] text-slate-400 mt-1 max-w-xl">
-            Checks every country's visa rules for Indian passports daily and refreshes official decision times (US, Canada, UK, Ireland).
-            Up to 10 changes apply automatically; more are held here for review.
+            Runs automatically at server start and every day: reads every country's visa rules for Indian passports,
+            allowed stay and conditions, and refreshes official decision times (US, Canada, UK, Ireland).
+            Changes apply automatically and admins get an email report; undo any change below.
           </p>
           <p className="text-[12px] text-slate-400 mt-1">
             Last run: {last.started_at ? new Date(last.started_at).toLocaleString() : 'not yet'}
-            {last.status ? ` · ${last.status} · ${last.rows ?? 0} countries read · ${last.changes ?? 0} change(s)` : ''}
+            {last.status === 'ok' && ` · ${last.rows ?? 0} countries read · ${last.changes ? `${last.changes} change(s) applied` : 'no changes'}`}
+            {last.status === 'parse_suspect' && ` · only ${last.rows ?? 0} countries read, nothing changed`}
+            {last.status === 'source_error' && ' · source unavailable, nothing changed'}
           </p>
         </div>
         <button type="button" onClick={runNow} disabled={busy}
@@ -75,12 +78,19 @@ export default function VisaRulesAgentPanel({ token }) {
                 {LABEL[c.old] || c.old || '—'} → <strong className="text-white">{LABEL[c.new] || c.new}</strong>
                 <span className="text-slate-500"> · “{c.wording}” · {c.detected_at ? new Date(c.detected_at).toLocaleDateString() : ''}</span>
               </span>
-              {c.status === 'held' ? (
-                <button type="button" onClick={() => apply(c.id)}
+              {c.status === 'held' && (
+                <button type="button" onClick={() => act(c.id, 'apply')}
                   className="h-8 px-3 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 inline-flex items-center gap-1 font-semibold">
                   <Check className="w-3.5 h-3.5" aria-hidden="true" /> Apply
                 </button>
-              ) : <span className="text-[11px] uppercase tracking-[0.12em] text-emerald-400 font-bold">Applied</span>}
+              )}
+              {c.status === 'applied' && (
+                <button type="button" onClick={() => act(c.id, 'undo')}
+                  className="h-8 px-3 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 inline-flex items-center gap-1 font-semibold">
+                  <Undo2 className="w-3.5 h-3.5" aria-hidden="true" /> Undo
+                </button>
+              )}
+              {c.status === 'undone' && <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">Undone</span>}
             </li>
           ))}
         </ul>

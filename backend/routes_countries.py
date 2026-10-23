@@ -136,6 +136,12 @@ async def country_detail(country_id: str):
     if not c:
         raise HTTPException(404, 'Country not found')
     c = (await _corrected([c]))[0]
+    try:  # rules this applicant must follow (kept current by the visa rules agent)
+        import visa_rules
+        iso2 = c.get('iso2') or ''
+        c['applicant_rules'] = visa_rules.applicant_rules(iso2, await visa_rules.load_detail(iso2))
+    except Exception:
+        c['applicant_rules'] = []
     c['application_fee'] = FLAT_APPLICATION_FEE_INR
     c['embassy_fee'] = round((c.get('fees_usd') or 0) * USD_TO_INR)
     c['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'

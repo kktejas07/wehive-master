@@ -245,3 +245,83 @@ def apply(doc: dict, official: Optional[dict] = None) -> dict:
         out["delivery"] = {"standard_days": t["max_days"] if t else 0,
                            "rush_days": t["min_days"] if t else 0, "same_day": False}
     return out
+
+
+# ---------------------------------------------------------------- applicant rules
+# What each applicant must follow, labelled by what it rests on:
+#   law       - EU Visa Code (Regulation 810/2009) for Schengen
+#   official  - the destination government's own visa page
+#   source    - allowed stay / conditions read daily by the visa rules agent
+#   guidance  - WeHive's practical advice (not a legal requirement)
+EU_VISA_CODE = ("EU Visa Code (Regulation 810/2009)",
+                "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32009R0810")
+SCHENGEN_RULES = [
+    "Passport issued within the last 10 years, valid at least 3 months after you leave the Schengen area, "
+    "with at least 2 blank pages.",
+    "Travel medical insurance of at least €30,000, valid in every Schengen country for your whole stay.",
+    "Fingerprints are taken at the visa centre, unless you gave them for a Schengen visa in the last 59 months.",
+    "Apply no earlier than 6 months and ideally at least 15 days before you travel.",
+    "Stay at most 90 days in any 180-day period.",
+]
+OFFICIAL_RULES = {
+    "US": (("US State Department: Visitor visa", "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"), [
+        "Fill in the DS-160 form online and pay the visa application (MRV) fee.",
+        "Attend an interview at a US embassy or consulate, unless you qualify for an interview waiver.",
+        "Bring a photo that meets the US visa photo rules.",
+    ]),
+    "GB": (("GOV.UK: Standard Visitor visa", "https://www.gov.uk/standard-visitor"), [
+        "Apply online and give fingerprints and a photo (biometrics) at a visa application centre.",
+        "You can usually stay up to 6 months.",
+        "If you plan to stay more than 6 months, you need a TB test from an approved clinic.",
+    ]),
+    "CA": (("IRCC: Visit Canada", "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada.html"), [
+        "Apply online for a visitor visa.",
+        "Give fingerprints and a photo (biometrics), unless you gave them in the last 10 years.",
+    ]),
+    "IE": (("Irish Immigration Service", "https://www.irishimmigration.ie/"), [
+        "Apply online, then send your passport and supporting documents as instructed.",
+    ]),
+}
+GUIDANCE = {
+    V: ["Keep proof of funds, accommodation and a return ticket; embassies usually ask for them."],
+    E: ["Apply only on the government's official eVisa site, and carry a printout of the approval."],
+    EA: ["Apply online in advance where you can, and carry a printout of the approval."],
+    A: ["Carry a return ticket, your accommodation details and the visa fee (often in cash)."],
+    F: ["Carry a return ticket and your accommodation details: immigration may ask for them."],
+}
+PASSPORT_GUIDANCE = "Passport valid at least 6 months beyond your travel dates (many countries require this)."
+
+
+def applicant_rules(iso2: str, detail: Optional[dict] = None) -> list[dict]:
+    """Checklist of rules an Indian applicant must follow for this destination.
+    `detail` is the agent's {"allowed_stay", "notes", "source"} for the country."""
+    info = classify(iso2)
+    req = info["requirement"]
+    if req in (R, NA):
+        return []
+    key = (info["parent"] or (iso2 or "")).upper()
+    rules: list[dict] = []
+    if detail and detail.get("allowed_stay"):
+        rules.append({"text": f"Allowed stay: {detail['allowed_stay']}.", "basis": "source",
+                      "source_name": REQUIREMENTS_SOURCE[0], "source_url": REQUIREMENTS_SOURCE[1]})
+    if detail and detail.get("notes"):
+        rules.append({"text": detail["notes"], "basis": "source",
+                      "source_name": REQUIREMENTS_SOURCE[0], "source_url": REQUIREMENTS_SOURCE[1]})
+    if info["schengen"] and req == V:
+        rules += [{"text": t, "basis": "law", "source_name": EU_VISA_CODE[0], "source_url": EU_VISA_CODE[1]}
+                  for t in SCHENGEN_RULES]
+    elif key in OFFICIAL_RULES and req == V:
+        (name, url), texts = OFFICIAL_RULES[key]
+        rules += [{"text": t, "basis": "official", "source_name": name, "source_url": url} for t in texts]
+    if not info["schengen"]:
+        rules.append({"text": PASSPORT_GUIDANCE, "basis": "guidance"})
+    rules += [{"text": t, "basis": "guidance"} for t in GUIDANCE.get(req, [])]
+    return rules
+
+
+async def load_detail(iso2: str) -> Optional[dict]:
+    """The agent's latest allowed stay / conditions for a destination (or its parent)."""
+    iso2 = (iso2 or "").upper()
+    iso2 = TERRITORIES.get(iso2, (iso2, None))[0]
+    from db import db
+    return await db["visa_rule_details"].find_one({"_id": iso2})

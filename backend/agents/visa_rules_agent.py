@@ -7,17 +7,20 @@ Countries tab). Each run:
    "Visa requirements for Indian citizens", which is updated as rules change)
    and classifies each country: visa-free, on arrival, eVisa, visa, restricted.
 2. Compares with what the site shows now (visa_rules + earlier agent changes).
-3. Applies the changes when the run looks healthy: at least MIN_ROWS countries
-   understood and no more than MAX_AUTO_CHANGES changes at once. A run with more
-   changes is held for an admin to apply, since that usually means the source
-   page was edited heavily or our parser misread it.
-4. Refreshes the official decision times (US, Canada, UK, Ireland).
+3. Applies every change automatically when the read is good (at least MIN_ROWS
+   countries understood); a bad read changes nothing. Admins can undo any change.
+4. Stores each country's allowed stay and current conditions (db.visa_rule_details),
+   shown to applicants as part of the rules to follow.
+5. Refreshes the official decision times (US, Canada, UK, Ireland).
+6. Emails a run summary to ADMIN_EMAILS.
 
-Every change is logged (db.visa_rule_changes) with the source wording.
+Runs at server start, then daily. Every change is logged (db.visa_rule_changes)
+with the source wording.
 Codes in visa_rules.PINNED are decided in code and never changed by the agent.
 """
 from __future__ import annotations
 
+import html
 import json
 import logging
 import re
@@ -36,8 +39,7 @@ logger = logging.getLogger("wehive.agents.visa_rules")
 SOURCE_URL = vr.REQUIREMENTS_SOURCE[1]
 API_URL = "https://en.wikipedia.org/api/rest_v1/page/html/Visa_requirements_for_Indian_citizens"
 RUN_EVERY_HOURS = 24
-MIN_ROWS = 150
-MAX_AUTO_CHANGES = 10
+MIN_ROWS = 150  # fewer countries understood = a bad read, so nothing is changed
 
 # Wikipedia row names that differ from REST Countries names.
 ALIASES = {
@@ -96,16 +98,23 @@ def classify_text(text: str) -> Optional[str]:
     return None
 
 
-def parse(html: str, names: Optional[dict] = None) -> dict:
-    """-> {"rows": n, "requirements": {iso2: (code, wording)}, "unmatched": [...]}"""
+def _cell(cells, i) -> str:
+    return _norm(cells[i].get_text(" "))[:600] if i is not None and i < len(cells) else ""
+
+
+def parse(page: str, names: Optional[dict] = None) -> dict:
+    """-> {"rows": n, "requirements": {iso2: (code, wording)},
+           "details": {iso2: {"allowed_stay", "notes"}}, "unmatched": [...]}"""
     names = names or name_index()
-    soup = BeautifulSoup(html, "html.parser")
-    out: dict = {"rows": 0, "requirements": {}, "unmatched": []}
+    soup = BeautifulSoup(page, "html.parser")
+    out: dict = {"rows": 0, "requirements": {}, "details": {}, "unmatched": []}
     for table in soup.find_all("table"):
         header = [_norm(c.get_text(" ")).lower() for c in (table.find("tr") or soup.new_tag("tr")).find_all(["th", "td"])]
         if not header or "country" not in header[0] or not any("visa requirement" in h for h in header):
             continue
         col = next(i for i, h in enumerate(header) if "visa requirement" in h)
+        stay_col = next((i for i, h in enumerate(header) if "allowed stay" in h), None)
+        notes_col = next((i for i, h in enumerate(header) if h.startswith("notes")), None)
         for row in table.find_all("tr")[1:]:
             cells = row.find_all(["th", "td"])
             if len(cells) <= col:
@@ -120,6 +129,8 @@ def parse(html: str, names: Optional[dict] = None) -> dict:
             if code:
                 out["rows"] += 1
                 out["requirements"].setdefault(iso, (code, wording))
+                detail = {"allowed_stay": _cell(cells, stay_col), "notes": _cell(cells, notes_col)}
+                out["details"].setdefault(iso, detail)
     return out
 
 
@@ -145,8 +156,11 @@ def diff(parsed: dict) -> list[dict]:
 
 
 async def run(force: bool = False, trigger: str = "scheduler") -> dict:
+    """One check. Fully automatic: on a good read every change is applied at once
+    (admins can undo any of them); a bad read changes nothing."""
     from db import db
-    meta_col, changes_col, overrides_col = db["visa_rules_agent"], db["visa_rule_changes"], db["visa_rule_overrides"]
+    meta_col, changes_col = db["visa_rules_agent"], db["visa_rule_changes"]
+    overrides_col, details_col = db["visa_rule_overrides"], db["visa_rule_details"]
     meta = await meta_col.find_one({"_id": "meta"}) or {}
     last = meta.get("last_run_at")
     if not force and last and datetime.utcnow() - last < timedelta(hours=RUN_EVERY_HOURS):
@@ -158,24 +172,26 @@ async def run(force: bool = False, trigger: str = "scheduler") -> dict:
         parsed = await fetch()
     except Exception as e:
         logger.warning("Visa rules source unavailable: %s", e)
-        result.update(status="source_error", error=str(e)[:200])
-        await meta_col.update_one({"_id": "meta"}, {"$set": {"last_run_at": datetime.utcnow(), "last_result": result}}, upsert=True)
+        result.update(status="source_error", error=str(e)[:200], rows=0, changes=0, applied=0)
+        await meta_col.update_one({"_id": "meta"}, {"$set": {"last_run_at": datetime.utcnow(), "last_result": result}},
+                                  upsert=True)
+        await report(result, [])
         return result
 
-    changes = diff(parsed)
     healthy = parsed["rows"] >= MIN_ROWS
-    auto = healthy and len(changes) <= MAX_AUTO_CHANGES
+    changes = diff(parsed) if healthy else []
     now = datetime.utcnow()
     for c in changes:
-        status = "applied" if auto else "held"
-        await changes_col.insert_one({"_id": str(uuid.uuid4()), **c, "status": status, "detected_at": now,
+        await changes_col.insert_one({"_id": str(uuid.uuid4()), **c, "status": "applied", "detected_at": now,
                                       "source": SOURCE_URL})
-        if auto:
-            await overrides_col.update_one({"_id": c["iso2"]}, {"$set": {
-                "requirement": c["new"], "wording": c["wording"], "updated_at": now, "by": "visa_rules_agent"}},
-                upsert=True)
-    if auto and changes:
-        await vr.refresh_overrides(force=True)
+        await overrides_col.update_one({"_id": c["iso2"]}, {"$set": {
+            "requirement": c["new"], "wording": c["wording"], "updated_at": now, "by": "visa_rules_agent"}},
+            upsert=True)
+    if healthy:
+        for iso, d in parsed["details"].items():
+            await details_col.update_one({"_id": iso}, {"$set": {
+                **d, "wording": parsed["requirements"][iso][1], "updated_at": now, "source": SOURCE_URL}}, upsert=True)
+    await vr.refresh_overrides(force=True)
 
     try:  # official decision times (US / Canada / UK / Ireland)
         import official_times
@@ -186,15 +202,65 @@ async def run(force: bool = False, trigger: str = "scheduler") -> dict:
         logger.warning("Official times refresh failed: %s", e)
 
     result.update(status="ok" if healthy else "parse_suspect", rows=parsed["rows"],
-                  unmatched=parsed["unmatched"][:20], changes=len(changes),
-                  applied=len(changes) if auto else 0, held=0 if auto else len(changes))
+                  unmatched=parsed["unmatched"][:20], changes=len(changes), applied=len(changes),
+                  summary=summary({**result, "status": "ok" if healthy else "parse_suspect",
+                                   "rows": parsed["rows"]}, changes).split("\n")[0])
     await meta_col.update_one({"_id": "meta"}, {"$set": {"last_run_at": now, "last_result": result}}, upsert=True)
-    logger.info("Visa rules agent: %s", {k: result[k] for k in ("status", "rows", "changes", "applied", "held")})
+    logger.info("Visa rules agent: %s", result["summary"])
+    await report(result, changes)
     return result
 
 
+def summary(result: dict, changes: list[dict]) -> str:
+    """Plain-language report of one run."""
+    if result.get("status") == "source_error":
+        return (f"Visa rules check failed: source unavailable ({result.get('error')}). "
+                "Nothing changed; the site keeps its current rules.")
+    if result.get("status") == "parse_suspect":
+        return (f"Visa rules check read only {result.get('rows')} countries (expected about 190). "
+                "Nothing changed; the source page may have changed layout.")
+    head = (f"Visa rules check: {result.get('rows')} countries read, "
+            + (f"{len(changes)} change(s) applied." if changes else "no changes."))
+    lines = [f"- {c['iso2']}: {vr.REQUIREMENT_LABELS.get(c['old'], c['old'])} -> "
+             f"{vr.REQUIREMENT_LABELS.get(c['new'], c['new'])} (source: \"{c['wording']}\")" for c in changes[:30]]
+    return "\n".join([head, *lines])
+
+
+async def report(result: dict, changes: list[dict]) -> None:
+    """Email the run summary to ADMIN_EMAILS (best effort, never raises)."""
+    try:
+        from config import ADMIN_EMAILS
+        from email_service import send_email
+        text = summary(result, changes) + "\n\nUndo any change in Admin -> Countries."
+        if result.get("status") == "ok":
+            subject = f"WeHive visa rules: {result.get('rows')} countries read, {len(changes)} change(s)"
+        else:
+            subject = "WeHive visa rules: check needs attention"
+        body = "<pre style='font-family:inherit;white-space:pre-wrap'>" + html.escape(text) + "</pre>"
+        for to in sorted(ADMIN_EMAILS):
+            await send_email(to, subject, body, text_body=text)
+    except Exception as e:
+        logger.info("Visa rules report not emailed: %s", e)
+
+
+async def undo(change_id: str) -> bool:
+    """Admin reverts an automatic change: the country goes back to its previous rule."""
+    from db import db
+    c = await db["visa_rule_changes"].find_one({"_id": change_id, "status": "applied"})
+    if not c:
+        return False
+    if c.get("old") in vr.REQUIREMENT_LABELS and c["old"] != vr.REQUIREMENTS.get(c["iso2"]):
+        await db["visa_rule_overrides"].update_one({"_id": c["iso2"]}, {"$set": {
+            "requirement": c["old"], "updated_at": datetime.utcnow(), "by": "admin_undo"}}, upsert=True)
+    else:
+        await db["visa_rule_overrides"].delete_one({"_id": c["iso2"]})
+    await db["visa_rule_changes"].update_one({"_id": change_id}, {"$set": {"status": "undone"}})
+    await vr.refresh_overrides(force=True)
+    return True
+
+
 async def apply_held(change_id: str) -> bool:
-    """Admin approves a held change."""
+    """Apply a change held by an older version of this agent."""
     from db import db
     c = await db["visa_rule_changes"].find_one({"_id": change_id, "status": "held"})
     if not c:
