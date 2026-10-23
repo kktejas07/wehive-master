@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import { API } from '../context/AuthContext';
 import { ContentCard, ContentCardGrid } from '../components/ui/ContentCard';
 import { useDialogA11y } from '../hooks/use-dialog-a11y';
+import { destination } from '../lib/destinations';
 
 export default function Blog() {
   const [blogs, setBlogs] = useState([]);
@@ -198,7 +199,7 @@ export default function Blog() {
                     </span>
                     {selectedBlog.country_id && (
                       <span className="px-3 py-1 bg-black/40 text-white text-[12px] font-bold rounded-full uppercase tracking-[0.14em] border border-white/30">
-                        {selectedBlog.country_id.substring(0,3)}
+                        {destination(selectedBlog.country_id).label}
                       </span>
                     )}
                   </div>

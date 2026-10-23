@@ -4,9 +4,14 @@ import { apiClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
 
-// Aggregated news and blog posts arrive as `pending`; nothing is published
-// until an admin approves it here.
-const KINDS = { news: 'News', blogs: 'Blogs' };
+// Aggregated news/blogs and community submissions arrive as `pending`; nothing
+// is published until an admin approves it here. (User-submitted events go to Global Events.)
+const KINDS = {
+  news: 'News',
+  blogs: 'Blogs',
+  'community/stories': 'Success stories',
+  'community/interviews': 'Interview experiences',
+};
 const LIMIT = 20;
 
 export default function ContentModerationTab() {
@@ -54,8 +59,8 @@ export default function ContentModerationTab() {
   return (
     <div className="space-y-6" data-testid="admin-moderation">
       <AdminHeader
-        title="News & Blog Moderation"
-        subtitle="Review items fetched from official feeds. Approved items go live on the site."
+        title="Content Moderation"
+        subtitle="Review feed items and community posts. Approved items go live on the site."
       />
 
       <div className="flex gap-2" role="group" aria-label="Content type">

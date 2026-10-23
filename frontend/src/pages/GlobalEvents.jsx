@@ -8,6 +8,7 @@ import { API } from '../context/AuthContext';
 import { toast } from '../hooks/use-toast';
 import { Loader2, MapPin, Calendar, Compass, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { destination } from '../lib/destinations';
 
 export default function GlobalEvents() {
   const [events, setEvents] = useState([]);
@@ -132,26 +133,28 @@ export default function GlobalEvents() {
                       </div>
                       <div className="flex items-center gap-2 text-[14px] text-muted-foreground">
                         <MapPin className="w-4 h-4 text-[hsl(var(--blue-700))]" />
-                        <span className="capitalize">{evt.country_id.replace('-', ' ')}</span>
+                        <span className="capitalize">{destination(evt.country_id).name}</span>
                       </div>
                     </div>
 
-                    {/* Actions */}
+                    {/* Actions: only for destinations that have visa / holiday pages */}
+                    {destination(evt.country_id).iso2 && (
                     <div className="mt-auto grid grid-cols-2 gap-3 pt-4 border-t border-[hsl(var(--border))]">
                       <Button
-                        onClick={() => navigate(`/holiday/${evt.country_id}`)}
+                        onClick={() => navigate(`/holiday/${destination(evt.country_id).iso2}`)}
                         variant="outline"
                         className="bg-white text-[hsl(var(--blue-900))] hover:bg-white hover:border-[hsl(var(--blue-700))] hover:text-[hsl(var(--blue-700))] font-semibold h-11 rounded-xl"
                       >
                         Plan Trip
                       </Button>
                       <Button
-                        onClick={() => navigate(`/visa/${evt.country_id}`)}
+                        onClick={() => navigate(`/visa/${destination(evt.country_id).iso2}`)}
                         className="btn-primary text-white font-semibold h-11 rounded-xl flex items-center justify-center gap-2"
                       >
                         Check Visa <ArrowRight className="w-4 h-4" />
                       </Button>
                     </div>
+                    )}
                   </div>
                 </div>
               ))}

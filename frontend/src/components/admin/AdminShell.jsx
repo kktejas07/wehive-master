@@ -23,7 +23,7 @@ const TABS = [
   { id: 'pricing',      to: '/admin/pricing',       label: 'Pricing',      Icon: Banknote,        testid: 'admin-nav-pricing' },
   { id: 'events',       to: '/admin/events',        label: 'Hero Events',  Icon: Megaphone,       testid: 'admin-nav-events' },
   { id: 'global-events',to: '/admin/global-events', label: 'Global Events',Icon: Globe,           testid: 'admin-nav-global-events' },
-  { id: 'moderation',   to: '/admin/moderation',    label: 'News & Blogs', Icon: Newspaper,       testid: 'admin-nav-moderation' },
+  { id: 'moderation',   to: '/admin/moderation',    label: 'Moderation',   Icon: Newspaper,       testid: 'admin-nav-moderation' },
   { id: 'requests',    to: '/admin/requests',      label: 'Requests',     Icon: ClipboardList,   testid: 'admin-nav-requests' },
   { id: 'promotions',  to: '/admin/promotions',    label: 'Promotions',   Icon: Tag,             testid: 'admin-nav-promotions' },
   { id: 'promocodes',  to: '/admin/promocodes',    label: 'Promo Codes',   Icon: Tag,             testid: 'admin-nav-promocodes' },

@@ -23,18 +23,33 @@ except ImportError:
 
 logger = logging.getLogger("wehive.event_aggregator")
 
-# Public listing pages scraped when ScrapeGraphAI is enabled.
+# Public listing pages scraped when ScrapeGraphAI is enabled: study-abroad,
+# education-fair and visa events in each destination, in India (where most
+# WeHive users are) and online.
+_EVENT_QUERY = "study-abroad"
 SEED_URLS = {
-    "united-kingdom": [{"url": "https://www.eventbrite.co.uk/d/united-kingdom/all-events/", "platform": "website"}],
-    "usa": [{"url": "https://www.eventbrite.com/d/ny--new-york/all-events/", "platform": "website"}],
+    "global": [{"url": f"https://www.eventbrite.com/d/online/{_EVENT_QUERY}/", "platform": "website"}],
+    "india": [
+        {"url": f"https://www.eventbrite.com/d/india--hyderabad/{_EVENT_QUERY}/", "platform": "website"},
+        {"url": f"https://www.eventbrite.com/d/india--bengaluru/{_EVENT_QUERY}/", "platform": "website"},
+    ],
+    "usa": [{"url": f"https://www.eventbrite.com/d/united-states/{_EVENT_QUERY}/", "platform": "website"}],
+    "united-kingdom": [{"url": f"https://www.eventbrite.co.uk/d/united-kingdom/{_EVENT_QUERY}/", "platform": "website"}],
+    "canada": [{"url": f"https://www.eventbrite.ca/d/canada/{_EVENT_QUERY}/", "platform": "website"}],
+    "australia": [{"url": f"https://www.eventbrite.com.au/d/australia/{_EVENT_QUERY}/", "platform": "website"}],
+    "new-zealand": [{"url": f"https://www.eventbrite.co.nz/d/new-zealand/{_EVENT_QUERY}/", "platform": "website"}],
+    "ireland": [{"url": f"https://www.eventbrite.ie/d/ireland/{_EVENT_QUERY}/", "platform": "website"}],
+    "germany": [{"url": f"https://www.eventbrite.de/d/germany/{_EVENT_QUERY}/", "platform": "website"}],
 }
 
 _PROMPT = """
-Extract all upcoming events, festivals, conferences, or gatherings listed on this page.
+Extract the upcoming events on this page that are relevant to people planning to study,
+work or migrate abroad: education fairs, university info sessions, visa / immigration
+webinars, scholarship and admissions events. Skip unrelated events (music, parties, sports).
 Format the output strictly as a JSON array of objects with the following keys:
 - "name": string (Title of the event)
 - "date": string (event date as printed on the page, ISO "YYYY-MM-DD"; null if not shown)
-- "category": string (e.g., "Music", "Tech", "Culture", "Meetup")
+- "category": string (one of "Education Fair", "Info Session", "Visa & Immigration", "Scholarship", "Meetup")
 - "image_url": string (main image if present, else null)
 - "source_url": string (link to the event page if present, else null)
 - "is_high_risk": boolean (True if it's a massive gathering >50k people or politically sensitive)
