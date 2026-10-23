@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { API } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
@@ -72,6 +74,9 @@ const COUNTRY_LIST = [
   { id: 'australia', label: 'Australia', flag: '', color: 'bg-emerald-500' },
 ];
 
+// Simulator set -> community visa type, for the "real questions" bank.
+const SIM_VISA = { us: 'us-f1', uk: 'uk-student', schengen: 'schengen-student', canada: 'canada-study', australia: 'australia-student' };
+
 const SCORE_CRITERIA = [
   { key: 'clarity', label: 'Clarity', max: 25 },
   { key: 'specificity', label: 'Specificity', max: 25 },
@@ -96,7 +101,27 @@ export default function VisaInterview() {
   const [active, setActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
 
-  const questions = INTERVIEW_QUESTIONS[country]?.questions || [];
+  // ?visa=<type> (from Community "Practice these") preselects the set and real questions.
+  const [visaParam] = useState(() => new URLSearchParams(window.location.search).get('visa'));
+  const [useReal, setUseReal] = useState(!!visaParam);
+  const [bank, setBank] = useState(null);
+  useEffect(() => {
+    const sim = Object.keys(SIM_VISA).find(k => SIM_VISA[k] === visaParam);
+    if (sim) setCountry(sim);
+  }, [visaParam]);
+  const realVisa = (visaParam && !Object.values(SIM_VISA).includes(visaParam)) ? visaParam : SIM_VISA[country];
+  useEffect(() => {
+    if (!realVisa) { setBank(null); return; }
+    axios.get(`${API}/community/interview-questions`, { params: { visa_type: realVisa, limit: 12 } })
+      .then(r => setBank(r.data)).catch(() => setBank(null));
+  }, [realVisa]);
+  const realQuestions = (bank?.questions || []).map((q, i) => ({
+    id: `real-${i}`,
+    question: q.question,
+    tips: `Reported in ${q.asked_in} of ${bank.interviews} recent interviews shared on WeHive.`,
+  }));
+  const practisingReal = useReal && realQuestions.length > 0;
+  const questions = practisingReal ? realQuestions : (INTERVIEW_QUESTIONS[country]?.questions || []);
   const total = questions.length;
   const currentQData = questions[currentQ];
 
@@ -202,6 +227,23 @@ export default function VisaInterview() {
                       </div>
                     </button>
                   ))}
+                </div>
+                <div className="mt-6 rounded-xl border border-[hsl(var(--border))] p-4">
+                  {realQuestions.length > 0 ? (
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" className="mt-1" checked={useReal} onChange={e => setUseReal(e.target.checked)} />
+                      <span>
+                        <span className="block font-semibold text-[14px] text-[hsl(var(--blue-900))]">Practise real recent questions ({bank.label})</span>
+                        <span className="block text-[12px] text-muted-foreground">
+                          {realQuestions.length} most-asked questions from {bank.interviews} interview{bank.interviews === 1 ? '' : 's'} shared by applicants.
+                        </span>
+                      </span>
+                    </label>
+                  ) : (
+                    <p className="text-[13px] text-muted-foreground">
+                      No shared interviews for this visa yet. <Link to="/community?tab=interviews" className="font-semibold text-[hsl(var(--blue-700))]">Share yours</Link> to help others.
+                    </p>
+                  )}
                 </div>
                 <div className="mt-6">
                   <Button variant="accent" onClick={startInterview} className="w-full h-12 rounded-xl text-white font-semibold">

@@ -60,6 +60,7 @@ const Hive = lazy(() => import('./pages/Hive'));
 const USVisaSlots = lazy(() => import('./pages/USVisaSlots'));
 const GlobalEvents = lazy(() => import('./pages/GlobalEvents'));
 const Blog = lazy(() => import('./pages/Blog'));
+const Community = lazy(() => import('./pages/Community'));
 const News = lazy(() => import('./pages/News'));
 
 function PricingLoader() {
@@ -137,6 +138,7 @@ function AnimatedRoutes() {
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
+          <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
           <Route path="/hive" element={<PageTransition><Hive /></PageTransition>} />
           <Route path="/us-visa-slots" element={<PageTransition><USVisaSlots /></PageTransition>} />
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
