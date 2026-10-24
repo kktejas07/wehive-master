@@ -95,7 +95,7 @@ EVENTS = [
         'description': 'Study abroad with dedicated visa support and scholarship benefits',
         'cta_label': 'View Student Visa',
         'cta_url': '/visa/ca',
-        'image_url': 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
+        'image_url': 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80',
         'accent_color': '#22c55e',
         'tag': 'student',
         'sort_order': 3,
