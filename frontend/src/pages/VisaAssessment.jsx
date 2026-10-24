@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, CheckCircle2, Award, ClipboardCheck, Users, HelpCircle, FileText, Sparkles, Send, ShieldCheck, GraduationCap } from 'lucide-react';
 import axios from 'axios';
-import { API } from '../context/AuthContext';
+import { API, useAuth } from '../context/AuthContext';
+import { CRS_MAX, IRCC_ROUNDS_URL, crsScore, crsVerdict } from '../lib/crs';
 import { useToast } from '../hooks/use-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -21,7 +22,7 @@ export default function VisaAssessment() {
   const [pathway, setPathway] = useState(''); // 'pr' or 'student'
   
   // PR Pathway fields
-  const [prAge, setPrAge] = useState('25-29');
+  const [prAge, setPrAge] = useState('28');
   const [prEdu, setPrEdu] = useState('masters');
   const [prLanguage, setPrLanguage] = useState('clb9'); // IELTS CLB 9+
   const [prExp, setPrExp] = useState('3plus');
@@ -39,40 +40,18 @@ export default function VisaAssessment() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Dynamic calculations
-  const calculateCRS = () => {
-    let score = 0;
-    
-    // Age Points
-    if (prAge === '18-24') score += 105;
-    else if (prAge === '25-29') score += 110;
-    else if (prAge === '30-34') score += 95;
-    else if (prAge === '35-39') score += 75;
-    else score += 45; // 40+
-    
-    // Education Points
-    if (prEdu === 'phd') score += 150;
-    else if (prEdu === 'masters') score += 135;
-    else if (prEdu === 'bachelors') score += 120;
-    else score += 98; // 2-year college
-    
-    // Language Points
-    if (prLanguage === 'clb9') score += 136;
-    else if (prLanguage === 'clb8') score += 116;
-    else if (prLanguage === 'clb7') score += 92;
-    else score += 68;
-    
-    // Experience Points
-    if (prExp === '3plus') score += 80;
-    else if (prExp === '2years') score += 50;
-    else if (prExp === '1year') score += 35;
-    else score += 0;
-    
-    // Add dummy adaptability/bonus points for realistic Express Entry scale (out of 600)
-    score += 50; 
-    
-    return score;
-  };
+  // Official CRS points (lib/crs.js) for the answers given; no invented bonus points.
+  const crs = crsScore({ age: prAge, edu: prEdu, clb: prLanguage, exp: prExp });
+  const calculateCRS = () => crs.total;
+
+  // Signed-in users don't retype their details.
+  const { user } = useAuth();
+  useEffect(() => {
+    if (!user) return;
+    setName((v) => v || user.name || '');
+    setEmail((v) => v || user.email || '');
+    setPhone((v) => v || user.phone || '');
+  }, [user]);
 
   const getStudentMatchStrength = () => {
     const budget = studentBudget;
@@ -92,7 +71,7 @@ export default function VisaAssessment() {
 
     // Default CA/AU
     if (gpa >= 70 && budget !== 'low') return { level: 'High Match', color: 'text-emerald-700 bg-emerald-50', pct: 88, text: 'Excellent prospects for college and university programs.' };
-    return { level: 'Good Match', color: 'text-emerald-700 bg-emerald-50', pct: 75, text: 'Standard requirements met. Visa approval probability is high.' };
+    return { level: 'Good Match', color: 'text-emerald-700 bg-emerald-50', pct: 75, text: 'Standard entry requirements met for many college and university programmes.' };
   };
 
   const handleNext = () => setStep((s) => s + 1);
@@ -114,7 +93,7 @@ Age Group: ${prAge}
 Education: ${prEdu}
 Language Level: ${prLanguage}
 Work Experience: ${prExp}
-Estimated CRS Score: ${calculateCRS()} / 600
+Estimated CRS Score: ${calculateCRS()} / ${CRS_MAX}
 Phone: ${phone}`
       : `Visa Assessment Pathway: Student Visa
 Target Country: ${COUNTRIES.find(c => c.id === studentCountry)?.name || studentCountry}
@@ -133,7 +112,11 @@ Phone: ${phone}`;
       });
       setSubmitted(true);
     } catch (err) {
-      toast({ title: 'Submission failed', description: typeof err?.response?.data?.detail === 'string' ? err.response.data.detail : 'Please check your details and try again.', variant: 'destructive' });
+      const detail = err?.response?.data?.detail;
+      const reason = typeof detail === 'string' ? detail
+        : Array.isArray(detail) && detail[0]?.loc?.includes('email') ? 'Please enter a valid email address.'
+        : 'Please check your details and try again.';
+      toast({ title: 'Submission failed', description: reason, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -153,7 +136,7 @@ Phone: ${phone}`;
               Visa Eligibility Assessment
             </h1>
             <p className="mt-2.5 text-[15px] text-muted-foreground max-w-lg mx-auto">
-              Check your CRS Express Entry points or study visa approval probability in under 2 minutes.
+              Check your Express Entry (CRS) points or how your profile fits study destinations, in under 2 minutes.
             </p>
           </div>
 
@@ -166,8 +149,8 @@ Phone: ${phone}`;
                 {/* Progress bar */}
                 <div className="mb-8">
                   <div className="flex justify-between items-center text-[12px] font-semibold text-muted-foreground mb-2">
-                    <span>STEP {step} OF {pathway ? 4 : 2}</span>
-                    <span>{Math.round((step / (pathway ? 4 : 2)) * 100)}%</span>
+                    <span>STEP {step} OF 4</span>
+                    <span>{Math.round((step / 4) * 100)}%</span>
                   </div>
                   <div className="h-2 rounded-full bg-[hsl(var(--soft-bg))] overflow-hidden">
                     <div 
@@ -211,7 +194,7 @@ Phone: ${phone}`;
                           <GraduationCap className="w-8 h-8 text-[hsl(var(--blue-700))] mb-3" />
                           <div className="font-bold text-[16px]">Student Visa Pathway</div>
                           <div className="text-[13px] text-muted-foreground mt-1">
-                            Evaluate university admission profiles and visa approval chances.
+                            See how your grades and budget fit universities in each destination.
                           </div>
                         </button>
                       </div>
@@ -231,18 +214,13 @@ Phone: ${phone}`;
                       
                       <div className="space-y-4">
                         <div>
-                          <label htmlFor="visaassessment-age-group" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Age Group</label>
-                          <select id="visaassessment-age-group" 
-                            value={prAge} 
+                          <label htmlFor="visaassessment-age-group" className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Your age</label>
+                          <input id="visaassessment-age-group" type="number" inputMode="numeric" min="17" max="70"
+                            value={prAge}
                             onChange={(e) => setPrAge(e.target.value)}
                             className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[16px] sm:text-[14px] text-[hsl(var(--blue-900))] bg-white outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20"
-                          >
-                            <option value="18-24">18 - 24 years</option>
-                            <option value="25-29">25 - 29 years (Max Points)</option>
-                            <option value="30-34">30 - 34 years</option>
-                            <option value="35-39">35 - 39 years</option>
-                            <option value="40plus">40+ years</option>
-                          </select>
+                          />
+                          <p className="mt-1 text-[12px] text-muted-foreground">Ages 20–29 get the most points (110).</p>
                         </div>
 
                         <div>
@@ -540,10 +518,18 @@ Phone: ${phone}`;
                     <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Estimated Express Entry CRS Points</div>
                     <div className="text-[64px] font-display font-bold text-[hsl(var(--blue-700))] leading-none">
                       {calculateCRS()}
-                      <span className="text-[16px] text-muted-foreground font-bold"> / 600</span>
+                      <span className="text-[16px] text-muted-foreground font-bold"> / {CRS_MAX}</span>
                     </div>
+                    <ul className="text-[13px] text-left text-[hsl(var(--blue-900))] space-y-1">
+                      <li>Age: {crs.parts.age}</li>
+                      <li>Education: {crs.parts.education}</li>
+                      <li>English: {crs.parts.language}</li>
+                      <li>Skill transferability: {crs.parts.transferability}</li>
+                    </ul>
                     <div className="text-[13px] text-muted-foreground leading-relaxed pt-2 border-t border-[hsl(var(--border))]">
-                      Your CRS score is excellent. Current rounds range between 490-530. You are highly eligible for Express Entry PR PNP pathways.
+                      {crsVerdict(calculateCRS())}{' '}
+                      Not counted here: Canadian work or study, French, a sibling in Canada, or a provincial nomination (+600).{' '}
+                      <a href={IRCC_ROUNDS_URL} target="_blank" rel="noopener noreferrer" className="underline font-semibold">See recent draw cut-offs (IRCC)</a>.
                     </div>
                   </div>
                 ) : (
@@ -558,12 +544,12 @@ Phone: ${phone}`;
                             <span className={`text-[13px] font-bold px-3 py-1 rounded-full ${match.color}`}>
                               {match.level}
                             </span>
-                            <span className="text-[28px] font-display font-bold text-[hsl(var(--blue-700))]">
-                              {match.pct}%
+                            <span className="text-[28px] font-display font-bold text-[hsl(var(--blue-700))]" title="Profile fit, not a visa approval chance">
+                              {match.pct}% fit
                             </span>
                           </div>
                           <div className="text-[13px] text-muted-foreground leading-relaxed pt-2 border-t border-[hsl(var(--border))]">
-                            {match.text} We have matching universities and scholarships aligned with your budget.
+                            {match.text} This is a profile fit, not a visa decision: the embassy decides. A WeHive consultant will suggest universities and scholarships for your budget.
                           </div>
                         </div>
                       );

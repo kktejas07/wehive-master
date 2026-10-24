@@ -4,8 +4,7 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
-import { API } from '../context/AuthContext';
-import { toast } from '../hooks/use-toast';
+import { API, useAuth } from '../context/AuthContext';
 import { MapPin, Calendar, Compass, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { destination } from '../lib/destinations';
@@ -17,6 +16,7 @@ export default function GlobalEvents() {
   const [digest, setDigest] = useState(null);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   useEffect(() => {
     let mounted = true;
@@ -31,16 +31,15 @@ export default function GlobalEvents() {
         if (mounted) setLoading(false);
       });
       
-    axios.get(`${API}/events/digest`)
-      .then(r => {
-        if (mounted && r.data?.digest) {
-          setDigest(r.data.digest);
-        }
-      })
-      .catch(() => { if (mounted) toast({ title: "Couldn't load the events digest" }); });
-      
+    // The AI digest is for signed-in users and optional: no error toast when it is unavailable.
+    if (token) {
+      axios.get(`${API}/events/digest`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => { if (mounted && r.data?.digest) setDigest(r.data.digest); })
+        .catch(() => {});
+    }
+
     return () => { mounted = false; };
-  }, []);
+  }, [token]);
 
   return (
     <div className="bg-[hsl(var(--soft-bg))] min-h-screen">

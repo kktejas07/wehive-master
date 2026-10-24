@@ -54,7 +54,10 @@ export async function initFirebase() {
       appId: process.env.REACT_APP_FIREBASE_APP_ID || process.env.FIREBASE_APP_ID || '',
     };
     if (!config.apiKey) {
+      // Not configured: Google/email sign-in is unavailable, OTP sign-in still works. Never call
+      // initializeApp without a key (it throws "auth/invalid-api-key" on every page).
       console.warn('Firebase not configured. Set Firebase config in Admin → Settings → Firebase Authentication.');
+      return { app: null, auth: null };
     }
   }
 
