@@ -128,12 +128,16 @@ def get_client():
             return _client
         if _USE_CHROMA:
             try:
-                os.makedirs(CHROMA_PATH, exist_ok=True)
+                # BGE-M3 vectors (1024-dim) get their own store: Chroma cannot mix them with
+                # the older Ollama ones, and an empty store makes bootstrap_rag re-ingest.
+                from embeddings_bge import active_backend
+                path = os.path.join(CHROMA_PATH, "bge-m3") if active_backend() == "bge-m3" else CHROMA_PATH
+                os.makedirs(path, exist_ok=True)
                 _client = chromadb.PersistentClient(
-                    path=CHROMA_PATH,
+                    path=path,
                     settings=ChromaSettings(anonymized_telemetry=False, allow_reset=True),
                 )
-                logger.info("ChromaDB persistent client ready @ %s", CHROMA_PATH)
+                logger.info("ChromaDB persistent client ready @ %s", path)
                 return _client
             except Exception as e:
                 logger.warning("ChromaDB init failed, using in-memory: %s", e)

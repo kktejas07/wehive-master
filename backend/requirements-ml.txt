@@ -1,0 +1,14 @@
+# Optional: self-hosted BGE-M3 embeddings (embeddings_bge.py) and semantic chunking
+# (chunker.py). Without these the backend keeps using Ollama embeddings and
+# fixed-size chunks automatically.
+#
+#   pip install -r requirements.txt -r requirements-ml.txt
+#
+# On a Linux server without a GPU, install the CPU build of torch first, or pip
+# pulls the CUDA build (several GB of NVIDIA libraries):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#
+# BGE-M3 downloads ~2.2 GB to ~/.cache/huggingface on first start and needs
+# roughly 2.5 GB of RAM on CPU.
+FlagEmbedding==1.4.2
+chonkie[semantic]==1.7.0

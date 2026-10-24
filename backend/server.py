@@ -1,3 +1,4 @@
+import asyncio
 import re
 import json
 import logging
@@ -289,6 +290,21 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     return JSONResponse(status_code=500, content={'ok': False, 'detail': 'Internal server error'})
 
 
+async def _warm_up_and_bootstrap_rag():
+    try:
+        # Choose and load the embedding model before anything is ingested.
+        from embeddings_bge import warm_up as warm_up_embeddings
+        logger.info('Embeddings backend: %s', await asyncio.to_thread(warm_up_embeddings))
+    except Exception as e:
+        logger.exception('Embeddings warm-up failed: %s', e)
+
+    try:
+        from bootstrap_rag import bootstrap_rag_and_prompts
+        await bootstrap_rag_and_prompts(db)
+    except Exception as e:
+        logger.exception('RAG/prompts bootstrap failed: %s', e)
+
+
 @app.on_event('startup')
 async def on_startup():
     try:
@@ -320,11 +336,9 @@ async def on_startup():
     except Exception as e:
         logger.exception('Agent tool registration failed: %s', e)
 
-    try:
-        from bootstrap_rag import bootstrap_rag_and_prompts
-        await bootstrap_rag_and_prompts(db)
-    except Exception as e:
-        logger.exception('RAG/prompts bootstrap failed: %s', e)
+    # In the background: loading BGE-M3 and (re)ingesting an empty vector store can
+    # take minutes on CPU, and the app works without RAG until it finishes.
+    app.state.rag_bootstrap = asyncio.create_task(_warm_up_and_bootstrap_rag())
 
     try:
         ev_count = await db['events'].estimated_document_count()

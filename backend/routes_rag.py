@@ -77,7 +77,8 @@ class DeleteDocsRequest(BaseModel):
 
 @router.get("/status")
 async def rag_status(user=Depends(get_current_admin_flex)):
-    """Backend status — Chroma, Ollama, prompt store."""
+    """Backend status — embeddings, Chroma, Ollama, prompt store."""
+    from embeddings_bge import BGE_MODEL, current_backend
     from ollama_embeddings import is_available, OLLAMA_EMBED_MODEL, OLLAMA_HOST
     from vector_store import list_collections, _USE_CHROMA, CHROMA_PATH
 
@@ -94,6 +95,7 @@ async def rag_status(user=Depends(get_current_admin_flex)):
     ollama_ok = await is_available()
     return {
         "ok": True,
+        "embeddings": {"backend": current_backend() or "not loaded", "bge_model": BGE_MODEL},
         "vector_store": {
             "backend": "chromadb" if _USE_CHROMA else "in_memory",
             "path": CHROMA_PATH,
