@@ -48,6 +48,16 @@ PURPOSES = {
     'other': 'Something else',
 }
 Purpose = Literal['tourist', 'business', 'student_f1', 'work', 'family', 'immigration', 'transit', 'other']
+# Keep in sync with BRANCHES in frontend/src/data/mock.js.
+BRANCHES = {
+    'miyapur': 'Miyapur, Hyderabad',
+    'habsiguda': 'Habsiguda, Hyderabad',
+    'manikonda': 'Manikonda, Hyderabad',
+    'ballari': 'Ballari',
+    'anantapur': 'Anantapur',
+    'east-windsor': 'East Windsor, NJ, USA',
+}
+Branch = Literal['miyapur', 'habsiguda', 'manikonda', 'ballari', 'anantapur', 'east-windsor']
 _PHONE = re.compile(r'^\+[1-9]\d{7,14}$')
 
 
@@ -62,6 +72,7 @@ class EnquiryCreate(BaseModel):
     message: Optional[str] = Field(default=None, max_length=1000)
     consent: bool
     source: str = Field(default='landing', max_length=40)
+    branch: Optional[Branch] = None  # which WeHive location referred this enquiry
     website: Optional[str] = Field(default=None, max_length=200)  # honeypot: humans never see or fill it
 
     @field_validator('phone')
@@ -91,6 +102,8 @@ def enquiry_message(e: EnquiryCreate) -> str:
              f'Phone: {e.phone}', f'Travellers: {e.travellers}']
     if e.travel_date:
         lines.append(f'Travel date: {e.travel_date.isoformat()}')
+    if e.branch:
+        lines.append(f'Referred by location: {BRANCHES[e.branch]}')
     if e.message and e.message.strip():
         lines += ['', e.message.strip()]
     return '\n'.join(lines)
@@ -137,6 +150,7 @@ async def create_enquiry(req: EnquiryCreate, bg: BackgroundTasks, _=Depends(_lea
         'travellers': req.travellers,
         'message': enquiry_message(req),
         'source': req.source,
+        'branch': req.branch,
         'consent_at': now,
         'created_at': now,
     }

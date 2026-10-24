@@ -57,3 +57,17 @@ def test_admin_can_filter_leads_by_purpose():
     lead = backoffice._lead({'_id': 'l1', 'name': 'A', 'type': 'enquiry', 'purpose': 'tourist', 'phone': '+911234567890'})
     assert lead['purpose'] == 'tourist' and lead['type'] == 'enquiry' and lead['phone'] == '+911234567890'
     assert backoffice._lead({'_id': 'l2', 'name': 'B'})['type'] == 'contact'  # old contact-form leads
+
+
+@pytest.mark.asyncio
+async def test_enquiry_records_referring_branch(monkeypatch):
+    coll = MagicMock(insert_one=AsyncMock())
+    monkeypatch.setattr(routes_leads, 'leads', coll)
+    await routes_leads.create_enquiry(routes_leads.EnquiryCreate(**{**GOOD, 'branch': 'habsiguda'}), MagicMock())
+    rec = coll.insert_one.await_args.args[0]
+    assert rec['branch'] == 'habsiguda' and 'Referred by location: Habsiguda, Hyderabad' in rec['message']
+    with pytest.raises(ValidationError):
+        routes_leads.EnquiryCreate(**{**GOOD, 'branch': 'mars'})
+    assert routes_leads.EnquiryCreate(**GOOD).branch is None
+    assert backoffice._lead_filter('all', None, None, 'manikonda') == {'branch': 'manikonda'}
+    assert backoffice._lead({'_id': 'l2', 'branch': 'ballari'})['branch'] == 'ballari'

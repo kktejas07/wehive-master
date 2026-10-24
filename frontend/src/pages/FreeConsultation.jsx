@@ -22,7 +22,7 @@ export default function FreeConsultation() {
           </p>
         </div>
       </section>
-      <EnquirySection />
+      <EnquirySection source="free-consultation" />
       <section className="py-16 bg-[hsl(var(--soft-bg))] border-y border-[hsl(var(--border))]" aria-labelledby="branches-title">
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <h2 id="branches-title" className="font-display font-bold text-[28px] tracking-[-0.02em] leading-tight">
