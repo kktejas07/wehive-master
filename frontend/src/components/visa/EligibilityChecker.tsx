@@ -139,7 +139,7 @@ export default function EligibilityChecker({ countryName }) {
 
               {isEligible && (
                 <div className="mt-6 flex flex-wrap justify-center gap-4">
-                  {['No Interview Required', 'Faster Processing', 'Guaranteed Renewal'].map((badge) => (
+                  {['Likely eligible: confirm with a WeHive counsellor'].map((badge) => (
                     <div key={badge} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-[12px] font-bold text-emerald-700">
                       <CheckCircle className="w-3.5 h-3.5" />
                       {badge}

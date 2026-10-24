@@ -69,6 +69,11 @@ class PublicUser(BaseModel):
     is_admin: bool = False
     is_staff: bool = False
     staff_role: Optional[str] = None
+    notify_email: bool = True
+    notify_whatsapp: bool = False
+    premium_free_left: int = 0  # free tries of premium AI tools left (premium.py)
+    pending_email: Optional[str] = None  # waiting for a code before it replaces email
+    pending_phone: Optional[str] = None
     created_at: datetime
 
 
@@ -79,6 +84,8 @@ class UpdateProfileRequest(BaseModel):
     gender: Optional[Literal['male', 'female', 'other']] = None
     avatar_seed: Optional[str] = None
     avatar_style: Optional[str] = None
+    notify_email: Optional[bool] = None  # email notifications and reminders (default on)
+    notify_whatsapp: Optional[bool] = None  # WhatsApp updates (opt-in)
 
 
 # ----- Applications ----- #

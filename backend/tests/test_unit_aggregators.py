@@ -301,9 +301,10 @@ def test_moderation_requires_admin(kind):
 @pytest.mark.asyncio
 async def test_slot_wait_times_marked_estimate_without_visahq_key():
     import slot_monitor
-    with patch("adapters.visahq_adapter.VISA_HQ_API_KEY", ""):
-        results, is_estimate = await slot_monitor._fetch_wait_times()
-    assert is_estimate is True and results["mumbai"]["f1"]
+    with patch("adapters.visahq_adapter.VISA_HQ_API_KEY", ""), \
+            patch.object(slot_monitor, "load_official_wait_times", new=AsyncMock(return_value=None)):
+        results, is_estimate, source = await slot_monitor._fetch_wait_times()
+    assert is_estimate is True and source == "estimate" and results["mumbai"]["f1"]
     display = slot_monitor.get_wait_times_for_display("usa")
     assert all(c["is_estimate"] for c in display.values())
 
@@ -315,3 +316,43 @@ async def test_telegram_reader_skips_when_not_configured():
             patch.object(telegram_slot_reader, "_telegram_get", new=AsyncMock()) as tg:
         assert await telegram_slot_reader.read_all_channels() == []
     tg.assert_not_called()
+
+
+# ─── Trusted feeds publish without review ────────────────────────────────────
+
+class _BacklogCol(FakeCol):
+    async def update_many(self, q, upd):
+        names = q.get("source_name", {}).get("$in", [])
+        hit = [d for d in self.docs if d.get("status") == q["status"] and d.get("source_name") in names]
+        for d in hit:
+            d.update(upd["$set"])
+        return SimpleNamespace(modified_count=len(hit))
+
+
+@pytest.mark.asyncio
+async def test_trusted_feed_items_go_live_and_backlog_is_published(monkeypatch):
+    monkeypatch.delenv("AGGREGATOR_AUTO_APPROVE", raising=False)
+    feeds = [{"name": "USCIS", "url": "https://feeds.test/a", "country_id": "usa", "trusted": True}]
+    col = _BacklogCol([
+        {"_id": "stuck", "source_url": "https://x/old", "source_name": "USCIS", "status": "pending"},
+        {"_id": "gnews", "source_url": "https://x/g", "source_name": "Some Blog", "status": "pending"},
+    ])
+    client = httpx.AsyncClient(transport=_mock_transport({"https://feeds.test/a": RSS}))
+    with patch.object(news, "NEWS_FEEDS", feeds), patch.object(news, "global_news_col", col), \
+            patch.object(news, "feed_client", return_value=client), \
+            patch.object(news, "ingest_vectors", new=AsyncMock()), \
+            patch.object(news.asyncio, "sleep", new=AsyncMock()):
+        await news.run_aggregator()
+    fresh = [d for d in col.docs if d["source_url"].startswith("https://example.gov/")]
+    assert fresh and all(d["status"] == "approved" for d in fresh)
+    status = {d["_id"]: d["status"] for d in col.docs}
+    assert status["stuck"] == "approved"  # waiting since before: now published
+    assert status["gnews"] == "pending"  # open-web results still need an admin
+
+
+def test_only_official_and_named_publishers_are_trusted():
+    trusted = {f["name"] for f in news.NEWS_FEEDS if f.get("trusted")}
+    assert trusted == {"USCIS", "UK Visas and Immigration (GOV.UK)",
+                       "Immigration, Refugees and Citizenship Canada",
+                       "U.S. Department of State - Travel Advisories"}
+    assert all(f.get("trusted") for f in blog_aggregator_agent.BLOG_FEEDS)

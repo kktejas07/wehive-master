@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Newspaper, AlertCircle, RefreshCw, AlertTriangle, X, Sparkles } from 'lucide-react';
 import { API } from '../context/AuthContext';
 import { useDialogA11y } from '../hooks/use-dialog-a11y';
+import { destination } from '../lib/destinations';
+import WeHiveLoader from './WeHiveLoader';
 
 const PAGE = 9;
 
@@ -27,14 +29,7 @@ const Newsroom = ({ countryId }) => {
 
   const getCountryInfo = (cid) => {
     if (!cid) return null;
-    const c = cid.toLowerCase();
-    const color = 'bg-white text-[hsl(var(--blue-900))] border border-[hsl(var(--border))]';
-    if (c.includes('us') || c.includes('united-states')) return { color, label: 'USA' };
-    if (c.includes('uk') || c.includes('united-kingdom')) return { color, label: 'UK' };
-    if (c.includes('australia')) return { color, label: 'AUS' };
-    if (c.includes('canada')) return { color, label: 'CAN' };
-    if (c.includes('germany')) return { color, label: 'GER' };
-    return { color, label: cid.toUpperCase().substring(0, 3) };
+    return { color: 'bg-white text-[hsl(var(--blue-900))] border border-[hsl(var(--border))]', label: destination(cid).label };
   };
 
   const getItemDate = (item) => {
@@ -157,8 +152,7 @@ const Newsroom = ({ countryId }) => {
               exit={{ opacity: 0 }}
               className="card-surface max-w-lg mx-auto flex flex-col items-center justify-center px-6 py-10 text-center text-[15px] text-muted-foreground"
             >
-              <RefreshCw className="w-6 h-6 animate-spin mb-3 text-[hsl(var(--blue-700))]" aria-hidden="true" />
-              <p>Fetching latest updates...</p>
+              <WeHiveLoader label="Fetching latest updates" />
             </motion.div>
           ) : errorState ? (
             <motion.div

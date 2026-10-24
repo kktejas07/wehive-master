@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from models import UniversityApplicationCreate, PrimaryApplicant
 from auth_utils import get_current_user
+from agent_assignment import pick_agent
 from db import db, applications, universities_col
 from fee_calculator import compute_multi_university_fees
 from serializers import serialize_doc
@@ -61,15 +62,7 @@ async def create_university_application(
 
     fees = compute_multi_university_fees(len(req.universities))
 
-    agents = await db.agents.find({'status': 'active'}).to_list(100)
-    agent_id = None
-    if agents:
-        agent_counts = []
-        for a in agents:
-            count = await db.applications.count_documents({'agent_id': a['_id']})
-            agent_counts.append((a['_id'], count))
-        agent_counts.sort(key=lambda x: x[1])
-        agent_id = agent_counts[0][0] if agent_counts else None
+    agent_id = await pick_agent(db)
 
     uni_names = [s['university']['name'] for s in uni_selections]
 

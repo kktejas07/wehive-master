@@ -148,6 +148,13 @@ export default function AIUniversityRecommender({ open, onClose }) {
             {results.note && (
               <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-[13px] text-amber-800">{results.note}</div>
             )}
+            {results.recommendations?.length > 0 && (
+              <p className="mb-3 text-[12px] text-muted-foreground">
+                {results.method === 'ai'
+                  ? 'Fit scores from WeHive AI, based on your profile and each university\'s data.'
+                  : 'Fit scores out of 100 from your budget, English score, chosen field, ranking and scholarships.'}
+              </p>
+            )}
             {results.recommendations && results.recommendations.length > 0 ? (
               <div className="space-y-3">
                 {results.recommendations.map((uni, idx) => (

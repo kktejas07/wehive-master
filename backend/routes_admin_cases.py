@@ -63,7 +63,7 @@ async def _app_or_404(application_id: str) -> dict:
 async def _notify(app: dict, kind: str, title: str, body: str, severity: str = 'info') -> None:
     if not app.get('user_id'):
         return
-    await notifications_col.insert_one({
+    doc = {
         '_id': str(uuid.uuid4()),
         'user_id': app['user_id'],
         'type': kind,
@@ -74,7 +74,10 @@ async def _notify(app: dict, kind: str, title: str, body: str, severity: str = '
         'action_link': f"/account/applications/{app['_id']}",
         'read': False,
         'created_at': datetime.utcnow(),
-    })
+    }
+    await notifications_col.insert_one(doc)
+    from notify import _publish
+    _publish(app['user_id'], doc)
 
 
 def _staff_public(u: Optional[dict]) -> Optional[dict]:

@@ -218,7 +218,8 @@ def _get_recommendation(level: str, factors: dict) -> str:
 def _require_staff(user: dict) -> None:
     """Admins and staff consultants may view other users' risk data."""
     email = (user.get("email") or "").lower()
-    if not (user.get("is_admin") or user.get("is_staff") or email in ADMIN_EMAILS):
+    verified_admin_email = email in ADMIN_EMAILS and user.get("email_verified") is True
+    if not (user.get("is_admin") or user.get("is_staff") or verified_admin_email):
         raise HTTPException(status_code=403, detail="Staff access required")
 
 

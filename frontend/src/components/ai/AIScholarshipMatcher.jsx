@@ -69,7 +69,7 @@ export default function AIScholarshipMatcher({ open, onClose }) {
                 <label htmlFor="aischolarshipmatcher-country" className="block text-[12px] font-bold text-[hsl(var(--blue-900))] mb-1">
                   <Globe className="w-3.5 h-3.5 inline mr-1" /> Country
                 </label>
-                <input id="aischolarshipmatcher-country" type="text" value={country} onChange={e => setCountry(e.target.value)} placeholder="us, gb, de..." className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--border))] text-[14px] outline-none focus:border-emerald-500" />
+                <input id="aischolarshipmatcher-country" type="text" value={country} onChange={e => setCountry(e.target.value)} placeholder="e.g. UK, Germany, us" className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--border))] text-[14px] outline-none focus:border-emerald-500" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -83,7 +83,7 @@ export default function AIScholarshipMatcher({ open, onClose }) {
                 <label htmlFor="aischolarshipmatcher-field-of-study" className="block text-[12px] font-bold text-[hsl(var(--blue-900))] mb-1">
                   <BookOpen className="w-3.5 h-3.5 inline mr-1" /> Field of Study
                 </label>
-                <input id="aischolarshipmatcher-field-of-study" type="text" value={fieldOfStudy} onChange={e => setFieldOfStudy(e.target.value)} placeholder="engineering, business..." className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--border))] text-[14px] outline-none focus:border-emerald-500" />
+                <input id="aischolarshipmatcher-field-of-study" type="text" value={fieldOfStudy} onChange={e => setFieldOfStudy(e.target.value)} placeholder="e.g. computer science, MBA, nursing" className="w-full h-10 px-4 rounded-xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--border))] text-[14px] outline-none focus:border-emerald-500" />
               </div>
             </div>
             <button onClick={handleMatch} disabled={busy}

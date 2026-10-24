@@ -6,7 +6,6 @@ import { Grid2X2, Map as MapIcon, Compass, Search } from 'lucide-react';
 import { COUNTRIES } from '../data/mock';
 import { API } from '../context/AuthContext';
 import { landmarkFor } from '../lib/landmarks';
-import DeliveryCountdown from './DeliveryCountdown';
 import Reveal from './Reveal';
 import { SkeletonGrid } from './ui/skeleton';
 import {
@@ -82,6 +81,8 @@ function CountryCard({ c, index = 0 }) {
   const fees_usd = c.fees_usd ?? firstCategory.fees_usd ?? firstCategory.fees?.usd ?? 0;
   const documents = c.documents || firstCategory.documents || ['Passport'];
   const delivery = c.delivery || {};
+  // Requirement and decision time from the server's visa rules (official / EU law / estimate).
+  const proc = c.processing;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -186,13 +187,13 @@ function CountryCard({ c, index = 0 }) {
       <div className="mt-3 px-1 flex items-center justify-between">
         <div>
           <div className="text-[12px] text-muted-foreground">
-            {isNoVisa ? 'Holiday planner' : 'Standard delivery'}
+            {isNoVisa ? 'Holiday planner' : (proc?.time ? (proc.time.metric === 'appointment_wait' ? 'Interview wait' : 'Typical decision') : 'Visa')}
           </div>
           <div className="text-[14px] font-semibold text-[hsl(var(--blue-900))] inline-flex items-center gap-2">
-            {isNoVisa ? `${c.holiday_default_days || 7} days suggested` : `${delivery.standard_days ?? 7} days`}
-            {!isNoVisa && delivery.same_day && (
-              <DeliveryCountdown compact deliveryDays={delivery.standard_days ?? 7} />
-            )}
+            {isNoVisa
+              ? `${c.holiday_default_days || 7} days suggested`
+              : proc?.time ? (proc.time.short || proc.time.label) : (proc?.requirement_label || `${delivery.standard_days ?? 7} days`)}
+            {proc?.time?.basis === 'estimate' && <span className="text-[11px] font-medium text-muted-foreground">est.</span>}
           </div>
         </div>
         {!isNoVisa && (

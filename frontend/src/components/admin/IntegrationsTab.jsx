@@ -8,8 +8,6 @@ import { useToast } from '../../hooks/use-toast';
 const CHANNELS = [
   { id: 'mock',             label: 'Mock (123456)',        hint: 'Dev-friendly — always uses the code `123456`.' },
   { id: 'auto',            label: 'Auto',                hint: 'Route email → SMTP/Postal, phone → WhatsApp; falls back to mock if creds missing.' },
-  { id: 'twilio_sms',      label: 'Twilio SMS',           hint: 'Requires TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER.' },
-  { id: 'twilio_whatsapp', label: 'Twilio WhatsApp',       hint: 'Requires sandbox opt-in or an approved WA sender.' },
   { id: 'whatsapp',        label: 'WhatsApp (OpenWA)',     hint: 'Uses OpenWA API for WhatsApp OTP delivery. Set up in Admin → Settings → OpenWA.' },
   { id: 'email',           label: 'Email (SMTP / Postal)',  hint: 'Uses SMTP or Postal API. Configure in Admin → Settings → Email or Postal.' },
 ];

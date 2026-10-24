@@ -29,7 +29,7 @@ PAYMENT_BYPASS_ENABLED = IS_DEV and os.environ.get('PAYMENT_BYPASS_ENABLED', '')
 
 PLANS = {
     'lite': {'name': 'Lite', 'amount_inr': 399, 'description': 'One visa application with expert review'},
-    'standard': {'name': 'Standard', 'amount_inr': 799, 'description': 'Most popular — priority support, on-time guarantee'},
+    'standard': {'name': 'Standard', 'amount_inr': 799, 'description': 'Most popular — priority support and faster document review'},
     'concierge': {'name': 'Concierge', 'amount_inr': 1099, 'description': 'Dedicated specialist, 24/7 phone support'},
 }
 
@@ -392,6 +392,7 @@ async def my_subscription(user=Depends(get_current_user)):
         payments_list.append({
             'id': p['_id'],
             'plan_id': p.get('plan_id'),
+            'plan_name': PLANS.get(p.get('plan_id') or '', {}).get('name'),
             'amount_inr': p.get('amount_inr', p.get('amount_usd')),
             'status': p.get('status'),
             'created_at': p.get('created_at').isoformat() if p.get('created_at') else None,

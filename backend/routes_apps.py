@@ -421,7 +421,8 @@ def _make_receipt_pdf(app: dict, user: dict) -> bytes:
         ParagraphStyle('foot', parent=body, fontSize=8, textColor=grey),
     ))
     elements.append(Paragraph(
-        'On-time guarantee: if your visa is delayed beyond the date promised at checkout, the entire We Hive service fee will be refunded automatically.',
+        'Visa decisions and timelines are set by the embassy or consulate; WeHive cannot guarantee an outcome or a date. '
+        f'Refund requests are reviewed under our refund policy: write to {SUPPORT_EMAIL}.',
         ParagraphStyle('foot2', parent=body, fontSize=8, textColor=red),
     ))
 

@@ -89,35 +89,6 @@ async def get_current_agent(authorization: Optional[str] = Header(default=None))
     return agent
 
 
-@router.post('/signup')
-async def agent_signup(req: AgentSignupRequest, _=Depends(_auth_limiter)):
-    existing = await db.agents.find_one({'$or': [{'email': req.email}, {'phone': req.phone}]})
-    if existing:
-        raise HTTPException(400, 'Agent already exists with this email or phone')
-    agent = {
-        '_id': str(uuid.uuid4()),
-        'name': req.name,
-        'email': req.email,
-        'phone': req.phone,
-        'password': hash_password(req.password),
-        'agency_name': req.agency_name or '',
-        'role': 'agent',
-        'status': 'active',
-        'commission_rate': DEFAULT_AGENT_COMMISSION_RATE,
-        'students_count': 0,
-        'applications_count': 0,
-        'total_revenue': 0,
-        'verified': False,
-        'blacklisted': False,
-        'fine': 0,
-        'created_at': datetime.utcnow(),
-        'updated_at': datetime.utcnow(),
-    }
-    await db.agents.insert_one(agent)
-    token = create_access_token({'sub': agent['email'], 'role': 'agent'})
-    return {'token': token, 'agent': {k: v for k, v in agent.items() if k != 'password'}}
-
-
 @router.post('/login')
 async def agent_login(req: AgentLoginRequest, _=Depends(_auth_limiter)):
     agent = await db.agents.find_one({'email': req.email})
@@ -348,6 +319,39 @@ async def admin_list_agents(
     for a in agents:
         a['id'] = str(a.get('_id', ''))
     return agents
+
+
+@router.post('/admin/agents')
+async def admin_create_agent(req: AgentSignupRequest, admin=Depends(get_current_admin_flex)):
+    """Agents are created by WeHive admins only (there is no public signup), so
+    customers' applications only ever go to people WeHive has vetted."""
+    email = req.email.lower()
+    if await db.agents.find_one({'$or': [{'email': email}, {'phone': req.phone}]}):
+        raise HTTPException(400, 'Agent already exists with this email or phone')
+    now = datetime.utcnow()
+    agent = {
+        '_id': str(uuid.uuid4()),
+        'name': req.name,
+        'email': email,
+        'phone': req.phone,
+        'password': hash_password(req.password),
+        'agency_name': req.agency_name or '',
+        'role': 'agent',
+        'status': 'active',
+        'commission_rate': DEFAULT_AGENT_COMMISSION_RATE,
+        'students_count': 0,
+        'applications_count': 0,
+        'total_revenue': 0,
+        'verified': True,
+        'blacklisted': False,
+        'fine': 0,
+        'created_by': admin.get('_id'),
+        'created_at': now,
+        'updated_at': now,
+    }
+    await db.agents.insert_one(agent)
+    await audit_record(admin, 'create', 'agent', agent['_id'], after={'email': email, 'name': req.name})
+    return {k: v for k, v in agent.items() if k != 'password'} | {'id': agent['_id']}
 
 
 @router.patch('/admin/agents/{agent_id}')

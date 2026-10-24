@@ -86,3 +86,26 @@ jobs:
           name: playwright-report
           path: frontend/playwright-report
           retention-days: 7
+
+  app:
+    name: App (Expo — typecheck, lint, tests, web export)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wehive-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: wehive-app/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - name: Static web export
+        run: npx expo export --platform web
+        env:
+          CI: "1"
+          EXPO_OFFLINE: "1"

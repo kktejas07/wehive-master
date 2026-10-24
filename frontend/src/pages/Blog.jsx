@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, RefreshCw, AlertCircle, X, Calendar, User as UserIcon, Mic, Loader2 } from 'lucide-react';
+import { FileText, AlertCircle, X, Calendar, User as UserIcon, Mic, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API } from '../context/AuthContext';
 import { ContentCard, ContentCardGrid } from '../components/ui/ContentCard';
 import { useDialogA11y } from '../hooks/use-dialog-a11y';
+import { destination } from '../lib/destinations';
+import WeHiveLoader from '../components/WeHiveLoader';
 
 export default function Blog() {
   const [blogs, setBlogs] = useState([]);
@@ -96,8 +98,7 @@ export default function Blog() {
                 exit={{ opacity: 0 }}
                 className="flex flex-col items-center justify-center py-20 text-muted-foreground"
               >
-                <RefreshCw className="w-8 h-8 animate-spin mb-4 text-primary" />
-                <p>Loading latest articles...</p>
+                <WeHiveLoader label="Loading latest articles" />
               </motion.div>
             ) : error ? (
               <motion.div
@@ -198,7 +199,7 @@ export default function Blog() {
                     </span>
                     {selectedBlog.country_id && (
                       <span className="px-3 py-1 bg-black/40 text-white text-[12px] font-bold rounded-full uppercase tracking-[0.14em] border border-white/30">
-                        {selectedBlog.country_id.substring(0,3)}
+                        {destination(selectedBlog.country_id).label}
                       </span>
                     )}
                   </div>

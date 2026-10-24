@@ -76,7 +76,7 @@ export default function About() {
             <p className="lead mt-6 max-w-2xl">
               {BRAND.name} Immigration Services was founded with a simple
               promise — bridging dreams and connecting continents. From a small
-              office in Hyderabad we now process visas across {KEY_STATS.countries} countries, with
+              office in Hyderabad we have grown to {KEY_STATS.offices} offices in India and the US, with
               transparent fees, honest timelines, and real human counsellors who
               stay with you long after the stamp.
             </p>
@@ -85,7 +85,7 @@ export default function About() {
       </section>
 
       <section className="py-12 md:py-16 bg-white border-b border-[hsl(var(--border))]">
-        <div className="container-page grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="container-page grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10">
           {STATS.map((s) => (
             <div key={s.id} className="border-l-2 border-[hsl(var(--blue-100))] pl-4">
               <div className="font-display font-bold text-[36px] sm:text-[44px] leading-none tracking-[-0.02em] text-[hsl(var(--blue-900))]">

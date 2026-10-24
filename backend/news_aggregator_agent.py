@@ -1,6 +1,7 @@
 """Global News Aggregator Agent.
 
-Pulls immigration / visa news from official public RSS/Atom feeds over plain
+Pulls immigration / visa news from official public RSS/Atom feeds, plus
+Google News search feeds for destinations with no official feed, over plain
 HTTP (no LLM, no API key) and stores each item as a *pending* news document
 with its real source URL and published date. Items are deduplicated by URL.
 Nothing is generated or invented: if a feed is unreachable the error is
@@ -16,6 +17,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote_plus
 
 import httpx
 
@@ -34,17 +36,20 @@ MAX_ITEMS_PER_FEED = int(os.environ.get("NEWS_MAX_ITEMS_PER_FEED", "20"))
 NEWS_FEEDS: List[Dict[str, Any]] = [
     {
         "name": "USCIS",
+        "trusted": True,  # official government feed: publish without review
         "url": "https://www.uscis.gov/news/rss-feed/59144",
         "country_id": "usa",
     },
     {
         "name": "UK Visas and Immigration (GOV.UK)",
+        "trusted": True,  # official government feed: publish without review
         "url": "https://www.gov.uk/search/news-and-communications.atom"
                "?organisations%5B%5D=uk-visas-and-immigration",
         "country_id": "united-kingdom",
     },
     {
         "name": "Immigration, Refugees and Citizenship Canada",
+        "trusted": True,  # official government feed: publish without review
         "url": "https://api.io.canada.ca/io-server/gc/news/en/v2"
                "?dept=departmentofcitizenshipandimmigration&type=newsreleases"
                "&sort=publishedDate&orderBy=desc&pick=50&format=atom&atomtitle=IRCC",
@@ -52,10 +57,39 @@ NEWS_FEEDS: List[Dict[str, Any]] = [
     },
     {
         "name": "U.S. Department of State - Travel Advisories",
+        "trusted": True,  # official government feed: publish without review
         "url": "https://travel.state.gov/_res/rss/TAsTWs.xml",
         "country_id": "usa",
         "category": "Travel",
     },
+]
+
+
+def google_news_feed(query: str) -> str:
+    """Public Google News RSS search (no key): last-7-day headlines from many publishers."""
+    return ("https://news.google.com/rss/search?q=" + quote_plus(f"{query} when:7d")
+            + "&hl=en-IN&gl=IN&ceid=IN:en")
+
+
+# Global coverage: one search per destination, so the newsroom isn't limited to
+# the countries that publish an official feed. source_name is the real publisher.
+GLOBAL_NEWS_QUERIES: Dict[str, str] = {
+    "usa": "F-1 visa OR H-1B OR green card",
+    "united-kingdom": "UK student visa OR UK skilled worker visa",
+    "canada": "Canada study permit OR Express Entry",
+    "australia": "Australia student visa OR Australia immigration",
+    "new-zealand": "New Zealand visa OR New Zealand immigration",
+    "ireland": "Ireland student visa OR Ireland immigration",
+    "germany": "Germany student visa OR Opportunity Card OR EU Blue Card",
+    "europe": "Schengen visa",
+    "uae": "UAE visa OR UAE golden visa",
+    "singapore": "Singapore student pass OR Singapore work pass",
+    "japan": "Japan student visa OR Japan work visa",
+    "global": "international students visa policy",
+}
+NEWS_FEEDS += [
+    {"name": f"Google News ({country})", "url": google_news_feed(query), "country_id": country}
+    for country, query in GLOBAL_NEWS_QUERIES.items()
 ]
 
 _ATOM = "{http://www.w3.org/2005/Atom}"
@@ -124,6 +158,7 @@ def parse_feed(xml_bytes: bytes) -> List[Dict[str, Any]]:
             "summary": _clean_text(_text(it.find("description"))),
             "published": _parse_date(_text(it.find("pubDate")) or _text(it.find(f"{_DC}date"))),
             "author": _clean_text(_text(it.find(f"{_DC}creator")), 120),
+            "publisher": _clean_text(_text(it.find("source")), 120),
             "categories": [_text(c) for c in it.findall("category") if _text(c)],
         })
 
@@ -141,6 +176,7 @@ def parse_feed(xml_bytes: bytes) -> List[Dict[str, Any]]:
             "summary": _clean_text(summary),
             "published": _parse_date(published),
             "author": _clean_text(_text(entry.find(f"{_ATOM}author/{_ATOM}name")), 120),
+            "publisher": "",
             "categories": [c.get("term", "") for c in entry.findall(f"{_ATOM}category") if c.get("term")],
         })
 
@@ -203,7 +239,7 @@ async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc)
     """Fetch every feed and upsert its items into `col`, deduplicated by source_url.
 
     `to_doc(feed, item)` maps a parsed item to the stored fields. New items are
-    inserted with status 'pending'; an existing URL whose title/date changed is
+    inserted as 'approved' for trusted feeds, else 'pending'; an existing URL whose title/date changed is
     refreshed without touching its moderation status.
     Returns {"inserted", "updated", "skipped", "errors": [...], "feeds": {...}}.
     """
@@ -238,7 +274,10 @@ async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc)
                         )
                         fstats["updated"] += 1
                     continue
-                res = await col.insert_one({**fields, "status": "pending", "created_at": datetime.utcnow()})
+                # Official government feeds and named publishers go live straight away;
+                # open search results (Google News) wait for an admin.
+                status = "approved" if feed.get("trusted") or auto_approve_all() else "pending"
+                res = await col.insert_one({**fields, "status": status, "created_at": datetime.utcnow()})
                 fstats["inserted"] += 1
                 vector_ids.append(str(res.inserted_id))
                 vector_docs.append(f"{fields['title']} {item['summary']}")
@@ -262,15 +301,19 @@ async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc)
 
 def _news_doc(feed: Dict[str, Any], item: Dict[str, Any]) -> Dict[str, Any]:
     published = item["published"]
+    publisher = item.get("publisher") or ""
+    title = item["title"]
+    if publisher and title.endswith(f" - {publisher}"):  # Google News appends the publisher
+        title = title[: -len(publisher) - 3]
     return {
-        "title": item["title"],
+        "title": title,
         "country_id": feed["country_id"],
         "date": published.strftime("%Y-%m-%d") if published else None,
         "published_at": published,
         "category": feed.get("category") or classify_category(f"{item['title']} {item['summary']}"),
         "content": item["summary"],
         "source_url": item["url"],
-        "source_name": feed["name"],
+        "source_name": publisher or feed["name"],
         "source": "rss",
     }
 
@@ -283,10 +326,29 @@ async def run_aggregator() -> Dict[str, Any]:
     return stats
 
 
+def auto_approve_all() -> bool:
+    return os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() in ("1", "true", "yes")
+
+
+async def approve_trusted_backlog(col, feeds: List[Dict[str, Any]]) -> int:
+    """Publish items already waiting from trusted feeds (e.g. the backlog from
+    before trusted feeds were auto-published)."""
+    trusted = [f["name"] for f in feeds if f.get("trusted")]
+    if not trusted:
+        return 0
+    result = await col.update_many({"status": "pending", "source_name": {"$in": trusted}},
+                                   {"$set": {"status": "approved"}})
+    return result.modified_count
+
+
 async def run_auto_approval():
-    """Approve pending news only when AGGREGATOR_AUTO_APPROVE is explicitly enabled."""
-    if os.environ.get("AGGREGATOR_AUTO_APPROVE", "").lower() not in ("1", "true", "yes"):
-        logger.info("AGGREGATOR_AUTO_APPROVE disabled; leaving pending news for admin review.")
+    """Publish pending items from trusted feeds; everything else only when
+    AGGREGATOR_AUTO_APPROVE is enabled."""
+    n = await approve_trusted_backlog(global_news_col, NEWS_FEEDS)
+    if n:
+        logger.info("Published %d pending news items from trusted feeds.", n)
+    if not auto_approve_all():
+        logger.info("AGGREGATOR_AUTO_APPROVE disabled; other pending news stays for admin review.")
         return
     result = await global_news_col.update_many({"status": "pending"}, {"$set": {"status": "approved"}})
     logger.info("Auto-approved %d pending news items.", result.modified_count)

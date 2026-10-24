@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { TrendingUp, Globe2, ShieldCheck, Clock, Award, LucideIcon } from 'lucide-react';
+import { Globe2, ShieldCheck, Award, LucideIcon } from 'lucide-react';
 
 interface CountUpProps {
   to: number;
@@ -43,13 +43,11 @@ interface StatItem {
   suffix: string;
 }
 
+// Only facts WeHive can back up (same as KEY_STATS in data/mock.js).
 const STATS: StatItem[] = [
-  { id: 'visas',    Icon: ShieldCheck, value: 5847, label: 'Visas approved this month', suffix: '+' },
-  // Keep in step with KEY_STATS in data/mock.js.
-  { id: 'rate',     Icon: TrendingUp,  value: 98,   label: 'Success rate',               suffix: '.6%' },
-  { id: 'countries',Icon: Globe2,      value: 60,   label: 'Countries supported',        suffix: '+' },
-  { id: 'sla',      Icon: Clock,       value: 12,   label: 'Average minutes to apply',   suffix: 'm' },
-  { id: 'happy',    Icon: Award,       value: 92,   label: 'Net promoter score',         suffix: '' },
+  { id: 'universities', Icon: Award,       value: 200, label: 'Partner universities',        suffix: '+' },
+  { id: 'offices',      Icon: ShieldCheck, value: 5,   label: 'Offices in India and the US', suffix: '' },
+  { id: 'countries',    Icon: Globe2,      value: 190, label: 'Countries in our visa guide', suffix: '+' },
 ];
 
 export default function StatsStrip() {
@@ -65,10 +63,10 @@ export default function StatsStrip() {
             The We Hive scoreboard
           </p>
           <h2 className="mt-3 font-display font-bold text-[28px] sm:text-[36px] leading-[1.15] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
-            Numbers we&rsquo;re accountable for
+            WeHive at a glance
           </h2>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {STATS.map((s, i) => {
             const Icon = s.Icon;
             return (

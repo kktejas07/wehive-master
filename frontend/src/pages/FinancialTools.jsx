@@ -4,7 +4,7 @@ import { DollarSign, Calculator, TrendingUp, CreditCard, ChevronRight, Globe, Ch
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
-import { API } from '../context/AuthContext';
+import { API, useAuth } from '../context/AuthContext';
 
 // ── Proof of Funds Estimator ──────────────────────────────────────────────────
 
@@ -119,6 +119,7 @@ function LiveCurrencyConverter() {
 // ── AI Financial Advisor ──────────────────────────────────────────────────────
 
 function AIFinancialAdvisor() {
+  const { token } = useAuth();
   const [query, setQuery] = useState('');
   const [chat, setChat] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -133,10 +134,14 @@ function AIFinancialAdvisor() {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API}/financials/insights`, { query: userMsg });
+      // /financials/insights requires sign-in; the token was never sent, so every question failed.
+      const res = await axios.post(`${API}/financials/insights`, { query: userMsg }, { headers: { Authorization: `Bearer ${token}` } });
       setChat(prev => [...prev, { role: 'ai', content: res.data.insight }]);
     } catch (e) {
-      setChat(prev => [...prev, { role: 'ai', content: "Sorry, I couldn't fetch an answer right now. Please try again." }]);
+      const msg = e?.response?.status === 401
+        ? 'Please sign in again to use the AI Financial Advisor.'
+        : "Sorry, I couldn't fetch an answer right now. Please try again in a minute.";
+      setChat(prev => [...prev, { role: 'ai', content: msg }]);
     }
     setLoading(false);
   };
@@ -335,7 +340,11 @@ const TOOLS = [
 ];
 
 export default function FinancialTools() {
-  const [active, setActive] = useState(null);
+  // ?tool=budget (e.g. from "Cost of Living Calculator") opens that tool directly.
+  const [active, setActive] = useState(() => {
+    const t = new URLSearchParams(window.location.search).get('tool');
+    return TOOLS.some(x => x.id === t) ? t : null;
+  });
   const current = TOOLS.find(t => t.id === active);
 
   return (

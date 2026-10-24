@@ -15,7 +15,7 @@ Wait-time data stored in MongoDB (usvisa_slots).
 import asyncio
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from db import usvisa_slots_col
@@ -290,6 +290,24 @@ CORRIDORS = {
     },
 }
 
+# Ireland: every Indian application is decided at the Embassy in New Delhi, so one
+# national entry. No hand-made estimates: figures come from the embassy (official_times).
+CORRIDORS["ireland"] = {
+    "id": "ireland", "name": "Ireland", "flag": "🇮🇪",
+    "from_country": "in", "to_country": "ie",
+    "booking_url": "https://visa.vfsglobal.com/ind/en/irl/",
+    "consulates": [
+        {"id": "india", "name": "All India", "city": "All VFS centres",
+         "jurisdiction": "Decided at the Embassy of Ireland, New Delhi"},
+    ],
+    "visa_types": [
+        {"id": "visitor_ie", "name": "Visit (short stay)", "label": "Tourist, Business"},
+        {"id": "student_ie", "name": "Study", "label": "Study"},
+    ],
+    "wait_times": {},
+}
+CORRIDORS["canada"]["visa_types"].append({"id": "work_ca", "name": "Work Permit", "label": "Work"})
+
 _scheduler_task: Optional[asyncio.Task] = None
 _last_check: Optional[str] = None
 
@@ -308,17 +326,120 @@ def _get_bls_booking_url(consulate_id: str, visa_type: str) -> str:
     return "https://blsindiavisa-usa.com/appointment"
 
 
-async def _fetch_wait_times():
-    """Fetch wait times from the VisaHQ API.
+OFFICIAL_REFRESH_SECONDS = 12 * 3600  # the official page changes monthly
+# A drop worth alerting on: at least 30 days AND at least a quarter shorter.
+DROP_MIN_DAYS = 30
+DROP_MIN_FRACTION = 0.25
 
-    Returns (results, is_estimate). Without VISA_HQ_API_KEY (or when VisaHQ has
-    no data) the values are static published estimates, flagged is_estimate=True
-    so the UI can label them as such.
+
+async def load_official_wait_times() -> Optional[dict]:
+    """Latest stored official figures: {"updated", "posts": {cid: {vt: "1 Month"}}}, or None."""
+    from db import db
+    posts: dict = {}
+    updated = None
+    async for d in db["usvisa_official_waits"].find({"consulate": {"$exists": True}}):
+        posts.setdefault(d["consulate"], {})[d["visa_type"]] = d["value"]
+        updated = d.get("updated") or updated
+    if not posts:
+        return None
+    from adapters import state_dept_wait_times as sd
+    return {"updated": updated, "posts": posts, "source_name": sd.SOURCE_LABEL,
+            "source_url": sd.OFFICIAL_URL, "metric": "next_available_appointment"}
+
+
+async def load_official_for(country: str) -> Optional[dict]:
+    """Official figures for any corridor (US per consulate; others per country)."""
+    if country == "usa":
+        return await load_official_wait_times()
+    import official_times
+    corridor = CORRIDORS.get(country)
+    if not corridor:
+        return None
+    return await official_times.load(country, [c["id"] for c in corridor["consulates"]])
+
+
+async def refresh_official_wait_times(force: bool = False) -> dict:
+    """Fetch the State Department page (at most every 12h), store the figures,
+    and alert subscribers whose consulate/visa wait dropped a lot."""
+    from adapters import state_dept_wait_times as sd
+    from db import db, usvisa_subscriptions_col
+    from notify import notify_user
+
+    col = db["usvisa_official_waits"]
+    meta = await col.find_one({"_id": "meta"}) or {}
+    last = meta.get("fetched_at")
+    if not force and last and (datetime.utcnow() - last).total_seconds() < OFFICIAL_REFRESH_SECONDS:
+        return {"skipped": "fresh"}
+
+    data = await sd.fetch()
+    now = datetime.utcnow()
+    await col.update_one({"_id": "meta"}, {"$set": {"fetched_at": now, "updated": data["updated"],
+                                                    "posts_found": len(data["posts"])}}, upsert=True)
+    if not data["posts"]:
+        return {"updated": data["updated"], "posts": 0, "drops": 0, "alerted": 0}
+
+    drops = []  # (cid, vt, old_value, new_value)
+    for cid, values in data["posts"].items():
+        for vt, value in values.items():
+            key = f"{cid}:{vt}"
+            prev = await col.find_one({"_id": key}) or {}
+            days = sd.wait_days(value)
+            old_days = prev.get("days")
+            if (old_days is not None and days is not None and prev.get("updated") != data["updated"]
+                    and old_days - days >= DROP_MIN_DAYS and days <= old_days * (1 - DROP_MIN_FRACTION)):
+                drops.append((cid, vt, prev.get("value"), value))
+            await col.update_one({"_id": key}, {"$set": {
+                "consulate": cid, "visa_type": vt, "value": value, "days": days,
+                "updated": data["updated"], "fetched_at": now,
+            }}, upsert=True)
+
+    alerted = 0
+    if drops:
+        names = {c["id"]: c["city"] for c in US_CONSULATES_INDIA}
+        visa_names = {v["id"]: v["name"] for v in VISA_TYPES}
+        async for sub in usvisa_subscriptions_col.find({}):
+            if _sub_country(sub) != "usa":
+                continue
+            mine = [d for d in drops if d[0] in (sub.get("consulates") or []) and d[1] in (sub.get("visa_types") or [])]
+            if not mine:
+                continue
+            lines = [f"{visa_names.get(vt, vt)} at {names.get(cid, cid)}: now {new} (was {old})" for cid, vt, old, new in mine]
+            await notify_user(
+                sub["user_id"],
+                title="US visa wait time dropped",
+                body="; ".join(lines) + f". Next available appointment, per the {sd.SOURCE_LABEL} (updated {data['updated']}).",
+                kind="wait_time_drop",
+                link="/us-visa-slots",
+                dedupe_key=f"waitdrop:{sub['user_id']}:{data['updated']}:" + ",".join(f"{c}-{v}" for c, v, _, _ in mine)[:150],
+            )
+            alerted += 1
+    return {"updated": data["updated"], "posts": len(data["posts"]), "drops": len(drops), "alerted": alerted}
+
+
+async def _fetch_wait_times():
+    """Wait times per consulate and visa type for the India -> US corridor.
+
+    Returns (results, is_estimate, source). Order of preference:
+    1. Official US State Department figures (stored by refresh_official_wait_times).
+    2. VisaHQ, when VISA_HQ_API_KEY is set.
+    3. Static published estimates (is_estimate=True), so the UI can label them.
     """
+    try:
+        official = await load_official_wait_times()
+    except Exception as e:
+        logger.warning("Could not load official wait times: %s", e)
+        official = None
+    if official:
+        results = {
+            c["id"]: {vt["id"]: official["posts"].get(c["id"], {}).get(vt["id"], "N/A") for vt in VISA_TYPES}
+            for c in US_CONSULATES_INDIA
+        }
+        return results, False, "state_dept"
+
     try:
         from adapters.visahq_adapter import get_slot_wait_time
     except ImportError:
-        return None, True
+        return None, True, "estimate"
 
     results = {}
     is_estimate = False
@@ -334,7 +455,7 @@ async def _fetch_wait_times():
                 results[cid][vt["id"]] = str(wt)
             else:
                 results[cid][vt["id"]] = PUBLISHED_WAIT_TIMES.get(vt["id"], {}).get(cid, "N/A")
-    return results, is_estimate
+    return results, is_estimate, ("estimate" if is_estimate else "visahq")
 
 
 def _get_wait_time_estimate(consulate_id: str, visa_type: str) -> str:
@@ -371,8 +492,21 @@ async def _run_slot_check():
     _last_check = datetime.utcnow().isoformat()
     _total_checks += 1
 
-    wait_times, is_estimate = await _fetch_wait_times()
-    source = "estimate" if is_estimate else "visahq"
+    try:
+        official = await refresh_official_wait_times()
+        if official.get("alerted"):
+            _notifications_sent += official["alerted"]
+            logger.info("Wait-time drop alerts sent to %d subscribers", official["alerted"])
+    except Exception as e:
+        logger.warning("Official wait-time refresh failed: %s", e)
+
+    try:
+        import official_times
+        await official_times.refresh_all()
+    except Exception as e:
+        logger.warning("Official processing-time refresh failed: %s", e)
+
+    wait_times, is_estimate, source = await _fetch_wait_times()
 
     if wait_times:
         check_date = datetime.utcnow().strftime("%Y-%m-%d")
@@ -424,7 +558,78 @@ async def _run_slot_check():
             await telegram.send_message(TELEGRAM_CHANNEL_ID, summary)
         _notifications_sent += 1
 
+    try:
+        alerted = await dispatch_slot_alerts()
+        _notifications_sent += alerted
+        if alerted:
+            logger.info("Slot alerts sent to %d subscribers", alerted)
+    except Exception as e:
+        logger.warning("Slot alert dispatch failed: %s", e)
+
     logger.info("Slot check complete (wait_times + Telegram)")
+
+
+def _sub_country(sub: dict) -> str:
+    return sub.get("country") or "usa"  # pre-per-country subscriptions were US
+
+
+async def dispatch_slot_alerts(max_age_hours: int = 48) -> int:
+    """Alert subscribers about slot openings reported since the last run.
+
+    Openings come from Telegram channel reports (US) and from WeHive users'
+    reports once an admin approves them (any country). Wait-time rows are not
+    openings and never alert. Each report is marked `notified` once handled.
+    Returns the number of users alerted.
+    """
+    from db import usvisa_slots_col, usvisa_subscriptions_col
+    from notify import notify_user
+
+    since = datetime.utcnow() - timedelta(hours=max_age_hours)
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    reports = await usvisa_slots_col.find({
+        "notified": False, "detected_at": {"$gte": since},
+        "$or": [{"source": "telegram_channel"}, {"source": "user_report", "status": "approved"}],
+    }).to_list(length=500)
+    if not reports:
+        return 0
+
+    alerted = 0
+    async for sub in usvisa_subscriptions_col.find({}):
+        country = _sub_country(sub)
+        corridor = CORRIDORS.get(country, CORRIDORS["usa"])
+        matches = [
+            r for r in reports
+            if (r.get("country") or "usa") == country
+            and r.get("consulate") in (sub.get("consulates") or [])
+            and (r.get("visa_type") in (sub.get("visa_types") or []) or r.get("visa_type") in (None, "", "unknown"))
+            and (not r.get("date") or r["date"] >= today)
+        ]
+        if not matches:
+            continue
+        names = {c["id"]: c["city"] for c in corridor["consulates"]}
+        visa_names = {v["id"]: v["name"] for v in corridor["visa_types"]}
+        lines = [
+            f"{visa_names.get(r.get('visa_type'), 'Visa')} at {names.get(r['consulate'], r['consulate'])}"
+            + (f" on {r['date']}" if r.get("date") else "")
+            + (" (reported by a WeHive member)" if r.get("source") == "user_report" else "")
+            for r in matches[:5]
+        ]
+        more = f" and {len(matches) - 5} more" if len(matches) > 5 else ""
+        await notify_user(
+            sub["user_id"],
+            title=f"{corridor['name']} visa slot reported",
+            body="New openings reported: " + "; ".join(lines) + more
+                 + ". Openings go fast; book on the official site if one suits you.",
+            kind="slot_alert",
+            link="/us-visa-slots",
+            dedupe_key="slot:" + sub["user_id"] + ":" + ",".join(sorted(r["_id"] for r in matches))[:180],
+        )
+        alerted += 1
+
+    await usvisa_slots_col.update_many(
+        {"_id": {"$in": [r["_id"] for r in reports]}}, {"$set": {"notified": True}},
+    )
+    return alerted
 
 
 async def _slot_monitor_loop():
@@ -444,8 +649,19 @@ def start_slot_monitor():
         logger.info("US visa slot monitor scheduler started")
 
 
-def get_wait_times_for_display(country: str = "usa") -> dict:
+def _display_wait(corridor: dict, official: Optional[dict], cid: str, vt: dict) -> dict:
+    value = (official or {}).get("posts", {}).get(cid, {}).get(vt["id"])
+    if value:
+        return {"visa": vt["label"], "wait": value, "estimate": False}
+    return {"visa": vt["label"], "wait": corridor["wait_times"].get(vt["id"], {}).get(cid, "N/A"), "estimate": True}
+
+
+def get_wait_times_for_display(country: str = "usa", official: Optional[dict] = None) -> dict:
+    """Per-consulate wait times for a corridor. `official` (from load_official_for)
+    replaces the hand-maintained figures; a visa type the official source doesn't
+    cover keeps its estimate, flagged per entry."""
     corridor = CORRIDORS.get(country, CORRIDORS["usa"])
+    use_official = bool(official)
     result = {}
     for consul in corridor["consulates"]:
         cid = consul["id"]
@@ -454,16 +670,12 @@ def get_wait_times_for_display(country: str = "usa") -> dict:
             "city": consul["city"],
             "jurisdiction": consul.get("jurisdiction", ""),
             "booking_url": corridor["booking_url"],
-            # Hand-maintained published figures, not live availability.
-            "source": "estimate",
-            "is_estimate": True,
-            "wait_times": {
-                vt["id"]: {
-                    "visa": vt["label"],
-                    "wait": corridor["wait_times"].get(vt["id"], {}).get(cid, "N/A"),
-                }
-                for vt in corridor["visa_types"]
-            },
+            # Official figures when available; otherwise hand-maintained estimates.
+            "source": "official" if use_official else "estimate",
+            "is_estimate": not use_official,
+            "updated": official.get("updated") if use_official else None,
+            "wait_times": {vt["id"]: _display_wait(corridor, official if use_official else None, cid, vt)
+                           for vt in corridor["visa_types"]},
         }
     return result
 

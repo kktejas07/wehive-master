@@ -145,6 +145,8 @@ async def test_travel_destination_uses_country_name(monkeypatch):
 @pytest.mark.asyncio
 async def test_chat_context_includes_rag_and_kg(monkeypatch):
     import routes_chatbot
+    for name in ('lookup_country', 'search_universities', 'get_application_fee'):  # no real DB
+        monkeypatch.setattr(routes_chatbot, name, AsyncMock(return_value=None))
     monkeypatch.setattr(routes_chatbot, '_rag_context', AsyncMock(return_value='From our knowledge base:\n[x] chunk'))
     monkeypatch.setattr(google_kg, 'context_for', AsyncMock(return_value='Facts from Google Knowledge Graph:\n- U of T'))
     ctx = await routes_chatbot._gather_context('Tell me about University of Toronto')

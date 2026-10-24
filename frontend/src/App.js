@@ -60,6 +60,7 @@ const Hive = lazy(() => import('./pages/Hive'));
 const USVisaSlots = lazy(() => import('./pages/USVisaSlots'));
 const GlobalEvents = lazy(() => import('./pages/GlobalEvents'));
 const Blog = lazy(() => import('./pages/Blog'));
+const Community = lazy(() => import('./pages/Community'));
 const News = lazy(() => import('./pages/News'));
 
 function PricingLoader() {
@@ -114,14 +115,14 @@ function AnimatedRoutes() {
           <Route path="/account/applications/:id" element={<PrivateRoute><PageTransition><ApplicationDetail /></PageTransition></PrivateRoute>} />
           <Route path="/track/:id" element={<PageTransition><TrackStatus /></PageTransition>} />
           <Route path="/track" element={<PageTransition><TrackPortal /></PageTransition>} />
-          <Route path="/assessment" element={<PageTransition><VisaAssessment /></PageTransition>} />
+          <Route path="/assessment" element={<PrivateRoute><PageTransition><VisaAssessment /></PageTransition></PrivateRoute>} />
           <Route path="/destinations/:countryId" element={<PageTransition><CountryHub /></PageTransition>} />
-          <Route path="/visa-interview-sandbox" element={<PageTransition><VisaInterviewSandbox /></PageTransition>} />
+          <Route path="/visa-interview-sandbox" element={<PrivateRoute><PageTransition><VisaInterviewSandbox /></PageTransition></PrivateRoute>} />
           <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/newsletter/:action" element={<PageTransition><NewsletterStatus /></PageTransition>} />
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
-          <Route path="/visa-interview" element={<PageTransition><VisaInterview /></PageTransition>} />
+          <Route path="/visa-interview" element={<PrivateRoute><PageTransition><VisaInterview /></PageTransition></PrivateRoute>} />
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/programs/:universityId" element={<PageTransition><ProgramList /></PageTransition>} />
@@ -129,16 +130,17 @@ function AnimatedRoutes() {
           <Route path="/resources" element={<PageTransition><StudentResources /></PageTransition>} />
           <Route path="/intake-calendar" element={<PageTransition><IntakeCalendar /></PageTransition>} />
           <Route path="/shared/:token" element={<PageTransition><SharedShortlist /></PageTransition>} />
-          <Route path="/financial-tools" element={<PageTransition><FinancialTools /></PageTransition>} />
+          <Route path="/financial-tools" element={<PrivateRoute><PageTransition><FinancialTools /></PageTransition></PrivateRoute>} />
           <Route path="/agent-training" element={<PageTransition><AgentTraining /></PageTransition>} />
           <Route path="/emergency" element={<PageTransition><EmergencyCare /></PageTransition>} />
-          <Route path="/visa-scheduling" element={<PageTransition><VisaScheduling /></PageTransition>} />
-          <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
+          <Route path="/visa-scheduling" element={<PrivateRoute><PageTransition><VisaScheduling /></PageTransition></PrivateRoute>} />
+          <Route path="/visa-checker" element={<PrivateRoute><PageTransition><VisaChecker /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
+          <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
           <Route path="/hive" element={<PageTransition><Hive /></PageTransition>} />
-          <Route path="/us-visa-slots" element={<PageTransition><USVisaSlots /></PageTransition>} />
+          <Route path="/us-visa-slots" element={<PrivateRoute><PageTransition><USVisaSlots /></PageTransition></PrivateRoute>} />
           <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />

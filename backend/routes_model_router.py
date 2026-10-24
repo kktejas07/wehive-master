@@ -39,13 +39,13 @@ class OrchestratorAccountRequest(BaseModel):
 
 
 @router.get("/profiles")
-async def list_model_profiles():
+async def list_model_profiles(_user=Depends(get_current_user)):
     from model_router import list_profiles as lp
     return {"ok": True, "profiles": lp()}
 
 
 @router.get("/profiles/{profile_id}")
-async def get_model_profile(profile_id: str):
+async def get_model_profile(profile_id: str, _user=Depends(get_current_user)):
     from model_router import get_profile
     profile = get_profile(profile_id)
     if not profile:
@@ -63,13 +63,13 @@ async def chat_with_profile(req: ChatWithProfileRequest, user=Depends(get_curren
 
 
 @router.get("/circuit-breaker")
-async def circuit_breaker_status():
+async def circuit_breaker_status(_admin=Depends(get_current_admin_flex)):
     from model_router import circuit_breaker_status as cbs
     return {"ok": True, **cbs()}
 
 
 @router.get("/byok/providers")
-async def byok_providers():
+async def byok_providers(_user=Depends(get_current_user)):
     from byok_vault import providers_accepting_byok
     return {"ok": True, "providers": providers_accepting_byok()}
 
@@ -116,13 +116,13 @@ async def mcp_handle(request: dict, _admin=Depends(get_current_admin_flex)):
 
 
 @router.get("/mcp/tools")
-async def mcp_list_tools():
+async def mcp_list_tools(_admin=Depends(get_current_admin_flex)):
     from mcp.runtime import list_tools as mcp_tools
     return {"ok": True, "tools": mcp_tools()}
 
 
 @router.get("/mcp/status")
-async def mcp_runtime_status():
+async def mcp_runtime_status(_admin=Depends(get_current_admin_flex)):
     from mcp.runtime import TOOLS, RESOURCES, PROMPTS
     return {
         "ok": True,

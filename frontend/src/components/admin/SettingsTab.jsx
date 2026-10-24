@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Loader2, Save, Eye, EyeOff, Info,
-  CreditCard, MessageSquare, Globe, Bell, Mail, Smartphone, Cloud, ShieldCheck,
+  CreditCard, MessageSquare, Globe, Bell, Mail, Cloud, ShieldCheck,
   Palette, Upload as UploadIcon, Key, Server, ChevronDown,
 } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
@@ -127,13 +127,12 @@ function ToggleField({ label, tooltip, value, onChange }) {
   );
 }
 
-const NAMESPACES = ['firebase', 'razorpay', 'email', 'twilio', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'openwa'];
+const NAMESPACES = ['firebase', 'razorpay', 'email', 'auth_methods', 'general', 'notifications', 'r2', 'branding', 'openwa'];
 
 const SECTION_META = {
   firebase: { label: 'Firebase', icon: Globe, title: 'Firebase Authentication' },
   razorpay: { label: 'Razorpay', icon: CreditCard, title: 'Razorpay Payments' },
   email: { label: 'Email', icon: Mail, title: 'Email (SMTP / Postal)' },
-  twilio: { label: 'Twilio', icon: Smartphone, title: 'Twilio SMS / WhatsApp' },
   auth_methods: { label: 'Auth Methods', icon: ShieldCheck, title: 'Authentication Methods' },
   notifications: { label: 'Notifications', icon: Bell, title: 'Notifications (Telegram / Discord / WhatsApp)' },
   general: { label: 'General', icon: MessageSquare, title: 'General' },
@@ -170,12 +169,6 @@ const FIELDS = {
     { type: 'divider', key: 'postal_divider', label: 'Postal Settings', visibleWhen: { key: 'provider', value: 'postal' } },
     { type: 'text', key: 'postal_api_url', label: 'Postal API URL', tooltip: 'e.g. https://postal.yourdomain.com', visibleWhen: { key: 'provider', value: 'postal' } },
     { type: 'secret', key: 'postal_api_key', label: 'Postal API Key', tooltip: 'From Postal admin panel → Credentials', visibleWhen: { key: 'provider', value: 'postal' } },
-  ],
-  twilio: [
-    { type: 'secret', key: 'account_sid', label: 'Account SID', tooltip: 'Twilio Account SID from twilio.com/console' },
-    { type: 'secret', key: 'auth_token', label: 'Auth Token', tooltip: 'Twilio Auth Token — keep this confidential' },
-    { type: 'text', key: 'sms_from', label: 'SMS From Number', tooltip: 'Twilio phone number for SMS e.g. +1234567890' },
-    { type: 'text', key: 'whatsapp_from', label: 'WhatsApp From Number', tooltip: 'Twilio WhatsApp sender e.g. whatsapp:+14155238886' },
   ],
   auth_methods: [
     { type: 'toggle', key: 'google_enabled', label: 'Google Sign-In', tooltip: 'Enable Google one-click sign-in via Firebase Auth (must be enabled in Firebase Console first)' },

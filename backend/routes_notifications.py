@@ -1,7 +1,10 @@
 from __future__ import annotations
 import asyncio
 import json
+import secrets
+import time
 from datetime import datetime
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -52,19 +55,55 @@ async def delete_notif(notif_id: str, user=Depends(get_current_user)):
     return {'ok': True}
 
 
-_notif_subscribers: dict[str, asyncio.Queue] = {}
+# Live push. Per-process: with several workers a user only gets live events from
+# the worker their stream is connected to (they still see everything on reload).
+_notif_subscribers: dict[str, set[asyncio.Queue]] = {}
+# EventSource can't send an Authorization header, and a JWT in the URL ends up in
+# access logs. So the client trades its token for a single-use ticket (60s).
+_stream_tickets: dict[str, tuple[str, float]] = {}
+TICKET_TTL_SECONDS = 60
+
+
+def _to_json(notif: dict) -> str:
+    out = {k: (v.isoformat() if isinstance(v, datetime) else v) for k, v in notif.items()}
+    out['id'] = out.pop('_id', out.get('id'))
+    return json.dumps({'notif': out})
+
+
+def publish(user_id: str, notif: dict) -> None:
+    """Push a just-saved notification to the user's open streams (best effort)."""
+    for queue in list(_notif_subscribers.get(user_id, ())):
+        try:
+            queue.put_nowait(_to_json(notif))
+        except asyncio.QueueFull:
+            pass
+
+
+@router.post('/stream-ticket')
+async def stream_ticket(user=Depends(get_current_user)):
+    now = time.monotonic()
+    for t, (_, exp) in list(_stream_tickets.items()):
+        if exp < now:
+            _stream_tickets.pop(t, None)
+    ticket = secrets.token_urlsafe(24)
+    _stream_tickets[ticket] = (user['_id'], now + TICKET_TTL_SECONDS)
+    return {'ticket': ticket, 'expires_in': TICKET_TTL_SECONDS}
 
 
 @router.get('/stream')
-async def stream_notifications(user=Depends(get_current_user_optional)):
-    if not user:
+async def stream_notifications(ticket: Optional[str] = None, user=Depends(get_current_user_optional)):
+    uid = user['_id'] if user else None
+    if not uid and ticket:
+        entry = _stream_tickets.pop(ticket, None)  # single use
+        if entry and entry[1] >= time.monotonic():
+            uid = entry[0]
+    if not uid:
         return StreamingResponse(
             iter([f"data: {json.dumps({'type':'auth_required'})}\n\n"]),
             media_type='text/event-stream',
         )
-    queue = asyncio.Queue()
-    uid = user['_id']
-    _notif_subscribers[uid] = queue
+    queue: asyncio.Queue = asyncio.Queue(maxsize=100)
+    _notif_subscribers.setdefault(uid, set()).add(queue)
 
     async def event_generator():
         try:
@@ -77,7 +116,11 @@ async def stream_notifications(user=Depends(get_current_user_optional)):
         except GeneratorExit:
             pass
         finally:
-            _notif_subscribers.pop(uid, None)
+            subs = _notif_subscribers.get(uid)
+            if subs is not None:
+                subs.discard(queue)
+                if not subs:
+                    _notif_subscribers.pop(uid, None)
 
     return StreamingResponse(
         event_generator(),

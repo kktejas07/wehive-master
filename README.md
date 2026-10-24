@@ -30,7 +30,7 @@ uvicorn server:app --reload --port 8000
 `backend/server.py` loads `backend/.env`. `.env.example` (root, mirrored at
 `backend/.env.example`) lists every variable the backend reads, grouped by feature. Required:
 `MONGO_URL`, `JWT_SECRET` (long random string), `APP_ENV`. Everything else enables optional
-integrations (SMTP/Postal, Twilio, Telegram, Razorpay, R2 storage, LLM providers, ...).
+integrations (SMTP/Postal, OpenWA WhatsApp, Telegram, Razorpay, R2 storage, LLM providers, ...).
 
 **Firebase Admin:** set `FIREBASE_PROJECT_ID` and `FIREBASE_CREDENTIALS` (the service-account
 JSON as a single-line string). If unset, the backend falls back to the `settings.firebase`

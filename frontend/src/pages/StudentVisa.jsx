@@ -997,8 +997,8 @@ className="relative rounded-2xl overflow-hidden group bg-white"
               { icon: Sparkles, label: 'Visa Interview Simulator', desc: 'Practice mock embassy interviews with scoring', href: '/visa-interview' },
               { icon: Calculator, label: 'AI Scholarship Matcher', desc: 'Find scholarships matching your profile', color: 'bg-[hsl(var(--blue-700))]', action: 'scholarship' },
               { icon: Sparkles, label: 'AI University Recommender', desc: 'Get personalized AI university recommendations', color: 'bg-[hsl(var(--blue-700))]', action: 'recommender' },
-              { icon: Home, label: 'Cost of Living Calculator', desc: 'Compare tuition, rent, food, and transport costs', href: '/student-visa' },
-              { icon: FileText, label: 'AI SOP / LOR Writer', desc: 'Generate university-specific application documents', href: '/student-visa' },
+              { icon: Home, label: 'Cost of Living Calculator', desc: 'Compare monthly rent, food and transport across study cities', href: '/financial-tools?tool=budget' },
+              { icon: FileText, label: 'AI SOP / Cover Letter Writer', desc: 'Draft a statement of purpose for your submitted application', href: '/account?tab=aitools' },
             ].map(tool => {
               if (tool.action === 'scholarship') {
                 return (

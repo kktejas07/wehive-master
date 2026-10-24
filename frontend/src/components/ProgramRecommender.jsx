@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, GraduationCap, DollarSign, Globe, Star, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Sparkles, Loader2, GraduationCap, DollarSign, Globe, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { API } from '../context/AuthContext';
@@ -83,11 +83,6 @@ function UniCard({ uni, rank }) {
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        {uni.match_score && (
-          <div className="flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-0.5 text-[12px] font-bold">
-            <Star className="w-3 h-3" /> {uni.match_score}%
-          </div>
-        )}
         <Link to={`/university/${uni.id || uni._id}`} className="inline-flex items-center gap-1 text-[12px] font-bold text-[hsl(var(--blue-700))] hover:underline">
           View <ArrowRight className="w-3 h-3" />
         </Link>
@@ -146,11 +141,8 @@ export default function ProgramRecommender() {
         .filter(u => !form.countries.length || form.countries.includes(u.country))
         .filter(u => !form.courses.length || (u.courses && form.courses.some(c => u.courses.includes(c))))
         .filter(u => !form.budget || (u.tuition_usd || 0) <= form.budget)
-        .map(u => ({
-          ...u,
-          match_score: Math.max(60, Math.min(99, 99 - (u.rank || 300) / 10 + Math.random() * 15 | 0)),
-        }))
-        .sort((a, b) => b.match_score - a.match_score);
+        // Matches your filters, best-ranked first. (A "match %" used to be shown; it was partly random.)
+        .sort((a, b) => (a.rank || 9999) - (b.rank || 9999));
       setResults(unis);
     } catch (err) {
       console.error('University API unavailable, using cached data:', err);
@@ -158,11 +150,8 @@ export default function ProgramRecommender() {
         .filter(u => !form.countries.length || form.countries.includes(u.country))
         .filter(u => !form.courses.length || (u.courses && form.courses.some(c => u.courses.includes(c))))
         .filter(u => !form.budget || (u.tuition_usd || 0) <= form.budget)
-        .map(u => ({
-          ...u,
-          match_score: Math.max(60, Math.min(99, 99 - (u.rank || 300) / 10 + Math.random() * 15 | 0)),
-        }))
-        .sort((a, b) => b.match_score - a.match_score);
+        // Matches your filters, best-ranked first. (A "match %" used to be shown; it was partly random.)
+        .sort((a, b) => (a.rank || 9999) - (b.rank || 9999));
       if (!allUniversities.length) {
         toast({ title: 'API unavailable', description: 'Showing sample universities. Check that the backend is running.', variant: 'destructive' });
       }

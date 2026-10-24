@@ -7,12 +7,14 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from rate_limit import RateLimit
+from uni_query import country_code, course_category, find_relaxed, relaxed_note
 from pydantic import BaseModel
 
 from admin_auth import get_current_admin_flex
 from db import db, universities_col
 from ai_marketplace import marketplace
 from normalize import normalize_university
+from university_fit import fit
 
 router = APIRouter(prefix="/ai/universities", tags=["ai-universities"])
 
@@ -31,16 +33,15 @@ _llm_limiter = RateLimit(max_calls=10, window_seconds=600)
 @router.post("/recommend")
 async def recommend(profile: RecommenderProfile, _=Depends(_llm_limiter)):
     flt = {"tuition_usd": {"$lte": profile.budget}}
-    if profile.country: flt["country"] = profile.country.lower()
-    if profile.preferred_courses: flt["courses"] = {"$in": [c.lower() for c in profile.preferred_courses]}
+    if profile.country: flt["country"] = country_code(profile.country)
+    if profile.preferred_courses: flt["courses"] = {"$in": sorted({course_category(c) for c in profile.preferred_courses if c})}
     if profile.ielts_score: flt["ielts_min"] = {"$lte": profile.ielts_score}
     if profile.gre_required is not None: flt["gre_required"] = profile.gre_required
     if profile.gmat_required is not None: flt["gmat_required"] = profile.gmat_required
     if profile.scholarships_only: flt["scholarships"] = True
-    candidates = await universities_col.find(flt, {"_id": 0}).sort("rank", 1).to_list(length=100)
-    if not candidates:
-        flt.pop("tuition_usd", None)
-        candidates = await universities_col.find(flt, {"_id": 0}).sort("rank", 1).to_list(length=50)
+    candidates, dropped = await find_relaxed(
+        universities_col, flt,
+        ["tuition_usd", "gre_required", "gmat_required", "courses", "ielts_min", "scholarships", "country"])
     candidates = [normalize_university(dict(d)) for d in candidates]
     if not candidates: return {"recommendations": [], "note": "No matches."}
     top = candidates[:30]
@@ -56,10 +57,17 @@ Universities: {json.dumps(ctx["universities"])}"""
         recs = json.loads(text.group()) if text else []
         if not isinstance(recs, list): recs = []
     except: recs = []
-    rm = {r["id"]: r for r in recs}
-    for u in top: u.update(rm.get(u.get("id"), {"fit_score": 50, "reason": "", "strengths": []}))
+    rm = {r.get("id"): r for r in recs if isinstance(r, dict) and isinstance(r.get("fit_score"), (int, float))}
+    for u in top:
+        base = fit(u, budget=profile.budget, ielts=profile.ielts_score,
+                   courses=[course_category(c) for c in profile.preferred_courses] or None,
+                   want_scholarship=profile.scholarships_only)
+        ai = rm.get(u.get("id"))
+        u.update({**base, **{k: ai[k] for k in ("fit_score", "reason", "strengths") if ai and ai.get(k)}},
+                 method="ai" if ai else "rules")
     top.sort(key=lambda x: x.get("fit_score", 0) or 0, reverse=True)
-    return {"recommendations": top[:10], "total_candidates": len(candidates)}
+    return {"recommendations": top[:10], "total_candidates": len(candidates),
+            "method": "ai" if rm else "rules", "note": relaxed_note(dropped)}
 
 
 class QuestionBody(BaseModel):
@@ -88,12 +96,13 @@ class ScholarshipProfile(BaseModel):
 @router.post("/scholarship-match")
 async def scholarship_match(profile: ScholarshipProfile, _=Depends(_llm_limiter)):
     flt = {"scholarships": True}
-    if profile.country: flt["country"] = profile.country.lower()
-    if profile.field_of_study: flt["courses"] = {"$in": [profile.field_of_study.lower()]}
+    if profile.country: flt["country"] = country_code(profile.country)
+    if profile.field_of_study: flt["courses"] = {"$in": [course_category(profile.field_of_study)]}
     if profile.ielts_score: flt["ielts_min"] = {"$lte": profile.ielts_score}
-    candidates = await universities_col.find(flt, {"_id": 0}).sort("rank", 1).to_list(length=100)
+    candidates, dropped = await find_relaxed(universities_col, flt, ["courses", "ielts_min", "country"])
     candidates = [normalize_university(dict(d)) for d in candidates]
-    if not candidates: return {"matches": [], "note": "No matches."}
+    if not candidates:
+        return {"matches": [], "note": "No universities with scholarships are listed yet. WeHive can search for you."}
     top = candidates[:30]
     ctx = {"profile": profile.model_dump(), "universities": [
         {"id": u["id"], "name": u.get("name"), "tuition_usd": u.get("tuition_usd")} for u in top]}
@@ -104,10 +113,19 @@ Universities: {json.dumps(ctx["universities"])}"""
         text = re.search(r"\[\s*\{.*\}\s*\]", (await marketplace.chat("anonymous", system_prompt, user_prompt)).strip(), re.DOTALL)
         matches = json.loads(text.group()) if text else []
     except: matches = []
-    mm = {m["id"]: m for m in matches}
-    result = [{**u, **mm.get(u.get("id", ""), {"match_score": 50})} for u in candidates if u.get("id") in mm]
+    mm = {m.get("id"): m for m in matches if isinstance(m, dict) and isinstance(m.get("match_score"), (int, float))}
+    result = []
+    for u in top:
+        base = fit(u, budget=profile.budget, ielts=profile.ielts_score,
+                   courses=[course_category(profile.field_of_study)] if profile.field_of_study else None,
+                   want_scholarship=True)
+        ai = mm.get(u.get("id"))
+        result.append({**u, "match_score": ai["match_score"] if ai else base["fit_score"],
+                       "reason": (ai or {}).get("reason") or base["reason"], "strengths": base["strengths"],
+                       "scholarship_tips": (ai or {}).get("scholarship_tips", ""), "method": "ai" if ai else "rules"})
     result.sort(key=lambda x: x.get("match_score", 0) or 0, reverse=True)
-    return {"matches": result[:10], "total_candidates": len(candidates)}
+    return {"matches": result[:10], "total_candidates": len(candidates), "method": "ai" if mm else "rules",
+            "note": relaxed_note(dropped)}
 
 
 class AcceptanceQuery(BaseModel):

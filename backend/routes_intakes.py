@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException
+from rate_limit import RateLimit
 from db import db, universities_col
 from ai_marketplace import marketplace
 import json
@@ -17,8 +18,11 @@ async def get_intake_calendar():
     intakes = [doc async for doc in cursor]
     return {"intakes": intakes}
 
-@router.get("/recommendations")
-async def get_university_recommendations(country: str, track: str):
+_llm_limiter = RateLimit(max_calls=10, window_seconds=600)
+
+
+@router.get("/recommendations", dependencies=[Depends(_llm_limiter)])
+async def get_university_recommendations(country: str = Query(max_length=60), track: str = Query(max_length=60)):
     """Recommends top universities for a given country and track."""
     # Attempt to query local DB first for speed
     cl = country.lower()
@@ -56,7 +60,7 @@ async def get_university_recommendations(country: str, track: str):
         
     return {"universities": unis}
 
-@router.get("/insights")
+@router.get("/insights", dependencies=[Depends(_llm_limiter)])
 async def get_university_insights(university: str, country: str, track: str):
     """Uses LLM to dynamically generate admission insights and FAQs."""
     prompt = f"""
@@ -91,8 +95,16 @@ async def get_university_insights(university: str, country: str, track: str):
             data = json.loads(m.group(0))
         else:
             data = json.loads(reply)
-            
-        return data
+        if isinstance(data, dict) and isinstance(data.get("insights"), list) and data["insights"]:
+            return {**data, "source": "ai"}
     except Exception as e:
-        logger.error(f"Failed to generate insights: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate AI insights")
+        logger.warning("AI insights unavailable, answering from stored data: %s", e)
+    # No AI answer: build insights from the university's own record instead of failing.
+    from university_fit import insights_from_data
+    from db import universities_col
+    from normalize import normalize_university
+    import re as _re
+    doc = await universities_col.find_one({"name": {"$regex": f"^{_re.escape(university.strip())}$", "$options": "i"}}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="No details for this university yet. WeHive can look it up for you.")
+    return insights_from_data(normalize_university(dict(doc)), track)

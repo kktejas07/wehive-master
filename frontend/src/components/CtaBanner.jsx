@@ -6,9 +6,9 @@ import { useAuth } from '../context/AuthContext';
 import Reveal from './Reveal';
 
 const METRICS = [
-  { id: 'm1', k: 'Avg. processing', v: '7.2 days' },
-  { id: 'm2', k: 'On‑time rate', v: KEY_STATS.onTimeRate },
-  { id: 'm3', k: 'Refund cases', v: '<0.6%' },
+  { id: 'm1', k: 'Partner universities', v: KEY_STATS.universities },
+  { id: 'm2', k: 'Offices', v: `${KEY_STATS.offices} in India & US` },
+  { id: 'm3', k: 'Visa guide', v: `${KEY_STATS.countries} countries` },
 ];
 
 function MetricCard({ k, v }) {
