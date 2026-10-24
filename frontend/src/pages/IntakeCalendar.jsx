@@ -307,9 +307,9 @@ function InsightsModal({ uni, onClose }) {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`${API}/intakes/insights?university=${uni.name}&country=${uni.country}&track=${uni.track}`)
+    axios.get(`${API}/intakes/insights`, { params: { university: uni.name, country: uni.country, track: uni.track } })
       .then(res => setData(res.data))
-      .catch(err => console.error("Failed to load insights", err))
+      .catch(() => setData(null))
       .finally(() => setLoading(false));
   }, [uni]);
 
@@ -354,7 +354,7 @@ function InsightsModal({ uni, onClose }) {
             ) : data ? (
               <div className="space-y-6">
                 <div>
-                  <h4 className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-3">AI Insights</h4>
+                  <h4 className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-3">{data.source === 'wehive_data' ? 'Key facts' : 'AI Insights'}</h4>
                   <ul className="space-y-2">
                     {data.insights?.map((insight, idx) => (
                       <li key={idx} className="flex items-start gap-2.5 text-[14px] text-[hsl(var(--blue-900))] leading-relaxed">
@@ -377,8 +377,9 @@ function InsightsModal({ uni, onClose }) {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-10 text-muted-foreground text-sm">Failed to generate insights. Please try again.</div>
+              <div className="text-center py-10 text-muted-foreground text-sm">No details for this university yet. Ask WeHive and we'll look it up for you.</div>
             )}
+            {data?.note && <p className="mt-4 text-[12px] text-muted-foreground">{data.note}</p>}
           </div>
         </motion.div>
       </motion.div>

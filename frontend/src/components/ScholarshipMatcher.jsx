@@ -8,6 +8,7 @@ import {
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
+import { scholarshipFit } from '../lib/scholarship-eligibility';
 
 const CACHE_KEY = 'wehive_universities_cache';
 
@@ -42,19 +43,7 @@ const SCHOLARSHIP_TYPES = [
   },
 ];
 
-function calculateEligibility(uni, profile) {
-  if (!uni.scholarships) return null;
-  let score = 0;
-  const reasons = [];
-  if (profile.gpa >= 3.5) { score += 25; reasons.push('High GPA'); }
-  if (profile.gpa >= 3.0) { score += 15; reasons.push('Good GPA'); }
-  if (profile.ielts >= uni.ielts_min) { score += 20; reasons.push('Meets IELTS requirement'); }
-  if ((profile.gre || profile.gmat) && uni.gre_required) { score += 15; reasons.push('Test scores ready'); }
-  if (profile.extracurriculars) { score += 10; reasons.push('Extracurricular involvement'); }
-  if (profile.work_experience_years >= 2) { score += 10; reasons.push('Work experience'); }
-  if (profile.research_experience) { score += 10; reasons.push('Research experience'); }
-  return { score: Math.min(100, score), reasons, eligible: score >= 50 };
-}
+const calculateEligibility = scholarshipFit;
 
 export default function ScholarshipMatcher({ universities, compact = false }) {
   const [profile, setProfile] = useState({

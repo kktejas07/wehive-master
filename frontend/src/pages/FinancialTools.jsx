@@ -138,7 +138,10 @@ function AIFinancialAdvisor() {
       const res = await axios.post(`${API}/financials/insights`, { query: userMsg }, { headers: { Authorization: `Bearer ${token}` } });
       setChat(prev => [...prev, { role: 'ai', content: res.data.insight }]);
     } catch (e) {
-      setChat(prev => [...prev, { role: 'ai', content: "Sorry, I couldn't fetch an answer right now. Please try again." }]);
+      const msg = e?.response?.status === 401
+        ? 'Please sign in again to use the AI Financial Advisor.'
+        : "Sorry, I couldn't fetch an answer right now. Please try again in a minute.";
+      setChat(prev => [...prev, { role: 'ai', content: msg }]);
     }
     setLoading(false);
   };
@@ -337,7 +340,11 @@ const TOOLS = [
 ];
 
 export default function FinancialTools() {
-  const [active, setActive] = useState(null);
+  // ?tool=budget (e.g. from "Cost of Living Calculator") opens that tool directly.
+  const [active, setActive] = useState(() => {
+    const t = new URLSearchParams(window.location.search).get('tool');
+    return TOOLS.some(x => x.id === t) ? t : null;
+  });
   const current = TOOLS.find(t => t.id === active);
 
   return (
