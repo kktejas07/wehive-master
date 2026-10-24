@@ -39,7 +39,6 @@ export default function Home() {
       <AIServices />
       <HowItWorks />
       <EnquirySection />
-      <OnTimeGuarantee />
       <DealsSection />
       <Newsroom />
       <Faq />
