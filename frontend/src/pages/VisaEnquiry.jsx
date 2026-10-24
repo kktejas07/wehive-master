@@ -57,7 +57,7 @@ export default function VisaEnquiry() {
           </form>
         </div>
       </section>
-      <EnquirySection />
+      <EnquirySection source="visa-enquiry" />
       <Footer />
     </div>
   );

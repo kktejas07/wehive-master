@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import {
   Plane, Briefcase, GraduationCap, HardHat, Users, Home, ArrowRightLeft, HelpCircle, Loader2, CheckCircle2,
 } from 'lucide-react';
 import { API } from '../context/AuthContext';
-import { COUNTRIES } from '../data/mock';
+import { COUNTRIES, BRANCHES } from '../data/mock';
 import Reveal from './Reveal';
 
 const PURPOSES = [
@@ -17,7 +18,7 @@ const PURPOSES = [
   { id: 'transit', label: 'Transit', hint: 'Passing through', Icon: ArrowRightLeft },
   { id: 'other', label: 'Something else', hint: 'Tell us below', Icon: HelpCircle },
 ];
-const EMPTY = { purpose: '', name: '', email: '', phone: '', destination: '', travel_date: '', travellers: 1, message: '', consent: false, website: '' };
+const EMPTY = { purpose: '', name: '', email: '', phone: '', destination: '', travel_date: '', travellers: 1, message: '', branch: '', consent: false, website: '' };
 
 const inputCls = 'w-full h-12 rounded-xl border border-[hsl(var(--border))] bg-white px-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors hover:border-[hsl(var(--blue-200))] focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20';
 const labelCls = 'block text-[14px] font-semibold text-[hsl(var(--blue-900))] mb-1.5';
@@ -33,8 +34,11 @@ function detailText(d) {
   return 'Something went wrong. Please try again.';
 }
 
-export default function EnquirySection() {
-  const [form, setForm] = useState(EMPTY);
+export default function EnquirySection({ source = 'landing' }) {
+  // ?branch=habsiguda pre-selects the referring location, e.g. from a QR code at that branch.
+  const [params] = useSearchParams();
+  const initialBranch = BRANCHES.some((b) => b.id === params.get('branch')) ? params.get('branch') : '';
+  const [form, setForm] = useState({ ...EMPTY, branch: initialBranch });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(null);
@@ -57,10 +61,11 @@ export default function EnquirySection() {
         travel_date: form.travel_date || null,
         travellers: Number(form.travellers) || 1,
         message: form.message.trim() || null,
-        source: 'landing',
+        branch: form.branch || null,
+        source,
       });
       setSent({ name: form.name.trim().split(' ')[0], destination: form.destination.trim() });
-      setForm(EMPTY);
+      setForm({ ...EMPTY, branch: initialBranch });
     } catch (err) {
       setError(err?.response?.status === 429
         ? 'Too many enquiries from this connection. Please try again in a few minutes.'
@@ -153,6 +158,13 @@ export default function EnquirySection() {
                     <label htmlFor="enq-travellers" className={labelCls}>Travellers</label>
                     <select id="enq-travellers" value={form.travellers} onChange={set('travellers')} className={inputCls}>
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n === 10 ? '10+' : n}</option>)}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="enq-branch" className={labelCls}>Referred by location</label>
+                    <select id="enq-branch" value={form.branch} onChange={set('branch')} className={inputCls}>
+                      <option value="">None / found you online</option>
+                      {BRANCHES.map((b) => <option key={b.id} value={b.id}>{b.city}</option>)}
                     </select>
                   </div>
                   <div className="sm:col-span-2">

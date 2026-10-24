@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Send, User, Mail, Phone, MessageSquare, ChevronDown } from 'lucide-react';
+import { Loader2, Send, User, Mail, Phone, MessageSquare, MessageCircle, ChevronDown } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useToast } from '../hooks/use-toast';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
-import { BRAND } from '../data/mock';
+import { BRAND, BRANCHES } from '../data/mock';
+
+const WHATSAPP = [
+  { id: 'wa1', label: 'WhatsApp (primary)', number: BRAND.whatsapp, raw: BRAND.whatsappRaw },
+  { id: 'wa2', label: 'WhatsApp (secondary)', number: BRAND.whatsappSecondary, raw: BRAND.whatsappSecondaryRaw },
+];
 
 const SUBJECTS = [
   { id: 'general', label: 'General inquiry' },
@@ -18,12 +23,6 @@ const SUBJECTS = [
 ];
 
 const FIELD_CLS = 'w-full h-12 rounded-xl border border-[hsl(var(--border))] bg-white pl-11 pr-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors duration-200 hover:border-[hsl(var(--blue-200))] focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20';
-
-const OFFICES = [
-  { id: 'hyd', title: 'Hyderabad', address: 'WeHive, Flat 201, Mathrusree Nagar, Miyapur, Hyderabad, Telangana 500049', map: 'https://maps.google.com/?q=WeHive+Flat+201+Mathrusree+Nagar+Miyapur+Hyderabad+Telangana+500049' },
-  { id: 'bll', title: 'Ballari', address: 'Shanti Plaza, 1st floor, Moka Road, Gandhi Nagar, Ballari, Karnataka 583103', map: 'https://maps.google.com/?q=Shanti+Plaza+Moka+Road+Gandhi+Nagar+Ballari+Karnataka+583103' },
-  { id: 'ewr', title: 'East Windsor, NJ', address: 'Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512', map: 'https://maps.google.com/?q=Building+B+339+Princeton-Hightstown+Road+East+Windsor+NJ+08512' },
-];
 
 function FormField({ label, children, required }) {
   return (
@@ -202,6 +201,14 @@ export default function Contact() {
                       {BRAND.phone}
                     </a>
                   </li>
+                  {WHATSAPP.map((w) => (
+                    <li key={w.id}>
+                      <a href={`https://wa.me/${w.raw}`} target="_blank" rel="noopener noreferrer" aria-label={`${w.label}: ${w.number}`} className="flex items-center gap-3 text-[15px] text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
+                        <span className="icon-tile h-9 w-9 rounded-lg"><MessageCircle className="w-4 h-4" aria-hidden="true" /></span>
+                        <span>{w.number} <span className="text-[13px] text-muted-foreground">· {w.label}</span></span>
+                      </a>
+                    </li>
+                  ))}
                   <li>
                     <a href={`mailto:${BRAND.email}`} className="flex items-center gap-3 text-[15px] text-[hsl(var(--blue-900))] hover:text-[hsl(var(--blue-700))] transition-colors duration-200">
                       <span className="icon-tile h-9 w-9 rounded-lg"><Mail className="w-4 h-4" aria-hidden="true" /></span>
@@ -218,18 +225,28 @@ export default function Contact() {
               <div className="card-surface p-6">
                 <h2 className="h-card">Visit us</h2>
                 <ul className="mt-2 divide-y divide-[hsl(var(--border))]">
-                  {OFFICES.map((o) => (
+                  {BRANCHES.map((o) => (
                     <li key={o.id} className="py-4 last:pb-0">
-                      <div className="text-[15px] font-semibold text-[hsl(var(--blue-900))]">{o.title}</div>
-                      <p className="mt-1 text-[14px] text-muted-foreground leading-relaxed">{o.address}</p>
-                      <a
-                        href={o.map}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-flex items-center gap-1 text-[14px] link-primary"
-                      >
-                        Open in Maps <span aria-hidden="true">→</span>
-                      </a>
+                      <div className="flex items-center gap-2 text-[15px] font-semibold text-[hsl(var(--blue-900))]">
+                        {o.city}
+                        {o.isNew && <span className="text-[11px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 bg-emerald-50 text-emerald-700">New</span>}
+                        {!o.address && <span className="text-[11px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 bg-amber-50 text-amber-700">Coming soon</span>}
+                      </div>
+                      {o.address ? (
+                        <>
+                          <p className="mt-1 text-[14px] text-muted-foreground leading-relaxed">{o.address}</p>
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-flex items-center gap-1 text-[14px] link-primary"
+                          >
+                            Open in Maps <span aria-hidden="true">→</span>
+                          </a>
+                        </>
+                      ) : (
+                        <p className="mt-1 text-[14px] text-muted-foreground leading-relaxed">Opening soon.</p>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -239,7 +256,7 @@ export default function Contact() {
                 <h2 className="h-card">Chat with Hive</h2>
                 <p className="mt-1.5 text-[15px] text-muted-foreground">Our AI visa assistant is available 24/7 to answer your questions instantly.</p>
                 <a
-                  href={`https://wa.me/${BRAND.phoneRaw.slice(1)}`}
+                  href={`https://wa.me/${BRAND.whatsappRaw}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-4 inline-flex items-center justify-center h-11 px-4 rounded-xl btn-outline text-[14px] font-semibold"

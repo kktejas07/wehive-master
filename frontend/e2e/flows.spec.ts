@@ -188,3 +188,19 @@ test('landing enquiry shows the server validation message', async ({ page, api }
   await page.getByTestId('enquiry-submit').click();
   await expect(page.getByTestId('enquiry-error')).toHaveText('Enter a valid phone number with country code, e.g. +91 98765 43210');
 });
+
+test('free consultation records the referring location from ?branch=', async ({ page, api }) => {
+  api.on('POST', /^\/leads\/enquiry$/, { ok: true, id: 'lead-10' }, 201);
+  await page.goto('/free-consultation?branch=habsiguda');
+  const form = page.getByTestId('enquiry-form');
+  await expect(form.getByLabel('Referred by location')).toHaveValue('habsiguda');
+  await page.getByTestId('enquiry-purpose-tourist').click();
+  await form.getByLabel('Full name *').fill('Priya Sharma');
+  await form.getByLabel('Email *').fill('priya@example.com');
+  await form.getByLabel('Phone / WhatsApp *').fill('+91 98765 43210');
+  await form.getByLabel('Destination country *').fill('Canada');
+  await page.getByTestId('enquiry-consent').check();
+  await page.getByTestId('enquiry-submit').click();
+  await expect(page.getByTestId('enquiry-success')).toBeVisible();
+  expect(api.calls.find((c) => c.path === '/leads/enquiry')?.body).toMatchObject({ branch: 'habsiguda', source: 'free-consultation' });
+});

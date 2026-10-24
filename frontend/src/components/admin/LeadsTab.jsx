@@ -6,6 +6,9 @@ import { AdminHeader, Panel } from './AdminShell';
 import Pagination from './Pagination';
 import { useToast } from '../../hooks/use-toast';
 import { useDebouncedValue } from '../../hooks/use-debounced-value';
+import { BRANCHES } from '../../data/mock';
+
+const BRANCH_LABEL = Object.fromEntries(BRANCHES.map((b) => [b.id, b.city]));
 
 const PAGE_SIZE = 25;
 const STATUSES = ['new', 'contacted', 'closed'];
@@ -29,6 +32,7 @@ export default function LeadsTab() {
   const { toast } = useToast();
   const [status, setStatus] = useState('new');
   const [purpose, setPurpose] = useState('all');
+  const [branch, setBranch] = useState('all');
   const [q, setQ] = useState('');
   const dq = useDebouncedValue(q.trim());
   const [skip, setSkip] = useState(0);
@@ -39,21 +43,21 @@ export default function LeadsTab() {
   const [busy, setBusy] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  useEffect(() => { setSkip(0); }, [dq, status, purpose]);
+  useEffect(() => { setSkip(0); }, [dq, status, purpose, branch]);
 
   const seq = useRef(0);
   const load = useCallback(async () => {
     const id = ++seq.current;
     setError('');
     try {
-      const r = await adminClient(token).get('/leads', { params: { status, purpose, q: dq || undefined, limit: PAGE_SIZE, skip } });
+      const r = await adminClient(token).get('/leads', { params: { status, purpose, branch, q: dq || undefined, limit: PAGE_SIZE, skip } });
       if (id === seq.current) setData(r.data);
     } catch (e) {
       if (id !== seq.current) return;
       setData({ items: [], total: 0 });
       setError(e?.response?.data?.detail || e.message);
     }
-  }, [token, status, purpose, dq, skip]);
+  }, [token, status, purpose, branch, dq, skip]);
 
   useEffect(() => { setData(null); load(); }, [load]);
 
@@ -130,6 +134,16 @@ export default function LeadsTab() {
           <option value="all">All purposes</option>
           {Object.entries(PURPOSE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
+        <select
+          data-testid="admin-leads-branch"
+          aria-label="Filter by referring location"
+          value={branch}
+          onChange={(e) => setBranch(e.target.value)}
+          className="h-9 px-2 rounded-xl bg-white/5 border border-white/10 text-[13px] text-white"
+        >
+          <option value="all">All locations</option>
+          {BRANCHES.map((b) => <option key={b.id} value={b.id}>{b.city}</option>)}
+        </select>
         <div className="relative flex-1 min-w-[220px]">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -174,6 +188,11 @@ export default function LeadsTab() {
                     {l.purpose && (
                       <span data-testid={`admin-lead-purpose-${l.id}`} className="rounded-full px-2 py-0.5 text-[11px] font-semibold bg-blue-500/15 text-blue-200">
                         {PURPOSE_LABEL[l.purpose] || l.purpose}{l.destination ? ` · ${l.destination}` : ''}
+                      </span>
+                    )}
+                    {l.branch && (
+                      <span data-testid={`admin-lead-branch-${l.id}`} className="rounded-full px-2 py-0.5 text-[11px] font-semibold bg-amber-500/15 text-amber-200">
+                        {BRANCH_LABEL[l.branch] || l.branch}
                       </span>
                     )}
                   </div>
