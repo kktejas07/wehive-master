@@ -4,8 +4,44 @@ shared by the local template engine (local_llm) and Hive/Stark
 """
 
 import re
+from typing import Optional
 
 RE_COUNTRY = re.compile(r"\b(us|uk|ca|au|de|fr|it|es|jp|sg|ae|th|ch|np|bt|pl|at|pt|gr|hr)\b", re.I)
+
+# Full country names → 2-letter ids (RE_COUNTRY alone can't match "Japan").
+# India is deliberately absent: We Hive serves Indian passport holders going
+# abroad, and \bin\b would false-positive on the English word "in".
+COUNTRY_ALIASES = {
+    "united states": "us", "usa": "us", "america": "us",
+    "united kingdom": "uk", "britain": "uk", "great britain": "uk", "england": "uk",
+    "canada": "ca", "australia": "au", "germany": "de", "france": "fr",
+    "italy": "it", "spain": "es", "japan": "jp", "singapore": "sg",
+    "uae": "ae", "united arab emirates": "ae", "dubai": "ae",
+    "thailand": "th", "switzerland": "ch", "nepal": "np", "bhutan": "bt",
+    "poland": "pl", "austria": "at", "portugal": "pt", "greece": "gr",
+    "croatia": "hr", "new zealand": "nz", "bahrain": "bh", "egypt": "eg",
+    "fiji": "fj", "indonesia": "id", "bali": "id", "kenya": "ke",
+    "cambodia": "kh", "kuwait": "kw", "laos": "la", "sri lanka": "lk",
+    "myanmar": "mm", "mauritius": "mu", "maldives": "mv", "malaysia": "my",
+    "oman": "om", "russia": "ru", "saudi arabia": "sa", "seychelles": "sc",
+    "turkey": "tr", "tanzania": "tz", "uganda": "ug", "vietnam": "vn",
+    "zimbabwe": "zw",
+}
+RE_COUNTRY_NAME = re.compile(
+    r"\b(" + "|".join(re.escape(k) for k in sorted(COUNTRY_ALIASES, key=len, reverse=True)) + r")\b",
+    re.I,
+)
+
+
+def extract_country_id(text: str) -> Optional[str]:
+    """Full country names first (unambiguous), then bare 2-letter codes."""
+    if not text:
+        return None
+    m = RE_COUNTRY_NAME.search(text)
+    if m:
+        return COUNTRY_ALIASES[m.group(1).lower()]
+    codes = RE_COUNTRY.findall(text)
+    return codes[0].lower() if codes else None
 
 
 # Canonical intents. Each pattern match adds 2 points (capped at 10); intents

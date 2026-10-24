@@ -490,10 +490,10 @@ async def local_chat(query: str, context: str = "", conversation_history: str = 
     3. Fallback
     """
     params = {}
-    from agents.orchestrator import RE_COUNTRY
-    codes = RE_COUNTRY.findall(query)
-    if codes:
-        params["country_id"] = codes[0].lower()
+    from agents.orchestrator import extract_country_id
+    country_id = extract_country_id(query)
+    if country_id:
+        params["country_id"] = country_id
     elif context:
         for line in context.split("\n"):
             m = re.match(r"Country:\s*(\w+)", line)
