@@ -1,3 +1,4 @@
+import asyncio
 import re
 import json
 import logging
@@ -405,11 +406,9 @@ async def on_startup():
     except Exception as e:
         logger.exception('Agent tool registration failed: %s', e)
 
-    try:
-        from bootstrap_rag import bootstrap_rag_and_prompts
-        await bootstrap_rag_and_prompts(db)
-    except Exception as e:
-        logger.exception('RAG/prompts bootstrap failed: %s', e)
+    # In the background: loading BGE-M3 and (re)ingesting an empty vector store can
+    # take minutes on CPU, and the app works without RAG until it finishes.
+    app.state.rag_bootstrap = asyncio.create_task(_warm_up_and_bootstrap_rag())
 
     try:
         ev_count = await db['events'].estimated_document_count()
