@@ -88,6 +88,17 @@ test('visa checker uses the backend Sherpa proxy, never joinsherpa.io directly',
   expect(sherpaHits).toEqual([]);
 });
 
+test('visa enquiry hands passport and destination to the public visa checker', async ({ page }) => {
+  await page.goto('/visa-enquiry');
+  await page.getByLabel('Travelling to').selectOption('uk');
+  await page.getByLabel('Passport country').selectOption('us');
+  await page.getByRole('button', { name: 'Check requirements' }).click();
+
+  await expect(page).toHaveURL(/\/visa-checker\?from=US&to=GB$/);
+  await expect(page.getByRole('button', { name: /^Nationality: United States/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: /^Destination: United Kingdom/ })).toHaveAttribute('aria-pressed', 'true');
+});
+
 test('unknown admin sub-path redirects to the admin overview', async ({ page, api }) => {
   api.on('GET', /^\/admin-auth\/me$/, { id: 'a-e2e-1', email: 'admin@example.com', name: 'E2E Admin', role: 'super_admin' });
   await page.addInitScript(() => window.localStorage.setItem('wehive_admin_token', 'e2e-admin-token'));

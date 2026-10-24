@@ -188,7 +188,23 @@ export default function VisaDetail() {
       <HowItWorks />
       <VisaFaqSection countryName={country.name} />
       <VisaComparison countryName={country.name} />
-      <AppointmentMonitor countryName={country.name} />
+      {isAuthed ? (
+        <AppointmentMonitor countryName={country.name} />
+      ) : (
+        <section className="py-12 bg-white border-t border-[hsl(var(--border))]">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between gap-4 flex-wrap">
+            <p className="text-[15px] text-[hsl(var(--blue-900))]">
+              Sign in to monitor {country.name} appointment slots and get alerts when they open.
+            </p>
+            <Button
+              onClick={() => navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`)}
+              className="rounded-xl btn-accent text-white h-11 px-6 font-bold"
+            >
+              Sign in
+            </Button>
+          </div>
+        </section>
+      )}
       <GuidedFormSection countryName={country.name} />
       <InterviewPrep countryName={country.name} />
       <EligibilityChecker countryName={country.name} />
