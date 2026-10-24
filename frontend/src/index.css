@@ -577,11 +577,73 @@ label[class*="focus-within:"]:has(:focus-visible) {
   translate: 0 1px;
 }
 
-/* WeHiveLoader: plane orbits the globe; globe breathes. */
-@keyframes wh-orbit { to { transform: rotate(360deg); } }
-@keyframes wh-pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
-.wh-orbit { transform-box: view-box; transform-origin: 48px 48px; animation: wh-orbit 1.8s linear infinite; }
-.wh-pulse { animation: wh-pulse 1.8s ease-in-out infinite; }
+/* WeHiveLoader: three brand loaders (thinking, flight plan, radar) from the
+   design team's handoff. Fin/plane paths are the logo; keep them as-is. */
+.wh-loader { --wh-blue: #1450a0; --wh-red: #d42a2a; --wh-fin: #e0262b; --wh-ink: #0e1b3d; font-family: 'Montserrat', sans-serif; color: var(--wh-ink); }
+.wh-loader, .wh-loader * { box-sizing: border-box; }
+.wh-loader .fin .body { fill: var(--wh-fin); }
+.wh-loader .plane { fill: #fff; }
+.wh-loader-in { animation: wh-fade-in .2s ease .15s both; }
+@keyframes wh-fade-in { from { opacity: 0; } }
+@keyframes wh-spin { to { transform: rotate(360deg); } }
+@keyframes wh-blink { 50% { opacity: .4; } }
+
+.wh-think { display: flex; align-items: center; gap: 18px; font-size: clamp(18px, 3.4vw, 26px); }
+.wh-think .fin { height: 2.2em; width: auto; flex-shrink: 0; animation: wh-breathe 2.4s ease-in-out infinite; }
+.wh-think .w { position: relative; height: 1.4em; min-width: min(15em, 70vw); }
+.wh-think .w span { position: absolute; left: 0; top: 0; white-space: nowrap; font-weight: 500; opacity: 0; background: linear-gradient(100deg, var(--wh-ink) 35%, var(--wh-red) 50%, var(--wh-ink) 65%) 100% 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: wh-wd 8s ease infinite, wh-shim 1.8s linear infinite; }
+.wh-think .w span:only-child { opacity: 1; animation: wh-shim 1.8s linear infinite; }
+.wh-think .w span:nth-child(2) { animation-delay: 2s, 0s; }
+.wh-think .w span:nth-child(3) { animation-delay: 4s, 0s; }
+.wh-think .w span:nth-child(4) { animation-delay: 6s, 0s; }
+@keyframes wh-breathe { 50% { transform: scale(.88) rotate(-4deg); } }
+@keyframes wh-shim { to { background-position: 0 0; } }
+@keyframes wh-wd { 0% { opacity: 0; transform: translateY(.4em); } 3%, 23% { opacity: 1; transform: none; } 26%, 100% { opacity: 0; transform: translateY(-.4em); } }
+
+.wh-plan { font-size: 16px; padding: 0 40px; }
+.wh-plan .rt { position: relative; width: min(calc(100vw - 112px), 720px); height: 96px; }
+.wh-plan .base { position: absolute; left: 0; right: 0; top: 40px; border-top: 2px dashed #cdd3e6; }
+.wh-plan .prog { position: absolute; left: 0; right: 0; top: 39px; height: 3px; background: linear-gradient(90deg, var(--wh-blue), var(--wh-red)); transform-origin: left; transform: scaleX(0); animation: wh-pg 8s linear infinite; }
+.wh-plan .n { position: absolute; top: 30px; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%; background: #fff; border: 3px solid #cdd3e6; }
+.wh-plan .n b { position: absolute; top: 36px; left: 50%; transform: translateX(-50%); font-weight: 500; font-size: 14px; white-space: nowrap; letter-spacing: .06em; margin-left: -3px; }
+.wh-plan .jet { position: absolute; top: 40px; left: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px; fill: var(--wh-red); transform: rotate(90deg); animation: wh-pj 8s linear infinite; }
+.wh-plan .cap { margin-top: 4px; text-align: center; font-weight: 300; letter-spacing: .2em; font-size: 13px; }
+@media (max-width: 480px) {
+  .wh-plan { padding: 0 28px; }
+  .wh-plan .rt { width: calc(100vw - 88px); }
+  .wh-plan .n b { font-size: 11px; letter-spacing: 0; margin-left: 0; }
+  .wh-plan .cap, .wh-radar .tag { font-size: 11px; letter-spacing: .12em; }
+}
+.wh-plan .n:nth-child(3) { left: 0; animation: wh-l0 8s linear infinite; }
+.wh-plan .n:nth-child(4) { left: 25%; animation: wh-l1 8s linear infinite; }
+.wh-plan .n:nth-child(5) { left: 50%; animation: wh-l2 8s linear infinite; }
+.wh-plan .n:nth-child(6) { left: 75%; animation: wh-l3 8s linear infinite; }
+.wh-plan .n:nth-child(7) { left: 100%; animation: wh-l4 8s linear infinite; }
+@keyframes wh-pg { 0% { transform: scaleX(0); opacity: 1; } 85% { transform: scaleX(1); opacity: 1; } 95%, 100% { transform: scaleX(1); opacity: 0; } }
+@keyframes wh-pj { 0% { left: 0; opacity: 1; } 85% { left: 100%; opacity: 1; } 95%, 100% { left: 100%; opacity: 0; } }
+@keyframes wh-l0 { 0% { background: #fff; border-color: #cdd3e6; } 1%, 92% { background: var(--wh-blue); border-color: var(--wh-blue); } 100% { background: #fff; border-color: #cdd3e6; } }
+@keyframes wh-l1 { 0%, 20.25% { background: #fff; border-color: #cdd3e6; } 22.25%, 92% { background: var(--wh-blue); border-color: var(--wh-blue); } 100% { background: #fff; border-color: #cdd3e6; } }
+@keyframes wh-l2 { 0%, 41.5% { background: #fff; border-color: #cdd3e6; } 43.5%, 92% { background: var(--wh-blue); border-color: var(--wh-blue); } 100% { background: #fff; border-color: #cdd3e6; } }
+@keyframes wh-l3 { 0%, 62.75% { background: #fff; border-color: #cdd3e6; } 64.75%, 92% { background: var(--wh-red); border-color: var(--wh-red); } 100% { background: #fff; border-color: #cdd3e6; } }
+@keyframes wh-l4 { 0%, 84% { background: #fff; border-color: #cdd3e6; } 86%, 92% { background: var(--wh-red); border-color: var(--wh-red); } 100% { background: #fff; border-color: #cdd3e6; } }
+
+.wh-radar { display: flex; flex-direction: column; align-items: center; gap: 22px; font-size: 16px; }
+.wh-radar .rd { position: relative; width: var(--wh-radar, 240px); height: var(--wh-radar, 240px); border-radius: 50%; border: 2px solid #dfe4f1; background: radial-gradient(circle, transparent 24%, #e6eaf5 24.5%, transparent 25.5%, transparent 49%, #e6eaf5 49.5%, transparent 50.5%, transparent 74%, #e6eaf5 74.5%, transparent 75.5%); display: grid; place-items: center; }
+.wh-radar .rd::before, .wh-radar .rd::after { content: ""; position: absolute; background: #e6eaf5; }
+.wh-radar .rd::before { left: 50%; top: 0; bottom: 0; width: 1px; }
+.wh-radar .rd::after { top: 50%; left: 0; right: 0; height: 1px; }
+.wh-radar .sw { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(212, 42, 42, 0) 0deg, rgba(212, 42, 42, 0) 270deg, rgba(212, 42, 42, .35) 360deg); animation: wh-spin 2.6s linear infinite; }
+.wh-radar .fin { height: 27%; width: auto; position: relative; }
+.wh-radar .bl { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--wh-blue); opacity: 0; animation: wh-blip 2.6s linear infinite; }
+.wh-radar .tag { font-weight: 300; letter-spacing: .2em; font-size: 13px; text-align: center; padding: 0 16px; animation: wh-blink 2.6s ease-in-out infinite; }
+@keyframes wh-blip { 0% { opacity: 0; transform: scale(.5); } 8% { opacity: 1; transform: scale(1.4); } 40%, 100% { opacity: 0; transform: scale(1); } }
+
+/* Reduced motion: the global rule below freezes animations on their last frame,
+   which would hide every status line, so show the first line still instead. */
+@media (prefers-reduced-motion: reduce) {
+  .wh-loader * { animation: none !important; }
+  .wh-think .w span:first-child { opacity: 1; }
+}
 
 /* Honour the OS "reduce motion" setting for CSS animations/transitions
    (framer-motion is handled by <MotionConfig reducedMotion="user"> in index.js). */
