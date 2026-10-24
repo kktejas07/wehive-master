@@ -1,6 +1,6 @@
 import { CloudOff, Inbox, type LucideIcon } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 
 import { radius, spacing } from '@/core/theme/tokens';
@@ -8,15 +8,11 @@ import { useTheme } from '@/core/theme/use-theme';
 import { AnimatedIcon } from '@/core/ui/animated-icon';
 import { Button } from '@/core/ui/button';
 import { Text } from '@/core/ui/text';
+import { WehiveLoader } from '@/core/ui/wehive-loader';
 
-export function Loading({ label = 'Loading…' }: { label?: string }) {
-  const { c } = useTheme();
-  return (
-    <View style={styles.center} accessibilityLiveRegion="polite">
-      <ActivityIndicator color={c.primary} />
-      <Text tone="muted">{label}</Text>
-    </View>
-  );
+/** Full-screen brand loader; rotates between the thinking, flight-plan and radar designs. */
+export function Loading({ label }: { label?: string }) {
+  return <WehiveLoader label={label} />;
 }
 
 /** Shimmering placeholder rows while a list loads. */
