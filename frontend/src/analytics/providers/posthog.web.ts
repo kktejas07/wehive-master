@@ -9,6 +9,8 @@ import { UserTraits } from '../types';
 class PostHogWebProvider implements AnalyticsProvider {
   name = 'posthog';
   private initialized = false;
+  // True only after posthog.init() ran; before that the snippet stub has no capture/identify.
+  private ready = false;
 
   init() {
     if (this.initialized) return;
@@ -28,6 +30,7 @@ class PostHogWebProvider implements AnalyticsProvider {
             maskTextSelector: '[data-ph-mask]',
           },
         });
+        this.ready = true;
         if (process.env.NODE_ENV !== 'production') {
           console.info('[Analytics Provider 🦔] PostHog Web Provider Initialized');
         }
@@ -38,7 +41,7 @@ class PostHogWebProvider implements AnalyticsProvider {
   }
 
   logEvent(eventName: string, properties: Record<string, any>) {
-    if (typeof window !== 'undefined' && (window as any).posthog) {
+    if (this.ready) {
       try {
         // Enforce no '$' prefix on custom properties
         const safeProps: Record<string, any> = {};
@@ -55,7 +58,7 @@ class PostHogWebProvider implements AnalyticsProvider {
   }
 
   setUserId(hashedUserId: string) {
-    if (typeof window !== 'undefined' && (window as any).posthog) {
+    if (this.ready) {
       try {
         (window as any).posthog.identify(hashedUserId);
       } catch (e) {}
@@ -63,7 +66,7 @@ class PostHogWebProvider implements AnalyticsProvider {
   }
 
   setUserProperties(traits: UserTraits) {
-    if (typeof window !== 'undefined' && (window as any).posthog) {
+    if (this.ready) {
       try {
         (window as any).posthog.setPersonProperties(traits);
       } catch (e) {}
@@ -71,7 +74,7 @@ class PostHogWebProvider implements AnalyticsProvider {
   }
 
   reset() {
-    if (typeof window !== 'undefined' && (window as any).posthog) {
+    if (this.ready) {
       try {
         (window as any).posthog.reset();
       } catch (e) {}
