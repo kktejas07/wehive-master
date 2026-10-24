@@ -6,7 +6,7 @@ const ROUTES = [
   '/', '/about', '/pricing', '/login', '/signup', '/track', '/assessment', '/help', '/contact',
   '/student-visa', '/visa-interview', '/visa-interview-sandbox', '/map', '/resources',
   '/intake-calendar', '/financial-tools', '/agent-training', '/emergency', '/visa-scheduling',
-  '/visa-checker', '/visa-enquiry', '/free-consultation', '/events', '/blog', '/news', '/hive', '/us-visa-slots', '/agent/login',
+  '/visa-checker', '/free-consultation', '/events', '/blog', '/news', '/hive', '/us-visa-slots', '/agent/login',
 ];
 
 for (const path of ROUTES) {
