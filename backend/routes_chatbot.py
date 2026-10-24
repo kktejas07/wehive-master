@@ -75,8 +75,10 @@ RAG_COLLECTIONS = ["wehive_kb", "wehive_countries", "wehive_universities", "kg_e
 
 
 async def _gather_context(user_prompt: str) -> str:
+    from agents.orchestrator import RE_COUNTRY_NAME, COUNTRY_ALIASES
     snippets = []
     country_codes = RE_COUNTRY_CODE.findall(user_prompt)
+    country_codes += [COUNTRY_ALIASES[m.group(0).lower()] for m in RE_COUNTRY_NAME.finditer(user_prompt)]
     is_student = bool(RE_STUDENT_KEYWORDS.search(user_prompt))
     is_visa = bool(RE_VISA_KEYWORDS.search(user_prompt))
 
