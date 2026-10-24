@@ -9,7 +9,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from fastapi.responses import StreamingResponse, FileResponse, RedirectResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from auth_utils import get_current_user
 from rate_limit import RateLimit
@@ -141,6 +141,16 @@ async def list_documents(application_id: str, user=Depends(get_current_user)):
     return [_serialize(d) for d in app.get('documents', [])]
 
 
+_ALLOWED_DOC_TYPES = {
+    "passport", "visa", "bank_statement", "employment_letter", "invitation_letter",
+    "travel_insurance", "flight_booking", "hotel_booking", "photographs",
+    "birth_certificate", "marriage_certificate", "degree_certificate",
+    "transcripts", "ielts_results", "toefl_results", "financial_documents",
+    "tax_returns", "police_clearance", "medical_certificate", "sponsorship_letter",
+    "proof_of_accommodation", "proof_of_funds", "cover_letter", "itinerary", "other",
+}
+
+
 @router.post('/{application_id}/documents')
 async def upload_document(
     application_id: str,
@@ -150,6 +160,8 @@ async def upload_document(
     user=Depends(get_current_user),
     _=Depends(_upload_limiter),
 ):
+    if doc_type.lower() not in _ALLOWED_DOC_TYPES:
+        raise HTTPException(400, f"Invalid doc_type. Allowed: {', '.join(sorted(_ALLOWED_DOC_TYPES))}")
     app = await _get_app_for_user(application_id, user["_id"])  # noqa: F841 (used for auth)
     # Read file with size cap
     content = await file.read(MAX_UPLOAD_BYTES + 1)
@@ -204,6 +216,26 @@ async def upload_document(
             '$set': {'updated_at': now},
         },
     )
+
+    # Best-effort: index document text/OCR into Qdrant so Eva can answer questions about it.
+    # PDFs → pypdf text extraction; images → pytesseract OCR then Ollama llava fallback.
+    _INDEXABLE_MIMES = {'application/pdf', 'image/jpeg', 'image/png', 'image/webp'}
+    if mime in _INDEXABLE_MIMES:
+        try:
+            import asyncio as _aio
+            from user_doc_indexer import index_user_doc
+            _aio.ensure_future(index_user_doc(
+                doc_id=doc_id,
+                user_id=str(user['_id']),
+                application_id=application_id,
+                doc_type=doc_type,
+                filename=safe_name,
+                content=content,
+                mime=mime,
+            ))
+        except Exception:
+            pass
+
     return _serialize(doc)
 
 
@@ -224,6 +256,13 @@ async def delete_document(application_id: str, doc_id: str, user=Depends(get_cur
         {'_id': application_id},
         {'$pull': {'documents': {'_id': doc_id}}},
     )
+    # Remove from Qdrant (best-effort)
+    try:
+        import asyncio as _aio
+        from qdrant_store import delete_document as qdrant_delete_doc
+        _aio.ensure_future(qdrant_delete_doc("wehive_user_docs", doc_id))
+    except Exception:
+        pass
     return {'ok': True}
 
 
@@ -268,10 +307,14 @@ async def list_messages(application_id: str, user=Depends(get_current_user)):
     return [_serialize(m) for m in msgs]
 
 
+class _MessageRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=2000)
+
+
 @router.post('/{application_id}/messages')
-async def post_message(application_id: str, payload: dict, user=Depends(get_current_user)):
+async def post_message(application_id: str, payload: _MessageRequest, user=Depends(get_current_user)):
     app = await _get_app_for_user(application_id, user["_id"])  # noqa: F841 (used for auth)
-    text = (payload or {}).get('text', '').strip()
+    text = payload.text.strip()
     if not text:
         raise HTTPException(400, 'Empty message')
     now = datetime.utcnow()

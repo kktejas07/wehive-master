@@ -562,6 +562,10 @@ pyparsing==3.3.2
     #   httplib2
 pypdf==5.1.0
     # via -r backend/requirements.txt (admin knowledge-base PDF uploads)
+Pillow>=10.4.0
+    # via -r backend/requirements.txt (image OCR pre-processing)
+pytesseract>=0.3.13
+    # via -r backend/requirements.txt (image OCR; also requires system tesseract-ocr binary)
 pypika==0.51.1
     # via chromadb
 pyproject-hooks==1.2.0

@@ -135,12 +135,27 @@ def parse(page: str, names: Optional[dict] = None) -> dict:
 
 
 async def fetch() -> dict:
+    """Fetch visa requirements. Uses Wikipedia REST API (reliable structured data).
+    Also attempts to scrape live USCIS processing times via playwright as a
+    supplementary signal stored alongside the parse result.
+    """
     async with httpx.AsyncClient(timeout=40, follow_redirects=True, headers={
         "User-Agent": "WeHiveVisaRulesAgent/1.0 (+https://wehive.co.in; info@wehive.co.in)",
     }) as client:
         resp = await client.get(API_URL)
         resp.raise_for_status()
-    return parse(resp.text)
+    parsed = parse(resp.text)
+
+    # Supplementary: pull live USCIS processing times (best-effort, non-blocking).
+    try:
+        from agents.browser_scraper import fetch_uscis_times
+        uscis_text = await fetch_uscis_times()
+        if uscis_text:
+            parsed["uscis_processing_raw"] = uscis_text[:3000]
+    except Exception as exc:
+        logger.debug("USCIS browser fetch skipped: %s", exc)
+
+    return parsed
 
 
 def diff(parsed: dict) -> list[dict]:

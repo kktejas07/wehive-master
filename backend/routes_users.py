@@ -1,3 +1,4 @@
+import asyncio as _asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from typing import Literal
@@ -226,3 +227,37 @@ async def change_password(req: ChangePasswordRequest, user=Depends(get_current_u
         {'$set': {'password_hash': hashed, 'updated_at': datetime.utcnow()}},
     )
     return {'ok': True}
+
+
+@router.delete('/me')
+async def delete_account(user=Depends(get_current_user)):
+    """GDPR/DPDP right-to-erasure: wipe all personal data for the authenticated user.
+
+    Deletes:
+      - User record from MongoDB
+      - All applications and saved plans
+      - Student memory (Mem0 + Qdrant wehive_student_memory)
+      - User-uploaded document vectors (Qdrant wehive_user_docs)
+    """
+    uid = str(user['_id'])
+
+    # Wipe MongoDB records
+    await users.delete_one({'_id': user['_id']})
+    await applications.delete_many({'user_id': uid})
+    await holiday_plans.delete_many({'user_id': uid})
+
+    # Wipe student memory (Mem0 manages its own store + Qdrant wehive_student_memory)
+    try:
+        from student_memory import student_memory
+        student_memory.forget(uid)
+    except Exception:
+        pass
+
+    # Wipe Qdrant user vectors (best-effort, non-blocking)
+    try:
+        from qdrant_store import delete_by_user
+        _asyncio.ensure_future(delete_by_user(uid))
+    except Exception:
+        pass
+
+    return {'ok': True, 'message': 'Account and all personal data deleted.'}

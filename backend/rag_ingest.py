@@ -20,6 +20,15 @@ from vector_store import upsert_documents
 
 logger = logging.getLogger("wehive.rag_ingest")
 
+# Dual-write to Qdrant when available (reads in LangGraph need it populated).
+async def _qdrant_upsert(collection: str, ids: list, texts: list, metas: list) -> None:
+    try:
+        from qdrant_store import upsert_documents as qdrant_upsert
+        docs = [{"id": id_, "text": t, "metadata": m} for id_, t, m in zip(ids, texts, metas)]
+        await qdrant_upsert(collection, docs)
+    except Exception as exc:
+        logger.debug("Qdrant dual-write skipped: %s", exc)
+
 CHUNK_SIZE = int(os.environ.get("RAG_CHUNK_SIZE", "800"))
 CHUNK_OVERLAP = int(os.environ.get("RAG_CHUNK_OVERLAP", "120"))
 
@@ -28,13 +37,27 @@ def _approx_tokens(s: str) -> int:
     return max(1, len(s) // 4)
 
 
+def _chonkie_chunk(text: str, chunk_size: int) -> List[str]:
+    """Semantic chunking via chonkie (optional dep). Returns [] if not installed."""
+    try:
+        from chonkie import SemanticChunker
+        chunker = SemanticChunker(chunk_size=chunk_size)
+        return [c.text for c in chunker.chunk(text)]
+    except Exception:
+        return []
+
+
 def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> List[str]:
-    """Greedy sentence-aware chunking with overlap.
+    """Semantic chunking when chonkie is installed, else greedy sentence-aware with overlap.
 
     Tries to keep sentences whole; falls back to a sliding window over
     character-based "tokens" (~4 chars each) when a single sentence is
     longer than `chunk_size`.
     """
+    if os.environ.get("USE_SEMANTIC_CHUNKER", "").lower() in ("1", "true"):
+        result = _chonkie_chunk(text, chunk_size)
+        if result:
+            return result
     if not text:
         return []
     text = text.strip()
@@ -159,6 +182,7 @@ async def ingest_documents(
             return
         vecs = await embed_texts(pending_texts, model=embed_model)
         upsert_documents(collection, pending_ids, pending_texts, vecs, pending_metas)
+        await _qdrant_upsert(collection, pending_ids, pending_texts, pending_metas)
         all_ids.extend(pending_ids)
         all_docs.extend(pending_texts)
         all_metas.extend(pending_metas)
