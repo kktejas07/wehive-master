@@ -28,6 +28,7 @@ const EXACT_TITLES = {
   '/visa-scheduling': `Visa Scheduling | ${SITE_NAME}`,
   '/visa-checker': `Visa Checker | ${SITE_NAME}`,
   '/visa-enquiry': `Get Visa Help | ${SITE_NAME}`,
+  '/free-consultation': `Free Visa Consultation | ${SITE_NAME}`,
   '/events': `Global Events | ${SITE_NAME}`,
   '/blog': `Blog | ${SITE_NAME}`,
   '/news': `News | ${SITE_NAME}`,
