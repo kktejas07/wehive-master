@@ -25,7 +25,9 @@ export default function RouteFallback() {
           <Bar className="h-10 w-24 rounded-xl" />
         </div>
       </div>
-      <WeHiveLoader label="Loading" className="py-32" showLabel={false} />
+      <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 72px)' }}>
+        <WeHiveLoader showLabel={false} />
+      </div>
     </div>
   );
 }
