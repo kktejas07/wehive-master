@@ -1,7 +1,8 @@
 """RAG Ingestion — turn raw documents into vector-store entries.
 
 Provides:
-  - chunk_text(): split long text into overlapping chunks (token-aware)
+  - chunk_text(): split long text into overlapping chunks (token-aware);
+    used when the semantic chunker (chunker.py) is unavailable
   - chunk_dict(): serialize a dict to a single chunk
   - make_id(): stable, deterministic id from namespace + key
   - ingest_documents(): full pipeline: chunk → embed → upsert
@@ -10,17 +11,19 @@ Provides:
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 import os
 from typing import Any, Iterable, List, Optional
 
-from ollama_embeddings import embed_texts
+from chunker import semantic_chunks
+from embeddings_bge import embed_texts
 from vector_store import upsert_documents
 
 logger = logging.getLogger("wehive.rag_ingest")
 
-CHUNK_SIZE = int(os.environ.get("RAG_CHUNK_SIZE", "800"))
+CHUNK_SIZE = int(os.environ.get("RAG_CHUNK_SIZE", "512"))  # BGE-M3 reads 512 tokens
 CHUNK_OVERLAP = int(os.environ.get("RAG_CHUNK_OVERLAP", "120"))
 
 
@@ -78,6 +81,16 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVE
     if cur:
         chunks.append(cur.strip())
     return [c for c in chunks if c]
+
+
+async def chunk_document(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> List[str]:
+    """Short text stays whole; long text is split by topic (semantic chunker) or, without it, by size."""
+    text = (text or "").strip()
+    if not text:
+        return []
+    if _approx_tokens(text) <= chunk_size:
+        return [text]
+    return await asyncio.to_thread(semantic_chunks, text) or chunk_text(text, chunk_size, overlap)
 
 
 def dict_to_text(d: dict, fields: Optional[list[str]] = None) -> str:
@@ -173,7 +186,7 @@ async def ingest_documents(
         text = dict_to_text(d, text_fields)
         if not text:
             continue
-        pieces = chunk_text(text, chunk_size, chunk_overlap) if chunk else [text]
+        pieces = await chunk_document(text, chunk_size, chunk_overlap) if chunk else [text]
         for idx, piece in enumerate(pieces):
             doc_id = f"{make_id(ns, raw_key)}-{idx}" if len(pieces) > 1 else make_id(ns, raw_key)
             meta = {**base_meta, "source_key": raw_key, "chunk_index": idx, "chunks": len(pieces)}

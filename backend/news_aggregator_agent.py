@@ -226,9 +226,9 @@ async def ingest_vectors(kind: str, ids: List[str], docs: List[str], metas: List
     if not ids:
         return
     try:
-        from ollama_embeddings import embed_query
+        from embeddings_bge import embed_texts
         from vector_store import upsert_documents
-        embeddings = [await embed_query(text) for text in docs]
+        embeddings = await embed_texts(docs)
         upsert_documents("wehive_rag", ids, docs, embeddings, metas)
         logger.info("Ingested %d %s items into Vector DB.", len(ids), kind)
     except Exception as e:

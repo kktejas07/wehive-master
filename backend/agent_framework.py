@@ -308,7 +308,7 @@ async def _retrieve_rag_context(query: str, collections: list[str], k: int = 4) 
     """Pull top-k chunks from each requested collection. Returns formatted text."""
     if not collections:
         return ""
-    from ollama_embeddings import embed_query
+    from embeddings_bge import embed_query
     from vector_store import query_collection
 
     try:
