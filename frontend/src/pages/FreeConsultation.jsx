@@ -1,8 +1,9 @@
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, MapPin } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import EnquirySection from '../components/EnquirySection';
 import HowItWorks from '../components/HowItWorks';
+import { BRANCHES } from '../data/mock';
 
 export default function FreeConsultation() {
   return (
@@ -22,6 +23,33 @@ export default function FreeConsultation() {
         </div>
       </section>
       <EnquirySection />
+      <section className="py-16 bg-[hsl(var(--soft-bg))] border-y border-[hsl(var(--border))]" aria-labelledby="branches-title">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <h2 id="branches-title" className="font-display font-bold text-[28px] tracking-[-0.02em] leading-tight">
+            Prefer to meet in person? Visit us
+          </h2>
+          <ul className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {BRANCHES.map(b => (
+              <li key={b.id} className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <MapPin className="w-4 h-4 text-[hsl(var(--blue-700))]" aria-hidden="true" />
+                  <span className="font-bold text-[15px]">{b.city}</span>
+                  {b.isNew && <span className="text-[11px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 bg-emerald-50 text-emerald-700">New</span>}
+                  {!b.address && <span className="text-[11px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 bg-amber-50 text-amber-700">Coming soon</span>}
+                </div>
+                {b.address ? (
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.address)}`} target="_blank" rel="noopener noreferrer"
+                    className="mt-2 block text-[14px] text-muted-foreground hover:text-[hsl(var(--blue-700))] hover:underline">
+                    {b.address}
+                  </a>
+                ) : (
+                  <p className="mt-2 text-[14px] text-muted-foreground">Opening soon. Book a free consultation online in the meantime.</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
       <HowItWorks />
       <Footer />
     </div>

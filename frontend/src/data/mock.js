@@ -8,9 +8,11 @@ export const BRAND = {
   logoWhite: '/brand/wehive-logo.png',
   phone: '+91 90007 34326',
   phoneRaw: '+919000734326',
-  // WhatsApp Business number shown next to the newsletter signup.
-  whatsapp: '+91 90007 34326',
-  whatsappRaw: '919000734326',
+  // WhatsApp Business numbers: primary is shown next to the newsletter signup.
+  whatsapp: '+91 91214 95077',
+  whatsappRaw: '919121495077',
+  whatsappSecondary: '+91 90007 34326',
+  whatsappSecondaryRaw: '919000734326',
   consultantPhone: '+91 91132 56726',
   consultantPhoneRaw: '+919113256726',
   email: 'info@wehive.co.in',
@@ -19,6 +21,16 @@ export const BRAND = {
   usaAddress: 'Building B 339, Princeton-Hightstown Road, East Windsor, NJ 08512, USA',
   hours: 'Mon – Sat · 09:00 – 18:00 IST',
 };
+
+// Walk-in branches. `address: null` means the branch is announced but not open yet.
+export const BRANCHES = [
+  { id: 'miyapur', city: 'Miyapur, Hyderabad', address: BRAND.address },
+  { id: 'habsiguda', city: 'Habsiguda, Hyderabad', address: 'St. No. 8, Habsiguda, Hyderabad, Telangana 500007, India', isNew: true },
+  { id: 'manikonda', city: 'Manikonda, Hyderabad', address: 'Begonia Homes Road, Alkapur Township, Manikonda, Hyderabad, Telangana 500089, India', isNew: true },
+  { id: 'ballari', city: 'Ballari', address: BRAND.ballariAddress },
+  { id: 'anantapur', city: 'Anantapur', address: null },
+  { id: 'east-windsor', city: 'East Windsor, NJ, USA', address: BRAND.usaAddress },
+];
 
 export const COUNTRIES = [
   {
