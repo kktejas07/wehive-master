@@ -250,10 +250,11 @@ async def _execute_tool(tool_name: str, arguments: dict) -> dict:
             return {"content": [{"type": "text", "text": json.dumps({"error": str(e)})}]}
 
     elif tool_name == "wehive_country_info":
+        import re as _re
         country = arguments.get("country", "").lower()
         doc = await mongo_db["countries_v2"].find_one({"id": country})
         if not doc:
-            doc = await mongo_db["countries_v2"].find_one({"name": {"$regex": country, "$options": "i"}})
+            doc = await mongo_db["countries_v2"].find_one({"name": {"$regex": _re.escape(country), "$options": "i"}})
         return {"content": [{"type": "text", "text": json.dumps(doc or {}, default=str)}]}
 
     elif tool_name == "wehive_slot_check":
