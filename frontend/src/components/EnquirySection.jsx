@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
-  Plane, Briefcase, GraduationCap, HardHat, Users, Home, ArrowRightLeft, HelpCircle, Loader2, CheckCircle2,
+  Plane, Briefcase, GraduationCap, HardHat, Users, Home, ArrowRightLeft, HelpCircle, Loader2, CheckCircle2, Tag,
 } from 'lucide-react';
 import { API } from '../context/AuthContext';
 import { COUNTRIES, BRANCHES } from '../data/mock';
@@ -94,13 +94,36 @@ export default function EnquirySection({ source = 'landing' }) {
         <Reveal index={1}>
           <div className="card-surface p-5 sm:p-7">
             {sent ? (
-              <div className="text-center py-8" role="status" data-testid="enquiry-success">
+              <div className="py-8 text-center" role="status" data-testid="enquiry-success">
                 <CheckCircle2 className="w-12 h-12 mx-auto text-emerald-600" aria-hidden="true" />
                 <h3 className="h-card mt-4">Thanks{sent.name ? `, ${sent.name}` : ''}!</h3>
                 <p className="mt-2 text-[15px] text-muted-foreground">
                   We've got your enquiry for {sent.destination}. Expect a call or WhatsApp within one working day, and check your email for a confirmation.
                 </p>
-                <button type="button" onClick={() => setSent(null)} className="mt-6 h-11 px-5 rounded-xl btn-primary font-semibold">
+
+                {/* ₹500 off promo */}
+                <div className="mt-6 rounded-2xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-6 py-5 text-left">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Tag className="w-4 h-4 text-[hsl(var(--blue-700))]" aria-hidden="true" />
+                    <span className="text-[13px] font-bold uppercase tracking-wide text-[hsl(var(--blue-700))]">Exclusive offer</span>
+                  </div>
+                  <p className="text-[16px] font-bold text-[hsl(var(--blue-900))]">
+                    Sign in and save <span className="text-[hsl(var(--red-500))]">₹500</span> on your next WeHive service
+                  </p>
+                  <p className="mt-1 text-[14px] text-muted-foreground">
+                    Create a free account to track your application, get reminders, and unlock your discount.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Link to="/signup" className="h-11 px-5 rounded-xl btn-accent font-semibold text-[14px] inline-flex items-center justify-center">
+                      Create free account
+                    </Link>
+                    <Link to="/login" className="h-11 px-5 rounded-xl btn-outline font-semibold text-[14px] inline-flex items-center justify-center">
+                      Sign in
+                    </Link>
+                  </div>
+                </div>
+
+                <button type="button" onClick={() => setSent(null)} className="mt-5 text-[14px] text-muted-foreground underline-offset-2 hover:underline">
                   Send another enquiry
                 </button>
               </div>

@@ -17,7 +17,7 @@ from eval.ragas_evaluator import eval_runs_col
 
 logger = logging.getLogger("wehive.admin_observability")
 
-router = APIRouter(prefix="/api/admin", tags=["admin-observability"])
+router = APIRouter(prefix="/admin", tags=["admin-observability"])
 
 
 def _serialise(doc: dict) -> dict:

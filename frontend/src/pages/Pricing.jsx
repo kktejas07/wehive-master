@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Loader2, CheckCircle2, XCircle, ArrowRight, ShieldCheck, Lock, Building2, CreditCard, Check } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, ArrowRight, ShieldCheck, Lock, Building2, CreditCard, Check, Tag, X, Sparkles } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { API, useAuth } from '../context/AuthContext';
@@ -25,7 +25,7 @@ function getRazorpay() {
   return null;
 }
 
-function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
+function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe, discountPercent }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubscribe = async () => {
@@ -36,6 +36,9 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
 
   const current = isPremium && isCurrentPlan(plan.id);
   const hl = plan.highlighted;
+  const discountedPrice = discountPercent > 0
+    ? Math.round(plan.price * (1 - discountPercent / 100))
+    : null;
 
   return (
     <div
@@ -45,9 +48,15 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
           : 'border border-[hsl(var(--border))] shadow-sm hover:shadow-md hover:-translate-y-0.5'
       }`}
     >
-      {hl && (
+      {hl && !discountPercent && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-[hsl(var(--blue-700))] text-white text-[12px] uppercase tracking-[0.14em] font-semibold px-3 py-1 whitespace-nowrap">
           Most popular
+        </div>
+      )}
+      {discountPercent > 0 && (
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-[#E10600] text-white text-[12px] uppercase tracking-[0.14em] font-semibold px-3 py-1 whitespace-nowrap">
+          <Sparkles className="w-3 h-3" aria-hidden="true" />
+          {discountPercent}% OFF
         </div>
       )}
       <h3 className={`font-display font-semibold text-[22px] ${hl ? 'text-[hsl(var(--blue-700))]' : 'text-[hsl(var(--blue-900))]'}`}>{plan.name}</h3>
@@ -55,7 +64,20 @@ function PlanCard({ plan, isCurrentPlan, isPremium, onSubscribe }) {
         {plan.tag}
       </p>
       <div className="mt-6 flex items-baseline gap-1.5 text-[hsl(var(--blue-900))]">
-        <span className="font-display font-bold text-[44px] sm:text-[48px] leading-none tracking-[-0.02em] tabular-nums">₹{plan.price.toLocaleString('en-IN')}</span>
+        {discountedPrice !== null ? (
+          <>
+            <span className="font-display font-bold text-[44px] sm:text-[48px] leading-none tracking-[-0.02em] tabular-nums text-[#E10600]">
+              ₹{discountedPrice.toLocaleString('en-IN')}
+            </span>
+            <span className="text-[20px] font-semibold line-through text-muted-foreground ml-1">
+              ₹{plan.price.toLocaleString('en-IN')}
+            </span>
+          </>
+        ) : (
+          <span className="font-display font-bold text-[44px] sm:text-[48px] leading-none tracking-[-0.02em] tabular-nums">
+            ₹{plan.price.toLocaleString('en-IN')}
+          </span>
+        )}
         <span className="text-[14px] text-muted-foreground">/ visa application</span>
       </div>
       <button
@@ -112,13 +134,15 @@ export default function Pricing() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
-  const [razorpayKey, setRazorpayKey] = useState('');
   const [loading, setLoading] = useState(true);
+  const [couponInput, setCouponInput] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [coupon, setCoupon] = useState(null); // {code, discount_percent, description}
+  const [couponError, setCouponError] = useState('');
+  const [activePromos, setActivePromos] = useState([]);
   const status = searchParams.get('status');
-  const plan_id = searchParams.get('plan');
 
   const isPremium = user?.is_premium;
-
 
   useEffect(() => {
     axios.get(`${API}/payments/plans`).then((r) => {
@@ -137,7 +161,33 @@ export default function Pricing() {
       setPlans([]);
       setLoading(false);
     });
+    axios.get(`${API}/promotions/active`, { params: { season: 'all' } })
+      .then((r) => setActivePromos(r.data || []))
+      .catch(() => {});
   }, []);
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    setCouponLoading(true);
+    setCouponError('');
+    try {
+      const r = await axios.post(`${API}/promotions/validate`, { code, cart_value: 0 });
+      setCoupon({ code: r.data.code, discount_percent: r.data.discount_percent, description: r.data.description });
+      toast({ title: `Code "${r.data.code}" applied!`, description: `${r.data.discount_percent}% off all plans.` });
+    } catch (e) {
+      setCouponError(e.response?.data?.detail || 'Invalid or expired code.');
+      setCoupon(null);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const clearCoupon = () => {
+    setCoupon(null);
+    setCouponInput('');
+    setCouponError('');
+  };
 
   // /auth/me doesn't expose which plan was bought yet, so no card is marked current until it does.
   const isCurrentPlan = (id) => !!user?.is_premium && user?.plan_id === id;
@@ -293,6 +343,74 @@ export default function Pricing() {
 
       <section className="py-16 md:py-24 bg-[hsl(var(--soft-bg))]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Active promo banners */}
+          {activePromos.length > 0 && (
+            <div className="mb-8 space-y-2">
+              {activePromos.map((p) => (
+                <div
+                  key={p.code}
+                  className="flex items-center gap-3 sm:gap-4 rounded-2xl px-4 sm:px-5 py-3 flex-wrap"
+                  style={{ background: '#011CB5' }}
+                >
+                  <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#E10600] text-white text-[12px] font-semibold uppercase tracking-[0.14em] px-2.5 py-1">
+                    <Sparkles className="w-3 h-3" aria-hidden="true" />
+                    {p.discount_percent ? `${p.discount_percent}% OFF` : p.discount_fixed ? `₹${p.discount_fixed} OFF` : 'OFFER'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[15px] font-bold text-white leading-snug">{p.description}</div>
+                    <div className="text-[13px] text-white/85 mt-0.5">Use code <span className="font-bold tracking-wider">{p.code}</span> at checkout</div>
+                  </div>
+                  <button
+                    onClick={() => { setCouponInput(p.code); }}
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-white/90 h-9 px-4 text-[13px] font-semibold text-[hsl(var(--blue-900))] transition-colors"
+                  >
+                    Apply <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Coupon code input */}
+          <div className="mb-10 flex flex-col sm:flex-row items-start sm:items-center gap-3 max-w-md">
+            <div className="relative flex-1 w-full">
+              <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <input
+                type="text"
+                placeholder="Have a coupon code?"
+                value={couponInput}
+                onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                className="w-full h-11 pl-9 pr-3 rounded-xl border border-[hsl(var(--border))] bg-white text-[14px] focus:outline-none focus:border-[hsl(var(--blue-700))] placeholder:text-muted-foreground"
+                aria-label="Coupon code"
+              />
+            </div>
+            {coupon ? (
+              <button
+                onClick={clearCoupon}
+                className="h-11 px-4 rounded-xl border border-[hsl(var(--border))] bg-white text-[14px] font-semibold text-muted-foreground hover:text-red-600 flex items-center gap-1.5 transition-colors"
+              >
+                <X className="w-4 h-4" /> Remove
+              </button>
+            ) : (
+              <button
+                onClick={handleApplyCoupon}
+                disabled={couponLoading || !couponInput.trim()}
+                className="h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[14px] font-semibold hover:bg-[hsl(var(--blue-800))] disabled:opacity-60 flex items-center gap-2 transition-colors"
+              >
+                {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+              </button>
+            )}
+          </div>
+          {coupon && (
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200 px-4 py-1.5 text-[13px] font-semibold text-emerald-700">
+              <CheckCircle2 className="w-4 h-4" /> Code <span className="font-bold">{coupon.code}</span> applied — {coupon.discount_percent}% off all plans!
+            </div>
+          )}
+          {couponError && (
+            <p className="mb-6 text-[13px] text-red-600 font-medium">{couponError}</p>
+          )}
+
           {loading ? (
             <div className="flex items-center justify-center py-20" role="status" aria-label="Loading plans">
               <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" aria-hidden="true" />
@@ -314,6 +432,7 @@ export default function Pricing() {
                   isCurrentPlan={isCurrentPlan}
                   isPremium={isPremium}
                   onSubscribe={handleSubscribe}
+                  discountPercent={coupon?.discount_percent || 0}
                 />
               ))}
             </div>
