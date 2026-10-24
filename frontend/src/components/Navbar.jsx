@@ -41,6 +41,7 @@ const NAV = [
       { id: 'student', label: 'Student Visa', to: '/student-visa', icon: GraduationCap },
       { id: 'fly', label: 'Fly', to: '/map', icon: Plane },
       { id: 'visa-help', label: 'Get Visa Help', to: '/visa-enquiry', icon: Mail },
+      { id: 'free-consultation', label: 'Free Consultation', to: '/free-consultation', icon: Phone },
     ]
   },
   {

@@ -57,6 +57,7 @@ const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
 const VisaChecker = lazy(() => import('./pages/VisaChecker'));
 const VisaEnquiry = lazy(() => import('./pages/VisaEnquiry'));
+const FreeConsultation = lazy(() => import('./pages/FreeConsultation'));
 const Hive = lazy(() => import('./pages/Hive'));
 const USVisaSlots = lazy(() => import('./pages/USVisaSlots'));
 const GlobalEvents = lazy(() => import('./pages/GlobalEvents'));
@@ -137,6 +138,7 @@ function AnimatedRoutes() {
           <Route path="/visa-scheduling" element={<PrivateRoute><PageTransition><VisaScheduling /></PageTransition></PrivateRoute>} />
           <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
           <Route path="/visa-enquiry" element={<PageTransition><VisaEnquiry /></PageTransition>} />
+          <Route path="/free-consultation" element={<PageTransition><FreeConsultation /></PageTransition>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
