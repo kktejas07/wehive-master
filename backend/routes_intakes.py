@@ -95,8 +95,16 @@ async def get_university_insights(university: str, country: str, track: str):
             data = json.loads(m.group(0))
         else:
             data = json.loads(reply)
-            
-        return data
+        if isinstance(data, dict) and isinstance(data.get("insights"), list) and data["insights"]:
+            return {**data, "source": "ai"}
     except Exception as e:
-        logger.error(f"Failed to generate insights: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate AI insights")
+        logger.warning("AI insights unavailable, answering from stored data: %s", e)
+    # No AI answer: build insights from the university's own record instead of failing.
+    from university_fit import insights_from_data
+    from db import universities_col
+    from normalize import normalize_university
+    import re as _re
+    doc = await universities_col.find_one({"name": {"$regex": f"^{_re.escape(university.strip())}$", "$options": "i"}}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="No details for this university yet. WeHive can look it up for you.")
+    return insights_from_data(normalize_university(dict(doc)), track)

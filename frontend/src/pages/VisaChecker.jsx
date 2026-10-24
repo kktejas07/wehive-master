@@ -49,7 +49,9 @@ function ResultDisplay({ result, isFallback }) {
       {isFallback && (
         <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2 text-[13px] text-amber-800">
           <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          Live provider unavailable — showing estimated requirements. Verify with the official embassy before applying.
+          {result.provider === 'WeHive visa rules'
+            ? "Live provider unavailable: showing WeHive's daily-checked rules for Indian passport holders. Confirm with the embassy before applying."
+            : 'Live provider unavailable. Verify with the official embassy before applying.'}
         </div>
       )}
       <div className="flex items-center gap-3 flex-wrap">
@@ -120,7 +122,11 @@ function ResultDisplay({ result, isFallback }) {
       ) : (
         <div className="rounded-2xl bg-[hsl(var(--soft-bg))] p-6 text-center">
           <Info className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-[14px] text-muted-foreground">No additional procedures required.</p>
+          <p className="text-[14px] text-muted-foreground">
+            {result.outcome === 'UNKNOWN'
+              ? "We couldn't confirm the requirements for this trip. WeHive will check them for you before you apply."
+              : 'No additional procedures required.'}
+          </p>
         </div>
       )}
     </motion.div>
@@ -156,7 +162,6 @@ export default function VisaChecker() {
   const [isFallback, setIsFallback] = useState(false);
 
   const nat = COUNTRIES.find(c => c.id === nationality);
-  const dest = COUNTRIES.find(c => c.id === destination);
 
   const checkVisa = async () => {
     if (!nationality || !destination) return;
@@ -180,24 +185,23 @@ export default function VisaChecker() {
       setResult(adaptSherpaTrips(response.data, input));
       setIsFallback(false);
     } catch (err) {
-      setError('Visa provider unavailable. Showing estimated requirements.');
+      // Live provider unavailable: answer from WeHive's daily-checked rules for Indian passports;
+      // for other passports say plainly that we couldn't check, rather than guessing.
       setIsFallback(true);
-      const { adaptSherpaTrips } = await import('../lib/visa-providers');
-      const sample = adaptSherpaTrips({
-        included: [{
-          type: 'PROCEDURE',
-          attributes: {
-            title: `${dest?.name || destination} Visa Application`,
-            description: `Standard procedure for ${nat?.name || nationality} citizens traveling to ${dest?.name || destination}.`,
-            enforcement: 'MANDATORY',
-            documentTypes: ['VISA'],
-            lengthOfStay: [{ type: 'DAYS', value: 30 }],
-            actions: [{ intent: 'apply-product', url: '#', product: { name: `${dest?.name || destination} Tourist Visa`, price: { value: 100, currency: 'USD' }, times: { applicationDeadline: { value: 72 } } } }],
-            sources: [{ title: `${dest?.name || destination} Immigration`, url: '#' }],
-          },
-        }],
-      }, { nationality: nationality.toUpperCase(), destination: destination.toUpperCase(), travelDate: travelDate || undefined });
-      setResult(sample);
+      const ctx = { nationality: nationality.toUpperCase(), destination: destination.toUpperCase(), travelDate: travelDate || undefined };
+      const { fromWehiveRules, unknownResult } = await import('../lib/visa-checker-fallback');
+      if (ctx.nationality === 'IN') {
+        try {
+          const c = await axios.get(`${API}/countries/${encodeURIComponent(destination.toLowerCase())}`);
+          setResult(fromWehiveRules(c.data, ctx));
+        } catch {
+          setError('We could not check this right now. Please try again, or ask WeHive to confirm.');
+          setResult(unknownResult(ctx));
+        }
+      } else {
+        setError(`Live checks for ${nat?.name || nationality} passports are unavailable right now. WeHive will confirm the requirements for you.`);
+        setResult(unknownResult(ctx));
+      }
     } finally {
       setLoading(false);
     }

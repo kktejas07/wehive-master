@@ -64,8 +64,8 @@ const NAV = [
       { id: 'visa-interview', label: 'Visa Interview Simulator', to: '/visa-interview', icon: Mic },
       { id: 'scholarship-matcher', label: 'AI Scholarship Matcher', to: '/student-visa', icon: Award },
       { id: 'uni-recommender', label: 'AI University Recommender', to: '/student-visa', icon: GraduationCap },
-      { id: 'cost-of-living', label: 'Cost of Living Calculator', to: '/student-visa', icon: Calculator },
-      { id: 'sop-lor-writer', label: 'AI SOP / LOR Writer', to: '/student-visa', icon: FileText },
+      { id: 'cost-of-living', label: 'Cost of Living Calculator', to: '/financial-tools?tool=budget', icon: Calculator },
+      { id: 'sop-lor-writer', label: 'AI SOP / Cover Letter Writer', to: '/account?tab=aitools', icon: FileText },
     ]
   },
   { id: 'pricing', label: 'Pricing', to: '/pricing', icon: CreditCard },
