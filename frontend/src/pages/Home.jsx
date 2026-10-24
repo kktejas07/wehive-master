@@ -13,6 +13,7 @@ import AIServices from '../components/ai/AIServices';
 import LiveTickerMarquee from '../components/LiveTickerMarquee';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
+import EnquirySection from '../components/EnquirySection';
 import { updateSEO } from '../lib/seo';
 
 export default function Home() {
@@ -37,6 +38,8 @@ export default function Home() {
       <SchengenCarousel />
       <AIServices />
       <HowItWorks />
+      <EnquirySection />
+      <OnTimeGuarantee />
       <DealsSection />
       <Newsroom />
       <Faq />

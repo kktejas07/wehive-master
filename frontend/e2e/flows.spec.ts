@@ -133,3 +133,47 @@ test.describe('Google Knowledge Graph', () => {
     await expect(page.getByTestId('planner-destination-card')).toContainText('island country in the Caribbean');
   });
 });
+
+test('landing page visa enquiry: choose a purpose, fill details, submit', async ({ page, api }) => {
+  api.on('POST', /^\/leads\/enquiry$/, { ok: true, id: 'lead-9' }, 201);
+  await page.goto('/');
+  const form = page.getByTestId('enquiry-form');
+  await form.scrollIntoViewIfNeeded();
+
+  await page.getByTestId('enquiry-submit').click();
+  await expect(page.getByTestId('enquiry-error')).toContainText('Choose what the trip is for');
+
+  await page.getByTestId('enquiry-purpose-business').click();
+  await form.getByLabel('Full name *').fill('Arjun Mehta');
+  await form.getByLabel('Email *').fill('arjun@example.com');
+  await form.getByLabel('Phone / WhatsApp *').fill('+91 98765 43210');
+  await form.getByLabel('Destination country *').fill('Germany');
+  await form.getByLabel('Travellers').selectOption('2');
+  await form.getByLabel('Anything else we should know?').fill('Trade fair in Hannover');
+  await page.getByTestId('enquiry-submit').click();
+  await expect(page.getByTestId('enquiry-error')).toContainText('consent');
+  await page.getByTestId('enquiry-consent').check();
+  await page.getByTestId('enquiry-submit').click();
+
+  await expect(page.getByTestId('enquiry-success')).toContainText('Germany');
+  const body = api.calls.find((c) => c.path === '/leads/enquiry')?.body as Record<string, unknown>;
+  expect(body).toMatchObject({
+    purpose: 'business', name: 'Arjun Mehta', email: 'arjun@example.com', phone: '+91 98765 43210',
+    destination: 'Germany', travellers: 2, message: 'Trade fair in Hannover', consent: true, travel_date: null, website: '',
+  });
+});
+
+test('landing enquiry shows the server validation message', async ({ page, api }) => {
+  api.on('POST', /^\/leads\/enquiry$/, { detail: [{ loc: ['body', 'phone'], msg: 'Value error, Enter a valid phone number with country code, e.g. +91 98765 43210' }] }, 422);
+  await page.goto('/');
+  const form = page.getByTestId('enquiry-form');
+  await form.scrollIntoViewIfNeeded();
+  await page.getByTestId('enquiry-purpose-student_f1').click();
+  await form.getByLabel('Full name *').fill('Priya Sharma');
+  await form.getByLabel('Email *').fill('priya@example.com');
+  await form.getByLabel('Phone / WhatsApp *').fill('98765 43210');
+  await form.getByLabel('Destination country *').fill('United States');
+  await page.getByTestId('enquiry-consent').check();
+  await page.getByTestId('enquiry-submit').click();
+  await expect(page.getByTestId('enquiry-error')).toHaveText('Enter a valid phone number with country code, e.g. +91 98765 43210');
+});

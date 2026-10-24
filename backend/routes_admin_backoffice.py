@@ -36,6 +36,12 @@ def _lead(d: dict) -> dict:
         'id': d['_id'],
         'name': ' '.join(p for p in (d.get('name'), d.get('surname')) if p),
         'email': d.get('email', ''),
+        'phone': d.get('phone'),
+        'type': d.get('type', 'contact'),
+        'purpose': d.get('purpose'),
+        'destination': d.get('destination'),
+        'travel_date': d.get('travel_date'),
+        'travellers': d.get('travellers'),
         'message': d.get('message', ''),
         'status': d.get('status', 'new'),
         'notes': [{**n, 'at': _iso(n.get('at'))} for n in d.get('notes', [])],
@@ -44,14 +50,17 @@ def _lead(d: dict) -> dict:
     }
 
 
-def _lead_filter(status: Optional[str], q: Optional[str]) -> dict:
+def _lead_filter(status: Optional[str], q: Optional[str], purpose: Optional[str] = None) -> dict:
     filt: dict = {}
+    if purpose and purpose != 'all':
+        filt['purpose'] = purpose
     if status == 'new':
         filt['status'] = {'$in': [None, 'new']}  # leads created before statuses existed have none
     elif status and status != 'all':
         filt['status'] = status
     if q:
-        filt['$or'] = [{'name': _rx(q)}, {'surname': _rx(q)}, {'email': _rx(q)}, {'message': _rx(q)}]
+        filt['$or'] = [{'name': _rx(q)}, {'surname': _rx(q)}, {'email': _rx(q)}, {'message': _rx(q)},
+                       {'phone': _rx(q)}, {'destination': _rx(q)}]
     return filt
 
 
@@ -60,10 +69,11 @@ async def admin_list_leads(
     _=Depends(get_current_admin_flex),
     status: Optional[str] = None,
     q: Optional[str] = Query(None, max_length=100),
+    purpose: Optional[str] = Query(None, max_length=30),
     limit: int = Query(25, ge=1, le=100),
     skip: int = Query(0, ge=0),
 ):
-    filt = _lead_filter(status, q)
+    filt = _lead_filter(status, q, purpose)
     total = await leads.count_documents(filt)
     items = [_lead(d) async for d in leads.find(filt).sort('created_at', -1).skip(skip).limit(limit)]
     new_count = await leads.count_documents({'status': {'$in': [None, 'new']}})
@@ -97,10 +107,11 @@ async def admin_update_lead(lead_id: str, patch: LeadPatch, admin=Depends(get_cu
 
 @router.get('/export/leads.csv')
 async def export_leads_csv(_=Depends(get_current_admin_flex)):
-    rows = [['id', 'name', 'email', 'status', 'message', 'created_at']]
+    rows = [['id', 'type', 'name', 'email', 'phone', 'purpose', 'destination', 'travel_date', 'travellers', 'status', 'message', 'created_at']]
     async for d in leads.find({}).sort('created_at', -1):
         x = _lead(d)
-        rows.append([x['id'], x['name'], x['email'], x['status'], x['message'], x['created_at'] or ''])
+        rows.append([x['id'], x['type'], x['name'], x['email'], x['phone'] or '', x['purpose'] or '', x['destination'] or '',
+                     x['travel_date'] or '', x['travellers'] or '', x['status'], x['message'], x['created_at'] or ''])
     return _csv_response(rows, 'wehive-leads.csv')
 
 

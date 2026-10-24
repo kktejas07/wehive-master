@@ -113,7 +113,7 @@ export default function ProgramRecommender() {
   const [form, setForm] = useState({
     courses: [],
     countries: [],
-    budget: 30000,
+    budget: 999999,
     ielts: '6.5',
     level: 'Masters',
   });
