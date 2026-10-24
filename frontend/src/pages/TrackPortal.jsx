@@ -20,18 +20,18 @@ export default function TrackPortal() {
 
   const steps = [
     {
-      title: 'Digital Filing',
-      desc: 'Our specialists compile, translate, and audit your files to ensure 100% compliance before lodging with the embassy.',
+      title: 'Expert document checks',
+      desc: 'Our specialists check and organise your documents against the embassy checklist before you submit.',
       icon: ShieldCheck,
     },
     {
-      title: 'Real-Time Sync',
-      desc: 'Every milestone (vfs booking, document review, embassy reception, decision) is pushed instantly to your dashboard.',
+      title: 'Every step in one place',
+      desc: 'Each milestone (document review, appointment booking, submission, decision) appears in your timeline as soon as your case team records it.',
       icon: Activity,
     },
     {
-      title: 'Instant Alerts',
-      desc: 'Receive automatic notifications via WhatsApp, SMS, and Email the second the consular officer updates your file status.',
+      title: 'Alerts when it changes',
+      desc: 'Get a notification in WeHive, by email, and on WhatsApp if you turn it on, whenever your application status changes.',
       icon: Bell,
     },
   ];
@@ -63,7 +63,7 @@ export default function TrackPortal() {
                     data-testid="track-input"
                     required
                     type="text"
-                    placeholder="Application ID, e.g. us-student-101"
+                    placeholder="Application ID (from your confirmation email)"
                     value={appId}
                     onChange={(e) => setAppId(e.target.value)}
                     className="w-full h-14 pl-12 pr-4 sm:pr-36 rounded-xl border border-[hsl(var(--border))] focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 outline-none text-[16px] sm:text-[15px] text-[hsl(var(--blue-900))] placeholder:text-muted-foreground bg-white transition shadow-sm"

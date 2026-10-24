@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Newspaper, AlertCircle, RefreshCw, AlertTriangle, X, Sparkles } from 'lucide-react';
-import { API } from '../context/AuthContext';
+import { API, useAuth } from '../context/AuthContext';
 import { useDialogA11y } from '../hooks/use-dialog-a11y';
 import { destination } from '../lib/destinations';
 import WeHiveLoader from './WeHiveLoader';
@@ -10,6 +10,7 @@ import WeHiveLoader from './WeHiveLoader';
 const PAGE = 9;
 
 const Newsroom = ({ countryId }) => {
+  const { token } = useAuth();
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [digest, setDigest] = useState(null);
@@ -54,14 +55,14 @@ const Newsroom = ({ countryId }) => {
       const response = await axios.get(url);
       setNews(response.data?.items || response.data || []);
       
-      // Also try to fetch AI digest (fails silently if missing)
-      try {
-        const digestRes = await axios.get(`${API}/news/digest`);
-        if (digestRes.data?.digest) {
-          setDigest(digestRes.data.digest);
+      // The AI digest is for signed-in users; skip it otherwise (it is optional either way).
+      if (token) {
+        try {
+          const digestRes = await axios.get(`${API}/news/digest`, { headers: { Authorization: `Bearer ${token}` } });
+          if (digestRes.data?.digest) setDigest(digestRes.data.digest);
+        } catch {
+          /* no digest yet */
         }
-      } catch (e) {
-        console.warn("No AI digest available yet.");
       }
     } catch (error) {
       if (error.response) {
@@ -89,7 +90,7 @@ const Newsroom = ({ countryId }) => {
     setVisible(PAGE);
     fetchNews();
   // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNews is recreated each render; re-run only when the listed inputs change
-  }, [countryId, category]);
+  }, [countryId, category, token]);
 
   return (
     <div className="container-page section">
