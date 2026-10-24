@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, Chrome, MessageSquare, Eye, EyeOff } from 'lucide-react';
+import { Mail, Phone, Loader2, Check, ArrowLeft, ShieldCheck, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
@@ -80,33 +80,21 @@ function OtpDigits({ value, onChange, length = 6 }) {
   );
 }
 
-function GoogleIcon() {
-  return (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-    </svg>
-  );
-}
-
 const ALL_TABS = [
-  { id: 'google', label: 'Google', Icon: Chrome, configKey: 'google_enabled' },
   { id: 'emailpwd', label: 'Email', Icon: Mail, configKey: 'email_password_enabled' },
   { id: 'otp', label: 'OTP', Icon: MessageSquare, configKey: 'otp_enabled' },
 ];
 
 export default function AuthCard({ mode, referralCode }) {
   const { sendOtp, verifyOtp, isAuthed } = useAuth();
-  const { loginWithGoogle, loginWithEmail, signupWithEmail, verificationSent, phoneOtp, verifyPhoneOtpCode, sendPasswordReset } = useFirebaseAuth();
+  const { loginWithEmail, signupWithEmail, verificationSent, phoneOtp, verifyPhoneOtpCode, sendPasswordReset } = useFirebaseAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const rawNext = searchParams.get('next');
   const isValidRedirect = (url) => url && url.startsWith('/') && !url.startsWith('//');
   const nextUrl = isValidRedirect(rawNext) ? rawNext : '/account';
-  const [tab, setTab] = useState('google');
+  const [tab, setTab] = useState('emailpwd');
   const [identifier, setIdentifier] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -117,7 +105,6 @@ export default function AuthCard({ mode, referralCode }) {
   const [verifying, setVerifying] = useState(false);
   const [otpInfo, setOtpInfo] = useState(null);
   const [countdown, setCountdown] = useState(0);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [emailPwdLoading, setEmailPwdLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [forgotSending, setForgotSending] = useState(false);
@@ -135,7 +122,6 @@ export default function AuthCard({ mode, referralCode }) {
     axios.get(`${API}/public/auth-config`).then((r) => {
       setAuthConfig(r.data);
       const firstEnabled = ALL_TABS.find((t) => {
-        if (t.configKey === 'google_enabled') return r.data.google_enabled !== false;
         if (t.configKey === 'email_password_enabled') return r.data.email_password_enabled !== false;
         if (t.configKey === 'otp_enabled') return r.data.otp_enabled !== false;
         return true;
@@ -164,21 +150,6 @@ export default function AuthCard({ mode, referralCode }) {
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [countdown]);
-
-  const onGoogleLogin = async () => {
-    setGoogleLoading(true);
-    try {
-      await loginWithGoogle();
-      toast({ title: 'Our Ambition. Our Guidance. No Frontiers', description: 'Signed in with Google.' });
-      navigate(nextUrl, { replace: true });
-    } catch (e) {
-      if (e.code !== 'auth/popup-closed-by-user') {
-        toast({ title: 'Google sign-in failed', description: e.response?.data?.detail || e.message });
-      }
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
 
   const onEmailPwdSubmit = async (e) => {
     e.preventDefault();
@@ -326,11 +297,9 @@ export default function AuthCard({ mode, referralCode }) {
       <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
         {step === 'otp'
           ? `Code sent to ${otpInfo?.masked || identifier}`
-          : tab === 'google'
-            ? 'Quick one-click sign in with your Google account.'
-            : tab === 'emailpwd'
-              ? isSignup ? 'Create account with email and password.' : 'Sign in with your email and password.'
-              : `We'll send a code via ${otpChannel === 'email' ? 'email' : otpChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'}.`}
+          : tab === 'emailpwd'
+            ? isSignup ? 'Create account with email and password.' : 'Sign in with your email and password.'
+            : `We'll send a code via ${otpChannel === 'email' ? 'email' : otpChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'}.`}
       </p>
 
       {step === 'input' ? (
@@ -339,21 +308,7 @@ export default function AuthCard({ mode, referralCode }) {
             <TabsInline value={tab} onChange={setTab} tabs={allowedTabs} />
           </div>
 
-          {tab === 'google' ? (
-            <div className="space-y-4">
-              <Button disabled={googleLoading} onClick={onGoogleLogin} variant="outline"
-                className="w-full h-12 rounded-xl font-semibold text-[15px] flex items-center gap-3">
-                {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleIcon />}
-                Continue with Google
-              </Button>
-              <div className="text-center text-[14px] text-muted-foreground">
-                {isSignup ? 'Already have an account? ' : 'New to We Hive? '}
-                <Link to={isSignup ? '/login' : '/signup'} className={ALT_LINK_CLS}>
-                  {isSignup ? 'Sign in' : 'Create account'}
-                </Link>
-              </div>
-            </div>
-          ) : tab === 'emailpwd' ? (
+          {tab === 'emailpwd' ? (
             <form onSubmit={onEmailPwdSubmit} className="space-y-4">
               {isSignup && (
                 <div>
