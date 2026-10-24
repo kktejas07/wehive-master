@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import { Clock, User } from 'lucide-react';
+import { destination } from '../../lib/destinations';
 
 interface ContentCardProps {
   imageUrl?: string;
@@ -38,17 +39,8 @@ export function ContentCard({
     return c ? 'bg-white text-[hsl(var(--blue-900))] border-white' : 'bg-white/90 text-[hsl(var(--blue-900))] border-white';
   };
 
-  const getCountryInfo = (cid?: string) => {
-    if (!cid) return null;
-    const c = cid.toLowerCase();
-    const color = 'bg-[hsl(var(--blue-900))]/70';
-    if (c.includes('us') || c.includes('united-states')) return { color, label: 'USA' };
-    if (c.includes('uk') || c.includes('united-kingdom')) return { color, label: 'UK' };
-    if (c.includes('australia')) return { color, label: 'AUS' };
-    if (c.includes('canada')) return { color, label: 'CAN' };
-    if (c.includes('germany')) return { color, label: 'GER' };
-    return { color, label: cid.toUpperCase().substring(0, 3) };
-  };
+  // Shared labels (lib/destinations): substring checks mislabelled e.g. "australia" as USA.
+  const getCountryInfo = (cid?: string) => (cid ? { color: 'bg-[hsl(var(--blue-900))]/70', label: destination(cid).label } : null);
 
   const countryInfo = getCountryInfo(countryId);
 

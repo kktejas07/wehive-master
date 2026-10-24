@@ -18,6 +18,7 @@ async function ensureAuth() {
     const { auth } = await initFirebase();
     _auth = auth;
   }
+  if (!_auth) throw new Error("Google and email-link sign-in aren't available right now. Use the email or WhatsApp code instead.");
   return _auth;
 }
 
@@ -60,9 +61,9 @@ export const firebaseAuth = {
 
   onAuthChange: (callback) => {
     let unsub = null;
-    ensureAuth().then((auth) => {
-      unsub = onAuthStateChanged(auth, callback);
-    });
+    ensureAuth()
+      .then((auth) => { unsub = onAuthStateChanged(auth, callback); })
+      .catch(() => callback(null)); // Firebase not configured: signed out, stop loading.
     return () => { if (unsub) unsub(); };
   },
 };
