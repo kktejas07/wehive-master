@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import {
@@ -9,6 +10,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { COUNTRIES } from '../data/mock';
 import { API } from '../lib/apiBase';
+import { useAuth } from '../context/AuthContext';
 
 const OUTCOME_META = {
   VISA_NOT_REQUIRED: { label: 'Visa Not Required', color: '#16a34a', bg: '#dcfce7', icon: CheckCircle2 },
@@ -19,8 +21,13 @@ const OUTCOME_META = {
   UNKNOWN:           { label: 'Check Required',      color: '#6b7280', bg: '#f3f4f6', icon: AlertTriangle },
 };
 
-const NATIONALITIES = COUNTRIES.filter(c => ['in', 'us', 'gb', 'sg', 'ae', 'ca', 'au', 'za', 'ng', 'ke'].includes(c.id));
+const NATIONALITIES = COUNTRIES;
 const DESTINATIONS = COUNTRIES.filter(c => !['in'].includes(c.id));
+// Query params use ISO codes (?from=IN&to=GB); our country ids use 'uk' for the United Kingdom.
+const pick = (list, v) => {
+  const id = v?.toLowerCase() === 'gb' ? 'uk' : v?.toLowerCase();
+  return list.some(c => c.id === id) ? id : '';
+};
 
 
 function ProviderBadge({ provider }) {
@@ -44,8 +51,16 @@ function OutcomeBadge({ outcome }) {
 }
 
 function ResultDisplay({ result, isFallback }) {
+  const { isAuthed } = useAuth();
+  const location = useLocation();
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+      {!isFallback && result.nationality !== 'IN' && (
+        <div className="p-3 rounded-xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] flex items-start gap-2 text-[13px] text-muted-foreground">
+          <Info className="w-4 h-4 shrink-0 mt-0.5" />
+          We don't have our own data for this passport yet — result is from our live provider.
+        </div>
+      )}
       {isFallback && (
         <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2 text-[13px] text-amber-800">
           <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
@@ -129,6 +144,18 @@ function ResultDisplay({ result, isFallback }) {
           </p>
         </div>
       )}
+
+      {!isAuthed && (
+        <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--blue-50))] p-5 flex items-center justify-between gap-4 flex-wrap">
+          <p className="text-[14px] text-[hsl(var(--blue-900))]">
+            Sign in to apply, track your application, and book your appointment.
+          </p>
+          <Link to={`/login?next=${encodeURIComponent(location.pathname + location.search)}`}
+            className="inline-flex items-center gap-1 text-[13px] font-bold text-[hsl(var(--blue-700))] hover:underline">
+            Sign in <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -153,8 +180,9 @@ function CountryCard({ c, selected, onSelect, label }) {
 }
 
 export default function VisaChecker() {
-  const [nationality, setNationality] = useState('in');
-  const [destination, setDestination] = useState('');
+  const [params] = useSearchParams();
+  const [nationality, setNationality] = useState(() => pick(NATIONALITIES, params.get('from')) || 'in');
+  const [destination, setDestination] = useState(() => pick(DESTINATIONS, params.get('to')));
   const [travelDate, setTravelDate] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -227,7 +255,7 @@ export default function VisaChecker() {
           <div className="lg:col-span-2 space-y-4">
             <div>
               <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-2">Nationality</div>
-              <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 max-h-[320px] overflow-y-auto pr-1">
                 {NATIONALITIES.map(c => (
                   <CountryCard key={c.id} c={c} selected={nationality === c.id}
                     onSelect={() => { setNationality(c.id); setResult(null); }} label="Nationality" />
