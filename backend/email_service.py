@@ -22,26 +22,46 @@ from settings_service import get_all as _get_settings
 
 logger = logging.getLogger('wehive.email')
 
-EMAIL_CSS = """
-<body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px">
-  <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
-    <tr><td style="padding:32px 32px 0 32px;text-align:center">
-      <h1 style="font-size:22px;font-weight:700;color:#1a1a2e;margin:0 0 6px 0">We Hive</h1>
-      <p style="font-size:14px;color:#64748b;margin:0 0 24px 0">__SUBHEADING__</p>
+BRAND_RED = '#E0212C'
+BRAND_DARK = '#1A1A2E'
+
+EMAIL_SHELL = """\
+<!doctype html>
+<html><body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">__PREHEADER__</div>
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" style="padding:32px 16px">
+  <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <tr><td style="height:4px;background:#E0212C;line-height:4px;font-size:0">&nbsp;</td></tr>
+    <tr><td style="padding:28px 36px 0 36px;text-align:center">
+      <div style="font-size:24px;font-weight:800;color:#1a1a2e;letter-spacing:-0.02em;margin:0">We&nbsp;Hive</div>
+      <div style="font-size:12px;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase;margin:6px 0 0 0">Your Global Journey Starts Here</div>
+      <div style="font-size:15px;font-weight:700;color:#1a1a2e;margin:22px 0 4px 0">__SUBHEADING__</div>
     </td></tr>
     __CONTENT__
-    <tr><td style="padding:0 32px 32px 32px;text-align:center">
-      <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.6">
-        Need help? Reply to this email or visit <a href="__SITE_URL__/help" style="color:#e0212c">We Hive Help</a>.<br>
-        &copy; 2026 We Hive. All rights reserved.
-      </p>
+    <tr><td style="padding:8px 36px 32px 36px;text-align:center">
+      <div style="border-top:1px solid #f1f5f9;padding-top:20px">
+        <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.7">
+          Need help? Reply to this email or call <a href="tel:+919121495077" style="color:#E0212C;text-decoration:none">+91 91214 95077</a> (Mon&ndash;Sat, 09:00&ndash;18:00 IST).<br>
+          We Hive &middot; Miyapur, Hyderabad &middot; East Windsor, NJ<br>
+          &copy; 2026 We Hive. All rights reserved.
+        </p>
+      </div>
     </td></tr>
   </table>
+  <div style="font-size:11px;color:#b6c2d1;margin-top:14px">Sent by We Hive &lt;noreply@wehive.co.in&gt; &middot; <a href="__SITE_URL__/help" style="color:#b6c2d1">Help</a></div>
 </td></tr></table>
-</body>
+</body></html>
 """
-EMAIL_CSS = EMAIL_CSS.replace('__SITE_URL__', FRONTEND_URL)
+EMAIL_SHELL = EMAIL_SHELL.replace('__SITE_URL__', FRONTEND_URL)
+
+
+def _btn(url: str, label: str) -> str:
+    return (
+        f'<div style="text-align:center;margin:24px 0">'
+        f'<a href="{url}" style="display:inline-block;background:#E0212C;color:#ffffff;'
+        f'text-decoration:none;font-weight:700;font-size:14px;padding:13px 34px;border-radius:10px">{label}</a>'
+        f'</div>'
+    )
 
 
 async def _get_email_config() -> dict:
@@ -193,64 +213,89 @@ async def send_email(
     return await _send_via_smtp(to_email, subject, html_body, text_body, pdf_bytes, pdf_filename, cc, bcc)
 
 
-def _wrap_html(subheading: str, content_html: str) -> str:
-    return EMAIL_CSS.replace('__SUBHEADING__', subheading).replace('__CONTENT__', content_html)
+def _wrap_html(subheading: str, content_html: str, preheader: str = '') -> str:
+    return (EMAIL_SHELL
+            .replace('__SUBHEADING__', subheading)
+            .replace('__CONTENT__', content_html)
+            .replace('__PREHEADER__', preheader or subheading))
 
 
 def build_otp_html(otp_code: str, purpose: str, expiry_minutes: int) -> str:
     purpose_label = 'sign in' if purpose == 'login' else 'account creation'
     content = f"""
-    <tr><td style="padding:0 32px;text-align:center">
-      <div style="background:#f8fafc;border-radius:12px;padding:24px;margin-bottom:24px">
-        <p style="font-size:13px;color:#64748b;margin:0 0 12px 0">Use this code to complete your {purpose_label}</p>
-        <div style="font-size:36px;font-weight:800;color:#e0212c;letter-spacing:8px;margin:0">{otp_code}</div>
-        <p style="font-size:12px;color:#94a3b8;margin:12px 0 0 0">This code expires in {expiry_minutes} minutes</p>
+    <tr><td style="padding:8px 36px;text-align:center">
+      <p style="font-size:14px;color:#475569;margin:0 0 16px 0;line-height:1.6">Hi there — use this code to complete your {purpose_label} on We Hive:</p>
+      <div style="background:#fef2f2;border:1px dashed #E0212C;border-radius:12px;padding:22px;margin:0 0 8px 0">
+        <div style="font-size:34px;font-weight:800;color:#E0212C;letter-spacing:10px;margin:0">{otp_code}</div>
       </div>
+      <p style="font-size:12px;color:#94a3b8;margin:12px 0 0 0">Expires in {expiry_minutes} minutes. Never share this code — We Hive staff will never ask for it.</p>
     </td></tr>
     """
-    return _wrap_html('Your verification code', content)
+    return _wrap_html('Your verification code', content, f'Your We Hive code is {otp_code} — expires in {expiry_minutes} min.')
 
 
 def build_newsletter_confirm_html(confirm_url: str, unsubscribe_url: str) -> str:
     content = f"""
-    <tr><td style="padding:0 32px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Thanks for signing up for We Hive updates.</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 20px 0;line-height:1.6">Confirm your email to start receiving visa rule changes, slot alerts and study-abroad news. If you didn't ask for this, ignore this email and you won't hear from us again.</p>
-      <div style="text-align:center;margin:24px 0">
-        <a href="{confirm_url}" style="display:inline-block;background:#CF1426;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Confirm subscription</a>
-      </div>
-      <p style="font-size:12px;color:#94a3b8;margin:0 0 8px 0;line-height:1.6">This link expires in 48 hours. You can <a href="{unsubscribe_url}" style="color:#94a3b8">unsubscribe</a> at any time.</p>
+    <tr><td style="padding:8px 36px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Thanks for signing up for We Hive updates.</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 8px 0;line-height:1.6">One click and you're in — visa rule changes, slot alerts and study-abroad news, straight to your inbox. If you didn't ask for this, just ignore this email.</p>
+      {_btn(confirm_url, 'Confirm subscription')}
+      <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.6">Link expires in 48 hours. <a href="{unsubscribe_url}" style="color:#94a3b8">Unsubscribe</a> anytime.</p>
     </td></tr>
     """
-    return _wrap_html('Confirm your subscription', content)
+    return _wrap_html('Confirm your subscription', content, 'Confirm your We Hive subscription — one click.')
+
+
+def build_email_verification_html(name: str, verify_url: str) -> str:
+    greeting = f'Hi{name},' if name else 'Hello,'
+    content = f"""
+    <tr><td style="padding:8px 36px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">{greeting}</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 8px 0;line-height:1.6">Welcome to <strong>We Hive</strong> — please verify your email address to unlock visa tracking, university applications and slot alerts.</p>
+      {_btn(verify_url, 'Verify my email')}
+      <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.6">Button not working? Paste this link into your browser:<br><a href="{verify_url}" style="color:#E0212C;word-break:break-all">{verify_url}</a></p>
+      <p style="font-size:12px;color:#94a3b8;margin:12px 0 0 0;line-height:1.6">If you didn't create a We Hive account, you can safely ignore this email.</p>
+    </td></tr>
+    """
+    return _wrap_html('Verify your email', content, 'Verify your We Hive email to get started.')
+
+
+def build_password_reset_html(name: str, reset_url: str, expiry_minutes: int = 30) -> str:
+    greeting = f'Hi{name},' if name else 'Hello,'
+    content = f"""
+    <tr><td style="padding:8px 36px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">{greeting}</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 8px 0;line-height:1.6">We received a request to reset your We Hive password. Click below to choose a new one — this link expires in {expiry_minutes} minutes.</p>
+      {_btn(reset_url, 'Reset my password')}
+      <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.6">Didn't ask for a reset? Your password is safe — just ignore this email.</p>
+    </td></tr>
+    """
+    return _wrap_html('Reset your password', content, f'Reset your We Hive password — expires in {expiry_minutes} min.')
 
 
 def build_welcome_html(name: str) -> str:
     content = f"""
-    <tr><td style="padding:0 32px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Hi{f' {name}' if name else ''},</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6"><strong>Our Ambition. Our Guidance. No Frontiers</strong> — your all-in-one platform for visa applications, university admissions, and immigration services.</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Here's what you can do now:</p>
-      <ul style="font-size:14px;color:#475569;margin:0 0 20px 0;padding-left:20px;line-height:1.8">
+    <tr><td style="padding:8px 36px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {name}' if name else ''}, welcome aboard!</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6"><strong>Our Ambition. Our Guidance. No Frontiers</strong> — your all-in-one platform for visas, universities and immigration.</p>
+      <ul style="font-size:14px;color:#475569;margin:0 0 8px 0;padding-left:20px;line-height:1.8">
         <li>Explore 190+ countries and check visa requirements</li>
         <li>Apply to 4,000+ universities worldwide</li>
         <li>Book flights, hotels, and travel insurance</li>
-        <li>Track application status in real time</li>
-        <li>Connect with expert immigration consultants</li>
+        <li>Track applications in real time</li>
+        <li>Chat with expert immigration consultants</li>
       </ul>
-      <div style="text-align:center;margin:24px 0">
-        <a href="{FRONTEND_URL}/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Go to Dashboard</a>
-      </div>
+      {_btn(f'{FRONTEND_URL}/account', 'Go to Dashboard')}
     </td></tr>
     """
-    return _wrap_html("Welcome aboard!", content)
+    return _wrap_html('Your global journey starts here', content, 'Welcome to We Hive — explore visas, universities and more.')
 
 
 def build_payment_success_html(name: str, plan_name: str, amount: int, currency: str, invoice_id: str) -> str:
     content = f"""
-    <tr><td style="padding:0 32px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Hi{f' {name}' if name else ''},</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Your payment was successful! Thank you for upgrading to <strong>{plan_name}</strong>.</p>
+    <tr><td style="padding:8px 36px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {name}' if name else ''}, payment confirmed!</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Thank you for upgrading to <strong>{plan_name}</strong>. Your receipt is below and the invoice PDF is attached.</p>
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin:16px 0">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="font-size:13px;color:#64748b;padding:4px 0">Plan</td><td style="font-size:13px;color:#1a1a2e;font-weight:700;padding:4px 0;text-align:right">{plan_name}</td></tr>
@@ -259,48 +304,38 @@ def build_payment_success_html(name: str, plan_name: str, amount: int, currency:
           <tr><td style="font-size:13px;color:#64748b;padding:4px 0">Status</td><td style="font-size:13px;color:#16a34a;font-weight:700;padding:4px 0;text-align:right">PAID</td></tr>
         </table>
       </div>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">You now have access to all premium features. Your invoice is attached to this email.</p>
-      <div style="text-align:center;margin:24px 0">
-        <a href="{FRONTEND_URL}/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Explore Premium Features</a>
-      </div>
+      {_btn(f'{FRONTEND_URL}/account', 'Explore Premium Features')}
     </td></tr>
     """
-    return _wrap_html(f'Payment Confirmed — {plan_name}', content)
+    return _wrap_html(f'Payment confirmed — {plan_name}', content, f'Your {plan_name} payment was successful.')
 
 
 def build_payment_failed_html(name: str, plan_name: str, amount: int, currency: str) -> str:
     content = f"""
-    <tr><td style="padding:0 32px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Hi{f' {name}' if name else ''},</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Your payment for <strong>{plan_name}</strong> ({currency} {amount:,}) could not be completed.</p>
+    <tr><td style="padding:8px 36px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {name}' if name else ''}, your payment didn't go through.</p>
       <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px;margin:16px 0">
-        <p style="font-size:13px;color:#991b1b;margin:0 0 8px 0;font-weight:700">Payment unsuccessful</p>
-        <p style="font-size:13px;color:#991b1b;margin:0;line-height:1.6">This could be due to insufficient funds, card limits, or a temporary network issue. Your account has not been charged.</p>
+        <p style="font-size:13px;color:#991b1b;margin:0 0 8px 0;font-weight:700">{plan_name} — {currency} {amount:,} · unsuccessful</p>
+        <p style="font-size:13px;color:#991b1b;margin:0;line-height:1.6">Usually low balance, card limits or a network blip. You have not been charged.</p>
       </div>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Please try again or use a different payment method.</p>
-      <div style="text-align:center;margin:24px 0">
-        <a href="{FRONTEND_URL}/pricing" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Try Again</a>
-      </div>
+      {_btn(f'{FRONTEND_URL}/pricing', 'Try Again')}
     </td></tr>
     """
-    return _wrap_html('Payment Failed — Action Required', content)
+    return _wrap_html('Payment failed — action needed', content, f'Your {plan_name} payment could not be completed.')
 
 
 def build_subscription_activated_html(name: str, plan_name: str, since: str) -> str:
     content = f"""
-    <tr><td style="padding:0 32px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 16px 0">Hi{f' {name}' if name else ''},</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Your <strong>{plan_name}</strong> subscription is now active, effective {since}.</p>
-      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Premium benefits include:</p>
-      <ul style="font-size:14px;color:#475569;margin:0 0 20px 0;padding-left:20px;line-height:1.8">
+    <tr><td style="padding:8px 36px;text-align:left">
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {name}' if name else ''}, your <strong>{plan_name}</strong> is active 🎉</p>
+      <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Effective {since}. Here's what's unlocked:</p>
+      <ul style="font-size:14px;color:#475569;margin:0 0 8px 0;padding-left:20px;line-height:1.8">
         <li>Priority application processing</li>
         <li>Dedicated specialist support</li>
         <li>Unlimited visa applications</li>
         <li>Advanced AI tools and document review</li>
       </ul>
-      <div style="text-align:center;margin:24px 0">
-        <a href="{FRONTEND_URL}/account" style="display:inline-block;background:#e0212c;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Go to Dashboard</a>
-      </div>
+      {_btn(f'{FRONTEND_URL}/account', 'Go to Dashboard')}
     </td></tr>
     """
-    return _wrap_html('Subscription Active!', content)
+    return _wrap_html('Subscription active', content, f'Your {plan_name} subscription is now active.')
