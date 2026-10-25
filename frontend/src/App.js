@@ -140,7 +140,7 @@ function AnimatedRoutes() {
           <Route path="/visa-scheduling" element={<PrivateRoute><PageTransition><VisaScheduling /></PageTransition></PrivateRoute>} />
           <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
           <Route path="/free-consultation" element={<PageTransition><FreeConsultation /></PageTransition>} />
-          <Route path="/apply" element={<PageTransition><ApplicantFlow /></PageTransition>} />
+          <Route path="/apply" element={<PrivateRoute><PageTransition><ApplicantFlow /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />

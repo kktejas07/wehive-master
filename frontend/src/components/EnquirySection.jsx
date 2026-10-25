@@ -185,14 +185,25 @@ export default function EnquirySection({ source = 'landing' }) {
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n === 10 ? '10+' : n}</option>)}
                     </select>
                   </div>
-                  {/* Group travel promo callout */}
+                  {/* Group travel promo — tourist / business / family */}
                   {GROUP_PROMO_PURPOSES.has(form.purpose) && Number(form.travellers) >= 3 && (
                     <div className="sm:col-span-2 flex items-start gap-3 rounded-xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
                       <Ticket className="w-4 h-4 mt-0.5 shrink-0 text-[hsl(var(--blue-700))]" />
                       <span>
                         <strong>Group of {form.travellers} travelers?</strong> You qualify for{' '}
                         <strong>15% off</strong> your total service fee and a{' '}
-                        <strong>free sticker visa</strong> for each traveler. Our consultant will apply this automatically.
+                        <strong>free sticker visa service</strong> for each traveler. Our consultant will apply this automatically.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Work visa dependent group promo — H1B + H4 / H3 combinations */}
+                  {form.purpose === 'work' && Number(form.travellers) >= 2 && (
+                    <div className="sm:col-span-2 flex items-start gap-3 rounded-xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
+                      <Ticket className="w-4 h-4 mt-0.5 shrink-0 text-[hsl(var(--blue-700))]" />
+                      <span>
+                        <strong>Travelling with dependents?</strong> Groups with H-1B + H-4, H-4 + H-3, or multiple H-1B holders each receive a{' '}
+                        <strong>free sticker visa service — worth ₹9,000 per person</strong>. Our consultant will confirm eligibility and apply this automatically.
                       </span>
                     </div>
                   )}

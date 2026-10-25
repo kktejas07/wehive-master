@@ -13,12 +13,12 @@ import { inr } from '../lib/utils';
 const SERVICE_FEE = 4999; // ₹ per university
 
 const VISA_TYPES = [
-  { id: 'f1', label: 'F-1 (USA)', hint: 'Study in the United States', flag: '🇺🇸' },
-  { id: 'uk', label: 'Student Visa UK', hint: 'Tier 4 / CAS', flag: '🇬🇧' },
-  { id: 'ca', label: 'Study Permit Canada', hint: 'DLI approved', flag: '🇨🇦' },
-  { id: 'au', label: 'Student Visa Australia', hint: 'Subclass 500', flag: '🇦🇺' },
-  { id: 'de', label: 'Student Visa Germany', hint: 'Enrolled or admitted', flag: '🇩🇪' },
-  { id: 'other', label: 'Other country', hint: 'Europe, Asia & more', flag: '🌍' },
+  { id: 'f1', label: 'F-1 (USA)', hint: 'Study in the United States' },
+  { id: 'uk', label: 'Student Visa UK', hint: 'Tier 4 / CAS' },
+  { id: 'ca', label: 'Study Permit Canada', hint: 'DLI approved' },
+  { id: 'au', label: 'Student Visa Australia', hint: 'Subclass 500' },
+  { id: 'de', label: 'Student Visa Germany', hint: 'Enrolled or admitted' },
+  { id: 'other', label: 'Other country', hint: 'Europe, Asia & more' },
 ];
 
 const DEGREES = [
@@ -75,7 +75,7 @@ function ProfileStep({ profile, onChange, onNext }) {
           {VISA_TYPES.map((v) => (
             <label key={v.id} className={selCls(visa_type === v.id)} onClick={() => onChange('visa_type', v.id)}>
               <input type="radio" name="visa_type" value={v.id} checked={visa_type === v.id} onChange={() => onChange('visa_type', v.id)} className="sr-only" />
-              <span className="text-[22px]">{v.flag}</span>
+              <Globe className="w-4 h-4 text-[hsl(var(--blue-700))]" />
               <span className="mt-1 block text-[13px] font-bold text-[hsl(var(--blue-900))]">{v.label}</span>
               <span className="block text-[11px] text-muted-foreground leading-snug">{v.hint}</span>
             </label>
