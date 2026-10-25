@@ -59,6 +59,7 @@ const VisaChecker = lazy(() => import('./pages/VisaChecker'));
 const FreeConsultation = lazy(() => import('./pages/FreeConsultation'));
 const Hive = lazy(() => import('./pages/Hive'));
 const USVisaSlots = lazy(() => import('./pages/USVisaSlots'));
+const UniversityApply = lazy(() => import('./pages/UniversityApply'));
 const GlobalEvents = lazy(() => import('./pages/GlobalEvents'));
 const Blog = lazy(() => import('./pages/Blog'));
 const Community = lazy(() => import('./pages/Community'));
@@ -127,6 +128,7 @@ function AnimatedRoutes() {
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/programs/:universityId" element={<PageTransition><ProgramList /></PageTransition>} />
+          <Route path="/apply/universities" element={<PageTransition><UniversityApply /></PageTransition>} />
           <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
           <Route path="/resources" element={<PageTransition><StudentResources /></PageTransition>} />
           <Route path="/intake-calendar" element={<PageTransition><IntakeCalendar /></PageTransition>} />

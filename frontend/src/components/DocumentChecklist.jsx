@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Upload, Check, AlertCircle, Loader2, X, Trash2, Calendar, Clock } from 'lucide-react';
+import { Upload, Check, AlertCircle, Loader2, X, Trash2, HelpCircle } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
-import { API } from '../context/AuthContext';
+import { API, useAuth } from '../context/AuthContext';
 
 const STATUS_COLORS = {
   uploaded: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Reviewing' },
@@ -20,7 +20,7 @@ function StatusBadge({ status }) {
   );
 }
 
-function DocRow({ docType, file, onUpload, onRemove, busy }) {
+function DocRow({ docType, file, onUpload, onRemove, onHelp, busy }) {
   const inputRef = useRef(null);
   const has = !!file;
   return (
@@ -78,11 +78,100 @@ function DocRow({ docType, file, onUpload, onRemove, busy }) {
                 {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                 Upload
               </button>
+              <button
+                onClick={() => onHelp(docType)}
+                title="Need help with this document?"
+                className="inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-[hsl(var(--blue-50))] text-muted-foreground hover:text-[hsl(var(--blue-700))]"
+                aria-label="Get help with this document"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
             </>
           )}
         </div>
       </div>
     </li>
+  );
+}
+
+function DocHelpModal({ docType, applicationId, token, onClose }) {
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  const { toast } = useToast();
+
+  const submit = async () => {
+    setBusy(true);
+    try {
+      await axios.post(
+        `${API}/leads/doc-help`,
+        { doc_type: docType, application_id: applicationId, message: message.trim() || null },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setDone(true);
+    } catch {
+      toast({ title: 'Could not send request', description: 'Please try again.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40" onClick={onClose}>
+      <div
+        className="w-full max-w-md bg-white rounded-2xl border border-[hsl(var(--border))] shadow-xl p-6 space-y-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {done ? (
+          <div className="text-center py-4 space-y-3">
+            <Check className="w-10 h-10 mx-auto text-emerald-500" />
+            <p className="font-bold text-[16px] text-[hsl(var(--blue-900))]">Request sent!</p>
+            <p className="text-[14px] text-muted-foreground">
+              A WeHive associate will reach out within 24 hours to assist you with <strong>{docType}</strong>.
+            </p>
+            <button onClick={onClose} className="mt-2 h-10 px-6 rounded-xl btn-accent text-[14px] font-semibold">
+              Done
+            </button>
+          </div>
+        ) : (
+          <>
+            <div>
+              <p className="text-[12px] uppercase tracking-wide font-bold text-[hsl(var(--blue-700))]">Document assistance</p>
+              <h3 className="mt-1 font-bold text-[18px] text-[hsl(var(--blue-900))]">Help with {docType}</h3>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                A WeHive financial advisor or associate will contact you. This is a paid assistance service — fees will be shared when we connect.
+              </p>
+            </div>
+            <div>
+              <label className="block text-[13px] font-semibold text-[hsl(var(--blue-900))] mb-1.5">
+                Describe what you need help with (optional)
+              </label>
+              <textarea
+                rows={3}
+                maxLength={500}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={`e.g. I need help arranging financial sponsorship documents for ${docType}`}
+                className="w-full rounded-xl border border-[hsl(var(--border))] px-3.5 py-2.5 text-[14px] outline-none focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20 resize-none"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={onClose} className="flex-1 h-10 rounded-xl border border-[hsl(var(--border))] text-[14px] font-semibold hover:border-[hsl(var(--blue-200))]">
+                Cancel
+              </button>
+              <button
+                onClick={submit}
+                disabled={busy}
+                className="flex-1 h-10 rounded-xl btn-accent text-[14px] font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-60"
+              >
+                {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Request callback
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -150,6 +239,7 @@ export function DocumentExpirationWarnings({ docs }) {
 export default function DocumentChecklist({ applicationId, requiredDocs, token, onDocsChange }) {
   const [docs, setDocs] = useState([]);
   const [busy, setBusy] = useState({});
+  const [helpDoc, setHelpDoc] = useState(null);
   const { toast } = useToast();
 
   const refresh = async () => {
@@ -236,9 +326,19 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
             busy={busy[d]}
             onUpload={(f) => handleUpload(d, f)}
             onRemove={handleRemove}
+            onHelp={(dt) => setHelpDoc(dt)}
           />
         ))}
       </ul>
+
+      {helpDoc && (
+        <DocHelpModal
+          docType={helpDoc}
+          applicationId={applicationId}
+          token={token}
+          onClose={() => setHelpDoc(null)}
+        />
+      )}
     </section>
   );
 }
