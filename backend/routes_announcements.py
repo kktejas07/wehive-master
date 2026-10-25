@@ -103,6 +103,7 @@ def build_whatsapp_text(title: str, message: str, link: str = '') -> str:
 
 
 def _out(a: dict) -> dict:
+    sched = a.get('scheduled_at')
     return {
         'id': a['_id'], 'title': a.get('title'), 'audience': a.get('audience'),
         'status': a.get('status'), 'recipients': a.get('recipients', 0),
@@ -110,7 +111,7 @@ def _out(a: dict) -> dict:
         'emails_failed': a.get('emails_failed', 0),
         'whatsapp_sent': a.get('whatsapp_sent', 0), 'whatsapp_failed': a.get('whatsapp_failed', 0),
         'channels': a.get('channels', {'inapp': True, 'email': True, 'whatsapp': False}),
-        'scheduled_at': a.get('scheduled_at').isoformat() if isinstance(a.get('scheduled_at'), datetime) else a.get('scheduled_at'),
+        'scheduled_at': sched.isoformat() + 'Z' if isinstance(sched, datetime) else sched,
         'created_by': a.get('created_by'),
         'created_at': a['created_at'].isoformat() if isinstance(a.get('created_at'), datetime) else a.get('created_at'),
         'finished_at': a['finished_at'].isoformat() if isinstance(a.get('finished_at'), datetime) else a.get('finished_at'),

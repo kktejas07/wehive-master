@@ -119,12 +119,13 @@ def _unsubscribe_url(token: str) -> str:
 
 
 def _out(c: dict) -> dict:
+    sched = c.get('scheduled_at')
     return {
         'id': c['_id'], 'subject': c.get('subject'), 'status': c.get('status'),
         'recipients': c.get('recipients', 0), 'sent': c.get('sent', 0), 'failed': c.get('failed', 0),
         'whatsapp_sent': c.get('whatsapp_sent', 0), 'whatsapp_failed': c.get('whatsapp_failed', 0),
         'channels': c.get('channels', {'email': True, 'whatsapp': False}),
-        'scheduled_at': c.get('scheduled_at').isoformat() if isinstance(c.get('scheduled_at'), datetime) else c.get('scheduled_at'),
+        'scheduled_at': sched.isoformat() + 'Z' if isinstance(sched, datetime) else sched,
         'created_by': c.get('created_by'),
         'created_at': c['created_at'].isoformat() if isinstance(c.get('created_at'), datetime) else c.get('created_at'),
         'finished_at': c['finished_at'].isoformat() if isinstance(c.get('finished_at'), datetime) else c.get('finished_at'),
