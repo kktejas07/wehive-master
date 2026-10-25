@@ -372,6 +372,21 @@ def _start_ragas_scheduler():
     asyncio.get_event_loop().create_task(_loop())
 
 
+async def _warm_up_and_bootstrap_rag():
+    try:
+        # Choose and load the embedding model before anything is ingested.
+        from embeddings_bge import warm_up as warm_up_embeddings
+        logger.info('Embeddings backend: %s', await asyncio.to_thread(warm_up_embeddings))
+    except Exception as e:
+        logger.exception('Embeddings warm-up failed: %s', e)
+
+    try:
+        from bootstrap_rag import bootstrap_rag_and_prompts
+        await bootstrap_rag_and_prompts(db)
+    except Exception as e:
+        logger.exception('RAG/prompts bootstrap failed: %s', e)
+
+
 @app.on_event('startup')
 async def on_startup():
     try:
