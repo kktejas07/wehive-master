@@ -11,7 +11,8 @@ import httpx
 logger = logging.getLogger('wehive.otp')
 
 WHATSAPP_FOOTER = (
-    '\n\nVisit website: https://wehive.co.in'
+    '\n----------------------------------'
+    '\nVisit website: https://wehive.co.in'
     '\n© WeHive. All rights reserved. · Powered by Axiss Groups'
 )
 
