@@ -14,6 +14,7 @@ import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import AdminsTab from '../components/admin/AdminsTab';
 import NewsletterTab from '../components/admin/NewsletterTab';
+import AnnouncementsTab from '../components/admin/AnnouncementsTab';
 import IntegrationsTab from '../components/admin/IntegrationsTab';
 import ExportsTab from '../components/admin/ExportsTab';
 import UniversitiesTab from '../components/admin/UniversitiesTab';
@@ -108,6 +109,7 @@ function AdminRoutes() {
                 <Route path="staff" element={<StaffTab />} />
                 <Route path="admins" element={<SuperOnly><AdminsTab /></SuperOnly>} />
                 <Route path="newsletter" element={<NewsletterTab />} />
+          <Route path="announcements" element={<AnnouncementsTab />} />
                 <Route path="integrations" element={<SuperOnly><IntegrationsTab /></SuperOnly>} />
                 <Route path="exports" element={<ExportsTab />} />
                 <Route path="leads" element={<LeadsTab />} />
