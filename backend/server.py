@@ -9,6 +9,7 @@ from pathlib import Path
 from fastapi import FastAPI, APIRouter, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 
@@ -83,6 +84,7 @@ from routes_travel import router as travel_router  # noqa: E402
 from routes_intakes import router as intakes_router  # noqa: E402
 from routes_financials import router as financials_router  # noqa: E402
 from routes_admin_observability import router as admin_observability_router  # noqa: E402
+from routes_admin_monitoring import router as admin_monitoring_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -188,6 +190,7 @@ api_router.include_router(travel_router)
 api_router.include_router(intakes_router)
 api_router.include_router(financials_router)
 api_router.include_router(admin_observability_router)
+api_router.include_router(admin_monitoring_router)
 
 app.include_router(api_router)
 
@@ -289,6 +292,62 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+def _cors_headers_for(request: Request) -> dict:
+    """Return CORS response headers for the request's Origin if it is allowed.
+
+    CORSMiddleware handles the normal path, but custom exception handlers bypass
+    middleware — they run before the middleware wraps the response.  Adding headers
+    here ensures that 4xx / 5xx JSON error bodies still carry CORS headers so that
+    browser clients can read the error detail rather than seeing a CORS block.
+    """
+    origin = request.headers.get("origin", "")
+    if not origin:
+        return {}
+    if '*' in _allow_origins:
+        return {"Access-Control-Allow-Origin": "*"}
+    if origin in _allow_origins:
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Vary": "Origin",
+        }
+    if _origin_regex and re.match(_origin_regex, origin):
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Vary": "Origin",
+        }
+    return {}
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=_cors_headers_for(request),
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+        headers=_cors_headers_for(request),
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logging.getLogger("wehive").error("Unhandled exception on %s %s: %s", request.method, request.url.path, exc, exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+        headers=_cors_headers_for(request),
+    )
 
 
 @app.middleware('http')

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, UserPlus, UserCog, Trash2 } from 'lucide-react';
+import { Loader2, UserPlus, UserCog, Trash2, TrendingUp } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -12,6 +12,69 @@ const ROLES = [
   { id: 'ops',         label: 'Operations' },
   { id: 'manager',     label: 'Manager' },
 ];
+
+function PerformancePanel({ token }) {
+  const [data, setData] = useState(null);
+  const [sortKey, setSortKey] = useState('open_cases');
+
+  useEffect(() => {
+    adminClient(token).get('/ai/agent-performance')
+      .then((r) => setData(r.data))
+      .catch(() => setData({ agents: [] }));
+  }, [token]);
+
+  const agents = [...(data?.agents || [])].sort((a, b) => (b[sortKey] ?? 0) - (a[sortKey] ?? 0));
+
+  return (
+    <Panel className="mt-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="text-[15px] font-display font-bold text-white flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-amber-300" />
+          Agent performance
+        </div>
+        <select value={sortKey} onChange={(e) => setSortKey(e.target.value)}
+          className="h-8 px-2 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white">
+          <option value="open_cases">Sort: open cases</option>
+          <option value="closed_month">Sort: closed this month</option>
+          <option value="avg_resolution_days">Sort: avg resolution</option>
+        </select>
+      </div>
+      {!data && <Loader2 className="w-4 h-4 animate-spin text-blue-300" />}
+      {data && agents.length === 0 && (
+        <div className="text-[13px] text-slate-400">No performance data yet.</div>
+      )}
+      {agents.length > 0 && (
+        <table className="min-w-full text-[12.5px]">
+          <thead>
+            <tr className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-500">
+              <th className="pb-2 text-left">Agent</th>
+              <th className="pb-2 text-right">Open</th>
+              <th className="pb-2 text-right">Closed (30d)</th>
+              <th className="pb-2 text-right">Avg days</th>
+            </tr>
+          </thead>
+          <tbody>
+            {agents.map((a, i) => (
+              <tr key={a.id || i} className="border-t border-white/5">
+                <td className="py-2.5">
+                  <div className="font-semibold text-white">{a.name || a.email || '—'}</div>
+                  <div className="text-[11px] text-slate-400">{a.email}</div>
+                </td>
+                <td className="py-2.5 text-right">
+                  <span className={`font-bold ${(a.open_cases ?? 0) > 10 ? 'text-amber-300' : 'text-slate-200'}`}>
+                    {a.open_cases ?? 0}
+                  </span>
+                </td>
+                <td className="py-2.5 text-right text-emerald-300 font-bold">{a.closed_month ?? 0}</td>
+                <td className="py-2.5 text-right text-slate-300">{a.avg_resolution_days != null ? `${a.avg_resolution_days}d` : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </Panel>
+  );
+}
 
 export default function StaffTab() {
   const { token } = useAdminAuth();
@@ -172,6 +235,7 @@ export default function StaffTab() {
           </tbody>
         </table>
       </Panel>
+      <PerformancePanel token={token} />
     </div>
   );
 }

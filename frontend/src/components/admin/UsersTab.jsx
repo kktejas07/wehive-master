@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, Search, Trash2, Crown, UserCog, AlertTriangle } from 'lucide-react';
+import { Loader2, Search, Trash2, Crown, UserCog, AlertTriangle, Bell } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, canWrite } from '../../lib/admin';
 import { AdminHeader, Panel } from './AdminShell';
@@ -38,6 +38,9 @@ export default function UsersTab() {
   const [skip, setSkip] = useState(0);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(null);
+  const [remindOpen, setRemindOpen] = useState(null);
+  const [remindTpl, setRemindTpl] = useState('generic');
+  const [remindBusy, setRemindBusy] = useState(false);
 
   useEffect(() => { setSkip(0); }, [dq, role]);
 
@@ -71,6 +74,19 @@ export default function UsersTab() {
       toast({ title: 'Failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
     } finally {
       setBusy(null);
+    }
+  };
+
+  const sendReminder = async (u) => {
+    setRemindBusy(true);
+    try {
+      await adminClient(token).post(`/users/${u.id}/send-reminder`, { template: remindTpl, note: null });
+      toast({ title: 'Reminder sent' });
+      setRemindOpen(null);
+    } catch (e) {
+      toast({ title: 'Failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    } finally {
+      setRemindBusy(false);
     }
   };
 
@@ -150,7 +166,7 @@ export default function UsersTab() {
               <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400">No users match.</td></tr>
             )}
             {items?.map((u) => (
-              <tr key={u.id} data-testid={`admin-user-row-${u.id}`} className="border-t border-white/5 hover:bg-white/5">
+              <tr key={u.id} data-testid={`admin-user-row-${u.id}`} className="border-t border-white/5 hover:bg-white/5 transition-colors duration-150">
                 <td className="px-5 py-3">
                   <Link to={`/admin/users/${u.id}`} data-testid={`admin-user-link-${u.id}`} className="font-bold text-white hover:underline">{u.name || u.email || u.phone || '—'}</Link>
                   <div className="text-[11px] text-slate-400 font-mono">{u.id.slice(0, 8)}…</div>
@@ -173,6 +189,36 @@ export default function UsersTab() {
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                    <div className="relative">
+                      <button
+                        onClick={() => { setRemindOpen(remindOpen === u.id ? null : u.id); setRemindTpl('generic'); }}
+                        className="inline-flex items-center gap-1 rounded-lg bg-white/5 hover:bg-white/10 px-2.5 py-1.5 text-[11.5px] font-bold text-slate-300"
+                        title="Send reminder"
+                      >
+                        <Bell className="w-3 h-3" />
+                      </button>
+                      {remindOpen === u.id && (
+                        <div className="absolute right-0 bottom-full mb-1 z-20 rounded-xl bg-[#111632] border border-white/10 shadow-2xl p-3 w-52">
+                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">Send reminder</p>
+                          <select
+                            value={remindTpl}
+                            onChange={(e) => setRemindTpl(e.target.value)}
+                            className="w-full h-9 px-2 rounded-lg bg-white/5 border border-white/10 text-[12.5px] text-white mb-2"
+                          >
+                            <option value="generic">General reminder</option>
+                            <option value="docs_pending">Documents pending</option>
+                            <option value="payment_pending">Payment pending</option>
+                          </select>
+                          <button
+                            disabled={remindBusy}
+                            onClick={() => sendReminder(u)}
+                            className="w-full h-9 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white text-[12.5px] font-bold transition-colors"
+                          >
+                            {remindBusy ? 'Sending…' : 'Send'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     {canManage && <>
                     <button
                       data-testid={`toggle-premium-${u.id}`}
