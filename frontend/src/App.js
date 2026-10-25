@@ -52,6 +52,7 @@ const StudentResources = lazy(() => import('./pages/StudentResources'));
 const IntakeCalendar = lazy(() => import('./pages/IntakeCalendar'));
 const SharedShortlist = lazy(() => import('./pages/SharedShortlist'));
 const EmailVerification = lazy(() => import('./pages/EmailVerification'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const FinancialTools = lazy(() => import('./pages/FinancialTools'));
 const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
@@ -112,6 +113,7 @@ function AnimatedRoutes() {
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
           <Route path="/__/auth/action" element={<EmailVerification />} />
+          <Route path="/verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
           <Route path="/account" element={<PrivateRoute><PageTransition><Account /></PageTransition></PrivateRoute>} />
           <Route path="/account/applications/:id" element={<PrivateRoute><PageTransition><ApplicationDetail /></PageTransition></PrivateRoute>} />
           <Route path="/track/:id" element={<PageTransition><TrackStatus /></PageTransition>} />
