@@ -374,9 +374,10 @@ def _start_ragas_scheduler():
 
 async def _warm_up_and_bootstrap_rag():
     try:
-        # Choose and load the embedding model before anything is ingested.
         from embeddings_bge import warm_up as warm_up_embeddings
         logger.info('Embeddings backend: %s', await asyncio.to_thread(warm_up_embeddings))
+    except ImportError:
+        logger.info('Embeddings warm-up not available in this build; skipping')
     except Exception as e:
         logger.exception('Embeddings warm-up failed: %s', e)
 
