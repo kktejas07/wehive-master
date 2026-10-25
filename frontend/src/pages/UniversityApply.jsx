@@ -173,7 +173,7 @@ function ProfileStep({ profile, onChange, onNext }) {
           {stickerVisa && (
             <div className="flex items-start gap-3 rounded-xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
               <Ticket className="w-4 h-4 mt-0.5 shrink-0 text-[hsl(var(--blue-700))]" />
-              <span><strong>5-University Offer:</strong> Apply to 5+ universities and we include a free sticker visa service!</span>
+              <span><strong>Study Visa Offer:</strong> Apply to 5+ universities on any study visa and we include a free sticker visa service!</span>
             </div>
           )}
         </div>
@@ -236,7 +236,7 @@ function UniversityStep({ profile, selected, onToggle, onNext, onBack }) {
           {stickerVisa && (
             <div className="flex items-start gap-3 rounded-xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
               <Ticket className="w-4 h-4 mt-0.5 shrink-0 text-[hsl(var(--blue-700))]" />
-              <span><strong>5-University Offer unlocked!</strong> A free sticker visa service is included with your package.</span>
+              <span><strong>Study Visa Offer unlocked!</strong> A free sticker visa service is included with your study package.</span>
             </div>
           )}
         </div>
@@ -366,8 +366,8 @@ function SummaryStep({ profile, selected, onBack }) {
             <div className="flex items-start gap-3 rounded-xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
               <Ticket className="w-4 h-4 mt-0.5 shrink-0 text-[hsl(var(--blue-700))]" />
               <div>
-                <strong>5-University Promotion applied!</strong>
-                <span className="ml-1">A free sticker visa service is included with this package.</span>
+                <strong>Study Visa 5-University Promotion applied!</strong>
+                <span className="ml-1">A free sticker visa service is included with this study package.</span>
               </div>
             </div>
           )}

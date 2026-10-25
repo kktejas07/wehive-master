@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
-  Plane, Briefcase, GraduationCap, HardHat, Users, Home, ArrowRightLeft, HelpCircle, Loader2, CheckCircle2, Tag,
+  Plane, Briefcase, GraduationCap, HardHat, Users, Home, ArrowRightLeft, HelpCircle, Loader2, CheckCircle2, Tag, Ticket,
 } from 'lucide-react';
 import { API } from '../context/AuthContext';
 import { COUNTRIES, BRANCHES } from '../data/mock';
@@ -14,10 +14,12 @@ const PURPOSES = [
   { id: 'student_f1', label: 'Student / F-1', hint: 'Study abroad', Icon: GraduationCap },
   { id: 'work', label: 'Work', hint: 'Job or work permit', Icon: HardHat },
   { id: 'family', label: 'Family visit', hint: 'Spouse, parents, relatives', Icon: Users },
-  { id: 'immigration', label: 'Immigration / PR', hint: 'Settle abroad', Icon: Home },
+  { id: 'immigration', label: 'Immigration / PR', hint: 'EB1A · EB5 · O1 · Canada PR · Australia PR', Icon: Home },
   { id: 'transit', label: 'Transit', hint: 'Passing through', Icon: ArrowRightLeft },
   { id: 'other', label: 'Something else', hint: 'Tell us below', Icon: HelpCircle },
 ];
+
+const GROUP_PROMO_PURPOSES = new Set(['tourist', 'business', 'family']);
 const EMPTY = { purpose: '', name: '', email: '', phone: '', destination: '', travel_date: '', travellers: 1, message: '', branch: '', consent: false, website: '' };
 
 const inputCls = 'w-full h-12 rounded-xl border border-[hsl(var(--border))] bg-white px-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors hover:border-[hsl(var(--blue-200))] focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20';
@@ -183,6 +185,18 @@ export default function EnquirySection({ source = 'landing' }) {
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n === 10 ? '10+' : n}</option>)}
                     </select>
                   </div>
+                  {/* Group travel promo callout */}
+                  {GROUP_PROMO_PURPOSES.has(form.purpose) && Number(form.travellers) >= 3 && (
+                    <div className="sm:col-span-2 flex items-start gap-3 rounded-xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
+                      <Ticket className="w-4 h-4 mt-0.5 shrink-0 text-[hsl(var(--blue-700))]" />
+                      <span>
+                        <strong>Group of {form.travellers} travelers?</strong> You qualify for{' '}
+                        <strong>15% off</strong> your total service fee and a{' '}
+                        <strong>free sticker visa</strong> for each traveler. Our consultant will apply this automatically.
+                      </span>
+                    </div>
+                  )}
+
                   <div className="sm:col-span-2">
                     <label htmlFor="enq-branch" className={labelCls}>Referred by location</label>
                     <select id="enq-branch" value={form.branch} onChange={set('branch')} className={inputCls}>
