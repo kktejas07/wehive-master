@@ -1253,8 +1253,8 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
               onClick={() => onToggleVisa(vt.id)}
               className={`min-h-[44px] px-3.5 py-2 rounded-full text-[12px] font-bold border-2 transition ${
                 selectedVisas.includes(vt.id)
-                  ? 'bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))]/30'
-                  : 'border-[hsl(var(--border))] text-muted-foreground hover:border-[hsl(var(--blue-200))]'
+                  ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))]'
+                  : 'bg-white border-[hsl(var(--border))] text-muted-foreground hover:border-[hsl(var(--blue-200))]'
               }`}
             >
               {vt.label}
@@ -1274,8 +1274,8 @@ function SubscribeForm({ selectedVisas, selectedConsulates, onToggleVisa, onTogg
               onClick={() => onToggleConsulate(c.id)}
               className={`min-h-[44px] px-3.5 py-2 rounded-full text-[12px] font-bold border-2 transition ${
                 selectedConsulates.includes(c.id)
-                  ? 'bg-[hsl(var(--blue-700))]/10 text-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))]/30'
-                  : 'border-[hsl(var(--border))] text-muted-foreground hover:border-[hsl(var(--blue-200))]'
+                  ? 'bg-[hsl(var(--blue-50))] text-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))]'
+                  : 'bg-white border-[hsl(var(--border))] text-muted-foreground hover:border-[hsl(var(--blue-200))]'
               }`}
             >
               {c.label}

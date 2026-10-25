@@ -59,10 +59,12 @@ const VisaChecker = lazy(() => import('./pages/VisaChecker'));
 const FreeConsultation = lazy(() => import('./pages/FreeConsultation'));
 const Hive = lazy(() => import('./pages/Hive'));
 const USVisaSlots = lazy(() => import('./pages/USVisaSlots'));
+const UniversityApply = lazy(() => import('./pages/UniversityApply'));
 const GlobalEvents = lazy(() => import('./pages/GlobalEvents'));
 const Blog = lazy(() => import('./pages/Blog'));
 const Community = lazy(() => import('./pages/Community'));
 const News = lazy(() => import('./pages/News'));
+const ApplicantFlow = lazy(() => import('./pages/ApplicantFlow'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -127,6 +129,7 @@ function AnimatedRoutes() {
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/programs/:universityId" element={<PageTransition><ProgramList /></PageTransition>} />
+          <Route path="/apply/universities" element={<PageTransition><UniversityApply /></PageTransition>} />
           <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
           <Route path="/resources" element={<PageTransition><StudentResources /></PageTransition>} />
           <Route path="/intake-calendar" element={<PageTransition><IntakeCalendar /></PageTransition>} />
@@ -137,6 +140,7 @@ function AnimatedRoutes() {
           <Route path="/visa-scheduling" element={<PrivateRoute><PageTransition><VisaScheduling /></PageTransition></PrivateRoute>} />
           <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
           <Route path="/free-consultation" element={<PageTransition><FreeConsultation /></PageTransition>} />
+          <Route path="/apply" element={<PrivateRoute><PageTransition><ApplicantFlow /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
