@@ -58,7 +58,9 @@ from routes_reviews import router as reviews_router  # noqa: E402
 from routes_community import router as community_router  # noqa: E402
 from routes_interview_score import router as interview_score_router  # noqa: E402
 from routes_newsletter import router as newsletter_router  # noqa: E402
-from routes_newsletter_campaigns import router as newsletter_campaigns_router, mark_interrupted_on_boot  # noqa: E402
+from routes_newsletter_campaigns import router as newsletter_campaigns_router  # noqa: E402
+from routes_announcements import router as announcements_router  # noqa: E402
+from broadcast_scheduler import mark_interrupted_on_boot, start_broadcast_scheduler  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
 from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
 from routes_rag import router as rag_router  # noqa: E402
@@ -163,6 +165,7 @@ api_router.include_router(community_router)
 api_router.include_router(interview_score_router)
 api_router.include_router(newsletter_router)
 api_router.include_router(newsletter_campaigns_router)
+api_router.include_router(announcements_router)
 api_router.include_router(i18n_router)
 api_router.include_router(agents_ai_router)
 api_router.include_router(rag_router)
@@ -392,6 +395,7 @@ async def on_startup():
             logger.info('Universities collection has %d docs', uni_count)
     except Exception as e:
         logger.exception('Startup failure: %s', e)
+    start_broadcast_scheduler()
 
     try:
         from qdrant_store import init_qdrant_collections

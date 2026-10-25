@@ -31,6 +31,7 @@ const TABS = [
   { id: 'staff',        to: '/admin/staff',         label: 'Staff',        Icon: UserCog,         testid: 'admin-nav-staff' },
   { id: 'admins',       to: '/admin/admins',        label: 'Admins',       Icon: ShieldCheck,     testid: 'admin-nav-admins', superOnly: true },
   { id: 'newsletter',   to: '/admin/newsletter',    label: 'Newsletter',   Icon: Mail,            testid: 'admin-nav-newsletter' },
+  { id: 'announcements', to: '/admin/announcements', label: 'Announcements', Icon: Megaphone,     testid: 'admin-nav-announcements' },
   { id: 'integrations', to: '/admin/integrations',  label: 'Integrations', Icon: Plug,            testid: 'admin-nav-integrations', superOnly: true },
   { id: 'universities', to: '/admin/universities',  label: 'Universities', Icon: Building2,       testid: 'admin-nav-universities' },
   { id: 'programs',     to: '/admin/programs',      label: 'Programs',     Icon: BookOpen,        testid: 'admin-nav-programs' },
