@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MessageSquare } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth, API } from '../context/AuthContext';
@@ -148,6 +148,89 @@ function EmbassyAppointmentCard({ app, id, token, onRefresh }) {
           Save Appointment
         </button>
       </div>
+    </section>
+  );
+}
+
+const PREP_GROUPS = [
+  {
+    group: 'Documents to bring',
+    items: [
+      'Original passport + photocopies',
+      'Visa application fee receipt',
+      'Offer letter from university',
+      'Financial proof (bank statement, sponsor letter)',
+    ],
+  },
+  {
+    group: 'Questions to prepare',
+    items: [
+      'Why this university?',
+      'How will you fund your studies?',
+      'What will you do after graduating?',
+      'Do you have family / ties back home?',
+    ],
+  },
+];
+const PREP_ALL = PREP_GROUPS.flatMap((g) => g.items);
+
+function InterviewPrepCard({ app }) {
+  const [checked, setChecked] = useState(Array(PREP_ALL.length).fill(false));
+  const show =
+    ['approved', 'visa_approved', 'in_review', 'interview_scheduled'].includes(app?.status) ||
+    !!app?.form_data?.visa_appointment?.date;
+  if (!show) return null;
+
+  const doneCount = checked.filter(Boolean).length;
+  const allDone = doneCount === PREP_ALL.length;
+  const toggle = (i) => setChecked((c) => { const n = [...c]; n[i] = !n[i]; return n; });
+
+  let idx = 0;
+  return (
+    <section className="rounded-2xl bg-white border border-border shadow-sm p-5 sm:p-8">
+      <div className="flex items-center gap-2 mb-1">
+        <MessageSquare className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+        <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">
+          Embassy Interview Prep
+        </div>
+      </div>
+      <div className="text-[13px] text-muted-foreground mb-3">{doneCount} of {PREP_ALL.length} prepared</div>
+      <div className="h-2 rounded-full bg-[#E8EDF8] overflow-hidden mb-4">
+        <div
+          className="h-2 bg-[#011CB5] rounded-full transition-all duration-300"
+          style={{ width: `${(doneCount / PREP_ALL.length) * 100}%` }}
+        />
+      </div>
+      {allDone && (
+        <div className="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-[13px] font-semibold text-emerald-800">
+          ✓ You&apos;re ready for your interview! Good luck.
+        </div>
+      )}
+      {PREP_GROUPS.map((grp) => (
+        <div key={grp.group} className="mb-4 last:mb-0">
+          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-2">
+            {grp.group}
+          </div>
+          <div className="space-y-2">
+            {grp.items.map((item) => {
+              const i = idx++;
+              return (
+                <label key={item} className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={checked[i]}
+                    onChange={() => toggle(i)}
+                    className="mt-0.5 w-4 h-4 rounded accent-[#011CB5] cursor-pointer shrink-0"
+                  />
+                  <span className={`text-[13.5px] leading-snug ${checked[i] ? 'line-through text-gray-400' : 'text-[hsl(var(--blue-900))]'}`}>
+                    {item}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </section>
   );
 }
@@ -347,6 +430,7 @@ export default function ApplicationDetail() {
               token={token}
               onDocsChange={setDocs}
             />
+            <InterviewPrepCard app={app} />
             <EmbassyAppointmentCard app={app} id={id} token={token} onRefresh={refresh} />
             <ApplicationTimelineSection app={app} TimelineComponent={ApplicationTimeline} />
           </div>
