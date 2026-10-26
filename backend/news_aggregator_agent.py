@@ -96,6 +96,9 @@ _ATOM = "{http://www.w3.org/2005/Atom}"
 _DC = "{http://purl.org/dc/elements/1.1/}"
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")
+# Bug 8: strip bare URLs that Google News / RSS feeds embed in article body text
+# (e.g. "Read more at https://www.bbc.com/news/... – BBC News")
+_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 
 
 # ---------------------------------------------------------------------------
@@ -103,10 +106,12 @@ _WS_RE = re.compile(r"\s+")
 # ---------------------------------------------------------------------------
 
 def _clean_text(value: Optional[str], limit: int = 1000) -> str:
-    """Strip HTML tags/entities and collapse whitespace."""
+    """Strip HTML tags/entities, bare URLs, and collapse whitespace."""
     if not value:
         return ""
     text = html.unescape(_TAG_RE.sub(" ", value))
+    # Bug 8: remove bare URLs that some feeds (Google News) embed in the body text
+    text = _URL_RE.sub("", text)
     return _WS_RE.sub(" ", text).strip()[:limit]
 
 
