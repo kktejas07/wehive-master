@@ -377,6 +377,12 @@ export function landmarkFor(country) {
   if (!country) return null;
   const key = (country.id || country.iso2 || '').toLowerCase();
   const local = LOCALS[key];
-  if (local) return CDN_BASE ? `${CDN_BASE}${local}` : local;
+  if (local) {
+    if (CDN_BASE) {
+      // LOCALS paths are /images/destinations/*.webp; R2 stores at destinations/*.webp
+      return `${CDN_BASE}${local.replace(/^\/images\//, '/')}`;
+    }
+    return local;
+  }
   return LANDMARKS[key] || null;
 }

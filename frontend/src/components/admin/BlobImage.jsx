@@ -22,8 +22,9 @@ export default function BlobImage({ filename, onR2, alt = '', className = '' }) 
 
       // If a public CDN URL is configured use it directly — avoids the admin
       // proxy and eliminates CORS issues with the R2 bucket.
+      // R2 stores files under destinations/{filename} (no /images/ prefix).
       if (CDN_BASE) {
-        setSrc(`${CDN_BASE}/images/destinations/${filename}`);
+        setSrc(`${CDN_BASE}/destinations/${filename}`);
         setLoading(false);
         return;
       }
