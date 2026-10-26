@@ -65,3 +65,34 @@ async def run_all_checks(db) -> List[dict]:
     reminders.extend(await check_pending_appointments(db))
     reminders.extend(await check_expiring_passports(db, db['scans']))
     return reminders
+
+
+async def dispatch_reminders(db) -> int:
+    """Run all checks and send email reminders. Returns count sent."""
+    from email_service import send_email
+
+    reminders = await run_all_checks(db)
+    sent = 0
+    for r in reminders:
+        user_id = r.get('user_id')
+        if not user_id:
+            continue
+        user = await db['users'].find_one({'_id': user_id}) or {}
+        email = user.get('email')
+        if not email:
+            continue
+        try:
+            await send_email(
+                to=email,
+                subject='WeHive — Action required on your application',
+                body=(
+                    f"Hi {user.get('name', 'Applicant')},\n\n"
+                    f"{r['message']}\n\n"
+                    "Log in to WeHive to take action: https://wehive.co.in/account\n\n"
+                    "Best,\nWeHive Team"
+                ),
+            )
+            sent += 1
+        except Exception:
+            pass
+    return sent

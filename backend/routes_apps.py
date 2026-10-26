@@ -17,8 +17,10 @@ from rate_limit import RateLimit
 _upload_limiter = RateLimit(max_calls=20, window_seconds=60)
 from config import CONSULTANT_NAME, CONSULTANT_AUTO_REPLY, SUPPORT_EMAIL, SUPPORT_PHONE
 from db import db, applications
+import asyncio
 from routes_chatbot import notify_status_change
 from serializers import serialize_doc
+from agents.document_validator import validate_document_background
 _serialize = serialize_doc
 import storage as r2
 
@@ -217,6 +219,11 @@ async def upload_document(
         },
     )
 
+    # Background: validate doc (MIME, resolution, etc.) and set status to verified/needs_reupload.
+    asyncio.create_task(validate_document_background(
+        application_id, doc_id, user['_id'], content, safe_name, len(content)
+    ))
+
     # Best-effort: index document text/OCR into Qdrant so Eva can answer questions about it.
     # PDFs → pypdf text extraction; images → pytesseract OCR then Ollama llava fallback.
     _INDEXABLE_MIMES = {'application/pdf', 'image/jpeg', 'image/png', 'image/webp'}
@@ -289,14 +296,13 @@ async def submit_application(application_id: str, user=Depends(get_current_user)
         raise HTTPException(400, 'Upload at least one document before submitting')
     now = datetime.utcnow()
     events = app.get('timeline') or _initial_timeline()
-    events.append({'id': str(uuid.uuid4()), 'status': 'submitted', 'label': 'Submitted to embassy', 'at': now, 'note': 'Your file is on its way.'})
-    events.append({'id': str(uuid.uuid4()), 'status': 'in_review', 'label': 'In consular review', 'at': now, 'note': 'A consular officer is reviewing your case.'})
+    events.append({'id': str(uuid.uuid4()), 'status': 'submitted', 'label': 'Application submitted', 'at': now, 'note': 'Your application is queued for review.'})
     await applications.update_one(
         {'_id': application_id},
-        {'$set': {'status': 'in_review', 'timeline': events, 'updated_at': now}},
+        {'$set': {'status': 'submitted', 'timeline': events, 'updated_at': now}},
     )
-    await notify_status_change(user['_id'], application_id, 'in_review')
-    return {'ok': True, 'status': 'in_review'}
+    await notify_status_change(user['_id'], application_id, 'submitted')
+    return {'ok': True, 'status': 'submitted'}
 
 
 # ---------- Messages with consultant ----------

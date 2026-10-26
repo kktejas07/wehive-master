@@ -173,6 +173,143 @@ async def admin_review_document(application_id: str, doc_id: str, body: DocRevie
     return {'ok': True, 'status': body.status}
 
 
+# ---------- request re-upload ----------
+class _ReuploadRequest(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=500)
+
+
+@router.post('/applications/{application_id}/documents/{doc_id}/request-reupload')
+async def admin_request_reupload(
+    application_id: str,
+    doc_id: str,
+    payload: _ReuploadRequest,
+    admin=Depends(get_current_admin_flex),
+):
+    app = await _app_or_404(application_id)
+    doc = next((d for d in app.get('documents', []) if d.get('_id') == doc_id), None)
+    if not doc:
+        raise HTTPException(404, 'Document not found')
+
+    now = datetime.utcnow()
+    await applications.update_one(
+        {'_id': application_id, 'documents._id': doc_id},
+        {'$set': {
+            'documents.$.status': 'needs_reupload',
+            'documents.$.admin_note': payload.reason,
+            'updated_at': now,
+        }},
+    )
+    await _notify(
+        app,
+        'doc_reupload',
+        'Document re-upload required',
+        f'Please re-upload your {doc.get("doc_type", "document")}: {payload.reason}',
+        severity='warning',
+    )
+    try:
+        from email_service import send_email
+        applicant = await users.find_one({'_id': app.get('user_id')}) or {}
+        email = applicant.get('email')
+        if email:
+            await send_email(
+                to=email,
+                subject='Action required: Re-upload a document',
+                body=(
+                    f"Hi {applicant.get('name', 'Applicant')},\n\n"
+                    f"Our team has requested that you re-upload your {doc.get('doc_type', 'document')}.\n\n"
+                    f"Reason: {payload.reason}\n\n"
+                    "Please log in to WeHive and re-upload at your earliest convenience.\n\n"
+                    "Thank you,\nWeHive Team"
+                ),
+            )
+    except Exception:
+        pass
+    await audit_record(admin, 'doc_reupload_requested', 'document', doc_id, extra={'application_id': application_id})
+    return {'ok': True}
+
+
+# ---------- admin status control ----------
+VALID_STATUSES = [
+    'submitted', 'in_review', 'appointment_scheduled', 'docs_pending',
+    'approved', 'rejected', 'visa_approved', 'visa_rejected', 'withdrawn',
+]
+
+_STATUS_LABELS = {
+    'submitted': 'Application Submitted',
+    'in_review': 'In Consular Review',
+    'appointment_scheduled': 'Appointment Scheduled',
+    'docs_pending': 'Documents Pending',
+    'approved': 'Application Approved',
+    'rejected': 'Application Rejected',
+    'visa_approved': 'Visa Approved',
+    'visa_rejected': 'Visa Rejected',
+    'withdrawn': 'Withdrawn',
+}
+
+
+class _StatusBody(BaseModel):
+    status: str
+    note: str = Field(default='')
+    visa_valid_from: Optional[str] = Field(default=None)
+    visa_valid_to: Optional[str] = Field(default=None)
+
+
+@router.post('/applications/{application_id}/status')
+async def admin_set_status(
+    application_id: str,
+    payload: _StatusBody,
+    admin=Depends(get_current_admin_flex),
+):
+    if payload.status not in VALID_STATUSES:
+        raise HTTPException(400, f'Invalid status. Valid: {", ".join(VALID_STATUSES)}')
+    if payload.status == 'visa_rejected' and not payload.note.strip():
+        raise HTTPException(400, 'A rejection reason (note) is required for visa_rejected')
+
+    app = await _app_or_404(application_id)
+    now = datetime.utcnow()
+
+    events = app.get('timeline', [])
+    events.append({
+        'id': str(uuid.uuid4()),
+        'status': payload.status,
+        'label': _STATUS_LABELS.get(payload.status, payload.status.replace('_', ' ').title()),
+        'at': now,
+        'note': payload.note or '',
+        'by': 'admin',
+    })
+
+    update: dict = {'status': payload.status, 'timeline': events, 'updated_at': now}
+    if payload.status == 'visa_approved':
+        if payload.visa_valid_from:
+            update['visa_valid_from'] = payload.visa_valid_from
+        if payload.visa_valid_to:
+            update['visa_valid_to'] = payload.visa_valid_to
+
+    await applications.update_one({'_id': application_id}, {'$set': update})
+
+    _notify_map = {
+        'visa_approved': ('Visa Approved! 🎉', 'Your visa application has been approved.', 'success'),
+        'visa_rejected': ('Visa Application Update', f'Your application was not approved. {payload.note}', 'danger'),
+        'approved': ('Application Approved', 'Your application has been approved.', 'success'),
+        'rejected': ('Application Update', f'Your application: {payload.note}', 'warning'),
+        'in_review': ('Application in Review', 'A consular officer is reviewing your case.', 'info'),
+        'appointment_scheduled': ('Appointment Scheduled', 'Your embassy appointment has been scheduled.', 'info'),
+    }
+    if payload.status in _notify_map:
+        title, body, sev = _notify_map[payload.status]
+        await _notify(app, f'status_{payload.status}', title, body, severity=sev)
+
+    from routes_chatbot import notify_status_change
+    try:
+        await notify_status_change(app.get('user_id'), application_id, payload.status)
+    except Exception:
+        pass
+
+    await audit_record(admin, 'status_changed', 'application', application_id,
+                       extra={'new_status': payload.status, 'note': payload.note})
+    return {'ok': True, 'status': payload.status}
+
+
 # ---------- messages & internal notes ----------
 class TextBody(BaseModel):
     text: str = Field(min_length=1, max_length=4000)
