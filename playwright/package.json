@@ -4,7 +4,12 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
-    "ws1": "playwright test tests/ws1-route-discovery.spec.ts"
+    "ws1": "playwright test tests/ws1-route-discovery.spec.ts",
+    "public": "playwright test tests/public.spec.ts",
+    "auth": "playwright test tests/auth-flows.spec.ts",
+    "dashboard": "playwright test tests/dashboard.spec.ts",
+    "admin": "playwright test tests/admin.spec.ts",
+    "suite": "playwright test tests/public.spec.ts tests/auth-flows.spec.ts tests/dashboard.spec.ts tests/admin.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
