@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { API } from '../../lib/apiBase';
 
+const CDN_BASE = (process.env.REACT_APP_CDN_URL || '').replace(/\/$/, '');
+
 export default function BlobImage({ filename, onR2, alt = '', className = '' }) {
   const [src, setSrc] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,6 +16,15 @@ export default function BlobImage({ filename, onR2, alt = '', className = '' }) 
 
       if (!onR2) {
         setSrc(`/images/destinations/${filename}`);
+        setLoading(false);
+        return;
+      }
+
+      // If a public CDN URL is configured use it directly — avoids the admin
+      // proxy and eliminates CORS issues with the R2 bucket.
+      // R2 stores files under destinations/{filename} (no /images/ prefix).
+      if (CDN_BASE) {
+        setSrc(`${CDN_BASE}/destinations/${filename}`);
         setLoading(false);
         return;
       }

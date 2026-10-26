@@ -353,28 +353,105 @@ function ApplicationCard({ a }) {
 
 function ApplicationsTab({ token }) {
   const [items, setItems] = useState(null);
+  const [showScholarshipOnly, setShowScholarshipOnly] = useState(false);
+
   useEffect(() => {
     axios
       .get(`${API}/users/me/applications`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => setItems(Array.isArray(r.data) ? r.data : (r.data?.items || [])))
       .catch(() => setItems([]));
   }, [token]);
+
   if (!items) return <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" />;
+
   if (items.length === 0) {
     return (
-      <EmptyState
-        title="No applications yet"
-        sub="Start a visa application from any country page \u2014 it will show up here."
-        cta={{ to: '/', label: 'Browse countries' }}
-      />
+      <>
+        <EmptyState
+          title="No applications yet"
+          sub="Start a visa application from any country page \u2014 it will show up here."
+          cta={{ to: '/', label: 'Browse countries' }}
+        />
+        <SOPTeaser />
+      </>
     );
   }
+
+  const filtered = showScholarshipOnly
+    ? items.filter((a) => a.university?.has_scholarship === true || a.scholarship_available === true)
+    : items;
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-      {items.map((a) => (
-        <ApplicationCard key={a.id} a={a} />
-      ))}
+    <div className="space-y-5">
+      {/* Scholarship filter toggle */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => setShowScholarshipOnly((v) => !v)}
+          className={`inline-flex items-center gap-2 rounded-xl px-4 h-9 text-[13px] font-semibold border transition ${
+            showScholarshipOnly
+              ? 'bg-[#011CB5] text-white border-[#011CB5]'
+              : 'bg-white text-[#1B2B5E] border-[#E8EDF8] hover:bg-[#F0F4FF]'
+          }`}
+        >
+          <GraduationCap className="w-4 h-4" />
+          Scholarships only
+        </button>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl bg-white border border-dashed border-black/15 p-8 text-center text-[14px] text-muted-foreground">
+          No scholarship-eligible applications yet.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map((a) => (
+            <ApplicationCard key={a.id} a={a} />
+          ))}
+        </div>
+      )}
+
+      <SOPTeaser />
+      <ReferralTeaser />
     </div>
+  );
+}
+
+function SOPTeaser() {
+  return (
+    <Link
+      to="/sop-builder"
+      className="flex items-center justify-between gap-4 rounded-2xl bg-white border border-[#E8EDF8] hover:border-[#011CB5]/30 hover:shadow-sm p-5 transition group"
+    >
+      <div className="min-w-0">
+        <div className="text-[14px] font-bold text-[#1B2B5E]">Write your Statement of Purpose</div>
+        <div className="text-[12.5px] text-gray-500 mt-0.5">Guided SOP builder with word counts and one-click download.</div>
+      </div>
+      <ChevronRight className="w-4 h-4 text-[#1B2B5E]/30 group-hover:text-[#011CB5] shrink-0" />
+    </Link>
+  );
+}
+
+function ReferralTeaser() {
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', 'referrals');
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }}
+      className="w-full flex items-center justify-between gap-4 rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-700))]/15 hover:border-[hsl(var(--blue-700))]/40 p-5 text-left transition group"
+    >
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <Gift className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+          <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">Refer a friend, earn \u20b9500</div>
+        </div>
+        <div className="text-[12.5px] text-muted-foreground mt-0.5">Share your referral code \u2014 earn credit for every friend who applies.</div>
+      </div>
+      <ChevronRight className="w-4 h-4 text-[hsl(var(--blue-900))]/30 group-hover:text-[hsl(var(--blue-700))] shrink-0" />
+    </button>
   );
 }
 

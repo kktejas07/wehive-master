@@ -510,7 +510,68 @@ export default function OverviewTab() {
         <div className="col-span-12 lg:col-span-4">
           <RecentAuditFeed activity={recent_activity} />
         </div>
+
+        {/* Row 5: Staff workload */}
+        <div className="col-span-12">
+          <StaffWorkloadCard />
+        </div>
       </div>
     </div>
+  );
+}
+
+function StaffWorkloadCard() {
+  const { token } = useAdminAuth();
+  const [rows, setRows] = useState(null);
+
+  useEffect(() => {
+    adminClient(token).get('/staff/workload')
+      .then((r) => {
+        const staff = r.data?.staff || r.data || [];
+        setRows([...staff].sort((a, b) => (b.open_cases ?? 0) - (a.open_cases ?? 0)));
+      })
+      .catch(() => setRows([]));
+  }, [token]);
+
+  return (
+    <Panel>
+      <div className="flex items-center gap-2 mb-4">
+        <Users className="w-4 h-4 text-[#011CB5]" />
+        <h3 className="text-[14px] font-bold text-[#1B2B5E]">Staff workload</h3>
+      </div>
+      {rows === null && <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-[#011CB5]" /></div>}
+      {rows !== null && rows.length === 0 && <p className="text-[13px] text-gray-400">No workload data available.</p>}
+      {rows !== null && rows.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-[13px]">
+            <thead>
+              <tr className="text-left text-[11px] uppercase tracking-[0.14em] font-bold text-gray-400 border-b border-[#E8EDF8]">
+                <th className="pb-2 pr-4">Staff</th>
+                <th className="pb-2 pr-4 text-right">Open cases</th>
+                <th className="pb-2 text-right">Avg days open</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((s) => (
+                <tr key={s.id} className="border-b border-[#F0F4FF] last:border-0">
+                  <td className="py-2.5 pr-4">
+                    <div className="font-semibold text-[#1B2B5E]">{s.name || s.email || s.id}</div>
+                    {s.name && s.email && <div className="text-[11px] text-gray-400">{s.email}</div>}
+                  </td>
+                  <td className="py-2.5 pr-4 text-right">
+                    <span className={`font-bold text-[14px] ${s.open_cases > 10 ? 'text-red-600' : s.open_cases > 5 ? 'text-amber-600' : 'text-[#1B2B5E]'}`}>
+                      {s.open_cases ?? 0}
+                    </span>
+                  </td>
+                  <td className="py-2.5 text-right text-gray-500">
+                    {s.avg_days != null ? `${Number(s.avg_days).toFixed(1)}d` : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Panel>
   );
 }

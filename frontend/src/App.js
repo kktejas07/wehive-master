@@ -66,6 +66,7 @@ const Blog = lazy(() => import('./pages/Blog'));
 const Community = lazy(() => import('./pages/Community'));
 const News = lazy(() => import('./pages/News'));
 const ApplicantFlow = lazy(() => import('./pages/ApplicantFlow'));
+const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -113,6 +114,8 @@ function AnimatedRoutes() {
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
           <Route path="/pricing" element={<PageTransition><Pricing /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/signin" element={<Navigate to="/login" replace />} />
+          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
           <Route path="/__/auth/action" element={<EmailVerification />} />
           <Route path="/verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
@@ -148,6 +151,7 @@ function AnimatedRoutes() {
           <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
           <Route path="/free-consultation" element={<PageTransition><FreeConsultation /></PageTransition>} />
           <Route path="/apply" element={<PrivateRoute><PageTransition><ApplicantFlow /></PageTransition></PrivateRoute>} />
+          <Route path="/sop-builder" element={<PrivateRoute><PageTransition><SOPBuilder /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
@@ -158,6 +162,9 @@ function AnimatedRoutes() {
           <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
+          {/* Legacy URL redirects */}
+          <Route path="/signin" element={<Navigate to="/login" replace />} />
+          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>

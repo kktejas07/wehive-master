@@ -110,8 +110,15 @@ export default function CategoryDetails({
         </div>
       </div>
       <div className="lg:col-span-5">
-        <div className="relative rounded-2xl overflow-hidden aspect-[4/5] border border-[hsl(var(--border))] shadow-sm">
-          <img src={fallbackImg} alt={country.name} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="relative rounded-2xl overflow-hidden aspect-[4/5] border border-[hsl(var(--border))] shadow-sm bg-[hsl(var(--blue-50))]">
+          {fallbackImg && (
+            <img
+              src={fallbackImg}
+              alt={country.name}
+              className="absolute inset-0 h-full w-full object-cover"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute bottom-5 left-5 right-5 text-white">
             <div className="text-[12px] uppercase tracking-[0.14em] text-white/70 font-bold">Multi-entry</div>

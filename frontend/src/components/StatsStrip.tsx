@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Globe2, ShieldCheck, Award, LucideIcon } from 'lucide-react';
 
 interface CountUpProps {
@@ -11,12 +11,24 @@ interface CountUpProps {
 
 function CountUp({ to, suffix = '', prefix = '', duration = 1.6 }: CountUpProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const [started, setStarted] = useState(false);
   const [v, setV] = useState(0);
   const reduce = useReducedMotion();
 
+  // Native IntersectionObserver — count-up only fires once the element is visible.
   useEffect(() => {
-    if (!inView) return;
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
+      { rootMargin: '0px 0px -60px 0px', threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!started) return;
     if (reduce) { setV(to); return; }
     let raf: number;
     const start = performance.now();
@@ -29,10 +41,9 @@ function CountUp({ to, suffix = '', prefix = '', duration = 1.6 }: CountUpProps)
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, to, duration, reduce]);
+  }, [started, to, duration, reduce]);
 
-  const formatted = v.toLocaleString('en-IN');
-  return <span ref={ref}>{prefix}{formatted}{suffix}</span>;
+  return <span ref={ref}>{prefix}{v.toLocaleString('en-IN')}{suffix}</span>;
 }
 
 interface StatItem {
