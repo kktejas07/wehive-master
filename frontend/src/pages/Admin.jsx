@@ -128,6 +128,8 @@ function AdminRoutes() {
                 <Route path="agents-v2" element={<AgentsV2Tab />} />
                 <Route path="hive-learning" element={<HiveLearningTab />} />
                 <Route path="destinations" element={<DestinationsTab />} />
+                <Route path="doc-review" element={<Navigate to="/admin/review" replace />} />
+                <Route path="hero-events" element={<Navigate to="/admin/events" replace />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />
               </Routes>
             </AdminShell>
