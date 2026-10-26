@@ -157,6 +157,9 @@ function AnimatedRoutes() {
           <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
+          {/* Legacy URL redirects */}
+          <Route path="/signin" element={<Navigate to="/login" replace />} />
+          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>
