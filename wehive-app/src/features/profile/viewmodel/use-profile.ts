@@ -2,20 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api, ApiError } from '@/core/api/client';
 
+import type { UserProfile } from '../model/types';
+
 interface ProfileUpdate { name?: string; phone?: string; }
 
-export interface UserProfile {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  email_verified?: boolean;
-  phone_verified?: boolean;
-  is_premium?: boolean;
-  premium_free_left?: number;
-  pending_email?: string;
-  journey_stage?: string;
-}
+export type { UserProfile };
 
 export function useProfileViewModel() {
   const qc = useQueryClient();
