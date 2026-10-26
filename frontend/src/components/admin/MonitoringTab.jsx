@@ -8,7 +8,7 @@ import { useToast } from '../../hooks/use-toast';
 
 const OPEN_STATUSES = ['submitted', 'in_review', 'appointment_scheduled'];
 const STATUS_LABEL = { submitted: 'Submitted', in_review: 'In Review', appointment_scheduled: 'Appointment' };
-const STATUS_COLOR = { submitted: 'text-blue-700', in_review: 'text-amber-700', appointment_scheduled: 'text-emerald-300' };
+const STATUS_COLOR = { submitted: 'text-blue-700', in_review: 'text-amber-700', appointment_scheduled: 'text-emerald-600' };
 
 function KanbanCard({ item }) {
   return (
@@ -16,7 +16,7 @@ function KanbanCard({ item }) {
       to={`/admin/applications/${item.id}`}
       className="block rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] px-3 py-2.5 hover:bg-[#EEF2FF] transition-colors"
     >
-      <div className="text-[13px] font-semibold text-white truncate">{item.applicant || '—'}</div>
+      <div className="text-[13px] font-semibold text-[#1B2B5E] truncate">{item.applicant || '—'}</div>
       <div className="text-[12px] text-gray-500 mt-0.5 truncate">
         {item.country || '—'}{item.visa_type ? ` · ${item.visa_type}` : ''}
       </div>
@@ -42,8 +42,8 @@ function Pipeline({ token }) {
   return (
     <Panel className="mt-6">
       <div className="flex items-center justify-between mb-4">
-        <div className="text-[15px] font-display font-bold text-white">Application pipeline</div>
-        <button onClick={load} className="text-gray-500 hover:text-white">
+        <div className="text-[15px] font-display font-bold text-[#1B2B5E]">Application pipeline</div>
+        <button onClick={load} className="text-gray-500 hover:text-[#1B2B5E]">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
@@ -115,20 +115,20 @@ function InactiveUsers({ token }) {
       <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
         <div className="flex items-center gap-2">
           <select value={days} onChange={(e) => { setDays(Number(e.target.value)); setSelected(new Set()); }}
-            className="h-8 px-2 rounded-lg bg-[#F5F7FF] border border-[#E8EDF8] text-[12px] text-white">
+            className="h-8 px-2 rounded-lg bg-[#F5F7FF] border border-[#E8EDF8] text-[12px] text-[#1B2B5E]">
             <option value={7}>7 days</option>
             <option value={14}>14 days</option>
             <option value={30}>30 days</option>
             <option value={90}>90 days</option>
           </select>
-          <div className="text-[15px] font-display font-bold text-white">
+          <div className="text-[15px] font-display font-bold text-[#1B2B5E]">
             Inactive ({days}d){data ? ` · ${data.total}` : ''}
           </div>
         </div>
         {selected.size > 0 && (
           <div className="flex items-center gap-2">
             <select value={template} onChange={(e) => setTemplate(e.target.value)}
-              className="h-9 px-2 rounded-lg bg-[#F5F7FF] border border-[#E8EDF8] text-[12px] text-white">
+              className="h-9 px-2 rounded-lg bg-[#F5F7FF] border border-[#E8EDF8] text-[12px] text-[#1B2B5E]">
               <option value="generic">General</option>
               <option value="docs_pending">Docs pending</option>
               <option value="payment_pending">Payment pending</option>
@@ -159,7 +159,7 @@ function InactiveUsers({ token }) {
                 className="accent-[hsl(var(--blue-700))]"
               />
               <div className="flex-1 min-w-0">
-                <div className="text-[13px] font-semibold text-white truncate">{u.name || u.email || u.id}</div>
+                <div className="text-[13px] font-semibold text-[#1B2B5E] truncate">{u.name || u.email || u.id}</div>
                 <div className="text-[12px] text-gray-500">{u.email}</div>
               </div>
               <div className="text-right shrink-0">
@@ -195,7 +195,7 @@ function AnomaliesPanel({ token }) {
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between text-left"
       >
-        <div className="text-[15px] font-display font-bold text-white flex items-center gap-2">
+        <div className="text-[15px] font-display font-bold text-[#1B2B5E] flex items-center gap-2">
           AI anomalies
           {items.length > 0 && (
             <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
@@ -218,7 +218,7 @@ function AnomaliesPanel({ token }) {
                 a.severity === 'warning'  ? 'bg-amber-400' : 'bg-blue-400'
               }`} />
               <div className="flex-1 min-w-0">
-                <div className="text-[13px] text-white">{a.message || a.description || '—'}</div>
+                <div className="text-[13px] text-[#1B2B5E]">{a.message || a.description || '—'}</div>
                 {a.entity_type && a.entity_id && (
                   <Link
                     to={`/admin/${a.entity_type === 'application' ? 'applications' : 'users'}/${a.entity_id}`}
