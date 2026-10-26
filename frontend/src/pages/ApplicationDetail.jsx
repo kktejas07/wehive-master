@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2 } from 'lucide-react';
@@ -17,6 +17,140 @@ import ApplicationFormCard from '../components/ApplicationFormCard';
 import ApplicationHero from '../components/application/ApplicationHero';
 import WhatsNextCard from '../components/application/WhatsNextCard';
 import ApplicationTimelineSection from '../components/application/ApplicationTimelineSection';
+
+function EmbassyAppointmentCard({ app, id, token, onRefresh }) {
+  const { toast } = useToast();
+  const [fees, setFees] = useState(null);
+  const [bookingDone, setBookingDone] = useState(!!app?.form_data?.visa_appointment?.date);
+  const [appt, setAppt] = useState({
+    date: app?.form_data?.visa_appointment?.date || '',
+    location: app?.form_data?.visa_appointment?.location || '',
+    reference: app?.form_data?.visa_appointment?.reference || '',
+    time: app?.form_data?.visa_appointment?.time || '',
+  });
+  const [saving, setSaving] = useState(false);
+
+  const showCard = ['appointment_scheduled', 'awaiting_docs', 'in_review', 'submitted', 'biometrics_done', 'interview_scheduled'].includes(app?.status);
+
+  useEffect(() => {
+    if (!showCard || !app?.country_id) return;
+    const country = app.country_id;
+    const category = app.visa_type || 'tourist';
+    axios.get(`${API}/embassy-fees?country=${country}&visa_category=${category}`)
+      .then((r) => setFees(r.data?.fees || []))
+      .catch(() => setFees([]));
+  }, [app?.country_id, app?.visa_type, showCard]);
+
+  if (!showCard) return null;
+
+  const totalRequired = (fees || []).filter((f) => f.required).reduce((s, f) => s + (f.amount || 0), 0);
+  const vfsUrl = fees?.[0]?.vfs_booking_url || null;
+
+  const saveAppt = async () => {
+    if (!appt.date) { toast({ title: 'Please enter the appointment date' }); return; }
+    setSaving(true);
+    try {
+      await axios.patch(
+        `${API}/users/me/applications/${id}/appointment`,
+        { date: appt.date, location: appt.location, reference: appt.reference, time: appt.time },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast({ title: 'Appointment saved' });
+      setBookingDone(true);
+      onRefresh?.();
+    } catch (e) {
+      toast({ title: 'Could not save', description: e?.response?.data?.detail || 'Try again' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="rounded-2xl bg-white border border-border shadow-sm p-5 sm:p-8">
+      <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))]">Embassy Appointment</div>
+      <h2 className="mt-1 font-display font-bold text-[22px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+        Book &amp; Record Appointment
+      </h2>
+
+      {fees && fees.length > 0 && (
+        <div className="mt-4 rounded-xl border border-border overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="bg-[hsl(var(--soft-bg))]">
+                <th className="text-left px-4 py-2.5 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">Fee</th>
+                <th className="text-right px-4 py-2.5 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">Amount</th>
+                <th className="text-right px-4 py-2.5 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fees.map((f, i) => (
+                <tr key={i} className="border-t border-border">
+                  <td className="px-4 py-2.5 text-[hsl(var(--blue-900))]">{f.label}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-[hsl(var(--blue-900))]">${f.amount?.toFixed(2)}</td>
+                  <td className="px-4 py-2.5 text-right">
+                    {f.required
+                      ? <span className="text-emerald-700 font-bold">Yes</span>
+                      : <span className="text-muted-foreground">Optional</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="px-4 py-3 bg-[hsl(var(--soft-bg))] border-t border-border text-[13px] font-bold text-[hsl(var(--blue-900))]">
+            Total required: ${totalRequired.toFixed(2)}
+          </div>
+        </div>
+      )}
+
+      {vfsUrl && (
+        <a
+          href={vfsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl btn-primary text-white px-5 h-11 text-[14px] font-bold"
+        >
+          Book Appointment →
+        </a>
+      )}
+
+      <div className="mt-5 border-t border-border pt-5">
+        <div className="text-[13px] font-bold text-[hsl(var(--blue-900))] mb-3">
+          {bookingDone ? 'Appointment Recorded' : 'Record Appointment Details'}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <label className="block">
+            <span className="text-[11.5px] uppercase tracking-wide font-bold text-muted-foreground">Date</span>
+            <input type="date" value={appt.date} onChange={(e) => setAppt((a) => ({ ...a, date: e.target.value }))}
+              className="mt-1 w-full h-10 px-3 rounded-xl border border-border outline-none focus:border-[hsl(var(--blue-700))] text-[14px] text-[hsl(var(--blue-900))]" />
+          </label>
+          <label className="block">
+            <span className="text-[11.5px] uppercase tracking-wide font-bold text-muted-foreground">Time</span>
+            <input type="time" value={appt.time} onChange={(e) => setAppt((a) => ({ ...a, time: e.target.value }))}
+              className="mt-1 w-full h-10 px-3 rounded-xl border border-border outline-none focus:border-[hsl(var(--blue-700))] text-[14px] text-[hsl(var(--blue-900))]" />
+          </label>
+          <label className="block">
+            <span className="text-[11.5px] uppercase tracking-wide font-bold text-muted-foreground">Location</span>
+            <input type="text" placeholder="City / Consulate" value={appt.location} onChange={(e) => setAppt((a) => ({ ...a, location: e.target.value }))}
+              className="mt-1 w-full h-10 px-3 rounded-xl border border-border outline-none focus:border-[hsl(var(--blue-700))] text-[14px] text-[hsl(var(--blue-900))] placeholder:text-muted-foreground" />
+          </label>
+          <label className="block">
+            <span className="text-[11.5px] uppercase tracking-wide font-bold text-muted-foreground">Booking Reference</span>
+            <input type="text" placeholder="e.g. VFS-123456" value={appt.reference} onChange={(e) => setAppt((a) => ({ ...a, reference: e.target.value }))}
+              className="mt-1 w-full h-10 px-3 rounded-xl border border-border outline-none focus:border-[hsl(var(--blue-700))] text-[14px] text-[hsl(var(--blue-900))] placeholder:text-muted-foreground" />
+          </label>
+        </div>
+        <button
+          onClick={saveAppt}
+          disabled={saving}
+          className="mt-4 h-10 px-6 rounded-xl btn-accent text-white text-[13px] font-bold disabled:opacity-60 inline-flex items-center gap-2"
+        >
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+          Save Appointment
+        </button>
+      </div>
+    </section>
+  );
+}
 
 export default function ApplicationDetail() {
   const { id } = useParams();
@@ -162,6 +296,44 @@ export default function ApplicationDetail() {
         onSubmit={onSubmit}
       />
 
+      {/* Visa outcome banners */}
+      {app.status === 'visa_approved' && (
+        <div className="bg-emerald-50 border-b border-emerald-200 py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl bg-emerald-100 border border-emerald-300 p-5 flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex-1">
+                <div className="text-emerald-800 font-bold text-[16px]">🎉 Visa Approved!</div>
+                {(app.visa_validity_from || app.visa_validity_until) && (
+                  <div className="text-[13px] text-emerald-700 mt-1">
+                    Valid {app.visa_validity_from ? new Date(app.visa_validity_from).toLocaleDateString() : ''}{app.visa_validity_until ? ` – ${new Date(app.visa_validity_until).toLocaleDateString()}` : ''}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {app.status === 'visa_rejected' && (
+        <div className="bg-red-50 border-b border-red-200 py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl bg-red-50 border border-red-200 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1">
+                <div className="text-red-800 font-bold text-[16px]">Application Not Approved</div>
+                <div className="text-[13px] text-red-700 mt-1">
+                  {app.rejection_reason || 'Please contact your consultant for details and next steps.'}
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/')}
+                className="shrink-0 px-5 py-2.5 rounded-xl bg-[hsl(var(--blue-700))] text-white text-[13px] font-bold hover:bg-[hsl(var(--blue-900))] transition-colors"
+              >
+                Start New Application
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="py-8 sm:py-12 bg-[hsl(var(--soft-bg))]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-6 lg:gap-8">
           <div className="lg:col-span-7 min-w-0 space-y-6">
@@ -175,6 +347,7 @@ export default function ApplicationDetail() {
               token={token}
               onDocsChange={setDocs}
             />
+            <EmbassyAppointmentCard app={app} id={id} token={token} onRefresh={refresh} />
             <ApplicationTimelineSection app={app} TimelineComponent={ApplicationTimeline} />
           </div>
           <aside className="lg:col-span-5 min-w-0 space-y-6">

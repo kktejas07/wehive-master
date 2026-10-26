@@ -63,6 +63,8 @@ from routes_newsletter_campaigns import router as newsletter_campaigns_router  #
 from routes_announcements import router as announcements_router  # noqa: E402
 from broadcast_scheduler import mark_interrupted_on_boot, start_broadcast_scheduler  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
+from routes_visa_requirements import router as visa_requirements_router  # noqa: E402
+from routes_embassy import router as embassy_router  # noqa: E402
 from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
 from routes_rag import router as rag_router  # noqa: E402
 from routes_prompts import router as prompts_router  # noqa: E402
@@ -195,6 +197,8 @@ api_router.include_router(newsletter_router)
 api_router.include_router(newsletter_campaigns_router)
 api_router.include_router(announcements_router)
 api_router.include_router(i18n_router)
+api_router.include_router(visa_requirements_router)
+api_router.include_router(embassy_router)
 api_router.include_router(agents_ai_router)
 api_router.include_router(rag_router)
 api_router.include_router(prompts_router)
@@ -526,6 +530,22 @@ async def on_startup():
         logger.exception('Promotional event seed failed: %s', e)
 
     _start_ragas_scheduler()
+
+    async def _reminder_scheduler_loop():
+        import logging as _log
+        _rlog = _log.getLogger('wehive.reminders')
+        while True:
+            try:
+                from agents.reminder_agent import dispatch_reminders
+                from db import db as _db
+                sent = await dispatch_reminders(_db)
+                if sent:
+                    _rlog.info('Dispatched %d email reminders', sent)
+            except Exception as _exc:
+                _rlog.warning('Reminder scheduler error: %s', _exc)
+            await asyncio.sleep(6 * 3600)
+
+    asyncio.create_task(_reminder_scheduler_loop())
 
 
 @app.on_event('shutdown')

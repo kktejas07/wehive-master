@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  Loader2, ArrowLeft, AlertTriangle, FileText, Eye, Check, X, RotateCcw, Send, Lock, ShieldCheck, ShieldAlert, ExternalLink,
+  Loader2, ArrowLeft, AlertTriangle, FileText, Eye, Check, X, RotateCcw, Send, Lock, ShieldCheck, ShieldAlert, ExternalLink, Shield,
 } from 'lucide-react';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, inr, STATUS_COLORS, SEVERITY_PILL, canWrite } from '../../lib/admin';
@@ -9,7 +9,18 @@ import { Panel } from './AdminShell';
 import { StatusDialog } from './ApplicationsTab';
 import { useToast } from '../../hooks/use-toast';
 
-const STATUSES = ['draft', 'submitted', 'in_review', 'approved', 'rejected'];
+const STATUSES = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'submitted', label: 'Submitted' },
+  { value: 'in_review', label: 'In Review' },
+  { value: 'awaiting_docs', label: 'Awaiting Docs' },
+  { value: 'appointment_scheduled', label: 'Appointment Scheduled' },
+  { value: 'biometrics_done', label: 'Biometrics Done' },
+  { value: 'interview_scheduled', label: 'Interview Scheduled' },
+  { value: 'visa_approved', label: 'Visa Approved' },
+  { value: 'visa_rejected', label: 'Visa Rejected' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
 const DOC_PILL = {
   uploaded: 'bg-blue-500/15 text-blue-200',
   approved: 'bg-emerald-500/15 text-emerald-300',
@@ -377,6 +388,11 @@ export default function ApplicationCase() {
   const [staff, setStaff] = useState([]);
   const [change, setChange] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [statusNote, setStatusNote] = useState('');
+  const [visaFrom, setVisaFrom] = useState('');
+  const [visaUntil, setVisaUntil] = useState('');
+  const [statusBusy, setStatusBusy] = useState(false);
   const readOnly = !canWrite(admin, 'cases');
 
   const load = useCallback(async () => {
@@ -421,6 +437,32 @@ export default function ApplicationCase() {
       toast({ title: 'Status update failed', description: errMsg(e), variant: 'destructive' });
     } finally {
       setBusy(false);
+    }
+  };
+
+  const updateStatusPanel = async () => {
+    const target = newStatus || c?.status || 'submitted';
+    if (target === 'visa_rejected' && !statusNote.trim()) {
+      toast({ title: 'Note required for rejection', variant: 'destructive' });
+      return;
+    }
+    setStatusBusy(true);
+    try {
+      await adminClient(token).post(`/admin/applications/${id}/status`, {
+        status: target,
+        note: statusNote || undefined,
+        visa_validity_from: visaFrom || undefined,
+        visa_validity_until: visaUntil || undefined,
+      });
+      toast({ title: 'Status updated', description: 'The applicant has been notified.' });
+      setStatusNote('');
+      setVisaFrom('');
+      setVisaUntil('');
+      await load();
+    } catch (e) {
+      toast({ title: 'Status update failed', description: errMsg(e), variant: 'destructive' });
+    } finally {
+      setStatusBusy(false);
     }
   };
 
@@ -483,7 +525,7 @@ export default function ApplicationCase() {
               onChange={(e) => setChange({ app: c, status: e.target.value })}
               className="h-10 px-2 rounded-xl bg-white/5 border border-white/10 text-[13px] text-white"
             >
-              {STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
+              {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </label>
           <label className="text-[11px] font-semibold text-slate-400">
@@ -535,7 +577,53 @@ export default function ApplicationCase() {
       </div>
 
       <div role="tabpanel">
-        {tab === 'overview' && <Overview c={c} onPatchAppt={patchAppt} readOnly={readOnly} />}
+        {tab === 'overview' && (
+          <>
+            <Overview c={c} onPatchAppt={patchAppt} readOnly={readOnly} />
+            {!readOnly && (
+              <Panel className="mt-4">
+                <div className="text-[15px] font-display font-bold text-white mb-4 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-amber-300" /> Status Control
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-[11px] uppercase tracking-widest text-slate-500 mb-1.5 block">New Status</label>
+                    <select value={newStatus || c.status || 'submitted'} onChange={(e) => setNewStatus(e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl bg-black/30 border border-white/10 text-white text-[13px]">
+                      {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[11px] uppercase tracking-widest text-slate-500 mb-1.5 block">
+                      Note {(newStatus || c.status) === 'visa_rejected' && <span className="text-red-400">*required</span>}
+                    </label>
+                    <textarea value={statusNote} onChange={(e) => setStatusNote(e.target.value)}
+                      rows={2} placeholder="Admin note visible to applicant…"
+                      className="w-full px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-white text-[13px] resize-none outline-none" />
+                  </div>
+                  {(newStatus || c.status) === 'visa_approved' && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] uppercase tracking-widest text-slate-500 mb-1.5 block">Valid From</label>
+                        <input type="date" value={visaFrom} onChange={(e) => setVisaFrom(e.target.value)}
+                          className="w-full h-10 px-3 rounded-xl bg-black/30 border border-white/10 text-white text-[13px]" />
+                      </div>
+                      <div>
+                        <label className="text-[11px] uppercase tracking-widest text-slate-500 mb-1.5 block">Valid Until</label>
+                        <input type="date" value={visaUntil} onChange={(e) => setVisaUntil(e.target.value)}
+                          className="w-full h-10 px-3 rounded-xl bg-black/30 border border-white/10 text-white text-[13px]" />
+                      </div>
+                    </div>
+                  )}
+                  <button disabled={statusBusy} onClick={updateStatusPanel}
+                    className="btn-admin-primary w-full h-10 rounded-xl text-[13px] font-bold disabled:opacity-50">
+                    {statusBusy ? 'Updating…' : 'Update Status'}
+                  </button>
+                </div>
+              </Panel>
+            )}
+          </>
+        )}
         {tab === 'documents' && <Documents c={c} token={token} onChanged={load} readOnly={readOnly} />}
         {tab === 'messages' && <Messages c={c} token={token} setCase={setCase} readOnly={readOnly} />}
         {tab === 'notes' && <Notes c={c} token={token} setCase={setCase} readOnly={readOnly} />}

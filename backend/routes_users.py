@@ -143,42 +143,17 @@ async def create_application(req: ApplicationCreate, user=Depends(get_current_us
 
 @router.get('/me/profile')
 async def get_my_profile(current_user=Depends(get_current_user)):
-    user_id = str(current_user['_id'])
-    latest_app = await applications.find_one({'user_id': user_id}, sort=[('created_at', -1)])
-    total_apps = await applications.count_documents({'user_id': user_id})
-    stage = 'inquiry'
-    if latest_app:
-        s = latest_app.get('status', '')
-        if s in ('approved', 'visa_issued'):
-            stage = 'approved'
-        elif s in ('submitted', 'in_review', 'embassy'):
-            stage = 'in_review'
-        elif s in ('docs_pending', 'payment_pending'):
-            stage = 'action_required'
-        else:
-            stage = 'active'
+    from viewmodels.user_viewmodel import UserViewModel
+    profile = await UserViewModel.get_profile(str(current_user['_id']))
+    if not profile:
+        raise HTTPException(404, 'User not found')
+    return profile
 
-    def _iso(v):
-        return v.isoformat() if hasattr(v, 'isoformat') else str(v or '')
 
-    return {
-        'id': user_id,
-        'name': current_user.get('name', ''),
-        'email': current_user.get('email', ''),
-        'phone': current_user.get('phone', ''),
-        'avatar_url': current_user.get('avatar_url'),
-        'is_premium': bool(current_user.get('is_premium', False)),
-        'journey_stage': stage,
-        'total_applications': total_apps,
-        'latest_application': {
-            'id': str(latest_app['_id']),
-            'status': latest_app.get('status', ''),
-            'destination': latest_app.get('form_data', {}).get('destination', ''),
-            'visa_type': latest_app.get('visa_type', ''),
-            'updated_at': _iso(latest_app.get('updated_at')),
-        } if latest_app else None,
-        'created_at': _iso(current_user.get('created_at')),
-    }
+@router.get('/me/payments')
+async def list_my_payments(page: int = 1, per_page: int = 20, current_user=Depends(get_current_user)):
+    from viewmodels.payment_viewmodel import PaymentViewModel
+    return await PaymentViewModel.list_for_user(str(current_user['_id']), page, per_page)
 
 
 @router.get('/me/applications')

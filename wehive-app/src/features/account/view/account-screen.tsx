@@ -13,10 +13,12 @@ import { Screen } from '@/core/ui/screen';
 import { Loading } from '@/core/ui/states';
 import { Text } from '@/core/ui/text';
 import { SignInForm } from '@/features/auth/view/sign-in-form';
+import { useProfileViewModel } from '@/features/profile/viewmodel/use-profile';
 
 export function AccountScreen() {
   const { user, ready, signOut, refresh } = useSession();
   const { c } = useTheme();
+  const { profile } = useProfileViewModel();
   if (!ready) return <Screen><Loading /></Screen>;
 
   return (
@@ -38,6 +40,18 @@ export function AccountScreen() {
             {user.email ? <Line icon={Mail} text={user.email} verified={user.email_verified} /> : null}
             {user.phone ? <Line icon={Phone} text={user.phone} verified={user.phone_verified} /> : null}
             {user.pending_email ? <Chip label={`Confirm ${user.pending_email} on the website`} tone="warning" /> : null}
+            {profile?.journey_stage ? (
+              <View style={styles.row}>
+                <Text tone="muted">Stage</Text>
+                <Chip label={profile.journey_stage} tone="neutral" />
+              </View>
+            ) : null}
+            {profile?.total_applications != null ? (
+              <View style={styles.row}>
+                <Text tone="muted">Applications</Text>
+                <Text variant="bodyStrong">{profile.total_applications}</Text>
+              </View>
+            ) : null}
           </Card>
           <Card>
             <View style={styles.row}>

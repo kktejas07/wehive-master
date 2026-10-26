@@ -1,6 +1,7 @@
 export type ApplicationStatus =
   | 'draft' | 'submitted' | 'docs_pending' | 'payment_pending'
-  | 'in_review' | 'embassy' | 'approved' | 'visa_issued' | 'rejected';
+  | 'in_review' | 'embassy' | 'approved' | 'visa_issued' | 'rejected'
+  | 'visa_approved' | 'visa_rejected' | 'appointment_scheduled' | 'withdrawn';
 
 export interface ApplicationSummary {
   id: string;
@@ -34,6 +35,9 @@ export interface ApplicationDetail extends ApplicationSummary {
   messages: ApplicationMessage[];
   timeline: { stage: string; date: string; note?: string }[];
   visa_appointment?: { date?: string; location?: string };
+  visa_valid_from?: string;
+  visa_valid_to?: string;
+  rejection_reason?: string;
 }
 
 export interface ApplicationsPage {

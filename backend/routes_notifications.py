@@ -11,6 +11,7 @@ from fastapi.responses import StreamingResponse
 
 from auth_utils import get_current_user, get_current_user_optional
 from db import db
+from viewmodels.notification_viewmodel import NotificationViewModel
 
 router = APIRouter(prefix='/notifications', tags=['notifications'])
 
@@ -18,33 +19,22 @@ notifications_col = db['notifications']
 
 
 @router.get('')
-async def list_notifications(user=Depends(get_current_user)):
-    items = []
-    async for n in notifications_col.find({'user_id': user['_id']}).sort('created_at', -1).limit(50):
-        n['id'] = n.pop('_id')
-        items.append(n)
-    unread = await notifications_col.count_documents({'user_id': user['_id'], 'read': {'$ne': True}})
-    return {'items': items, 'unread': unread}
+async def list_notifications(page: int = 1, user=Depends(get_current_user)):
+    return await NotificationViewModel.list_for_user(user['_id'], page)
 
 
 @router.post('/mark-read')
 async def mark_read(notif_id: str, user=Depends(get_current_user)):
-    r = await notifications_col.update_one(
-        {'_id': notif_id, 'user_id': user['_id']},
-        {'$set': {'read': True, 'read_at': datetime.utcnow()}}
-    )
-    if r.modified_count == 0:
+    updated = await NotificationViewModel.mark_read(notif_id, user['_id'])
+    if not updated:
         raise HTTPException(404, 'Notification not found')
     return {'ok': True}
 
 
 @router.post('/mark-all-read')
 async def mark_all_read(user=Depends(get_current_user)):
-    await notifications_col.update_many(
-        {'user_id': user['_id'], 'read': {'$ne': True}},
-        {'$set': {'read': True, 'read_at': datetime.utcnow()}}
-    )
-    return {'ok': True}
+    count = await NotificationViewModel.mark_all_read(user['_id'])
+    return {'ok': True, 'updated': count}
 
 
 @router.delete('/{notif_id}')
