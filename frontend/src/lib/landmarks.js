@@ -268,9 +268,14 @@ const _LOCALS_RAW = {
 };
 
 // Rewrite local paths to use the CDN base URL when REACT_APP_CDN_URL is set.
+// R2 stores destination images at destinations/{filename} (no /images/ prefix),
+// so strip the /images/ segment when constructing the CDN URL.
 export const LOCALS = CDN_BASE
   ? Object.fromEntries(
-      Object.entries(_LOCALS_RAW).map(([k, v]) => [k, `${CDN_BASE}${v}`])
+      Object.entries(_LOCALS_RAW).map(([k, v]) => [
+        k,
+        `${CDN_BASE}${v.replace('/images/', '/')}`,
+      ])
     )
   : _LOCALS_RAW;
 

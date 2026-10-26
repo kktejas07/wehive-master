@@ -24,7 +24,7 @@ const POPULAR_VISAS = [
   {
     id: 'us',
     country: 'USA',
-    flag: '',
+    flag: '🇺🇸',
     visaType: 'B1/B2 Tourist',
     processing: '3-5 days',
     price: '₹15,999',
@@ -35,7 +35,7 @@ const POPULAR_VISAS = [
   {
     id: 'uk',
     country: 'UK',
-    flag: '',
+    flag: '🇬🇧',
     visaType: 'Standard Visitor',
     processing: '5-10 days',
     price: '₹12,499',
@@ -46,7 +46,7 @@ const POPULAR_VISAS = [
   {
     id: 'au',
     country: 'Australia',
-    flag: '',
+    flag: '🇦🇺',
     visaType: 'Subclass 600',
     processing: '5-7 days',
     price: '₹18,999',
@@ -57,7 +57,7 @@ const POPULAR_VISAS = [
   {
     id: 'jp',
     country: 'Japan',
-    flag: '',
+    flag: '🇯🇵',
     visaType: 'Tourist Visa',
     processing: '4-6 days',
     price: '₹8,999',
@@ -68,7 +68,7 @@ const POPULAR_VISAS = [
   {
     id: 'ca',
     country: 'Canada',
-    flag: '',
+    flag: '🇨🇦',
     visaType: 'Visitor Visa',
     processing: '7-14 days',
     price: '₹14,999',
@@ -79,7 +79,7 @@ const POPULAR_VISAS = [
   {
     id: 'ae',
     country: 'UAE',
-    flag: '',
+    flag: '🇦🇪',
     visaType: 'Tourist/Transit',
     processing: '2-4 days',
     price: '₹6,999',
@@ -90,7 +90,7 @@ const POPULAR_VISAS = [
   {
     id: 'de',
     country: 'Germany',
-    flag: '',
+    flag: '🇩🇪',
     visaType: 'Schengen Visa',
     processing: '5-8 days',
     price: '₹11,999',
@@ -101,7 +101,7 @@ const POPULAR_VISAS = [
   {
     id: 'sg',
     country: 'Singapore',
-    flag: '',
+    flag: '🇸🇬',
     visaType: 'Tourist Visa',
     processing: '1-3 days',
     price: '₹4,999',
