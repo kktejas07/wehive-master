@@ -1,4 +1,3 @@
-// TODO: wire this hook to views/pages/UniversityDetail.jsx in Stage 3
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API } from '../context/AuthContext';
@@ -85,7 +84,7 @@ export function useUniversityDetailViewModel(universityId: string | undefined) {
     reviews,
     loading,
     saved, setSaved,
-    translated,
+    translated, setTranslated,
     translate,
     showApplyModal, setShowApplyModal,
     refetch: fetchUniversity,

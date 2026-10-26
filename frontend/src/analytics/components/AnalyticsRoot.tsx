@@ -1,10 +1,4 @@
-/**
- * Analytics App Root Wrapper
- * Initializes early global error listeners, consent gates, and debug overlay.
- */
-
 import React, { useEffect } from 'react';
-import { AnalyticsDebugOverlay } from '../dev/AnalyticsDebugOverlay';
 import { captureError } from '../errors/captureError';
 
 interface Props {
@@ -13,7 +7,6 @@ interface Props {
 
 export function AnalyticsRoot({ children }: Props) {
   useEffect(() => {
-    // Synchronous unhandled error listener
     const handleGlobalError = (event: ErrorEvent) => {
       captureError(event.error || event.message, { scope: 'global_unhandled_error', severity: 'error' });
     };
@@ -31,10 +24,5 @@ export function AnalyticsRoot({ children }: Props) {
     };
   }, []);
 
-  return (
-    <>
-      {children}
-      <AnalyticsDebugOverlay />
-    </>
-  );
+  return <>{children}</>;
 }
