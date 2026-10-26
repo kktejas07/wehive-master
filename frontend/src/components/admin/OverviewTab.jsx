@@ -88,8 +88,8 @@ function SvgDonut({ segments = [] }) {
   return (
     <svg viewBox="0 0 120 120" className="w-[120px] h-[120px]">
       {arcs.map((a) => <path key={a.label} d={a.d} fill={a.color} opacity="0.9" />)}
-      <circle cx={CX} cy={CY} r="28" fill="var(--admin-bg, #0F172A)" />
-      <text x={CX} y={CY + 5} textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">{total}</text>
+      <circle cx={CX} cy={CY} r="28" fill="white" />
+      <text x={CX} y={CY + 5} textAnchor="middle" fill="#1B2B5E" fontSize="14" fontWeight="bold">{total}</text>
     </svg>
   );
 }
@@ -100,21 +100,21 @@ function WelcomeBanner({ admin, alertCount, onRunAggregators, running }) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   return (
-    <div className="relative overflow-hidden rounded-2xl border p-5 h-full"
-      style={{ background: 'linear-gradient(135deg, rgba(27,43,94,0.6) 0%, rgba(1,28,181,0.15) 100%)', borderColor: 'var(--glass-border, rgba(255,255,255,0.10))' }}>
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at top right, rgba(1,28,181,0.2), transparent 60%)' }} />
+    <div className="relative overflow-hidden rounded-2xl border bg-white p-6 h-full" style={{ borderColor: '#BDD0FF' }}>
+      <div className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(1,28,181,0.06), transparent 70%)', transform: 'translate(30%, -30%)' }} />
       <div className="relative">
-        <div className="eyebrow text-[11px] text-gray-500">{greeting}</div>
-        <h2 className="mt-1 text-[22px] font-display font-bold text-white">{admin?.name || admin?.email || 'Admin'}</h2>
+        <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-[#011CB5] mb-1">{greeting}</div>
+        <div className="w-8 h-0.5 bg-[#011CB5] rounded mb-3" />
+        <h2 className="text-[22px] font-display font-bold text-[#1B2B5E]">{admin?.name || admin?.email || 'Admin'}</h2>
         {alertCount > 0 && (
-          <div className="mt-1 text-[13px] text-amber-700 font-semibold flex items-center gap-1.5">
+          <div className="mt-2 text-[13px] text-amber-600 font-semibold flex items-center gap-1.5">
             <AlertTriangle className="w-3.5 h-3.5" /> {alertCount} alert{alertCount !== 1 ? 's' : ''} need attention
           </div>
         )}
         <button
           onClick={onRunAggregators}
           disabled={running}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12.5px] font-bold bg-[#EEF2FF] hover:bg-[#E5EBFF] text-white disabled:opacity-50 transition-colors"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12.5px] font-bold bg-[#011CB5] hover:bg-[#0122D4] text-white disabled:opacity-50 transition-colors"
         >
           {running ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
           Run aggregators
@@ -141,11 +141,11 @@ function QuickStats({ monitoring }) {
       <div className="grid grid-cols-2 gap-3">
         {tiles.map((t) => (
           <Link key={t.label} to="/admin/monitoring"
-            className="rounded-xl bg-white/5 border border-[#E8EDF8] px-3 py-2.5 hover:bg-[#EEF2FF] transition-colors flex items-center gap-2">
+            className="rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] px-3 py-2.5 hover:bg-[#EEF2FF] transition-colors flex items-center gap-2">
             <t.Icon className={`w-4 h-4 shrink-0 ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-gray-400'}`} />
             <div>
-              <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-gray-500 leading-none">{t.label}</div>
-              <div className={`text-[18px] font-display font-bold leading-snug ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-white'}`}>{t.value ?? '—'}</div>
+              <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-gray-400 leading-none">{t.label}</div>
+              <div className={`text-[18px] font-display font-bold leading-snug ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-[#1B2B5E]'}`}>{t.value ?? '—'}</div>
             </div>
           </Link>
         ))}
@@ -157,29 +157,28 @@ function QuickStats({ monitoring }) {
 // ─── row 2 ────────────────────────────────────────────────────────────────────
 
 const METRIC_ACCENTS = {
-  users:    { from: '#1B2B5E', to: '#011CB5', icon: 'text-blue-700',    ring: 'bg-blue-50' },
-  apps:     { from: '#1B2B5E', to: '#92400e', icon: 'text-amber-700',   ring: 'bg-amber-50' },
-  revenue:  { from: '#1B2B5E', to: '#064e3b', icon: 'text-emerald-300', ring: 'bg-emerald-500/15' },
-  countries:{ from: '#1B2B5E', to: '#1e3a8a', icon: 'text-sky-300',     ring: 'bg-sky-500/15' },
+  users:    { border: '#BDD0FF', icon: 'text-[#011CB5]', ring: 'bg-blue-50',    value: 'text-[#011CB5]' },
+  apps:     { border: '#FDE68A', icon: 'text-amber-600', ring: 'bg-amber-50',   value: 'text-amber-700' },
+  revenue:  { border: '#A7F3D0', icon: 'text-emerald-600', ring: 'bg-emerald-50', value: 'text-emerald-700' },
+  countries:{ border: '#BAE6FD', icon: 'text-sky-600',   ring: 'bg-sky-50',     value: 'text-sky-700' },
 };
 
 function KPICard({ label, value, sub, Icon, accentKey = 'users', delta, testid }) {
   const a = METRIC_ACCENTS[accentKey] || METRIC_ACCENTS.users;
   return (
-    <div className="card-lift relative overflow-hidden rounded-2xl border p-5 cursor-default"
-      style={{ background: `linear-gradient(135deg, ${a.from} 0%, var(--admin-bg, #0F172A) 100%)`, borderColor: 'var(--glass-border, rgba(255,255,255,0.10))' }}>
-      <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ background: `radial-gradient(ellipse at top right, ${a.to}, transparent 70%)` }} />
-      <div className="relative flex items-center justify-between">
-        <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-gray-500">{label}</div>
+    <div className="card-lift relative overflow-hidden rounded-2xl border bg-white p-5 cursor-default"
+      style={{ borderColor: a.border }}>
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-gray-400">{label}</div>
         <span className={`h-9 w-9 inline-flex items-center justify-center rounded-xl ${a.ring} ${a.icon}`}>
           <Icon className="w-4 h-4" />
         </span>
       </div>
-      <div className="relative mt-4 text-[32px] font-display font-bold tracking-[-0.02em] text-white" data-testid={testid}>{value}</div>
-      <div className="relative mt-1 flex items-center gap-2">
+      <div className={`mt-4 text-[32px] font-display font-bold tracking-[-0.02em] ${a.value}`} data-testid={testid}>{value}</div>
+      <div className="mt-1 flex items-center gap-2">
         {sub && <span className="text-[12px] text-gray-500">{sub}</span>}
         {delta != null && (
-          <span className={`text-[11px] font-bold ${delta > 0 ? 'text-emerald-300' : 'text-red-600'}`}>
+          <span className={`text-[11px] font-bold ${delta > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
             {delta > 0 ? '↑' : '↓'} {Math.abs(delta)}
           </span>
         )}
@@ -217,14 +216,14 @@ function FunnelPanel({ funnel }) {
           const pct = Math.round((count / max) * 100);
           return (
             <Link key={s.key} to={`/admin/users?stage=${s.key}`}
-              className="block hover:bg-white/5 rounded-lg px-2 py-1 -mx-2 transition-colors group">
+              className="block hover:bg-[#F0F4FF] rounded-lg px-2 py-1 -mx-2 transition-colors group">
               <div className="flex justify-between text-[12px] mb-1">
-                <span className="text-gray-600 group-hover:text-white">{s.label}</span>
+                <span className="text-gray-600 group-hover:text-[#1B2B5E]">{s.label}</span>
                 <span className="text-[#1B2B5E] font-semibold">{count.toLocaleString()}
                   {drop != null && <span className="text-red-600 ml-1.5 font-normal">↓{drop}%</span>}
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-white/[0.06]">
+              <div className="h-1.5 rounded-full bg-[#E8EDF8]">
                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #011CB5, #F59E0B)' }} />
               </div>
             </Link>
@@ -323,7 +322,7 @@ function TopDestinations({ countries }) {
                 <span className="text-gray-700">{c.flag ? `${c.flag} ` : ''}{c.name || c.country_id}</span>
                 <span className="text-[#1B2B5E] font-semibold">{c.count}</span>
               </div>
-              <div className="h-1.5 rounded-full bg-white/[0.06]">
+              <div className="h-1.5 rounded-full bg-[#E8EDF8]">
                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #F59E0B, rgba(245,158,11,0.4))' }} />
               </div>
             </div>
