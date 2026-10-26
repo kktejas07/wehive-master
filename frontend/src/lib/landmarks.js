@@ -2,14 +2,19 @@
  * Destination image lookup per ISO-2 country code.
  * Prefers local AI-generated illustrations; falls back to Unsplash stock photos
  * or the mock data / Wikipedia API.
+ *
+ * Set REACT_APP_CDN_URL to serve images from Cloudflare R2 (or any CDN) in
+ * production instead of the local /images/destinations path.
  */
+
+const CDN_BASE = (process.env.REACT_APP_CDN_URL || '').replace(/\/$/, '');
 
 const U = (id, w = 900) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 // Local AI-generated destination illustrations (241 countries, 2:3 portrait).
 // Generated via Flux on Together AI — see /destination-illustrations/.
-export const LOCALS = {
+const _LOCALS_RAW = {
   'ad': '/images/destinations/andorra.webp',
   'ae': '/images/destinations/united-arab-emirates.webp',
   'af': '/images/destinations/afghanistan.webp',
@@ -262,6 +267,13 @@ export const LOCALS = {
   'zw': '/images/destinations/zimbabwe.webp',
 };
 
+// Rewrite local paths to use the CDN base URL when REACT_APP_CDN_URL is set.
+export const LOCALS = CDN_BASE
+  ? Object.fromEntries(
+      Object.entries(_LOCALS_RAW).map(([k, v]) => [k, `${CDN_BASE}${v}`])
+    )
+  : _LOCALS_RAW;
+
 // Fallback: curated Unsplash stock photos for popular landmark-rich countries.
 const LANDMARKS = {
   'us': U('photo-1485871981521-5b1fd3805eee'),
@@ -364,5 +376,7 @@ const LANDMARKS = {
 export function landmarkFor(country) {
   if (!country) return null;
   const key = (country.id || country.iso2 || '').toLowerCase();
-  return LOCALS[key] || LANDMARKS[key] || null;
+  const local = LOCALS[key];
+  if (local) return CDN_BASE ? `${CDN_BASE}${local}` : local;
+  return LANDMARKS[key] || null;
 }
