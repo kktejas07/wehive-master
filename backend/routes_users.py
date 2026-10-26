@@ -11,6 +11,7 @@ from agent_assignment import pick_agent
 from admin_auth import hash_password, verify_password
 from constants import AppStatus
 from db import users, applications, holiday_plans, db
+from viewmodels.application_viewmodel import ApplicationViewModel
 from serializers import serialize_doc
 import uuid
 
@@ -187,20 +188,7 @@ async def list_applications(
     status: str = None,
     user=Depends(get_current_user),
 ):
-    query = {'user_id': user['_id']}
-    if status:
-        query['status'] = status
-    skip = (page - 1) * per_page
-    total = await applications.count_documents(query)
-    cur = applications.find(query).sort('created_at', -1).skip(skip).limit(per_page)
-    items = [serialize_doc(d) async for d in cur]
-    return {
-        'items': items,
-        'total': total,
-        'page': page,
-        'per_page': per_page,
-        'pages': max(1, (total + per_page - 1) // per_page),
-    }
+    return await ApplicationViewModel.list_for_user(user['_id'], page, per_page, status)
 
 
 @router.post('/me/saved-plans')
