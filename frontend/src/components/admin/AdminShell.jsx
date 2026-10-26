@@ -1,5 +1,6 @@
 import { Link, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useResponsive } from '../../hooks/useResponsive';
 import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, canWrite, ROLE_NAMES } from '../../lib/admin';
@@ -70,15 +71,21 @@ export default function AdminShell({ children }) {
   const [nameVal, setNameVal] = useState('');
   const [nameBusy, setNameBusy] = useState(false);
 
-  // Sidebar collapse — persisted to localStorage
-  const [collapsed, setCollapsed] = useState(() => {
+  // Responsive layout
+  const responsive = useResponsive();
+
+  // Manual collapse override (stored) — only applies when showSidebar + !iconOnly
+  const [userCollapsed, setUserCollapsed] = useState(() => {
     try { return localStorage.getItem('admin-sidebar-collapsed') === '1'; } catch { return false; }
   });
-  const toggleCollapse = () => setCollapsed((v) => {
+  const toggleCollapse = () => setUserCollapsed((v) => {
     const next = !v;
     try { localStorage.setItem('admin-sidebar-collapsed', next ? '1' : '0'); } catch {}
     return next;
   });
+
+  // Derive effective collapsed state: tablet always icon-rail; large screens use manual toggle
+  const collapsed = !responsive.showSidebar ? false : (responsive.iconOnly || userCollapsed);
 
   const user = admin;
   const [critical, setCritical] = useState(0);
@@ -126,9 +133,11 @@ export default function AdminShell({ children }) {
   };
 
   return (
-    <div className="admin-theme h-screen bg-[#F8FAFF] text-[#1B2B5E]" data-testid="admin-shell">
-      <div className={`grid h-screen transition-[grid-template-columns] duration-200 ${collapsed ? 'lg:grid-cols-[64px_1fr]' : 'lg:grid-cols-[240px_1fr]'}`}>
-        <aside className="hidden lg:flex flex-col bg-[#F0F4FF] border-r border-[#E8EDF8] overflow-y-auto admin-scrollbar">
+    <div className="admin-theme h-screen bg-[#F8FAFF] text-[#1B2B5E]" data-testid="admin-shell"
+      style={{ fontSize: `${responsive.textScale}rem` }}>
+      <div className="grid h-screen transition-[grid-template-columns] duration-200"
+        style={{ gridTemplateColumns: responsive.showSidebar ? `${responsive.sidebarWidth}px 1fr` : '1fr' }}>
+        <aside className={`${responsive.showSidebar ? 'flex' : 'hidden'} flex-col bg-[#F0F4FF] border-r border-[#E8EDF8] overflow-y-auto admin-scrollbar`}>
           {/* Logo + collapse toggle */}
           <div className={`flex items-center border-b border-[#E8EDF8] shrink-0 ${collapsed ? 'justify-center p-3' : 'justify-between px-4 py-3'}`}>
             {!collapsed && (
@@ -284,7 +293,9 @@ export default function AdminShell({ children }) {
           </div>
         </aside>
 
-        <main className="p-5 sm:p-8 lg:p-10 max-w-full overflow-y-auto relative z-10 admin-scrollbar bg-[#F8FAFF]">
+        <main className="overflow-y-auto relative z-10 admin-scrollbar bg-[#F8FAFF]"
+          style={{ padding: `${responsive.gutter}px`, fontSize: 'inherit' }}>
+          <div style={responsive.contentMax ? { maxWidth: `${responsive.contentMax}px`, margin: '0 auto' } : undefined}>
           {/* Mobile tab pill bar */}
           <nav aria-label="Admin sections" className="lg:hidden flex overflow-x-auto snap-x scroll-px-5 [scrollbar-width:none] gap-1.5 mb-5 -mx-5 px-5">
             {tabs.map((t) => {
@@ -318,6 +329,7 @@ export default function AdminShell({ children }) {
             </div>
           )}
           {mustEnrol && !pathname.startsWith('/admin/security') ? <Navigate to="/admin/security" replace /> : children}
+          </div>
         </main>
       </div>
 
