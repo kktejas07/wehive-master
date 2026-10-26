@@ -1,6 +1,6 @@
 import os
 from fastapi import APIRouter, HTTPException, Depends, Request, BackgroundTasks
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from pydantic import BaseModel, Field
 
@@ -19,7 +19,7 @@ from constants import REFERRAL_REWARD_INR
 from rate_limit import RateLimit
 import uuid
 
-from config import ADMIN_EMAILS, OTP_TTL_MIN, IS_DEV, SUPPORT_EMAIL
+from config import ADMIN_EMAILS, OTP_TTL_MIN, IS_DEV, SUPPORT_EMAIL, FRONTEND_URL
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -242,6 +242,107 @@ async def me(user=Depends(get_current_user)):
     return _public(user)
 
 
+# ---------- backend-owned email verification (Postal/SMTP, not Firebase) ----------
+
+EMAIL_VERIFY_TTL_HOURS = 24
+
+
+class RequestEmailVerificationRequest(BaseModel):
+    id_token: str  # Firebase ID token: binds the verification to this Firebase UID
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
+async def _backend_email_verified(firebase_uid: str, email: str) -> bool:
+    rec = await db['email_verifications'].find_one({
+        'firebase_uid': firebase_uid,
+        'email': (email or '').lower(),
+        'used_at': {'$ne': None},
+    })
+    return rec is not None
+
+
+@router.post('/request-email-verification')
+async def request_email_verification(req: RequestEmailVerificationRequest, _=Depends(_verify_limiter)):
+    """Send the signup verification email via Postal/SMTP instead of Firebase."""
+    import hashlib
+    import secrets
+    from firebase_utils import _get_firebase_creds, init_firebase_admin, verify_firebase_token
+    import firebase_admin
+
+    project_id, creds_json = await _get_firebase_creds()
+    if not project_id or not creds_json:
+        raise HTTPException(status_code=503, detail='Firebase not configured.')
+    if not firebase_admin._apps:
+        init_firebase_admin(project_id, creds_json)
+    try:
+        decoded = await verify_firebase_token(req.id_token)
+    except Exception:
+        raise HTTPException(status_code=401, detail='Invalid session. Sign in again.')
+
+    email = (decoded.get('email') or '').lower().strip()
+    firebase_uid = decoded.get('uid')
+    if not email or not firebase_uid:
+        raise HTTPException(status_code=400, detail='No email on this account.')
+
+    raw = secrets.token_urlsafe(32)
+    digest = hashlib.sha256(raw.encode('utf-8')).hexdigest()
+    now = datetime.utcnow()
+    await db['email_verifications'].delete_many({'firebase_uid': firebase_uid, 'used_at': None})
+    await db['email_verifications'].insert_one({
+        '_id': digest,
+        'firebase_uid': firebase_uid,
+        'email': email,
+        'name': decoded.get('name', ''),
+        'created_at': now,
+        'expires_at': now + timedelta(hours=EMAIL_VERIFY_TTL_HOURS),
+        'used_at': None,
+    })
+
+    from email_service import build_email_verification_html, send_email
+    verify_url = f'{FRONTEND_URL}/verify-email?token={raw}'
+    name = decoded.get('name', '')
+    sent = await send_email(
+        to_email=email,
+        subject='Verify your We Hive email',
+        html_body=build_email_verification_html(name, verify_url),
+        text_body=f'Hi {name or "there"}, verify your We Hive email: {verify_url}',
+    )
+    if not sent:
+        raise HTTPException(status_code=502, detail='Could not send the verification email. Try again later.')
+    return {'sent': True, 'masked': mask(email)}
+
+
+@router.post('/verify-email')
+async def verify_email(req: VerifyEmailRequest):
+    """Consume a verification link token and mark the address verified."""
+    import hashlib
+    digest = hashlib.sha256((req.token or '').strip().encode('utf-8')).hexdigest()
+    doc = await db['email_verifications'].find_one({'_id': digest})
+    if not doc or doc.get('used_at'):
+        raise HTTPException(status_code=400, detail='This link has expired or already been used.')
+    if doc.get('expires_at') and doc['expires_at'] < datetime.utcnow():
+        raise HTTPException(status_code=400, detail='This link has expired. Request a new one.')
+    now = datetime.utcnow()
+    await db['email_verifications'].update_one({'_id': digest}, {'$set': {'used_at': now}})
+    email = doc['email']
+    user = await users.find_one({'email': email})
+    if user:
+        await users.update_one({'_id': user['_id']}, {'$set': {'email_verified': True, 'updated_at': now}})
+    else:
+        await users.insert_one({
+            '_id': str(uuid.uuid4()),
+            'name': doc.get('name', ''),
+            'email': email,
+            'email_verified': True,
+            'created_at': now,
+            'updated_at': now,
+        })
+    return {'ok': True, 'email': mask(email)}
+
+
 @router.post('/firebase-sync', response_model=AuthTokens)
 async def firebase_sync(req: FirebaseSyncRequest, request: Request, _=Depends(_verify_limiter)):
     from firebase_utils import _get_firebase_creds, init_firebase_admin, verify_firebase_token
@@ -260,9 +361,14 @@ async def firebase_sync(req: FirebaseSyncRequest, request: Request, _=Depends(_v
 
     firebase_uid = decoded['uid']
     email = decoded.get('email')
-    # Anyone can create a Firebase password account for any address; only a verified
-    # email may be used to find or claim a WeHive account.
-    if email and decoded.get('email_verified') is not True:
+    # Anyone can create a Firebase password account for any address, so an unverified
+    # Firebase token alone never claims an account. Trust it only when Firebase says
+    # the email is verified, or when this exact Firebase UID completed our own
+    # Postal verification link (request-email-verification → verify-email).
+    verified = decoded.get('email_verified') is True
+    if email and not verified:
+        verified = await _backend_email_verified(firebase_uid, email)
+    if email and not verified:
         raise HTTPException(status_code=403, detail='Email not verified. Check your inbox for the verification link.')
     name = decoded.get('name', '')
     picture = decoded.get('picture')
@@ -276,7 +382,7 @@ async def firebase_sync(req: FirebaseSyncRequest, request: Request, _=Depends(_v
                 '_id': str(uuid.uuid4()),
                 'name': name,
                 'email': email,
-                'email_verified': decoded.get('email_verified', False),
+                'email_verified': True if verified else decoded.get('email_verified', False),
                 'firebase_uid': firebase_uid,
                 'avatar_url': picture,
                 'created_at': now,

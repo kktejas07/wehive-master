@@ -54,30 +54,40 @@ export function FirebaseAuthProvider({ children }) {
     return user;
   }, [syncWithBackend]);
 
+  // Email verification now goes through our Postal backend (branded template),
+  // not Firebase's default email. Binds the link to this Firebase UID server-side.
+  const requestBackendVerification = useCallback(async () => {
+    const idToken = await getFirebaseIdToken();
+    if (!idToken) throw new Error('Sign in again to resend the verification email');
+    await axios.post(`${API}/auth/request-email-verification`, { id_token: idToken });
+    setVerificationSent(true);
+  }, []);
+
   // No backend session until the email is verified (firebase-sync rejects unverified accounts).
   const signupWithEmail = useCallback(async (email, password, name) => {
     const user = await firebaseAuth.emailSignup(email, password, name);
-    setVerificationSent(true);
+    await requestBackendVerification();
     return user;
-  }, []);
+  }, [requestBackendVerification]);
 
   const loginWithEmail = useCallback(async (email, password) => {
     const user = await firebaseAuth.emailLogin(email, password);
-    if (!user.emailVerified) {
-      await firebaseAuth.sendVerification(user);
-      setVerificationSent(true);
-      return user;
+    try {
+      await syncWithBackend();
+      // Backend is the source of truth now (Firebase's flag stays false for our links).
+      return { emailVerified: true };
+    } catch (e) {
+      if (e.response?.status === 403 && e.response?.data?.detail?.includes('verif')) {
+        await requestBackendVerification();
+        return user;
+      }
+      throw e;
     }
-    await syncWithBackend();
-    return user;
-  }, [syncWithBackend]);
+  }, [syncWithBackend, requestBackendVerification]);
 
   const resendVerification = useCallback(async () => {
-    if (firebaseUser) {
-      await firebaseAuth.sendVerification(firebaseUser);
-      setVerificationSent(true);
-    }
-  }, [firebaseUser]);
+    await requestBackendVerification();
+  }, [requestBackendVerification]);
 
   const sendPasswordReset = useCallback(async (email) => {
     await firebaseAuth.sendPasswordReset(email);
