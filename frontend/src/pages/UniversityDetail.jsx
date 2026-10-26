@@ -3,7 +3,7 @@ import { useParams, Link, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
-import { useUniversityDetailViewModel } from '../viewmodels/useUniversityDetailViewModel';
+import { useUniversityDetailViewModel } from '../features/universities/viewmodels/useUniversityDetailViewModel';
 import MultiUniversityApplyModal from '../components/MultiUniversityApplyModal';
 import AIUniversityQA from '../components/ai/AIUniversityQA';
 import AIAcceptanceProbability from '../components/ai/AIAcceptanceProbability';

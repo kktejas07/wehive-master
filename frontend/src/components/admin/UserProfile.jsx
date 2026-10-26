@@ -5,7 +5,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { inr, STATUS_COLORS, canWrite } from '../../lib/admin';
 import { Panel } from './AdminShell';
 import { useToast } from '../../hooks/use-toast';
-import { useUserProfileViewModel } from '../../viewmodels/useUserProfileViewModel';
+import { useUserProfileViewModel } from '../../viewmodels/useUserProfileViewModel'; // stays in viewmodels/ (admin-wide)
 import { avatarUrl } from '../../lib/avatars';
 
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
