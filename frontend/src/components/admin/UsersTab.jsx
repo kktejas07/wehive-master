@@ -41,6 +41,8 @@ export default function UsersTab() {
   const [remindOpen, setRemindOpen] = useState(null);
   const [remindTpl, setRemindTpl] = useState('generic');
   const [remindBusy, setRemindBusy] = useState(false);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   useEffect(() => { setSkip(0); }, [dq, role]);
 
@@ -87,6 +89,52 @@ export default function UsersTab() {
       toast({ title: 'Failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
     } finally {
       setRemindBusy(false);
+    }
+  };
+
+  const toggleSelect = (id) => setSelected((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
+  const toggleAll = () => {
+    if (!items) return;
+    const allIds = items.map((u) => u.id);
+    const allSelected = allIds.every((id) => selected.has(id));
+    if (allSelected) {
+      setSelected((prev) => { const next = new Set(prev); allIds.forEach((id) => next.delete(id)); return next; });
+    } else {
+      setSelected((prev) => { const next = new Set(prev); allIds.forEach((id) => next.add(id)); return next; });
+    }
+  };
+
+  const bulkPremium = async () => {
+    setBulkBusy(true);
+    try {
+      for (const id of selected) {
+        await adminClient(token).patch(`/users/${id}`, { is_premium: true });
+      }
+      toast({ title: `${selected.size} user${selected.size > 1 ? 's' : ''} upgraded to premium` });
+      setSelected(new Set());
+      await load();
+    } catch (e) {
+      toast({ title: 'Bulk premium failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const bulkRemind = async () => {
+    setBulkBusy(true);
+    try {
+      await adminClient(token).post('/users/bulk-remind', { user_ids: [...selected], template: 'generic' });
+      toast({ title: `Reminder sent to ${selected.size} user${selected.size > 1 ? 's' : ''}` });
+      setSelected(new Set());
+    } catch (e) {
+      toast({ title: 'Bulk remind failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    } finally {
+      setBulkBusy(false);
     }
   };
 
@@ -145,6 +193,15 @@ export default function UsersTab() {
         <table className="min-w-full text-[13.5px]">
           <thead>
             <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-gray-500 bg-[#F5F7FF]">
+              <th className="px-4 py-3 w-10">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-[#E8EDF8] accent-[#011CB5]"
+                  checked={items?.length > 0 && items.every((u) => selected.has(u.id))}
+                  onChange={toggleAll}
+                  aria-label="Select all"
+                />
+              </th>
               <th className="px-5 py-3">User</th>
               <th className="px-5 py-3">Contact</th>
               <th className="px-5 py-3">Role</th>
@@ -154,19 +211,28 @@ export default function UsersTab() {
           </thead>
           <tbody>
             {items === null && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-gray-500"><Loader2 className="w-5 h-5 animate-spin inline text-blue-700" /></td></tr>
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-gray-500"><Loader2 className="w-5 h-5 animate-spin inline text-blue-700" /></td></tr>
             )}
             {error && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-red-600" role="alert">
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-red-600" role="alert">
                 <AlertTriangle className="w-4 h-4 inline mr-1.5" /> Could not load users: {error}{' '}
                 <button onClick={load} className="underline text-gray-700 ml-1">Retry</button>
               </td></tr>
             )}
             {!error && items?.length === 0 && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-gray-500">No users match.</td></tr>
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-gray-500">No users match.</td></tr>
             )}
             {items?.map((u) => (
-              <tr key={u.id} data-testid={`admin-user-row-${u.id}`} className="border-t border-[#E8EDF8] hover:bg-[#F5F7FF] transition-colors duration-150">
+              <tr key={u.id} data-testid={`admin-user-row-${u.id}`} className={`border-t border-[#E8EDF8] transition-colors duration-150 ${selected.has(u.id) ? 'bg-[#EEF2FF]' : 'hover:bg-[#F5F7FF]'}`}>
+                <td className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-[#E8EDF8] accent-[#011CB5]"
+                    checked={selected.has(u.id)}
+                    onChange={() => toggleSelect(u.id)}
+                    aria-label={`Select ${u.email || u.id}`}
+                  />
+                </td>
                 <td className="px-5 py-3">
                   <Link to={`/admin/users/${u.id}`} data-testid={`admin-user-link-${u.id}`} className="font-bold text-white hover:underline">{u.name || u.email || u.phone || '—'}</Link>
                   <div className="text-[11px] text-gray-500 font-mono">{u.id.slice(0, 8)}…</div>
@@ -258,6 +324,33 @@ export default function UsersTab() {
           <div className="px-5 pb-3"><Pagination skip={skip} limit={PAGE_SIZE} total={total} onPageChange={setSkip} /></div>
         )}
       </Panel>
+
+      {selected.size > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#E8EDF8] p-4 flex items-center gap-3 shadow-lg">
+          <span className="text-[13px] font-semibold text-[#1B2B5E]">{selected.size} selected</span>
+          <button
+            disabled={bulkBusy}
+            onClick={bulkPremium}
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-[12.5px] font-bold"
+          >
+            <Crown className="w-3.5 h-3.5" /> Grant Premium
+          </button>
+          <button
+            disabled={bulkBusy}
+            onClick={bulkRemind}
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#011CB5] hover:bg-[#0015A0] disabled:opacity-50 text-white text-[12.5px] font-bold"
+          >
+            <Bell className="w-3.5 h-3.5" /> Send Reminder
+          </button>
+          {bulkBusy && <Loader2 className="w-4 h-4 animate-spin text-[#011CB5]" />}
+          <button
+            onClick={() => setSelected(new Set())}
+            className="ml-auto text-[12.5px] text-gray-400 hover:text-gray-600"
+          >
+            Clear
+          </button>
+        </div>
+      )}
     </div>
   );
 }
