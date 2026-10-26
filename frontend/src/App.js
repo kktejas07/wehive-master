@@ -114,6 +114,8 @@ function AnimatedRoutes() {
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
           <Route path="/pricing" element={<PageTransition><Pricing /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/signin" element={<Navigate to="/login" replace />} />
+          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
           <Route path="/__/auth/action" element={<EmailVerification />} />
           <Route path="/verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
