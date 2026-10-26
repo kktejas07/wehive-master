@@ -356,3 +356,60 @@ def test_only_official_and_named_publishers_are_trusted():
                        "Immigration, Refugees and Citizenship Canada",
                        "U.S. Department of State - Travel Advisories"}
     assert all(f.get("trusted") for f in blog_aggregator_agent.BLOG_FEEDS)
+
+
+# ─── Bug 8: URL stripping from article body text ─────────────────────────────
+
+def test_clean_text_strips_bare_urls():
+    """Bug 8 fix: URLs embedded in RSS description should be removed."""
+    import news_aggregator_agent as news
+    raw = "India visa policy update. Read more at https://www.thehindu.com/news/abc-123 for details."
+    result = news._clean_text(raw)
+    assert "https://" not in result
+    assert "thehindu" not in result
+    assert "India visa policy update" in result
+    assert "for details" in result
+
+
+def test_clean_text_strips_multiple_urls():
+    """Multiple URLs in one text block should all be stripped."""
+    import news_aggregator_agent as news
+    raw = "Source: https://example.com/a. Also see http://other.org/b/c?d=1&e=2 for more."
+    result = news._clean_text(raw)
+    assert "https://" not in result
+    assert "http://" not in result
+    assert "Source:" in result
+    assert "Also see" in result
+    assert "for more" in result
+
+
+def test_clean_text_strips_html_and_urls_together():
+    """HTML stripping and URL stripping should both apply."""
+    import news_aggregator_agent as news
+    raw = '<p>USCIS announces <b>new policy</b>. Details: https://uscis.gov/news/123</p>'
+    result = news._clean_text(raw)
+    assert "<" not in result
+    assert "https://" not in result
+    assert "USCIS announces" in result
+    assert "new policy" in result
+
+
+def test_clean_text_preserves_normal_text_without_urls():
+    """Text without URLs should pass through unmodified (apart from HTML/whitespace)."""
+    import news_aggregator_agent as news
+    raw = "New visa processing times announced for H-1B applicants."
+    result = news._clean_text(raw)
+    assert result == raw
+
+
+def test_clean_text_handles_empty_string():
+    import news_aggregator_agent as news
+    assert news._clean_text("") == ""
+    assert news._clean_text(None) == ""
+
+
+def test_clean_text_respects_limit():
+    import news_aggregator_agent as news
+    long_text = "word " * 300  # > 1000 chars
+    result = news._clean_text(long_text, limit=100)
+    assert len(result) <= 100

@@ -132,6 +132,11 @@ function AnimatedRoutes() {
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
           <Route path="/visa-interview" element={<PrivateRoute><PageTransition><VisaInterview /></PageTransition></PrivateRoute>} />
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
+          {/* Bug 5: /signin was returning 404 — redirect to the real login route */}
+          <Route path="/signin" element={<Navigate to="/login" replace />} />
+          {/* Bug 6: /tools/visa-checker was returning 404 — redirect to the real route */}
+          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
+          <Route path="/tools/:tool" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/programs/:universityId" element={<PageTransition><ProgramList /></PageTransition>} />
           <Route path="/apply/universities" element={<PageTransition><UniversityApply /></PageTransition>} />

@@ -443,6 +443,51 @@ async def admin_list_applications(
     return {'total': total, 'items': out, 'limit': limit, 'skip': skip}
 
 
+class AppCreate(BaseModel):
+    user_id: str
+    country_id: str
+    visa_type: str = 'Tourist'
+    status: Optional[Literal['draft', 'submitted', 'in_review', 'approved', 'rejected']] = 'draft'
+    travel_date: Optional[str] = None
+    notes: Optional[str] = None
+
+
+@router.post('/applications', status_code=201)
+async def admin_create_application(payload: AppCreate, admin=Depends(get_current_admin)):
+    """Admin-only: create an application on behalf of any user (used for seeding/testing)."""
+    user = await users.find_one({'_id': payload.user_id})
+    if not user:
+        raise HTTPException(404, f'User {payload.user_id} not found')
+    now = datetime.utcnow()
+    status = payload.status or 'draft'
+    label_map = STATUS_LABELS
+    app = {
+        '_id': str(uuid.uuid4()),
+        'user_id': payload.user_id,
+        'country_id': payload.country_id.lower(),
+        'visa_type': payload.visa_type,
+        'status': status,
+        'travel_date': payload.travel_date,
+        'primary_applicant': {'name': user.get('name'), 'email': user.get('email')},
+        'notes': payload.notes or '',
+        'timeline': [{
+            'id': str(uuid.uuid4()),
+            'status': status,
+            'label': label_map.get(status, status.title()),
+            'at': now,
+            'note': f'Created by admin {admin.get("email", "")}',
+        }],
+        'documents': [],
+        'created_at': now,
+        'updated_at': now,
+    }
+    await applications.insert_one(app)
+    await audit_record(admin, 'create', 'application', app['_id'],
+                       extra={'user_id': payload.user_id, 'country_id': payload.country_id,
+                              'visa_type': payload.visa_type, 'source': 'admin_seed'})
+    return _serialize_app(app)
+
+
 class AppPatch(BaseModel):
     status: Optional[Literal['draft', 'submitted', 'in_review', 'approved', 'rejected']] = None
     note: Optional[str] = None

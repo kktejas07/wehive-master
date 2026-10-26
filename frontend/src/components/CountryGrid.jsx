@@ -427,6 +427,7 @@ export default function CountryGrid({ filters }) {
           <EmptyResults />
         ) : view === 'grid' ? (
           <>
+            {/* align-content:start prevents blank space when the last row is partial (Bug 10) */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 content-start">
               {displayedItems.map((c, i) => (
                 <CountryCard key={c.id} c={c} index={i} />
