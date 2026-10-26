@@ -281,12 +281,82 @@ function EditSelect({ label, value, onChange, children, testid }) {
   );
 }
 
+const COUNTRY_FLAGS = {
+  us: '🇺🇸', usa: '🇺🇸', 'united states': '🇺🇸',
+  gb: '🇬🇧', uk: '🇬🇧', 'united kingdom': '🇬🇧',
+  ca: '🇨🇦', canada: '🇨🇦',
+  au: '🇦🇺', australia: '🇦🇺',
+  de: '🇩🇪', germany: '🇩🇪',
+  fr: '🇫🇷', france: '🇫🇷',
+  jp: '🇯🇵', japan: '🇯🇵',
+  in: '🇮🇳', india: '🇮🇳',
+  sg: '🇸🇬', singapore: '🇸🇬',
+  nz: '🇳🇿', 'new zealand': '🇳🇿',
+  ie: '🇮🇪', ireland: '🇮🇪',
+  nl: '🇳🇱', netherlands: '🇳🇱',
+};
+
+function countryFlagEmoji(id) {
+  return COUNTRY_FLAGS[(id || '').toLowerCase()] || '🌍';
+}
+
+const APP_STATUS_STYLES = {
+  draft: 'bg-slate-100 text-slate-600',
+  submitted: 'bg-blue-50 text-blue-700',
+  in_review: 'bg-amber-50 text-amber-700',
+  awaiting_docs: 'bg-orange-50 text-orange-700',
+  appointment_scheduled: 'bg-purple-50 text-purple-700',
+  biometrics_done: 'bg-indigo-50 text-indigo-700',
+  interview_scheduled: 'bg-violet-50 text-violet-700',
+  visa_approved: 'bg-emerald-50 text-emerald-700',
+  visa_rejected: 'bg-red-50 text-red-700',
+  cancelled: 'bg-slate-100 text-slate-400',
+};
+
+function AppStatusBadge({ status }) {
+  const cls = APP_STATUS_STYLES[status] || APP_STATUS_STYLES.draft;
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-bold capitalize ${cls}`}>
+      {(status || 'draft').replace(/_/g, ' ')}
+    </span>
+  );
+}
+
+function ApplicationCard({ a }) {
+  const flag = countryFlagEmoji(a.country_id);
+  const university = a.form_data?.university_name || a.form_data?.university || null;
+  const program = a.form_data?.program || a.form_data?.course || a.visa_type || '';
+  const updatedAt = a.updated_at || a.created_at;
+  return (
+    <Link
+      to={`/account/applications/${a.id}`}
+      className="block rounded-2xl bg-white border border-border hover:border-[hsl(var(--blue-700))]/30 hover:shadow-md p-5 transition-all duration-200"
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-bold text-[hsl(var(--blue-900))] truncate">
+            {university || a.country_id.toUpperCase()}
+          </div>
+          {program && (
+            <div className="text-[12px] text-muted-foreground mt-0.5 truncate">{program}</div>
+          )}
+        </div>
+        <span className="text-2xl shrink-0 mt-0.5">{flag}</span>
+      </div>
+      <AppStatusBadge status={a.status} />
+      <div className="mt-3 text-[11.5px] text-muted-foreground">
+        #{a.id?.slice(0, 8).toUpperCase()} · {updatedAt ? new Date(updatedAt).toLocaleDateString() : '\u2014'}
+      </div>
+    </Link>
+  );
+}
+
 function ApplicationsTab({ token }) {
   const [items, setItems] = useState(null);
   useEffect(() => {
     axios
       .get(`${API}/users/me/applications`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => setItems(r.data))
+      .then((r) => setItems(Array.isArray(r.data) ? r.data : (r.data?.items || [])))
       .catch(() => setItems([]));
   }, [token]);
   if (!items) return <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" />;
@@ -300,30 +370,9 @@ function ApplicationsTab({ token }) {
     );
   }
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       {items.map((a) => (
-        <Link
-          key={a.id}
-          to={`/account/applications/${a.id}`}
-          className="block rounded-2xl bg-white border border-border hover:border-[hsl(var(--blue-700))]/20 p-5 transition"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
-                  {a.country_id.toUpperCase()} · {a.visa_type}
-                </span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold capitalize ${statusColor(a.status)}`}>
-                  {(a.status || 'draft').replace('_', ' ')}
-                </span>
-              </div>
-              <div className="mt-0.5 text-[12.5px] text-muted-foreground">
-                #{a.id?.slice(0, 8).toUpperCase()} · created {new Date(a.created_at).toLocaleDateString()}
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-[hsl(var(--blue-900))]/40 shrink-0" />
-          </div>
-        </Link>
+        <ApplicationCard key={a.id} a={a} />
       ))}
     </div>
   );

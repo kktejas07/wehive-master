@@ -9,6 +9,8 @@ const STATUS_COLORS = {
   reviewing: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Reviewing' },
   approved: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Approved' },
   rejected: { bg: 'bg-red-100', text: 'text-red-700', label: 'Action needed' },
+  needs_reupload: { bg: 'bg-red-100', text: 'text-red-700', label: 'Re-upload needed' },
+  verified: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Verified' },
 };
 
 function StatusBadge({ status }) {
@@ -22,12 +24,15 @@ function StatusBadge({ status }) {
 
 function DocRow({ docType, file, onUpload, onRemove, onHelp, busy }) {
   const inputRef = useRef(null);
+  const reuploadRef = useRef(null);
   const has = !!file;
+  const needsReupload = has && file.status === 'needs_reupload';
   return (
     <li className="rounded-2xl border border-border bg-white p-4 sm:p-5">
       <div className="flex items-start gap-4">
         <span
           className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full ${
+            needsReupload ? 'bg-amber-50 text-amber-600' :
             has ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-[hsl(var(--blue-700))]'
           }`}
         >
@@ -90,6 +95,32 @@ function DocRow({ docType, file, onUpload, onRemove, onHelp, busy }) {
           )}
         </div>
       </div>
+      {needsReupload && (
+        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+          <span className="text-red-700 text-[13px] flex-1">
+            Action required: {file.admin_note || 'Please re-upload this document.'}
+          </span>
+          <input
+            ref={reuploadRef}
+            type="file"
+            hidden
+            accept="application/pdf,image/*"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) { onRemove(file.id); onUpload(f); }
+              e.target.value = '';
+            }}
+          />
+          <button
+            onClick={() => reuploadRef.current?.click()}
+            disabled={busy}
+            className="shrink-0 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-[12px] font-bold rounded-lg transition-colors disabled:opacity-60"
+          >
+            Re-upload
+          </button>
+        </div>
+      )}
     </li>
   );
 }
