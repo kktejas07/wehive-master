@@ -11,6 +11,7 @@ from agent_assignment import pick_agent
 from admin_auth import hash_password, verify_password
 from constants import AppStatus
 from db import users, applications, holiday_plans, db
+from viewmodels.application_viewmodel import ApplicationViewModel
 from serializers import serialize_doc
 import uuid
 
@@ -140,10 +141,54 @@ async def create_application(req: ApplicationCreate, user=Depends(get_current_us
     return serialize_doc(app)
 
 
+@router.get('/me/profile')
+async def get_my_profile(current_user=Depends(get_current_user)):
+    user_id = str(current_user['_id'])
+    latest_app = await applications.find_one({'user_id': user_id}, sort=[('created_at', -1)])
+    total_apps = await applications.count_documents({'user_id': user_id})
+    stage = 'inquiry'
+    if latest_app:
+        s = latest_app.get('status', '')
+        if s in ('approved', 'visa_issued'):
+            stage = 'approved'
+        elif s in ('submitted', 'in_review', 'embassy'):
+            stage = 'in_review'
+        elif s in ('docs_pending', 'payment_pending'):
+            stage = 'action_required'
+        else:
+            stage = 'active'
+
+    def _iso(v):
+        return v.isoformat() if hasattr(v, 'isoformat') else str(v or '')
+
+    return {
+        'id': user_id,
+        'name': current_user.get('name', ''),
+        'email': current_user.get('email', ''),
+        'phone': current_user.get('phone', ''),
+        'avatar_url': current_user.get('avatar_url'),
+        'is_premium': bool(current_user.get('is_premium', False)),
+        'journey_stage': stage,
+        'total_applications': total_apps,
+        'latest_application': {
+            'id': str(latest_app['_id']),
+            'status': latest_app.get('status', ''),
+            'destination': latest_app.get('form_data', {}).get('destination', ''),
+            'visa_type': latest_app.get('visa_type', ''),
+            'updated_at': _iso(latest_app.get('updated_at')),
+        } if latest_app else None,
+        'created_at': _iso(current_user.get('created_at')),
+    }
+
+
 @router.get('/me/applications')
-async def list_applications(user=Depends(get_current_user)):
-    cur = applications.find({'user_id': user['_id']}).sort('created_at', -1)
-    return [serialize_doc(d) async for d in cur]
+async def list_applications(
+    page: int = 1,
+    per_page: int = 20,
+    status: str = None,
+    user=Depends(get_current_user),
+):
+    return await ApplicationViewModel.list_for_user(user['_id'], page, per_page, status)
 
 
 @router.post('/me/saved-plans')
@@ -227,6 +272,19 @@ async def change_password(req: ChangePasswordRequest, user=Depends(get_current_u
         {'$set': {'password_hash': hashed, 'updated_at': datetime.utcnow()}},
     )
     return {'ok': True}
+
+
+class PushTokenBody(BaseModel):
+    token: str
+    platform: str = 'expo'
+
+
+@router.post('/me/push-token', status_code=204)
+async def save_push_token(body: PushTokenBody, current_user=Depends(get_current_user)):
+    await users.update_one(
+        {'_id': current_user['_id']},
+        {'$set': {'push_token': body.token, 'push_platform': body.platform, 'updated_at': datetime.utcnow()}},
+    )
 
 
 @router.delete('/me')

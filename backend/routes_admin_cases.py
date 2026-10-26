@@ -11,8 +11,11 @@ Endpoints (all admin-only):
   GET   /api/admin/staff/workload                                — assignable staff with open-case counts
   GET   /api/admin/alerts                                        — stale cases, appointments, expiring passports…
 """
+import logging
 import uuid
 from datetime import date, datetime, timedelta
+
+logger = logging.getLogger('wehive.admin_cases')
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -158,6 +161,15 @@ async def admin_review_document(application_id: str, doc_id: str, body: DocRevie
     await audit_record(admin, body.status, 'document', doc_id,
                        before={'status': doc.get('status')}, after={'status': body.status},
                        extra={'application_id': application_id, 'reason': body.reason})
+    user = await users.find_one({'_id': app.get('user_id')}, {'email': 1, 'name': 1}) if app.get('user_id') else None
+    if user and user.get('email'):
+        try:
+            from viewmodels.email_viewmodel import send_document_action
+            await send_document_action(app['user_id'], user['email'], user.get('name') or 'there',
+                                       doc.get('doc_type') or doc.get('filename') or 'document',
+                                       body.status, body.reason or '')
+        except Exception as _e:
+            logger.warning('doc action email failed: %s', _e)
     return {'ok': True, 'status': body.status}
 
 
@@ -175,6 +187,14 @@ async def admin_send_message(application_id: str, body: TextBody, admin=Depends(
     await applications.update_one({'_id': application_id}, {'$push': {'messages': msg}, '$set': {'updated_at': now}})
     await _notify(app, 'message', 'New message from your consultant', body.text.strip()[:140])
     await audit_record(admin, 'message', 'application', application_id)
+    user = await users.find_one({'_id': app.get('user_id')}, {'email': 1, 'name': 1}) if app.get('user_id') else None
+    if user and user.get('email'):
+        try:
+            from viewmodels.email_viewmodel import send_admin_message
+            await send_admin_message(app['user_id'], user['email'], user.get('name') or 'there',
+                                     body.text.strip()[:500], application_id)
+        except Exception as _e:
+            logger.warning('admin message email failed: %s', _e)
     return {'id': msg['_id'], 'from': 'consultant', 'name': msg['name'], 'text': msg['text'], 'at': now.isoformat()}
 
 

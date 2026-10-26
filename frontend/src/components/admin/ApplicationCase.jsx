@@ -41,7 +41,46 @@ function SectionTitle({ children }) {
   return <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-2">{children}</div>;
 }
 
-function Overview({ c }) {
+function ApptDateInput({ value, onSave }) {
+  const [v, setV] = useState(value || '');
+  const [busy, setBusy] = useState(false);
+  const { toast } = useToast();
+  const dirty = v !== (value || '');
+  const save = async () => {
+    setBusy(true);
+    try {
+      await onSave(v);
+      toast({ title: 'Appointment date saved' });
+    } catch (e) {
+      toast({ title: 'Save failed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-2 flex items-center gap-2">
+      <input
+        type="date"
+        data-testid="case-appt-date-input"
+        value={v}
+        onChange={(e) => setV(e.target.value)}
+        className="h-8 px-2 rounded-lg bg-black/30 border border-white/10 text-[12.5px] text-white outline-none"
+      />
+      {dirty && (
+        <button
+          data-testid="case-appt-date-save"
+          disabled={busy}
+          onClick={save}
+          className="h-8 px-3 rounded-lg bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold disabled:opacity-50"
+        >
+          {busy ? '…' : 'Save'}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Overview({ c, onPatchAppt, readOnly }) {
   const appt = c.visa_appointment || {};
   const form = Object.entries(c.form_data || {}).filter(([, v]) => v !== null && v !== '' && typeof v !== 'object').slice(0, 14);
   return (
@@ -60,6 +99,12 @@ function Overview({ c }) {
         <Row k="Applicants" v={c.applicants} />
         <Row k="Fee" v={c.fee_inr != null ? inr(c.fee_inr) : null} />
         <Row k="Appointment" v={appt.date ? `${fmtDate(appt.date)}${appt.time ? ` · ${appt.time}` : ''}` : null} />
+        {!readOnly && (
+          <ApptDateInput
+            value={appt.date ? appt.date.slice(0, 10) : ''}
+            onSave={onPatchAppt}
+          />
+        )}
         <Row k="Embassy" v={[appt.embassy, appt.city].filter(Boolean).join(', ')} />
         <Row k="Agent" v={c.agent ? `${c.agent.name || c.agent.email}${c.agent.agency_name ? ` · ${c.agent.agency_name}` : ''}` : null} />
       </Panel>
@@ -379,6 +424,13 @@ export default function ApplicationCase() {
     }
   };
 
+  const patchAppt = async (date) => {
+    await adminClient(token).patch(`/applications/${id}`, {
+      form_data: { visa_appointment: { date } },
+    });
+    await load();
+  };
+
   const back = (
     <Link to="/admin/applications" data-testid="case-back" className="inline-flex items-center gap-1 text-[13px] font-semibold text-slate-400 hover:text-white">
       <ArrowLeft className="w-3.5 h-3.5" /> Applications
@@ -483,7 +535,7 @@ export default function ApplicationCase() {
       </div>
 
       <div role="tabpanel">
-        {tab === 'overview' && <Overview c={c} />}
+        {tab === 'overview' && <Overview c={c} onPatchAppt={patchAppt} readOnly={readOnly} />}
         {tab === 'documents' && <Documents c={c} token={token} onChanged={load} readOnly={readOnly} />}
         {tab === 'messages' && <Messages c={c} token={token} setCase={setCase} readOnly={readOnly} />}
         {tab === 'notes' && <Notes c={c} token={token} setCase={setCase} readOnly={readOnly} />}

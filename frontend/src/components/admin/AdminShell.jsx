@@ -6,45 +6,55 @@ import { adminClient, canWrite, ROLE_NAMES } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
-  Key, User, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
-  Inbox, CreditCard, History, Activity, ScanSearch, Lock,
+  Key, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
+  Inbox, CreditCard, History, Activity, ScanSearch, Lock, BarChart3, ChevronLeft, ChevronRight, Pencil,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
+// Groups define sidebar section order and headers
+const GROUPS = [
+  'Overview',
+  'Users & Applications',
+  'Content & Destinations',
+  'Commercial',
+  'AI & System',
+  'Admin',
+];
+
 const TABS = [
-  { id: 'overview',     to: '/admin',               label: 'Overview',     Icon: LayoutDashboard, testid: 'admin-nav-overview' },
-  { id: 'users',        to: '/admin/users',         label: 'Users',        Icon: UsersIcon,       testid: 'admin-nav-users' },
-  { id: 'applications', to: '/admin/applications',  label: 'Applications', Icon: FileStack,       testid: 'admin-nav-applications' },
-  { id: 'review',       to: '/admin/review',        label: 'Doc review',   Icon: ScanSearch,      testid: 'admin-nav-review' },
-  { id: 'leads',        to: '/admin/leads',         label: 'Leads',        Icon: Inbox,           testid: 'admin-nav-leads' },
-  { id: 'payments',     to: '/admin/payments',      label: 'Payments',     Icon: CreditCard,      testid: 'admin-nav-payments' },
-  { id: 'countries',    to: '/admin/countries',     label: 'Countries',    Icon: Globe,           testid: 'admin-nav-countries' },
-  { id: 'pricing',      to: '/admin/pricing',       label: 'Pricing',      Icon: Banknote,        testid: 'admin-nav-pricing' },
-  { id: 'events',       to: '/admin/events',        label: 'Hero Events',  Icon: Megaphone,       testid: 'admin-nav-events' },
-  { id: 'global-events',to: '/admin/global-events', label: 'Global Events',Icon: Globe,           testid: 'admin-nav-global-events' },
-  { id: 'moderation',   to: '/admin/moderation',    label: 'Moderation',   Icon: Newspaper,       testid: 'admin-nav-moderation' },
-  { id: 'requests',    to: '/admin/requests',      label: 'Requests',     Icon: ClipboardList,   testid: 'admin-nav-requests' },
-  { id: 'promotions',  to: '/admin/promotions',    label: 'Promotions',   Icon: Tag,             testid: 'admin-nav-promotions' },
-  { id: 'promocodes',  to: '/admin/promocodes',    label: 'Promo Codes',   Icon: Tag,             testid: 'admin-nav-promocodes' },
-  { id: 'agents',       to: '/admin/agents',        label: 'Agents',       Icon: Briefcase,       testid: 'admin-nav-agents' },
-  { id: 'staff',        to: '/admin/staff',         label: 'Staff',        Icon: UserCog,         testid: 'admin-nav-staff' },
-  { id: 'admins',       to: '/admin/admins',        label: 'Admins',       Icon: ShieldCheck,     testid: 'admin-nav-admins', superOnly: true },
-  { id: 'newsletter',   to: '/admin/newsletter',    label: 'Newsletter',   Icon: Mail,            testid: 'admin-nav-newsletter' },
-  { id: 'announcements', to: '/admin/announcements', label: 'Announcements', Icon: Megaphone,     testid: 'admin-nav-announcements' },
-  { id: 'integrations', to: '/admin/integrations',  label: 'Integrations', Icon: Plug,            testid: 'admin-nav-integrations', superOnly: true },
-  { id: 'universities', to: '/admin/universities',  label: 'Universities', Icon: Building2,       testid: 'admin-nav-universities' },
-  { id: 'programs',     to: '/admin/programs',      label: 'Programs',     Icon: BookOpen,        testid: 'admin-nav-programs' },
-  { id: 'exports',      to: '/admin/exports',       label: 'Exports',      Icon: Download,        testid: 'admin-nav-exports' },
-  { id: 'destinations', to: '/admin/destinations',  label: 'Destinations', Icon: ImageIcon,        testid: 'admin-nav-destinations' },
-  { id: 'rag',          to: '/admin/rag',           label: 'RAG & Vectors', Icon: Database,        testid: 'admin-nav-rag' },
-  { id: 'prompts',      to: '/admin/prompts',       label: 'Prompts',      Icon: FileText,         testid: 'admin-nav-prompts' },
-  { id: 'agents-v2',    to: '/admin/agents-v2',     label: 'Agents V2',    Icon: Bot,              testid: 'admin-nav-agents-v2' },
-  { id: 'hive-learning', to: '/admin/hive-learning', label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning' },
-  { id: 'health',       to: '/admin/health',        label: 'System health', Icon: Activity,       testid: 'admin-nav-health' },
-  { id: 'audit',        to: '/admin/audit',         label: 'Audit log',    Icon: History,         testid: 'admin-nav-audit' },
-  { id: 'security',     to: '/admin/security',      label: 'My security',  Icon: Lock,            testid: 'admin-nav-security' },
-  { id: 'settings',     to: '/admin/settings',      label: 'Settings',     Icon: Settings,        testid: 'admin-nav-settings', superOnly: true },
+  { id: 'overview',      to: '/admin',                label: 'Overview',      Icon: LayoutDashboard, testid: 'admin-nav-overview',      group: 'Overview' },
+  { id: 'monitoring',    to: '/admin/monitoring',     label: 'Monitoring',    Icon: BarChart3,       testid: 'admin-nav-monitoring',    group: 'Overview' },
+  { id: 'users',         to: '/admin/users',          label: 'Users',         Icon: UsersIcon,       testid: 'admin-nav-users',         group: 'Users & Applications' },
+  { id: 'applications',  to: '/admin/applications',   label: 'Applications',  Icon: FileStack,       testid: 'admin-nav-applications',  group: 'Users & Applications' },
+  { id: 'review',        to: '/admin/review',         label: 'Doc review',    Icon: ScanSearch,      testid: 'admin-nav-review',        group: 'Users & Applications' },
+  { id: 'leads',         to: '/admin/leads',          label: 'Leads',         Icon: Inbox,           testid: 'admin-nav-leads',         group: 'Users & Applications' },
+  { id: 'countries',     to: '/admin/countries',      label: 'Countries',     Icon: Globe,           testid: 'admin-nav-countries',     group: 'Content & Destinations' },
+  { id: 'universities',  to: '/admin/universities',   label: 'Universities',  Icon: Building2,       testid: 'admin-nav-universities',  group: 'Content & Destinations' },
+  { id: 'programs',      to: '/admin/programs',       label: 'Programs',      Icon: BookOpen,        testid: 'admin-nav-programs',      group: 'Content & Destinations' },
+  { id: 'destinations',  to: '/admin/destinations',   label: 'Destinations',  Icon: ImageIcon,       testid: 'admin-nav-destinations',  group: 'Content & Destinations' },
+  { id: 'events',        to: '/admin/events',         label: 'Hero Events',   Icon: Megaphone,       testid: 'admin-nav-events',        group: 'Content & Destinations' },
+  { id: 'global-events', to: '/admin/global-events',  label: 'Global Events', Icon: Globe,           testid: 'admin-nav-global-events', group: 'Content & Destinations' },
+  { id: 'hive-learning', to: '/admin/hive-learning',  label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning', group: 'Content & Destinations' },
+  { id: 'moderation',    to: '/admin/moderation',     label: 'Moderation',    Icon: Newspaper,       testid: 'admin-nav-moderation',    group: 'Content & Destinations' },
+  { id: 'payments',      to: '/admin/payments',       label: 'Payments',      Icon: CreditCard,      testid: 'admin-nav-payments',      group: 'Commercial' },
+  { id: 'pricing',       to: '/admin/pricing',        label: 'Pricing',       Icon: Banknote,        testid: 'admin-nav-pricing',       group: 'Commercial' },
+  { id: 'promotions',    to: '/admin/promotions',     label: 'Promotions',    Icon: Tag,             testid: 'admin-nav-promotions',    group: 'Commercial' },
+  { id: 'promocodes',    to: '/admin/promocodes',     label: 'Promo Codes',   Icon: Tag,             testid: 'admin-nav-promocodes',    group: 'Commercial' },
+  { id: 'requests',      to: '/admin/requests',       label: 'Requests',      Icon: ClipboardList,   testid: 'admin-nav-requests',      group: 'Commercial' },
+  { id: 'agents',        to: '/admin/agents',         label: 'Agents',        Icon: Briefcase,       testid: 'admin-nav-agents',        group: 'Commercial' },
+  { id: 'exports',       to: '/admin/exports',        label: 'Exports',       Icon: Download,        testid: 'admin-nav-exports',       group: 'Commercial' },
+  { id: 'rag',           to: '/admin/rag',            label: 'RAG & Vectors', Icon: Database,        testid: 'admin-nav-rag',           group: 'AI & System' },
+  { id: 'prompts',       to: '/admin/prompts',        label: 'Prompts',       Icon: FileText,        testid: 'admin-nav-prompts',       group: 'AI & System' },
+  { id: 'agents-v2',     to: '/admin/agents-v2',      label: 'Agents V2',     Icon: Bot,             testid: 'admin-nav-agents-v2',     group: 'AI & System' },
+  { id: 'newsletter',    to: '/admin/newsletter',     label: 'Newsletter',    Icon: Mail,            testid: 'admin-nav-newsletter',    group: 'AI & System' },
+  { id: 'health',        to: '/admin/health',         label: 'System health', Icon: Activity,        testid: 'admin-nav-health',        group: 'AI & System' },
+  { id: 'integrations',  to: '/admin/integrations',   label: 'Integrations',  Icon: Plug,            testid: 'admin-nav-integrations',  group: 'AI & System', superOnly: true },
+  { id: 'staff',         to: '/admin/staff',          label: 'Staff',         Icon: UserCog,         testid: 'admin-nav-staff',         group: 'Admin' },
+  { id: 'admins',        to: '/admin/admins',         label: 'Admins',        Icon: ShieldCheck,     testid: 'admin-nav-admins',        group: 'Admin', superOnly: true },
+  { id: 'audit',         to: '/admin/audit',          label: 'Audit log',     Icon: History,         testid: 'admin-nav-audit',         group: 'Admin' },
+  { id: 'security',      to: '/admin/security',       label: 'My security',   Icon: Lock,            testid: 'admin-nav-security',      group: 'Admin' },
+  { id: 'settings',      to: '/admin/settings',       label: 'Settings',      Icon: Settings,        testid: 'admin-nav-settings',      group: 'Admin', superOnly: true },
 ];
 
 export default function AdminShell({ children }) {
@@ -56,6 +66,19 @@ export default function AdminShell({ children }) {
   const [pwForm, setPwForm] = useState({ current: '', new: '', confirm: '' });
   const [pwSaving, setPwSaving] = useState(false);
   const [pwError, setPwError] = useState('');
+  const [editingName, setEditingName] = useState(false);
+  const [nameVal, setNameVal] = useState('');
+  const [nameBusy, setNameBusy] = useState(false);
+
+  // Sidebar collapse — persisted to localStorage
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem('admin-sidebar-collapsed') === '1'; } catch { return false; }
+  });
+  const toggleCollapse = () => setCollapsed((v) => {
+    const next = !v;
+    try { localStorage.setItem('admin-sidebar-collapsed', next ? '1' : '0'); } catch {}
+    return next;
+  });
 
   const user = admin;
   const [critical, setCritical] = useState(0);
@@ -65,11 +88,11 @@ export default function AdminShell({ children }) {
       .then((r) => setCritical((r.data.items || []).filter((a) => a.severity === 'critical').length))
       .catch(() => {});
   }, []);
-  const badge = (t) => t.id === 'applications' && critical > 0 && (
+  const badge = (t, mobile = false) => t.id === 'applications' && critical > 0 && (
     <span
-      data-testid={`admin-nav-applications-critical${t.mobile ? '-m' : ''}`}
+      data-testid={`admin-nav-applications-critical${mobile ? '-m' : ''}`}
       title={`${critical} critical alert${critical === 1 ? '' : 's'}`}
-      className={`${t.mobile ? 'ml-1.5' : 'ml-auto'} min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[11px] font-bold tabular-nums`}
+      className={`${mobile ? 'ml-1.5' : collapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold tabular-nums`}
     >
       {critical}
     </span>
@@ -78,6 +101,16 @@ export default function AdminShell({ children }) {
   const mustEnrol = !!admin?.two_factor_required;
   const role = admin?.admin_role;
   const limited = admin && !canWrite(admin, 'manage');
+
+  const saveName = async () => {
+    if (!nameVal.trim()) return;
+    setNameBusy(true);
+    try {
+      await adminClient().put('/me', { name: nameVal.trim() });
+      setEditingName(false);
+      window.location.reload();
+    } catch { } finally { setNameBusy(false); }
+  };
 
   const handlePasswordChange = async () => {
     if (pwForm.new !== pwForm.confirm) { setPwError('Passwords do not match'); return; }
@@ -94,82 +127,160 @@ export default function AdminShell({ children }) {
 
   return (
     <div className="admin-theme h-screen bg-[#0b1020] text-slate-100" data-testid="admin-shell">
-      <div className="grid lg:grid-cols-[260px_1fr] h-screen">
-        <aside className="hidden lg:flex flex-col bg-[#0a0e1e] border-r border-white/5 p-5 overflow-y-auto admin-scrollbar">
-          <Link to="/" className="inline-flex items-center gap-2 text-slate-200 hover:text-white">
-            <img src={BRAND.logo} alt="We Hive" className="h-10 w-auto brightness-0 invert" />
-            <span className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold">Admin</span>
-          </Link>
+      <div className={`grid h-screen transition-[grid-template-columns] duration-200 ${collapsed ? 'lg:grid-cols-[64px_1fr]' : 'lg:grid-cols-[240px_1fr]'}`}>
+        <aside className="hidden lg:flex flex-col bg-[#0a0e1e] border-r border-white/5 overflow-y-auto admin-scrollbar">
+          {/* Logo + collapse toggle */}
+          <div className={`flex items-center border-b border-white/5 shrink-0 ${collapsed ? 'justify-center p-3' : 'justify-between px-4 py-3'}`}>
+            {!collapsed && (
+              <Link to="/" className="inline-flex items-center gap-2 text-slate-200 hover:text-white min-w-0">
+                <img src={BRAND.logo} alt="We Hive" className="h-8 w-auto brightness-0 invert shrink-0" />
+                <span className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Admin</span>
+              </Link>
+            )}
+            <button
+              onClick={toggleCollapse}
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="h-7 w-7 rounded-lg bg-white/5 hover:bg-white/10 inline-flex items-center justify-center text-slate-400 hover:text-white transition-colors shrink-0"
+            >
+              {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+          <div className="flag-stripe" />
 
-          <nav aria-label="Admin sections" className="mt-8 space-y-0.5 flex-1">
-            {tabs.map((t) => {
-              const Icon = t.Icon;
-              const active = pathname === t.to || (t.id !== 'overview' && pathname.startsWith(t.to));
+          {/* Grouped nav */}
+          <nav aria-label="Admin sections" className={`flex-1 overflow-y-auto py-3 admin-scrollbar ${collapsed ? 'px-1.5' : 'px-3'}`}>
+            {GROUPS.map((group) => {
+              const groupTabs = tabs.filter((t) => t.group === group);
+              if (!groupTabs.length) return null;
               return (
-                <NavLink
-                  key={t.id}
-                  to={t.to}
-                  end={t.id === 'overview'}
-                  data-testid={t.testid}
-                  className={`flex items-center gap-3 px-3 min-h-[40px] rounded-lg text-[13.5px] font-semibold transition-colors duration-150 ${
-                    active
-                      ? 'bg-[hsl(var(--blue-700))] text-white'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {t.label}
-                  {badge(t)}
-                </NavLink>
+                <div key={group} className={collapsed ? 'mb-3' : 'mb-5'}>
+                  {!collapsed && (
+                    <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-600 px-2 mb-1.5">{group}</div>
+                  )}
+                  <div className="space-y-0.5">
+                    {groupTabs.map((t) => {
+                      const Icon = t.Icon;
+                      const active = pathname === t.to || (t.id !== 'overview' && pathname.startsWith(t.to));
+                      if (collapsed) {
+                        return (
+                          <NavLink
+                            key={t.id}
+                            to={t.to}
+                            end={t.id === 'overview'}
+                            data-testid={t.testid}
+                            title={t.label}
+                            className={`relative flex items-center justify-center h-10 w-full rounded-lg transition-colors duration-150 ${
+                              active ? 'bg-[hsl(var(--blue-700))] text-white' : 'text-slate-500 hover:text-white hover:bg-white/5'
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                            {badge(t)}
+                          </NavLink>
+                        );
+                      }
+                      return (
+                        <NavLink
+                          key={t.id}
+                          to={t.to}
+                          end={t.id === 'overview'}
+                          data-testid={t.testid}
+                          className={`flex items-center gap-3 px-3 min-h-[38px] rounded-lg text-[13px] font-semibold transition-colors duration-150 ${
+                            active
+                              ? 'text-white shadow-sm border-l-[3px] border-amber-400 pl-[10px]'
+                              : 'text-slate-400 hover:text-white hover:bg-white/5 border-l-[3px] border-transparent'
+                          }`}
+                          style={active ? { background: 'linear-gradient(90deg, #1B2B5E 0%, rgba(27,43,94,0.4) 100%)' } : {}}
+                        >
+                          <Icon className="w-4 h-4 shrink-0" />
+                          <span className="truncate">{t.label}</span>
+                          {badge(t)}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </nav>
 
-          <div className="mt-auto pt-6 border-t border-white/5">
-            <div className="relative">
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-3 px-1 w-full hover:bg-white/5 rounded-xl py-2 -mx-1 transition"
-              >
-                <span className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/10 shrink-0">
-                  <img
-                    src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })}
-                    alt="admin"
-                    className="h-full w-full object-cover"
-                  />
-                </span>
-                <div className="min-w-0 text-left">
-                  <div className="text-[13px] font-bold truncate">{user?.name || 'Admin'}</div>
-                  <div className="text-[12px] text-slate-400 truncate">{user?.email}</div>
-                </div>
-              </button>
-
-              {profileOpen && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl bg-[#111632] border border-white/10 shadow-2xl overflow-hidden z-50">
+          {/* Footer: avatar + site link */}
+          <div className={`border-t border-white/5 shrink-0 ${collapsed ? 'p-2' : 'p-3'}`}>
+            {collapsed ? (
+              <div className="space-y-1.5">
+                <button onClick={() => setProfileOpen(!profileOpen)} className="relative w-full flex justify-center" title={user?.email}>
+                  <span className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/10">
+                    <img src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })} alt="admin" className="h-full w-full object-cover" />
+                  </span>
+                </button>
+                <Link to="/" title="Back to site" className="flex items-center justify-center h-8 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="relative">
                   <button
-                    onClick={() => { setPwModal(true); setProfileOpen(false); }}
-                    className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-slate-200 hover:bg-white/5 transition-colors"
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-3 px-1 w-full hover:bg-white/5 rounded-xl py-2 -mx-1 transition"
                   >
-                    <Key className="w-3.5 h-3.5" /> Change Password
+                    <span className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/10 shrink-0">
+                      <img src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })} alt="admin" className="h-full w-full object-cover" />
+                    </span>
+                    <div className="min-w-0 text-left">
+                      <div className="text-[13px] font-bold truncate">{user?.name || 'Admin'}</div>
+                      <div className="text-[12px] text-slate-400 truncate">{user?.email}</div>
+                    </div>
                   </button>
-                  <button
-                    onClick={() => { logout(); setProfileOpen(false); }}
-                    className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-red-300 hover:bg-white/5 transition-colors border-t border-white/5"
-                  >
-                    <LogOut className="w-3.5 h-3.5" /> Sign out
-                  </button>
-                </div>
-              )}
-            </div>
 
-            <div className="mt-3">
-              <Link
-                to="/"
-                className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/10 hover:border-white/30 min-h-[36px] px-4 text-[12px] font-semibold text-slate-300 hover:text-white transition-colors w-full"
-              >
-                <ArrowLeft className="w-3 h-3" /> Site
-              </Link>
-            </div>
+                  {profileOpen && (
+                    <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl bg-[#111632] border border-white/10 shadow-2xl overflow-hidden z-50">
+                      {editingName ? (
+                        <div className="px-4 py-3 flex gap-2">
+                          <input
+                            autoFocus
+                            value={nameVal}
+                            onChange={(e) => setNameVal(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false); }}
+                            placeholder="Display name"
+                            className="flex-1 h-8 px-2 rounded-lg bg-white/10 border border-white/15 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-blue-500"
+                          />
+                          <button disabled={nameBusy} onClick={saveName} className="h-8 px-3 rounded-lg bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold disabled:opacity-50">
+                            {nameBusy ? '…' : 'Save'}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setNameVal(user?.name || ''); setEditingName(true); }}
+                          className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-slate-200 hover:bg-white/5 transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" /> Edit name
+                        </button>
+                      )}
+                      <button
+                        onClick={() => { setPwModal(true); setProfileOpen(false); setEditingName(false); }}
+                        className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-slate-200 hover:bg-white/5 transition-colors border-t border-white/5"
+                      >
+                        <Key className="w-3.5 h-3.5" /> Change Password
+                      </button>
+                      <button
+                        onClick={() => { logout(); setProfileOpen(false); }}
+                        className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-red-300 hover:bg-white/5 transition-colors border-t border-white/5"
+                      >
+                        <LogOut className="w-3.5 h-3.5" /> Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <Link
+                    to="/"
+                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/10 hover:border-white/30 min-h-[34px] px-4 text-[12px] font-semibold text-slate-300 hover:text-white transition-colors w-full"
+                  >
+                    <ArrowLeft className="w-3 h-3" /> Site
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </aside>
 
@@ -239,15 +350,15 @@ export default function AdminShell({ children }) {
 
 export function AdminHeader({ title, subtitle, right }) {
   return (
-    <div className="flex items-end justify-between gap-4 flex-wrap mb-6 sm:mb-8 pb-5 border-b border-white/5">
+    <div className="flex items-end justify-between gap-4 flex-wrap mb-6 sm:mb-8 pb-5 border-b border-white/[0.06]">
       <div>
-        <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-blue-300">
+        <div className="text-[11px] uppercase tracking-[0.18em] font-bold" style={{ color: 'var(--admin-amber, #F59E0B)' }}>
           We Hive · Super Admin
         </div>
         <h1 className="mt-1.5 font-display font-bold text-[26px] sm:text-[32px] leading-tight tracking-[-0.02em] text-white">
           {title}
         </h1>
-        {subtitle && <p className="mt-1 text-[14px] text-slate-400 max-w-2xl">{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-[13px] text-slate-400 max-w-2xl">{subtitle}</p>}
       </div>
       {right}
     </div>
@@ -256,6 +367,11 @@ export function AdminHeader({ title, subtitle, right }) {
 
 export function Panel({ children, className = '' }) {
   return (
-    <div className={`rounded-2xl bg-[#111632] border border-white/[0.08] p-4 sm:p-5 ${className}`}>{children}</div>
+    <div
+      className={`card-lift relative overflow-hidden rounded-2xl border p-4 sm:p-5 ${className}`}
+      style={{ background: 'var(--glass, rgba(255,255,255,0.05))', borderColor: 'var(--glass-border, rgba(255,255,255,0.10))', backdropFilter: 'blur(12px)' }}
+    >
+      {children}
+    </div>
   );
 }

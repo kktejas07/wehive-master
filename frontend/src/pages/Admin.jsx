@@ -36,6 +36,7 @@ import HiveLearningTab from '../components/admin/HiveLearningTab';
 import LeadsTab from '../components/admin/LeadsTab';
 import PaymentsTab from '../components/admin/PaymentsTab';
 import AuditTab from '../components/admin/AuditTab';
+import MonitoringTab from '../components/admin/MonitoringTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
@@ -115,6 +116,7 @@ function AdminRoutes() {
                 <Route path="leads" element={<LeadsTab />} />
                 <Route path="payments" element={<PaymentsTab />} />
                 <Route path="audit" element={<AuditTab />} />
+                <Route path="monitoring" element={<MonitoringTab />} />
                 <Route path="health" element={<HealthTab />} />
                 <Route path="security" element={<SecurityTab />} />
                 <Route path="review" element={<ReviewQueueTab />} />
