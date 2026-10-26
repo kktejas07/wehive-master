@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe3D } from '../components/ui/3d-globe';
 import Navbar from '../components/Navbar';
+import { landmarkFor } from '../lib/landmarks';
 import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 import {
@@ -111,6 +112,7 @@ const POPULAR_VISAS = [
 ];
 
 function VisaCard({ visa, index, onClick }) {
+  const cardImg = landmarkFor({ id: visa.id });
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -129,7 +131,13 @@ function VisaCard({ visa, index, onClick }) {
         </div>
       )}
       <div className="h-20 bg-[hsl(var(--blue-50))] border-b border-[hsl(var(--border))] flex items-center justify-center relative overflow-hidden">
-        {visa.flag ? <span className="text-5xl">{visa.flag}</span> : <Globe className="w-10 h-10 text-[hsl(var(--blue-700))]" />}
+        {cardImg ? (
+          <img src={cardImg} alt={visa.country} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        ) : visa.flag ? (
+          <span className="text-5xl">{visa.flag}</span>
+        ) : (
+          <Globe className="w-10 h-10 text-[hsl(var(--blue-700))]" />
+        )}
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between">
