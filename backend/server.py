@@ -89,7 +89,33 @@ from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
 
+from starlette.middleware.base import BaseHTTPMiddleware  # noqa: E402
+
+
+_MIN_APP_VERSION = (1, 0, 0)
+
+
+def _parse_version(v: str):
+    try:
+        return tuple(int(x) for x in v.split('.')[:3])
+    except Exception:
+        return None
+
+
+class AppVersionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        client_v = request.headers.get('X-App-Version')
+        if client_v:
+            response.headers['X-Min-App-Version'] = '.'.join(str(x) for x in _MIN_APP_VERSION)
+            parsed = _parse_version(client_v)
+            if parsed and parsed < _MIN_APP_VERSION:
+                response.headers['X-Update-Required'] = 'true'
+        return response
+
+
 app = FastAPI(title='We Hive API', version='1.0.0')
+app.add_middleware(AppVersionMiddleware)
 
 api_router = APIRouter(prefix='/api')
 

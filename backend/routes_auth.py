@@ -10,8 +10,8 @@ from models import (
 )
 import premium
 from auth_utils import (
-    claim_contact, classify_identifier, normalize_phone, sign_jwt, mask,
-    get_current_user,
+    claim_contact, classify_identifier, normalize_phone, sign_jwt, sign_refresh_jwt,
+    decode_jwt, mask, get_current_user,
 )
 from admin_auth import verify_password
 from db import db, users
@@ -34,7 +34,7 @@ class LoginRequest(BaseModel):
     password: str
 
 
-@router.post('/login', response_model=AuthTokens)
+@router.post('/login')
 async def user_login(req: LoginRequest, request: Request, _=Depends(_login_limiter)):
     email = req.email.lower().strip()
     user = await users.find_one({'email': email})
@@ -43,7 +43,32 @@ async def user_login(req: LoginRequest, request: Request, _=Depends(_login_limit
     if not verify_password(req.password, user['password_hash']):
         raise HTTPException(401, 'Invalid email or password')
     token = sign_jwt(user['_id'])
-    return AuthTokens(access_token=token, user=_public(user))
+    refresh = sign_refresh_jwt(user['_id'])
+    return {**AuthTokens(access_token=token, user=_public(user)).model_dump(), 'refresh_token': refresh}
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+@router.post('/refresh')
+async def refresh_token(req: RefreshRequest):
+    """Exchange a refresh token for a new access token."""
+    try:
+        payload = decode_jwt(req.refresh_token)
+        if payload.get('type') != 'refresh':
+            raise HTTPException(401, 'Not a refresh token')
+        user_id = payload.get('sub')
+        user = await users.find_one({'_id': user_id})
+        if not user:
+            raise HTTPException(401, 'User not found')
+        new_access = sign_jwt(user['_id'])
+        new_refresh = sign_refresh_jwt(user['_id'])
+        return {'access_token': new_access, 'refresh_token': new_refresh, 'token_type': 'bearer'}
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise
+        raise HTTPException(401, 'Invalid or expired refresh token')
 
 
 def _is_admin(u: dict) -> bool:
