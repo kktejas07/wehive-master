@@ -81,102 +81,79 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* ── Admin panel glass design tokens ───────────────────────────── */
+/* ── Admin panel light theme design tokens ───────────────────────────── */
 .admin-theme {
-  --admin-bg: #0F172A;
-  --admin-sidebar: #0a0e1e;
+  --admin-bg: #F8FAFF;
+  --admin-sidebar: #F0F4FF;
   --admin-navy: #1B2B5E;
   --admin-blue: #011CB5;
-  --admin-amber: #F59E0B;
+  --admin-amber: #D97706;
   --admin-red: #FF0302;
-  --glass: rgba(255,255,255,0.05);
-  --glass-border: rgba(255,255,255,0.10);
-  --glass-hover: rgba(255,255,255,0.08);
-  --admin-card-gradient-from: #1B2B5E;
-  --admin-card-gradient-to: #0F172A;
+  --glass: #FFFFFF;
+  --glass-border: #E8EDF8;
+  --glass-hover: #F5F7FF;
+  --panel-bg: #FFFFFF;
+  --panel-border: #E8EDF8;
+  --text-primary: #1B2B5E;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
 }
 
-/* Admin dark-theme card-lift: blue glow replaces the light neutral shadow */
+/* Admin light-theme card-lift: subtle blue shadow */
 .admin-theme .card-lift:hover {
-  box-shadow: 0 12px 32px -12px rgba(1, 28, 181, 0.45), 0 0 0 1px rgba(1, 28, 181, 0.18);
-  border-color: rgba(1, 28, 181, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(1, 28, 181, 0.10);
+  transform: translateY(-1px);
+  border-color: #BDD0FF !important;
+  background: #FFFFFF;
 }
 
-/* Atmospheric radial mesh behind admin main content */
-.admin-theme main::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 55% 380px at 80% 0%, rgba(27, 43, 94, 0.22), transparent 70%),
-    radial-gradient(ellipse 35% 280px at 5% 85%, rgba(255, 3, 2, 0.06), transparent 70%);
-  z-index: 0;
-}
+/* No radial mesh on light admin — clean white */
+.admin-theme main::before { content: none; }
 .admin-theme main > * { position: relative; z-index: 1; }
 
-/* Eyebrow in admin context: use amber accent underline */
+/* Eyebrow in admin context: navy brand underline */
 .admin-theme .eyebrow {
-  color: rgba(148, 163, 184, 1);
-  background-image: linear-gradient(90deg, var(--admin-amber, #F59E0B), rgba(245,158,11,0.3));
+  color: #011CB5;
+  background-image: linear-gradient(90deg, #011CB5, rgba(1,28,181,0.3));
 }
 
-/* Skeleton-stagger in admin: use the same fade-in keyframe, slightly faster */
+/* Skeleton-stagger in admin: same fade-in, slightly faster */
 .admin-theme .skeleton-stagger > * { animation-duration: 0.25s; }
 
-/* Radial atmospheric depth on admin main content */
+/* Light page background for admin main content */
 .admin-theme main {
-  background-image:
-    radial-gradient(ellipse 70% 500px at 80% -5%, rgba(1, 28, 181, 0.18) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 400px at 10% 10%, rgba(255, 3, 2, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 80% 300px at 50% 100%, rgba(27, 43, 94, 0.22) 0%, transparent 70%);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: #F8FAFF;
+  background-image: none;
 }
 
-/* Admin glass panels — hover lift with brand border glow */
+/* Admin light panels — hover lift with brand border */
 .admin-theme .panel-hover {
   position: relative;
-  transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
 }
 .admin-theme .panel-hover:hover {
-  transform: translateY(-2px);
-  border-color: rgba(1, 28, 181, 0.35) !important;
-  box-shadow:
-    0 0 0 1px rgba(1, 28, 181, 0.20),
-    0 8px 24px -8px rgba(1, 28, 181, 0.30),
-    0 20px 40px -20px rgba(0, 0, 0, 0.5);
-}
-.admin-theme .panel-hover:hover::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(1,28,181,0.06) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
+  transform: translateY(-1px);
+  border-color: #BDD0FF !important;
+  box-shadow: 0 4px 20px rgba(1, 28, 181, 0.10);
 }
 
-/* Admin gradient button — shifting navy→electric brand gradient */
+/* Admin primary button — solid brand blue */
 .admin-theme .btn-admin-primary {
-  background: linear-gradient(135deg, #1B2B5E 0%, #011CB5 60%, #0518FE 100%);
-  background-size: 200% 100%;
-  background-position: 0% 0%;
+  background: #011CB5;
   color: #fff;
   border: none;
   font-weight: 700;
   letter-spacing: 0.01em;
-  transition: background-position 400ms ease, box-shadow 250ms ease, transform 120ms ease;
-  box-shadow: 0 4px 14px -6px rgba(1, 28, 181, 0.50);
+  transition: background 200ms ease, box-shadow 200ms ease;
+  box-shadow: 0 2px 8px -4px rgba(1, 28, 181, 0.40);
 }
 .admin-theme .btn-admin-primary:hover:not(:disabled) {
-  background-position: 100% 0%;
-  box-shadow: 0 6px 20px -8px rgba(1, 28, 181, 0.75), 0 2px 8px -4px rgba(5, 24, 254, 0.40);
+  background: #0122D4;
+  box-shadow: 0 4px 14px -6px rgba(1, 28, 181, 0.55);
 }
 .admin-theme .btn-admin-primary:active:not(:disabled) {
   transform: translateY(1px);
   filter: brightness(0.92);
-  box-shadow: 0 2px 8px -4px rgba(1, 28, 181, 0.40);
 }
 
 /* Entrance stagger for admin tab content */
@@ -657,33 +634,33 @@ div[class*="emergent" i][style*="position: fixed"] { display: none !important; }
 .text-flip-container { perspective: 1000px; display: inline-block; }
 .text-flip-word { transform-style: preserve-3d; backface-visibility: hidden; }
 
-/* Dark admin scrollbar — matches theme */
+/* Light admin scrollbar */
 .admin-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 .admin-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
+  background: #F0F4FF;
   border-radius: 3px;
 }
 .admin-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #C8D5F0;
   border-radius: 3px;
   transition: background 0.2s;
 }
 .admin-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: #A5BDEC;
 }
 .admin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) rgba(255, 255, 255, 0.03);
+  scrollbar-color: #C8D5F0 #F0F4FF;
 }
 
 /* Visible keyboard focus for controls that strip the outline without adding
    their own focus style (WCAG 2.4.7). Elements with focus:ring / focus-visible: /
    focus:border classes keep their own styling. */
 :root { --focus-ring: hsl(var(--ring)); }
-.admin-theme { --focus-ring: hsl(var(--blue-100)); }
+.admin-theme { --focus-ring: #011CB5; }
 :is(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible:not([class*="focus:ring"]):not([class*="focus-visible:"]):not([class*="focus:border"]):not(label[class*="focus-within:"] *) {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
