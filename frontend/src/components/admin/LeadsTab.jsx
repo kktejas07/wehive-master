@@ -114,7 +114,7 @@ export default function LeadsTab() {
                 aria-selected={on}
                 data-testid={`admin-leads-filter-${f}`}
                 onClick={() => setStatus(f)}
-                className={`h-9 px-3.5 rounded-xl text-[13px] font-semibold border transition-colors ${on ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white' : 'bg-[#F8FAFF] border-[#E8EDF8] text-[var(--text-secondary)] hover:bg-[#F0F4FF]'}`}
+                className={`h-9 px-3.5 rounded-xl text-[13px] font-semibold border transition-colors ${on ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-[var(--text-primary)]' : 'bg-[#F8FAFF] border-[#E8EDF8] text-[var(--text-secondary)] hover:bg-[#F0F4FF]'}`}
               >
                 {cap(f)}
                 {f === 'new' && data?.new > 0 && (
@@ -221,7 +221,7 @@ export default function LeadsTab() {
                     <a
                       href={`mailto:${l.email}?subject=${encodeURIComponent('Re: your enquiry to We Hive')}`}
                       data-testid={`admin-lead-reply-${l.id}`}
-                      className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-semibold"
+                      className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[var(--text-primary)] text-[13px] font-semibold"
                     >
                       <Mail className="w-3.5 h-3.5" /> Reply by email
                     </a>

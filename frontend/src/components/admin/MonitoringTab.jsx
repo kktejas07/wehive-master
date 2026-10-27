@@ -136,7 +136,7 @@ function InactiveUsers({ token }) {
             <button
               onClick={bulkRemind}
               disabled={reminding}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[hsl(var(--blue-700))] text-white text-[12px] font-semibold disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[hsl(var(--blue-700))] text-[var(--text-primary)] text-[12px] font-semibold disabled:opacity-50"
             >
               {reminding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bell className="w-3.5 h-3.5" />}
               Remind {selected.size}

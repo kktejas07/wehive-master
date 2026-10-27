@@ -318,7 +318,7 @@ export default function DestinationsTab() {
             <button
               onClick={handleSync}
               disabled={syncing}
-              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
             >
               {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
               {syncing ? 'Uploading...' : 'Upload All to R2'}
@@ -537,7 +537,7 @@ export default function DestinationsTab() {
             <button
               onClick={handleSeed}
               disabled={seeding}
-              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
             >
               {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               {seeding ? 'Seeding...' : 'Seed Manifest from Repo'}

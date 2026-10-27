@@ -51,19 +51,19 @@ function AddAgentModal({ token, onClose, onDone }) {
   ];
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <form {...dialogProps} onSubmit={submit} className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-[var(--glass-border)] p-6 space-y-3">
+      <form {...dialogProps} onSubmit={submit} className="w-full max-w-md rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] p-6 space-y-3">
         <h3 className="text-[var(--text-primary)] font-bold text-[18px]">Add agent</h3>
         {fields.map(([k, label, type, required]) => (
           <div key={k}>
             <label htmlFor={`add-agent-${k}`} className="block text-[12px] text-[var(--text-secondary)] mb-1">{label}</label>
             <input id={`add-agent-${k}`} type={type} required={required} minLength={k === 'password' ? 8 : undefined}
               value={form[k]} onChange={set(k)}
-              className="w-full h-10 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[14px] text-[var(--text-primary)] outline-none focus:border-white/25" />
+              className="w-full h-10 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--admin-blue)]" />
           </div>
         ))}
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" onClick={onClose} className="h-10 px-4 rounded-lg bg-[var(--glass-hover)] text-[var(--text-secondary)] text-sm font-semibold">Cancel</button>
-          <button type="submit" disabled={busy} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50">
+          <button type="submit" disabled={busy} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-[var(--text-primary)] text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50">
             {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />} Create agent
           </button>
         </div>
@@ -211,14 +211,14 @@ function AgentCard({ agent, token, onRefresh }) {
               </button>
             )}
             <button onClick={() => setShowCommModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] px-4 h-10 text-[13px] font-semibold text-white transition">
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] px-4 h-10 text-[13px] font-semibold text-[var(--text-primary)] transition">
               <DollarSign className="w-3.5 h-3.5" /> Record Commission
             </button>
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-[var(--text-secondary)]">Tier:</span>
               {['bronze','silver','gold','platinum'].map(t => (
                 <button key={t} onClick={() => patch({ tier: t })} disabled={busy}
-                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize transition ${tier === t ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:text-white'}`}>
+                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize transition ${tier === t ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)]' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
                   {t}
                 </button>
               ))}
@@ -265,7 +265,7 @@ export default function AgentsTab() {
       <AdminHeader title="Agent Partners" subtitle={`Agents are added by admins only; only active, verified agents receive applications${pending > 0 ? ` · ${pending} pending approval` : ''}`} />
       <div className="flex justify-end">
         <button type="button" onClick={() => setAdding(true)} data-testid="add-agent-btn"
-          className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2">
+          className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-[var(--text-primary)] text-sm font-semibold inline-flex items-center gap-2">
           <Plus className="w-4 h-4" aria-hidden="true" /> Add agent
         </button>
       </div>
@@ -275,7 +275,7 @@ export default function AgentsTab() {
           <div className="flex gap-2 flex-wrap">
             {STATUS_FILTERS.map(f => (
               <button key={f.value} onClick={() => { setStatusFilter(f.value); setSkip(0); }}
-                className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${statusFilter === f.value ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)]'}`}>
+                className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${statusFilter === f.value ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)]' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)]'}`}>
                 {f.label}{f.value === 'pending' && pending > 0 ? ` (${pending})` : ''}
               </button>
             ))}

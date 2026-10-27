@@ -104,7 +104,7 @@ function EventForm({ value, onChange, onCancel, onSave, busy, isNew }) {
           data-testid="event-form-save"
           disabled={busy || !v.title.trim()}
           onClick={onSave}
-          className="rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 px-4 py-2 text-[12.5px] font-bold text-white inline-flex items-center gap-1"
+          className="rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 px-4 py-2 text-[12.5px] font-bold text-[var(--text-primary)] inline-flex items-center gap-1"
         >
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Save className="w-3.5 h-3.5" /> Save event</>}
         </button>
@@ -201,7 +201,7 @@ export default function EventsTab() {
           <button
             data-testid="event-new-btn"
             onClick={startCreate}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white px-4 py-2.5 text-[13px] font-bold"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[var(--text-primary)] px-4 py-2.5 text-[13px] font-bold"
           >
             <Plus className="w-4 h-4" /> New event
           </button>
@@ -217,7 +217,7 @@ export default function EventsTab() {
               onClick={() => { setFilter(t); setSkip(0); }}
               className={`rounded-full px-3 py-1 text-[11.5px] font-bold uppercase tracking-[0.12em] border transition ${
                 filter === t
-                  ? 'bg-[hsl(var(--blue-700))] text-white border-[hsl(var(--blue-700))]'
+                  ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)] border-[hsl(var(--blue-700))]'
                   : 'border-[var(--glass-border)] text-[var(--text-secondary)] hover:border-[hsl(var(--blue-700))]/50'
               }`}
             >
@@ -251,7 +251,7 @@ export default function EventsTab() {
             <article
               key={ev.id}
               data-testid={`event-card-${ev.id}`}
-              className="rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] overflow-hidden hover:border-white/15 transition"
+              className="rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] overflow-hidden hover:border-[var(--glass-border)] transition"
             >
               <div
                 className="aspect-[16/9] relative overflow-hidden"

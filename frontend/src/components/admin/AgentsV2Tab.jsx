@@ -176,7 +176,7 @@ function RunPanel({ agent, token, onClose }) {
             placeholder="Ask the agent anything…"
             className="w-full rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 py-2 text-[13px] text-[var(--text-primary)] outline-none focus:border-emerald-500/50 resize-y" />
         </label>
-        <button onClick={run} disabled={busy || !input.trim()} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
+        <button onClick={run} disabled={busy || !input.trim()} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-[var(--text-primary)] disabled:opacity-50 inline-flex items-center gap-1.5">
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
           Run Agent
         </button>
@@ -285,7 +285,7 @@ export default function AgentsV2Tab() {
             <button onClick={refresh} className="h-10 px-3 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[12px] text-[var(--text-primary)] inline-flex items-center gap-1.5">
               <RefreshCw className="w-3.5 h-3.5" /> Refresh
             </button>
-            <button onClick={() => setEditing(EMPTY_FORM)} className="h-10 px-3 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white inline-flex items-center gap-1.5">
+            <button onClick={() => setEditing(EMPTY_FORM)} className="h-10 px-3 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5">
               <Plus className="w-3.5 h-3.5" /> New Agent
             </button>
           </div>

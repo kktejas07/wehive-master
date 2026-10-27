@@ -256,7 +256,7 @@ export default function UniversitiesTab() {
           <input value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && search()} placeholder="Search name, country..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-white border border-[#E8EDF8] text-[13px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5]" />
         </div>
         <input value={countryFilter} onChange={e => setCountryFilter(e.target.value)} placeholder="Country code (us, gb...)" className="h-10 px-4 rounded-xl bg-white border border-[#E8EDF8] text-[13px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5] w-40" />
-        <button onClick={search} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-bold">Search</button>
+        <button onClick={search} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[var(--text-primary)] text-[13px] font-bold">Search</button>
         <button onClick={() => { setQuery(''); setCountryFilter(''); setSkip(0); loadList('', '', 0); }} className="h-10 px-4 rounded-xl bg-[#F0F4FF] hover:bg-[#E8EDF8] text-[var(--text-secondary)] text-[13px] font-bold">Clear</button>
       </div>
 
@@ -274,7 +274,7 @@ export default function UniversitiesTab() {
             <div className="flex flex-wrap gap-2 items-center">
               <input ref={seedRef} type="file" accept=".csv" onChange={e => setSeedFile(e.target.files[0])} className="text-[11px] text-[var(--text-secondary)] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-[#F0F4FF] file:text-[11px] file:font-bold file:text-[var(--text-secondary)]" />
               <label className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]"><input type="checkbox" checked={seedDryRun} onChange={e => setSeedDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
-              <button disabled={!seedFile || seedBusy} onClick={handleSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{seedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileSpreadsheet className="w-3 h-3" />} Go</button>
+              <button disabled={!seedFile || seedBusy} onClick={handleSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] px-2.5 py-1.5 text-[11px] font-bold">{seedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileSpreadsheet className="w-3 h-3" />} Go</button>
             </div>
             {seedResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-[var(--text-secondary)] max-h-24 overflow-y-auto">{JSON.stringify(seedResult, null, 2)}</div>}
           </Panel>
@@ -304,14 +304,14 @@ export default function UniversitiesTab() {
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-[#1B2B5E] mb-2 flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-blue-600" /> AI Enrich Missing</h4>
             <p className="text-[11px] text-[var(--text-muted)] mb-2">Batch-fills template descriptions, courses, facilities for bare universities.</p>
-            <button disabled={aiEnrichBusy} onClick={handleAIEnrich} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{aiEnrichBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Enrich with AI</button>
+            <button disabled={aiEnrichBusy} onClick={handleAIEnrich} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] px-2.5 py-1.5 text-[11px] font-bold">{aiEnrichBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Enrich with AI</button>
             {aiEnrichResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-[var(--text-secondary)] max-h-24 overflow-y-auto">{JSON.stringify(aiEnrichResult, null, 2)}</div>}
           </Panel>
 
           {/* Re-seed */}
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-[#1B2B5E] mb-2 flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5 text-red-600" /> Re-seed</h4>
-            <button disabled={reSeedBusy} onClick={handleReSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{reSeedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Re-seed from static</button>
+            <button disabled={reSeedBusy} onClick={handleReSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] px-2.5 py-1.5 text-[11px] font-bold">{reSeedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Re-seed from static</button>
             {reSeedResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-[var(--text-secondary)] max-h-24 overflow-y-auto">{JSON.stringify(reSeedResult, null, 2)}</div>}
           </Panel>
         </div>
@@ -428,7 +428,7 @@ export default function UniversitiesTab() {
 
             <div className="sticky bottom-0 bg-white flex justify-end gap-2 p-5 border-t border-[#E8EDF8]">
               <button onClick={closeEditor} className="h-10 px-5 rounded-xl bg-[#F0F4FF] hover:bg-[#E8EDF8] text-[#1B2B5E] text-[13px] font-bold">Cancel</button>
-              <button disabled={saving} onClick={saveEdit} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white text-[13px] font-bold">
+              <button disabled={saving} onClick={saveEdit} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] text-[13px] font-bold">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {saving ? 'Saving...' : 'Save'}
               </button>

@@ -76,9 +76,9 @@ export default function CategoryDetails({
         </p>
 
         {cat.processing_days != null && (
-          <div className="mt-5 flex items-center gap-2 text-[13px] text-[var(--text-secondary)]">
+          <div className="mt-5 flex items-center gap-2 text-[13px] text-muted-foreground">
             <Clock className="w-4 h-4 shrink-0" />
-            <span>Processing time: <strong className="text-[var(--text-primary)]">{cat.processing_days} working day{cat.processing_days !== 1 ? 's' : ''}</strong></span>
+            <span>Processing time: <strong className="text-[hsl(var(--blue-900))]">{cat.processing_days} working day{cat.processing_days !== 1 ? 's' : ''}</strong></span>
           </div>
         )}
 

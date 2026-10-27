@@ -58,7 +58,7 @@ export default function GlobalEventsTab() {
               setRunningAggregator(false);
             }}
             disabled={runningAggregator}
-            className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white inline-flex items-center gap-1.5 transition disabled:opacity-50"
+            className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 transition disabled:opacity-50"
           >
             {runningAggregator ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
             Run AI Aggregators Now
@@ -118,7 +118,7 @@ export default function GlobalEventsTab() {
             }
           }}
           disabled={scraping}
-          className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white font-bold disabled:opacity-50 flex items-center gap-2"
+          className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-[var(--text-primary)] font-bold disabled:opacity-50 flex items-center gap-2"
         >
           {scraping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
           Trigger Scraper
@@ -131,7 +131,7 @@ export default function GlobalEventsTab() {
             key={s}
             onClick={() => setStatusFilter(s)}
             className={`px-4 py-2 rounded-lg text-sm font-bold capitalize transition-colors ${
-              statusFilter === s ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/20 text-[var(--text-secondary)] hover:text-white'
+              statusFilter === s ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)]' : 'bg-black/20 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             {s}
