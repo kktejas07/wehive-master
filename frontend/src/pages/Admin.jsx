@@ -37,6 +37,9 @@ import LeadsTab from '../components/admin/LeadsTab';
 import PaymentsTab from '../components/admin/PaymentsTab';
 import AuditTab from '../components/admin/AuditTab';
 import MonitoringTab from '../components/admin/MonitoringTab';
+import AgenticTab from '../components/admin/AgenticTab';
+import SlotMonitorTab from '../components/admin/SlotMonitorTab';
+import ReferralsTab from '../components/admin/ReferralsTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
@@ -128,6 +131,9 @@ function AdminRoutes() {
                 <Route path="agents-v2" element={<AgentsV2Tab />} />
                 <Route path="hive-learning" element={<HiveLearningTab />} />
                 <Route path="destinations" element={<DestinationsTab />} />
+                <Route path="agentic" element={<AgenticTab />} />
+                <Route path="slot-monitor" element={<SlotMonitorTab />} />
+                <Route path="referrals" element={<ReferralsTab />} />
                 <Route path="doc-review" element={<Navigate to="/admin/review" replace />} />
                 <Route path="hero-events" element={<Navigate to="/admin/events" replace />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />

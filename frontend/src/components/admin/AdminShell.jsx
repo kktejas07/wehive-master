@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
   Key, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
-  Inbox, CreditCard, History, Activity, ScanSearch, Lock, BarChart3, ChevronLeft, ChevronRight, Pencil,
+  Inbox, CreditCard, History, Activity, ScanSearch, Lock, BarChart3, ChevronLeft, ChevronRight, Pencil, Clock, Share2,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
@@ -36,6 +36,7 @@ const TABS = [
   { id: 'destinations',  to: '/admin/destinations',   label: 'Destinations',  Icon: ImageIcon,       testid: 'admin-nav-destinations',  group: 'Content & Destinations' },
   { id: 'events',        to: '/admin/events',         label: 'Hero Events',   Icon: Megaphone,       testid: 'admin-nav-events',        group: 'Content & Destinations' },
   { id: 'global-events', to: '/admin/global-events',  label: 'Global Events', Icon: Globe,           testid: 'admin-nav-global-events', group: 'Content & Destinations' },
+  { id: 'announcements', to: '/admin/announcements', label: 'Announcements', Icon: Megaphone,    testid: 'admin-nav-announcements', group: 'Content & Destinations' },
   { id: 'hive-learning', to: '/admin/hive-learning',  label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning', group: 'Content & Destinations' },
   { id: 'moderation',    to: '/admin/moderation',     label: 'Moderation',    Icon: Newspaper,       testid: 'admin-nav-moderation',    group: 'Content & Destinations' },
   { id: 'payments',      to: '/admin/payments',       label: 'Payments',      Icon: CreditCard,      testid: 'admin-nav-payments',      group: 'Commercial' },
@@ -44,10 +45,13 @@ const TABS = [
   { id: 'promocodes',    to: '/admin/promocodes',     label: 'Promo Codes',   Icon: Tag,             testid: 'admin-nav-promocodes',    group: 'Commercial' },
   { id: 'requests',      to: '/admin/requests',       label: 'Requests',      Icon: ClipboardList,   testid: 'admin-nav-requests',      group: 'Commercial' },
   { id: 'agents',        to: '/admin/agents',         label: 'Agents',        Icon: Briefcase,       testid: 'admin-nav-agents',        group: 'Commercial' },
+  { id: 'referrals',     to: '/admin/referrals',     label: 'Referrals',     Icon: Share2,       testid: 'admin-nav-referrals',     group: 'Commercial' },
   { id: 'exports',       to: '/admin/exports',        label: 'Exports',       Icon: Download,        testid: 'admin-nav-exports',       group: 'Commercial' },
   { id: 'rag',           to: '/admin/rag',            label: 'RAG & Vectors', Icon: Database,        testid: 'admin-nav-rag',           group: 'AI & System' },
   { id: 'prompts',       to: '/admin/prompts',        label: 'Prompts',       Icon: FileText,        testid: 'admin-nav-prompts',       group: 'AI & System' },
   { id: 'agents-v2',     to: '/admin/agents-v2',      label: 'Agents V2',     Icon: Bot,             testid: 'admin-nav-agents-v2',     group: 'AI & System' },
+  { id: 'agentic',        to: '/admin/agentic',        label: 'Agentic AI',    Icon: Bot,             testid: 'admin-nav-agentic',       group: 'AI & System' },
+  { id: 'slot-monitor',  to: '/admin/slot-monitor',   label: 'Slot Monitor',  Icon: Clock,           testid: 'admin-nav-slot-monitor',  group: 'AI & System' },
   { id: 'newsletter',    to: '/admin/newsletter',     label: 'Newsletter',    Icon: Mail,            testid: 'admin-nav-newsletter',    group: 'AI & System' },
   { id: 'health',        to: '/admin/health',         label: 'System health', Icon: Activity,        testid: 'admin-nav-health',        group: 'AI & System' },
   { id: 'integrations',  to: '/admin/integrations',   label: 'Integrations',  Icon: Plug,            testid: 'admin-nav-integrations',  group: 'AI & System', superOnly: true },

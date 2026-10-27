@@ -209,7 +209,7 @@ const FIELDS = {
     { type: 'text', key: 'from_name', label: 'From Name', tooltip: 'Display name e.g. We Hive' },
   ],
   openwa: [
-    { type: 'text', key: 'api_url', label: 'API URL', tooltip: 'OpenWA server URL e.g. http://167.233.39.15:2785' },
+    { type: 'text', key: 'api_url', label: 'API URL', tooltip: 'OpenWA server URL e.g. http://your-openwa-server:2785' },
     { type: 'secret', key: 'api_key', label: 'API Key', tooltip: 'OpenWA API key (starts with owa_k1_...)' },
     { type: 'text', key: 'instance_id', label: 'Instance ID', tooltip: 'OpenWA session ID from dashboard' },
   ],
