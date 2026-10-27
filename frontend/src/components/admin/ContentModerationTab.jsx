@@ -72,7 +72,7 @@ export default function ContentModerationTab() {
             aria-pressed={kind === k}
             onClick={() => { setKind(k); setPage(1); }}
             className={`h-10 px-4 rounded-lg text-sm font-bold transition-colors ${
-              kind === k ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/20 text-[var(--text-secondary)] hover:text-white'
+              kind === k ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)]' : 'bg-black/20 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             {label}{kind === k && !loading ? ` · ${data.total} pending` : ''}

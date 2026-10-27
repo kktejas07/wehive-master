@@ -376,7 +376,7 @@ export default function SettingsTab() {
               onClick={() => setActiveTab(n)}
               className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 h-10 rounded-lg text-[12px] font-semibold transition ${
                 activeTab === n
-                  ? 'bg-[hsl(var(--blue-700))] text-white'
+                  ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)]'
                   : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-hover)]'
               }`}
             >
@@ -406,7 +406,7 @@ export default function SettingsTab() {
               <button
                 onClick={handleSave}
                 disabled={saving === ns || !hasChanges}
-                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
               >
                 {saving === ns ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 Save {meta.label}

@@ -103,7 +103,7 @@ function AddCategoryButton({ existing, onAdd }) {
         type="button"
         data-testid="add-category-btn"
         onClick={() => setOpen(true)}
-        className="rounded-lg border border-dashed border-white/15 hover:border-[hsl(var(--blue-700))]/50 hover:bg-[var(--glass-hover)] p-3 text-[12.5px] font-bold text-[var(--text-secondary)] inline-flex items-center justify-center gap-2 w-full"
+        className="rounded-lg border border-dashed border-[var(--glass-border)] hover:border-[hsl(var(--blue-700))]/50 hover:bg-[var(--glass-hover)] p-3 text-[12.5px] font-bold text-[var(--text-secondary)] inline-flex items-center justify-center gap-2 w-full"
       >
         <Plus className="w-3.5 h-3.5" /> Add visa type
       </button>
@@ -122,8 +122,8 @@ function AddCategoryButton({ existing, onAdd }) {
             onClick={() => { setPicked(v); setCustom(''); }}
             className={`rounded-full px-2.5 py-1 text-[11px] font-bold border ${
               picked === v
-                ? 'bg-[hsl(var(--blue-700))] text-white border-[hsl(var(--blue-700))]'
-                : 'border-white/15 text-[var(--text-secondary)] hover:border-[hsl(var(--blue-700))]/50'
+                ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)] border-[hsl(var(--blue-700))]'
+                : 'border-[var(--glass-border)] text-[var(--text-secondary)] hover:border-[hsl(var(--blue-700))]/50'
             }`}
           >{v}</button>
         ))}
@@ -142,7 +142,7 @@ function AddCategoryButton({ existing, onAdd }) {
           data-testid="add-category-confirm"
           onClick={add}
           disabled={!picked && !custom}
-          className="rounded-md bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 px-3 py-1 text-[11.5px] font-bold text-white"
+          className="rounded-md bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 px-3 py-1 text-[11.5px] font-bold text-[var(--text-primary)]"
         >
           Add
         </button>
@@ -249,7 +249,7 @@ function CountryRow({ c, onSaved }) {
                 data-testid={`save-country-${c.id}`}
                 disabled={busy}
                 onClick={save}
-                className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] px-2.5 py-1.5 text-[11.5px] font-bold text-white"
+                className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] px-2.5 py-1.5 text-[11.5px] font-bold text-[var(--text-primary)]"
               >
                 {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Save className="w-3 h-3" /> Save</>}
               </button>

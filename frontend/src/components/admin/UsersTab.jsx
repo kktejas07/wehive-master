@@ -278,7 +278,7 @@ export default function UsersTab() {
                           <button
                             disabled={remindBusy}
                             onClick={() => sendReminder(u)}
-                            className="w-full h-9 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white text-[12.5px] font-bold transition-colors"
+                            className="w-full h-9 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] text-[12.5px] font-bold transition-colors"
                           >
                             {remindBusy ? 'Sending…' : 'Send'}
                           </button>

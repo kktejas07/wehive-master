@@ -60,7 +60,7 @@ export function StatusDialog({ change, busy, onCancel, onConfirm }) {
             data-testid="admin-app-status-confirm"
             disabled={busy}
             onClick={() => onConfirm(note.trim())}
-            className="flex-1 h-11 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-semibold text-[13px]"
+            className="flex-1 h-11 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-semibold text-[13px]"
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Update & notify'}
           </button>

@@ -82,7 +82,7 @@ function ApptDateInput({ value, onSave }) {
           data-testid="case-appt-date-save"
           disabled={busy}
           onClick={save}
-          className="h-8 px-3 rounded-lg bg-[hsl(var(--blue-700))] text-white text-[12px] font-bold disabled:opacity-50"
+          className="h-8 px-3 rounded-lg bg-[hsl(var(--blue-700))] text-[var(--text-primary)] text-[12px] font-bold disabled:opacity-50"
         >
           {busy ? '…' : 'Save'}
         </button>
@@ -215,7 +215,7 @@ function Documents({ c, token, onChanged, readOnly }) {
                 </label>
                 <textarea id={`doc-reason-${d._id}`} data-testid={`case-doc-reason-${d._id}`} rows={2} value={reason} onChange={(e) => setReason(e.target.value)} className={inputCls} placeholder="e.g. The scan is blurry — please upload a clearer copy" />
                 <div className="mt-2 flex gap-2">
-                  <button data-testid={`case-doc-submit-${d._id}`} disabled={!reason.trim() || busy === d._id} onClick={() => submit(d, review.status, reason.trim())} className={`${btn} h-9 px-3.5 bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white`}>
+                  <button data-testid={`case-doc-submit-${d._id}`} disabled={!reason.trim() || busy === d._id} onClick={() => submit(d, review.status, reason.trim())} className={`${btn} h-9 px-3.5 bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[var(--text-primary)]`}>
                     {busy === d._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null} {review.status === 'rejected' ? 'Reject document' : 'Request re-upload'}
                   </button>
                   <button onClick={() => setReview(null)} className={`${btn} h-9 px-3.5 bg-[#EEF2FF] hover:bg-[#D0DCFF] text-[var(--text-primary)]`}>Cancel</button>
@@ -238,7 +238,7 @@ function Composer({ testid, placeholder, cta, busy, onSubmit }) {
         data-testid={`${testid}-submit`}
         disabled={busy || !text.trim()}
         onClick={async () => { if (await onSubmit(text.trim())) setText(''); }}
-        className="h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-semibold disabled:opacity-50"
+        className="h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[var(--text-primary)] text-[13px] font-semibold disabled:opacity-50"
       >
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3.5 h-3.5" />} {cta}
       </button>
@@ -271,7 +271,7 @@ function Messages({ c, token, setCase, readOnly }) {
           const staff = m.from === 'consultant';
           return (
             <li key={m._id || i} className={`flex ${staff ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13.5px] ${staff ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[#F5F7FF] text-[#1B2B5E]'}`}>
+              <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13.5px] ${staff ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)]' : 'bg-[#F5F7FF] text-[#1B2B5E]'}`}>
                 <div className="whitespace-pre-wrap break-words">{m.text}</div>
                 <div className={`mt-1 text-[11px] ${staff ? 'text-[var(--text-secondary)]' : 'text-[var(--text-secondary)]'}`}>{m.name || (staff ? 'Consultant' : 'Applicant')} · {fmt(m.at)}</div>
               </div>
@@ -569,7 +569,7 @@ export default function ApplicationCase() {
             aria-selected={tab === key}
             data-testid={`case-tab-${key}`}
             onClick={() => setTab(key)}
-            className={`shrink-0 h-9 px-3.5 rounded-xl text-[13px] font-semibold border transition-colors ${tab === key ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white' : 'bg-[#F5F7FF] border-[#E8EDF8] text-[var(--text-secondary)] hover:bg-[#EEF2FF]'}`}
+            className={`shrink-0 h-9 px-3.5 rounded-xl text-[13px] font-semibold border transition-colors ${tab === key ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-[var(--text-primary)]' : 'bg-[#F5F7FF] border-[#E8EDF8] text-[var(--text-secondary)] hover:bg-[#EEF2FF]'}`}
           >
             {text}{counts[key] ? <span className="ml-1.5 tabular-nums opacity-80">{counts[key]}</span> : null}
           </button>
