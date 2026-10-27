@@ -17,9 +17,9 @@ export default function SlotMonitorTab() {
     setErr('');
     try {
       const [slotsData, summaryData, consulatesData] = await Promise.all([
-        adminClient('/slot-monitor/slots?limit=50'),
-        adminClient('/slot-monitor/slots/summary'),
-        adminClient('/slot-monitor/consulates'),
+        adminClient('/usvisa/slots?limit=50'),
+        adminClient('/usvisa/slots/summary'),
+        adminClient('/usvisa/consulates'),
       ]);
       setSlots(Array.isArray(slotsData) ? slotsData : slotsData?.slots || []);
       setSummary(summaryData);
