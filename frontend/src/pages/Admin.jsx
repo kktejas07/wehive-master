@@ -40,6 +40,7 @@ import MonitoringTab from '../components/admin/MonitoringTab';
 import AgenticTab from '../components/admin/AgenticTab';
 import SlotMonitorTab from '../components/admin/SlotMonitorTab';
 import ReferralsTab from '../components/admin/ReferralsTab';
+import VisaSchedulingTab from '../components/admin/VisaSchedulingTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
@@ -134,6 +135,7 @@ function AdminRoutes() {
                 <Route path="agentic" element={<AgenticTab />} />
                 <Route path="slot-monitor" element={<SlotMonitorTab />} />
                 <Route path="referrals" element={<ReferralsTab />} />
+                <Route path="visa-scheduling" element={<VisaSchedulingTab />} />
                 <Route path="doc-review" element={<Navigate to="/admin/review" replace />} />
                 <Route path="hero-events" element={<Navigate to="/admin/events" replace />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />
