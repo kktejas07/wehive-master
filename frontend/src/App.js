@@ -67,6 +67,7 @@ const Community = lazy(() => import('./pages/Community'));
 const News = lazy(() => import('./pages/News'));
 const ApplicantFlow = lazy(() => import('./pages/ApplicantFlow'));
 const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
+const PostApprovalHub = lazy(() => import('./pages/PostApprovalHub'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -152,6 +153,7 @@ function AnimatedRoutes() {
           <Route path="/free-consultation" element={<PageTransition><FreeConsultation /></PageTransition>} />
           <Route path="/apply" element={<PrivateRoute><PageTransition><ApplicantFlow /></PageTransition></PrivateRoute>} />
           <Route path="/sop-builder" element={<PrivateRoute><PageTransition><SOPBuilder /></PageTransition></PrivateRoute>} />
+          <Route path="/post-approval/:applicationId" element={<PrivateRoute><PageTransition><PostApprovalHub /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />

@@ -2,7 +2,6 @@ import { Button } from '../ui/button';
 import { Clock, Calendar, CreditCard, Loader2, LucideIcon } from 'lucide-react';
 import { BRAND, COUNTRIES } from '../../data/mock';
 import { landmarkFor } from '../../lib/landmarks';
-import DeliveryCountdown from '../DeliveryCountdown';
 import { computeFees } from '../FeeBreakdown';
 
 interface VisaCategory {
@@ -76,9 +75,10 @@ export default function CategoryDetails({
           which makes the decision.
         </p>
 
-        {country.delivery?.same_day && (
-          <div className="mt-5">
-            <DeliveryCountdown deliveryDays={cat.processing_days} />
+        {cat.processing_days != null && (
+          <div className="mt-5 flex items-center gap-2 text-[13px] text-[var(--text-secondary)]">
+            <Clock className="w-4 h-4 shrink-0" />
+            <span>Processing time: <strong className="text-[var(--text-primary)]">{cat.processing_days} working day{cat.processing_days !== 1 ? 's' : ''}</strong></span>
           </div>
         )}
 

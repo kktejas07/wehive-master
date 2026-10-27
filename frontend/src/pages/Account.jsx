@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot, ClipboardList, Clock, CheckCircle, XCircle, Send, Briefcase, GraduationCap, Receipt } from 'lucide-react';
+import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot, ClipboardList, Clock, CheckCircle, XCircle, Send, Briefcase, GraduationCap, Receipt, ArrowRight } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
 import { statusColor } from '../lib/utils';
 import ScansTab from '../components/account/ScansTab';
@@ -344,7 +344,16 @@ function ApplicationCard({ a }) {
         <span className="text-2xl shrink-0 mt-0.5">{flag}</span>
       </div>
       <AppStatusBadge status={a.status} />
-      <div className="mt-3 text-[11.5px] text-muted-foreground">
+      {a.status === 'visa_approved' && (
+        <Link
+          to={`/post-approval/${a.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-[hsl(var(--blue-700))] hover:underline"
+        >
+          Plan your journey <ArrowRight className="w-3 h-3" />
+        </Link>
+      )}
+      <div className="mt-2 text-[11.5px] text-muted-foreground">
         #{a.id?.slice(0, 8).toUpperCase()} · {updatedAt ? new Date(updatedAt).toLocaleDateString() : '\u2014'}
       </div>
     </Link>
