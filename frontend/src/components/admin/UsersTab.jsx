@@ -338,7 +338,7 @@ export default function UsersTab() {
           <button
             disabled={bulkBusy}
             onClick={bulkRemind}
-            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#011CB5] hover:bg-[#0015A0] disabled:opacity-50 text-[var(--text-primary)] text-[12.5px] font-bold"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#011CB5] hover:bg-[#0015A0] disabled:opacity-50 text-white text-[12.5px] font-bold"
           >
             <Bell className="w-3.5 h-3.5" /> Send Reminder
           </button>

@@ -184,7 +184,7 @@ export default function AdminShell({ children }) {
                             data-testid={t.testid}
                             title={t.label}
                             className={`relative flex items-center justify-center h-10 w-full rounded-lg transition-colors duration-150 ${
-                              active ? 'bg-[#011CB5] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[#011CB5] hover:bg-[#EEF2FF]'
+                              active ? 'bg-[#011CB5] text-white' : 'text-[var(--text-secondary)] hover:text-[#011CB5] hover:bg-[#EEF2FF]'
                             }`}
                           >
                             <Icon className="w-4 h-4" />
@@ -200,7 +200,7 @@ export default function AdminShell({ children }) {
                           data-testid={t.testid}
                           className={`flex items-center gap-3 px-3 min-h-[38px] rounded-lg text-[13px] font-semibold transition-colors duration-150 ${
                             active
-                              ? 'text-[var(--text-primary)] shadow-sm border-l-[3px] border-[#011CB5] pl-[10px]'
+                              ? 'text-white shadow-sm border-l-[3px] border-[#011CB5] pl-[10px]'
                               : 'text-[var(--text-secondary)] hover:text-[#1B2B5E] hover:bg-[#EEF2FF] border-l-[3px] border-transparent'
                           }`}
                           style={active ? { background: 'linear-gradient(90deg, #011CB5 0%, rgba(1,28,181,0.75) 100%)' } : {}}
@@ -258,7 +258,7 @@ export default function AdminShell({ children }) {
                             placeholder="Display name"
                             className="flex-1 h-8 px-2 rounded-lg bg-gray-50 border border-gray-200 text-[13px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5]"
                           />
-                          <button disabled={nameBusy} onClick={saveName} className="h-8 px-3 rounded-lg bg-[#011CB5] text-[var(--text-primary)] text-[12px] font-bold disabled:opacity-50">
+                          <button disabled={nameBusy} onClick={saveName} className="h-8 px-3 rounded-lg bg-[#011CB5] text-white text-[12px] font-bold disabled:opacity-50">
                             {nameBusy ? '…' : 'Save'}
                           </button>
                         </div>
@@ -311,7 +311,7 @@ export default function AdminShell({ children }) {
                   to={t.to}
                   end={t.id === 'overview'}
                   className={`shrink-0 snap-start inline-flex items-center rounded-lg px-3.5 min-h-[40px] text-[13px] font-semibold whitespace-nowrap transition-colors ${
-                    active ? 'bg-[#011CB5] text-[var(--text-primary)]' : 'bg-white border border-[#E8EDF8] text-[var(--text-secondary)] hover:text-[#1B2B5E]'
+                    active ? 'bg-[#011CB5] text-white' : 'bg-white border border-[#E8EDF8] text-[var(--text-secondary)] hover:text-[#1B2B5E]'
                   }`}
                 >
                   {t.label}
@@ -355,7 +355,7 @@ export default function AdminShell({ children }) {
               </div>
               <div className="flex gap-2 mt-5">
                 <button onClick={() => setPwModal(false)} className="flex-1 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-[13px] transition-colors">Cancel</button>
-                <button onClick={handlePasswordChange} disabled={pwSaving || !pwForm.current || !pwForm.new} className="flex-1 h-11 rounded-xl bg-[#011CB5] hover:bg-[#0122D4] disabled:opacity-50 text-[var(--text-primary)] font-semibold text-[13px] transition-colors">{pwSaving ? 'Saving...' : 'Update Password'}</button>
+                <button onClick={handlePasswordChange} disabled={pwSaving || !pwForm.current || !pwForm.new} className="flex-1 h-11 rounded-xl bg-[#011CB5] hover:bg-[#0122D4] disabled:opacity-50 text-white font-semibold text-[13px] transition-colors">{pwSaving ? 'Saving...' : 'Update Password'}</button>
               </div>
             </div>
           </div>
