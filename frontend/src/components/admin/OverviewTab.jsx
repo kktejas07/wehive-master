@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { AdminHeader, Panel } from './AdminShell';
 import { inr, SEVERITY_PILL, ALERT_KIND_LABEL, adminClient } from '../../lib/admin';
+import { relativeTime } from '../../lib/utils';
 import { useOverviewViewModel } from '../../viewmodels/useOverviewViewModel';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { useToast } from '../../hooks/use-toast';
@@ -362,15 +363,6 @@ function AppStatusPanel({ applications }) {
   );
 }
 
-function relativeTime(iso) {
-  if (!iso) return '';
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
 
 function initials(email = '') {
   const parts = email.split('@')[0].split(/[._-]/);

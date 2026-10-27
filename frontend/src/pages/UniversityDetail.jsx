@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
-import { API } from '../context/AuthContext';
+import { useUniversityDetailViewModel } from '../features/universities/viewmodels/useUniversityDetailViewModel';
 import MultiUniversityApplyModal from '../components/MultiUniversityApplyModal';
 import AIUniversityQA from '../components/ai/AIUniversityQA';
 import AIAcceptanceProbability from '../components/ai/AIAcceptanceProbability';
@@ -132,23 +131,16 @@ function FacilityCard({ name }) {
 export default function UniversityDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const [uni, setUni] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saved, setSaved] = useState(false);
-  const [showApplyModal, setShowApplyModal] = useState(false);
-  const [translated, setTranslated] = useState(null);
+  const {
+    uni, loading, saved, setSaved,
+    showApplyModal, setShowApplyModal,
+    translated, setTranslated,
+  } = useUniversityDetailViewModel(id);
 
   const t = (field, fallback) => {
     if (translated && translated[field]) return translated[field];
     return uni?.[field] ?? fallback ?? '';
   };
-
-  useEffect(() => {
-    setLoading(true);
-    axios.get(`${API}/universities/${id}`)
-      .then(r => { setUni(r.data); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, [id]);
 
   useEffect(() => {
     if (searchParams.get('apply') === 'true') {
