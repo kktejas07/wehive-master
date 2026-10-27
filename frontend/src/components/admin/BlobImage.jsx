@@ -57,7 +57,7 @@ export default function BlobImage({ filename, onR2, alt = '', className = '' }) 
   }, [filename, onR2]);
 
   if (loading || !src) {
-    return <div className={`${className} bg-white/5 animate-pulse`} />;
+    return <div className={`${className} bg-[var(--glass-hover)] animate-pulse`} />;
   }
 
   return <img src={src} alt={alt} className={className} loading="lazy" />;

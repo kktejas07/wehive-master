@@ -36,20 +36,20 @@ const humanize = (k) => k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
 const errMsg = (e) => e?.response?.data?.detail || e.message;
-const inputCls = 'w-full px-3 py-2 rounded-xl bg-gray-50 border border-[#E8EDF8] focus:border-[hsl(var(--blue-700))] text-[13.5px] text-white placeholder:text-gray-400 outline-none';
+const inputCls = 'w-full px-3 py-2 rounded-xl bg-gray-50 border border-[#E8EDF8] focus:border-[hsl(var(--blue-700))] text-[13.5px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none';
 const btn = 'inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[12px] font-bold disabled:opacity-50';
 
 function Row({ k, v }) {
   return (
     <div className="flex justify-between gap-4 py-1.5 border-t first:border-t-0 border-[#E8EDF8] text-[13px]">
-      <span className="text-gray-500">{k}</span>
+      <span className="text-[var(--text-secondary)]">{k}</span>
       <span className="text-[#1B2B5E] text-right break-all">{v || '—'}</span>
     </div>
   );
 }
 
 function SectionTitle({ children }) {
-  return <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-500 mb-2">{children}</div>;
+  return <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-2">{children}</div>;
 }
 
 function ApptDateInput({ value, onSave }) {
@@ -75,7 +75,7 @@ function ApptDateInput({ value, onSave }) {
         data-testid="case-appt-date-input"
         value={v}
         onChange={(e) => setV(e.target.value)}
-        className="h-8 px-2 rounded-lg bg-gray-50 border border-[#E8EDF8] text-[12.5px] text-white outline-none"
+        className="h-8 px-2 rounded-lg bg-gray-50 border border-[#E8EDF8] text-[12.5px] text-[var(--text-primary)] outline-none"
       />
       {dirty && (
         <button
@@ -174,7 +174,7 @@ function Documents({ c, token, onChanged, readOnly }) {
     }
   };
 
-  if (!c.documents?.length) return <Panel><p className="text-[13.5px] text-gray-500">No documents uploaded yet.</p></Panel>;
+  if (!c.documents?.length) return <Panel><p className="text-[13.5px] text-[var(--text-secondary)]">No documents uploaded yet.</p></Panel>;
   return (
     <Panel className="p-0 overflow-hidden">
       {c.documents.map((d) => {
@@ -182,10 +182,10 @@ function Documents({ c, token, onChanged, readOnly }) {
         return (
           <div key={d._id} data-testid={`case-doc-${d._id}`} className="border-t first:border-t-0 border-[#E8EDF8] px-5 py-4">
             <div className="flex flex-wrap items-center gap-3">
-              <FileText className="w-4 h-4 text-gray-500 shrink-0" />
+              <FileText className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
               <div className="flex-1 min-w-[180px]">
-                <div className="font-bold text-white text-[13.5px]">{humanize(d.doc_type || 'document')}</div>
-                <div className="text-[12px] text-gray-500 break-all">{d.filename} · uploaded {fmt(d.uploaded_at)}</div>
+                <div className="font-bold text-[var(--text-primary)] text-[13.5px]">{humanize(d.doc_type || 'document')}</div>
+                <div className="text-[12px] text-[var(--text-secondary)] break-all">{d.filename} · uploaded {fmt(d.uploaded_at)}</div>
                 {d.review_reason && <div className="text-[12px] text-amber-200 mt-0.5">Reason: {d.review_reason}</div>}
               </div>
               <span data-testid={`case-doc-status-${d._id}`} className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-[0.12em] font-bold ${DOC_PILL[d.status] || DOC_PILL.uploaded}`}>
@@ -210,7 +210,7 @@ function Documents({ c, token, onChanged, readOnly }) {
             </div>
             {open && (
               <div className="mt-3 sm:pl-7">
-                <label htmlFor={`doc-reason-${d._id}`} className="block text-[12px] font-semibold text-gray-600 mb-1">
+                <label htmlFor={`doc-reason-${d._id}`} className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-1">
                   Reason for {review.status === 'rejected' ? 'rejecting' : 'requesting a re-upload'} (required, sent to the applicant)
                 </label>
                 <textarea id={`doc-reason-${d._id}`} data-testid={`case-doc-reason-${d._id}`} rows={2} value={reason} onChange={(e) => setReason(e.target.value)} className={inputCls} placeholder="e.g. The scan is blurry — please upload a clearer copy" />
@@ -218,7 +218,7 @@ function Documents({ c, token, onChanged, readOnly }) {
                   <button data-testid={`case-doc-submit-${d._id}`} disabled={!reason.trim() || busy === d._id} onClick={() => submit(d, review.status, reason.trim())} className={`${btn} h-9 px-3.5 bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white`}>
                     {busy === d._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null} {review.status === 'rejected' ? 'Reject document' : 'Request re-upload'}
                   </button>
-                  <button onClick={() => setReview(null)} className={`${btn} h-9 px-3.5 bg-[#EEF2FF] hover:bg-[#D0DCFF] text-white`}>Cancel</button>
+                  <button onClick={() => setReview(null)} className={`${btn} h-9 px-3.5 bg-[#EEF2FF] hover:bg-[#D0DCFF] text-[var(--text-primary)]`}>Cancel</button>
                 </div>
               </div>
             )}
@@ -265,7 +265,7 @@ function Messages({ c, token, setCase, readOnly }) {
   const msgs = c.messages || [];
   return (
     <Panel>
-      {msgs.length === 0 && <p className="text-[13.5px] text-gray-500">No messages yet.</p>}
+      {msgs.length === 0 && <p className="text-[13.5px] text-[var(--text-secondary)]">No messages yet.</p>}
       <ul className="space-y-2.5">
         {msgs.map((m, i) => {
           const staff = m.from === 'consultant';
@@ -273,14 +273,14 @@ function Messages({ c, token, setCase, readOnly }) {
             <li key={m._id || i} className={`flex ${staff ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13.5px] ${staff ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[#F5F7FF] text-[#1B2B5E]'}`}>
                 <div className="whitespace-pre-wrap break-words">{m.text}</div>
-                <div className={`mt-1 text-[11px] ${staff ? 'text-white/70' : 'text-gray-500'}`}>{m.name || (staff ? 'Consultant' : 'Applicant')} · {fmt(m.at)}</div>
+                <div className={`mt-1 text-[11px] ${staff ? 'text-[var(--text-secondary)]' : 'text-[var(--text-secondary)]'}`}>{m.name || (staff ? 'Consultant' : 'Applicant')} · {fmt(m.at)}</div>
               </div>
             </li>
           );
         })}
       </ul>
       {!readOnly && <Composer testid="case-message" placeholder="Reply to the applicant…" cta="Send" busy={busy} onSubmit={send} />}
-      <p className="mt-1.5 text-[11.5px] text-gray-400">The applicant is notified of every reply.</p>
+      <p className="mt-1.5 text-[11.5px] text-[var(--text-muted)]">The applicant is notified of every reply.</p>
     </Panel>
   );
 }
@@ -306,12 +306,12 @@ function Notes({ c, token, setCase, readOnly }) {
       <div data-testid="case-notes-private" className="flex items-center gap-2 text-[12.5px] font-semibold text-amber-700 mb-3">
         <Lock className="w-3.5 h-3.5" /> Only visible to staff. Never shown to the applicant.
       </div>
-      {(c.internal_notes || []).length === 0 && <p className="text-[13.5px] text-gray-500">No internal notes yet.</p>}
+      {(c.internal_notes || []).length === 0 && <p className="text-[13.5px] text-[var(--text-secondary)]">No internal notes yet.</p>}
       <ul className="space-y-2">
         {(c.internal_notes || []).map((n) => (
           <li key={n.id} className="rounded-lg bg-[#F5F7FF] px-3 py-2 text-[13px] text-[#1B2B5E]">
             <div className="whitespace-pre-wrap break-words">{n.text}</div>
-            <div className="mt-0.5 text-[11.5px] text-gray-500">{n.by} · {fmt(n.at)}</div>
+            <div className="mt-0.5 text-[11.5px] text-[var(--text-secondary)]">{n.by} · {fmt(n.at)}</div>
           </li>
         ))}
       </ul>
@@ -322,16 +322,16 @@ function Notes({ c, token, setCase, readOnly }) {
 
 function Timeline({ c }) {
   const items = [...(c.timeline || [])].reverse();
-  if (!items.length) return <Panel><p className="text-[13.5px] text-gray-500">No timeline events yet.</p></Panel>;
+  if (!items.length) return <Panel><p className="text-[13.5px] text-[var(--text-secondary)]">No timeline events yet.</p></Panel>;
   return (
     <Panel>
       <ol className="space-y-3 border-l border-[#E8EDF8] pl-4">
         {items.map((t, i) => (
           <li key={t.id || i} className="relative">
             <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-[hsl(var(--blue-700))]" />
-            <div className="text-[13.5px] font-semibold text-white">{t.label || label(t.status)}</div>
-            {t.note && <div className="text-[12.5px] text-gray-600 break-words">{t.note}</div>}
-            <div className="text-[11.5px] text-gray-500">{fmt(t.at)}</div>
+            <div className="text-[13.5px] font-semibold text-[var(--text-primary)]">{t.label || label(t.status)}</div>
+            {t.note && <div className="text-[12.5px] text-[var(--text-secondary)] break-words">{t.note}</div>}
+            <div className="text-[11.5px] text-[var(--text-secondary)]">{fmt(t.at)}</div>
           </li>
         ))}
       </ol>
@@ -340,7 +340,7 @@ function Timeline({ c }) {
 }
 
 function Scans({ c }) {
-  if (!c.scans?.length) return <Panel><p className="text-[13.5px] text-gray-500">No AI scans for this application.</p></Panel>;
+  if (!c.scans?.length) return <Panel><p className="text-[13.5px] text-[var(--text-secondary)]">No AI scans for this application.</p></Panel>;
   return (
     <div className="space-y-4">
       {c.scans.map((s) => {
@@ -349,8 +349,8 @@ function Scans({ c }) {
         return (
           <div key={s.id} data-testid={`case-scan-${s.id}`}><Panel>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="font-bold text-white text-[13.5px]">{humanize(s.kind || 'scan')}</span>
-              <span className="text-[12px] text-gray-500">{fmt(s.created_at)}</span>
+              <span className="font-bold text-[var(--text-primary)] text-[13.5px]">{humanize(s.kind || 'scan')}</span>
+              <span className="text-[12px] text-[var(--text-secondary)]">{fmt(s.created_at)}</span>
               {iv && (iv.found ? (
                 <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold bg-emerald-500/15 text-emerald-300">
                   <ShieldCheck className="w-3 h-3" /> Issuer verified{iv.name ? `: ${iv.name}` : ''}
@@ -366,7 +366,7 @@ function Scans({ c }) {
                 </a>
               )}
             </div>
-            {fields.length === 0 ? <p className="text-[12.5px] text-gray-500">Nothing extracted.</p> : (
+            {fields.length === 0 ? <p className="text-[12.5px] text-[var(--text-secondary)]">Nothing extracted.</p> : (
               <div className="grid sm:grid-cols-2 gap-x-6">
                 {fields.map(([k, v]) => <Row key={k} k={humanize(k)} v={typeof v === 'object' ? JSON.stringify(v) : String(v)} />)}
               </div>
@@ -474,7 +474,7 @@ export default function ApplicationCase() {
   };
 
   const back = (
-    <Link to="/admin/applications" data-testid="case-back" className="inline-flex items-center gap-1 text-[13px] font-semibold text-gray-500 hover:text-white">
+    <Link to="/admin/applications" data-testid="case-back" className="inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
       <ArrowLeft className="w-3.5 h-3.5" /> Applications
     </Link>
   );
@@ -505,10 +505,10 @@ export default function ApplicationCase() {
       {back}
       <div className="mt-3 mb-5 pb-5 border-b border-[#E8EDF8] flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display font-bold text-[24px] sm:text-[30px] leading-tight tracking-[-0.02em] text-white break-words">
+          <h1 className="font-display font-bold text-[24px] sm:text-[30px] leading-tight tracking-[-0.02em] text-[var(--text-primary)] break-words">
             {c.applicant?.name || c.primary_applicant?.name || 'Unknown applicant'}
           </h1>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-[13.5px] text-gray-500">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[13.5px] text-[var(--text-secondary)]">
             <span>{c.country_name || c.country_id?.toUpperCase()} · {c.visa_type}</span>
             <span className="font-mono text-[12px]">#{c.id.slice(0, 8).toUpperCase()}</span>
             <span data-testid="case-status" className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] uppercase tracking-[0.12em] font-bold ${STATUS_COLORS[c.status] || STATUS_COLORS.draft}`}>
@@ -517,25 +517,25 @@ export default function ApplicationCase() {
           </div>
         </div>
         <fieldset disabled={readOnly} className="flex flex-wrap items-end gap-2 disabled:opacity-60">
-          <label className="text-[11px] font-semibold text-gray-500">
+          <label className="text-[11px] font-semibold text-[var(--text-secondary)]">
             <span className="block mb-1">Status</span>
             <select
               data-testid="case-status-select"
               value={c.status || 'draft'}
               onChange={(e) => setChange({ app: c, status: e.target.value })}
-              className="h-10 px-2 rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] text-[13px] text-white"
+              className="h-10 px-2 rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] text-[13px] text-[var(--text-primary)]"
             >
               {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </label>
-          <label className="text-[11px] font-semibold text-gray-500">
+          <label className="text-[11px] font-semibold text-[var(--text-secondary)]">
             <span className="block mb-1">Assigned to</span>
             <select
               data-testid="case-assign-select"
               value={c.assigned_to || ''}
               disabled={busy}
               onChange={(e) => assign(e.target.value)}
-              className="h-10 px-2 rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] text-[13px] text-white max-w-[230px]"
+              className="h-10 px-2 rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] text-[13px] text-[var(--text-primary)] max-w-[230px]"
             >
               <option value="">Unassigned</option>
               {staffOptions.map((s) => (
@@ -569,7 +569,7 @@ export default function ApplicationCase() {
             aria-selected={tab === key}
             data-testid={`case-tab-${key}`}
             onClick={() => setTab(key)}
-            className={`shrink-0 h-9 px-3.5 rounded-xl text-[13px] font-semibold border transition-colors ${tab === key ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white' : 'bg-[#F5F7FF] border-[#E8EDF8] text-gray-600 hover:bg-[#EEF2FF]'}`}
+            className={`shrink-0 h-9 px-3.5 rounded-xl text-[13px] font-semibold border transition-colors ${tab === key ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white' : 'bg-[#F5F7FF] border-[#E8EDF8] text-[var(--text-secondary)] hover:bg-[#EEF2FF]'}`}
           >
             {text}{counts[key] ? <span className="ml-1.5 tabular-nums opacity-80">{counts[key]}</span> : null}
           </button>
@@ -582,36 +582,36 @@ export default function ApplicationCase() {
             <Overview c={c} onPatchAppt={patchAppt} readOnly={readOnly} />
             {!readOnly && (
               <Panel className="mt-4">
-                <div className="text-[15px] font-display font-bold text-white mb-4 flex items-center gap-2">
+                <div className="text-[15px] font-display font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                   <Shield className="w-4 h-4 text-amber-700" /> Status Control
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-[11px] uppercase tracking-widest text-gray-400 mb-1.5 block">New Status</label>
+                    <label className="text-[11px] uppercase tracking-widest text-[var(--text-muted)] mb-1.5 block">New Status</label>
                     <select value={newStatus || c.status || 'submitted'} onChange={(e) => setNewStatus(e.target.value)}
-                      className="w-full h-10 px-3 rounded-xl bg-gray-50 border border-[#E8EDF8] text-white text-[13px]">
+                      className="w-full h-10 px-3 rounded-xl bg-gray-50 border border-[#E8EDF8] text-[var(--text-primary)] text-[13px]">
                       {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-[11px] uppercase tracking-widest text-gray-400 mb-1.5 block">
+                    <label className="text-[11px] uppercase tracking-widest text-[var(--text-muted)] mb-1.5 block">
                       Note {(newStatus || c.status) === 'visa_rejected' && <span className="text-red-400">*required</span>}
                     </label>
                     <textarea value={statusNote} onChange={(e) => setStatusNote(e.target.value)}
                       rows={2} placeholder="Admin note visible to applicant…"
-                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-[#E8EDF8] text-white text-[13px] resize-none outline-none" />
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-[#E8EDF8] text-[var(--text-primary)] text-[13px] resize-none outline-none" />
                   </div>
                   {(newStatus || c.status) === 'visa_approved' && (
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[11px] uppercase tracking-widest text-gray-400 mb-1.5 block">Valid From</label>
+                        <label className="text-[11px] uppercase tracking-widest text-[var(--text-muted)] mb-1.5 block">Valid From</label>
                         <input type="date" value={visaFrom} onChange={(e) => setVisaFrom(e.target.value)}
-                          className="w-full h-10 px-3 rounded-xl bg-gray-50 border border-[#E8EDF8] text-white text-[13px]" />
+                          className="w-full h-10 px-3 rounded-xl bg-gray-50 border border-[#E8EDF8] text-[var(--text-primary)] text-[13px]" />
                       </div>
                       <div>
-                        <label className="text-[11px] uppercase tracking-widest text-gray-400 mb-1.5 block">Valid Until</label>
+                        <label className="text-[11px] uppercase tracking-widest text-[var(--text-muted)] mb-1.5 block">Valid Until</label>
                         <input type="date" value={visaUntil} onChange={(e) => setVisaUntil(e.target.value)}
-                          className="w-full h-10 px-3 rounded-xl bg-gray-50 border border-[#E8EDF8] text-white text-[13px]" />
+                          className="w-full h-10 px-3 rounded-xl bg-gray-50 border border-[#E8EDF8] text-[var(--text-primary)] text-[13px]" />
                       </div>
                     </div>
                   )}

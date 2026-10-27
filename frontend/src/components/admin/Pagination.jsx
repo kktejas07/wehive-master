@@ -17,8 +17,8 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
   const goTo = (page) => onPageChange((page - 1) * limit);
 
   return (
-    <div className="flex items-center justify-between pt-4 border-t border-white/5">
-      <span className="text-[11px] text-slate-400">
+    <div className="flex items-center justify-between pt-4 border-t border-[var(--glass-border)]">
+      <span className="text-[11px] text-[var(--text-secondary)]">
         {skip + 1}–{Math.min(skip + limit, total)} of {total}
       </span>
       <div className="flex items-center gap-1">
@@ -26,7 +26,7 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
           onClick={() => goTo(1)}
           aria-label="First page"
           disabled={currentPage === 1}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-hover)] disabled:opacity-30 disabled:cursor-default transition"
         >
           <ChevronsLeft className="w-3.5 h-3.5" />
         </button>
@@ -34,7 +34,7 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
           onClick={() => goTo(currentPage - 1)}
           aria-label="Previous page"
           disabled={currentPage === 1}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-hover)] disabled:opacity-30 disabled:cursor-default transition"
         >
           <ChevronLeft className="w-3.5 h-3.5" />
         </button>
@@ -48,7 +48,7 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
             className={`w-7 h-7 rounded-lg text-[11px] font-bold transition ${
               p === currentPage
                 ? 'bg-[hsl(var(--blue-700))] text-white'
-                : 'text-slate-400 hover:text-white hover:bg-white/10'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-hover)]'
             }`}
           >
             {p}
@@ -61,7 +61,7 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
           onClick={() => goTo(currentPage + 1)}
           aria-label="Next page"
           disabled={currentPage === totalPages}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-hover)] disabled:opacity-30 disabled:cursor-default transition"
         >
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
@@ -69,7 +69,7 @@ export default function Pagination({ skip, limit, total, onPageChange }) {
           onClick={() => goTo(totalPages)}
           aria-label="Last page"
           disabled={currentPage === totalPages}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-default transition"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-hover)] disabled:opacity-30 disabled:cursor-default transition"
         >
           <ChevronsRight className="w-3.5 h-3.5" />
         </button>

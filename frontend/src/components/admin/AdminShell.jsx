@@ -99,7 +99,7 @@ export default function AdminShell({ children }) {
     <span
       data-testid={`admin-nav-applications-critical${mobile ? '-m' : ''}`}
       title={`${critical} critical alert${critical === 1 ? '' : 's'}`}
-      className={`${mobile ? 'ml-1.5' : collapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold tabular-nums`}
+      className={`${mobile ? 'ml-1.5' : collapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-red-500 text-[var(--text-primary)] text-[10px] font-bold tabular-nums`}
     >
       {critical}
     </span>
@@ -143,13 +143,13 @@ export default function AdminShell({ children }) {
             {!collapsed && (
               <Link to="/" className="inline-flex items-center gap-2 text-[#1B2B5E] hover:text-[#011CB5] min-w-0">
                 <img src={BRAND.logo} alt="We Hive" className="h-8 w-auto shrink-0" />
-                <span className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-bold">Admin</span>
+                <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)] font-bold">Admin</span>
               </Link>
             )}
             <button
               onClick={toggleCollapse}
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="h-7 w-7 rounded-lg bg-[#E5EBFF] hover:bg-[#D0DCFF] inline-flex items-center justify-center text-gray-500 hover:text-[#011CB5] transition-colors shrink-0"
+              className="h-7 w-7 rounded-lg bg-[#E5EBFF] hover:bg-[#D0DCFF] inline-flex items-center justify-center text-[var(--text-secondary)] hover:text-[#011CB5] transition-colors shrink-0"
             >
               {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
             </button>
@@ -164,7 +164,7 @@ export default function AdminShell({ children }) {
               return (
                 <div key={group} className={collapsed ? 'mb-3' : 'mb-5'}>
                   {!collapsed && (
-                    <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-gray-400 px-2 mb-1.5">{group}</div>
+                    <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-[var(--text-muted)] px-2 mb-1.5">{group}</div>
                   )}
                   <div className="space-y-0.5">
                     {groupTabs.map((t) => {
@@ -179,7 +179,7 @@ export default function AdminShell({ children }) {
                             data-testid={t.testid}
                             title={t.label}
                             className={`relative flex items-center justify-center h-10 w-full rounded-lg transition-colors duration-150 ${
-                              active ? 'bg-[#011CB5] text-white' : 'text-gray-500 hover:text-[#011CB5] hover:bg-[#EEF2FF]'
+                              active ? 'bg-[#011CB5] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[#011CB5] hover:bg-[#EEF2FF]'
                             }`}
                           >
                             <Icon className="w-4 h-4" />
@@ -195,8 +195,8 @@ export default function AdminShell({ children }) {
                           data-testid={t.testid}
                           className={`flex items-center gap-3 px-3 min-h-[38px] rounded-lg text-[13px] font-semibold transition-colors duration-150 ${
                             active
-                              ? 'text-white shadow-sm border-l-[3px] border-[#011CB5] pl-[10px]'
-                              : 'text-gray-500 hover:text-[#1B2B5E] hover:bg-[#EEF2FF] border-l-[3px] border-transparent'
+                              ? 'text-[var(--text-primary)] shadow-sm border-l-[3px] border-[#011CB5] pl-[10px]'
+                              : 'text-[var(--text-secondary)] hover:text-[#1B2B5E] hover:bg-[#EEF2FF] border-l-[3px] border-transparent'
                           }`}
                           style={active ? { background: 'linear-gradient(90deg, #011CB5 0%, rgba(1,28,181,0.75) 100%)' } : {}}
                         >
@@ -221,7 +221,7 @@ export default function AdminShell({ children }) {
                     <img src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })} alt="admin" className="h-full w-full object-cover" />
                   </span>
                 </button>
-                <Link to="/" title="Back to site" className="flex items-center justify-center h-8 rounded-lg bg-[#EEF2FF] hover:bg-[#E5EBFF] text-gray-500 hover:text-[#011CB5] transition-colors">
+                <Link to="/" title="Back to site" className="flex items-center justify-center h-8 rounded-lg bg-[#EEF2FF] hover:bg-[#E5EBFF] text-[var(--text-secondary)] hover:text-[#011CB5] transition-colors">
                   <ArrowLeft className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -237,7 +237,7 @@ export default function AdminShell({ children }) {
                     </span>
                     <div className="min-w-0 text-left">
                       <div className="text-[13px] font-bold text-[#1B2B5E] truncate">{user?.name || 'Admin'}</div>
-                      <div className="text-[12px] text-gray-500 truncate">{user?.email}</div>
+                      <div className="text-[12px] text-[var(--text-secondary)] truncate">{user?.email}</div>
                     </div>
                   </button>
 
@@ -251,9 +251,9 @@ export default function AdminShell({ children }) {
                             onChange={(e) => setNameVal(e.target.value)}
                             onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false); }}
                             placeholder="Display name"
-                            className="flex-1 h-8 px-2 rounded-lg bg-gray-50 border border-gray-200 text-[13px] text-[#1B2B5E] placeholder:text-gray-400 outline-none focus:border-[#011CB5]"
+                            className="flex-1 h-8 px-2 rounded-lg bg-gray-50 border border-gray-200 text-[13px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5]"
                           />
-                          <button disabled={nameBusy} onClick={saveName} className="h-8 px-3 rounded-lg bg-[#011CB5] text-white text-[12px] font-bold disabled:opacity-50">
+                          <button disabled={nameBusy} onClick={saveName} className="h-8 px-3 rounded-lg bg-[#011CB5] text-[var(--text-primary)] text-[12px] font-bold disabled:opacity-50">
                             {nameBusy ? '…' : 'Save'}
                           </button>
                         </div>
@@ -283,7 +283,7 @@ export default function AdminShell({ children }) {
                 <div className="mt-2">
                   <Link
                     to="/"
-                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-[#E8EDF8] hover:border-blue-300 min-h-[34px] px-4 text-[12px] font-semibold text-gray-600 hover:text-[#1B2B5E] transition-colors w-full"
+                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-[#E8EDF8] hover:border-blue-300 min-h-[34px] px-4 text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[#1B2B5E] transition-colors w-full"
                   >
                     <ArrowLeft className="w-3 h-3" /> Site
                   </Link>
@@ -306,7 +306,7 @@ export default function AdminShell({ children }) {
                   to={t.to}
                   end={t.id === 'overview'}
                   className={`shrink-0 snap-start inline-flex items-center rounded-lg px-3.5 min-h-[40px] text-[13px] font-semibold whitespace-nowrap transition-colors ${
-                    active ? 'bg-[#011CB5] text-white' : 'bg-white border border-[#E8EDF8] text-gray-600 hover:text-[#1B2B5E]'
+                    active ? 'bg-[#011CB5] text-[var(--text-primary)]' : 'bg-white border border-[#E8EDF8] text-[var(--text-secondary)] hover:text-[#1B2B5E]'
                   }`}
                 >
                   {t.label}
@@ -335,22 +335,22 @@ export default function AdminShell({ children }) {
 
       {/* Password Change Modal */}
       {pwModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={() => setPwModal(false)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[var(--glass)] backdrop-blur-sm" onClick={() => setPwModal(false)}>
           <div {...dialogProps} className="rounded-2xl bg-white border border-[#E8EDF8] w-full max-w-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
               <h3 className="text-[16px] font-semibold text-[#1B2B5E] mb-4">Change password</h3>
               <div className="space-y-2">
-                <label htmlFor="admin-pw-current" className="block text-[12px] font-semibold text-gray-600 mb-1">Current password</label>
-                <input id="admin-pw-current" type="password" value={pwForm.current} onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))} placeholder="Current password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-gray-400 outline-none focus:border-[#011CB5]" />
-                <label htmlFor="admin-pw-new" className="block text-[12px] font-semibold text-gray-600 mb-1">New password</label>
-                <input id="admin-pw-new" type="password" value={pwForm.new} onChange={e => setPwForm(p => ({ ...p, new: e.target.value }))} placeholder="New password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-gray-400 outline-none focus:border-[#011CB5]" />
-                <label htmlFor="admin-pw-confirm" className="block text-[12px] font-semibold text-gray-600 mb-1">Confirm new password</label>
-                <input id="admin-pw-confirm" type="password" value={pwForm.confirm} onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))} placeholder="Confirm new password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-gray-400 outline-none focus:border-[#011CB5]" />
+                <label htmlFor="admin-pw-current" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-1">Current password</label>
+                <input id="admin-pw-current" type="password" value={pwForm.current} onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))} placeholder="Current password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5]" />
+                <label htmlFor="admin-pw-new" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-1">New password</label>
+                <input id="admin-pw-new" type="password" value={pwForm.new} onChange={e => setPwForm(p => ({ ...p, new: e.target.value }))} placeholder="New password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5]" />
+                <label htmlFor="admin-pw-confirm" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-1">Confirm new password</label>
+                <input id="admin-pw-confirm" type="password" value={pwForm.confirm} onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))} placeholder="Confirm new password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5]" />
                 {pwError && <p className="text-[12px] text-red-600 font-semibold">{pwError}</p>}
               </div>
               <div className="flex gap-2 mt-5">
                 <button onClick={() => setPwModal(false)} className="flex-1 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-[13px] transition-colors">Cancel</button>
-                <button onClick={handlePasswordChange} disabled={pwSaving || !pwForm.current || !pwForm.new} className="flex-1 h-11 rounded-xl bg-[#011CB5] hover:bg-[#0122D4] disabled:opacity-50 text-white font-semibold text-[13px] transition-colors">{pwSaving ? 'Saving...' : 'Update Password'}</button>
+                <button onClick={handlePasswordChange} disabled={pwSaving || !pwForm.current || !pwForm.new} className="flex-1 h-11 rounded-xl bg-[#011CB5] hover:bg-[#0122D4] disabled:opacity-50 text-[var(--text-primary)] font-semibold text-[13px] transition-colors">{pwSaving ? 'Saving...' : 'Update Password'}</button>
               </div>
             </div>
           </div>
@@ -370,7 +370,7 @@ export function AdminHeader({ title, subtitle, right }) {
         <h1 className="mt-1.5 font-display font-bold text-[26px] sm:text-[32px] leading-tight tracking-[-0.02em] text-[#1B2B5E]">
           {title}
         </h1>
-        {subtitle && <p className="mt-1 text-[13px] text-gray-500 max-w-2xl">{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-[13px] text-[var(--text-secondary)] max-w-2xl">{subtitle}</p>}
       </div>
       {right}
     </div>

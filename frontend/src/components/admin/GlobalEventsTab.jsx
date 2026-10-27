@@ -66,23 +66,23 @@ export default function GlobalEventsTab() {
         }
       />
 
-      <div className="bg-black/20 p-4 rounded-xl border border-white/10 flex flex-wrap gap-4 items-end">
-        <label className="flex flex-col gap-1 text-sm text-slate-400">
+      <div className="bg-black/20 p-4 rounded-xl border border-[var(--glass-border)] flex flex-wrap gap-4 items-end">
+        <label className="flex flex-col gap-1 text-sm text-[var(--text-secondary)]">
           Scrape URL:
           <input 
             type="text" 
             placeholder="https://eventbrite.co.uk..." 
             value={scrapeUrl} 
             onChange={e => setScrapeUrl(e.target.value)} 
-            className="h-10 px-3 rounded-lg bg-black/40 border border-white/10 text-white w-64"
+            className="h-10 px-3 rounded-lg bg-[var(--glass)] border border-[var(--glass-border)] text-[var(--text-primary)] w-64"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-400">
+        <label className="flex flex-col gap-1 text-sm text-[var(--text-secondary)]">
           Source Platform:
           <select 
             value={scrapePlatform} 
             onChange={e => setScrapePlatform(e.target.value)} 
-            className="h-10 px-3 rounded-lg bg-black/40 border border-white/10 text-white w-36"
+            className="h-10 px-3 rounded-lg bg-[var(--glass)] border border-[var(--glass-border)] text-[var(--text-primary)] w-36"
           >
             <option value="">Website (Direct)</option>
             <option value="twitter">X / Twitter</option>
@@ -90,13 +90,13 @@ export default function GlobalEventsTab() {
             <option value="threads">Threads</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate-400">
+        <label className="flex flex-col gap-1 text-sm text-[var(--text-secondary)]">
           Country ID:
           <input 
             type="text" 
             value={scrapeCountry} 
             onChange={e => setScrapeCountry(e.target.value)} 
-            className="h-10 px-3 rounded-lg bg-black/40 border border-white/10 text-white w-32"
+            className="h-10 px-3 rounded-lg bg-[var(--glass)] border border-[var(--glass-border)] text-[var(--text-primary)] w-32"
           />
         </label>
         <button 
@@ -131,7 +131,7 @@ export default function GlobalEventsTab() {
             key={s}
             onClick={() => setStatusFilter(s)}
             className={`px-4 py-2 rounded-lg text-sm font-bold capitalize transition-colors ${
-              statusFilter === s ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/20 text-slate-400 hover:text-white'
+              statusFilter === s ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/20 text-[var(--text-secondary)] hover:text-white'
             }`}
           >
             {s}
@@ -141,23 +141,23 @@ export default function GlobalEventsTab() {
 
       <Panel>
         {loading ? (
-          <div className="p-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+          <div className="p-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-[var(--text-secondary)]" /></div>
         ) : events.length === 0 ? (
-          <div className="p-10 text-center text-slate-400 text-sm">No {statusFilter} events found.</div>
+          <div className="p-10 text-center text-[var(--text-secondary)] text-sm">No {statusFilter} events found.</div>
         ) : (
           <div className="divide-y divide-white/5">
             {events.map(evt => (
-              <div key={evt.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+              <div key={evt.id} className="p-4 flex items-center justify-between hover:bg-[var(--glass-hover)] transition-colors">
                 <div className="flex items-center gap-4">
                   {evt.image_url ? (
-                    <img loading="lazy" decoding="async" src={evt.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-black/40" />
+                    <img loading="lazy" decoding="async" src={evt.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-[var(--glass)]" />
                   ) : (
-                    <div className="w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-lg bg-[var(--glass)] flex items-center justify-center">
                       <Globe className="w-5 h-5 text-slate-600" />
                     </div>
                   )}
                   <div>
-                    <div className="text-sm font-bold text-white flex items-center gap-2">
+                    <div className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                       {evt.name}
                       {evt.is_high_risk && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[11px] uppercase tracking-wider">
@@ -165,7 +165,7 @@ export default function GlobalEventsTab() {
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-slate-400 mt-1 capitalize">
+                    <div className="text-xs text-[var(--text-secondary)] mt-1 capitalize">
                       {evt.date} • {(evt.country_id || '').replace('-', ' ')} • {evt.category}
                     </div>
                   </div>

@@ -15,7 +15,7 @@ const errText = (e) => {
 const ROLE_LABEL = { manager: 'Manager', support: 'Support', finance: 'Finance', viewer: 'Viewer' };
 
 function StatusPill({ a }) {
-  if (a.env_managed) return <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11.5px] font-semibold text-slate-200">Server setting</span>;
+  if (a.env_managed) return <span className="rounded-full bg-[var(--glass-hover)] px-2 py-0.5 text-[11.5px] font-semibold text-[var(--text-primary)]">Server setting</span>;
   if (!a.has_password) return <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11.5px] font-semibold text-amber-300">Invite pending</span>;
   return <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11.5px] font-semibold text-emerald-300">Active</span>;
 }
@@ -113,7 +113,7 @@ export default function AdminsTab() {
       />
 
       <Panel className="mb-4">
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-3">Add an admin</div>
+        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-3">Add an admin</div>
         <form
           className="grid sm:grid-cols-[1fr_1fr_auto_auto] gap-3"
           onSubmit={(e) => { e.preventDefault(); if (email.trim()) invite(email.trim(), name.trim()); }}
@@ -126,7 +126,7 @@ export default function AdminsTab() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             aria-label="Email"
-            className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white placeholder:text-slate-500"
+            className="h-10 px-3 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[13.5px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
           />
           <input
             data-testid="admin-admins-name"
@@ -134,14 +134,14 @@ export default function AdminsTab() {
             onChange={(e) => setName(e.target.value)}
             placeholder="Name (for new people)"
             aria-label="Name"
-            className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white placeholder:text-slate-500"
+            className="h-10 px-3 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[13.5px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
           />
           <select
             data-testid="admin-admins-role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             aria-label="Role"
-            className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white"
+            className="h-10 px-3 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[13.5px] text-[var(--text-primary)]"
           >
             {Object.keys(ROLE_LABEL).map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
           </select>
@@ -155,11 +155,11 @@ export default function AdminsTab() {
           </button>
         </form>
         {Object.keys(roles).length > 0 && (
-          <ul className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-0.5 text-[12px] text-slate-400">
-            {Object.entries(roles).map(([k, v]) => <li key={k}><span className="font-semibold text-slate-200">{ROLE_LABEL[k]}</span> — {v}</li>)}
+          <ul className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-0.5 text-[12px] text-[var(--text-secondary)]">
+            {Object.entries(roles).map(([k, v]) => <li key={k}><span className="font-semibold text-[var(--text-primary)]">{ROLE_LABEL[k]}</span> — {v}</li>)}
           </ul>
         )}
-        <p className="mt-3 text-[11.5px] text-slate-400">
+        <p className="mt-3 text-[11.5px] text-[var(--text-secondary)]">
           New admins get an email with a link to set their password. The link works once and expires in 72 hours.
         </p>
         {link && (
@@ -167,8 +167,8 @@ export default function AdminsTab() {
             <div className="text-[12.5px] font-semibold text-amber-200 mb-2">Invite link for {link.email}. Send it to them privately.</div>
             <div className="flex gap-2">
               <input readOnly value={link.url} onFocus={(e) => e.target.select()} aria-label="Invite link"
-                className="h-9 flex-1 min-w-0 px-3 rounded-lg bg-black/20 border border-white/10 text-[12px] text-slate-200" />
-              <button type="button" onClick={copy} className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-[12px] font-bold text-white">
+                className="h-9 flex-1 min-w-0 px-3 rounded-lg bg-black/20 border border-[var(--glass-border)] text-[12px] text-[var(--text-primary)]" />
+              <button type="button" onClick={copy} className="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-border)] text-[12px] font-bold text-[var(--text-primary)]">
                 <Copy className="w-3.5 h-3.5" /> Copy
               </button>
             </div>
@@ -179,7 +179,7 @@ export default function AdminsTab() {
       <Panel className="overflow-x-auto p-0">
         <table className="min-w-full text-[13.5px]">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 bg-white/5">
+            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-[var(--text-secondary)] bg-[var(--glass-hover)]">
               <th className="px-5 py-3">Admin</th>
               <th className="px-5 py-3">Role</th>
               <th className="px-5 py-3">Status</th>
@@ -189,31 +189,31 @@ export default function AdminsTab() {
           </thead>
           <tbody>
             {items === null && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
+              <tr><td colSpan={5} className="px-5 py-10 text-center text-[var(--text-secondary)]"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
             )}
             {items?.length === 0 && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400">
+              <tr><td colSpan={5} className="px-5 py-10 text-center text-[var(--text-secondary)]">
                 <ShieldCheck className="w-5 h-5 inline mr-2" /> No admins found.
               </td></tr>
             )}
             {items?.map((a) => {
               const isMe = me?.id === a.id;
               return (
-                <tr key={a.id} data-testid={`admin-admins-row-${a.id}`} className="border-t border-white/5 hover:bg-white/5">
+                <tr key={a.id} data-testid={`admin-admins-row-${a.id}`} className="border-t border-[var(--glass-border)] hover:bg-[var(--glass-hover)]">
                   <td className="px-5 py-3">
-                    <div className="font-bold text-white">{a.name || '—'}{isMe && <span className="ml-2 text-[11.5px] font-semibold text-slate-400">(you)</span>}</div>
-                    <div className="text-[12px] text-slate-400">{a.email || '—'}</div>
+                    <div className="font-bold text-[var(--text-primary)]">{a.name || '—'}{isMe && <span className="ml-2 text-[11.5px] font-semibold text-[var(--text-secondary)]">(you)</span>}</div>
+                    <div className="text-[12px] text-[var(--text-secondary)]">{a.email || '—'}</div>
                   </td>
                   <td className="px-5 py-3">
                     {a.env_managed ? (
-                      <span className="text-[12.5px] font-semibold text-slate-200">Super admin</span>
+                      <span className="text-[12.5px] font-semibold text-[var(--text-primary)]">Super admin</span>
                     ) : (
                       <select
                         data-testid={`admin-admins-role-${a.id}`}
                         value={a.admin_role || 'manager'}
                         onChange={(e) => changeRole(a, e.target.value)}
                         aria-label={`Role for ${a.email}`}
-                        className="h-8 px-2 rounded-lg bg-white/5 border border-white/10 text-[12.5px] text-white"
+                        className="h-8 px-2 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[12.5px] text-[var(--text-primary)]"
                       >
                         {Object.keys(ROLE_LABEL).map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
                       </select>
@@ -225,7 +225,7 @@ export default function AdminsTab() {
                       {a.totp_enabled && <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-[11.5px] font-semibold text-blue-200">2FA</span>}
                     </div>
                   </td>
-                  <td className="px-5 py-3 text-slate-400 text-[12.5px]">
+                  <td className="px-5 py-3 text-[var(--text-secondary)] text-[12.5px]">
                     {a.created_at ? new Date(a.created_at).toLocaleDateString('en-IN') : '—'}
                   </td>
                   <td className="px-5 py-3">
@@ -234,7 +234,7 @@ export default function AdminsTab() {
                         <button
                           onClick={() => invite(a.email, a.name)}
                           disabled={busy}
-                          className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/15 px-2.5 py-1.5 text-[11.5px] font-bold text-white disabled:opacity-60"
+                          className="inline-flex items-center gap-1 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-border)] px-2.5 py-1.5 text-[11.5px] font-bold text-[var(--text-primary)] disabled:opacity-60"
                         >
                           <Mail className="w-3 h-3" /> Resend invite
                         </button>
@@ -243,7 +243,7 @@ export default function AdminsTab() {
                         <button
                           data-testid={`admin-admins-reset-2fa-${a.id}`}
                           onClick={() => resetTwoFactor(a)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/15 px-2.5 py-1.5 text-[11.5px] font-bold text-white"
+                          className="inline-flex items-center gap-1 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-border)] px-2.5 py-1.5 text-[11.5px] font-bold text-[var(--text-primary)]"
                         >
                           <ShieldOff className="w-3 h-3" /> Reset 2FA
                         </button>
@@ -265,7 +265,7 @@ export default function AdminsTab() {
           </tbody>
         </table>
       </Panel>
-      <p className="mt-3 text-[11.5px] text-slate-400">
+      <p className="mt-3 text-[11.5px] text-[var(--text-secondary)]">
         Admins marked “Server setting” come from the ADMIN_EMAILS setting on the server and can only be removed there.
       </p>
     </div>
