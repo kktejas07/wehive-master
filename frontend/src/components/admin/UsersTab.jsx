@@ -16,7 +16,7 @@ function Chip({ children, color = 'slate' }) {
     amber:   'bg-amber-50 text-amber-700',
     indigo:  'bg-blue-50 text-blue-200',
     red:     'bg-red-500/15 text-red-600',
-    slate:   'bg-[#F5F7FF] text-gray-600',
+    slate:   'bg-[#F5F7FF] text-[var(--text-secondary)]',
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] uppercase tracking-[0.14em] font-bold ${map[color]}`}>
@@ -161,20 +161,20 @@ export default function UsersTab() {
       <Panel>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
             <input
               data-testid="admin-users-search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search by name, email or phone…"
-              className="w-full h-10 pl-9 pr-3 rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] focus:border-[hsl(var(--blue-700))] text-[13.5px] text-white placeholder:text-gray-400 outline-none"
+              className="w-full h-10 pl-9 pr-3 rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] focus:border-[hsl(var(--blue-700))] text-[13.5px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none"
             />
           </div>
           <select
             data-testid="admin-users-role-filter"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="h-10 px-3 rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] text-[13.5px] text-white"
+            className="h-10 px-3 rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] text-[13.5px] text-[var(--text-primary)]"
           >
             <option value="all">All roles</option>
             <option value="premium">Premium only</option>
@@ -183,7 +183,7 @@ export default function UsersTab() {
             <option value="suspended">Suspended</option>
           </select>
         </div>
-        <p className="mt-3 text-[12px] text-gray-500">
+        <p className="mt-3 text-[12px] text-[var(--text-secondary)]">
           Admin rights are granted and revoked in the{' '}
           <Link to="/admin/admins" className="text-blue-700 hover:underline">Admins</Link> tab.
         </p>
@@ -192,7 +192,7 @@ export default function UsersTab() {
       <Panel className="mt-4 overflow-x-auto p-0">
         <table className="min-w-full text-[13.5px]">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-gray-500 bg-[#F5F7FF]">
+            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-[var(--text-secondary)] bg-[#F5F7FF]">
               <th className="px-4 py-3 w-10">
                 <input
                   type="checkbox"
@@ -211,7 +211,7 @@ export default function UsersTab() {
           </thead>
           <tbody>
             {items === null && (
-              <tr><td colSpan={6} className="px-5 py-10 text-center text-gray-500"><Loader2 className="w-5 h-5 animate-spin inline text-blue-700" /></td></tr>
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-[var(--text-secondary)]"><Loader2 className="w-5 h-5 animate-spin inline text-blue-700" /></td></tr>
             )}
             {error && (
               <tr><td colSpan={6} className="px-5 py-10 text-center text-red-600" role="alert">
@@ -220,7 +220,7 @@ export default function UsersTab() {
               </td></tr>
             )}
             {!error && items?.length === 0 && (
-              <tr><td colSpan={6} className="px-5 py-10 text-center text-gray-500">No users match.</td></tr>
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-[var(--text-secondary)]">No users match.</td></tr>
             )}
             {items?.map((u) => (
               <tr key={u.id} data-testid={`admin-user-row-${u.id}`} className={`border-t border-[#E8EDF8] transition-colors duration-150 ${selected.has(u.id) ? 'bg-[#EEF2FF]' : 'hover:bg-[#F5F7FF]'}`}>
@@ -234,12 +234,12 @@ export default function UsersTab() {
                   />
                 </td>
                 <td className="px-5 py-3">
-                  <Link to={`/admin/users/${u.id}`} data-testid={`admin-user-link-${u.id}`} className="font-bold text-white hover:underline">{u.name || u.email || u.phone || '—'}</Link>
-                  <div className="text-[11px] text-gray-500 font-mono">{u.id.slice(0, 8)}…</div>
+                  <Link to={`/admin/users/${u.id}`} data-testid={`admin-user-link-${u.id}`} className="font-bold text-[var(--text-primary)] hover:underline">{u.name || u.email || u.phone || '—'}</Link>
+                  <div className="text-[11px] text-[var(--text-secondary)] font-mono">{u.id.slice(0, 8)}…</div>
                 </td>
-                <td className="px-5 py-3 text-gray-600">
+                <td className="px-5 py-3 text-[var(--text-secondary)]">
                   <div>{u.email || '—'}</div>
-                  <div className="text-[12px] text-gray-500">{u.phone || '—'}</div>
+                  <div className="text-[12px] text-[var(--text-secondary)]">{u.phone || '—'}</div>
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex flex-wrap gap-1.5">
@@ -250,7 +250,7 @@ export default function UsersTab() {
                     {!u.is_admin && !u.is_staff && !u.is_premium && <Chip>Free</Chip>}
                   </div>
                 </td>
-                <td className="px-5 py-3 text-gray-500 text-[12.5px]">
+                <td className="px-5 py-3 text-[var(--text-secondary)] text-[12.5px]">
                   {u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN') : '—'}
                 </td>
                 <td className="px-5 py-3">
@@ -258,18 +258,18 @@ export default function UsersTab() {
                     <div className="relative">
                       <button
                         onClick={() => { setRemindOpen(remindOpen === u.id ? null : u.id); setRemindTpl('generic'); }}
-                        className="inline-flex items-center gap-1 rounded-lg bg-[#F5F7FF] hover:bg-[#EEF2FF] px-2.5 py-1.5 text-[11.5px] font-bold text-gray-600"
+                        className="inline-flex items-center gap-1 rounded-lg bg-[#F5F7FF] hover:bg-[#EEF2FF] px-2.5 py-1.5 text-[11.5px] font-bold text-[var(--text-secondary)]"
                         title="Send reminder"
                       >
                         <Bell className="w-3 h-3" />
                       </button>
                       {remindOpen === u.id && (
                         <div className="absolute right-0 bottom-full mb-1 z-20 rounded-xl bg-white border border-[#E8EDF8] shadow-2xl p-3 w-52">
-                          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Send reminder</p>
+                          <p className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wide mb-2">Send reminder</p>
                           <select
                             value={remindTpl}
                             onChange={(e) => setRemindTpl(e.target.value)}
-                            className="w-full h-9 px-2 rounded-lg bg-[#F5F7FF] border border-[#E8EDF8] text-[12.5px] text-white mb-2"
+                            className="w-full h-9 px-2 rounded-lg bg-[#F5F7FF] border border-[#E8EDF8] text-[12.5px] text-[var(--text-primary)] mb-2"
                           >
                             <option value="generic">General reminder</option>
                             <option value="docs_pending">Documents pending</option>
@@ -331,21 +331,21 @@ export default function UsersTab() {
           <button
             disabled={bulkBusy}
             onClick={bulkPremium}
-            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-[12.5px] font-bold"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-[var(--text-primary)] text-[12.5px] font-bold"
           >
             <Crown className="w-3.5 h-3.5" /> Grant Premium
           </button>
           <button
             disabled={bulkBusy}
             onClick={bulkRemind}
-            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#011CB5] hover:bg-[#0015A0] disabled:opacity-50 text-white text-[12.5px] font-bold"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#011CB5] hover:bg-[#0015A0] disabled:opacity-50 text-[var(--text-primary)] text-[12.5px] font-bold"
           >
             <Bell className="w-3.5 h-3.5" /> Send Reminder
           </button>
           {bulkBusy && <Loader2 className="w-4 h-4 animate-spin text-[#011CB5]" />}
           <button
             onClick={() => setSelected(new Set())}
-            className="ml-auto text-[12.5px] text-gray-400 hover:text-gray-600"
+            className="ml-auto text-[12.5px] text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
           >
             Clear
           </button>

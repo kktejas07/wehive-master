@@ -17,7 +17,7 @@ function KanbanCard({ item }) {
       className="block rounded-xl bg-[#F5F7FF] border border-[#E8EDF8] px-3 py-2.5 hover:bg-[#EEF2FF] transition-colors"
     >
       <div className="text-[13px] font-semibold text-[#1B2B5E] truncate">{item.applicant || '—'}</div>
-      <div className="text-[12px] text-gray-500 mt-0.5 truncate">
+      <div className="text-[12px] text-[var(--text-secondary)] mt-0.5 truncate">
         {item.country || '—'}{item.visa_type ? ` · ${item.visa_type}` : ''}
       </div>
       {item.days_in_stage > 7 && (
@@ -43,7 +43,7 @@ function Pipeline({ token }) {
     <Panel className="mt-6">
       <div className="flex items-center justify-between mb-4">
         <div className="text-[15px] font-display font-bold text-[#1B2B5E]">Application pipeline</div>
-        <button onClick={load} className="text-gray-500 hover:text-[#1B2B5E]">
+        <button onClick={load} className="text-[var(--text-secondary)] hover:text-[#1B2B5E]">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
@@ -52,15 +52,15 @@ function Pipeline({ token }) {
         <div className="grid md:grid-cols-3 gap-4">
           {data.columns.map((col) => (
             <div key={col.status}>
-              <div className={`text-[11px] uppercase tracking-[0.14em] font-bold mb-2 ${STATUS_COLOR[col.status] || 'text-gray-500'}`}>
-                {col.label} <span className="text-gray-400">({col.items.length})</span>
+              <div className={`text-[11px] uppercase tracking-[0.14em] font-bold mb-2 ${STATUS_COLOR[col.status] || 'text-[var(--text-secondary)]'}`}>
+                {col.label} <span className="text-[var(--text-muted)]">({col.items.length})</span>
               </div>
               <div className="space-y-2">
                 {col.items.slice(0, 20).map((item) => (
                   <KanbanCard key={item.id} item={item} />
                 ))}
                 {col.items.length === 0 && (
-                  <div className="text-[12px] text-gray-400 py-4 text-center">Empty</div>
+                  <div className="text-[12px] text-[var(--text-muted)] py-4 text-center">Empty</div>
                 )}
               </div>
             </div>
@@ -160,16 +160,16 @@ function InactiveUsers({ token }) {
               />
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] font-semibold text-[#1B2B5E] truncate">{u.name || u.email || u.id}</div>
-                <div className="text-[12px] text-gray-500">{u.email}</div>
+                <div className="text-[12px] text-[var(--text-secondary)]">{u.email}</div>
               </div>
               <div className="text-right shrink-0">
-                <div className="text-[12px] text-gray-600">{u.days_inactive ?? '?'}d inactive</div>
+                <div className="text-[12px] text-[var(--text-secondary)]">{u.days_inactive ?? '?'}d inactive</div>
                 <div className="text-[11px] text-amber-700">{u.recommended_action.replace('_', ' ')}</div>
               </div>
             </label>
           ))}
           {data.users.length === 0 && (
-            <div className="text-[13px] text-gray-500 py-6 text-center">No inactive users.</div>
+            <div className="text-[13px] text-[var(--text-secondary)] py-6 text-center">No inactive users.</div>
           )}
         </div>
       )}
@@ -198,18 +198,18 @@ function AnomaliesPanel({ token }) {
         <div className="text-[15px] font-display font-bold text-[#1B2B5E] flex items-center gap-2">
           AI anomalies
           {items.length > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
+            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-[var(--text-primary)] text-[10px] font-bold">
               {items.length}
             </span>
           )}
         </div>
-        <span className="text-gray-500 text-[12px]">{open ? '▲' : '▼'}</span>
+        <span className="text-[var(--text-secondary)] text-[12px]">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
         <div className="mt-3">
           {!data && <Loader2 className="w-4 h-4 animate-spin text-blue-700" />}
           {data && items.length === 0 && (
-            <div className="text-[13px] text-gray-500 py-2">No anomalies detected.</div>
+            <div className="text-[13px] text-[var(--text-secondary)] py-2">No anomalies detected.</div>
           )}
           {items.map((a, i) => (
             <div key={i} className="flex items-start gap-3 py-2.5 border-t first:border-t-0 border-[#E8EDF8]">
@@ -267,11 +267,11 @@ export default function MonitoringTab() {
           {[
             { label: 'Stale cases', value: dashboard.stale_cases, color: dashboard.stale_cases > 0 ? 'text-amber-700' : 'text-emerald-300' },
             { label: 'Pending docs', value: dashboard.pending_docs, color: dashboard.pending_docs > 0 ? 'text-amber-700' : 'text-emerald-300' },
-            { label: 'Inactive users (7d)', value: dashboard.inactive_users, color: dashboard.inactive_users > 5 ? 'text-red-600' : 'text-gray-600' },
-            { label: 'Email bounces (30d)', value: dashboard.email_bounces, color: dashboard.email_bounces > 0 ? 'text-red-600' : 'text-gray-600' },
+            { label: 'Inactive users (7d)', value: dashboard.inactive_users, color: dashboard.inactive_users > 5 ? 'text-red-600' : 'text-[var(--text-secondary)]' },
+            { label: 'Email bounces (30d)', value: dashboard.email_bounces, color: dashboard.email_bounces > 0 ? 'text-red-600' : 'text-[var(--text-secondary)]' },
           ].map((t) => (
             <Panel key={t.label}>
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-500">{t.label}</div>
+              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">{t.label}</div>
               <div className={`mt-2 text-[28px] font-display font-bold ${t.color}`}>{t.value}</div>
             </Panel>
           ))}

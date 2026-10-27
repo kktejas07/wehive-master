@@ -30,31 +30,31 @@ function ReviewRow({ item, token, onDecided, readOnly }) {
   };
 
   return (
-    <li className="px-5 py-4 border-t first:border-t-0 border-white/5" data-testid={`review-item-${item.id}`}>
+    <li className="px-5 py-4 border-t first:border-t-0 border-[var(--glass-border)]" data-testid={`review-item-${item.id}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`px-2 py-0.5 rounded-full text-[10.5px] uppercase tracking-[0.12em] font-bold ${SEVERITY_PILL?.[item.severity] || 'bg-white/10 text-slate-200'}`}>{item.severity}</span>
-            <span className="text-white font-semibold capitalize">{label(item.document)}</span>
-            {item.title && <span className="text-slate-400 text-[13px] truncate">· {item.title}</span>}
+            <span className={`px-2 py-0.5 rounded-full text-[10.5px] uppercase tracking-[0.12em] font-bold ${SEVERITY_PILL?.[item.severity] || 'bg-[var(--glass-hover)] text-[var(--text-primary)]'}`}>{item.severity}</span>
+            <span className="text-[var(--text-primary)] font-semibold capitalize">{label(item.document)}</span>
+            {item.title && <span className="text-[var(--text-secondary)] text-[13px] truncate">· {item.title}</span>}
           </div>
-          <div className="mt-1 text-[12.5px] text-slate-400">
+          <div className="mt-1 text-[12.5px] text-[var(--text-secondary)]">
             {item.user?.id ? <Link to={`/admin/users/${item.user.id}`} className="text-blue-300 hover:underline">{item.user.name || item.user.email}</Link> : 'Unknown user'}
             {item.application_id && <> · <Link to={`/admin/applications/${item.application_id}`} className="text-blue-300 hover:underline">open case</Link></>}
             {' · '}scanned {fmt(item.created_at)}
           </div>
           <ul className="mt-2 space-y-1">
             {item.flags.map((f) => (
-              <li key={f.kind} className="text-[13px] text-slate-200 flex gap-2">
-                <AlertTriangle className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${f.severity === 'critical' ? 'text-red-300' : f.severity === 'warning' ? 'text-amber-300' : 'text-slate-400'}`} aria-hidden="true" />
+              <li key={f.kind} className="text-[13px] text-[var(--text-primary)] flex gap-2">
+                <AlertTriangle className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${f.severity === 'critical' ? 'text-red-300' : f.severity === 'warning' ? 'text-amber-300' : 'text-[var(--text-secondary)]'}`} aria-hidden="true" />
                 <span>{f.message}</span>
               </li>
             ))}
           </ul>
           {item.review && (
-            <div className="mt-2 text-[12.5px] text-slate-400">
+            <div className="mt-2 text-[12.5px] text-[var(--text-secondary)]">
               {item.review.decision === 'cleared' ? 'Cleared' : 'Marked suspicious'} by {item.review.by} · {fmt(item.review.at)}
-              {item.review.note && <span className="text-slate-300"> — “{item.review.note}”</span>}
+              {item.review.note && <span className="text-[var(--text-secondary)]"> — “{item.review.note}”</span>}
             </div>
           )}
         </div>
@@ -73,14 +73,14 @@ function ReviewRow({ item, token, onDecided, readOnly }) {
       </div>
       {flagging && (
         <form className="mt-3 space-y-2" onSubmit={(e) => { e.preventDefault(); decide('suspicious'); }}>
-          <label htmlFor={`review-note-${item.id}`} className="block text-[12px] text-slate-300">What looks wrong? This is added to the case's internal notes.</label>
+          <label htmlFor={`review-note-${item.id}`} className="block text-[12px] text-[var(--text-secondary)]">What looks wrong? This is added to the case's internal notes.</label>
           <textarea id={`review-note-${item.id}`} rows={2} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-[13.5px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
+            className="w-full px-3 py-2 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] text-[13.5px] text-[var(--text-primary)] outline-none focus:border-[hsl(var(--blue-700))]" />
           <div className="flex gap-2">
-            <button type="submit" disabled={busy || note.trim().length < 3} className="inline-flex items-center gap-1 rounded-lg bg-red-600 hover:bg-red-700 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-50">
+            <button type="submit" disabled={busy || note.trim().length < 3} className="inline-flex items-center gap-1 rounded-lg bg-red-600 hover:bg-red-700 px-3 py-1.5 text-[12px] font-bold text-[var(--text-primary)] disabled:opacity-50">
               {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Mark suspicious
             </button>
-            <button type="button" onClick={() => setFlagging(false)} className="rounded-lg bg-white/10 hover:bg-white/20 px-3 py-1.5 text-[12px] font-bold text-white">Cancel</button>
+            <button type="button" onClick={() => setFlagging(false)} className="rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] px-3 py-1.5 text-[12px] font-bold text-[var(--text-primary)]">Cancel</button>
           </div>
         </form>
       )}
@@ -118,16 +118,16 @@ export default function ReviewQueueTab() {
       <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Review state">
         {STATES.map(([id, l]) => (
           <button key={id} onClick={() => setState(id)} aria-pressed={state === id}
-            className={`h-9 px-3 rounded-lg text-[12.5px] font-bold ${state === id ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 text-slate-300 hover:text-white'}`}>
+            className={`h-9 px-3 rounded-lg text-[12.5px] font-bold ${state === id ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:text-white'}`}>
             {l}{state === id && data ? ` · ${data.total}` : ''}
           </button>
         ))}
       </div>
       <Panel className="p-0">
-        {error && <div role="alert" className="px-5 py-8 text-center text-red-300">Could not load the queue: {error} <button onClick={load} className="underline text-slate-200">Retry</button></div>}
+        {error && <div role="alert" className="px-5 py-8 text-center text-red-300">Could not load the queue: {error} <button onClick={load} className="underline text-[var(--text-primary)]">Retry</button></div>}
         {!data && !error && <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></div>}
         {data && data.items.length === 0 && (
-          <div className="px-5 py-10 text-center text-slate-400"><ShieldAlert className="w-5 h-5 inline mr-2" />Nothing here.</div>
+          <div className="px-5 py-10 text-center text-[var(--text-secondary)]"><ShieldAlert className="w-5 h-5 inline mr-2" />Nothing here.</div>
         )}
         {data && data.items.length > 0 && (
           <ul>{data.items.map((i) => <ReviewRow key={i.id} item={i} token={token} readOnly={!canWrite(admin, 'cases')} onDecided={state === 'open' ? remove : load} />)}</ul>

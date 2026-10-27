@@ -19,20 +19,20 @@ const AGENT_OPTIONS = [
 
 function StatCard({ label, value, hint, Icon }) {
   return (
-    <div className="rounded-2xl bg-[#111632] border border-white/5 p-4">
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400">
+    <div className="rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] p-4">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] font-bold text-[var(--text-secondary)]">
         {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
         {label}
       </div>
-      <div className="mt-2 text-[26px] font-bold text-white tracking-tight">{value}</div>
-      {hint ? <div className="mt-1 text-[11.5px] text-slate-400">{hint}</div> : null}
+      <div className="mt-2 text-[26px] font-bold text-[var(--text-primary)] tracking-tight">{value}</div>
+      {hint ? <div className="mt-1 text-[11.5px] text-[var(--text-secondary)]">{hint}</div> : null}
     </div>
   );
 }
 
 function Pill({ children, tone = 'slate' }) {
   const tones = {
-    slate: 'bg-white/5 text-slate-300 border-white/10',
+    slate: 'bg-[var(--glass-hover)] text-[var(--text-secondary)] border-[var(--glass-border)]',
     navy: 'bg-blue-500/10 text-blue-300 border-blue-400/20',
     red: 'bg-red-500/10 text-red-300 border-red-400/20',
     green: 'bg-emerald-500/10 text-emerald-300 border-emerald-400/20',
@@ -47,10 +47,10 @@ function Pill({ children, tone = 'slate' }) {
 
 function ActionButton({ onClick, loading, children, Icon, tone = 'navy', disabled }) {
   const tones = {
-    navy: 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500',
-    red: 'bg-red-600 hover:bg-red-500 text-white border-red-500',
-    green: 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500',
-    slate: 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10',
+    navy: 'bg-blue-600 hover:bg-blue-500 text-[var(--text-primary)] border-blue-500',
+    red: 'bg-red-600 hover:bg-red-500 text-[var(--text-primary)] border-red-500',
+    green: 'bg-emerald-600 hover:bg-emerald-500 text-[var(--text-primary)] border-emerald-500',
+    slate: 'bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] border-[var(--glass-border)]',
   };
   return (
     <button
@@ -237,7 +237,7 @@ export default function HiveLearningTab() {
             <select
               value={days}
               onChange={(e) => setDays(parseInt(e.target.value, 10) || 7)}
-              className="h-10 rounded-lg bg-[#111632] border border-white/10 px-3 text-[12px] text-slate-200 outline-none"
+              className="h-10 rounded-lg bg-[var(--panel-bg)] border border-[var(--glass-border)] px-3 text-[12px] text-[var(--text-primary)] outline-none"
             >
               {[1, 3, 7, 14, 30].map(d => <option key={d} value={d}>Last {d} day{d > 1 ? 's' : ''}</option>)}
             </select>
@@ -273,11 +273,11 @@ export default function HiveLearningTab() {
       <Panel>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <div className="flex items-center gap-2 text-[13px] font-bold text-white">
+            <div className="flex items-center gap-2 text-[13px] font-bold text-[var(--text-primary)]">
               <Brain className="w-4 h-4 text-emerald-400" />
               Real-time self-learning
             </div>
-            <p className="text-[12.5px] text-slate-400 mt-1 max-w-2xl">
+            <p className="text-[12.5px] text-[var(--text-secondary)] mt-1 max-w-2xl">
               On every server boot, Hive greps the most recent feeds and asks the model to improve
               the 4 system prompts. New versions are saved to Mongo and picked up on the next run —
               no restart. Use the controls below to mine, propose, or auto-apply on demand.
@@ -302,24 +302,24 @@ export default function HiveLearningTab() {
         </div>
 
         {autoApplyResult && (
-          <div className="mt-4 rounded-xl bg-black/30 border border-white/10 p-4 text-[12.5px] text-slate-200">
+          <div className="mt-4 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] p-4 text-[12.5px] text-[var(--text-primary)]">
             <div className="flex items-center gap-2 mb-2 text-emerald-300">
               <CheckCircle2 className="w-4 h-4" />
               <span className="font-bold">Auto-apply result</span>
             </div>
-            <div className="text-slate-300 mb-2">
+            <div className="text-[var(--text-secondary)] mb-2">
               Feeds seen: {autoApplyResult.feeds_seen} · Force: {String(autoApplyResult.force)} · min_delta: {autoApplyResult.min_delta}
             </div>
             {autoApplyResult.note && <div className="text-amber-300 mb-2">{autoApplyResult.note}</div>}
             {autoApplyResult.applied?.length > 0 && (
               <div className="mb-2">
-                <div className="font-bold text-white mb-1">Applied</div>
+                <div className="font-bold text-[var(--text-primary)] mb-1">Applied</div>
                 <ul className="space-y-1">
                   {autoApplyResult.applied.map((a) => (
                     <li key={a.agent_id} className="flex items-center gap-2">
                       <Pill tone="green">v{a.version}</Pill>
-                      <span className="font-mono text-slate-300">{a.agent_id}</span>
-                      <span className="text-slate-400">delta={a.delta}</span>
+                      <span className="font-mono text-[var(--text-secondary)]">{a.agent_id}</span>
+                      <span className="text-[var(--text-secondary)]">delta={a.delta}</span>
                     </li>
                   ))}
                 </ul>
@@ -327,11 +327,11 @@ export default function HiveLearningTab() {
             )}
             {autoApplyResult.skipped?.length > 0 && (
               <div>
-                <div className="font-bold text-white mb-1">Skipped</div>
+                <div className="font-bold text-[var(--text-primary)] mb-1">Skipped</div>
                 <ul className="space-y-1">
                   {autoApplyResult.skipped.map((s) => (
-                    <li key={s.agent_id || s.reason} className="text-slate-400">
-                      <span className="font-mono text-slate-300">{s.agent_id || '—'}</span> · {s.reason}
+                    <li key={s.agent_id || s.reason} className="text-[var(--text-secondary)]">
+                      <span className="font-mono text-[var(--text-secondary)]">{s.agent_id || '—'}</span> · {s.reason}
                     </li>
                   ))}
                 </ul>
@@ -351,34 +351,34 @@ export default function HiveLearningTab() {
         {/* Mine */}
         <Panel>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2 text-[13px] font-bold text-white">
+            <div className="flex items-center gap-2 text-[13px] font-bold text-[var(--text-primary)]">
               <ListChecks className="w-4 h-4 text-blue-300" />
               Mine recent feeds
             </div>
             <ActionButton onClick={runMine} loading={mining} Icon={Brain}>Grep &amp; cluster</ActionButton>
           </div>
           {!mineResult && (
-            <p className="text-[12.5px] text-slate-400">
-              Click <span className="text-white font-bold">Grep &amp; cluster</span> to send the last {days}-day
+            <p className="text-[12.5px] text-[var(--text-secondary)]">
+              Click <span className="text-[var(--text-primary)] font-bold">Grep &amp; cluster</span> to send the last {days}-day
               feed window to the model. It returns top intents, weak-answer gaps, and missing tools.
             </p>
           )}
           {mineResult && (
-            <div className="space-y-3 text-[12.5px] text-slate-200">
-              <div className="text-slate-400">Feeds in window: <span className="text-white font-bold">{mineResult.feeds_count}</span></div>
+            <div className="space-y-3 text-[12.5px] text-[var(--text-primary)]">
+              <div className="text-[var(--text-secondary)]">Feeds in window: <span className="text-[var(--text-primary)] font-bold">{mineResult.feeds_count}</span></div>
               {mineResult.note && <div className="text-amber-300">{mineResult.note}</div>}
               {(mineResult.intents || []).length > 0 && (
                 <div>
-                  <div className="font-bold text-white mb-1">Top intents</div>
+                  <div className="font-bold text-[var(--text-primary)] mb-1">Top intents</div>
                   <ul className="space-y-1">
                     {mineResult.intents.map((it) => (
-                      <li key={it.label} className="rounded-lg bg-white/5 border border-white/10 p-2">
+                      <li key={it.label} className="rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] p-2">
                         <div className="flex items-center gap-2 mb-1">
                           <Pill tone="navy">{it.label}</Pill>
                           {it.agents?.map(a => <Pill key={a} tone="slate">{a}</Pill>)}
                         </div>
                         {it.phrasings?.length > 0 && (
-                          <ul className="list-disc pl-4 text-slate-300">
+                          <ul className="list-disc pl-4 text-[var(--text-secondary)]">
                             {it.phrasings.slice(0, 3).map((p) => <li key={p}>{p}</li>)}
                           </ul>
                         )}
@@ -389,13 +389,13 @@ export default function HiveLearningTab() {
               )}
               {(mineResult.gaps || []).length > 0 && (
                 <div>
-                  <div className="font-bold text-white mb-1">Gaps (weak answers)</div>
+                  <div className="font-bold text-[var(--text-primary)] mb-1">Gaps (weak answers)</div>
                   <ul className="space-y-1">
                     {mineResult.gaps.map((g) => (
                       <li key={g.label} className="rounded-lg bg-red-500/5 border border-red-400/20 p-2">
                         <div className="font-bold text-red-200">{g.label}</div>
-                        <div className="text-slate-300">{g.why_weak}</div>
-                        {g.evidence && <div className="text-slate-400 text-[11px]">{g.evidence}</div>}
+                        <div className="text-[var(--text-secondary)]">{g.why_weak}</div>
+                        {g.evidence && <div className="text-[var(--text-secondary)] text-[11px]">{g.evidence}</div>}
                       </li>
                     ))}
                   </ul>
@@ -403,13 +403,13 @@ export default function HiveLearningTab() {
               )}
               {(mineResult.tool_gaps || []).length > 0 && (
                 <div>
-                  <div className="font-bold text-white mb-1">Missing tools</div>
+                  <div className="font-bold text-[var(--text-primary)] mb-1">Missing tools</div>
                   <ul className="space-y-1">
                     {mineResult.tool_gaps.map((t) => (
                       <li key={t.label} className="rounded-lg bg-amber-500/5 border border-amber-400/20 p-2">
                         <div className="font-bold text-amber-200">{t.label}</div>
-                        <div className="text-slate-300">{t.description}</div>
-                        {t.suggested_tool && <div className="text-slate-400 text-[11px]">→ {t.suggested_tool}</div>}
+                        <div className="text-[var(--text-secondary)]">{t.description}</div>
+                        {t.suggested_tool && <div className="text-[var(--text-secondary)] text-[11px]">→ {t.suggested_tool}</div>}
                       </li>
                     ))}
                   </ul>
@@ -422,7 +422,7 @@ export default function HiveLearningTab() {
         {/* Propose prompt edits */}
         <Panel>
           <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-[13px] font-bold text-white">
+            <div className="flex items-center gap-2 text-[13px] font-bold text-[var(--text-primary)]">
               <FileText className="w-4 h-4 text-emerald-300" />
               Propose prompt edit
             </div>
@@ -430,7 +430,7 @@ export default function HiveLearningTab() {
               <select
                 value={proposeAgent}
                 onChange={(e) => setProposeAgent(e.target.value)}
-                className="h-10 rounded-lg bg-[#0a0e1e] border border-white/10 px-3 text-[12px] text-slate-200 outline-none"
+                className="h-10 rounded-lg bg-[#0a0e1e] border border-[var(--glass-border)] px-3 text-[12px] text-[var(--text-primary)] outline-none"
               >
                 {AGENT_OPTIONS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
               </select>
@@ -438,8 +438,8 @@ export default function HiveLearningTab() {
             </div>
           </div>
           {!proposeResult && (
-            <p className="text-[12.5px] text-slate-400">
-              The model reads the agent's <span className="text-white font-mono">{proposeAgent}</span> feeds
+            <p className="text-[12.5px] text-[var(--text-secondary)]">
+              The model reads the agent's <span className="text-[var(--text-primary)] font-mono">{proposeAgent}</span> feeds
               and rewrites the system prompt. Review the diff, then click Apply to save a new version
               (real-time — no restart).
             </p>
@@ -448,28 +448,28 @@ export default function HiveLearningTab() {
             <div className="text-amber-300 text-[12.5px]">{proposeResult.note || 'No proposal returned.'}</div>
           )}
           {proposeResult?.ok && (
-            <div className="space-y-3 text-[12px] text-slate-200">
+            <div className="space-y-3 text-[12px] text-[var(--text-primary)]">
               <div className="flex items-center gap-2 flex-wrap">
                 <Pill tone="navy">{proposeResult.prompt_id}</Pill>
                 <Pill tone="slate">v{proposeResult.current_version} → v{proposeResult.proposed_version}</Pill>
                 {proposeResult.delta != null && <Pill tone={proposeResult.delta >= 0.12 ? 'green' : 'amber'}>Δ={proposeResult.delta}</Pill>}
               </div>
-              <details className="rounded-lg bg-black/30 border border-white/10 p-2" open>
-                <summary className="cursor-pointer text-white font-bold text-[12px]">Current system prompt</summary>
-                <pre className="mt-2 text-[11.5px] whitespace-pre-wrap text-slate-300">{proposeResult.current_system}</pre>
+              <details className="rounded-lg bg-[var(--glass)] border border-[var(--glass-border)] p-2" open>
+                <summary className="cursor-pointer text-[var(--text-primary)] font-bold text-[12px]">Current system prompt</summary>
+                <pre className="mt-2 text-[11.5px] whitespace-pre-wrap text-[var(--text-secondary)]">{proposeResult.current_system}</pre>
               </details>
               <details className="rounded-lg bg-emerald-500/5 border border-emerald-400/20 p-2" open>
                 <summary className="cursor-pointer text-emerald-200 font-bold text-[12px]">Proposed new system prompt</summary>
-                <pre className="mt-2 text-[11.5px] whitespace-pre-wrap text-slate-200">{proposeResult.new_system}</pre>
+                <pre className="mt-2 text-[11.5px] whitespace-pre-wrap text-[var(--text-primary)]">{proposeResult.new_system}</pre>
               </details>
               {(proposeResult.changes || []).length > 0 && (
                 <div>
-                  <div className="font-bold text-white mb-1">What changed</div>
+                  <div className="font-bold text-[var(--text-primary)] mb-1">What changed</div>
                   <ul className="space-y-1">
                     {proposeResult.changes.map((c) => (
-                      <li key={c.intent} className="rounded-lg bg-white/5 border border-white/10 p-2 text-[11.5px]">
-                        <div className="text-white font-bold">{c.intent}</div>
-                        <div className="text-slate-400"><span className="line-through">{c.before}</span> → <span className="text-emerald-200">{c.after}</span></div>
+                      <li key={c.intent} className="rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] p-2 text-[11.5px]">
+                        <div className="text-[var(--text-primary)] font-bold">{c.intent}</div>
+                        <div className="text-[var(--text-secondary)]"><span className="line-through">{c.before}</span> → <span className="text-emerald-200">{c.after}</span></div>
                       </li>
                     ))}
                   </ul>
@@ -490,7 +490,7 @@ export default function HiveLearningTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Panel>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2 text-[13px] font-bold text-white">
+            <div className="flex items-center gap-2 text-[13px] font-bold text-[var(--text-primary)]">
               <BookOpen className="w-4 h-4 text-blue-300" />
               Propose new prompt-kit cards
             </div>
@@ -499,25 +499,25 @@ export default function HiveLearningTab() {
           {cardsResult?.prompts?.length > 0 ? (
             <ul className="space-y-2 text-[12.5px]">
               {cardsResult.prompts.map((p) => (
-                <li key={p.title} className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <li key={p.title} className="rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <Pill tone="navy">{p.title}</Pill>
                     {p.target_agent && <Pill tone="slate">{p.target_agent}</Pill>}
                   </div>
-                  <div className="text-slate-300">{p.sub}</div>
-                  <div className="text-slate-400 italic mt-1">"{p.sample_question}"</div>
-                  {p.rationale && <div className="text-slate-400 text-[11px] mt-1">{p.rationale}</div>}
+                  <div className="text-[var(--text-secondary)]">{p.sub}</div>
+                  <div className="text-[var(--text-secondary)] italic mt-1">"{p.sample_question}"</div>
+                  {p.rationale && <div className="text-[var(--text-secondary)] text-[11px] mt-1">{p.rationale}</div>}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-[12.5px] text-slate-400">No suggestions yet — generate from recent feeds.</p>
+            <p className="text-[12.5px] text-[var(--text-secondary)]">No suggestions yet — generate from recent feeds.</p>
           )}
         </Panel>
 
         <Panel>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2 text-[13px] font-bold text-white">
+            <div className="flex items-center gap-2 text-[13px] font-bold text-[var(--text-primary)]">
               <Wrench className="w-4 h-4 text-amber-300" />
               Propose new tools
             </div>
@@ -531,19 +531,19 @@ export default function HiveLearningTab() {
                     <Pill tone="amber">{t.name}</Pill>
                     {t.target_agent && <Pill tone="slate">{t.target_agent}</Pill>}
                   </div>
-                  <div className="text-slate-200">{t.description}</div>
-                  {t.when_to_call && <div className="text-slate-400 text-[11.5px] mt-1">When: {t.when_to_call}</div>}
+                  <div className="text-[var(--text-primary)]">{t.description}</div>
+                  {t.when_to_call && <div className="text-[var(--text-secondary)] text-[11.5px] mt-1">When: {t.when_to_call}</div>}
                   {t.parameters && (
                     <details className="mt-1">
-                      <summary className="cursor-pointer text-[11px] text-slate-400">Schema</summary>
-                      <pre className="mt-1 text-[11px] whitespace-pre-wrap text-slate-300">{JSON.stringify(t.parameters, null, 2)}</pre>
+                      <summary className="cursor-pointer text-[11px] text-[var(--text-secondary)]">Schema</summary>
+                      <pre className="mt-1 text-[11px] whitespace-pre-wrap text-[var(--text-secondary)]">{JSON.stringify(t.parameters, null, 2)}</pre>
                     </details>
                   )}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-[12.5px] text-slate-400">No suggestions yet — generate from recent feeds.</p>
+            <p className="text-[12.5px] text-[var(--text-secondary)]">No suggestions yet — generate from recent feeds.</p>
           )}
         </Panel>
       </div>
@@ -552,27 +552,27 @@ export default function HiveLearningTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Panel>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2 text-[13px] font-bold text-white">
-              <Database className="w-4 h-4 text-slate-300" />
+            <div className="flex items-center gap-2 text-[13px] font-bold text-[var(--text-primary)]">
+              <Database className="w-4 h-4 text-[var(--text-secondary)]" />
               Recent feeds ({feeds.length})
             </div>
           </div>
           {feeds.length === 0 ? (
-            <p className="text-[12.5px] text-slate-400">No feeds yet. Have a few conversations with Hive.</p>
+            <p className="text-[12.5px] text-[var(--text-secondary)]">No feeds yet. Have a few conversations with Hive.</p>
           ) : (
             <ul className="space-y-2 text-[12px] max-h-[420px] overflow-y-auto pr-1">
               {feeds.map((f) => (
-                <li key={f.ts + (f.user_input || '')} className="rounded-lg bg-white/5 border border-white/10 p-2.5">
+                <li key={f.ts + (f.user_input || '')} className="rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] p-2.5">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <Pill tone="navy">{f.agent_id}</Pill>
                     {f.tool_calls?.map(t => <Pill key={t} tone="slate">{t}</Pill>)}
                     {f.error && <Pill tone="red">error</Pill>}
-                    <span className="ml-auto text-[11px] text-slate-400 inline-flex items-center gap-1">
+                    <span className="ml-auto text-[11px] text-[var(--text-secondary)] inline-flex items-center gap-1">
                       <Clock className="w-3 h-3" />{new Date(f.ts).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <div className="text-slate-200"><span className="text-slate-400">U:</span> {f.user_input}</div>
-                  {f.answer && <div className="text-slate-300 mt-0.5 line-clamp-2"><span className="text-slate-400">A:</span> {f.answer}</div>}
+                  <div className="text-[var(--text-primary)]"><span className="text-[var(--text-secondary)]">U:</span> {f.user_input}</div>
+                  {f.answer && <div className="text-[var(--text-secondary)] mt-0.5 line-clamp-2"><span className="text-[var(--text-secondary)]">A:</span> {f.answer}</div>}
                 </li>
               ))}
             </ul>
@@ -581,30 +581,30 @@ export default function HiveLearningTab() {
 
         <Panel>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2 text-[13px] font-bold text-white">
-              <BarChart3 className="w-4 h-4 text-slate-300" />
+            <div className="flex items-center gap-2 text-[13px] font-bold text-[var(--text-primary)]">
+              <BarChart3 className="w-4 h-4 text-[var(--text-secondary)]" />
               Proposal history
             </div>
           </div>
           {proposals.length === 0 ? (
-            <p className="text-[12.5px] text-slate-400">No proposals yet.</p>
+            <p className="text-[12.5px] text-[var(--text-secondary)]">No proposals yet.</p>
           ) : (
             <ul className="space-y-2 text-[12px] max-h-[420px] overflow-y-auto pr-1">
               {proposals.map((p) => (
-                <li key={p.id || p.ts} className="rounded-lg bg-white/5 border border-white/10 p-2.5">
+                <li key={p.id || p.ts} className="rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] p-2.5">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <Pill tone={p.payload?.applied ? 'green' : 'slate'}>{p.kind}</Pill>
                     {p.status && p.status !== 'proposed' && <Pill tone={p.status === 'applied' ? 'green' : 'slate'}>{p.status}</Pill>}
                     {p.payload?.agent_id && <Pill tone="navy">{p.payload.agent_id}</Pill>}
                     {p.payload?.version != null && <Pill tone="slate">v{p.payload.version}</Pill>}
-                    <span className="ml-auto text-[11px] text-slate-400 inline-flex items-center gap-1">
+                    <span className="ml-auto text-[11px] text-[var(--text-secondary)] inline-flex items-center gap-1">
                       <Clock className="w-3 h-3" />{new Date(p.ts).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                   {p.payload?.new_system && (
                     <details>
-                      <summary className="cursor-pointer text-[11px] text-slate-400">View system text</summary>
-                      <pre className="mt-1 text-[11px] whitespace-pre-wrap text-slate-300">{p.payload.new_system}</pre>
+                      <summary className="cursor-pointer text-[11px] text-[var(--text-secondary)]">View system text</summary>
+                      <pre className="mt-1 text-[11px] whitespace-pre-wrap text-[var(--text-secondary)]">{p.payload.new_system}</pre>
                     </details>
                   )}
                   {p.status === 'proposed' && p.id && (
@@ -613,7 +613,7 @@ export default function HiveLearningTab() {
                         <button
                           onClick={() => decide(p, 'approve')}
                           disabled={deciding === p.id}
-                          className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11.5px] font-bold disabled:opacity-60"
+                          className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-[var(--text-primary)] text-[11.5px] font-bold disabled:opacity-60"
                         >
                           {deciding === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />} Approve & apply
                         </button>
@@ -621,7 +621,7 @@ export default function HiveLearningTab() {
                       <button
                         onClick={() => decide(p, 'reject')}
                         disabled={deciding === p.id}
-                        className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-[11.5px] font-bold disabled:opacity-60"
+                        className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-border)] text-[var(--text-primary)] text-[11.5px] font-bold disabled:opacity-60"
                       >
                         <XCircle className="w-3 h-3" /> Reject
                       </button>

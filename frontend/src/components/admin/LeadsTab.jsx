@@ -16,7 +16,7 @@ const FILTERS = [...STATUSES, 'all'];
 const PILL = {
   new: 'bg-blue-100 text-blue-700',
   contacted: 'bg-amber-100 text-amber-700',
-  closed: 'bg-[#F0F4FF] text-gray-500',
+  closed: 'bg-[#F0F4FF] text-[var(--text-secondary)]',
 };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const PURPOSE_LABEL = {
@@ -96,7 +96,7 @@ export default function LeadsTab() {
             data-testid="admin-leads-export"
             onClick={exportCsv}
             disabled={exporting}
-            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[#F8FAFF] hover:bg-[#F0F4FF] border border-[#E8EDF8] text-[13px] font-semibold text-gray-600 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[#F8FAFF] hover:bg-[#F0F4FF] border border-[#E8EDF8] text-[13px] font-semibold text-[var(--text-secondary)] disabled:opacity-60"
           >
             {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Export CSV
           </button>
@@ -114,11 +114,11 @@ export default function LeadsTab() {
                 aria-selected={on}
                 data-testid={`admin-leads-filter-${f}`}
                 onClick={() => setStatus(f)}
-                className={`h-9 px-3.5 rounded-xl text-[13px] font-semibold border transition-colors ${on ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white' : 'bg-[#F8FAFF] border-[#E8EDF8] text-gray-500 hover:bg-[#F0F4FF]'}`}
+                className={`h-9 px-3.5 rounded-xl text-[13px] font-semibold border transition-colors ${on ? 'bg-[hsl(var(--blue-700))] border-[hsl(var(--blue-700))] text-white' : 'bg-[#F8FAFF] border-[#E8EDF8] text-[var(--text-secondary)] hover:bg-[#F0F4FF]'}`}
               >
                 {cap(f)}
                 {f === 'new' && data?.new > 0 && (
-                  <span data-testid="admin-leads-new-count" className="ml-1.5 rounded-full bg-white/30 px-1.5 text-[11px] tabular-nums">{data.new}</span>
+                  <span data-testid="admin-leads-new-count" className="ml-1.5 rounded-full bg-[var(--glass-border)] px-1.5 text-[11px] tabular-nums">{data.new}</span>
                 )}
               </button>
             );
@@ -145,13 +145,13 @@ export default function LeadsTab() {
           {BRANCHES.map((b) => <option key={b.id} value={b.id}>{b.city}</option>)}
         </select>
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <input
             data-testid="admin-leads-search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, email, phone, country or message…"
-            className="w-full h-9 pl-9 pr-3 rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] focus:border-[hsl(var(--blue-700))] text-[13.5px] text-[#1B2B5E] placeholder:text-gray-400 outline-none"
+            className="w-full h-9 pl-9 pr-3 rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] focus:border-[hsl(var(--blue-700))] text-[13.5px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none"
           />
         </div>
       </div>
@@ -163,11 +163,11 @@ export default function LeadsTab() {
         {error && (
           <div className="py-10 text-center text-[13.5px] text-red-600" role="alert">
             <AlertTriangle className="w-4 h-4 inline mr-1.5" /> Could not load leads: {error}{' '}
-            <button onClick={load} className="underline text-gray-600 ml-1">Retry</button>
+            <button onClick={load} className="underline text-[var(--text-secondary)] ml-1">Retry</button>
           </div>
         )}
         {data && !error && data.items.length === 0 && (
-          <div className="py-10 text-center text-slate-400 text-[13.5px]">
+          <div className="py-10 text-center text-[var(--text-secondary)] text-[13.5px]">
             <Inbox className="w-5 h-5 inline mr-2" /> No {status === 'all' ? '' : status} leads{dq ? ' match your search' : ''}.
           </div>
         )}
@@ -183,7 +183,7 @@ export default function LeadsTab() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-[#1B2B5E]">{l.name || '—'}</span>
-                    <span className="text-[12.5px] text-gray-400 break-all">{l.email}</span>
+                    <span className="text-[12.5px] text-[var(--text-muted)] break-all">{l.email}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${PILL[l.status] || PILL.closed}`}>{cap(l.status || 'new')}</span>
                     {l.purpose && (
                       <span data-testid={`admin-lead-purpose-${l.id}`} className="rounded-full px-2 py-0.5 text-[11px] font-semibold bg-blue-100 text-blue-700">
@@ -196,10 +196,10 @@ export default function LeadsTab() {
                       </span>
                     )}
                   </div>
-                  {!expanded && <div className="mt-0.5 text-[12.5px] text-gray-400 truncate">{l.message}</div>}
+                  {!expanded && <div className="mt-0.5 text-[12.5px] text-[var(--text-muted)] truncate">{l.message}</div>}
                 </div>
-                <span className="text-[12px] text-gray-400 shrink-0 hidden sm:inline">{fmt(l.created_at)}</span>
-                <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                <span className="text-[12px] text-[var(--text-muted)] shrink-0 hidden sm:inline">{fmt(l.created_at)}</span>
+                <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
               </button>
 
               {expanded && (
@@ -207,7 +207,7 @@ export default function LeadsTab() {
                   <p className="whitespace-pre-wrap text-[13.5px] text-[#1B2B5E] rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] p-4">{l.message}</p>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <label htmlFor={`lead-status-${l.id}`} className="text-[12px] font-semibold text-gray-400">Status</label>
+                    <label htmlFor={`lead-status-${l.id}`} className="text-[12px] font-semibold text-[var(--text-muted)]">Status</label>
                     <select
                       id={`lead-status-${l.id}`}
                       data-testid={`admin-lead-status-${l.id}`}
@@ -230,7 +230,7 @@ export default function LeadsTab() {
                         <a href={`tel:${l.phone}`} className="inline-flex items-center h-9 px-3.5 rounded-lg bg-[#F0F4FF] hover:bg-[#EEF2FF] text-[#1B2B5E] text-[13px] font-semibold">
                           Call {l.phone}
                         </a>
-                        <a href={waLink(l.phone)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center h-9 px-3.5 rounded-lg bg-emerald-600/80 hover:bg-emerald-600 text-white text-[13px] font-semibold">
+                        <a href={waLink(l.phone)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center h-9 px-3.5 rounded-lg bg-emerald-600/80 hover:bg-emerald-600 text-[var(--text-primary)] text-[13px] font-semibold">
                           WhatsApp
                         </a>
                       </>
@@ -238,13 +238,13 @@ export default function LeadsTab() {
                   </div>
 
                   <div>
-                    <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-400 mb-2">Notes</div>
-                    {(l.notes || []).length === 0 && <p className="text-[12.5px] text-gray-400">No notes yet.</p>}
+                    <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-muted)] mb-2">Notes</div>
+                    {(l.notes || []).length === 0 && <p className="text-[12.5px] text-[var(--text-muted)]">No notes yet.</p>}
                     <ul className="space-y-2">
                       {(l.notes || []).map((n, i) => (
                         <li key={`${n.at}-${i}`} className="text-[13px] text-[#1B2B5E] rounded-lg bg-[#F8FAFF] px-3 py-2 border border-[#E8EDF8]">
                           <div className="whitespace-pre-wrap">{n.text}</div>
-                          <div className="mt-0.5 text-[11.5px] text-gray-400">{n.by || 'admin'} · {fmt(n.at)}</div>
+                          <div className="mt-0.5 text-[11.5px] text-[var(--text-muted)]">{n.by || 'admin'} · {fmt(n.at)}</div>
                         </li>
                       ))}
                     </ul>
@@ -256,7 +256,7 @@ export default function LeadsTab() {
                         onChange={(e) => setNote(e.target.value)}
                         rows={2}
                         placeholder="Add a note (visible to admins only)…"
-                        className="flex-1 px-3 py-2 rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] focus:border-[hsl(var(--blue-700))] text-[13px] text-[#1B2B5E] placeholder:text-gray-400 outline-none"
+                        className="flex-1 px-3 py-2 rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] focus:border-[hsl(var(--blue-700))] text-[13px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none"
                       />
                       <button
                         data-testid={`admin-lead-add-note-${l.id}`}

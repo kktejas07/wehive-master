@@ -241,7 +241,7 @@ export default function UniversitiesTab() {
         subtitle="Browse, edit, and bulk-manage university data."
         right={
           <div className="flex items-center gap-2 text-[13px]">
-            <div className="flex items-center gap-3 text-gray-500 font-semibold">
+            <div className="flex items-center gap-3 text-[var(--text-secondary)] font-semibold">
               <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> {stats.total}</span>
               <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {stats.countries}</span>
             </div>
@@ -252,16 +252,16 @@ export default function UniversitiesTab() {
       {/* ── Search + Filters ── */}
       <div className="flex flex-wrap gap-3 mb-4 items-center">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && search()} placeholder="Search name, country..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-white border border-[#E8EDF8] text-[13px] text-[#1B2B5E] placeholder:text-gray-400 outline-none focus:border-[#011CB5]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+          <input value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && search()} placeholder="Search name, country..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-white border border-[#E8EDF8] text-[13px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5]" />
         </div>
-        <input value={countryFilter} onChange={e => setCountryFilter(e.target.value)} placeholder="Country code (us, gb...)" className="h-10 px-4 rounded-xl bg-white border border-[#E8EDF8] text-[13px] text-[#1B2B5E] placeholder:text-gray-400 outline-none focus:border-[#011CB5] w-40" />
+        <input value={countryFilter} onChange={e => setCountryFilter(e.target.value)} placeholder="Country code (us, gb...)" className="h-10 px-4 rounded-xl bg-white border border-[#E8EDF8] text-[13px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5] w-40" />
         <button onClick={search} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-bold">Search</button>
-        <button onClick={() => { setQuery(''); setCountryFilter(''); setSkip(0); loadList('', '', 0); }} className="h-10 px-4 rounded-xl bg-[#F0F4FF] hover:bg-[#E8EDF8] text-gray-500 text-[13px] font-bold">Clear</button>
+        <button onClick={() => { setQuery(''); setCountryFilter(''); setSkip(0); loadList('', '', 0); }} className="h-10 px-4 rounded-xl bg-[#F0F4FF] hover:bg-[#E8EDF8] text-[var(--text-secondary)] text-[13px] font-bold">Clear</button>
       </div>
 
       {/* ── Bulk ops toggle ── */}
-      <button onClick={() => setBulkOpen(!bulkOpen)} className="flex items-center gap-2 mb-3 text-[12px] font-bold text-gray-400 hover:text-[#1B2B5E] transition">
+      <button onClick={() => setBulkOpen(!bulkOpen)} className="flex items-center gap-2 mb-3 text-[12px] font-bold text-[var(--text-muted)] hover:text-[#1B2B5E] transition">
         {bulkOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         Bulk operations (seed, enrich, scorecard, re-seed)
       </button>
@@ -272,47 +272,47 @@ export default function UniversitiesTab() {
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-[#1B2B5E] mb-2 flex items-center gap-1.5"><Upload className="w-3.5 h-3.5 text-blue-600" /> Seed from CSV</h4>
             <div className="flex flex-wrap gap-2 items-center">
-              <input ref={seedRef} type="file" accept=".csv" onChange={e => setSeedFile(e.target.files[0])} className="text-[11px] text-gray-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-[#F0F4FF] file:text-[11px] file:font-bold file:text-gray-600" />
-              <label className="flex items-center gap-1 text-[11px] text-gray-400"><input type="checkbox" checked={seedDryRun} onChange={e => setSeedDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
+              <input ref={seedRef} type="file" accept=".csv" onChange={e => setSeedFile(e.target.files[0])} className="text-[11px] text-[var(--text-secondary)] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-[#F0F4FF] file:text-[11px] file:font-bold file:text-[var(--text-secondary)]" />
+              <label className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]"><input type="checkbox" checked={seedDryRun} onChange={e => setSeedDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
               <button disabled={!seedFile || seedBusy} onClick={handleSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{seedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileSpreadsheet className="w-3 h-3" />} Go</button>
             </div>
-            {seedResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-gray-600 max-h-24 overflow-y-auto">{JSON.stringify(seedResult, null, 2)}</div>}
+            {seedResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-[var(--text-secondary)] max-h-24 overflow-y-auto">{JSON.stringify(seedResult, null, 2)}</div>}
           </Panel>
 
           {/* Enrich */}
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-[#1B2B5E] mb-2 flex items-center gap-1.5"><Database className="w-3.5 h-3.5 text-amber-600" /> Enrich from CSV</h4>
             <div className="flex flex-wrap gap-2 items-center">
-              <input ref={enrichRef} type="file" accept=".csv" onChange={e => setEnrichFile(e.target.files[0])} className="text-[11px] text-gray-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-[#F0F4FF] file:text-[11px] file:font-bold file:text-gray-600" />
-              <label className="flex items-center gap-1 text-[11px] text-gray-400"><input type="checkbox" checked={enrichDryRun} onChange={e => setEnrichDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
-              <button disabled={!enrichFile || enrichBusy} onClick={handleEnrich} className="inline-flex items-center gap-1 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{enrichBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />} Go</button>
+              <input ref={enrichRef} type="file" accept=".csv" onChange={e => setEnrichFile(e.target.files[0])} className="text-[11px] text-[var(--text-secondary)] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-[#F0F4FF] file:text-[11px] file:font-bold file:text-[var(--text-secondary)]" />
+              <label className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]"><input type="checkbox" checked={enrichDryRun} onChange={e => setEnrichDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
+              <button disabled={!enrichFile || enrichBusy} onClick={handleEnrich} className="inline-flex items-center gap-1 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-[var(--text-primary)] px-2.5 py-1.5 text-[11px] font-bold">{enrichBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />} Go</button>
             </div>
-            {enrichResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-gray-600 max-h-24 overflow-y-auto">{JSON.stringify(enrichResult, null, 2)}</div>}
+            {enrichResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-[var(--text-secondary)] max-h-24 overflow-y-auto">{JSON.stringify(enrichResult, null, 2)}</div>}
           </Panel>
 
           {/* Scorecard */}
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-[#1B2B5E] mb-2 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> College Scorecard</h4>
             <div className="flex flex-wrap gap-2 items-center">
-              <label className="flex items-center gap-1 text-[11px] text-gray-400"><input type="checkbox" checked={scDryRun} onChange={e => setScDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
-              <button disabled={scBusy} onClick={handleScorecard} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{scBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />} Run</button>
+              <label className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]"><input type="checkbox" checked={scDryRun} onChange={e => setScDryRun(e.target.checked)} className="accent-[hsl(var(--blue-700))]" /> Dry run</label>
+              <button disabled={scBusy} onClick={handleScorecard} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-[var(--text-primary)] px-2.5 py-1.5 text-[11px] font-bold">{scBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />} Run</button>
             </div>
-            {scResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-gray-600 max-h-24 overflow-y-auto">{JSON.stringify(scResult, null, 2)}</div>}
+            {scResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-[var(--text-secondary)] max-h-24 overflow-y-auto">{JSON.stringify(scResult, null, 2)}</div>}
           </Panel>
 
           {/* AI Enrichment */}
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-[#1B2B5E] mb-2 flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-blue-600" /> AI Enrich Missing</h4>
-            <p className="text-[11px] text-gray-400 mb-2">Batch-fills template descriptions, courses, facilities for bare universities.</p>
+            <p className="text-[11px] text-[var(--text-muted)] mb-2">Batch-fills template descriptions, courses, facilities for bare universities.</p>
             <button disabled={aiEnrichBusy} onClick={handleAIEnrich} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{aiEnrichBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Enrich with AI</button>
-            {aiEnrichResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-gray-600 max-h-24 overflow-y-auto">{JSON.stringify(aiEnrichResult, null, 2)}</div>}
+            {aiEnrichResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-[var(--text-secondary)] max-h-24 overflow-y-auto">{JSON.stringify(aiEnrichResult, null, 2)}</div>}
           </Panel>
 
           {/* Re-seed */}
           <Panel className="!p-4">
             <h4 className="text-[13px] font-bold text-[#1B2B5E] mb-2 flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5 text-red-600" /> Re-seed</h4>
             <button disabled={reSeedBusy} onClick={handleReSeed} className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white px-2.5 py-1.5 text-[11px] font-bold">{reSeedBusy ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Re-seed from static</button>
-            {reSeedResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-gray-600 max-h-24 overflow-y-auto">{JSON.stringify(reSeedResult, null, 2)}</div>}
+            {reSeedResult && <div className="mt-2 p-2 rounded-lg bg-[#F0F4FF] text-[11px] font-mono text-[var(--text-secondary)] max-h-24 overflow-y-auto">{JSON.stringify(reSeedResult, null, 2)}</div>}
           </Panel>
         </div>
       )}
@@ -320,15 +320,15 @@ export default function UniversitiesTab() {
       {/* ── List ── */}
       <Panel className="overflow-hidden">
         {items === null ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-[var(--text-secondary)]" /></div>
         ) : items.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-[14px]">No universities found.</div>
+          <div className="text-center py-12 text-[var(--text-secondary)] text-[14px]">No universities found.</div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-[12px]">
                 <thead>
-                  <tr className="border-b border-[#E8EDF8] text-gray-400 font-semibold uppercase tracking-wider">
+                  <tr className="border-b border-[#E8EDF8] text-[var(--text-muted)] font-semibold uppercase tracking-wider">
                     <th className="text-left py-2.5 px-2">Name</th>
                     <th className="text-left py-2.5 px-2">Country</th>
                     <th className="text-right py-2.5 px-2">Rank</th>
@@ -343,14 +343,14 @@ export default function UniversitiesTab() {
                   {items.map((u) => (
                     <tr key={u.id} className="border-b border-[#E8EDF8] hover:bg-[#F0F4FF] transition">
                       <td className="py-2.5 px-2 text-[#1B2B5E] font-semibold truncate max-w-[220px]">{u.name}</td>
-                      <td className="py-2.5 px-2 text-gray-500">{u.country_name} {u.flag}</td>
-                      <td className="py-2.5 px-2 text-right text-gray-500">{u.rank || '—'}</td>
-                      <td className="py-2.5 px-2 text-right text-gray-500">{u.tuition_usd ? `$${u.tuition_usd.toLocaleString()}` : '—'}</td>
-                      <td className="py-2.5 px-2 text-right text-gray-500">{u.students ? u.students.toLocaleString() : '—'}</td>
-                      <td className="py-2.5 px-2 text-center">{u.scholarships ? <span className="text-emerald-600">Yes</span> : <span className="text-gray-400">—</span>}</td>
-                      <td className="py-2.5 px-2 text-center text-gray-500">{u.ielts_min || '—'}</td>
+                      <td className="py-2.5 px-2 text-[var(--text-secondary)]">{u.country_name} {u.flag}</td>
+                      <td className="py-2.5 px-2 text-right text-[var(--text-secondary)]">{u.rank || '—'}</td>
+                      <td className="py-2.5 px-2 text-right text-[var(--text-secondary)]">{u.tuition_usd ? `$${u.tuition_usd.toLocaleString()}` : '—'}</td>
+                      <td className="py-2.5 px-2 text-right text-[var(--text-secondary)]">{u.students ? u.students.toLocaleString() : '—'}</td>
+                      <td className="py-2.5 px-2 text-center">{u.scholarships ? <span className="text-emerald-600">Yes</span> : <span className="text-[var(--text-muted)]">—</span>}</td>
+                      <td className="py-2.5 px-2 text-center text-[var(--text-secondary)]">{u.ielts_min || '—'}</td>
                       <td className="py-2.5 px-2 text-right">
-                        <button onClick={() => openEditor(u)} className="inline-flex items-center gap-1 rounded-lg bg-[#F0F4FF] hover:bg-[#E8EDF8] text-gray-500 px-2.5 py-1.5 text-[11px] font-bold transition"><Edit3 className="w-3 h-3" /></button>
+                        <button onClick={() => openEditor(u)} className="inline-flex items-center gap-1 rounded-lg bg-[#F0F4FF] hover:bg-[#E8EDF8] text-[var(--text-secondary)] px-2.5 py-1.5 text-[11px] font-bold transition"><Edit3 className="w-3 h-3" /></button>
                       </td>
                     </tr>
                   ))}
@@ -361,10 +361,10 @@ export default function UniversitiesTab() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#E8EDF8]">
-                <div className="text-[12px] text-gray-400">{total} total</div>
+                <div className="text-[12px] text-[var(--text-muted)]">{total} total</div>
                 <div className="flex gap-1">
                   <button disabled={currentPage <= 1} onClick={() => { setSkip(s => Math.max(0, s - limit)); loadList(query, countryFilter, Math.max(0, skip - limit)); }} className="h-8 px-3 rounded-lg bg-[#F0F4FF] hover:bg-[#E8EDF8] disabled:opacity-30 text-[#1B2B5E] text-[11px] font-bold">Prev</button>
-                  <span className="h-8 px-3 flex items-center text-[12px] text-gray-400">{currentPage} / {totalPages}</span>
+                  <span className="h-8 px-3 flex items-center text-[12px] text-[var(--text-muted)]">{currentPage} / {totalPages}</span>
                   <button disabled={currentPage >= totalPages} onClick={() => { setSkip(s => s + limit); loadList(query, countryFilter, skip + limit); }} className="h-8 px-3 rounded-lg bg-[#F0F4FF] hover:bg-[#E8EDF8] disabled:opacity-30 text-[#1B2B5E] text-[11px] font-bold">Next</button>
                 </div>
               </div>
@@ -379,13 +379,13 @@ export default function UniversitiesTab() {
           <div {...dialogProps} className="rounded-2xl bg-white border border-[#E8EDF8] w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-5 border-b border-[#E8EDF8]">
               <h3 className="text-[16px] font-bold text-[#1B2B5E] truncate max-w-[400px]">{editDraft.name || 'Edit University'}</h3>
-              <button aria-label="Close" onClick={closeEditor} className="h-8 w-8 rounded-lg bg-[#F0F4FF] hover:bg-[#E8EDF8] flex items-center justify-center"><X className="w-4 h-4 text-gray-400" /></button>
+              <button aria-label="Close" onClick={closeEditor} className="h-8 w-8 rounded-lg bg-[#F0F4FF] hover:bg-[#E8EDF8] flex items-center justify-center"><X className="w-4 h-4 text-[var(--text-muted)]" /></button>
             </div>
 
             <div className="p-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
               {FIELDS.filter(f => f.editable).map(f => (
                 <div key={f.key}>
-                  <label className="block text-[11px] font-semibold text-gray-400 mb-1 uppercase tracking-wider">{f.label}</label>
+                  <label className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">{f.label}</label>
                   {f.type === 'boolean' ? (
                     <select value={editDraft[f.key] === true ? 'true' : editDraft[f.key] === false ? 'false' : ''} onChange={e => updateDraft(f.key, e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)} className="w-full h-9 px-3 rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] text-[12px] text-[#1B2B5E] outline-none focus:border-[#011CB5]">
                       <option value="">—</option>
@@ -413,12 +413,12 @@ export default function UniversitiesTab() {
             {/* List fields (courses, intakes, accreditation, facilities) */}
             {['courses', 'popular_courses', 'intakes', 'accreditation', 'facilities'].map(listKey => (
               <div key={listKey} className="px-5 mb-3">
-                <label id={`uni-${listKey}`} className="block text-[11px] font-semibold text-gray-400 mb-1 uppercase tracking-wider">{listKey.replace(/_/g, ' ')}</label>
+                <label id={`uni-${listKey}`} className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">{listKey.replace(/_/g, ' ')}</label>
                 <div role="group" aria-labelledby={`uni-${listKey}`} className="flex flex-wrap gap-1.5">
                   {(editDraft[listKey] || []).map((item, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-[#F0F4FF] border border-[#E8EDF8] px-2 py-0.5 text-[11px] text-gray-500">
+                    <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-[#F0F4FF] border border-[#E8EDF8] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]">
                       {item}
-                      <button onClick={() => updateDraft(listKey, (editDraft[listKey] || []).filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500"><X className="w-2.5 h-2.5" /></button>
+                      <button onClick={() => updateDraft(listKey, (editDraft[listKey] || []).filter((_, j) => j !== i))} className="text-[var(--text-muted)] hover:text-red-500"><X className="w-2.5 h-2.5" /></button>
                     </span>
                   ))}
                   <AddListItem onAdd={v => updateDraft(listKey, [...(editDraft[listKey] || []), v])} />
@@ -451,7 +451,7 @@ function AddListItem({ onAdd }) {
           <button onClick={() => { if (val.trim()) { onAdd(val.trim()); setVal(''); } }} className="text-emerald-600 hover:text-emerald-700"><Plus className="w-3 h-3" /></button>
         </span>
       ) : (
-        <button onClick={() => setShow(true)} className="text-gray-400 hover:text-gray-600"><Plus className="w-3.5 h-3.5" /></button>
+        <button onClick={() => setShow(true)} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]"><Plus className="w-3.5 h-3.5" /></button>
       )}
     </span>
   );

@@ -51,13 +51,13 @@ export default function VisaRulesAgentPanel({ token }) {
     <Panel>
       <div className="p-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 font-bold text-white"><Bot className="w-4 h-4" aria-hidden="true" /> Visa Rules Agent</div>
-          <p className="text-[12.5px] text-slate-400 mt-1 max-w-xl">
+          <div className="flex items-center gap-2 font-bold text-[var(--text-primary)]"><Bot className="w-4 h-4" aria-hidden="true" /> Visa Rules Agent</div>
+          <p className="text-[12.5px] text-[var(--text-secondary)] mt-1 max-w-xl">
             Runs automatically at server start and every day: reads every country's visa rules for Indian passports,
             allowed stay and conditions, and refreshes official decision times (US, Canada, UK, Ireland).
             Changes apply automatically and admins get an email report; undo any change below.
           </p>
-          <p className="text-[12px] text-slate-400 mt-1">
+          <p className="text-[12px] text-[var(--text-secondary)] mt-1">
             Last run: {last.started_at ? new Date(last.started_at).toLocaleString() : 'not yet'}
             {last.status === 'ok' && ` · ${last.rows ?? 0} countries read · ${last.changes ? `${last.changes} change(s) applied` : 'no changes'}`}
             {last.status === 'parse_suspect' && ` · only ${last.rows ?? 0} countries read, nothing changed`}
@@ -70,13 +70,13 @@ export default function VisaRulesAgentPanel({ token }) {
         </button>
       </div>
       {data?.items?.length > 0 && (
-        <ul className="divide-y divide-white/5 border-t border-white/5">
+        <ul className="divide-y divide-white/5 border-t border-[var(--glass-border)]">
           {data.items.slice(0, 15).map(c => (
             <li key={c.id} className="px-5 py-3 flex items-center justify-between gap-3 text-[13px]">
-              <span className="text-slate-200">
-                <span className="font-mono text-slate-400 mr-2">{c.iso2}</span>
-                {LABEL[c.old] || c.old || '—'} → <strong className="text-white">{LABEL[c.new] || c.new}</strong>
-                <span className="text-slate-500"> · “{c.wording}” · {c.detected_at ? new Date(c.detected_at).toLocaleDateString() : ''}</span>
+              <span className="text-[var(--text-primary)]">
+                <span className="font-mono text-[var(--text-secondary)] mr-2">{c.iso2}</span>
+                {LABEL[c.old] || c.old || '—'} → <strong className="text-[var(--text-primary)]">{LABEL[c.new] || c.new}</strong>
+                <span className="text-[var(--text-muted)]"> · “{c.wording}” · {c.detected_at ? new Date(c.detected_at).toLocaleDateString() : ''}</span>
               </span>
               {c.status === 'held' && (
                 <button type="button" onClick={() => act(c.id, 'apply')}
@@ -86,11 +86,11 @@ export default function VisaRulesAgentPanel({ token }) {
               )}
               {c.status === 'applied' && (
                 <button type="button" onClick={() => act(c.id, 'undo')}
-                  className="h-8 px-3 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 inline-flex items-center gap-1 font-semibold">
+                  className="h-8 px-3 rounded-lg bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)] inline-flex items-center gap-1 font-semibold">
                   <Undo2 className="w-3.5 h-3.5" aria-hidden="true" /> Undo
                 </button>
               )}
-              {c.status === 'undone' && <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">Undone</span>}
+              {c.status === 'undone' && <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)] font-bold">Undone</span>}
             </li>
           ))}
         </ul>

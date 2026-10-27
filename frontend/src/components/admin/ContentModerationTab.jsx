@@ -72,7 +72,7 @@ export default function ContentModerationTab() {
             aria-pressed={kind === k}
             onClick={() => { setKind(k); setPage(1); }}
             className={`h-10 px-4 rounded-lg text-sm font-bold transition-colors ${
-              kind === k ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/20 text-slate-400 hover:text-white'
+              kind === k ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-black/20 text-[var(--text-secondary)] hover:text-white'
             }`}
           >
             {label}{kind === k && !loading ? ` · ${data.total} pending` : ''}
@@ -82,10 +82,10 @@ export default function ContentModerationTab() {
 
       <Panel>
         {loading ? (
-          <div className="p-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+          <div className="p-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-[var(--text-secondary)]" /></div>
         ) : data.items.length === 0 ? (
-          <div className="p-10 text-center text-slate-400 text-sm">
-            <Newspaper className="w-6 h-6 mx-auto mb-2 text-slate-500" aria-hidden="true" />
+          <div className="p-10 text-center text-[var(--text-secondary)] text-sm">
+            <Newspaper className="w-6 h-6 mx-auto mb-2 text-[var(--text-muted)]" aria-hidden="true" />
             Nothing waiting for review.
           </div>
         ) : (
@@ -96,11 +96,11 @@ export default function ContentModerationTab() {
               return (
                 <li key={item.id} className="p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <div className="text-sm font-bold text-white">{item.title}</div>
-                    <div className="text-xs text-slate-400 mt-1">
+                    <div className="text-sm font-bold text-[var(--text-primary)]">{item.title}</div>
+                    <div className="text-xs text-[var(--text-secondary)] mt-1">
                       {[source, item.date, item.category, item.country_id].filter(Boolean).join(' • ')}
                     </div>
-                    {snippet && <p className="text-[13px] text-slate-300 mt-2 line-clamp-2">{snippet}</p>}
+                    {snippet && <p className="text-[13px] text-[var(--text-secondary)] mt-2 line-clamp-2">{snippet}</p>}
                     {item.source_url && (
                       <a
                         href={item.source_url}
@@ -140,12 +140,12 @@ export default function ContentModerationTab() {
       </Panel>
 
       {data.pages > 1 && (
-        <div className="flex items-center justify-center gap-3 text-sm text-slate-400">
+        <div className="flex items-center justify-center gap-3 text-sm text-[var(--text-secondary)]">
           <button
             type="button"
             onClick={() => setPage(p => p - 1)}
             disabled={page <= 1}
-            className="h-10 px-4 rounded-lg bg-black/20 hover:text-white disabled:opacity-40"
+            className="h-10 px-4 rounded-lg bg-black/20 hover:text-[var(--text-primary)] disabled:opacity-40"
           >
             Previous
           </button>
@@ -154,7 +154,7 @@ export default function ContentModerationTab() {
             type="button"
             onClick={() => setPage(p => p + 1)}
             disabled={page >= data.pages}
-            className="h-10 px-4 rounded-lg bg-black/20 hover:text-white disabled:opacity-40"
+            className="h-10 px-4 rounded-lg bg-black/20 hover:text-[var(--text-primary)] disabled:opacity-40"
           >
             Next
           </button>

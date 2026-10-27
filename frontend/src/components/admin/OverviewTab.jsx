@@ -14,7 +14,7 @@ import { useToast } from '../../hooks/use-toast';
 // ─── chart helpers ────────────────────────────────────────────────────────────
 
 function SvgAreaChart({ data = [], series = [], height = 80 }) {
-  if (!data || data.length === 0) return <div className="h-20 flex items-center justify-center text-[12px] text-gray-400">No data</div>;
+  if (!data || data.length === 0) return <div className="h-20 flex items-center justify-center text-[12px] text-[var(--text-muted)]">No data</div>;
   const W = 300;
   const H = height;
   const pad = 4;
@@ -115,7 +115,7 @@ function WelcomeBanner({ admin, alertCount, onRunAggregators, running }) {
         <button
           onClick={onRunAggregators}
           disabled={running}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12.5px] font-bold bg-[#011CB5] hover:bg-[#0122D4] text-white disabled:opacity-50 transition-colors"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12.5px] font-bold bg-[#011CB5] hover:bg-[#0122D4] text-[var(--text-primary)] disabled:opacity-50 transition-colors"
         >
           {running ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
           Run aggregators
@@ -128,7 +128,7 @@ function WelcomeBanner({ admin, alertCount, onRunAggregators, running }) {
 function QuickStats({ monitoring }) {
   if (!monitoring) return (
     <Panel className="h-full flex items-center justify-center">
-      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+      <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
     </Panel>
   );
   const tiles = [
@@ -143,9 +143,9 @@ function QuickStats({ monitoring }) {
         {tiles.map((t) => (
           <Link key={t.label} to="/admin/monitoring"
             className="rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] px-3 py-2.5 hover:bg-[#EEF2FF] transition-colors flex items-center gap-2">
-            <t.Icon className={`w-4 h-4 shrink-0 ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-gray-400'}`} />
+            <t.Icon className={`w-4 h-4 shrink-0 ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-[var(--text-muted)]'}`} />
             <div>
-              <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-gray-400 leading-none">{t.label}</div>
+              <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-[var(--text-muted)] leading-none">{t.label}</div>
               <div className={`text-[18px] font-display font-bold leading-snug ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-[#1B2B5E]'}`}>{t.value ?? '—'}</div>
             </div>
           </Link>
@@ -170,14 +170,14 @@ function KPICard({ label, value, sub, Icon, accentKey = 'users', delta, testid }
     <div className="card-lift relative overflow-hidden rounded-2xl border bg-white p-5 cursor-default"
       style={{ borderColor: a.border }}>
       <div className="flex items-center justify-between">
-        <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-gray-400">{label}</div>
+        <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-[var(--text-muted)]">{label}</div>
         <span className={`h-9 w-9 inline-flex items-center justify-center rounded-xl ${a.ring} ${a.icon}`}>
           <Icon className="w-4 h-4" />
         </span>
       </div>
       <div className={`mt-4 text-[32px] font-display font-bold tracking-[-0.02em] ${a.value}`} data-testid={testid}>{value}</div>
       <div className="mt-1 flex items-center gap-2">
-        {sub && <span className="text-[12px] text-gray-500">{sub}</span>}
+        {sub && <span className="text-[12px] text-[var(--text-secondary)]">{sub}</span>}
         {delta != null && (
           <span className={`text-[11px] font-bold ${delta > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
             {delta > 0 ? '↑' : '↓'} {Math.abs(delta)}
@@ -202,13 +202,13 @@ const FUNNEL_STEPS = [
 function FunnelPanel({ funnel }) {
   if (!funnel) return (
     <Panel className="flex items-center justify-center h-full">
-      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+      <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
     </Panel>
   );
   const max = Math.max(1, ...FUNNEL_STEPS.map((s) => funnel[s.key] || 0));
   return (
     <Panel>
-      <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-500 mb-3">User funnel (90d)</div>
+      <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-3">User funnel (90d)</div>
       <div className="space-y-2">
         {FUNNEL_STEPS.map((s, i) => {
           const count = funnel[s.key] || 0;
@@ -219,7 +219,7 @@ function FunnelPanel({ funnel }) {
             <Link key={s.key} to={`/admin/users?stage=${s.key}`}
               className="block hover:bg-[#F0F4FF] rounded-lg px-2 py-1 -mx-2 transition-colors group">
               <div className="flex justify-between text-[12px] mb-1">
-                <span className="text-gray-600 group-hover:text-[#1B2B5E]">{s.label}</span>
+                <span className="text-[var(--text-secondary)] group-hover:text-[#1B2B5E]">{s.label}</span>
                 <span className="text-[#1B2B5E] font-semibold">{count.toLocaleString()}
                   {drop != null && <span className="text-red-600 ml-1.5 font-normal">↓{drop}%</span>}
                 </span>
@@ -238,7 +238,7 @@ function FunnelPanel({ funnel }) {
 function AlertsPanel({ alerts }) {
   if (!alerts) return (
     <Panel className="flex items-center justify-center h-full">
-      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+      <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
     </Panel>
   );
   const items = (alerts.items || []).slice(0, 8);
@@ -246,21 +246,21 @@ function AlertsPanel({ alerts }) {
   return (
     <Panel className="flex flex-col">
       <div className="flex items-center justify-between mb-3">
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-500">Alerts ({alerts.total ?? items.length})</div>
+        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Alerts ({alerts.total ?? items.length})</div>
         {alerts.total > 8 && (
           <Link to="/admin/alerts" className="text-[11px] text-blue-700 hover:text-blue-200 flex items-center gap-0.5">
             View all <ArrowUpRight className="w-3 h-3" />
           </Link>
         )}
       </div>
-      {items.length === 0 && <div className="text-[13px] text-gray-400">No active alerts.</div>}
+      {items.length === 0 && <div className="text-[13px] text-[var(--text-muted)]">No active alerts.</div>}
       <div className="space-y-2">
         {items.map((al) => (
           <div key={al.id} className="flex items-start gap-2 text-[12.5px]">
             <span className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${SEV_DOT[al.severity] || SEV_DOT.low}`} />
             <div className="min-w-0">
               <div className="text-gray-700 truncate">{al.message || ALERT_KIND_LABEL?.[al.kind] || al.kind}</div>
-              {al.applicant_name && <div className="text-gray-400 text-[11px]">{al.applicant_name}{al.days != null ? ` · ${al.days}d` : ''}</div>}
+              {al.applicant_name && <div className="text-[var(--text-muted)] text-[11px]">{al.applicant_name}{al.days != null ? ` · ${al.days}d` : ''}</div>}
             </div>
             {al.case_id && (
               <Link to={`/admin/applications/${al.case_id}`}
@@ -279,8 +279,8 @@ function TrendPanel({ trend }) {
   return (
     <Panel>
       <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="w-4 h-4 text-gray-500" />
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-500">90-day trend</div>
+        <TrendingUp className="w-4 h-4 text-[var(--text-secondary)]" />
+        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">90-day trend</div>
       </div>
       <SvgAreaChart
         data={trend || []}
@@ -291,10 +291,10 @@ function TrendPanel({ trend }) {
         ]}
       />
       <div className="mt-2 flex gap-4">
-        <span className="flex items-center gap-1.5 text-[11px] text-gray-500">
+        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
           <span className="h-2 w-2 rounded-full bg-[#011CB5] inline-block" /> Signups
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-gray-500">
+        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
           <span className="h-2 w-2 rounded-full bg-[#F59E0B] inline-block" /> Applications
         </span>
       </div>
@@ -310,10 +310,10 @@ function TopDestinations({ countries }) {
   return (
     <Panel>
       <div className="flex items-center gap-2 mb-3">
-        <Globe className="w-4 h-4 text-gray-500" />
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-500">Top destinations</div>
+        <Globe className="w-4 h-4 text-[var(--text-secondary)]" />
+        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Top destinations</div>
       </div>
-      {items.length === 0 && <div className="text-[13px] text-gray-400">No data yet.</div>}
+      {items.length === 0 && <div className="text-[13px] text-[var(--text-muted)]">No data yet.</div>}
       <div className="space-y-2.5">
         {items.map((c) => {
           const pct = Math.round((c.count / max) * 100);
@@ -346,14 +346,14 @@ function AppStatusPanel({ applications }) {
   const segments = DONUT_SEGMENTS.map((s) => ({ ...s, value: applications?.[s.key] || 0 }));
   return (
     <Panel>
-      <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-500 mb-3">App status</div>
+      <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-3">App status</div>
       <div className="flex items-center gap-4">
         <SvgDonut segments={segments} />
         <div className="space-y-1.5">
           {segments.map((s) => (
             <div key={s.key} className="flex items-center gap-1.5 text-[11.5px]">
               <span className="h-2 w-2 rounded-full shrink-0" style={{ background: s.color }} />
-              <span className="text-gray-500">{s.label}</span>
+              <span className="text-[var(--text-secondary)]">{s.label}</span>
               <span className="ml-auto text-[#1B2B5E] font-semibold">{s.value}</span>
             </div>
           ))}
@@ -374,14 +374,14 @@ function RecentAuditFeed({ activity }) {
   return (
     <Panel>
       <div className="flex items-center gap-2 mb-3">
-        <History className="w-4 h-4 text-gray-500" />
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-gray-500">Recent audit</div>
+        <History className="w-4 h-4 text-[var(--text-secondary)]" />
+        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Recent audit</div>
       </div>
-      {items.length === 0 && <div className="text-[13px] text-gray-400">No recent activity.</div>}
+      {items.length === 0 && <div className="text-[13px] text-[var(--text-muted)]">No recent activity.</div>}
       <div className="space-y-2.5">
         {items.map((e, i) => (
           <div key={i} className="flex items-start gap-2.5">
-            <span className="h-7 w-7 rounded-full inline-flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+            <span className="h-7 w-7 rounded-full inline-flex items-center justify-center text-[10px] font-bold text-[var(--text-primary)] shrink-0"
               style={{ background: 'linear-gradient(135deg, #1B2B5E, #011CB5)' }}>
               {initials(e.admin_email)}
             </span>
@@ -389,7 +389,7 @@ function RecentAuditFeed({ activity }) {
               <div className="text-[12.5px] text-gray-700 truncate capitalize">
                 {e.action} {e.entity_type ? `on ${e.entity_type}` : ''}{e.entity_id ? ` #${e.entity_id}` : ''}
               </div>
-              <div className="text-[11px] text-gray-400">{e.admin_email} · {relativeTime(e.at)}</div>
+              <div className="text-[11px] text-[var(--text-muted)]">{e.admin_email} · {relativeTime(e.at)}</div>
             </div>
           </div>
         ))}
@@ -532,12 +532,12 @@ function StaffWorkloadCard() {
         <h3 className="text-[14px] font-bold text-[#1B2B5E]">Staff workload</h3>
       </div>
       {rows === null && <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-[#011CB5]" /></div>}
-      {rows !== null && rows.length === 0 && <p className="text-[13px] text-gray-400">No workload data available.</p>}
+      {rows !== null && rows.length === 0 && <p className="text-[13px] text-[var(--text-muted)]">No workload data available.</p>}
       {rows !== null && rows.length > 0 && (
         <div className="overflow-x-auto">
           <table className="min-w-full text-[13px]">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-[0.14em] font-bold text-gray-400 border-b border-[#E8EDF8]">
+              <tr className="text-left text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-muted)] border-b border-[#E8EDF8]">
                 <th className="pb-2 pr-4">Staff</th>
                 <th className="pb-2 pr-4 text-right">Open cases</th>
                 <th className="pb-2 text-right">Avg days open</th>
@@ -548,14 +548,14 @@ function StaffWorkloadCard() {
                 <tr key={s.id} className="border-b border-[#F0F4FF] last:border-0">
                   <td className="py-2.5 pr-4">
                     <div className="font-semibold text-[#1B2B5E]">{s.name || s.email || s.id}</div>
-                    {s.name && s.email && <div className="text-[11px] text-gray-400">{s.email}</div>}
+                    {s.name && s.email && <div className="text-[11px] text-[var(--text-muted)]">{s.email}</div>}
                   </td>
                   <td className="py-2.5 pr-4 text-right">
                     <span className={`font-bold text-[14px] ${s.open_cases > 10 ? 'text-red-600' : s.open_cases > 5 ? 'text-amber-600' : 'text-[#1B2B5E]'}`}>
                       {s.open_cases ?? 0}
                     </span>
                   </td>
-                  <td className="py-2.5 text-right text-gray-500">
+                  <td className="py-2.5 text-right text-[var(--text-secondary)]">
                     {s.avg_days != null ? `${Number(s.avg_days).toFixed(1)}d` : '—'}
                   </td>
                 </tr>

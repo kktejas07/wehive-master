@@ -51,18 +51,18 @@ function AddAgentModal({ token, onClose, onDone }) {
   ];
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <form {...dialogProps} onSubmit={submit} className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-white/10 p-6 space-y-3">
-        <h3 className="text-white font-bold text-[18px]">Add agent</h3>
+      <form {...dialogProps} onSubmit={submit} className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-[var(--glass-border)] p-6 space-y-3">
+        <h3 className="text-[var(--text-primary)] font-bold text-[18px]">Add agent</h3>
         {fields.map(([k, label, type, required]) => (
           <div key={k}>
-            <label htmlFor={`add-agent-${k}`} className="block text-[12px] text-slate-400 mb-1">{label}</label>
+            <label htmlFor={`add-agent-${k}`} className="block text-[12px] text-[var(--text-secondary)] mb-1">{label}</label>
             <input id={`add-agent-${k}`} type={type} required={required} minLength={k === 'password' ? 8 : undefined}
               value={form[k]} onChange={set(k)}
-              className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[14px] text-white outline-none focus:border-white/25" />
+              className="w-full h-10 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[14px] text-[var(--text-primary)] outline-none focus:border-white/25" />
           </div>
         ))}
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className="h-10 px-4 rounded-lg bg-white/5 text-slate-300 text-sm font-semibold">Cancel</button>
+          <button type="button" onClick={onClose} className="h-10 px-4 rounded-lg bg-[var(--glass-hover)] text-[var(--text-secondary)] text-sm font-semibold">Cancel</button>
           <button type="submit" disabled={busy} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50">
             {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />} Create agent
           </button>
@@ -94,31 +94,31 @@ function CommissionModal({ agent, token, onClose, onDone }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
-      <div {...dialogProps} className="bg-[#111632] rounded-2xl border border-white/10 w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
-        <div className="font-bold text-white text-[16px]">Record Commission Payment</div>
-        <div className="text-[12px] text-slate-400">Agent: <span className="text-white font-bold">{agent.agency_name || agent.name}</span></div>
+      <div {...dialogProps} className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)] w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+        <div className="font-bold text-[var(--text-primary)] text-[16px]">Record Commission Payment</div>
+        <div className="text-[12px] text-[var(--text-secondary)]">Agent: <span className="text-[var(--text-primary)] font-bold">{agent.agency_name || agent.name}</span></div>
         {[
           { k: 'university_name', label: 'University Name', placeholder: 'e.g. University of Toronto' },
           { k: 'amount_inr', label: 'Amount (₹)', placeholder: '25000', type: 'number' },
           { k: 'note', label: 'Note (optional)', placeholder: 'Enrollment confirmation #123' },
         ].map(({ k, label, placeholder, type = 'text' }) => (
           <label key={k} className="block">
-            <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">{label}</span>
+            <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">{label}</span>
             <input type={type} value={form[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} placeholder={placeholder}
-              className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50" />
+              className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[hsl(var(--blue-700))]/50" />
           </label>
         ))}
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Type</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Type</span>
           <select value={form.commission_type} onChange={e => setForm(f => ({ ...f, commission_type: e.target.value }))}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none">
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none">
             <option value="enrollment">Enrollment</option>
             <option value="application">Application</option>
           </select>
         </label>
         <div className="flex gap-2 pt-1">
-          <button onClick={onClose} className="flex-1 h-10 rounded-full bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300">Cancel</button>
-          <button onClick={submit} disabled={busy} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-white disabled:opacity-50">
+          <button onClick={onClose} className="flex-1 h-10 rounded-full bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[13px] font-bold text-[var(--text-secondary)]">Cancel</button>
+          <button onClick={submit} disabled={busy} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-[var(--text-primary)] disabled:opacity-50">
             {busy ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Record Payment'}
           </button>
         </div>
@@ -147,30 +147,30 @@ function AgentCard({ agent, token, onRefresh }) {
   const status = agent.status || 'pending';
 
   return (
-    <div className="rounded-2xl bg-white/5 border border-white/8 overflow-hidden">
-      <button onClick={() => setExpanded(v => !v)} className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/5 transition">
+    <div className="rounded-2xl bg-[var(--glass-hover)] border border-[var(--glass-border)] overflow-hidden">
+      <button onClick={() => setExpanded(v => !v)} className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-[var(--glass-hover)] transition">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[16px] shrink-0 bg-blue-500/15 text-blue-300">
           {(agent.agency_name || agent.name || 'A')[0].toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[14px] font-bold text-white">{agent.agency_name || agent.name || '—'}</span>
-            <span className={`text-[11px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 ${STATUS_BADGE[status] || 'bg-white/5 text-slate-400'}`}>{status}</span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 bg-white/10 text-slate-200">{tier}</span>
+            <span className="text-[14px] font-bold text-[var(--text-primary)]">{agent.agency_name || agent.name || '—'}</span>
+            <span className={`text-[11px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 ${STATUS_BADGE[status] || 'bg-[var(--glass-hover)] text-[var(--text-secondary)]'}`}>{status}</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-0.5 bg-[var(--glass-hover)] text-[var(--text-primary)]">{tier}</span>
           </div>
-          <div className="text-[12px] text-slate-400 mt-0.5 truncate">{agent.email} · {agent.city || '—'}, {(agent.country || '').toUpperCase()}</div>
+          <div className="text-[12px] text-[var(--text-secondary)] mt-0.5 truncate">{agent.email} · {agent.city || '—'}, {(agent.country || '').toUpperCase()}</div>
         </div>
         <div className="flex items-center gap-4 shrink-0 text-right">
           <div className="hidden sm:block">
-            <div className="text-[13px] font-bold text-white">{agent.total_students || agent.students_count || 0} students</div>
-            <div className="text-[11px] text-slate-400">₹{((agent.total_commission_inr || agent.total_revenue || 0) / 1000).toFixed(0)}K earned</div>
+            <div className="text-[13px] font-bold text-[var(--text-primary)]">{agent.total_students || agent.students_count || 0} students</div>
+            <div className="text-[11px] text-[var(--text-secondary)]">₹{((agent.total_commission_inr || agent.total_revenue || 0) / 1000).toFixed(0)}K earned</div>
           </div>
-          {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          {expanded ? <ChevronUp className="w-4 h-4 text-[var(--text-secondary)]" /> : <ChevronDown className="w-4 h-4 text-[var(--text-secondary)]" />}
         </div>
       </button>
 
       {expanded && (
-        <div className="border-t border-white/8 px-5 py-4 space-y-4">
+        <div className="border-t border-[var(--glass-border)] px-5 py-4 space-y-4">
           <div className="grid sm:grid-cols-4 gap-3">
             {[
               ['Students', agent.total_students || agent.students_count || 0, Users],
@@ -178,35 +178,35 @@ function AgentCard({ agent, token, onRefresh }) {
               ['Successful', agent.successful_applications || 0, CheckCircle],
               ['Commission', `₹${((agent.total_commission_inr || agent.total_revenue || 0)).toLocaleString()}`, DollarSign],
             ].map(([l, v, Icon]) => (
-              <div key={l} className="rounded-xl bg-white/5 p-3 text-center">
-                <div className="text-[18px] font-bold text-white">{v}</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">{l}</div>
+              <div key={l} className="rounded-xl bg-[var(--glass-hover)] p-3 text-center">
+                <div className="text-[18px] font-bold text-[var(--text-primary)]">{v}</div>
+                <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">{l}</div>
               </div>
             ))}
           </div>
 
           {agent.specializations?.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
-              {agent.specializations.map(s => <span key={s} className="text-[11px] font-bold bg-white/8 text-slate-300 rounded-full px-2.5 py-0.5">{s.toUpperCase()}</span>)}
+              {agent.specializations.map(s => <span key={s} className="text-[11px] font-bold bg-[var(--glass-hover)] text-[var(--text-secondary)] rounded-full px-2.5 py-0.5">{s.toUpperCase()}</span>)}
             </div>
           )}
 
           <div className="flex flex-wrap gap-2">
             {status === 'pending' && (
               <button onClick={() => patch({ status: 'active', verified: true })} disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 h-10 text-[12.5px] font-semibold text-white transition disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 h-10 text-[12.5px] font-semibold text-[var(--text-primary)] transition disabled:opacity-50">
                 <CheckCircle className="w-3.5 h-3.5" /> Approve Agent
               </button>
             )}
             {status === 'active' && (
               <button onClick={() => patch({ status: 'suspended' })} disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/70 hover:bg-red-600 px-4 h-10 text-[12.5px] font-semibold text-white transition disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/70 hover:bg-red-600 px-4 h-10 text-[12.5px] font-semibold text-[var(--text-primary)] transition disabled:opacity-50">
                 <XCircle className="w-3.5 h-3.5" /> Suspend
               </button>
             )}
             {status === 'suspended' && (
               <button onClick={() => patch({ status: 'active', verified: true })} disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/70 hover:bg-emerald-600 px-4 h-10 text-[12.5px] font-semibold text-white transition disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/70 hover:bg-emerald-600 px-4 h-10 text-[12.5px] font-semibold text-[var(--text-primary)] transition disabled:opacity-50">
                 <CheckCircle className="w-3.5 h-3.5" /> Reactivate
               </button>
             )}
@@ -215,10 +215,10 @@ function AgentCard({ agent, token, onRefresh }) {
               <DollarSign className="w-3.5 h-3.5" /> Record Commission
             </button>
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-slate-400">Tier:</span>
+              <span className="text-[11px] text-[var(--text-secondary)]">Tier:</span>
               {['bronze','silver','gold','platinum'].map(t => (
                 <button key={t} onClick={() => patch({ tier: t })} disabled={busy}
-                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize transition ${tier === t ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}>
+                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize transition ${tier === t ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:text-white'}`}>
                   {t}
                 </button>
               ))}
@@ -271,27 +271,27 @@ export default function AgentsTab() {
       </div>
       {adding && <AddAgentModal token={token} onClose={() => setAdding(false)} onDone={load} />}
       <Panel>
-        <div className="flex flex-wrap items-center gap-3 p-4 border-b border-white/5">
+        <div className="flex flex-wrap items-center gap-3 p-4 border-b border-[var(--glass-border)]">
           <div className="flex gap-2 flex-wrap">
             {STATUS_FILTERS.map(f => (
               <button key={f.value} onClick={() => { setStatusFilter(f.value); setSkip(0); }}
-                className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${statusFilter === f.value ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
+                className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${statusFilter === f.value ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)]'}`}>
                 {f.label}{f.value === 'pending' && pending > 0 ? ` (${pending})` : ''}
               </button>
             ))}
           </div>
           <div className="flex-1 min-w-[160px]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)]" />
               <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search agents…"
-                className="w-full h-9 rounded-xl bg-white/5 border border-white/10 pl-8 pr-3 text-[13px] text-white outline-none focus:border-white/20 placeholder:text-slate-500" />
+                className="w-full h-9 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] pl-8 pr-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--glass-border)] placeholder:text-[var(--text-muted)]" />
             </div>
           </div>
         </div>
 
         <div className="p-4 space-y-3">
-          {!items && <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>}
-          {items && filtered?.length === 0 && <div className="py-12 text-center text-slate-400 text-[14px]">No agents found.</div>}
+          {!items && <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[var(--text-secondary)]" /></div>}
+          {items && filtered?.length === 0 && <div className="py-12 text-center text-[var(--text-secondary)] text-[14px]">No agents found.</div>}
           {filtered?.map(agent => <AgentCard key={agent._id || agent.id} agent={agent} token={token} onRefresh={load} />)}
           {items && filtered?.length > 0 && <div className="mt-4"><Pagination skip={skip} limit={pageSize} total={total} onPageChange={setSkip} /></div>}
         </div>

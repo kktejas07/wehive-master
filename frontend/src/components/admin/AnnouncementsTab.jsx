@@ -15,8 +15,8 @@ const STATUS_PILL = {
   interrupted: 'bg-red-500/15 text-red-300',
 };
 const btn = 'inline-flex items-center gap-1.5 h-10 px-4 rounded-xl text-[13px] font-semibold disabled:opacity-50';
-const field = 'w-full px-3 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white placeholder:text-slate-500 outline-none focus:border-[hsl(var(--blue-700))]';
-const label = 'block text-[12px] font-semibold text-slate-300 mb-1';
+const field = 'w-full px-3 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[hsl(var(--blue-700))]';
+const label = 'block text-[12px] font-semibold text-[var(--text-secondary)] mb-1';
 
 const AUDIENCES = [
   { id: 'all', name: 'All users', hint: 'Every registered user' },
@@ -27,13 +27,13 @@ const AUDIENCES = [
 
 function Stat({ icon: Icon, name, value }) {
   return (
-    <div className="rounded-2xl bg-white/5 border border-white/10 px-4 py-3 flex items-center gap-3">
+    <div className="rounded-2xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-4 py-3 flex items-center gap-3">
       <span className="w-9 h-9 rounded-xl bg-[hsl(var(--blue-700))]/20 flex items-center justify-center shrink-0">
         <Icon className="w-4.5 h-4.5 text-blue-300" />
       </span>
       <span>
-        <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 font-bold">{name}</span>
-        <span className="block text-[20px] font-bold text-white tabular-nums leading-tight">{value ?? '…'}</span>
+        <span className="block text-[11px] uppercase tracking-[0.12em] text-[var(--text-secondary)] font-bold">{name}</span>
+        <span className="block text-[20px] font-bold text-[var(--text-primary)] tabular-nums leading-tight">{value ?? '…'}</span>
       </span>
     </div>
   );
@@ -42,7 +42,7 @@ function Stat({ icon: Icon, name, value }) {
 function Toggle({ on, onChange, label: text }) {
   return (
     <button type="button" role="switch" aria-checked={on} aria-label={text} onClick={() => onChange(!on)}
-      className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${on ? 'bg-[hsl(var(--blue-700))]' : 'bg-white/15'}`}>
+      className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${on ? 'bg-[hsl(var(--blue-700))]' : 'bg-[var(--glass-border)]'}`}>
       <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
     </button>
   );
@@ -121,16 +121,16 @@ export default function AnnouncementsTab() {
       </div>
 
       <Panel className="mb-4">
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-3">New announcement</div>
+        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-3">New announcement</div>
         <div className="grid lg:grid-cols-[1fr_340px] gap-4">
           <div className="space-y-3" data-testid="announcement-compose">
             <div>
               <label htmlFor="an-title" className={label}>Title *</label>
               <input id="an-title" value={title} maxLength={100} onChange={(e) => setTitle(e.target.value)} className={`${field} h-10`} placeholder="Platform maintenance scheduled" />
-              <p className="mt-1 text-[11.5px] text-slate-500 tabular-nums">{title.trim().length}/100</p>
+              <p className="mt-1 text-[11.5px] text-[var(--text-muted)] tabular-nums">{title.trim().length}/100</p>
             </div>
             <div>
-              <label htmlFor="an-image" className={label}>Image <span className="text-slate-500 font-normal">(optional)</span></label>
+              <label htmlFor="an-image" className={label}>Image <span className="text-[var(--text-muted)] font-normal">(optional)</span></label>
               <input id="an-image" value={image} onChange={(e) => setImage(e.target.value)} className={`${field} h-10`} placeholder="https://…" inputMode="url" />
             </div>
             <div>
@@ -139,7 +139,7 @@ export default function AnnouncementsTab() {
                 placeholder={'Write your announcement… A blank line starts a new paragraph, **double stars** make bold.'} />
             </div>
             <div>
-              <label htmlFor="an-link" className={label}>Link <span className="text-slate-500 font-normal">(optional)</span></label>
+              <label htmlFor="an-link" className={label}>Link <span className="text-[var(--text-muted)] font-normal">(optional)</span></label>
               <input id="an-link" value={link} onChange={(e) => setLink(e.target.value)} className={`${field} h-10`} placeholder="https://wehive.co.in/…" inputMode="url" />
             </div>
 
@@ -150,11 +150,11 @@ export default function AnnouncementsTab() {
                   const on = audience === a.id;
                   return (
                     <button key={a.id} type="button" onClick={() => setAudience(a.id)}
-                      className={`text-left rounded-xl border px-3.5 py-2.5 transition-colors ${on ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))]/10' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}>
-                      <span className="block text-[13.5px] font-semibold text-white">{a.name}
-                        <span className="ml-1.5 text-[11.5px] text-slate-400 tabular-nums">{sizes ? `· ${sizes[a.id] ?? 0}` : ''}</span>
+                      className={`text-left rounded-xl border px-3.5 py-2.5 transition-colors ${on ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))]/10' : 'border-[var(--glass-border)] bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)]'}`}>
+                      <span className="block text-[13.5px] font-semibold text-[var(--text-primary)]">{a.name}
+                        <span className="ml-1.5 text-[11.5px] text-[var(--text-secondary)] tabular-nums">{sizes ? `· ${sizes[a.id] ?? 0}` : ''}</span>
                       </span>
-                      <span className="block text-[12px] text-slate-400">{a.hint}</span>
+                      <span className="block text-[12px] text-[var(--text-secondary)]">{a.hint}</span>
                     </button>
                   );
                 })}
@@ -164,35 +164,35 @@ export default function AnnouncementsTab() {
               )}
             </div>
 
-            <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-2">Delivery channels</div>
+            <div className="rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] p-3">
+              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-2">Delivery channels</div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3 text-[13px] text-slate-200">
-                  <span className="inline-flex items-center gap-2"><Bell className="w-4 h-4 text-slate-400" /> In-app notification</span>
+                <div className="flex items-center justify-between gap-3 text-[13px] text-[var(--text-primary)]">
+                  <span className="inline-flex items-center gap-2"><Bell className="w-4 h-4 text-[var(--text-secondary)]" /> In-app notification</span>
                   <Toggle on={chInapp} onChange={setChInapp} label="In-app channel" />
                 </div>
-                <div className="flex items-center justify-between gap-3 text-[13px] text-slate-200">
-                  <span className="inline-flex items-center gap-2"><Mail className="w-4 h-4 text-slate-400" /> Email</span>
+                <div className="flex items-center justify-between gap-3 text-[13px] text-[var(--text-primary)]">
+                  <span className="inline-flex items-center gap-2"><Mail className="w-4 h-4 text-[var(--text-secondary)]" /> Email</span>
                   <Toggle on={chEmail} onChange={setChEmail} label="Email channel" />
                 </div>
-                <div className="flex items-center justify-between gap-3 text-[13px] text-slate-200">
-                  <span className="inline-flex items-center gap-2"><MessageCircle className="w-4 h-4 text-slate-400" /> WhatsApp <span className="text-slate-500">· opt-in users only</span></span>
+                <div className="flex items-center justify-between gap-3 text-[13px] text-[var(--text-primary)]">
+                  <span className="inline-flex items-center gap-2"><MessageCircle className="w-4 h-4 text-[var(--text-secondary)]" /> WhatsApp <span className="text-[var(--text-muted)]">· opt-in users only</span></span>
                   <Toggle on={chWhatsapp} onChange={setChWhatsapp} label="WhatsApp channel" />
                 </div>
               </div>
             </div>
 
             <div>
-              <label htmlFor="an-schedule" className={label}>Schedule for later <span className="text-slate-500 font-normal">(leave empty to send now)</span></label>
+              <label htmlFor="an-schedule" className={label}>Schedule for later <span className="text-[var(--text-muted)] font-normal">(leave empty to send now)</span></label>
               <input id="an-schedule" type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} className={`${field} h-10 [color-scheme:dark]`} />
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <button className={`${btn} bg-white/10 hover:bg-white/20 text-white`} disabled={!ready || !!busy}
+              <button className={`${btn} bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)]`} disabled={!ready || !!busy}
                 onClick={() => act('preview', async () => setPreview((await apiClient(token).post('/announcements/admin/preview', payload)).data.html))}>
                 {busy === 'preview' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />} Preview
               </button>
-              <button className={`${btn} bg-white/10 hover:bg-white/20 text-white`} disabled={!ready || !!busy}
+              <button className={`${btn} bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)]`} disabled={!ready || !!busy}
                 onClick={() => act('test', async () => {
                   const { data } = await apiClient(token).post('/announcements/admin/test', payload);
                   toast({ title: 'Test sent', description: `Check ${data.sent_to}` });
@@ -207,13 +207,13 @@ export default function AnnouncementsTab() {
                 </button>
               )}
             </div>
-            {!isSuper && <p className="text-[12px] text-slate-400">Only a super admin can broadcast. You can preview and send yourself a test.</p>}
+            {!isSuper && <p className="text-[12px] text-[var(--text-secondary)]">Only a super admin can broadcast. You can preview and send yourself a test.</p>}
             {confirming && (
               <div className="rounded-xl border border-amber-400/30 bg-amber-500/10 p-3 flex flex-wrap items-center gap-3" data-testid="announcement-confirm">
                 <span className="text-[13px] text-amber-100">
                   {scheduledISO ? `Schedule “${title.trim()}” for ${count} recipients?` : `Send “${title.trim()}” to ${count} recipients now?`} This can&apos;t be undone.
                 </span>
-                <button className={`${btn} bg-red-600 hover:bg-red-700 text-white h-9`} disabled={!!busy} data-testid="announcement-confirm-send"
+                <button className={`${btn} bg-red-600 hover:bg-red-700 text-[var(--text-primary)] h-9`} disabled={!!busy} data-testid="announcement-confirm-send"
                   onClick={() => act('send', async () => {
                     await apiClient(token).post('/announcements/admin', { ...payload, scheduled_at: scheduledISO });
                     toast({ title: scheduledISO ? 'Scheduled' : 'Sending started', description: scheduledISO ? 'It will go out automatically.' : 'Progress shows below.' });
@@ -222,7 +222,7 @@ export default function AnnouncementsTab() {
                   }).finally(() => { setConfirming(false); load(); })}>
                   {busy === 'send' && <Loader2 className="w-4 h-4 animate-spin" />} Yes, {scheduledISO ? 'schedule' : 'send'}
                 </button>
-                <button className={`${btn} bg-white/10 hover:bg-white/20 text-white h-9`} onClick={() => setConfirming(false)}>Cancel</button>
+                <button className={`${btn} bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] h-9`} onClick={() => setConfirming(false)}>Cancel</button>
               </div>
             )}
             {preview && (
@@ -231,23 +231,23 @@ export default function AnnouncementsTab() {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-2">Live preview</div>
-              <div className="rounded-xl bg-black/30 border border-white/10 p-3">
-                <p className="text-[14px] font-bold text-white">{title.trim() || '(no title)'}</p>
-                <p className="text-[13px] text-slate-300 mt-1 whitespace-pre-wrap">{message.trim() || '(no message)'}</p>
+            <div className="rounded-2xl bg-[var(--glass-hover)] border border-[var(--glass-border)] p-4">
+              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-2">Live preview</div>
+              <div className="rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] p-3">
+                <p className="text-[14px] font-bold text-[var(--text-primary)]">{title.trim() || '(no title)'}</p>
+                <p className="text-[13px] text-[var(--text-secondary)] mt-1 whitespace-pre-wrap">{message.trim() || '(no message)'}</p>
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {chInapp && <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/10 text-slate-300">In-app</span>}
-                  {chEmail && <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/10 text-slate-300">Email</span>}
-                  {chWhatsapp && <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/10 text-slate-300">WhatsApp</span>}
+                  {chInapp && <span className="text-[11px] px-2 py-0.5 rounded-full bg-[var(--glass-hover)] text-[var(--text-secondary)]">In-app</span>}
+                  {chEmail && <span className="text-[11px] px-2 py-0.5 rounded-full bg-[var(--glass-hover)] text-[var(--text-secondary)]">Email</span>}
+                  {chWhatsapp && <span className="text-[11px] px-2 py-0.5 rounded-full bg-[var(--glass-hover)] text-[var(--text-secondary)]">WhatsApp</span>}
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-2">Test WhatsApp</div>
+            <div className="rounded-2xl bg-[var(--glass-hover)] border border-[var(--glass-border)] p-4">
+              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-2">Test WhatsApp</div>
               <input value={waNumber} onChange={(e) => setWaNumber(e.target.value)} placeholder="+919876543210" className={`${field} h-10 mb-2`} inputMode="tel" aria-label="Test WhatsApp number" />
-              <button className={`${btn} bg-white/10 hover:bg-white/20 text-white w-full justify-center`} disabled={!ready || !!busy || !waNumber.trim()}
+              <button className={`${btn} bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] w-full justify-center`} disabled={!ready || !!busy || !waNumber.trim()}
                 onClick={() => act('testwa', async () => {
                   const { data } = await apiClient(token).post('/announcements/admin/test-whatsapp', { ...payload, whatsapp: waNumber.trim() });
                   toast({ title: 'WhatsApp test sent', description: `Check ${data.sent_to}` });
@@ -256,9 +256,9 @@ export default function AnnouncementsTab() {
               </button>
             </div>
 
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-2">How it works</div>
-              <ul className="text-[12.5px] text-slate-300 space-y-1.5 leading-relaxed">
+            <div className="rounded-2xl bg-[var(--glass-hover)] border border-[var(--glass-border)] p-4">
+              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-2">How it works</div>
+              <ul className="text-[12.5px] text-[var(--text-secondary)] space-y-1.5 leading-relaxed">
                 <li className="flex gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" /> In-app lands in the user&apos;s notification bell instantly.</li>
                 <li className="flex gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" /> Email skips users who turned notifications off; WhatsApp needs opt-in.</li>
                 <li className="flex gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" /> Re-sends are deduped per user, and schedules fire automatically.</li>
@@ -269,16 +269,16 @@ export default function AnnouncementsTab() {
 
         {items.length > 0 && (
           <div className="mt-5">
-            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-2">History</div>
+            <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-2">History</div>
             <ul className="divide-y divide-white/5" data-testid="announcements-history">
               {items.map((a) => (
                 <li key={a.id} className="py-2 flex flex-wrap items-center justify-between gap-2 text-[13px]">
-                  <span className="text-white">{a.title} <span className="text-slate-500">· {a.audience}</span></span>
-                  <span className="flex items-center gap-2 text-slate-400">
+                  <span className="text-[var(--text-primary)]">{a.title} <span className="text-[var(--text-muted)]">· {a.audience}</span></span>
+                  <span className="flex items-center gap-2 text-[var(--text-secondary)]">
                     {a.inapp > 0 ? `${a.inapp} in-app · ` : ''}{a.emails_sent}/{a.recipients} email
                     {(a.whatsapp_sent > 0 || a.whatsapp_failed > 0) ? ` · ${a.whatsapp_sent} WhatsApp` : ''}
                     {a.status === 'scheduled' && a.scheduled_at ? ` · ${new Date(a.scheduled_at).toLocaleString('en-IN')}` : ` · ${new Date(a.created_at + 'Z').toLocaleDateString('en-IN')}`}
-                    <span className={`px-2 py-0.5 rounded-full text-[10.5px] uppercase tracking-[0.12em] font-bold ${STATUS_PILL[a.status] || 'bg-white/10 text-slate-300'}`}>{a.status}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10.5px] uppercase tracking-[0.12em] font-bold ${STATUS_PILL[a.status] || 'bg-[var(--glass-hover)] text-[var(--text-secondary)]'}`}>{a.status}</span>
                   </span>
                 </li>
               ))}
