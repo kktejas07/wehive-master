@@ -68,8 +68,8 @@ function ProtectedAdmin({ children }) {
 
   if (loading || !admin) {
     return (
-      <div className="min-h-screen bg-[#0b1020] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" />
+      <div className="min-h-screen bg-[#f4f6fb] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[#3b82f6]" />
       </div>
     );
   }
