@@ -29,6 +29,8 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Any, Optional
 
+import observability_internal as obs
+
 logger = logging.getLogger("wehive.agent_framework")
 
 DEFAULT_MAX_ITERATIONS = 6
@@ -269,34 +271,63 @@ async def _llm_call(
     """
     from ai_marketplace import marketplace
 
+    span_id = ""
+    try:
+        span_id = await obs.start_span(
+            "llm_call", "llm",
+            {"system_prompt": system_prompt[:500], "user_prompt": user_prompt[:500],
+             "provider_id": provider_id, "model": model},
+        )
+    except Exception:
+        pass
+
+    reply_text = ""
+    reply_info: dict = {}
+    call_error: str | None = None
+
     # 1 & 2 — marketplace handles user BYOK first, then platform default
     try:
-        return await marketplace.chat_with_info(user_id, system_prompt, user_prompt, max_tokens)
+        reply_text, reply_info = await marketplace.chat_with_info(user_id, system_prompt, user_prompt, max_tokens)
     except Exception as e:
         logger.debug("Marketplace chat unavailable: %s", e)
+        reply_info = {}
 
-    # 3 — forced provider from agent spec (e.g. Ollama)
-    if provider_id and model:
+        # 3 — forced provider from agent spec (e.g. Ollama)
+        if provider_id and model:
+            try:
+                from ai_marketplace import get_provider, PROVIDER_REGISTRY
+                meta = PROVIDER_REGISTRY.get(provider_id, {})
+                base_url = meta.get("default_url", "") if provider_id == "ollama" else meta.get("base_url", "")
+                provider = get_provider(provider_id, key="", base_url=base_url, model=model)
+                reply_text = await provider.chat(system_prompt, user_prompt, max_tokens)
+                reply_info = {
+                    "id": provider_id,
+                    "name": meta.get("name", provider_id),
+                    "model": model,
+                    "powered_by_tagline": meta.get("powered_by_tagline", ""),
+                }
+            except Exception as e2:
+                logger.warning("Forced provider %s/%s failed: %s", provider_id, model, e2)
+
+        if not reply_text:
+            # 4 — local Ollama as final fallback
+            from local_llm import local_chat_with_info
+            reply_text, reply_info = await local_chat_with_info(user_prompt, context=system_prompt)
+
+    if span_id:
         try:
-            from ai_marketplace import get_provider, PROVIDER_REGISTRY
-            meta = PROVIDER_REGISTRY.get(provider_id, {})
-            base_url = meta.get("default_url", "") if provider_id == "ollama" else meta.get("base_url", "")
-            provider = get_provider(provider_id, key="", base_url=base_url, model=model)
-            reply = await provider.chat(system_prompt, user_prompt, max_tokens)
-            return reply, {
-                "id": provider_id,
-                "name": meta.get("name", provider_id),
-                "model": model,
-                "powered_by_tagline": meta.get("powered_by_tagline", ""),
-            }
-        except Exception as e:
-            logger.warning("Forced provider %s/%s failed: %s", provider_id, model, e)
+            await obs.end_span(
+                span_id,
+                {"reply": reply_text[:500]},
+                model=reply_info.get("model", model) if isinstance(reply_info, dict) else model,
+                provider=reply_info.get("id", provider_id) if isinstance(reply_info, dict) else provider_id,
+                error=call_error,
+                metadata={"user_id": user_id},
+            )
+        except Exception:
+            pass
 
-    # 4 — local Ollama as final fallback
-    from local_llm import local_chat_with_info
-
-    reply, info = await local_chat_with_info(user_prompt, context=system_prompt)
-    return reply, info
+    return reply_text, reply_info
 
 
 # ---------------------------------------------------------------------------
@@ -313,13 +344,21 @@ async def _retrieve_rag_context(
     if not collections:
         return ""
 
+    span_id = ""
+    try:
+        span_id = await obs.start_span(
+            "rag_retrieval", "retrieval",
+            {"query": query[:300], "collections": collections, "k": k},
+        )
+    except Exception:
+        pass
+
     # ── Qdrant hybrid path ──────────────────────────────────────────────────
     try:
         import asyncio as _asyncio
         from qdrant_store import hybrid_search, rrf_merge
         from reranker import reranker
         searches = [hybrid_search(col, query, top_k=k * 3) for col in collections]
-        # Include user's own uploaded documents if user_id supplied
         if user_id:
             searches.append(
                 hybrid_search(
@@ -338,6 +377,11 @@ async def _retrieve_rag_context(
                 label = payload.get("name") or payload.get("source_key") or h.get("id") or "source"
                 snippets.append(f"[{label}] {payload.get('text', '')}")
             if snippets:
+                if span_id:
+                    try:
+                        await obs.end_span(span_id, {"chunks": len(snippets), "backend": "qdrant"})
+                    except Exception:
+                        pass
                 return "\n\n".join(snippets)
     except Exception as e:
         logger.debug("Qdrant retrieval skipped, falling back to ChromaDB: %s", e)
@@ -349,8 +393,18 @@ async def _retrieve_rag_context(
         vec = await embed_query(query)
     except Exception as e:
         logger.warning("RAG embed failed: %s", e)
+        if span_id:
+            try:
+                await obs.end_span(span_id, {}, error=str(e))
+            except Exception:
+                pass
         return ""
     if not vec:
+        if span_id:
+            try:
+                await obs.end_span(span_id, {"chunks": 0}, error="empty embedding")
+            except Exception:
+                pass
         return ""
     snippets: list[str] = []
     for coll in collections:
@@ -363,6 +417,13 @@ async def _retrieve_rag_context(
             meta = h.get("metadata") or {}
             label = meta.get("name") or meta.get("source_key") or h.get("id") or "source"
             snippets.append(f"[{label}] {h.get('document', '')}")
+
+    if span_id:
+        try:
+            await obs.end_span(span_id, {"chunks": len(snippets), "collections_queried": len(collections)})
+        except Exception:
+            pass
+
     return "\n\n".join(snippets)
 
 
@@ -398,6 +459,15 @@ async def run_agent(
         user_id=user_id,
     )
     t0 = time.time()
+
+    trace_id = ""
+    try:
+        trace_id = await obs.start_trace(
+            f"agent:{spec.id}",
+            {"agent_id": spec.id, "user_id": user_id},
+        )
+    except Exception:
+        pass
 
     try:
         store = get_store()
@@ -485,39 +555,39 @@ async def run_agent(
 
             tool_name, tool_args = parsed
             if tool_name not in available_tools:
-                obs = f"Error: tool '{tool_name}' is not available to this agent."
+                tool_obs = f"Error: tool '{tool_name}' is not available to this agent."
                 run.steps.append(
                     AgentStep(
                         iteration=iteration,
                         thought=response.strip(),
                         tool_name=tool_name,
                         tool_args=tool_args,
-                        observation=obs,
+                        observation=tool_obs,
                         duration_ms=int((time.time() - step_t0) * 1000),
                     )
                 )
                 user_prompt = (
-                    f"{user_prompt}\n\nObservation: {obs}\n"
+                    f"{user_prompt}\n\nObservation: {tool_obs}\n"
                     f"That tool is not available. Either call a valid tool or give a final answer."
                 )
                 continue
 
             result, err = await call_tool_by_name(tool_name, tool_args)
-            obs = f"Error: {err}" if err else _stringify_tool_result(result)
+            tool_obs = f"Error: {err}" if err else _stringify_tool_result(result)
             run.steps.append(
                 AgentStep(
                     iteration=iteration,
                     thought=response.strip(),
                     tool_name=tool_name,
                     tool_args=tool_args,
-                    observation=obs,
+                    observation=tool_obs,
                     error=err,
                     duration_ms=int((time.time() - step_t0) * 1000),
                 )
             )
             user_prompt = (
                 f"{user_prompt}\n\nAssistant: {response.strip()}\n\n"
-                f"Observation: {obs}\n\nNow decide: call another tool, or give a final answer."
+                f"Observation: {tool_obs}\n\nNow decide: call another tool, or give a final answer."
             )
         else:
             if not run.final_answer and run.steps:
@@ -532,6 +602,13 @@ async def run_agent(
 
     run.finished_at = datetime.utcnow().isoformat()
     run.duration_ms = int((time.time() - t0) * 1000)
+
+    if trace_id:
+        try:
+            await obs.end_trace(trace_id)
+        except Exception:
+            pass
+
     return run
 
 

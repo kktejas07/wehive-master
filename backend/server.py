@@ -89,6 +89,12 @@ from routes_intakes import router as intakes_router  # noqa: E402
 from routes_financials import router as financials_router  # noqa: E402
 from routes_admin_observability import router as admin_observability_router  # noqa: E402
 from routes_admin_monitoring import router as admin_monitoring_router  # noqa: E402
+from routes_observability import router as observability_router  # noqa: E402
+from routes_rag_eval import router as rag_eval_router  # noqa: E402
+from routes_student_memory import router as student_memory_router  # noqa: E402
+from routes_graph_rag import router as graph_rag_router  # noqa: E402
+from routes_scraping import router as scraping_router  # noqa: E402
+from routes_content_pipeline import router as content_pipeline_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -224,6 +230,12 @@ api_router.include_router(intakes_router)
 api_router.include_router(financials_router)
 api_router.include_router(admin_observability_router)
 api_router.include_router(admin_monitoring_router)
+api_router.include_router(observability_router)
+api_router.include_router(rag_eval_router)
+api_router.include_router(student_memory_router)
+api_router.include_router(graph_rag_router)
+api_router.include_router(scraping_router)
+api_router.include_router(content_pipeline_router)
 
 app.include_router(api_router)
 
@@ -474,6 +486,21 @@ async def _warm_up_and_bootstrap_rag():
         await bootstrap_rag_and_prompts(db)
     except Exception as e:
         logger.exception('RAG/prompts bootstrap failed: %s', e)
+
+    try:
+        from graph_rag import build_graph
+        stats = await build_graph()
+        logger.info('GraphRAG built: %s', stats)
+    except Exception as e:
+        logger.exception('GraphRAG build failed: %s', e)
+
+    try:
+        from scraping_agent import seed_default_targets
+        seeded = await seed_default_targets()
+        if seeded:
+            logger.info('Seeded %d default scrape targets', seeded)
+    except Exception as e:
+        logger.exception('Scrape target seeding failed: %s', e)
 
 
 @app.on_event('startup')

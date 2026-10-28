@@ -232,6 +232,38 @@ def register_all():
         _visa_lookup_impl,
     )
 
+    async def _news_search_impl(query: str, limit: int = 5) -> dict:
+        """Search recent news from the global_news collection."""
+        from db import global_news_col
+        cursor = global_news_col.find(
+            {"$text": {"$search": query}, "status": "published"},
+            {"score": {"$meta": "textScore"}},
+        ).sort([("score", {"$meta": "textScore"})]).limit(max(1, min(limit, 20)))
+        results = []
+        async for doc in cursor:
+            results.append({
+                "title": doc.get("title", ""),
+                "summary": doc.get("summary", doc.get("body", ""))[:300],
+                "url": doc.get("url", ""),
+                "published_at": str(doc.get("created_at", "")),
+                "country": doc.get("country_id", ""),
+            })
+        return {"results": results, "count": len(results)}
+
+    register_tool(
+        'news_search',
+        'Search recent visa/immigration news articles. Use for content research and trend discovery.',
+        {
+            'type': 'object',
+            'properties': {
+                'query': {'type': 'string', 'description': 'News search query'},
+                'limit': {'type': 'integer', 'description': 'Max results (default 5, max 20)'},
+            },
+            'required': ['query'],
+        },
+        _news_search_impl,
+    )
+
     register_tool(
         'rag_search',
         'STABLE — semantic search over a RAG collection. Use for universities (university_data / wehive_universities), visa background (visa_guides), travel guides (travel_guides), or document checklists (document_checklists).',
