@@ -46,6 +46,12 @@ import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
 import AdminResetPassword from './AdminResetPassword';
 import RoleGuard from '../components/admin/RoleGuard';
+import ObservabilityTab from '../components/admin/ObservabilityTab';
+import RAGEvalTab from '../components/admin/RAGEvalTab';
+import StudentMemoryTab from '../components/admin/StudentMemoryTab';
+import GraphRAGTab from '../components/admin/GraphRAGTab';
+import ScrapingTab from '../components/admin/ScrapingTab';
+import ContentPipelineTab from '../components/admin/ContentPipelineTab';
 import { Loader2, ShieldAlert } from 'lucide-react';
 
 function ProtectedAdmin({ children }) {
@@ -137,6 +143,12 @@ function AdminRoutes() {
                 <Route path="slot-monitor" element={<SlotMonitorTab />} />
                 <Route path="referrals" element={<ReferralsTab />} />
                 <Route path="visa-scheduling" element={<VisaSchedulingTab />} />
+                <Route path="observability" element={<ObservabilityTab />} />
+                <Route path="rag-eval" element={<RAGEvalTab />} />
+                <Route path="student-memory" element={<StudentMemoryTab />} />
+                <Route path="graph-rag" element={<GraphRAGTab />} />
+                <Route path="scraping" element={<ScrapingTab />} />
+                <Route path="content-pipeline" element={<ContentPipelineTab />} />
                 <Route path="doc-review" element={<Navigate to="/admin/review" replace />} />
                 <Route path="hero-events" element={<Navigate to="/admin/events" replace />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />

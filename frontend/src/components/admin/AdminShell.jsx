@@ -9,6 +9,7 @@ import {
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
   Key, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
   Inbox, CreditCard, History, Activity, ScanSearch, Lock, BarChart3, ChevronLeft, ChevronRight, Pencil, Clock, Share2, CalendarCheck,
+  Eye, Target, UserCheck, GitBranch, Radar, PenTool,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
@@ -51,6 +52,12 @@ const TABS = [
   { id: 'prompts',       to: '/admin/prompts',        label: 'Prompts',       Icon: FileText,        testid: 'admin-nav-prompts',       group: 'AI & System' },
   { id: 'agents-v2',     to: '/admin/agents-v2',      label: 'Agents V2',     Icon: Bot,             testid: 'admin-nav-agents-v2',     group: 'AI & System' },
   { id: 'agentic',        to: '/admin/agentic',        label: 'Agentic AI',    Icon: Bot,             testid: 'admin-nav-agentic',       group: 'AI & System' },
+  { id: 'observability',   to: '/admin/observability',     label: 'Observability',     Icon: Eye,            testid: 'admin-nav-observability',  group: 'AI & System' },
+  { id: 'rag-eval',        to: '/admin/rag-eval',          label: 'RAG Eval',          Icon: Target,         testid: 'admin-nav-rag-eval',       group: 'AI & System' },
+  { id: 'student-memory',  to: '/admin/student-memory',    label: 'Student Memory',    Icon: UserCheck,      testid: 'admin-nav-student-memory', group: 'AI & System' },
+  { id: 'graph-rag',       to: '/admin/graph-rag',         label: 'Graph RAG',         Icon: GitBranch,      testid: 'admin-nav-graph-rag',      group: 'AI & System' },
+  { id: 'scraping',        to: '/admin/scraping',          label: 'Scraping',          Icon: Radar,          testid: 'admin-nav-scraping',       group: 'AI & System' },
+  { id: 'content-pipeline',to: '/admin/content-pipeline',  label: 'Content Pipeline',  Icon: PenTool,        testid: 'admin-nav-content-pipeline',group: 'AI & System' },
   { id: 'slot-monitor',      to: '/admin/slot-monitor',      label: 'Slot Monitor',      Icon: Clock,          testid: 'admin-nav-slot-monitor',      group: 'AI & System' },
   { id: 'visa-scheduling',   to: '/admin/visa-scheduling',   label: 'Visa Scheduling',   Icon: CalendarCheck,  testid: 'admin-nav-visa-scheduling',   group: 'AI & System' },
   { id: 'newsletter',    to: '/admin/newsletter',     label: 'Newsletter',    Icon: Mail,            testid: 'admin-nav-newsletter',    group: 'AI & System' },
