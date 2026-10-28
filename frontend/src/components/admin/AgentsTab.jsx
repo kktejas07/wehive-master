@@ -117,8 +117,8 @@ function CommissionModal({ agent, token, onClose, onDone }) {
           </select>
         </label>
         <div className="flex gap-2 pt-1">
-          <button onClick={onClose} className="flex-1 h-10 rounded-full bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[13px] font-bold text-[var(--text-secondary)]">Cancel</button>
-          <button onClick={submit} disabled={busy} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-[var(--text-primary)] disabled:opacity-50">
+          <button onClick={onClose} className="flex-1 h-10 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[13px] font-bold text-[var(--text-secondary)]">Cancel</button>
+          <button onClick={submit} disabled={busy} className="flex-1 h-10 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[13px] font-bold text-[var(--text-primary)] disabled:opacity-50">
             {busy ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Record Payment'}
           </button>
         </div>

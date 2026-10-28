@@ -188,6 +188,7 @@ ADMIN_ROLES = {
     'manager': 'Full access (except super-admin settings)',
     'support': 'Applications, cases, leads, document review, profile requests',
     'finance': 'Payments, pricing and promo codes',
+    'doc_reviewer': 'Document review and read-only application access',
     'viewer': 'Read-only',
 }
 _ANY_ROLE_WRITES = re.compile(
@@ -197,6 +198,7 @@ _ANY_ROLE_WRITES = re.compile(
 _ROLE_WRITES = {
     'support': re.compile(r'^/admin/(applications|leads|review-queue|profile-requests)(/|$)'),
     'finance': re.compile(r'^/admin/(payments|pricing)(/|$)|^/promotions/'),
+    'doc_reviewer': re.compile(r'^/admin/(review-queue)(/|$)'),
 }
 
 
@@ -292,3 +294,18 @@ async def get_super_admin(user=Depends(get_current_admin_flex)):
     if not is_super_admin(user):
         raise HTTPException(status_code=403, detail='Only a super admin can do this.')
     return user
+
+
+def require_role(allowed_roles: list[str]):
+    """FastAPI dependency factory: returns a dependency that checks admin_role against the allowed list.
+
+    super_admin always passes. Usage: Depends(require_role(['manager', 'finance']))
+    """
+    async def _check(user=Depends(get_current_admin_flex)):
+        if is_super_admin(user):
+            return user
+        role = user.get('admin_role') or 'manager'
+        if role not in allowed_roles:
+            raise HTTPException(status_code=403, detail='Insufficient permissions')
+        return user
+    return _check

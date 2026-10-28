@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useResponsive } from '../../hooks/useResponsive';
 import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, canWrite, ROLE_NAMES } from '../../lib/admin';
+import { adminClient, canWrite, canViewTab, ROLE_NAMES } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
@@ -109,7 +109,7 @@ export default function AdminShell({ children }) {
       {critical}
     </span>
   );
-  const tabs = TABS.filter((t) => !t.superOnly || admin?.is_super_admin);
+  const tabs = TABS.filter((t) => (!t.superOnly || admin?.is_super_admin) && canViewTab(admin, t.id));
   const mustEnrol = !!admin?.two_factor_required;
   const role = admin?.admin_role;
   const limited = admin && !canWrite(admin, 'manage');

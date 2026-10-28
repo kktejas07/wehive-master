@@ -25,7 +25,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from admin_auth import get_current_admin_flex, get_super_admin
+from admin_auth import get_current_admin_flex, get_super_admin, require_role
 from config import ADMIN_EMAILS, DESTINATION_IMAGE_BASE_URLS, IS_DEV
 from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS
 from audit import record as audit_record, recent as audit_recent
@@ -310,7 +310,7 @@ class UserPatch(BaseModel):
 
 
 @router.patch('/users/{user_id}')
-async def admin_update_user(user_id: str, patch: UserPatch, admin=Depends(get_current_admin)):
+async def admin_update_user(user_id: str, patch: UserPatch, admin=Depends(require_role(['manager', 'support']))):
     u = await users.find_one({'_id': user_id})
     if not u:
         raise HTTPException(404, 'User not found')
@@ -369,7 +369,7 @@ class StaffCreate(BaseModel):
 
 
 @router.post('/staff')
-async def admin_create_staff(payload: StaffCreate, admin=Depends(get_current_admin)):
+async def admin_create_staff(payload: StaffCreate, admin=Depends(require_role(['manager']))):
     email = payload.email.strip().lower()
     now = datetime.utcnow()
     existing = await users.find_one({'email': email})
@@ -494,7 +494,7 @@ class AppPatch(BaseModel):
 
 
 @router.patch('/applications/{application_id}')
-async def admin_update_application(application_id: str, patch: AppPatch, admin=Depends(get_current_admin)):
+async def admin_update_application(application_id: str, patch: AppPatch, admin=Depends(require_role(['manager', 'support']))):
     app = await applications.find_one({'_id': application_id})
     if not app:
         raise HTTPException(404, 'Application not found')
@@ -569,7 +569,7 @@ class CountryPatch(BaseModel):
 
 
 @router.patch('/countries/{country_id}')
-async def admin_update_country(country_id: str, patch: CountryPatch, admin=Depends(get_current_admin)):
+async def admin_update_country(country_id: str, patch: CountryPatch, admin=Depends(require_role(['manager']))):
     cid = country_id.lower()
     existing = await countries_col.find_one({'id': cid})
     if not existing:
@@ -624,7 +624,7 @@ async def admin_get_pricing(_=Depends(get_current_admin)):
 
 
 @router.patch('/pricing')
-async def admin_update_pricing(patch: PricingPatch, admin=Depends(get_current_admin)):
+async def admin_update_pricing(patch: PricingPatch, admin=Depends(require_role(['manager', 'finance']))):
     before = await load_pricing()
     update = {k: v for k, v in patch.model_dump(exclude_none=True).items()}
     if not update:
@@ -710,7 +710,7 @@ async def admin_list_events(
 
 
 @router.post('/events')
-async def admin_create_event(payload: EventCreate, admin=Depends(get_current_admin)):
+async def admin_create_event(payload: EventCreate, admin=Depends(require_role(['manager']))):
     now = datetime.utcnow()
     doc = {
         '_id': str(uuid.uuid4()),
@@ -724,7 +724,7 @@ async def admin_create_event(payload: EventCreate, admin=Depends(get_current_adm
 
 
 @router.patch('/events/{event_id}')
-async def admin_update_event(event_id: str, payload: EventPatch, admin=Depends(get_current_admin)):
+async def admin_update_event(event_id: str, payload: EventPatch, admin=Depends(require_role(['manager']))):
     existing = await events_col.find_one({'_id': event_id})
     if not existing:
         raise HTTPException(404, 'Event not found')
@@ -744,7 +744,7 @@ async def admin_update_event(event_id: str, payload: EventPatch, admin=Depends(g
 
 
 @router.delete('/events/{event_id}')
-async def admin_delete_event(event_id: str, admin=Depends(get_current_admin)):
+async def admin_delete_event(event_id: str, admin=Depends(require_role(['manager']))):
     existing = await events_col.find_one({'_id': event_id})
     if not existing:
         raise HTTPException(404, 'Event not found')

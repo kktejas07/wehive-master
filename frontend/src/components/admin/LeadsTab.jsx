@@ -23,6 +23,11 @@ const PURPOSE_LABEL = {
   tourist: 'Tourist', business: 'Business', student_f1: 'Student / F-1', work: 'Work',
   family: 'Family visit', immigration: 'Immigration / PR', transit: 'Transit', other: 'Other',
 };
+const SOURCE_LABEL = {
+  landing: 'Landing page', contact: 'Contact form', visa_assessment: 'Visa assessment',
+  website: 'Website', enquiry: 'Enquiry',
+};
+const SOURCE_PILL = 'rounded-full px-2 py-0.5 text-[11px] font-semibold bg-purple-100 text-purple-700';
 const waLink = (phone) => `https://wa.me/${(phone || '').replace(/\D/g, '')}`;
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
 
@@ -190,6 +195,9 @@ export default function LeadsTab() {
                         {PURPOSE_LABEL[l.purpose] || l.purpose}{l.destination ? ` · ${l.destination}` : ''}
                       </span>
                     )}
+                    {l.source && (
+                      <span className={SOURCE_PILL}>{SOURCE_LABEL[l.source] || l.source}</span>
+                    )}
                     {l.branch && (
                       <span data-testid={`admin-lead-branch-${l.id}`} className="rounded-full px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700">
                         {BRANCH_LABEL[l.branch] || l.branch}
@@ -204,6 +212,15 @@ export default function LeadsTab() {
 
               {expanded && (
                 <div className="px-5 pb-5 space-y-4" data-testid={`admin-lead-detail-${l.id}`}>
+                  {(l.destination || l.travellers || l.travel_date || l.source) && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[12.5px]">
+                      {l.destination && <div><span className="text-[var(--text-muted)] block">Destination</span><span className="text-[#1B2B5E] font-semibold">{l.destination}</span></div>}
+                      {l.travel_date && <div><span className="text-[var(--text-muted)] block">Travel date</span><span className="text-[#1B2B5E] font-semibold">{l.travel_date}</span></div>}
+                      {l.travellers > 1 && <div><span className="text-[var(--text-muted)] block">Travellers</span><span className="text-[#1B2B5E] font-semibold">{l.travellers}</span></div>}
+                      {l.source && <div><span className="text-[var(--text-muted)] block">Source</span><span className="text-[#1B2B5E] font-semibold">{SOURCE_LABEL[l.source] || l.source}</span></div>}
+                      <div><span className="text-[var(--text-muted)] block">Received</span><span className="text-[#1B2B5E] font-semibold">{fmt(l.created_at)}</span></div>
+                    </div>
+                  )}
                   <p className="whitespace-pre-wrap text-[13.5px] text-[#1B2B5E] rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] p-4">{l.message}</p>
 
                   <div className="flex flex-wrap items-center gap-2">

@@ -87,10 +87,10 @@ function PromptEditor({ initial, onSave, onCancel, saving }) {
           className="w-full rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 py-2 text-[12px] text-[var(--text-primary)] outline-none font-mono resize-y" />
       </label>
       <div className="flex gap-2 pt-1">
-        <button onClick={onCancel} className="flex-1 h-10 rounded-full bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[13px] font-bold text-[var(--text-secondary)] inline-flex items-center justify-center gap-1.5">
+        <button onClick={onCancel} className="flex-1 h-10 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[13px] font-bold text-[var(--text-secondary)] inline-flex items-center justify-center gap-1.5">
           <X className="w-3.5 h-3.5" /> Cancel
         </button>
-        <button onClick={submit} disabled={saving || !form.id.trim()} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-[var(--text-primary)] disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
+        <button onClick={submit} disabled={saving || !form.id.trim()} className="flex-1 h-10 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[13px] font-bold text-[var(--text-primary)] disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
           {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           Save Prompt
         </button>

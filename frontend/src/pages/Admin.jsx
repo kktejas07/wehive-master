@@ -45,6 +45,7 @@ import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
 import AdminResetPassword from './AdminResetPassword';
+import RoleGuard from '../components/admin/RoleGuard';
 import { Loader2, ShieldAlert } from 'lucide-react';
 
 function ProtectedAdmin({ children }) {
@@ -102,16 +103,16 @@ function AdminRoutes() {
                 <Route path="users/:id" element={<UserProfile />} />
                 <Route path="applications" element={<ApplicationsTab />} />
                 <Route path="applications/:id" element={<ApplicationCase />} />
-                <Route path="countries" element={<CountriesTab />} />
-                <Route path="pricing" element={<PricingTab />} />
-                <Route path="events" element={<EventsTab />} />
+                <Route path="countries" element={<RoleGuard allowed={['manager']}><CountriesTab /></RoleGuard>} />
+                <Route path="pricing" element={<RoleGuard allowed={['manager', 'finance']}><PricingTab /></RoleGuard>} />
+                <Route path="events" element={<RoleGuard allowed={['manager']}><EventsTab /></RoleGuard>} />
                 <Route path="global-events" element={<GlobalEventsTab />} />
                 <Route path="moderation" element={<ContentModerationTab />} />
                 <Route path="requests" element={<RequestsTab />} />
                 <Route path="promotions" element={<PromotionsTab />} />
                 <Route path="promocodes" element={<PromoCodesTab />} />
                 <Route path="agents" element={<AgentsTab />} />
-                <Route path="staff" element={<StaffTab />} />
+                <Route path="staff" element={<RoleGuard allowed={['manager']}><StaffTab /></RoleGuard>} />
                 <Route path="admins" element={<SuperOnly><AdminsTab /></SuperOnly>} />
                 <Route path="newsletter" element={<NewsletterTab />} />
           <Route path="announcements" element={<AnnouncementsTab />} />

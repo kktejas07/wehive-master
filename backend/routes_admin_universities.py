@@ -24,8 +24,12 @@ router = APIRouter(prefix="/admin/universities", tags=["admin-universities"])
 universities_col = db["universities_v2"]
 
 
+from admin_auth import require_role as _require_role
+
 async def _admin(user=Depends(get_current_admin_flex)):
     return user
+
+_admin_write = _require_role(['manager'])
 
 
 class UniversityPatch(BaseModel):
@@ -50,7 +54,7 @@ async def get_stats(_=Depends(_admin)):
 
 
 @router.post("/seed-from-csv")
-async def seed_csv(file: UploadFile = File(...), dry_run: bool = Form(False), admin=Depends(_admin)):
+async def seed_csv(file: UploadFile = File(...), dry_run: bool = Form(False), admin=Depends(_admin_write)):
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(400, "Must be a CSV file")
     result = await seed_from_csv_bytes(await read_capped(file), file.filename, dry_run=dry_run)
@@ -63,7 +67,7 @@ async def seed_csv(file: UploadFile = File(...), dry_run: bool = Form(False), ad
 @router.post("/enrich-from-csv")
 async def enrich_csv(file: UploadFile = File(...), threshold: int = Form(88),
     insert_missing: bool = Form(False), dry_run: bool = Form(False),
-    column_overrides: Optional[str] = Form(None), admin=Depends(_admin)):
+    column_overrides: Optional[str] = Form(None), admin=Depends(_admin_write)):
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(400, "Must be a CSV file")
     overrides = _json.loads(column_overrides) if column_overrides else {}
@@ -79,7 +83,7 @@ async def enrich_csv(file: UploadFile = File(...), threshold: int = Form(88),
 
 @router.post("/enrich-scorecard")
 async def scorecard(threshold: int = Form(88), insert_missing: bool = Form(False),
-    dry_run: bool = Form(False), admin=Depends(_admin)):
+    dry_run: bool = Form(False), admin=Depends(_admin_write)):
     result = await enrich_scorecard(os.environ.get("SCORECARD_API_KEY", "DEMO_KEY"),
         threshold=threshold, insert_missing=insert_missing, dry_run=dry_run)
     if "error" in result: raise HTTPException(400, result["error"])
@@ -89,7 +93,7 @@ async def scorecard(threshold: int = Form(88), insert_missing: bool = Form(False
 
 
 @router.post("/re-seed")
-async def re_seed(admin=Depends(_admin)):
+async def re_seed(admin=Depends(_admin_write)):
     try:
         result = await seed_universities()
         await audit_record(admin, "re_seed", "universities", "static",
@@ -120,7 +124,7 @@ async def get_one(uid: str, _=Depends(_admin)):
 
 
 @router.patch("/{uid}")
-async def update_one(uid: str, body: UniversityPatch, admin=Depends(_admin)):
+async def update_one(uid: str, body: UniversityPatch, admin=Depends(_admin_write)):
     existing = await universities_col.find_one({"id": uid})
     if not existing: raise HTTPException(404)
     update = {k: v for k, v in body.model_dump(exclude_none=True).items()}

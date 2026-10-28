@@ -14,7 +14,7 @@ from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from admin_auth import get_current_admin_flex
+from admin_auth import get_current_admin_flex, require_role
 from audit import audit_col, record as audit_record
 from db import leads, payments, users
 from routes_admin import _csv_response
@@ -91,7 +91,7 @@ class LeadPatch(BaseModel):
 
 
 @router.patch('/leads/{lead_id}')
-async def admin_update_lead(lead_id: str, patch: LeadPatch, admin=Depends(get_current_admin_flex)):
+async def admin_update_lead(lead_id: str, patch: LeadPatch, admin=Depends(require_role(['manager', 'support']))):
     lead = await leads.find_one({'_id': lead_id})
     if not lead:
         raise HTTPException(404, 'Lead not found')

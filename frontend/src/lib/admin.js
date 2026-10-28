@@ -93,11 +93,34 @@ export const ALERT_KIND_LABEL = {
 // Mirrors admin_auth.role_allows on the server (the server is what actually enforces it):
 // everyone can view; "cases" = applications, leads, document review, profile requests;
 // "finance" = payments, pricing, promo codes; anything else needs a manager.
-const ROLE_AREAS = { support: ['cases'], finance: ['finance'], viewer: [] };
+const ROLE_AREAS = { support: ['cases'], finance: ['finance'], doc_reviewer: ['review'], viewer: [] };
 export function canWrite(admin, area = 'manage') {
   if (!admin) return false;
   const role = admin.admin_role || 'manager';
   if (admin.is_super_admin || role === 'super_admin' || role === 'manager') return true;
   return (ROLE_AREAS[role] || []).includes(area);
 }
-export const ROLE_NAMES = { super_admin: 'Super admin', manager: 'Manager', support: 'Support', finance: 'Finance', viewer: 'Viewer' };
+
+// Which sidebar sections a role can see. Manager / super_admin see everything.
+// Others see a curated list. Returns true if the nav item should be visible.
+const ROLE_VISIBLE_TABS = {
+  support:      ['overview', 'applications', 'review', 'leads', 'users', 'staff', 'audit', 'health', 'security'],
+  finance:      ['overview', 'applications', 'payments', 'pricing', 'promocodes', 'exports', 'audit', 'health', 'security'],
+  doc_reviewer: ['overview', 'applications', 'review', 'audit', 'security'],
+  viewer:       ['overview', 'applications', 'users', 'leads', 'payments', 'countries', 'pricing', 'events', 'universities', 'programs', 'exports', 'audit', 'health', 'security'],
+};
+export function canViewTab(admin, tabId) {
+  if (!admin) return false;
+  const role = admin.admin_role || 'manager';
+  if (admin.is_super_admin || role === 'super_admin' || role === 'manager') return true;
+  const allowed = ROLE_VISIBLE_TABS[role];
+  return allowed ? allowed.includes(tabId) : false;
+}
+
+export function adminRole(admin) {
+  if (!admin) return null;
+  if (admin.is_super_admin) return 'super_admin';
+  return admin.admin_role || 'manager';
+}
+
+export const ROLE_NAMES = { super_admin: 'Super admin', manager: 'Manager', support: 'Support', finance: 'Finance', doc_reviewer: 'Doc reviewer', viewer: 'Viewer' };

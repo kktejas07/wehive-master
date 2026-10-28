@@ -40,7 +40,7 @@ async def _send_openwa_whatsapp(to: str, body: str) -> bool:
     """Send WhatsApp message via OpenWA API.
 
     Supports self-hosted OpenWA instances. Expects:
-    - OPENWA_API_URL  (e.g. http://167.233.39.15:2785)
+    - OPENWA_API_URL  (e.g. http://your-openwa-server:2785)
     - OPENWA_API_KEY  (API key starting with owa_k1_...)
     - OPENWA_INSTANCE_ID  (Session ID from OpenWA dashboard)
     """

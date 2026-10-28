@@ -166,7 +166,9 @@ Phone: ${phone}`;
         name: firstName,
         surname: lastName,
         email: email,
+        phone: phone || null,
         message: message,
+        source: 'visa_assessment',
       });
       setSubmitted(true);
     } catch (err) {
