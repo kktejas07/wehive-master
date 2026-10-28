@@ -51,6 +51,15 @@ global_blogs_col = db['global_blogs']
 global_news_col = db['global_news']
 newsletter_col = db['newsletter_subscribers']
 
+# --- New AI stack collections ---
+llm_traces_col = db['llm_traces']
+rag_evaluations_col = db['rag_evaluations']
+student_memories_col = db['student_memories']
+graph_rag_meta_col = db['graph_rag_meta']
+scrape_targets_col = db['scrape_targets']
+scrape_runs_col = db['scrape_runs']
+content_pipeline_runs_col = db['content_pipeline_runs']
+
 async def ensure_indexes():
     await users.create_index('email', unique=True, sparse=True)
     await users.create_index('phone', unique=True, sparse=True)
@@ -137,3 +146,21 @@ async def ensure_indexes():
     await global_news_col.create_index('status')
     await global_news_col.create_index('category')
     await global_news_col.create_index([('created_at', -1)])
+    # --- New AI stack indexes ---
+    await llm_traces_col.create_index([('trace_id', 1), ('started_at', 1)])
+    await llm_traces_col.create_index([('started_at', -1)])
+    await llm_traces_col.create_index([('kind', 1), ('started_at', -1)])
+    await llm_traces_col.create_index([('provider', 1), ('model', 1)])
+    await llm_traces_col.create_index([('status', 1)])
+    await rag_evaluations_col.create_index([('session_id', 1)])
+    await rag_evaluations_col.create_index([('evaluated_at', -1)])
+    await rag_evaluations_col.create_index([('auto', 1), ('evaluated_at', -1)])
+    await student_memories_col.create_index([('user_id', 1), ('key', 1)], unique=True)
+    await student_memories_col.create_index([('user_id', 1), ('type', 1)])
+    await student_memories_col.create_index([('extracted_at', -1)])
+    await scrape_targets_col.create_index('active')
+    await scrape_targets_col.create_index('category')
+    await scrape_runs_col.create_index([('target_id', 1), ('scraped_at', -1)])
+    await scrape_runs_col.create_index([('changed', 1), ('scraped_at', -1)])
+    await content_pipeline_runs_col.create_index([('status', 1), ('created_at', -1)])
+    await content_pipeline_runs_col.create_index([('created_at', -1)])

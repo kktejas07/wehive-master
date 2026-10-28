@@ -74,9 +74,19 @@ RE_VISA_KEYWORDS = re.compile(
 RAG_COLLECTIONS = ["wehive_kb", "wehive_countries", "wehive_universities", "kg_entities"]
 
 
-async def _gather_context(user_prompt: str) -> str:
+async def _gather_context(user_prompt: str, user_id: str = None) -> str:
     from agents.orchestrator import RE_COUNTRY_NAME, COUNTRY_ALIASES
     snippets = []
+
+    # Student memory: inject persistent user profile context
+    if user_id:
+        try:
+            from student_memory import get_memory_context
+            mem_ctx = await get_memory_context(user_id)
+            if mem_ctx:
+                snippets.append(f"About this student:\n{mem_ctx}")
+        except Exception:
+            logger.debug("Student memory context failed", exc_info=True)
     country_codes = RE_COUNTRY_CODE.findall(user_prompt)
     country_codes += [COUNTRY_ALIASES[m.group(0).lower()] for m in RE_COUNTRY_NAME.finditer(user_prompt)]
     is_student = bool(RE_STUDENT_KEYWORDS.search(user_prompt))
@@ -126,6 +136,17 @@ async def _gather_context(user_prompt: str) -> str:
             )
 
     snippets.extend(s for s in await asyncio.gather(_rag_context(user_prompt), google_kg.context_for(user_prompt)) if s)
+
+    # Graph RAG: inject visa-graph context for visa/travel queries
+    if is_visa and country_codes:
+        try:
+            from graph_rag import hybrid_graph_rag_query
+            graph_ctx = await asyncio.wait_for(hybrid_graph_rag_query(user_prompt), timeout=5)
+            if graph_ctx:
+                snippets.append(f"Visa graph insights:\n{graph_ctx}")
+        except Exception:
+            logger.debug("GraphRAG context failed", exc_info=True)
+
     return "\n\n".join(snippets) if snippets else ""
 
 
@@ -248,7 +269,8 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     }
     await chat_messages.insert_one(user_msg)
 
-    context = await _gather_context(text)
+    uid = user["_id"] if user else None
+    context = await _gather_context(text, user_id=uid)
 
     from rag_service import retrieve_conversation_history
 
@@ -262,12 +284,11 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         enriched_prompt = f"Current data from our system:\n{context}\n\nUser question: {text}"
 
     try:
-        user_id = user["_id"] if user else None
         has_api_key = bool(os.environ.get("DEFAULT_LLM_KEY", "").strip())
 
-        if has_api_key and user_id:
+        if has_api_key and uid:
             reply_text, provider_info = await marketplace.chat_with_info(
-                user_id=user_id,
+                user_id=uid,
                 system_prompt=enriched_system,
                 user_prompt=enriched_prompt,
                 max_tokens=1024,
@@ -305,6 +326,29 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         "created_at": datetime.utcnow(),
     }
     await chat_messages.insert_one(assistant_msg)
+
+    # Fire-and-forget: student memory extraction + RAG auto-evaluation
+    if uid:
+        try:
+            from student_memory import extract_facts_from_turn, upsert_memories
+            async def _extract_and_store():
+                facts = await extract_facts_from_turn(text, reply_text)
+                if facts:
+                    await upsert_memories(uid, facts)
+            asyncio.create_task(_extract_and_store())
+        except Exception:
+            pass
+        try:
+            from rag_eval import auto_evaluate_hook
+            asyncio.create_task(auto_evaluate_hook(
+                session_id=session_id,
+                message_id=assistant_msg["_id"],
+                question=text,
+                answer=reply_text,
+                context=context,
+            ))
+        except Exception:
+            pass
 
     new_title = sess.get("title") or "New chat"
     if new_title in ("New chat", None, ""):

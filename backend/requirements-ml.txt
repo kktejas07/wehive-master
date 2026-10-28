@@ -12,3 +12,4 @@
 # roughly 2.5 GB of RAM on CPU.
 FlagEmbedding==1.4.2
 chonkie[semantic]==1.7.0
+networkx>=3.2

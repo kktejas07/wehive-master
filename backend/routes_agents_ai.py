@@ -257,6 +257,11 @@ async def _scheduler_loop():
                 await run_visa_rules()
             except Exception as e:
                 logger.exception("Visa rules agent failed: %s", e)
+            try:
+                from scraping_agent import run_scrape_cycle
+                await run_scrape_cycle()
+            except Exception as e:
+                logger.exception("Scrape cycle failed: %s", e)
             logger.info("Scheduler: agents complete")
         except Exception as e:
             logger.exception("Scheduler error: %s", e)

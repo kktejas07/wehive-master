@@ -316,6 +316,72 @@ async def bootstrap_rag_and_prompts(db) -> dict:
         logger.warning("Hive RAG seed failed: %s", e)
         summary["errors"].append(f"hive_rag: {e}")
 
+    # ── Content pipeline prompts ──
+    try:
+        content_prompts = [
+            {
+                "id": "content.research",
+                "version": 1,
+                "description": "Content pipeline — research agent finds trending visa/immigration topics",
+                "tags": ["content", "research", "agent"],
+                "variables": ["content_type", "topic", "context"],
+                "system": (
+                    "You are a visa/immigration content researcher. Find the most relevant "
+                    "and trending information about the given topic. Use news_search and rag_search "
+                    "tools to gather facts. Return a structured research brief with key points, "
+                    "statistics, and source references."
+                ),
+                "user": "Research topic: {{ topic }}\nContent type: {{ content_type }}\nContext: {{ context }}",
+            },
+            {
+                "id": "content.write",
+                "version": 1,
+                "description": "Content pipeline — writer agent creates content from research",
+                "tags": ["content", "writer", "agent"],
+                "variables": ["content_type", "topic", "research", "word_limit"],
+                "system": (
+                    "You are a professional content writer for We Hive Immigration Services. "
+                    "Write engaging, accurate content based on the research provided. "
+                    "Tone: warm, professional, India-friendly. Use ₹ for INR. "
+                    "Stay within the word limit. Do not invent facts."
+                ),
+                "user": (
+                    "Write a {{ content_type }} about: {{ topic }}\n"
+                    "Word limit: {{ word_limit }}\n\nResearch:\n{{ research }}"
+                ),
+            },
+            {
+                "id": "content.review",
+                "version": 1,
+                "description": "Content pipeline — reviewer agent checks accuracy and quality",
+                "tags": ["content", "reviewer", "agent"],
+                "variables": ["content_type", "draft", "research"],
+                "system": (
+                    "You are a content quality reviewer for We Hive. Check the draft for: "
+                    "1) Factual accuracy against the research. 2) Tone and brand voice. "
+                    "3) Compliance (no misleading claims, proper disclaimers). "
+                    "4) Grammar and clarity. Score 1-10 and list specific issues."
+                ),
+                "user": (
+                    "Review this {{ content_type }}:\n\n{{ draft }}\n\n"
+                    "Research it was based on:\n{{ research }}"
+                ),
+            },
+        ]
+        for sp in content_prompts:
+            try:
+                p = Prompt(
+                    id=sp["id"], version=sp["version"], description=sp["description"],
+                    tags=sp["tags"], variables=sp["variables"],
+                    system=sp["system"], user=sp["user"],
+                )
+                await prompts.save(p)
+                summary["prompts"] += 1
+            except Exception as e:
+                logger.warning("Could not seed content prompt %s: %s", sp["id"], e)
+    except Exception as e:
+        logger.warning("Content pipeline prompt seeding failed: %s", e)
+
     # ── Hive self-learning (opt-in: HIVE_SELF_LEARN=1) ──
     # Mines recent authenticated Hive conversations and stores proposed
     # prompt rewrites as pending in `hive_proposals`. Nothing is applied
