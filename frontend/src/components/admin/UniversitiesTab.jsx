@@ -253,9 +253,9 @@ export default function UniversitiesTab() {
       <div className="flex flex-wrap gap-3 mb-4 items-center">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && search()} placeholder="Search name, country..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-[#111632] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-sky-500" />
+          <input value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && search()} placeholder="Search name, country..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-[#111632] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-[hsl(var(--blue-700))]" />
         </div>
-        <input value={countryFilter} onChange={e => setCountryFilter(e.target.value)} placeholder="Country code (us, gb...)" className="h-10 px-4 rounded-xl bg-[#111632] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-sky-500 w-40" />
+        <input value={countryFilter} onChange={e => setCountryFilter(e.target.value)} placeholder="Country code (us, gb...)" className="h-10 px-4 rounded-xl bg-[#111632] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-[hsl(var(--blue-700))] w-40" />
         <button onClick={search} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-bold">Search</button>
         <button onClick={() => { setQuery(''); setCountryFilter(''); setSkip(0); loadList('', '', 0); }} className="h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-[13px] font-bold">Clear</button>
       </div>
@@ -387,24 +387,24 @@ export default function UniversitiesTab() {
                 <div key={f.key}>
                   <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">{f.label}</label>
                   {f.type === 'boolean' ? (
-                    <select value={editDraft[f.key] === true ? 'true' : editDraft[f.key] === false ? 'false' : ''} onChange={e => updateDraft(f.key, e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500">
+                    <select value={editDraft[f.key] === true ? 'true' : editDraft[f.key] === false ? 'false' : ''} onChange={e => updateDraft(f.key, e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))]">
                       <option value="">—</option>
                       <option value="true">Yes</option>
                       <option value="false">No</option>
                     </select>
                   ) : f.type === 'number' ? (
-                    <input type="number" value={editDraft[f.key] ?? ''} onChange={e => updateDraft(f.key, e.target.value === '' ? null : Number(e.target.value))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                    <input type="number" value={editDraft[f.key] ?? ''} onChange={e => updateDraft(f.key, e.target.value === '' ? null : Number(e.target.value))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
                   ) : f.type === 'textarea' ? (
-                    <textarea value={editDraft[f.key] || ''} onChange={e => updateDraft(f.key, e.target.value)} rows={3} className="w-full px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500 resize-none" />
+                    <textarea value={editDraft[f.key] || ''} onChange={e => updateDraft(f.key, e.target.value)} rows={3} className="w-full px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))] resize-none" />
                   ) : f.key === 'image_url' ? (
                     <div className="space-y-2">
-                      <input type="text" value={editDraft[f.key] || ''} onChange={e => updateDraft(f.key, e.target.value)} placeholder="https://..." className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                      <input type="text" value={editDraft[f.key] || ''} onChange={e => updateDraft(f.key, e.target.value)} placeholder="https://..." className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
                       {editDraft.image_url && (
                         <img loading="lazy" decoding="async" src={editDraft.image_url} alt="" className="w-full h-24 rounded-lg object-cover bg-black/50" onError={e => { e.target.style.display = 'none' }} />
                       )}
                     </div>
                   ) : (
-                    <input type="text" value={editDraft[f.key] || ''} onChange={e => updateDraft(f.key, e.target.value)} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                    <input type="text" value={editDraft[f.key] || ''} onChange={e => updateDraft(f.key, e.target.value)} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
                   )}
                 </div>
               ))}

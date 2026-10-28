@@ -261,7 +261,7 @@ export default function RAGTab() {
         </div>
         <div className="space-y-3">
           <textarea value={query} onChange={e => setQuery(e.target.value)} rows={2} placeholder="Ask anything — e.g. 'Tell me about student visa for Canada' or 'Universities offering scholarships in Germany'"
-            className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[13px] text-white outline-none focus:border-emerald-500/50 resize-y" />
+            className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))] resize-y" />
           <div className="flex flex-wrap items-center gap-2">
             <label className="text-[11px] text-slate-400">k =
               <input type="number" min={1} max={20} value={retrieveK} onChange={e => setRetrieveK(parseInt(e.target.value) || 4)}

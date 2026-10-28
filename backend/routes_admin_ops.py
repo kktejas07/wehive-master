@@ -19,7 +19,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
-from admin_auth import get_current_admin_flex, is_super_admin
+from admin_auth import get_current_admin_flex, is_super_admin, require_role
 from audit import audit_col, record as audit_record
 from config import ADMIN_EMAILS
 from constants import AppStatus
@@ -96,7 +96,7 @@ class SuspendBody(BaseModel):
 
 
 @router.post('/users/{user_id}/suspend')
-async def admin_suspend_user(user_id: str, body: SuspendBody, admin=Depends(get_current_admin_flex)):
+async def admin_suspend_user(user_id: str, body: SuspendBody, admin=Depends(require_role(['manager']))):
     if user_id == admin['_id']:
         raise HTTPException(400, 'You cannot suspend your own account')
     u = await users.find_one({'_id': user_id})
@@ -120,7 +120,7 @@ async def admin_suspend_user(user_id: str, body: SuspendBody, admin=Depends(get_
 
 
 @router.post('/users/{user_id}/unsuspend')
-async def admin_unsuspend_user(user_id: str, admin=Depends(get_current_admin_flex)):
+async def admin_unsuspend_user(user_id: str, admin=Depends(require_role(['manager']))):
     u = await users.find_one({'_id': user_id})
     if not u:
         raise HTTPException(404, 'User not found')

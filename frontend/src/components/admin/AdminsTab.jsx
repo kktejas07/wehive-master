@@ -12,12 +12,12 @@ const errText = (e) => {
   return e.message;
 };
 
-const ROLE_LABEL = { manager: 'Manager', support: 'Support', finance: 'Finance', viewer: 'Viewer' };
+const ROLE_LABEL = { manager: 'Manager', support: 'Support', finance: 'Finance', doc_reviewer: 'Doc reviewer', viewer: 'Viewer' };
 
 function StatusPill({ a }) {
-  if (a.env_managed) return <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11.5px] font-semibold text-slate-200">Server setting</span>;
-  if (!a.has_password) return <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11.5px] font-semibold text-amber-300">Invite pending</span>;
-  return <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11.5px] font-semibold text-emerald-300">Active</span>;
+  if (a.env_managed) return <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-slate-200">Server setting</span>;
+  if (!a.has_password) return <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300">Invite pending</span>;
+  return <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-300">Active</span>;
 }
 
 export default function AdminsTab() {
@@ -159,7 +159,7 @@ export default function AdminsTab() {
             {Object.entries(roles).map(([k, v]) => <li key={k}><span className="font-semibold text-slate-200">{ROLE_LABEL[k]}</span> — {v}</li>)}
           </ul>
         )}
-        <p className="mt-3 text-[11.5px] text-slate-400">
+        <p className="mt-3 text-[11px] text-slate-400">
           New admins get an email with a link to set their password. The link works once and expires in 72 hours.
         </p>
         {link && (
@@ -201,7 +201,7 @@ export default function AdminsTab() {
               return (
                 <tr key={a.id} data-testid={`admin-admins-row-${a.id}`} className="border-t border-white/5 hover:bg-white/5">
                   <td className="px-5 py-3">
-                    <div className="font-bold text-white">{a.name || '—'}{isMe && <span className="ml-2 text-[11.5px] font-semibold text-slate-400">(you)</span>}</div>
+                    <div className="font-bold text-white">{a.name || '—'}{isMe && <span className="ml-2 text-[11px] font-semibold text-slate-400">(you)</span>}</div>
                     <div className="text-[12px] text-slate-400">{a.email || '—'}</div>
                   </td>
                   <td className="px-5 py-3">
@@ -222,7 +222,7 @@ export default function AdminsTab() {
                   <td className="px-5 py-3">
                     <div className="flex flex-wrap gap-1.5 items-center">
                       <StatusPill a={a} />
-                      {a.totp_enabled && <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-[11.5px] font-semibold text-blue-200">2FA</span>}
+                      {a.totp_enabled && <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-[11px] font-semibold text-blue-200">2FA</span>}
                     </div>
                   </td>
                   <td className="px-5 py-3 text-slate-400 text-[12.5px]">
@@ -234,7 +234,7 @@ export default function AdminsTab() {
                         <button
                           onClick={() => invite(a.email, a.name)}
                           disabled={busy}
-                          className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/15 px-2.5 py-1.5 text-[11.5px] font-bold text-white disabled:opacity-60"
+                          className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white disabled:opacity-60"
                         >
                           <Mail className="w-3 h-3" /> Resend invite
                         </button>
@@ -243,7 +243,7 @@ export default function AdminsTab() {
                         <button
                           data-testid={`admin-admins-reset-2fa-${a.id}`}
                           onClick={() => resetTwoFactor(a)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/15 px-2.5 py-1.5 text-[11.5px] font-bold text-white"
+                          className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white"
                         >
                           <ShieldOff className="w-3 h-3" /> Reset 2FA
                         </button>
@@ -252,7 +252,7 @@ export default function AdminsTab() {
                         <button
                           data-testid={`admin-admins-remove-${a.id}`}
                           onClick={() => remove(a)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1.5 text-[11.5px] font-bold text-red-300"
+                          className="inline-flex items-center gap-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1.5 text-[11px] font-bold text-red-300"
                         >
                           <Trash2 className="w-3 h-3" /> Remove
                         </button>
@@ -265,7 +265,7 @@ export default function AdminsTab() {
           </tbody>
         </table>
       </Panel>
-      <p className="mt-3 text-[11.5px] text-slate-400">
+      <p className="mt-3 text-[11px] text-slate-400">
         Admins marked “Server setting” come from the ADMIN_EMAILS setting on the server and can only be removed there.
       </p>
     </div>

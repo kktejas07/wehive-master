@@ -12,7 +12,7 @@ function MetricCard({ label, value, sub, Icon, accent, testid }) {
     <Panel className="relative overflow-hidden" >
       <div className="flex items-center justify-between">
         <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">{label}</div>
-        <span className={`h-8 w-8 inline-flex items-center justify-center rounded-lg bg-blue-500/15 text-blue-300`}>
+        <span className={`h-8 w-8 inline-flex items-center justify-center rounded-lg bg-[#3730A3]/20 text-[#818CF8]`}>
           <Icon className="w-4 h-4" />
         </span>
       </div>
@@ -24,7 +24,7 @@ function MetricCard({ label, value, sub, Icon, accent, testid }) {
   );
 }
 
-function SparkBars({ data, metric = 'applications', accent = 'hsl(var(--blue-500))' }) {
+function SparkBars({ data, metric = 'applications', accent = '#818CF8' }) {
   const max = Math.max(1, ...data.map((d) => d[metric] || 0));
   return (
     <div className="flex items-end gap-1.5 h-24">
@@ -48,7 +48,7 @@ function SparkBars({ data, metric = 'applications', accent = 'hsl(var(--blue-500
   );
 }
 
-const SEVERITY_DOT = { critical: 'bg-red-400', warning: 'bg-amber-400', info: 'bg-blue-300' };
+const SEVERITY_DOT = { critical: 'bg-red-400', warning: 'bg-amber-400', info: 'bg-[#818CF8]' };
 
 // Cases that need action soon (GET /admin/alerts), critical first.
 function NeedsAttention({ token }) {
@@ -73,20 +73,20 @@ function NeedsAttention({ token }) {
           {data && <span className="text-[12px] font-semibold text-slate-400 tabular-nums">{data.total}</span>}
         </div>
         <label className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-300 cursor-pointer">
-          <input data-testid="alerts-mine-toggle" type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} className="accent-[hsl(var(--blue-700))]" />
+          <input data-testid="alerts-mine-toggle" type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} className="accent-[#3730A3]" />
           Mine only
         </label>
       </div>
       {data && Object.keys(data.counts || {}).length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
           {Object.entries(data.counts).map(([k, n]) => (
-            <span key={k} data-testid={`alerts-count-${k}`} className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11.5px] font-semibold text-slate-300">
+            <span key={k} data-testid={`alerts-count-${k}`} className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] font-semibold text-slate-300">
               {ALERT_KIND_LABEL[k] || k} <span className="tabular-nums text-white">{n}</span>
             </span>
           ))}
         </div>
       )}
-      {!data && !err && <Loader2 className="w-4 h-4 animate-spin text-blue-300" />}
+      {!data && !err && <Loader2 className="w-4 h-4 animate-spin text-[#818CF8]" />}
       {err && <p className="text-[13px] text-red-300">Could not load alerts: {err}</p>}
       {data?.items.length === 0 && <p className="text-[13px] text-slate-400">Nothing needs attention right now.</p>}
       <ul className="divide-y divide-white/5">
@@ -144,7 +144,7 @@ function Funnel({ token }) {
               key={d}
               onClick={() => setDays(d)}
               aria-pressed={days === d}
-              className={`h-8 px-3 rounded-lg text-[12px] font-bold ${days === d ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 text-slate-300 hover:text-white'}`}
+              className={`h-8 px-3 rounded-lg text-[12px] font-bold ${days === d ? 'bg-[#3730A3] text-white' : 'bg-[#3730A3]/10 text-[#A5B4FC] hover:text-white'}`}
             >
               {l}
             </button>
@@ -152,7 +152,7 @@ function Funnel({ token }) {
         </div>
       </div>
       {err && <div className="mt-4 text-[13px] text-red-300" role="alert">Could not load funnel: {err}</div>}
-      {!data && !err && <div className="py-8 text-center"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></div>}
+      {!data && !err && <div className="py-8 text-center"><Loader2 className="w-5 h-5 animate-spin inline text-[#818CF8]" /></div>}
       {data && (
         <div className="mt-4 grid lg:grid-cols-3 gap-5">
           <ol className="lg:col-span-2 space-y-2.5">
@@ -166,7 +166,7 @@ function Funnel({ token }) {
                   </span>
                 </div>
                 <div className="mt-1 h-2.5 rounded-full bg-white/5 overflow-hidden">
-                  <div className="h-full rounded-full bg-[hsl(var(--blue-500))]" style={{ width: `${top ? Math.max(2, (100 * s.count) / top) : 0}%` }} />
+                  <div className="h-full rounded-full bg-[#818CF8]" style={{ width: `${top ? Math.max(2, (100 * s.count) / top) : 0}%` }} />
                 </div>
               </li>
             ))}
@@ -222,7 +222,7 @@ export default function OverviewTab() {
       <div>
         <AdminHeader title="Overview" />
         <NeedsAttention token={token} />
-        <Panel><Loader2 className="w-5 h-5 animate-spin text-blue-300" /></Panel>
+        <Panel><Loader2 className="w-5 h-5 animate-spin text-[#818CF8]" /></Panel>
       </div>
     );
   }
@@ -259,7 +259,7 @@ export default function OverviewTab() {
           value={users.total}
           sub={`${users.new_7d} this week · ${users.premium} premium`}
           Icon={Users}
-          accent="bg-blue-500"
+          accent="bg-[#3730A3]"
         />
         <MetricCard
           testid="metric-applications"
@@ -283,7 +283,7 @@ export default function OverviewTab() {
           value={countries.total}
           sub={`${countries.no_visa} visa-free for Indians`}
           Icon={Globe}
-          accent="bg-blue-500"
+          accent="bg-[#3730A3]"
         />
       </div>
 
@@ -300,15 +300,15 @@ export default function OverviewTab() {
                 Applications & signups
               </div>
             </div>
-            <TrendingUp className="w-4 h-4 text-blue-300" />
+            <TrendingUp className="w-4 h-4 text-[#818CF8]" />
           </div>
           <div className="mt-5">
             <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold mb-2">Applications / day</div>
-            <SparkBars data={trend} metric="applications" accent="hsl(var(--blue-500))" />
+            <SparkBars data={trend} metric="applications" accent="#818CF8" />
           </div>
           <div className="mt-5">
             <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold mb-2">New signups / day</div>
-            <SparkBars data={trend} metric="users" accent="hsl(var(--blue-100))" />
+            <SparkBars data={trend} metric="users" accent="#A5B4FC" />
           </div>
         </Panel>
 
@@ -324,7 +324,7 @@ export default function OverviewTab() {
                   <span className="text-[11px] font-bold text-slate-400 w-4">{idx + 1}</span>
                   <span className="text-lg leading-none">{c.flag || <Globe className="w-4 h-4 text-slate-400" />}</span>
                   <span className="flex-1 text-[13.5px] font-bold text-white truncate">{c.name}</span>
-                  <span className="text-[12px] font-bold text-blue-300 inline-flex items-center gap-0.5">
+                  <span className="text-[12px] font-bold text-[#818CF8] inline-flex items-center gap-0.5">
                     {c.count} <ArrowUpRight className="w-3 h-3" />
                   </span>
                 </li>
@@ -358,7 +358,7 @@ export default function OverviewTab() {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 inline-flex items-center gap-2">
-              <History className="w-3 h-3 text-blue-300" /> Recent activity
+              <History className="w-3 h-3 text-[#818CF8]" /> Recent activity
             </div>
             <div className="mt-1 text-[18px] font-display font-bold text-white">Admin audit log</div>
           </div>

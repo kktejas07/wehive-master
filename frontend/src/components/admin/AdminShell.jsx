@@ -2,12 +2,12 @@ import { Link, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { BRAND } from '../../data/mock';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import { adminClient, canWrite, ROLE_NAMES } from '../../lib/admin';
+import { adminClient, canWrite, canViewTab, ROLE_NAMES } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
   Key, User, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
-  Inbox, CreditCard, History, Activity, ScanSearch, Lock,
+  Inbox, CreditCard, History, Activity, ScanSearch, Lock, CalendarDays, Share2,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
@@ -40,6 +40,10 @@ const TABS = [
   { id: 'prompts',      to: '/admin/prompts',       label: 'Prompts',      Icon: FileText,         testid: 'admin-nav-prompts' },
   { id: 'agents-v2',    to: '/admin/agents-v2',     label: 'Agents V2',    Icon: Bot,              testid: 'admin-nav-agents-v2' },
   { id: 'hive-learning', to: '/admin/hive-learning', label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning' },
+  { id: 'agentics',     to: '/admin/agentics',      label: 'Agentic AI',   Icon: Bot,             testid: 'admin-nav-agentics' },
+  { id: 'slot-monitor', to: '/admin/slot-monitor',  label: 'Slot Monitor', Icon: ScanSearch,      testid: 'admin-nav-slot-monitor' },
+  { id: 'referrals',    to: '/admin/referrals',     label: 'Referrals',    Icon: Share2,          testid: 'admin-nav-referrals' },
+  { id: 'visa-scheduling', to: '/admin/visa-scheduling', label: 'Visa Scheduling', Icon: CalendarDays, testid: 'admin-nav-visa-scheduling' },
   { id: 'health',       to: '/admin/health',        label: 'System health', Icon: Activity,       testid: 'admin-nav-health' },
   { id: 'audit',        to: '/admin/audit',         label: 'Audit log',    Icon: History,         testid: 'admin-nav-audit' },
   { id: 'security',     to: '/admin/security',      label: 'My security',  Icon: Lock,            testid: 'admin-nav-security' },
@@ -73,7 +77,7 @@ export default function AdminShell({ children }) {
       {critical}
     </span>
   );
-  const tabs = TABS.filter((t) => !t.superOnly || admin?.is_super_admin);
+  const tabs = TABS.filter((t) => (!t.superOnly || admin?.is_super_admin) && canViewTab(admin, t.id));
   const mustEnrol = !!admin?.two_factor_required;
   const role = admin?.admin_role;
   const limited = admin && !canWrite(admin, 'manage');
@@ -92,9 +96,9 @@ export default function AdminShell({ children }) {
   };
 
   return (
-    <div className="admin-theme h-screen bg-[#0b1020] text-slate-100" data-testid="admin-shell">
+    <div className="admin-theme h-screen bg-[#1E1B4B] text-slate-100" data-testid="admin-shell">
       <div className="grid lg:grid-cols-[260px_1fr] h-screen">
-        <aside className="hidden lg:flex flex-col bg-[#0a0e1e] border-r border-white/5 p-5 overflow-y-auto admin-scrollbar">
+        <aside className="hidden lg:flex flex-col bg-[#16133D] border-r border-[#3730A3]/20 p-5 overflow-y-auto admin-scrollbar">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-200 hover:text-white">
             <img src={BRAND.logo} alt="We Hive" className="h-10 w-auto brightness-0 invert" />
             <span className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold">Admin</span>
@@ -112,8 +116,8 @@ export default function AdminShell({ children }) {
                   data-testid={t.testid}
                   className={`flex items-center gap-3 px-3 min-h-[40px] rounded-lg text-[13.5px] font-semibold transition-colors duration-150 ${
                     active
-                      ? 'bg-[hsl(var(--blue-700))] text-white'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-[#3730A3] text-white'
+                      : 'text-[#A5B4FC] hover:text-white hover:bg-[#3730A3]/20'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -183,7 +187,7 @@ export default function AdminShell({ children }) {
                   to={t.to}
                   end={t.id === 'overview'}
                   className={`shrink-0 snap-start inline-flex items-center rounded-lg px-3.5 min-h-[40px] text-[13px] font-semibold whitespace-nowrap transition-colors ${
-                    active ? 'bg-[hsl(var(--blue-700))] text-white' : 'bg-white/5 border border-white/10 text-slate-300 hover:text-white'
+                    active ? 'bg-[#3730A3] text-white' : 'bg-[#3730A3]/10 border border-[#3730A3]/20 text-[#A5B4FC] hover:text-white'
                   }`}
                 >
                   {t.label}
@@ -240,7 +244,7 @@ export function AdminHeader({ title, subtitle, right }) {
   return (
     <div className="flex items-end justify-between gap-4 flex-wrap mb-6 sm:mb-8 pb-5 border-b border-white/5">
       <div>
-        <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-blue-300">
+        <div className="text-[12px] uppercase tracking-[0.14em] font-semibold text-[#818CF8]">
           We Hive · Super Admin
         </div>
         <h1 className="mt-1.5 font-display font-bold text-[26px] sm:text-[32px] leading-tight tracking-[-0.02em] text-white">
@@ -255,6 +259,6 @@ export function AdminHeader({ title, subtitle, right }) {
 
 export function Panel({ children, className = '' }) {
   return (
-    <div className={`rounded-2xl bg-[#111632] border border-white/[0.08] p-4 sm:p-5 ${className}`}>{children}</div>
+    <div className={`rounded-2xl bg-[#252060] border border-[#3730A3]/15 p-4 sm:p-5 ${className}`}>{children}</div>
   );
 }

@@ -35,10 +35,15 @@ import HiveLearningTab from '../components/admin/HiveLearningTab';
 import LeadsTab from '../components/admin/LeadsTab';
 import PaymentsTab from '../components/admin/PaymentsTab';
 import AuditTab from '../components/admin/AuditTab';
+import AgenticsTab from '../components/admin/AgenticsTab';
+import SlotMonitorTab from '../components/admin/SlotMonitorTab';
+import ReferralsTab from '../components/admin/ReferralsTab';
+import VisaSchedulingTab from '../components/admin/VisaSchedulingTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
 import AdminResetPassword from './AdminResetPassword';
+import RoleGuard from '../components/admin/RoleGuard';
 import { Loader2, ShieldAlert } from 'lucide-react';
 
 function ProtectedAdmin({ children }) {
@@ -55,8 +60,8 @@ function ProtectedAdmin({ children }) {
 
   if (loading || !admin) {
     return (
-      <div className="min-h-screen bg-[#0b1020] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" />
+      <div className="min-h-screen bg-[#1E1B4B] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[#818CF8]" />
       </div>
     );
   }
@@ -96,16 +101,16 @@ function AdminRoutes() {
                 <Route path="users/:id" element={<UserProfile />} />
                 <Route path="applications" element={<ApplicationsTab />} />
                 <Route path="applications/:id" element={<ApplicationCase />} />
-                <Route path="countries" element={<CountriesTab />} />
-                <Route path="pricing" element={<PricingTab />} />
-                <Route path="events" element={<EventsTab />} />
+                <Route path="countries" element={<RoleGuard allowed={['manager', 'super_admin', 'viewer']} readOnly><CountriesTab /></RoleGuard>} />
+                <Route path="pricing" element={<RoleGuard allowed={['manager', 'super_admin', 'finance', 'viewer']} readOnly><PricingTab /></RoleGuard>} />
+                <Route path="events" element={<RoleGuard allowed={['manager', 'super_admin']}><EventsTab /></RoleGuard>} />
                 <Route path="global-events" element={<GlobalEventsTab />} />
                 <Route path="moderation" element={<ContentModerationTab />} />
                 <Route path="requests" element={<RequestsTab />} />
                 <Route path="promotions" element={<PromotionsTab />} />
                 <Route path="promocodes" element={<PromoCodesTab />} />
                 <Route path="agents" element={<AgentsTab />} />
-                <Route path="staff" element={<StaffTab />} />
+                <Route path="staff" element={<RoleGuard allowed={['manager', 'super_admin', 'support']}><StaffTab /></RoleGuard>} />
                 <Route path="admins" element={<SuperOnly><AdminsTab /></SuperOnly>} />
                 <Route path="newsletter" element={<NewsletterTab />} />
                 <Route path="integrations" element={<SuperOnly><IntegrationsTab /></SuperOnly>} />
@@ -123,6 +128,10 @@ function AdminRoutes() {
                 <Route path="prompts" element={<PromptsTab />} />
                 <Route path="agents-v2" element={<AgentsV2Tab />} />
                 <Route path="hive-learning" element={<HiveLearningTab />} />
+                <Route path="agentics" element={<AgenticsTab />} />
+                <Route path="slot-monitor" element={<SlotMonitorTab />} />
+                <Route path="referrals" element={<ReferralsTab />} />
+                <Route path="visa-scheduling" element={<VisaSchedulingTab />} />
                 <Route path="destinations" element={<DestinationsTab />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />
               </Routes>

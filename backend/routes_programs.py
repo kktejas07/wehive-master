@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from admin_auth import get_current_admin_flex
+from admin_auth import get_current_admin_flex, require_role
 from db import db
 
 router = APIRouter(prefix="/programs", tags=["programs"])
@@ -19,6 +19,8 @@ programs_col = db["programs"]
 
 async def _admin(user=Depends(get_current_admin_flex)):
     return user
+
+_admin_write = require_role(['manager'])
 
 
 class ProgramCreate(BaseModel):
@@ -96,7 +98,7 @@ async def admin_list_programs(
 
 
 @admin_router.post("")
-async def admin_create_program(body: ProgramCreate, admin=Depends(_admin)):
+async def admin_create_program(body: ProgramCreate, admin=Depends(_admin_write)):
     from audit import record as audit_record
     doc = body.model_dump()
     doc["id"] = f"{body.university_id}-{uuid.uuid4().hex[:8]}"
@@ -109,7 +111,7 @@ async def admin_create_program(body: ProgramCreate, admin=Depends(_admin)):
 
 
 @admin_router.patch("/{program_id}")
-async def admin_update_program(program_id: str, body: ProgramUpdate, admin=Depends(_admin)):
+async def admin_update_program(program_id: str, body: ProgramUpdate, admin=Depends(_admin_write)):
     from audit import record as audit_record
     existing = await programs_col.find_one({"id": program_id})
     if not existing:
@@ -126,7 +128,7 @@ async def admin_update_program(program_id: str, body: ProgramUpdate, admin=Depen
 
 
 @admin_router.delete("/{program_id}")
-async def admin_delete_program(program_id: str, admin=Depends(_admin)):
+async def admin_delete_program(program_id: str, admin=Depends(_admin_write)):
     from audit import record as audit_record
     existing = await programs_col.find_one({"id": program_id})
     if not existing:

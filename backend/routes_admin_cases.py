@@ -21,7 +21,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 import storage as r2
-from admin_auth import get_current_admin_flex
+from admin_auth import get_current_admin_flex, require_role
 from audit import record as audit_record
 from db import applications, db, notifications_col, scans, users
 from routes_admin import _serialize_app
@@ -130,7 +130,7 @@ class DocReview(BaseModel):
 
 
 @router.patch('/applications/{application_id}/documents/{doc_id}')
-async def admin_review_document(application_id: str, doc_id: str, body: DocReview, admin=Depends(get_current_admin_flex)):
+async def admin_review_document(application_id: str, doc_id: str, body: DocReview, admin=Depends(require_role(['manager', 'support', 'doc_reviewer']))):
     if body.status != 'approved' and not (body.reason or '').strip():
         raise HTTPException(400, 'Give the applicant a reason')
     app = await _app_or_404(application_id)
@@ -167,7 +167,7 @@ class TextBody(BaseModel):
 
 
 @router.post('/applications/{application_id}/messages')
-async def admin_send_message(application_id: str, body: TextBody, admin=Depends(get_current_admin_flex)):
+async def admin_send_message(application_id: str, body: TextBody, admin=Depends(require_role(['manager', 'support']))):
     app = await _app_or_404(application_id)
     now = datetime.utcnow()
     msg = {'_id': str(uuid.uuid4()), 'from': 'consultant', 'name': admin.get('name') or 'We Hive team',
@@ -179,7 +179,7 @@ async def admin_send_message(application_id: str, body: TextBody, admin=Depends(
 
 
 @router.post('/applications/{application_id}/internal-notes')
-async def admin_add_internal_note(application_id: str, body: TextBody, admin=Depends(get_current_admin_flex)):
+async def admin_add_internal_note(application_id: str, body: TextBody, admin=Depends(require_role(['manager', 'support', 'doc_reviewer']))):
     await _app_or_404(application_id)
     note = {'_id': str(uuid.uuid4()), 'application_id': application_id, 'text': body.text.strip(),
             'by': admin.get('email') or admin['_id'], 'at': datetime.utcnow()}
@@ -198,7 +198,7 @@ async def _assignable(user_id: str) -> Optional[dict]:
 
 
 @router.patch('/applications/{application_id}/assign')
-async def admin_assign(application_id: str, body: AssignBody, admin=Depends(get_current_admin_flex)):
+async def admin_assign(application_id: str, body: AssignBody, admin=Depends(require_role(['manager', 'support']))):
     app = await _app_or_404(application_id)
     staff = None
     if body.staff_id:

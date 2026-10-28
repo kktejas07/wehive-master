@@ -86,8 +86,7 @@ export default function VisaAssessment() {
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ') || '';
 
-    // Build assessment message
-    const message = pathway === 'pr' 
+    const message = pathway === 'pr'
       ? `Visa Assessment Pathway: Permanent Residency (PR)
 Age Group: ${prAge}
 Education: ${prEdu}
@@ -100,15 +99,16 @@ Target Country: ${COUNTRIES.find(c => c.id === studentCountry)?.name || studentC
 Current Education: ${studentEdu}
 Academic Score: ${studentGpa}%
 Budget: ${studentBudget}
-Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)
-Phone: ${phone}`;
+Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)`;
 
     try {
       await axios.post(`${API}/leads`, {
         name: firstName,
         surname: lastName,
         email: email,
+        phone: phone || null,
         message: message,
+        source: 'visa_assessment',
       });
       setSubmitted(true);
     } catch (err) {

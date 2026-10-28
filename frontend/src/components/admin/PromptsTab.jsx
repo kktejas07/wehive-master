@@ -87,10 +87,10 @@ function PromptEditor({ initial, onSave, onCancel, saving }) {
           className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[12px] text-white outline-none font-mono resize-y" />
       </label>
       <div className="flex gap-2 pt-1">
-        <button onClick={onCancel} className="flex-1 h-10 rounded-full bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300 inline-flex items-center justify-center gap-1.5">
+        <button onClick={onCancel} className="flex-1 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300 inline-flex items-center justify-center gap-1.5">
           <X className="w-3.5 h-3.5" /> Cancel
         </button>
-        <button onClick={submit} disabled={saving || !form.id.trim()} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-white disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
+        <button onClick={submit} disabled={saving || !form.id.trim()} className="flex-1 h-10 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[13px] font-bold text-white disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
           {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           Save Prompt
         </button>

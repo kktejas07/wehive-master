@@ -29,7 +29,10 @@ async def create_lead(req: LeadCreate, _=Depends(_lead_limiter)):
         'name': req.name,
         'surname': req.surname or '',
         'email': req.email,
+        'phone': req.phone or '',
         'message': req.message,
+        'source': req.source or 'website',
+        'status': 'new',
         'created_at': datetime.utcnow(),
     }
     await leads.insert_one(rec)

@@ -126,10 +126,10 @@ function AgentEditor({ initial, onSave, onCancel, saving }) {
         </label>
       </div>
       <div className="flex gap-2 pt-1">
-        <button onClick={onCancel} className="flex-1 h-10 rounded-full bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300 inline-flex items-center justify-center gap-1.5">
+        <button onClick={onCancel} className="flex-1 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300 inline-flex items-center justify-center gap-1.5">
           <X className="w-3.5 h-3.5" /> Cancel
         </button>
-        <button onClick={submit} disabled={saving || !form.id.trim() || !form.name.trim()} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-white disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
+        <button onClick={submit} disabled={saving || !form.id.trim() || !form.name.trim()} className="flex-1 h-10 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[13px] font-bold text-white disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
           {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           Save Agent
         </button>
@@ -174,7 +174,7 @@ function RunPanel({ agent, token, onClose }) {
           <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Input</span>
           <textarea value={input} onChange={e => setInput(e.target.value)} rows={3}
             placeholder="Ask the agent anything…"
-            className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[13px] text-white outline-none focus:border-emerald-500/50 resize-y" />
+            className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))] resize-y" />
         </label>
         <button onClick={run} disabled={busy || !input.trim()} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}

@@ -408,7 +408,7 @@ async def admin_me(admin=Depends(get_current_admin_flex)):
 INVITE_TTL = timedelta(hours=72)
 
 
-AdminRole = Literal['manager', 'support', 'finance', 'viewer']
+AdminRole = Literal['manager', 'support', 'finance', 'doc_reviewer', 'viewer']
 
 
 class AdminInviteRequest(BaseModel):

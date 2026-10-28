@@ -51,19 +51,19 @@ function AddAgentModal({ token, onClose, onDone }) {
   ];
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <form {...dialogProps} onSubmit={submit} className="w-full max-w-md rounded-2xl bg-[#0f172a] border border-white/10 p-6 space-y-3">
+      <form {...dialogProps} onSubmit={submit} className="w-full max-w-md rounded-2xl bg-[#111632] border border-white/10 p-6 space-y-3">
         <h3 className="text-white font-bold text-[18px]">Add agent</h3>
         {fields.map(([k, label, type, required]) => (
           <div key={k}>
             <label htmlFor={`add-agent-${k}`} className="block text-[12px] text-slate-400 mb-1">{label}</label>
             <input id={`add-agent-${k}`} type={type} required={required} minLength={k === 'password' ? 8 : undefined}
               value={form[k]} onChange={set(k)}
-              className="w-full h-10 rounded-lg bg-white/5 border border-white/10 px-3 text-[14px] text-white outline-none focus:border-white/25" />
+              className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
           </div>
         ))}
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className="h-10 px-4 rounded-lg bg-white/5 text-slate-300 text-sm font-semibold">Cancel</button>
-          <button type="submit" disabled={busy} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50">
+          <button type="button" onClick={onClose} className="h-10 px-4 rounded-xl bg-white/5 text-slate-300 text-sm font-semibold">Cancel</button>
+          <button type="submit" disabled={busy} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50">
             {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />} Create agent
           </button>
         </div>
@@ -105,7 +105,7 @@ function CommissionModal({ agent, token, onClose, onDone }) {
           <label key={k} className="block">
             <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">{label}</span>
             <input type={type} value={form[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} placeholder={placeholder}
-              className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50" />
+              className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
           </label>
         ))}
         <label className="block">
@@ -117,8 +117,8 @@ function CommissionModal({ agent, token, onClose, onDone }) {
           </select>
         </label>
         <div className="flex gap-2 pt-1">
-          <button onClick={onClose} className="flex-1 h-10 rounded-full bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300">Cancel</button>
-          <button onClick={submit} disabled={busy} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-white disabled:opacity-50">
+          <button onClick={onClose} className="flex-1 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300">Cancel</button>
+          <button onClick={submit} disabled={busy} className="flex-1 h-10 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[13px] font-bold text-white disabled:opacity-50">
             {busy ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Record Payment'}
           </button>
         </div>
@@ -265,7 +265,7 @@ export default function AgentsTab() {
       <AdminHeader title="Agent Partners" subtitle={`Agents are added by admins only; only active, verified agents receive applications${pending > 0 ? ` · ${pending} pending approval` : ''}`} />
       <div className="flex justify-end">
         <button type="button" onClick={() => setAdding(true)} data-testid="add-agent-btn"
-          className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2">
+          className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] text-white text-sm font-semibold inline-flex items-center gap-2">
           <Plus className="w-4 h-4" aria-hidden="true" /> Add agent
         </button>
       </div>
@@ -284,7 +284,7 @@ export default function AgentsTab() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search agents…"
-                className="w-full h-9 rounded-xl bg-white/5 border border-white/10 pl-8 pr-3 text-[13px] text-white outline-none focus:border-white/20 placeholder:text-slate-500" />
+                className="w-full h-9 rounded-xl bg-white/5 border border-white/10 pl-8 pr-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))] placeholder:text-slate-500" />
             </div>
           </div>
         </div>

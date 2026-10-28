@@ -20,7 +20,7 @@ from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from admin_auth import get_current_admin_flex
+from admin_auth import get_current_admin_flex, require_role
 from audit import record as audit_record
 from db import db, scans, users
 
@@ -196,7 +196,7 @@ class ReviewDecision(BaseModel):
 
 
 @router.patch('/review-queue/{scan_id}')
-async def admin_review_scan(scan_id: str, body: ReviewDecision, admin=Depends(get_current_admin_flex)):
+async def admin_review_scan(scan_id: str, body: ReviewDecision, admin=Depends(require_role(['manager', 'support', 'doc_reviewer']))):
     s = await scans.find_one({'_id': scan_id})
     if not s:
         raise HTTPException(404, 'Scan not found')

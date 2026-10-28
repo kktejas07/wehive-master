@@ -122,7 +122,7 @@ export default function ProgramsTab() {
       <AdminHeader title="Programs" subtitle="Manage per-university program/course details." />
 
       <div className="flex items-center gap-3 mb-4">
-        <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Filter by university ID..." className="flex-1 h-10 px-4 rounded-xl bg-[#111632] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-sky-500 max-w-sm" />
+        <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Filter by university ID..." className="flex-1 h-10 px-4 rounded-xl bg-[#111632] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-[hsl(var(--blue-700))] max-w-sm" />
         <button onClick={() => load()} className="h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[13px] font-bold">Filter</button>
         <button onClick={openCreate} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-bold flex items-center gap-1.5 ml-auto"><Plus className="w-4 h-4" /> New Program</button>
       </div>
@@ -178,11 +178,11 @@ export default function ProgramsTab() {
             <div className="p-5 grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label htmlFor="programstab-university-id" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">University ID *</label>
-                <input id="programstab-university-id" value={form.university_id} onChange={e => setForm(f => ({ ...f, university_id: e.target.value }))} placeholder="e.g. us-massachusetts-institute-of-technology" className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-university-id" value={form.university_id} onChange={e => setForm(f => ({ ...f, university_id: e.target.value }))} placeholder="e.g. us-massachusetts-institute-of-technology" className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div className="col-span-2">
                 <label htmlFor="programstab-program-name" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Program Name *</label>
-                <input id="programstab-program-name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Master of Science in Computer Science" className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-program-name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Master of Science in Computer Science" className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div>
                 <label htmlFor="programstab-degree-type" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Degree Type</label>
@@ -192,23 +192,23 @@ export default function ProgramsTab() {
               </div>
               <div>
                 <label htmlFor="programstab-duration-years" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Duration (years)</label>
-                <input id="programstab-duration-years" type="number" step="0.5" min="0.5" max="8" value={form.duration_years} onChange={e => setForm(f => ({ ...f, duration_years: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-duration-years" type="number" step="0.5" min="0.5" max="8" value={form.duration_years} onChange={e => setForm(f => ({ ...f, duration_years: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div>
                 <label htmlFor="programstab-tuition-usd-yr" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Tuition (USD/yr)</label>
-                <input id="programstab-tuition-usd-yr" type="number" min="0" value={form.tuition_usd} onChange={e => setForm(f => ({ ...f, tuition_usd: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-tuition-usd-yr" type="number" min="0" value={form.tuition_usd} onChange={e => setForm(f => ({ ...f, tuition_usd: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div>
                 <label htmlFor="programstab-application-fee-usd" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Application Fee (USD)</label>
-                <input id="programstab-application-fee-usd" type="number" min="0" value={form.application_fee_usd} onChange={e => setForm(f => ({ ...f, application_fee_usd: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-application-fee-usd" type="number" min="0" value={form.application_fee_usd} onChange={e => setForm(f => ({ ...f, application_fee_usd: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div>
                 <label htmlFor="programstab-ielts-min" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">IELTS Min</label>
-                <input id="programstab-ielts-min" type="number" step="0.5" min="0" max="9" value={form.ielts_min} onChange={e => setForm(f => ({ ...f, ielts_min: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-ielts-min" type="number" step="0.5" min="0" max="9" value={form.ielts_min} onChange={e => setForm(f => ({ ...f, ielts_min: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div>
                 <label htmlFor="programstab-toefl-min" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">TOEFL Min</label>
-                <input id="programstab-toefl-min" type="number" min="0" max="120" value={form.toefl_min} onChange={e => setForm(f => ({ ...f, toefl_min: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-toefl-min" type="number" min="0" max="120" value={form.toefl_min} onChange={e => setForm(f => ({ ...f, toefl_min: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div className="flex items-center gap-4 pt-5">
                 <label className="flex items-center gap-1.5 text-[12px] text-slate-300"><input type="checkbox" checked={form.gre_required} onChange={e => setForm(f => ({ ...f, gre_required: e.target.checked }))} className="accent-[hsl(var(--blue-700))]" /> GRE Required</label>
@@ -216,11 +216,11 @@ export default function ProgramsTab() {
               </div>
               <div>
                 <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Language</label>
-                <input value={form.language} onChange={e => setForm(f => ({ ...f, language: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input value={form.language} onChange={e => setForm(f => ({ ...f, language: e.target.value }))} className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div>
                 <label htmlFor="programstab-campus" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Campus</label>
-                <input id="programstab-campus" value={form.campus} onChange={e => setForm(f => ({ ...f, campus: e.target.value }))} placeholder="Main campus" className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-campus" value={form.campus} onChange={e => setForm(f => ({ ...f, campus: e.target.value }))} placeholder="Main campus" className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
               <div className="col-span-2">
                 <label id="programstab-intake-months" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Intake Months</label>
@@ -233,15 +233,15 @@ export default function ProgramsTab() {
               </div>
               <div className="col-span-2">
                 <label htmlFor="programstab-entry-requirements" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Entry Requirements</label>
-                <textarea id="programstab-entry-requirements" value={form.entry_requirements} onChange={e => setForm(f => ({ ...f, entry_requirements: e.target.value }))} rows={2} className="w-full px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500 resize-none" />
+                <textarea id="programstab-entry-requirements" value={form.entry_requirements} onChange={e => setForm(f => ({ ...f, entry_requirements: e.target.value }))} rows={2} className="w-full px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))] resize-none" />
               </div>
               <div className="col-span-2">
                 <label htmlFor="programstab-description" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Description</label>
-                <textarea id="programstab-description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500 resize-none" />
+                <textarea id="programstab-description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))] resize-none" />
               </div>
               <div className="col-span-2">
                 <label htmlFor="programstab-program-url" className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Program URL</label>
-                <input id="programstab-program-url" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} placeholder="https://..." className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] text-white outline-none focus:border-sky-500" />
+                <input id="programstab-program-url" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} placeholder="https://..." className="w-full h-9 px-3 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]" />
               </div>
             </div>
             <div className="sticky bottom-0 bg-[#111632] flex justify-end gap-2 p-5 border-t border-white/5">

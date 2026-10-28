@@ -32,28 +32,28 @@ function CategoryEditor({ visaType, cat, onChange, onDelete }) {
         <label className="text-[11px] text-slate-400">
           Display name
           <input value={cat.name || ''} onChange={(e) => update({ name: e.target.value })}
-            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+            className="mt-0.5 w-full h-9 px-2 rounded-lg bg-black/30 border border-white/10 text-[13px] text-white" />
         </label>
         <label className="text-[11px] text-slate-400">
           Validity
           <input value={cat.validity || ''} onChange={(e) => update({ validity: e.target.value })}
             placeholder="e.g. 90 DAYS"
-            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+            className="mt-0.5 w-full h-9 px-2 rounded-lg bg-black/30 border border-white/10 text-[13px] text-white" />
         </label>
         <label className="text-[11px] text-slate-400">
           Govt fees (INR)
           <input type="number" value={cat.fees_inr ?? 0} onChange={(e) => update({ fees_inr: Number(e.target.value) })}
-            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+            className="mt-0.5 w-full h-9 px-2 rounded-lg bg-black/30 border border-white/10 text-[13px] text-white" />
         </label>
         <label className="text-[11px] text-slate-400">
           Govt fees (USD)
           <input type="number" value={cat.fees_usd ?? 0} onChange={(e) => update({ fees_usd: Number(e.target.value) })}
-            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+            className="mt-0.5 w-full h-9 px-2 rounded-lg bg-black/30 border border-white/10 text-[13px] text-white" />
         </label>
         <label className="text-[11px] text-slate-400">
           Processing days
           <input type="number" value={cat.processing_days ?? 0} onChange={(e) => update({ processing_days: Number(e.target.value) })}
-            className="mt-0.5 w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white" />
+            className="mt-0.5 w-full h-9 px-2 rounded-lg bg-black/30 border border-white/10 text-[13px] text-white" />
         </label>
         <label className="text-[11px] text-slate-400 inline-flex items-end gap-2">
           <input type="checkbox" checked={!!cat.multi_entry} onChange={(e) => update({ multi_entry: e.target.checked })} />
@@ -66,7 +66,7 @@ function CategoryEditor({ visaType, cat, onChange, onDelete }) {
             onChange={(e) => setDocs(e.target.value)}
             rows={4}
             placeholder={'Passport (6mo validity)\nTwo recent photos\nFinancial proof'}
-            className="mt-0.5 w-full px-2 py-1.5 rounded bg-black/30 border border-white/10 text-[12.5px] text-white resize-y"
+            className="mt-0.5 w-full px-2 py-1.5 rounded-lg bg-black/30 border border-white/10 text-[13px] text-white resize-y"
           />
         </label>
       </div>
@@ -133,7 +133,7 @@ function AddCategoryButton({ existing, onAdd }) {
         value={custom}
         onChange={(e) => { setCustom(e.target.value); setPicked(''); }}
         placeholder="Or custom type (e.g. Digital Nomad)"
-        className="w-full h-8 px-2 rounded bg-black/30 border border-white/10 text-[12.5px] text-white"
+        className="w-full h-9 px-2 rounded-lg bg-black/30 border border-white/10 text-[13px] text-white"
       />
       <div className="flex gap-2 mt-2 justify-end">
         <button type="button" onClick={() => setOpen(false)} className="rounded-md px-2.5 py-1 text-[11.5px] font-bold text-slate-300 hover:bg-white/5">Cancel</button>
