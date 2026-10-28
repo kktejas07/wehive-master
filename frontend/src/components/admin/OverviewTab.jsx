@@ -115,7 +115,7 @@ function WelcomeBanner({ admin, alertCount, onRunAggregators, running }) {
         <button
           onClick={onRunAggregators}
           disabled={running}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12.5px] font-bold bg-[#011CB5] hover:bg-[#0122D4] text-[var(--text-primary)] disabled:opacity-50 transition-colors"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12.5px] font-bold bg-[#011CB5] hover:bg-[#0122D4] text-white disabled:opacity-50 transition-colors"
         >
           {running ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
           Run aggregators

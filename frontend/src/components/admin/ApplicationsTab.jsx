@@ -194,14 +194,14 @@ export default function ApplicationsTab() {
             <button
               onClick={() => setViewMode('list')}
               title="List view"
-              className={`h-10 w-10 flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-[#011CB5] text-[var(--text-primary)]' : 'bg-white text-[var(--text-muted)] hover:bg-[#F0F4FF]'}`}
+              className={`h-10 w-10 flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-[#011CB5] text-white' : 'bg-white text-[var(--text-muted)] hover:bg-[#F0F4FF]'}`}
             >
               <LayoutList className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('board')}
               title="Board view"
-              className={`h-10 w-10 flex items-center justify-center transition-colors ${viewMode === 'board' ? 'bg-[#011CB5] text-[var(--text-primary)]' : 'bg-white text-[var(--text-muted)] hover:bg-[#F0F4FF]'}`}
+              className={`h-10 w-10 flex items-center justify-center transition-colors ${viewMode === 'board' ? 'bg-[#011CB5] text-white' : 'bg-white text-[var(--text-muted)] hover:bg-[#F0F4FF]'}`}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -269,7 +269,7 @@ export default function ApplicationsTab() {
                       <Link
                         to={`/admin/applications/${a.id}`}
                         data-testid={`case-open-${a.id}`}
-                        className="h-8 inline-flex items-center px-2.5 rounded-lg bg-[#011CB5] hover:bg-[#0015A0] text-[var(--text-primary)] text-[12px] font-semibold"
+                        className="h-8 inline-flex items-center px-2.5 rounded-lg bg-[#011CB5] hover:bg-[#0015A0] text-white text-[12px] font-semibold"
                       >
                         Open
                       </Link>
