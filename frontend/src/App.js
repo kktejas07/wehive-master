@@ -52,6 +52,7 @@ const StudentResources = lazy(() => import('./pages/StudentResources'));
 const IntakeCalendar = lazy(() => import('./pages/IntakeCalendar'));
 const SharedShortlist = lazy(() => import('./pages/SharedShortlist'));
 const EmailVerification = lazy(() => import('./pages/EmailVerification'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const FinancialTools = lazy(() => import('./pages/FinancialTools'));
 const AgentTraining = lazy(() => import('./pages/AgentTraining'));
 const EmergencyCare = lazy(() => import('./pages/EmergencyCare'));
@@ -59,10 +60,14 @@ const VisaChecker = lazy(() => import('./pages/VisaChecker'));
 const FreeConsultation = lazy(() => import('./pages/FreeConsultation'));
 const Hive = lazy(() => import('./pages/Hive'));
 const USVisaSlots = lazy(() => import('./pages/USVisaSlots'));
+const UniversityApply = lazy(() => import('./pages/UniversityApply'));
 const GlobalEvents = lazy(() => import('./pages/GlobalEvents'));
 const Blog = lazy(() => import('./pages/Blog'));
 const Community = lazy(() => import('./pages/Community'));
 const News = lazy(() => import('./pages/News'));
+const ApplicantFlow = lazy(() => import('./pages/ApplicantFlow'));
+const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
+const PostApprovalHub = lazy(() => import('./pages/PostApprovalHub'));
 
 function PricingLoader() {
   useEffect(() => {
@@ -110,8 +115,11 @@ function AnimatedRoutes() {
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
           <Route path="/pricing" element={<PageTransition><Pricing /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/signin" element={<Navigate to="/login" replace />} />
+          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
           <Route path="/__/auth/action" element={<EmailVerification />} />
+          <Route path="/verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
           <Route path="/account" element={<PrivateRoute><PageTransition><Account /></PageTransition></PrivateRoute>} />
           <Route path="/account/applications/:id" element={<PrivateRoute><PageTransition><ApplicationDetail /></PageTransition></PrivateRoute>} />
           <Route path="/track/:id" element={<PageTransition><TrackStatus /></PageTransition>} />
@@ -125,8 +133,14 @@ function AnimatedRoutes() {
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
           <Route path="/visa-interview" element={<PrivateRoute><PageTransition><VisaInterview /></PageTransition></PrivateRoute>} />
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
+          {/* Bug 5: /signin was returning 404 — redirect to the real login route */}
+          <Route path="/signin" element={<Navigate to="/login" replace />} />
+          {/* Bug 6: /tools/visa-checker was returning 404 — redirect to the real route */}
+          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
+          <Route path="/tools/:tool" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/programs/:universityId" element={<PageTransition><ProgramList /></PageTransition>} />
+          <Route path="/apply/universities" element={<PageTransition><UniversityApply /></PageTransition>} />
           <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
           <Route path="/resources" element={<PageTransition><StudentResources /></PageTransition>} />
           <Route path="/intake-calendar" element={<PageTransition><IntakeCalendar /></PageTransition>} />
@@ -137,6 +151,9 @@ function AnimatedRoutes() {
           <Route path="/visa-scheduling" element={<PrivateRoute><PageTransition><VisaScheduling /></PageTransition></PrivateRoute>} />
           <Route path="/visa-checker" element={<PageTransition><VisaChecker /></PageTransition>} />
           <Route path="/free-consultation" element={<PageTransition><FreeConsultation /></PageTransition>} />
+          <Route path="/apply" element={<PrivateRoute><PageTransition><ApplicantFlow /></PageTransition></PrivateRoute>} />
+          <Route path="/sop-builder" element={<PrivateRoute><PageTransition><SOPBuilder /></PageTransition></PrivateRoute>} />
+          <Route path="/post-approval/:applicationId" element={<PrivateRoute><PageTransition><PostApprovalHub /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
@@ -147,6 +164,9 @@ function AnimatedRoutes() {
           <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
+          {/* Legacy URL redirects */}
+          <Route path="/signin" element={<Navigate to="/login" replace />} />
+          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>

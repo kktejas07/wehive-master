@@ -3,7 +3,6 @@ import {
   signInWithPopup,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  sendEmailVerification,
   sendPasswordResetEmail,
   signOut,
   onAuthStateChanged,
@@ -32,10 +31,11 @@ export const firebaseAuth = {
   },
 
   emailSignup: async (email, password, name) => {
+    // Verification goes through our Postal backend (/auth/request-email-verification),
+    // not Firebase's default template — so no sendEmailVerification here.
     const auth = await ensureAuth();
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(result.user, { displayName: name });
-    await sendEmailVerification(result.user);
     return result.user;
   },
 
@@ -45,8 +45,9 @@ export const firebaseAuth = {
     return result.user;
   },
 
-  sendVerification: async (user) => {
-    await sendEmailVerification(user);
+  sendVerification: async () => {
+    // Legacy no-op: verification emails now come from the Postal backend.
+    // Call requestBackendVerification() in FirebaseAuthContext instead.
   },
 
   sendPasswordReset: async (email) => {

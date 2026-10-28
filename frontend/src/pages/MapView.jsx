@@ -23,7 +23,8 @@ const POPULAR_VISAS = [
   {
     id: 'us',
     country: 'USA',
-    flag: '',
+    flag: '🇺🇸',
+    image: '/images/destinations/united-states.webp',
     visaType: 'B1/B2 Tourist',
     processing: '3-5 days',
     price: '₹15,999',
@@ -34,7 +35,8 @@ const POPULAR_VISAS = [
   {
     id: 'uk',
     country: 'UK',
-    flag: '',
+    flag: '🇬🇧',
+    image: '/images/destinations/united-kingdom.webp',
     visaType: 'Standard Visitor',
     processing: '5-10 days',
     price: '₹12,499',
@@ -45,7 +47,8 @@ const POPULAR_VISAS = [
   {
     id: 'au',
     country: 'Australia',
-    flag: '',
+    flag: '🇦🇺',
+    image: '/images/destinations/australia.webp',
     visaType: 'Subclass 600',
     processing: '5-7 days',
     price: '₹18,999',
@@ -56,7 +59,8 @@ const POPULAR_VISAS = [
   {
     id: 'jp',
     country: 'Japan',
-    flag: '',
+    flag: '🇯🇵',
+    image: '/images/destinations/japan.webp',
     visaType: 'Tourist Visa',
     processing: '4-6 days',
     price: '₹8,999',
@@ -67,7 +71,8 @@ const POPULAR_VISAS = [
   {
     id: 'ca',
     country: 'Canada',
-    flag: '',
+    flag: '🇨🇦',
+    image: '/images/destinations/canada.webp',
     visaType: 'Visitor Visa',
     processing: '7-14 days',
     price: '₹14,999',
@@ -78,7 +83,8 @@ const POPULAR_VISAS = [
   {
     id: 'ae',
     country: 'UAE',
-    flag: '',
+    flag: '🇦🇪',
+    image: '/images/destinations/united-arab-emirates.webp',
     visaType: 'Tourist/Transit',
     processing: '2-4 days',
     price: '₹6,999',
@@ -89,7 +95,8 @@ const POPULAR_VISAS = [
   {
     id: 'de',
     country: 'Germany',
-    flag: '',
+    flag: '🇩🇪',
+    image: '/images/destinations/germany.webp',
     visaType: 'Schengen Visa',
     processing: '5-8 days',
     price: '₹11,999',
@@ -100,7 +107,8 @@ const POPULAR_VISAS = [
   {
     id: 'sg',
     country: 'Singapore',
-    flag: '',
+    flag: '🇸🇬',
+    image: '/images/destinations/singapore.webp',
     visaType: 'Tourist Visa',
     processing: '1-3 days',
     price: '₹4,999',
@@ -128,8 +136,19 @@ function VisaCard({ visa, index, onClick }) {
           </span>
         </div>
       )}
-      <div className="h-20 bg-[hsl(var(--blue-50))] border-b border-[hsl(var(--border))] flex items-center justify-center relative overflow-hidden">
-        {visa.flag ? <span className="text-5xl">{visa.flag}</span> : <Globe className="w-10 h-10 text-[hsl(var(--blue-700))]" />}
+      <div className="h-20 border-b border-[hsl(var(--border))] flex items-center justify-center relative overflow-hidden bg-[hsl(var(--blue-50))]">
+        {visa.image ? (
+          <img
+            src={visa.image}
+            alt={visa.country}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => { e.target.style.display = 'none'; }}
+            loading="lazy"
+          />
+        ) : null}
+        <span className="relative z-10 text-4xl drop-shadow-lg">
+          {visa.flag || <Globe className="w-10 h-10 text-[hsl(var(--blue-700))]" />}
+        </span>
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between">

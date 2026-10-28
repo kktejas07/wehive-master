@@ -23,13 +23,13 @@ const SEASON_OPTIONS = ['all', 'summer', 'fall', 'winter', 'spring', 'student_in
 function Field({ label, value, onChange, placeholder = '', type = 'text', className = '' }) {
   return (
     <label className={`block ${className}`}>
-      <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">{label}</span>
+      <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50 placeholder:text-slate-500"
+        className="w-full h-9 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[hsl(var(--blue-700))]/50 placeholder:text-[var(--text-muted)]"
       />
     </label>
   );
@@ -49,11 +49,11 @@ function PromoForm({ onSave, onCancel, busy }) {
         <Field label="Max uses" value={String(form.max_uses)} onChange={(v) => set('max_uses')(parseInt(v, 10) || 0)} type="number" />
         <Field label="Min cart value" value={String(form.min_cart_value)} onChange={(v) => set('min_cart_value')(parseFloat(v) || 0)} type="number" />
         <div>
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Season</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Season</span>
           <select
             value={form.season}
             onChange={(e) => set('season')(e.target.value)}
-            className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50"
+            className="w-full h-9 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[hsl(var(--blue-700))]/50"
           >
             {SEASON_OPTIONS.map((v) => <option key={v} value={v}>{v.replace('_', ' ')}</option>)}
           </select>
@@ -65,7 +65,7 @@ function PromoForm({ onSave, onCancel, busy }) {
         <button
           onClick={onCancel}
           disabled={busy}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 hover:bg-white/10 px-5 h-10 text-[13px] font-semibold text-slate-300 transition disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] px-5 h-10 text-[13px] font-semibold text-[var(--text-secondary)] transition disabled:opacity-50"
         >
           <X className="w-3.5 h-3.5" /> Cancel
         </button>
@@ -152,7 +152,7 @@ export default function PromotionsTab() {
 
       {creating && (
         <Panel>
-          <div className="text-[14px] font-bold text-white mb-5 flex items-center gap-2">
+          <div className="text-[14px] font-bold text-[var(--text-primary)] mb-5 flex items-center gap-2">
             <Tag className="w-4 h-4 text-blue-300" /> New Promo Code
           </div>
           <PromoForm onSave={create} onCancel={() => setCreating(false)} busy={busy} />
@@ -162,12 +162,12 @@ export default function PromotionsTab() {
       <Panel>
         {!items && (
           <div className="flex justify-center py-10">
-            <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+            <Loader2 className="w-5 h-5 animate-spin text-[var(--text-secondary)]" />
           </div>
         )}
 
         {items && items.length === 0 && !creating && (
-          <div className="py-12 text-center text-slate-400">
+          <div className="py-12 text-center text-[var(--text-secondary)]">
             No promo codes yet. Create one above.
           </div>
         )}
@@ -178,15 +178,15 @@ export default function PromotionsTab() {
               <div key={promo.code} className="py-4 flex items-center gap-4 flex-wrap">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[14px] font-bold font-mono text-white">{promo.code}</span>
-                    <span className="text-[11px] uppercase tracking-[0.12em] font-bold rounded-full px-2 py-0.5 bg-white/8 text-slate-400">
+                    <span className="text-[14px] font-bold font-mono text-[var(--text-primary)]">{promo.code}</span>
+                    <span className="text-[11px] uppercase tracking-[0.12em] font-bold rounded-full px-2 py-0.5 bg-[var(--glass-hover)] text-[var(--text-secondary)]">
                       {promo.discount_percent}% off · {promo.season || 'all'}
                     </span>
-                    <span className={`text-[11px] uppercase tracking-[0.12em] font-bold rounded-full px-2 py-0.5 ${promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/5 text-slate-400'}`}>
+                    <span className={`text-[11px] uppercase tracking-[0.12em] font-bold rounded-full px-2 py-0.5 ${promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)]'}`}>
                       {promo.active ? 'Live' : 'Off'}
                     </span>
                   </div>
-                  <div className="text-[12px] text-slate-400 mt-0.5 truncate">
+                  <div className="text-[12px] text-[var(--text-secondary)] mt-0.5 truncate">
                     {promo.description} · {promo.used_count || 0}/{promo.max_uses} used
                     {promo.expires_at ? ` · expires ${new Date(promo.expires_at).toLocaleDateString()}` : ''}
                   </div>
@@ -195,14 +195,14 @@ export default function PromotionsTab() {
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => toggle(promo)}
-                    className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition"
+                    className="w-8 h-8 rounded-lg hover:bg-[var(--glass-hover)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition"
                     title={promo.active ? 'Deactivate' : 'Activate'}
                   >
                     {promo.active ? <ToggleRight className="w-4 h-4 text-emerald-400" /> : <ToggleLeft className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={() => remove(promo.code)}
-                    className="w-8 h-8 rounded-lg hover:bg-red-500/10 flex items-center justify-center text-slate-400 hover:text-red-400 transition"
+                    className="w-8 h-8 rounded-lg hover:bg-red-500/10 flex items-center justify-center text-[var(--text-secondary)] hover:text-red-400 transition"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

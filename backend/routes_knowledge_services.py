@@ -159,6 +159,20 @@ async def kg_rag_index(user=Depends(get_current_admin_flex)):
             texts,
             extra_metadata={"source": "google_knowledge_graph", "indexed_at": datetime.utcnow().isoformat()},
         )
+        # Dual-write to Qdrant (best-effort)
+        try:
+            from qdrant_store import upsert_documents as qdrant_upsert
+            qdrant_docs = [
+                {
+                    "id": t["id"],
+                    "text": t["text"],
+                    "metadata": {"source": "google_knowledge_graph"},
+                }
+                for t in texts
+            ]
+            await qdrant_upsert("kg_entities", qdrant_docs)
+        except Exception as exc:
+            logger.debug("Qdrant KG dual-write skipped: %s", exc)
         return {"ok": True, "indexed": len(texts), "collection": "kg_entities"}
     except Exception as e:
         logger.exception("KG→RAG indexing failed")

@@ -1,119 +1,94 @@
-import { useState } from 'react';
-import { Loader2, Gift, CheckCircle2, Info, Lock } from 'lucide-react';
-import { useAdminAuth } from '../../context/AdminAuthContext';
-import { apiClient, canWrite } from '../../lib/admin';
-import { AdminHeader, Panel } from './AdminShell';
-import { useToast } from '../../hooks/use-toast';
+import { useState, useEffect, useCallback } from 'react';
+import { Share2, Gift, Users, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
+import { adminClient } from '../../lib/admin';
+import { Panel } from './AdminShell';
 
-const errText = (e) => {
-  const d = e?.response?.data?.detail;
-  if (typeof d === 'string') return d;
-  if (Array.isArray(d) && d.length) return d[0].msg;
-  return e.message;
-};
-
-// Backend (routes_referrals.py) only exposes one admin-callable route: POST /referrals/reward.
-// /code, /stats, /claim and /my-code are student-scoped (student token) and there is no
-// admin list endpoint, so this tab is a reward-processing tool plus a session log.
 export default function ReferralsTab() {
-  const { token, admin: me } = useAdminAuth();
-  const { toast } = useToast();
-  const [userId, setUserId] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [log, setLog] = useState([]);
-  const writable = canWrite(me, 'finance');
+  const [stats, setStats] = useState(null);
+  const [codes, setCodes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
 
-  const process = async (e) => {
-    e.preventDefault();
-    const id = userId.trim();
-    if (!id) return;
-    if (!window.confirm(`Mark the pending referral for user ${id} as earned and credit the referrer?`)) return;
-    setBusy(true);
+  const load = useCallback(async () => {
+    setLoading(true); setErr('');
     try {
-      const { data } = await apiClient(token).post('/referrals/reward', null, { params: { referred_user_id: id } });
-      setLog((l) => [{ id, message: data.message, ok: true, at: new Date() }, ...l]);
-      toast({ title: 'Referral processed', description: data.message });
-      setUserId('');
-    } catch (err) {
-      const message = errText(err);
-      setLog((l) => [{ id, message, ok: false, at: new Date() }, ...l]);
-      toast({ title: 'Could not process referral', description: message });
-    } finally {
-      setBusy(false);
-    }
-  };
+      const data = await adminClient('/referrals/stats');
+      setStats(data);
+      if (Array.isArray(data?.codes)) setCodes(data.codes);
+      else if (Array.isArray(data?.top_codes)) setCodes(data.top_codes);
+    } catch (ex) {
+      setErr(ex?.response?.data?.detail || 'Failed to load referral data');
+    } finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-[var(--admin-blue)]" /></div>;
 
   return (
-    <div data-testid="admin-referrals-tab">
-      <AdminHeader
-        title="Referrals"
-        subtitle="Credit a referrer once the person they referred has completed a paid application."
-      />
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Share2 className="w-6 h-6 text-[var(--admin-blue)]" />
+        <div>
+          <h2 className="text-[18px] font-semibold text-[var(--text-primary)]">Referrals</h2>
+          <p className="text-[13px] text-[var(--text-muted)]">Referral codes, claim stats, and reward tracking</p>
+        </div>
+      </div>
 
-      <Panel className="mb-4">
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-3">Process a referral reward</div>
-        {!writable && (
-          <div className="mb-3 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-[12.5px] text-slate-300">
-            <Lock className="w-3.5 h-3.5" /> Your role can view this tab but cannot credit rewards.
+      {err && <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-[13px] text-red-700"><AlertCircle className="w-4 h-4 shrink-0" />{err}</div>}
+
+      {stats && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { label: 'Total codes', value: stats.total_codes ?? codes.length, Icon: Share2, color: 'text-[var(--admin-blue)]' },
+            { label: 'Total claims', value: stats.total_claims ?? stats.claims ?? '—', Icon: Users, color: 'text-emerald-600' },
+            { label: 'Rewards issued', value: stats.total_rewards ?? stats.rewards ?? '—', Icon: Gift, color: 'text-[var(--admin-amber)]' },
+            { label: 'Conversion rate', value: stats.conversion_rate ? `${(stats.conversion_rate * 100).toFixed(1)}%` : '—', Icon: TrendingUp, color: 'text-[var(--text-primary)]' },
+          ].map(({ label, value, Icon, color }) => (
+            <Panel key={label}>
+              <div className="flex items-center gap-2 mb-1">
+                <Icon className={`w-4 h-4 ${color}`} />
+                <span className="text-[12px] text-[var(--text-muted)]">{label}</span>
+              </div>
+              <div className={`text-[24px] font-bold ${color}`}>{value}</div>
+            </Panel>
+          ))}
+        </div>
+      )}
+
+      {codes.length > 0 && (
+        <Panel>
+          <h3 className="text-[14px] font-semibold text-[var(--text-primary)] mb-3">Top referral codes</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-[var(--glass-border)]">
+                  {['Code', 'Owner', 'Claims', 'Rewards', 'Created'].map(h => (
+                    <th key={h} className="pb-2 text-left font-medium text-[var(--text-muted)] pr-4">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {codes.map((c, i) => (
+                  <tr key={c.code || i} className="border-b border-[var(--glass-border)] last:border-0">
+                    <td className="py-2 pr-4 font-mono font-bold text-[var(--admin-blue)]">{c.code}</td>
+                    <td className="py-2 pr-4 text-[var(--text-secondary)]">{c.owner_email || c.owner || '—'}</td>
+                    <td className="py-2 pr-4 text-[var(--text-primary)]">{c.claims ?? c.claim_count ?? 0}</td>
+                    <td className="py-2 pr-4 text-[var(--text-primary)]">{c.rewards ?? c.reward_count ?? 0}</td>
+                    <td className="py-2 text-[var(--text-muted)]">{c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-        <form className="grid sm:grid-cols-[1fr_auto] gap-3" onSubmit={process}>
-          <input
-            data-testid="admin-referrals-user-id"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            placeholder="Referred user ID"
-            aria-label="Referred user ID"
-            disabled={!writable}
-            className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white placeholder:text-slate-500 disabled:opacity-60"
-          />
-          <button
-            data-testid="admin-referrals-reward-btn"
-            type="submit"
-            disabled={busy || !writable || !userId.trim()}
-            className="h-10 px-4 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13.5px] font-bold disabled:opacity-60"
-          >
-            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Gift className="w-3.5 h-3.5" /> Credit referrer</>}
-          </button>
-        </form>
-        <p className="mt-3 flex items-start gap-1.5 text-[11.5px] text-slate-400">
-          <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-          Use the ID of the referred (new) user. If they have no pending referral, nothing changes. Crediting is one-time per referred user.
-        </p>
-      </Panel>
+        </Panel>
+      )}
 
-      <Panel className="overflow-x-auto p-0">
-        <table className="min-w-full text-[13.5px]">
-          <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 bg-white/5">
-              <th className="px-5 py-3">Referred user</th>
-              <th className="px-5 py-3">Result</th>
-              <th className="px-5 py-3">Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {log.length === 0 && (
-              <tr><td colSpan={3} className="px-5 py-10 text-center text-slate-400">
-                <Gift className="w-5 h-5 inline mr-2" /> No rewards processed in this session.
-              </td></tr>
-            )}
-            {log.map((r, i) => (
-              <tr key={`${r.id}-${i}`} className="border-t border-white/5 hover:bg-white/5">
-                <td className="px-5 py-3 font-mono text-[12.5px] text-slate-100">{r.id}</td>
-                <td className="px-5 py-3">
-                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11.5px] font-semibold ${r.ok ? 'bg-emerald-500/15 text-emerald-300' : 'bg-red-500/15 text-red-300'}`}>
-                    {r.ok && <CheckCircle2 className="w-3 h-3" />} {r.message}
-                  </span>
-                </td>
-                <td className="px-5 py-3 text-slate-400 text-[12.5px]">{r.at.toLocaleTimeString('en-IN')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Panel>
-      <p className="mt-3 text-[11.5px] text-slate-400">
-        The backend has no admin endpoint for listing referral codes or transactions yet; this log only shows actions taken since you opened the page.
-      </p>
+      {!err && !stats && (
+        <Panel>
+          <p className="text-[13px] text-[var(--text-muted)] text-center py-8">No referral data available yet</p>
+        </Panel>
+      )}
     </div>
   );
 }

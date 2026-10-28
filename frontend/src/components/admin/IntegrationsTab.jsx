@@ -48,29 +48,29 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
   };
 
   return (
-    <div className="border-b border-white/5 last:border-0 py-3 px-1">
+    <div className="border-b border-[var(--glass-border)] last:border-0 py-3 px-1">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-[13px] font-bold text-white">{svc.name}</div>
-          <div className="text-[11.5px] text-slate-400 mt-0.5">{svc.description}</div>
+          <div className="text-[13px] font-bold text-[var(--text-primary)]">{svc.name}</div>
+          <div className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">{svc.description}</div>
           {svc.features && svc.features.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1.5">
               {svc.features.map(f => (
-                <span key={f} className="text-[11px] font-semibold bg-white/5 text-slate-400 px-2 py-0.5 rounded-full">
+                <span key={f} className="text-[11px] font-semibold bg-[var(--glass-hover)] text-[var(--text-secondary)] px-2 py-0.5 rounded-full">
                   {f.replace(/_/g, ' ')}
                 </span>
               ))}
             </div>
           )}
           {svc.powered_by_tagline && (
-            <div className="text-[11px] text-slate-400 mt-1">{svc.powered_by_tagline}</div>
+            <div className="text-[11px] text-[var(--text-secondary)] mt-1">{svc.powered_by_tagline}</div>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {!isConnected ? (
             <button
               onClick={() => setShowForm(v => !v)}
-              className="text-[11px] font-bold text-blue-300 hover:text-white px-3 py-1.5 rounded-lg border border-[hsl(var(--blue-700))]/30 hover:border-[hsl(var(--blue-700))] transition"
+              className="text-[11px] font-bold text-blue-300 hover:text-[var(--text-primary)] px-3 py-1.5 rounded-lg border border-[hsl(var(--blue-700))]/30 hover:border-[hsl(var(--blue-700))] transition"
             >
               Connect
             </button>
@@ -78,7 +78,7 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
             <>
               {isDefault && <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">Default</span>}
               {!isDefault && (
-                <button onClick={() => onSetDefault(svc.id)} className="text-[11px] font-bold text-slate-400 hover:text-white px-2 py-1 rounded-lg hover:bg-white/5 transition">Set Default</button>
+                <button onClick={() => onSetDefault(svc.id)} className="text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-2 py-1 rounded-lg hover:bg-[var(--glass-hover)] transition">Set Default</button>
               )}
               <button onClick={() => onDisconnect(svc.id)} className="p-1 rounded text-red-400 hover:text-red-300 hover:bg-red-500/10 transition">
                 <Trash2 className="w-3.5 h-3.5" />
@@ -89,24 +89,24 @@ function ServiceRow({ svc, isConnected, isDefault, onConnect, onDisconnect, onTe
       </div>
 
       {showForm && (
-        <div className="mt-3 bg-white/5 rounded-lg p-3 space-y-2.5">
+        <div className="mt-3 bg-[var(--glass-hover)] rounded-lg p-3 space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-[12px] font-bold text-slate-300">Connect {svc.name}</span>
-            <button onClick={() => setShowForm(false)} className="p-1 rounded hover:bg-white/10 transition"><X className="w-3.5 h-3.5 text-slate-400" /></button>
+            <span className="text-[12px] font-bold text-[var(--text-secondary)]">Connect {svc.name}</span>
+            <button onClick={() => setShowForm(false)} className="p-1 rounded hover:bg-[var(--glass-hover)] transition"><X className="w-3.5 h-3.5 text-[var(--text-secondary)]" /></button>
           </div>
           {svc.requires_key && (
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 mb-1">{svc.key_label}</label>
+              <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">{svc.key_label}</label>
               <div className="relative">
-                <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)]" />
                 <input aria-label={svc.key_label} type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder={svc.key_placeholder}
-                  className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 focus:border-[hsl(var(--blue-700))]/50 outline-none" />
+                  className="w-full h-9 pl-8 pr-3 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[12px] text-[var(--text-primary)] placeholder-slate-600 focus:border-[hsl(var(--blue-700))]/50 outline-none" />
               </div>
             </div>
           )}
           <div className="flex items-center gap-2 pt-1">
             <button onClick={handleTest} disabled={testing || (svc.requires_key && !apiKey)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-[11px] font-bold text-slate-400 hover:bg-white/5 disabled:opacity-40 transition">
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--glass-border)] text-[11px] font-bold text-[var(--text-secondary)] hover:bg-[var(--glass-hover)] disabled:opacity-40 transition">
               {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />} Test
             </button>
             <button onClick={handleConnect} disabled={connecting || (svc.requires_key && !apiKey)}
@@ -296,8 +296,8 @@ export default function IntegrationsTab() {
 
       {/* OTP Channel */}
       <Panel className="mb-4">
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Active OTP channel</div>
-        <div className="mt-1 text-[22px] font-display font-bold text-white capitalize">
+        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Active OTP channel</div>
+        <div className="mt-1 text-[22px] font-display font-bold text-[var(--text-primary)] capitalize">
           {!otpData ? 'Unknown' : otpData.otp_channel ? otpData.otp_channel.replace('_', ' ') : 'Not configured'}
         </div>
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -312,14 +312,14 @@ export default function IntegrationsTab() {
                 className={`text-left rounded-xl border p-3 transition ${
                   active
                     ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))]/10'
-                    : 'border-white/10 bg-white/5 hover:border-[hsl(var(--blue-700))]/50'
+                    : 'border-[var(--glass-border)] bg-[var(--glass-hover)] hover:border-[hsl(var(--blue-700))]/50'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="text-[13.5px] font-bold text-white">{c.label}</div>
+                  <div className="text-[13.5px] font-bold text-[var(--text-primary)]">{c.label}</div>
                   {active && <CheckCircle2 className="w-4 h-4 text-blue-300" />}
                 </div>
-                <div className="mt-1 text-[12px] text-slate-400">{c.hint}</div>
+                <div className="mt-1 text-[12px] text-[var(--text-secondary)]">{c.hint}</div>
               </button>
             );
           })}
@@ -328,11 +328,11 @@ export default function IntegrationsTab() {
 
       {/* Platform Default LLM */}
       <Panel className="mb-4">
-        <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-white/5">
+        <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-[var(--glass-border)]">
           <Cpu className="w-4 h-4 text-emerald-400" />
           <div>
-            <div className="text-[13.5px] font-bold text-white">Default LLM Provider</div>
-            <div className="text-[11.5px] text-slate-400">Platform-wide default AI provider used when users haven't connected their own key</div>
+            <div className="text-[13.5px] font-bold text-[var(--text-primary)]">Default LLM Provider</div>
+            <div className="text-[11.5px] text-[var(--text-secondary)]">Platform-wide default AI provider used when users haven't connected their own key</div>
           </div>
           {llmConfig?.key && (
             <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[11px] font-bold uppercase tracking-[0.14em]">
@@ -342,17 +342,17 @@ export default function IntegrationsTab() {
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 mb-1">Provider</label>
+            <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">Provider</label>
             <select value={llmProvider} onChange={e => { setLlmProvider(e.target.value); setLlmModel(''); }}
-              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50">
+              className="w-full h-9 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[12px] text-[var(--text-primary)] outline-none focus:border-[hsl(var(--blue-700))]/50">
               {providers.length === 0 && <option value="">Loading…</option>}
               {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
           <div>
-            <label htmlFor="integrationstab-model" className="block text-[11px] font-bold text-slate-400 mb-1">Model</label>
+            <label htmlFor="integrationstab-model" className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">Model</label>
             <select id="integrationstab-model" value={llmModel} onChange={e => setLlmModel(e.target.value)}
-              className="w-full h-9 rounded-lg bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none focus:border-[hsl(var(--blue-700))]/50">
+              className="w-full h-9 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[12px] text-[var(--text-primary)] outline-none focus:border-[hsl(var(--blue-700))]/50">
               {(!llmModel || !(providers.find(p => p.id === llmProvider)?.models || []).includes(llmModel)) && llmModel && (
                 <option value={llmModel}>{llmModel}</option>
               )}
@@ -363,16 +363,16 @@ export default function IntegrationsTab() {
           </div>
         </div>
         <div className="mt-2">
-          <label htmlFor="integrationstab-api-key" className="block text-[11px] font-bold text-slate-400 mb-1">API Key</label>
+          <label htmlFor="integrationstab-api-key" className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">API Key</label>
           <div className="relative">
-            <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)]" />
             <input id="integrationstab-api-key" type="password" value={llmKey} onChange={e => setLlmKey(e.target.value)} placeholder={llmConfig?.key ? '(key saved — enter new value to replace)' : 'gsk_...'}
-              className="w-full h-9 pl-8 pr-3 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-slate-600 outline-none focus:border-[hsl(var(--blue-700))]/50" />
+              className="w-full h-9 pl-8 pr-3 rounded-lg bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[12px] text-[var(--text-primary)] placeholder-slate-600 outline-none focus:border-[hsl(var(--blue-700))]/50" />
           </div>
         </div>
         <div className="flex items-center gap-2 mt-3">
           <button onClick={testDefaultLlm} disabled={llmTesting || !llmKey.trim()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-[11px] font-bold text-slate-400 hover:bg-white/5 disabled:opacity-40 transition">
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--glass-border)] text-[11px] font-bold text-[var(--text-secondary)] hover:bg-[var(--glass-hover)] disabled:opacity-40 transition">
             {llmTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />} Test
           </button>
           <button onClick={saveDefaultLlm} disabled={llmSaving || !llmKey.trim()}
@@ -385,8 +385,8 @@ export default function IntegrationsTab() {
       {/* Third-party Services */}
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <div className="text-[14px] font-bold text-white">Third-Party Services</div>
-          <div className="text-[12px] text-slate-400 mt-0.5">Platform-wide API connections managed by admin</div>
+          <div className="text-[14px] font-bold text-[var(--text-primary)]">Third-Party Services</div>
+          <div className="text-[12px] text-[var(--text-secondary)] mt-0.5">Platform-wide API connections managed by admin</div>
         </div>
         {thirdPartyData?.connected && (
           <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-1 rounded-full">
@@ -398,11 +398,11 @@ export default function IntegrationsTab() {
       <div className="space-y-3">
         {(categories || []).map(cat => (
           <Panel key={cat.id}>
-            <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-white/5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{CATEGORY_ICONS[cat.id] || 'API'}</span>
+            <div className="flex items-center gap-2.5 mb-3 pb-2.5 border-b border-[var(--glass-border)]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">{CATEGORY_ICONS[cat.id] || 'API'}</span>
               <div>
-                <div className="text-[13.5px] font-bold text-white">{cat.name}</div>
-                <div className="text-[11.5px] text-slate-400">{cat.description}</div>
+                <div className="text-[13.5px] font-bold text-[var(--text-primary)]">{cat.name}</div>
+                <div className="text-[11.5px] text-[var(--text-secondary)]">{cat.description}</div>
               </div>
             </div>
             <div>

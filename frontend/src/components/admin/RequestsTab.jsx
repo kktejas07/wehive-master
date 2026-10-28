@@ -64,41 +64,41 @@ function RequestCard({ req, token, onReviewed }) {
   const hasFields = Object.keys(fields).length > 0;
 
   return (
-    <div className="rounded-2xl bg-white/5 border border-white/8 overflow-hidden">
+    <div className="rounded-2xl bg-[var(--glass-hover)] border border-[var(--glass-border)] overflow-hidden">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-white/5 transition"
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-[var(--glass-hover)] transition"
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[14px] font-bold text-white">
+            <span className="text-[14px] font-bold text-[var(--text-primary)]">
               {REQUEST_TYPE_LABELS[req.request_type] || req.request_type}
             </span>
             <StatusBadge status={req.status} />
           </div>
           <div className="mt-0.5 flex items-center gap-3 flex-wrap">
-            <span className="inline-flex items-center gap-1 text-[12px] text-slate-400">
+            <span className="inline-flex items-center gap-1 text-[12px] text-[var(--text-secondary)]">
               <User className="w-3 h-3" />
               {req.user_name || 'Unknown'} · {req.user_email || req.user_phone || '—'}
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-[var(--text-secondary)]">
               {new Date(req.created_at).toLocaleDateString()} {new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
         </div>
-        {expanded ? <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
+        {expanded ? <ChevronUp className="w-4 h-4 text-[var(--text-secondary)] shrink-0" /> : <ChevronDown className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />}
       </button>
 
       {expanded && (
-        <div className="border-t border-white/8 px-5 py-4 space-y-4">
+        <div className="border-t border-[var(--glass-border)] px-5 py-4 space-y-4">
           {hasFields && (
             <div>
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-2">Requested changes</div>
+              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-2">Requested changes</div>
               <div className="grid sm:grid-cols-2 gap-2">
                 {Object.entries(fields).map(([k, v]) => (
-                  <div key={k} className="rounded-xl bg-white/5 px-4 py-2.5">
-                    <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">{k}</div>
-                    <div className="text-[13px] font-bold text-white mt-0.5">{v}</div>
+                  <div key={k} className="rounded-xl bg-[var(--glass-hover)] px-4 py-2.5">
+                    <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">{k}</div>
+                    <div className="text-[13px] font-bold text-[var(--text-primary)] mt-0.5">{v}</div>
                   </div>
                 ))}
               </div>
@@ -107,8 +107,8 @@ function RequestCard({ req, token, onReviewed }) {
 
           {req.message && (
             <div>
-              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">User message</div>
-              <div className="text-[13px] text-slate-300 italic">"{req.message}"</div>
+              <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">User message</div>
+              <div className="text-[13px] text-[var(--text-secondary)] italic">"{req.message}"</div>
             </div>
           )}
 
@@ -121,7 +121,7 @@ function RequestCard({ req, token, onReviewed }) {
           {req.status === 'pending' && (
             <div className="space-y-3 pt-1">
               <div>
-                <label htmlFor="requeststab-note-to-user-optional" className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
+                <label htmlFor="requeststab-note-to-user-optional" className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1.5">
                   Note to user (optional)
                 </label>
                 <textarea id="requeststab-note-to-user-optional"
@@ -129,14 +129,14 @@ function RequestCard({ req, token, onReviewed }) {
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Add a note explaining your decision…"
                   rows={2}
-                  className="w-full rounded-xl bg-white/5 border border-white/10 focus:border-[hsl(var(--blue-700))]/50 outline-none px-4 py-2.5 text-[13px] text-white placeholder:text-slate-500 resize-none"
+                  className="w-full rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] focus:border-[hsl(var(--blue-700))]/50 outline-none px-4 py-2.5 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] resize-none"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => review('approve')}
                   disabled={busy}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 h-10 text-[13px] font-semibold text-white transition disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-5 h-10 text-[13px] font-semibold text-[var(--text-primary)] transition disabled:opacity-50"
                 >
                   {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                   Approve
@@ -144,7 +144,7 @@ function RequestCard({ req, token, onReviewed }) {
                 <button
                   onClick={() => review('reject')}
                   disabled={busy}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 px-5 h-10 text-[13px] font-semibold text-white transition disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 px-5 h-10 text-[13px] font-semibold text-[var(--text-primary)] transition disabled:opacity-50"
                 >
                   {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
                   Reject
@@ -154,7 +154,7 @@ function RequestCard({ req, token, onReviewed }) {
           )}
 
           {req.status !== 'pending' && req.reviewed_at && (
-            <div className="text-[11.5px] text-slate-400">
+            <div className="text-[11.5px] text-[var(--text-secondary)]">
               Reviewed {new Date(req.reviewed_at).toLocaleDateString()} {new Date(req.reviewed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           )}
@@ -191,7 +191,7 @@ export default function RequestsTab() {
       />
 
       <Panel>
-        <div className="flex flex-wrap gap-2 p-4 border-b border-white/5">
+        <div className="flex flex-wrap gap-2 p-4 border-b border-[var(--glass-border)]">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -199,7 +199,7 @@ export default function RequestsTab() {
               className={`rounded-full px-4 py-1.5 text-[12.5px] font-bold transition ${
                 statusFilter === f.value
                   ? 'bg-[hsl(var(--blue-700))] text-white'
-                  : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                  : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)]'
               }`}
             >
               {f.label}
@@ -210,12 +210,12 @@ export default function RequestsTab() {
         <div className="p-4 space-y-3">
           {!items && (
             <div className="flex justify-center py-8">
-              <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+              <Loader2 className="w-5 h-5 animate-spin text-[var(--text-secondary)]" />
             </div>
           )}
 
           {items && items.length === 0 && (
-            <div className="py-12 text-center text-slate-400 text-[14px]">
+            <div className="py-12 text-center text-[var(--text-secondary)] text-[14px]">
               No {statusFilter || ''} requests found.
             </div>
           )}

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
-  Plane, Briefcase, GraduationCap, HardHat, Users, Home, ArrowRightLeft, HelpCircle, Loader2, CheckCircle2,
+  Plane, Briefcase, GraduationCap, HardHat, Users, Home, ArrowRightLeft, HelpCircle, Loader2, CheckCircle2, Tag, Ticket,
 } from 'lucide-react';
 import { API } from '../context/AuthContext';
 import { COUNTRIES, BRANCHES } from '../data/mock';
@@ -14,10 +14,12 @@ const PURPOSES = [
   { id: 'student_f1', label: 'Student / F-1', hint: 'Study abroad', Icon: GraduationCap },
   { id: 'work', label: 'Work', hint: 'Job or work permit', Icon: HardHat },
   { id: 'family', label: 'Family visit', hint: 'Spouse, parents, relatives', Icon: Users },
-  { id: 'immigration', label: 'Immigration / PR', hint: 'Settle abroad', Icon: Home },
+  { id: 'immigration', label: 'Immigration / PR', hint: 'EB1A · EB5 · O1 · Canada PR · Australia PR', Icon: Home },
   { id: 'transit', label: 'Transit', hint: 'Passing through', Icon: ArrowRightLeft },
   { id: 'other', label: 'Something else', hint: 'Tell us below', Icon: HelpCircle },
 ];
+
+const GROUP_PROMO_PURPOSES = new Set(['tourist', 'business', 'family']);
 const EMPTY = { purpose: '', name: '', email: '', phone: '', destination: '', travel_date: '', travellers: 1, message: '', branch: '', consent: false, website: '' };
 
 const inputCls = 'w-full h-12 rounded-xl border border-[hsl(var(--border))] bg-white px-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors hover:border-[hsl(var(--blue-200))] focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20';
@@ -94,13 +96,36 @@ export default function EnquirySection({ source = 'landing' }) {
         <Reveal index={1}>
           <div className="card-surface p-5 sm:p-7">
             {sent ? (
-              <div className="text-center py-8" role="status" data-testid="enquiry-success">
+              <div className="py-8 text-center" role="status" data-testid="enquiry-success">
                 <CheckCircle2 className="w-12 h-12 mx-auto text-emerald-600" aria-hidden="true" />
                 <h3 className="h-card mt-4">Thanks{sent.name ? `, ${sent.name}` : ''}!</h3>
                 <p className="mt-2 text-[15px] text-muted-foreground">
                   We've got your enquiry for {sent.destination}. Expect a call or WhatsApp within one working day, and check your email for a confirmation.
                 </p>
-                <button type="button" onClick={() => setSent(null)} className="mt-6 h-11 px-5 rounded-xl btn-primary font-semibold">
+
+                {/* ₹500 off promo */}
+                <div className="mt-6 rounded-2xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-6 py-5 text-left">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Tag className="w-4 h-4 text-[hsl(var(--blue-700))]" aria-hidden="true" />
+                    <span className="text-[13px] font-bold uppercase tracking-wide text-[hsl(var(--blue-700))]">Exclusive offer</span>
+                  </div>
+                  <p className="text-[16px] font-bold text-[hsl(var(--blue-900))]">
+                    Sign in and save <span className="text-[hsl(var(--red-500))]">₹500</span> on your next WeHive service
+                  </p>
+                  <p className="mt-1 text-[14px] text-muted-foreground">
+                    Create a free account to track your application, get reminders, and unlock your discount.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Link to="/signup" className="h-11 px-5 rounded-xl btn-accent font-semibold text-[14px] inline-flex items-center justify-center">
+                      Create free account
+                    </Link>
+                    <Link to="/login" className="h-11 px-5 rounded-xl btn-outline font-semibold text-[14px] inline-flex items-center justify-center">
+                      Sign in
+                    </Link>
+                  </div>
+                </div>
+
+                <button type="button" onClick={() => setSent(null)} className="mt-5 text-[14px] text-muted-foreground underline-offset-2 hover:underline">
                   Send another enquiry
                 </button>
               </div>
@@ -160,6 +185,28 @@ export default function EnquirySection({ source = 'landing' }) {
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n === 10 ? '10+' : n}</option>)}
                     </select>
                   </div>
+                  {/* Group travel promo — tourist / business / family */}
+                  {GROUP_PROMO_PURPOSES.has(form.purpose) && Number(form.travellers) >= 3 && (
+                    <div className="sm:col-span-2 flex items-start gap-3 rounded-xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
+                      <Ticket className="w-4 h-4 mt-0.5 shrink-0 text-[hsl(var(--blue-700))]" />
+                      <span>
+                        <strong>Group of {form.travellers} travelers?</strong> Each traveler qualifies for a{' '}
+                        <strong>free sticker visa service — worth ₹9,000 per person</strong>. Our consultant will apply this automatically.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Work visa dependent group promo — H1B + H4 / H3 combinations */}
+                  {form.purpose === 'work' && Number(form.travellers) >= 2 && (
+                    <div className="sm:col-span-2 flex items-start gap-3 rounded-xl border border-[hsl(var(--blue-200))] bg-[hsl(var(--blue-50))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
+                      <Ticket className="w-4 h-4 mt-0.5 shrink-0 text-[hsl(var(--blue-700))]" />
+                      <span>
+                        <strong>Travelling with dependents?</strong> Groups with H-1B + H-4, H-4 + H-3, or multiple H-1B holders each receive a{' '}
+                        <strong>free sticker visa service — worth ₹9,000 per person</strong>. Our consultant will confirm eligibility and apply this automatically.
+                      </span>
+                    </div>
+                  )}
+
                   <div className="sm:col-span-2">
                     <label htmlFor="enq-branch" className={labelCls}>Referred by location</label>
                     <select id="enq-branch" value={form.branch} onChange={set('branch')} className={inputCls}>

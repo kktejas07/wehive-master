@@ -1,100 +1,52 @@
-import * as React from "react"
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button";
+export function Pagination({ children, className = '' }) {
+  return <nav role="navigation" aria-label="pagination" className={`flex justify-center ${className}`}>{children}</nav>;
+}
 
-const Pagination = ({
-  className,
-  ...props
-}) => (
-  <nav
-    role="navigation"
-    aria-label="pagination"
-    className={cn("mx-auto flex w-full justify-center", className)}
-    {...props} />
-)
-Pagination.displayName = "Pagination"
+export function PaginationContent({ children, className = '' }) {
+  return <ul className={`flex items-center gap-1 ${className}`}>{children}</ul>;
+}
 
-const PaginationContent = React.forwardRef(({ className, ...props }, ref) => (
-  <ul
-    ref={ref}
-    className={cn("flex flex-row items-center gap-1", className)}
-    {...props} />
-))
-PaginationContent.displayName = "PaginationContent"
+export function PaginationItem({ children, className = '' }) {
+  return <li className={className}>{children}</li>;
+}
 
-const PaginationItem = React.forwardRef(({ className, ...props }, ref) => (
-  <li ref={ref} className={cn("", className)} {...props} />
-))
-PaginationItem.displayName = "PaginationItem"
+export function PaginationLink({ children, isActive, onClick, className = '' }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex h-9 w-9 items-center justify-center rounded-lg border text-[13px] font-medium transition-colors
+        ${isActive
+          ? 'border-[#011CB5] bg-[#011CB5] text-white'
+          : 'border-[#E8EDF8] bg-white text-gray-600 hover:bg-[#F0F4FF] hover:text-[#1B2B5E]'}
+        ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
 
-const PaginationLink = ({
-  className,
-  isActive,
-  size = "icon",
-  ...props
-}) => (
-  <a
-    aria-current={isActive ? "page" : undefined}
-    className={cn(buttonVariants({
-      variant: isActive ? "outline" : "ghost",
-      size,
-    }), className)}
-    {...props} />
-)
-PaginationLink.displayName = "PaginationLink"
+export function PaginationPrevious({ onClick, className = '' }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Previous page"
+      className={`flex h-9 w-9 items-center justify-center rounded-lg border border-[#E8EDF8] bg-white text-gray-600 hover:bg-[#F0F4FF] transition-colors ${className}`}
+    >
+      <ChevronLeft className="w-4 h-4" />
+    </button>
+  );
+}
 
-const PaginationPrevious = ({
-  className,
-  ...props
-}) => (
-  <PaginationLink
-    aria-label="Go to previous page"
-    size="default"
-    className={cn("gap-1 pl-2.5", className)}
-    {...props}>
-    <ChevronLeft className="h-4 w-4" />
-    <span>Previous</span>
-  </PaginationLink>
-)
-PaginationPrevious.displayName = "PaginationPrevious"
-
-const PaginationNext = ({
-  className,
-  ...props
-}) => (
-  <PaginationLink
-    aria-label="Go to next page"
-    size="default"
-    className={cn("gap-1 pr-2.5", className)}
-    {...props}>
-    <span>Next</span>
-    <ChevronRight className="h-4 w-4" />
-  </PaginationLink>
-)
-PaginationNext.displayName = "PaginationNext"
-
-const PaginationEllipsis = ({
-  className,
-  ...props
-}) => (
-  <span
-    aria-hidden
-    className={cn("flex h-9 w-9 items-center justify-center", className)}
-    {...props}>
-    <MoreHorizontal className="h-4 w-4" />
-    <span className="sr-only">More pages</span>
-  </span>
-)
-PaginationEllipsis.displayName = "PaginationEllipsis"
-
-export {
-  Pagination,
-  PaginationContent,
-  PaginationLink,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-  PaginationEllipsis,
+export function PaginationNext({ onClick, className = '' }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Next page"
+      className={`flex h-9 w-9 items-center justify-center rounded-lg border border-[#E8EDF8] bg-white text-gray-600 hover:bg-[#F0F4FF] transition-colors ${className}`}
+    >
+      <ChevronRight className="w-4 h-4" />
+    </button>
+  );
 }

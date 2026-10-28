@@ -1,250 +1,330 @@
-import { useState, useCallback } from 'react';
-import { Loader2, CalendarPlus, CalendarDays, Search, Building2, Clock } from 'lucide-react';
-import { useAdminAuth } from '../../context/AdminAuthContext';
-import { apiClient, canWrite } from '../../lib/admin';
-import { AdminHeader, Panel } from './AdminShell';
-import { useToast } from '../../hooks/use-toast';
+import { useState, useEffect, useCallback } from 'react';
+import { CalendarCheck, Loader2, AlertCircle, CheckCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { adminClient } from '../../lib/admin';
+import { Panel } from './AdminShell';
 
-const errText = (e) => {
-  const d = e?.response?.data?.detail;
-  if (typeof d === 'string') return d;
-  if (Array.isArray(d) && d.length) return d[0].msg;
-  return e.message;
-};
+const COUNTRIES = [
+  { code: 'us', label: 'United States', name: 'United States' },
+  { code: 'gb', label: 'United Kingdom', name: 'United Kingdom' },
+  { code: 'ca', label: 'Canada', name: 'Canada' },
+  { code: 'au', label: 'Australia', name: 'Australia' },
+  { code: 'de', label: 'Germany', name: 'Germany' },
+  { code: 'fr', label: 'France', name: 'France' },
+  { code: 'ae', label: 'UAE', name: 'United Arab Emirates' },
+  { code: 'sg', label: 'Singapore', name: 'Singapore' },
+];
 
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const DEFAULT_TIMES = '9:00 AM, 10:00 AM, 11:00 AM, 1:00 PM, 2:00 PM, 3:00 PM';
-const INPUT = 'h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white placeholder:text-slate-500';
-const LABEL = 'block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5';
+const ALL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const ALL_TIMES = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
+const DEFAULT_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const DEFAULT_TIMES = ['9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM'];
 
-export default function VisaSchedulingTab() {
-  const { token, admin } = useAdminAuth();
-  const { toast } = useToast();
-  const writable = canWrite(admin, 'cases');
+const fieldCls = 'h-10 w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] px-3 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--admin-blue)]';
+const labelCls = 'block text-[12px] font-medium text-[var(--text-secondary)] mb-1';
 
-  const [countryId, setCountryId] = useState('');
-  const [fromDate, setFromDate] = useState('');
-  const [slots, setSlots] = useState(null);
-  const [loadedFor, setLoadedFor] = useState('');
+// ── Slots section ────────────────────────────────────────────────────────────
+function SlotsSection() {
+  const [country, setCountry] = useState('us');
+  const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [embassies, setEmbassies] = useState([]);
+  const [err, setErr] = useState('');
 
+  const load = useCallback(async (c) => {
+    setLoading(true); setErr('');
+    try {
+      const data = await adminClient(`/visa-scheduling/slots/${c}`);
+      setSlots(Array.isArray(data) ? data : []);
+    } catch (ex) {
+      setErr(ex?.response?.data?.detail || 'Failed to load slots');
+      setSlots([]);
+    } finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(country); }, [country, load]);
+
+  const available = slots.filter(s => !s.booked).length;
+  const booked = slots.filter(s => s.booked).length;
+
+  return (
+    <Panel>
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div>
+          <label className={labelCls}>Country</label>
+          <select value={country} onChange={e => setCountry(e.target.value)} className={`${fieldCls} w-48`}>
+            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+          </select>
+        </div>
+        {!loading && slots.length > 0 && (
+          <div className="flex gap-3 mt-4">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[12px] font-medium">{available} available</span>
+            <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[12px] font-medium">{booked} booked</span>
+          </div>
+        )}
+      </div>
+
+      {err && <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-[13px] text-[var(--admin-red)] mb-3"><AlertCircle className="w-4 h-4 shrink-0" />{err}</div>}
+      {loading && <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-[var(--admin-blue)]" /></div>}
+
+      {!loading && slots.length === 0 && !err && (
+        <p className="text-[13px] text-[var(--text-muted)] text-center py-10">No slots found for {COUNTRIES.find(c => c.code === country)?.label}. Use the Generate tab to create slots.</p>
+      )}
+
+      {!loading && slots.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="border-b border-[var(--glass-border)]">
+                {['Date', 'Time', 'Day', 'Embassy', 'Status', 'Application'].map(h => (
+                  <th key={h} className="pb-2 text-left font-medium text-[var(--text-muted)] pr-4 whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {slots.map((s, i) => (
+                <tr key={s._id || i} className="border-b border-[var(--glass-border)] last:border-0 hover:bg-[var(--glass-hover)]">
+                  <td className="py-2 pr-4 text-[var(--text-primary)] font-medium whitespace-nowrap">{s.date}</td>
+                  <td className="py-2 pr-4 text-[var(--text-secondary)] whitespace-nowrap">{s.time}</td>
+                  <td className="py-2 pr-4 text-[var(--text-secondary)]">{s.day}</td>
+                  <td className="py-2 pr-4 text-[var(--text-secondary)]">{s.embassy || '—'}</td>
+                  <td className="py-2 pr-4">
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${s.booked ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                      {s.booked ? 'Booked' : 'Available'}
+                    </span>
+                  </td>
+                  <td className="py-2 text-[var(--text-muted)] font-mono text-[12px]">
+                    {s.application_id ? s.application_id.slice(0, 8) + '…' : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+// ── Generate section ─────────────────────────────────────────────────────────
+function GenerateSection() {
+  const [country, setCountry] = useState('us');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [days, setDays] = useState(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
-  const [times, setTimes] = useState(DEFAULT_TIMES);
-  const [embassy, setEmbassy] = useState('');
-  const [generating, setGenerating] = useState(false);
+  const [embassy, setEmbassy] = useState('New Delhi');
+  const [days, setDays] = useState(new Set(DEFAULT_DAYS));
+  const [times, setTimes] = useState(new Set(DEFAULT_TIMES));
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [err, setErr] = useState('');
 
-  const load = useCallback(async (id) => {
-    const cid = (id || '').trim().toLowerCase();
-    if (!cid) return;
-    setLoading(true);
-    try {
-      const c = apiClient(token);
-      const [s, e] = await Promise.all([
-        c.get(`/visa-scheduling/slots/${encodeURIComponent(cid)}`, { params: fromDate ? { date: fromDate } : {} }),
-        c.get(`/visa-scheduling/embassies/${encodeURIComponent(cid)}`).catch(() => ({ data: [] })),
-      ]);
-      setSlots(s.data || []);
-      setEmbassies(e.data || []);
-      setLoadedFor(cid);
-    } catch (err) {
-      setSlots([]);
-      toast({ title: 'Could not load slots', description: errText(err) });
-    } finally {
-      setLoading(false);
-    }
-  }, [token, toast, fromDate]);
+  const toggle = (set, setFn, val) =>
+    setFn(prev => { const s = new Set(prev); s.has(val) ? s.delete(val) : s.add(val); return s; });
 
-  const toggleDay = (d) => setDays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d]));
-
-  const generate = async (e) => {
+  const handleGenerate = async (e) => {
     e.preventDefault();
-    const timeList = times.split(',').map((t) => t.trim()).filter(Boolean);
-    if (!countryId.trim() || !startDate || !endDate) return;
-    if (endDate < startDate) { toast({ title: 'End date must be on or after the start date' }); return; }
-    if (!days.length || !timeList.length) { toast({ title: 'Pick at least one day and one time' }); return; }
-    setGenerating(true);
+    if (!startDate || !endDate || days.size === 0 || times.size === 0) return;
+    setLoading(true); setSuccess(''); setErr('');
     try {
-      const { data } = await apiClient(token).post('/visa-scheduling/slots/generate', {
-        country_id: countryId.trim().toLowerCase(),
-        start_date: startDate,
-        end_date: endDate,
-        days,
-        times: timeList,
-        embassy: embassy.trim(),
+      const data = await adminClient('/visa-scheduling/slots/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          country_id: country,
+          start_date: startDate,
+          end_date: endDate,
+          embassy,
+          days: [...days],
+          times: [...times],
+        }),
       });
-      toast({ title: 'Slots generated', description: data.message });
-      await load(countryId);
-    } catch (err) {
-      toast({ title: 'Could not generate slots', description: errText(err) });
-    } finally {
-      setGenerating(false);
-    }
+      setSuccess(`${data.count ?? data.message} slots generated for ${COUNTRIES.find(c => c.code === country)?.label}`);
+    } catch (ex) {
+      setErr(ex?.response?.data?.detail || 'Failed to generate slots');
+    } finally { setLoading(false); }
   };
 
   return (
-    <div data-testid="admin-visa-scheduling-tab">
-      <AdminHeader
-        title="Visa scheduling"
-        subtitle="Create embassy appointment slots by country and see what is still open for students to book."
-      />
+    <Panel>
+      <h3 className="text-[14px] font-semibold text-[var(--text-primary)] mb-4">Generate appointment slots</h3>
+      {success && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-[13px] text-emerald-700 mb-4">
+          <CheckCircle className="w-4 h-4 shrink-0" />{success}
+        </div>
+      )}
+      {err && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-[13px] text-[var(--admin-red)] mb-4">
+          <AlertCircle className="w-4 h-4 shrink-0" />{err}
+        </div>
+      )}
+      <form onSubmit={handleGenerate} className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Country</label>
+            <select value={country} onChange={e => setCountry(e.target.value)} className={fieldCls}>
+              {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Embassy / Consulate</label>
+            <input value={embassy} onChange={e => setEmbassy(e.target.value)} placeholder="e.g. New Delhi" className={fieldCls} />
+          </div>
+          <div>
+            <label className={labelCls}>Start date</label>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={fieldCls} required />
+          </div>
+          <div>
+            <label className={labelCls}>End date</label>
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={fieldCls} required />
+          </div>
+        </div>
 
-      <Panel className="mb-4">
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-3">Open slots</div>
-        <form
-          className="grid sm:grid-cols-[1fr_auto_auto] gap-3"
-          onSubmit={(e) => { e.preventDefault(); load(countryId); }}
-        >
-          <input
-            data-testid="admin-visa-country"
-            value={countryId}
-            onChange={(e) => setCountryId(e.target.value)}
-            placeholder="Country id (e.g. usa, uk, canada)"
-            aria-label="Country id"
-            className={INPUT}
-          />
-          <input
-            data-testid="admin-visa-from"
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            aria-label="Show slots from date"
-            className={INPUT}
-          />
-          <button
-            data-testid="admin-visa-load-btn"
-            type="submit"
-            disabled={loading || !countryId.trim()}
-            className="h-10 px-4 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-[13.5px] font-bold disabled:opacity-60"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Search className="w-3.5 h-3.5" /> Load slots</>}
-          </button>
-        </form>
-        <p className="mt-3 text-[11.5px] text-slate-400">Shows up to 50 unbooked slots, earliest first. Booked slots are not listed.</p>
-      </Panel>
-
-      {writable && (
-        <Panel className="mb-4">
-          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-3">Generate slots</div>
-          <form className="grid gap-4" onSubmit={generate}>
-            <div className="grid sm:grid-cols-4 gap-3">
-              <div>
-                <label className={LABEL} htmlFor="visa-gen-start">Start date</label>
-                <input id="visa-gen-start" data-testid="admin-visa-start" type="date" required value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)} className={`${INPUT} w-full`} />
-              </div>
-              <div>
-                <label className={LABEL} htmlFor="visa-gen-end">End date</label>
-                <input id="visa-gen-end" data-testid="admin-visa-end" type="date" required value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)} className={`${INPUT} w-full`} />
-              </div>
-              <div className="sm:col-span-2">
-                <label className={LABEL} htmlFor="visa-gen-embassy">Embassy / location</label>
-                <input id="visa-gen-embassy" data-testid="admin-visa-embassy" value={embassy} list="visa-embassies"
-                  onChange={(e) => setEmbassy(e.target.value)} placeholder="e.g. New Delhi" className={`${INPUT} w-full`} />
-                <datalist id="visa-embassies">
-                  {embassies.map((m) => <option key={m.id} value={m.name} />)}
-                </datalist>
-              </div>
-            </div>
-            <div>
-              <div className={LABEL}>Days</div>
-              <div className="flex flex-wrap gap-2">
-                {WEEKDAYS.map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    aria-pressed={days.includes(d)}
-                    onClick={() => toggleDay(d)}
-                    className={`rounded-lg px-2.5 py-1.5 text-[12px] font-bold border ${days.includes(d)
-                      ? 'bg-blue-500/20 border-blue-400/40 text-blue-100'
-                      : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'}`}
-                  >
-                    {d.slice(0, 3)}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className={LABEL} htmlFor="visa-gen-times">Times (comma separated)</label>
-              <input id="visa-gen-times" data-testid="admin-visa-times" value={times}
-                onChange={(e) => setTimes(e.target.value)} className={`${INPUT} w-full`} />
-            </div>
-            <div>
-              <button
-                data-testid="admin-visa-generate-btn"
-                type="submit"
-                disabled={generating || !countryId.trim() || !startDate || !endDate}
-                className="h-10 px-4 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13.5px] font-bold disabled:opacity-60"
-              >
-                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CalendarPlus className="w-3.5 h-3.5" /> Generate slots</>}
+        <div>
+          <label className={labelCls}>Days of week</label>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {ALL_DAYS.map(d => (
+              <button type="button" key={d} onClick={() => toggle(days, setDays, d)}
+                className={`px-3 py-1 rounded-full text-[12px] font-medium transition-colors ${days.has(d) ? 'bg-[var(--admin-blue)] text-white' : 'bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[var(--text-secondary)]'}`}>
+                {d.slice(0, 3)}
               </button>
-              <span className="ml-3 text-[11.5px] text-slate-400">
-                Uses the country id above. Running it twice for the same dates creates duplicate slots.
-              </span>
-            </div>
-          </form>
-        </Panel>
-      )}
-
-      {embassies.length > 0 && (
-        <Panel className="mb-4">
-          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-3">Embassies and consulates</div>
-          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[12.5px] text-slate-300">
-            {embassies.map((m) => (
-              <li key={m.id} className="flex items-start gap-2">
-                <Building2 className="w-3.5 h-3.5 mt-0.5 text-slate-400 shrink-0" />
-                <span><span className="font-semibold text-white">{m.name}</span> <span className="text-slate-400">{m.address}</span></span>
-              </li>
             ))}
-          </ul>
-        </Panel>
-      )}
+          </div>
+        </div>
 
-      <Panel className="overflow-x-auto p-0">
-        <table className="min-w-full text-[13.5px]">
+        <div>
+          <label className={labelCls}>Time slots</label>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {ALL_TIMES.map(t => (
+              <button type="button" key={t} onClick={() => toggle(times, setTimes, t)}
+                className={`px-3 py-1 rounded-full text-[12px] font-medium transition-colors ${times.has(t) ? 'bg-[var(--admin-blue)] text-white' : 'bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[var(--text-secondary)]'}`}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button type="submit" disabled={loading || !startDate || !endDate || days.size === 0 || times.size === 0}
+          className="flex items-center gap-2 h-10 px-5 rounded-lg bg-[var(--admin-blue)] text-white text-[13px] font-medium disabled:opacity-50">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CalendarCheck className="w-4 h-4" />}
+          Generate Slots
+        </button>
+      </form>
+    </Panel>
+  );
+}
+
+// ── Embassy Fees section ─────────────────────────────────────────────────────
+function EmbassyFeesSection() {
+  const [fees, setFees] = useState([]);
+  const [filter, setFilter] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [expanded, setExpanded] = useState(new Set());
+
+  useEffect(() => {
+    adminClient('/embassy-fees')
+      .then(data => setFees(Array.isArray(data) ? data : []))
+      .catch(ex => setErr(ex?.response?.data?.detail || 'Failed to load embassy fees'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = filter ? fees.filter(f => f.country.toLowerCase().includes(filter.toLowerCase())) : fees;
+  const toggleRow = (id) => setExpanded(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+
+  if (loading) return <Panel><div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-[var(--admin-blue)]" /></div></Panel>;
+
+  return (
+    <Panel>
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div>
+          <label className={labelCls}>Filter by country</label>
+          <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="e.g. United States" className={`${fieldCls} w-56`} />
+        </div>
+      </div>
+      {err && <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-[13px] text-[var(--admin-red)] mb-3"><AlertCircle className="w-4 h-4 shrink-0" />{err}</div>}
+      <div className="overflow-x-auto">
+        <table className="w-full text-[13px]">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 bg-white/5">
-              <th className="px-5 py-3">Date</th>
-              <th className="px-5 py-3">Day</th>
-              <th className="px-5 py-3">Time</th>
-              <th className="px-5 py-3">Embassy</th>
-              <th className="px-5 py-3">Status</th>
+            <tr className="border-b border-[var(--glass-border)]">
+              {['Country', 'Visa Type', 'Currency', 'Total Fee', 'Book', ''].map(h => (
+                <th key={h} className="pb-2 text-left font-medium text-[var(--text-muted)] pr-4 whitespace-nowrap">{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {loading && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline text-blue-300" /></td></tr>
-            )}
-            {!loading && slots === null && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400">
-                <CalendarDays className="w-5 h-5 inline mr-2" /> Enter a country id and load its slots.
-              </td></tr>
-            )}
-            {!loading && slots?.length === 0 && (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-slate-400">
-                <CalendarDays className="w-5 h-5 inline mr-2" /> No open slots for “{loadedFor || countryId}”.
-              </td></tr>
-            )}
-            {!loading && slots?.map((s) => (
-              <tr key={s._id || s.id} data-testid={`admin-visa-slot-${s._id || s.id}`} className="border-t border-white/5 hover:bg-white/5">
-                <td className="px-5 py-3 font-bold text-white">{s.date}</td>
-                <td className="px-5 py-3 text-slate-300">{s.day || '—'}</td>
-                <td className="px-5 py-3 text-slate-300"><Clock className="w-3 h-3 inline mr-1.5 text-slate-400" />{s.time}</td>
-                <td className="px-5 py-3 text-slate-300">{s.embassy || '—'}</td>
-                <td className="px-5 py-3">
-                  <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11.5px] font-semibold text-emerald-300">Open</span>
-                </td>
-              </tr>
+            {filtered.map(f => (
+              <>
+                <tr key={f.id} className="border-b border-[var(--glass-border)] hover:bg-[var(--glass-hover)] cursor-pointer" onClick={() => toggleRow(f.id)}>
+                  <td className="py-2 pr-4 text-[var(--text-primary)] font-medium">{f.country}</td>
+                  <td className="py-2 pr-4 text-[var(--text-secondary)]">{f.visa_type}</td>
+                  <td className="py-2 pr-4 text-[var(--text-secondary)]">{f.currency}</td>
+                  <td className="py-2 pr-4 font-semibold text-[var(--text-primary)]">{f.currency} {f.total?.toLocaleString()}</td>
+                  <td className="py-2 pr-4">
+                    {f.booking_url && (
+                      <a href={f.booking_url} target="_blank" rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="flex items-center gap-1 text-[var(--admin-blue)] hover:underline text-[12px]">
+                        Book <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </td>
+                  <td className="py-2 text-[var(--text-muted)]">
+                    {expanded.has(f.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </td>
+                </tr>
+                {expanded.has(f.id) && (
+                  <tr key={`${f.id}-exp`} className="bg-[var(--glass-hover)]">
+                    <td colSpan={6} className="px-4 py-3">
+                      <div className="space-y-1.5">
+                        {f.fees?.map((fee, i) => (
+                          <div key={i} className="flex items-center gap-3 text-[12px]">
+                            <span className={`w-16 text-center text-[11px] font-medium rounded px-1.5 py-0.5 ${fee.required ? 'bg-red-100 text-red-700' : 'bg-[var(--glass-border)] text-[var(--text-muted)]'}`}>
+                              {fee.required ? 'Required' : 'Optional'}
+                            </span>
+                            <span className="text-[var(--text-primary)] font-medium">{fee.name}</span>
+                            <span className="font-semibold text-[var(--text-primary)]">{f.currency} {fee.amount}</span>
+                            {fee.note && <span className="text-[var(--text-muted)]">— {fee.note}</span>}
+                          </div>
+                        ))}
+                        {f.notes && <p className="text-[12px] text-[var(--text-muted)] mt-2 italic">{f.notes}</p>}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
           </tbody>
         </table>
-      </Panel>
-      {slots?.length > 0 && (
-        <p className="mt-3 text-[11.5px] text-slate-400">{slots.length} open slot{slots.length === 1 ? '' : 's'} shown for {loadedFor}.</p>
-      )}
+      </div>
+    </Panel>
+  );
+}
+
+// ── Main tab ─────────────────────────────────────────────────────────────────
+const SECTIONS = ['Slots', 'Generate', 'Embassy Fees'];
+
+export default function VisaSchedulingTab() {
+  const [section, setSection] = useState('Slots');
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center gap-3">
+        <CalendarCheck className="w-6 h-6 text-[var(--admin-blue)]" />
+        <div>
+          <h2 className="text-[18px] font-semibold text-[var(--text-primary)]">Visa Scheduling</h2>
+          <p className="text-[13px] text-[var(--text-muted)]">Appointment slots, bulk generation, and embassy fee reference</p>
+        </div>
+      </div>
+
+      <div className="flex gap-1 p-1 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] w-fit">
+        {SECTIONS.map(s => (
+          <button key={s} onClick={() => setSection(s)}
+            className={`px-4 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${section === s ? 'bg-white shadow-sm text-[var(--admin-blue)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
+            {s}
+          </button>
+        ))}
+      </div>
+
+      {section === 'Slots' && <SlotsSection />}
+      {section === 'Generate' && <GenerateSection />}
+      {section === 'Embassy Fees' && <EmbassyFeesSection />}
     </div>
   );
 }

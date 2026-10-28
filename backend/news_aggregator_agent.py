@@ -9,6 +9,7 @@ recorded and the run moves on.
 """
 
 import asyncio
+import hashlib
 import html
 import logging
 import os
@@ -96,18 +97,60 @@ _ATOM = "{http://www.w3.org/2005/Atom}"
 _DC = "{http://purl.org/dc/elements/1.1/}"
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")
+# Bug 8: strip bare URLs that Google News / RSS feeds embed in article body text
+# (e.g. "Read more at https://www.bbc.com/news/... – BBC News")
+_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 
 
 # ---------------------------------------------------------------------------
 # Feed fetching / parsing (also used by blog_aggregator_agent)
 # ---------------------------------------------------------------------------
 
+_URL_RE = re.compile(r'https?://\S+', re.IGNORECASE)
+
+
+def _title_hash(title: str) -> str:
+    """Stable 12-char hash of a normalised title for near-duplicate detection."""
+    normalised = re.sub(r'\W+', '', title.lower())
+    return hashlib.sha256(normalised.encode()).hexdigest()[:12]
+
+
 def _clean_text(value: Optional[str], limit: int = 1000) -> str:
-    """Strip HTML tags/entities and collapse whitespace."""
+    """Strip HTML tags/entities, bare URLs, and collapse whitespace."""
     if not value:
         return ""
     text = html.unescape(_TAG_RE.sub(" ", value))
+    # Bug 8: remove bare URLs that some feeds (Google News) embed in the body text
+    text = _URL_RE.sub("", text)
     return _WS_RE.sub(" ", text).strip()[:limit]
+
+
+def _strip_source_urls(text: str, source_url: str) -> str:
+    """Remove bare URLs whose domain matches the feed's own domain from body text.
+
+    Feed aggregators (e.g. streamlinefeed.co.ke) sometimes inject their own
+    domain into article summaries.  Strip any URL whose hostname matches the
+    source feed's hostname so readers only see the article content.
+    """
+    if not source_url or not text:
+        return text
+    try:
+        from urllib.parse import urlparse
+        source_host = urlparse(source_url).hostname or ''
+    except Exception:
+        return text
+    if not source_host:
+        return text
+
+    def _keep(m: re.Match) -> str:
+        try:
+            host = urlparse(m.group()).hostname or ''
+        except Exception:
+            return m.group()
+        return '' if host == source_host else m.group()
+
+    cleaned = _URL_RE.sub(_keep, text)
+    return _WS_RE.sub(' ', cleaned).strip()
 
 
 def _parse_date(value: Optional[str]) -> Optional[datetime]:
@@ -226,9 +269,9 @@ async def ingest_vectors(kind: str, ids: List[str], docs: List[str], metas: List
     if not ids:
         return
     try:
-        from ollama_embeddings import embed_query
+        from embeddings_bge import embed_texts
         from vector_store import upsert_documents
-        embeddings = [await embed_query(text) for text in docs]
+        embeddings = await embed_texts(docs)
         upsert_documents("wehive_rag", ids, docs, embeddings, metas)
         logger.info("Ingested %d %s items into Vector DB.", len(ids), kind)
     except Exception as e:
@@ -236,7 +279,8 @@ async def ingest_vectors(kind: str, ids: List[str], docs: List[str], metas: List
 
 
 async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc) -> Dict[str, Any]:
-    """Fetch every feed and upsert its items into `col`, deduplicated by source_url.
+    """Fetch every feed and upsert its items into `col`, deduplicated by source_url
+    and title hash (catches the same story arriving via multiple feeds/URLs).
 
     `to_doc(feed, item)` maps a parsed item to the stored fields. New items are
     inserted as 'approved' for trusted feeds, else 'pending'; an existing URL whose title/date changed is
@@ -263,7 +307,12 @@ async def upsert_feed_items(col, feeds: List[Dict[str, Any]], kind: str, to_doc)
 
             for item in items[:MAX_ITEMS_PER_FEED]:
                 fields = to_doc(feed, item)
+                # Primary dedup: exact URL match.
                 existing = await col.find_one({"source_url": item["url"]})
+                # Secondary dedup: same normalised title from a different URL
+                # (same story re-syndicated across feeds).
+                if not existing and fields.get("title_hash"):
+                    existing = await col.find_one({"title_hash": fields["title_hash"]})
                 if existing:
                     if existing.get("title") == fields["title"] and existing.get("date") == fields["date"]:
                         fstats["skipped"] += 1
@@ -305,13 +354,16 @@ def _news_doc(feed: Dict[str, Any], item: Dict[str, Any]) -> Dict[str, Any]:
     title = item["title"]
     if publisher and title.endswith(f" - {publisher}"):  # Google News appends the publisher
         title = title[: -len(publisher) - 3]
+    # Strip bare source-domain URLs injected by feed aggregators (Bug 8).
+    content = _strip_source_urls(item["summary"], item["url"])
     return {
         "title": title,
+        "title_hash": _title_hash(title),
         "country_id": feed["country_id"],
         "date": published.strftime("%Y-%m-%d") if published else None,
         "published_at": published,
         "category": feed.get("category") or classify_category(f"{item['title']} {item['summary']}"),
-        "content": item["summary"],
+        "content": content,
         "source_url": item["url"],
         "source_name": publisher or feed["name"],
         "source": "rss",

@@ -33,17 +33,17 @@ function Tooltip({ text }) {
         type="button"
         onMouseEnter={() => { updatePosition(); setShow(true); }}
         onMouseLeave={() => setShow(false)}
-        className="text-slate-400 hover:text-slate-300 transition"
+        className="text-[var(--text-secondary)] hover:text-[var(--text-secondary)] transition"
       >
         <Info className="w-3.5 h-3.5" />
       </button>
       {show && createPortal(
         <div
-          className="fixed z-[99999] -translate-x-1/2 px-3 py-2 rounded-lg bg-slate-800 border border-white/10 text-[11px] text-slate-300 whitespace-nowrap shadow-lg pointer-events-none"
+          className="fixed z-[99999] -translate-x-1/2 px-3 py-2 rounded-lg bg-[var(--admin-navy)] border border-[var(--glass-border)] text-[11px] text-[var(--text-secondary)] whitespace-nowrap shadow-lg pointer-events-none"
           style={{ top: pos.top, left: pos.left, transform: 'translate(-50%, -100%)' }}
         >
           {text}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 border-r border-b border-white/10 rotate-45" />
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--admin-navy)] border-r border-b border-[var(--glass-border)] rotate-45" />
         </div>,
         document.body
       )}
@@ -59,7 +59,7 @@ function SecretField({ label, tooltip, value, onChange }) {
   const masked = value === SECRET_MASK;
   return (
     <label className="block">
-      <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
+      <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1.5">
         {label}
         {tooltip && <Tooltip text={tooltip} />}
       </span>
@@ -69,18 +69,18 @@ function SecretField({ label, tooltip, value, onChange }) {
           value={value}
           onFocus={(e) => masked && e.target.select()}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--blue-700))] focus:bg-black/40 text-[14px] text-white placeholder:text-slate-500 outline-none transition pr-10"
+          className="w-full h-11 px-4 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] focus:border-[hsl(var(--blue-700))] focus:bg-[var(--glass)] text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none transition pr-10"
         />
         <button
           type="button"
           onClick={() => setShow((s) => !s)}
           tabIndex={-1}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-secondary)] transition"
         >
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
-      {masked && <span className="mt-1 block text-[11px] text-slate-500">Saved. Type a new value to replace it.</span>}
+      {masked && <span className="mt-1 block text-[11px] text-[var(--text-muted)]">Saved. Type a new value to replace it.</span>}
     </label>
   );
 }
@@ -88,7 +88,7 @@ function SecretField({ label, tooltip, value, onChange }) {
 function Field({ label, tooltip, value, onChange, placeholder }) {
   return (
     <label className="block">
-      <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
+      <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1.5">
         {label}
         {tooltip && <Tooltip text={tooltip} />}
       </span>
@@ -97,7 +97,7 @@ function Field({ label, tooltip, value, onChange, placeholder }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-11 px-4 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--blue-700))] focus:bg-black/40 text-[14px] text-white placeholder:text-slate-500 outline-none transition"
+        className="w-full h-11 px-4 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] focus:border-[hsl(var(--blue-700))] focus:bg-[var(--glass)] text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none transition"
       />
     </label>
   );
@@ -106,7 +106,7 @@ function Field({ label, tooltip, value, onChange, placeholder }) {
 function ToggleField({ label, tooltip, value, onChange }) {
   return (
     <label className="block">
-      <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
+      <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1.5">
         {label}
         {tooltip && <Tooltip text={tooltip} />}
       </span>
@@ -114,7 +114,7 @@ function ToggleField({ label, tooltip, value, onChange }) {
         type="button"
         onClick={() => onChange(!value)}
         className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
-          value ? 'bg-emerald-500' : 'bg-white/15'
+          value ? 'bg-emerald-500' : 'bg-[var(--glass-border)]'
         }`}
       >
         <span
@@ -365,7 +365,7 @@ export default function SettingsTab() {
         subtitle="Configure all platform integrations — saved to database, applied instantly without redeployment"
       />
 
-      <div className="sticky top-0 z-10 bg-[#0b1020] pt-4 pb-3 flex gap-1 overflow-x-auto scrollbar-none border-b border-white/5 mb-6">
+      <div className="sticky top-0 z-10 bg-[#0b1020] pt-4 pb-3 flex gap-1 overflow-x-auto scrollbar-none border-b border-[var(--glass-border)] mb-6">
         {NAMESPACES.map((n) => {
           const m = SECTION_META[n] || { label: n, icon: Globe };
           const Icon = m.icon;
@@ -376,8 +376,8 @@ export default function SettingsTab() {
               onClick={() => setActiveTab(n)}
               className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 h-10 rounded-lg text-[12px] font-semibold transition ${
                 activeTab === n
-                  ? 'bg-[hsl(var(--blue-700))] text-white'
-                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)]'
+                  : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-hover)]'
               }`}
             >
               <Icon className={`w-3.5 h-3.5 ${dirty && activeTab !== n ? 'text-amber-400' : ''}`} />
@@ -395,7 +395,7 @@ export default function SettingsTab() {
               <div className="h-9 w-9 rounded-xl bg-[hsl(var(--blue-700))]/15 flex items-center justify-center">
                 <TabIcon className="w-4.5 h-4.5 text-blue-300" />
               </div>
-              <h3 className="text-[16px] font-bold text-white">{meta.title}</h3>
+              <h3 className="text-[16px] font-bold text-[var(--text-primary)]">{meta.title}</h3>
             </div>
             <div className="flex items-center gap-3">
               {changedTabs.length > 1 && (
@@ -406,7 +406,7 @@ export default function SettingsTab() {
               <button
                 onClick={handleSave}
                 disabled={saving === ns || !hasChanges}
-                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
               >
                 {saving === ns ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 Save {meta.label}
@@ -423,8 +423,8 @@ export default function SettingsTab() {
               }
               if (field.type === 'divider') {
                 return (
-                  <div key={field.key} className="sm:col-span-2 pt-2 border-t border-white/10">
-                    <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-slate-400">{field.label}</div>
+                  <div key={field.key} className="sm:col-span-2 pt-2 border-t border-[var(--glass-border)]">
+                    <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">{field.label}</div>
                   </div>
                 );
               }
@@ -432,7 +432,7 @@ export default function SettingsTab() {
                 <div key={field.key}>
                   {field.type === 'select' ? (
                     <label className="block">
-                      <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
+                      <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1.5">
                         {field.label}
                         {field.tooltip && <Tooltip text={field.tooltip} />}
                       </span>
@@ -440,14 +440,14 @@ export default function SettingsTab() {
                         <select
                           value={values[field.key] || ''}
                           onChange={(e) => setField(field.key, e.target.value)}
-                          className="w-full h-11 px-4 pr-10 rounded-xl bg-black/30 border border-white/10 focus:border-[hsl(var(--blue-700))] text-[14px] text-white outline-none transition appearance-none"
+                          className="w-full h-11 px-4 pr-10 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] focus:border-[hsl(var(--blue-700))] text-[14px] text-[var(--text-primary)] outline-none transition appearance-none"
                         >
                           <option value="">Select provider...</option>
                           {field.options.map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                           ))}
                         </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
                       </div>
                     </label>
                   ) : field.type === 'secret' ? (
@@ -467,13 +467,13 @@ export default function SettingsTab() {
                   ) : field.type === 'file' ? (
                     <div>
                       <label className="block">
-                        <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1.5">
+                        <span className="flex items-center text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1.5">
                           {field.label}
                           {field.tooltip && <Tooltip text={field.tooltip} />}
                         </span>
                       </label>
                       <div className="flex items-center gap-2">
-                        <label className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[12px] font-bold transition cursor-pointer shrink-0">
+                        <label className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] text-[12px] font-bold transition cursor-pointer shrink-0">
                           {uploading === field.key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadIcon className="w-3.5 h-3.5" />}
                           {uploading === field.key ? 'Uploading...' : `Upload ${field.label}`}
                           <input
@@ -487,11 +487,11 @@ export default function SettingsTab() {
                           />
                         </label>
                         {brandingAssets[field.key]?.url && (
-                          <img loading="lazy" decoding="async" src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-auto max-w-[120px] rounded-lg object-contain border border-white/10 bg-white/5" />
+                          <img loading="lazy" decoding="async" src={brandingAssets[field.key].url} alt={field.label} className="h-10 w-auto max-w-[120px] rounded-lg object-contain border border-[var(--glass-border)] bg-[var(--glass-hover)]" />
                         )}
                       </div>
                       {brandingAssets[field.key] && (
-                        <p className="mt-1 text-[11px] text-slate-400">
+                        <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
                           Uploaded • {(brandingAssets[field.key].size / 1024).toFixed(1)} KB
                         </p>
                       )}

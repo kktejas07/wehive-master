@@ -14,6 +14,7 @@ import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import AdminsTab from '../components/admin/AdminsTab';
 import NewsletterTab from '../components/admin/NewsletterTab';
+import AnnouncementsTab from '../components/admin/AnnouncementsTab';
 import IntegrationsTab from '../components/admin/IntegrationsTab';
 import ExportsTab from '../components/admin/ExportsTab';
 import UniversitiesTab from '../components/admin/UniversitiesTab';
@@ -35,7 +36,8 @@ import HiveLearningTab from '../components/admin/HiveLearningTab';
 import LeadsTab from '../components/admin/LeadsTab';
 import PaymentsTab from '../components/admin/PaymentsTab';
 import AuditTab from '../components/admin/AuditTab';
-import AgenticsTab from '../components/admin/AgenticsTab';
+import MonitoringTab from '../components/admin/MonitoringTab';
+import AgenticTab from '../components/admin/AgenticTab';
 import SlotMonitorTab from '../components/admin/SlotMonitorTab';
 import ReferralsTab from '../components/admin/ReferralsTab';
 import VisaSchedulingTab from '../components/admin/VisaSchedulingTab';
@@ -60,8 +62,8 @@ function ProtectedAdmin({ children }) {
 
   if (loading || !admin) {
     return (
-      <div className="min-h-screen bg-[#1E1B4B] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[#818CF8]" />
+      <div className="min-h-screen bg-[#0b1020] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--blue-700))]" />
       </div>
     );
   }
@@ -101,23 +103,25 @@ function AdminRoutes() {
                 <Route path="users/:id" element={<UserProfile />} />
                 <Route path="applications" element={<ApplicationsTab />} />
                 <Route path="applications/:id" element={<ApplicationCase />} />
-                <Route path="countries" element={<RoleGuard allowed={['manager', 'super_admin', 'viewer']} readOnly><CountriesTab /></RoleGuard>} />
-                <Route path="pricing" element={<RoleGuard allowed={['manager', 'super_admin', 'finance', 'viewer']} readOnly><PricingTab /></RoleGuard>} />
-                <Route path="events" element={<RoleGuard allowed={['manager', 'super_admin']}><EventsTab /></RoleGuard>} />
+                <Route path="countries" element={<RoleGuard allowed={['manager']}><CountriesTab /></RoleGuard>} />
+                <Route path="pricing" element={<RoleGuard allowed={['manager', 'finance']}><PricingTab /></RoleGuard>} />
+                <Route path="events" element={<RoleGuard allowed={['manager']}><EventsTab /></RoleGuard>} />
                 <Route path="global-events" element={<GlobalEventsTab />} />
                 <Route path="moderation" element={<ContentModerationTab />} />
                 <Route path="requests" element={<RequestsTab />} />
                 <Route path="promotions" element={<PromotionsTab />} />
                 <Route path="promocodes" element={<PromoCodesTab />} />
                 <Route path="agents" element={<AgentsTab />} />
-                <Route path="staff" element={<RoleGuard allowed={['manager', 'super_admin', 'support']}><StaffTab /></RoleGuard>} />
+                <Route path="staff" element={<RoleGuard allowed={['manager']}><StaffTab /></RoleGuard>} />
                 <Route path="admins" element={<SuperOnly><AdminsTab /></SuperOnly>} />
                 <Route path="newsletter" element={<NewsletterTab />} />
+          <Route path="announcements" element={<AnnouncementsTab />} />
                 <Route path="integrations" element={<SuperOnly><IntegrationsTab /></SuperOnly>} />
                 <Route path="exports" element={<ExportsTab />} />
                 <Route path="leads" element={<LeadsTab />} />
                 <Route path="payments" element={<PaymentsTab />} />
                 <Route path="audit" element={<AuditTab />} />
+                <Route path="monitoring" element={<MonitoringTab />} />
                 <Route path="health" element={<HealthTab />} />
                 <Route path="security" element={<SecurityTab />} />
                 <Route path="review" element={<ReviewQueueTab />} />
@@ -128,11 +132,13 @@ function AdminRoutes() {
                 <Route path="prompts" element={<PromptsTab />} />
                 <Route path="agents-v2" element={<AgentsV2Tab />} />
                 <Route path="hive-learning" element={<HiveLearningTab />} />
-                <Route path="agentics" element={<AgenticsTab />} />
+                <Route path="destinations" element={<DestinationsTab />} />
+                <Route path="agentic" element={<AgenticTab />} />
                 <Route path="slot-monitor" element={<SlotMonitorTab />} />
                 <Route path="referrals" element={<ReferralsTab />} />
                 <Route path="visa-scheduling" element={<VisaSchedulingTab />} />
-                <Route path="destinations" element={<DestinationsTab />} />
+                <Route path="doc-review" element={<Navigate to="/admin/review" replace />} />
+                <Route path="hero-events" element={<Navigate to="/admin/events" replace />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />
               </Routes>
             </AdminShell>

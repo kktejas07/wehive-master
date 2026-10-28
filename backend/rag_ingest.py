@@ -1,7 +1,8 @@
 """RAG Ingestion — turn raw documents into vector-store entries.
 
 Provides:
-  - chunk_text(): split long text into overlapping chunks (token-aware)
+  - chunk_text(): split long text into overlapping chunks (token-aware);
+    used when the semantic chunker (chunker.py) is unavailable
   - chunk_dict(): serialize a dict to a single chunk
   - make_id(): stable, deterministic id from namespace + key
   - ingest_documents(): full pipeline: chunk → embed → upsert
@@ -10,15 +11,26 @@ Provides:
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 import os
 from typing import Any, Iterable, List, Optional
 
-from ollama_embeddings import embed_texts
+from chunker import semantic_chunks
+from embeddings_bge import embed_texts
 from vector_store import upsert_documents
 
 logger = logging.getLogger("wehive.rag_ingest")
+
+# Dual-write to Qdrant when available (reads in LangGraph need it populated).
+async def _qdrant_upsert(collection: str, ids: list, texts: list, metas: list) -> None:
+    try:
+        from qdrant_store import upsert_documents as qdrant_upsert
+        docs = [{"id": id_, "text": t, "metadata": m} for id_, t, m in zip(ids, texts, metas)]
+        await qdrant_upsert(collection, docs)
+    except Exception as exc:
+        logger.debug("Qdrant dual-write skipped: %s", exc)
 
 CHUNK_SIZE = int(os.environ.get("RAG_CHUNK_SIZE", "800"))
 CHUNK_OVERLAP = int(os.environ.get("RAG_CHUNK_OVERLAP", "120"))
@@ -28,13 +40,27 @@ def _approx_tokens(s: str) -> int:
     return max(1, len(s) // 4)
 
 
+def _chonkie_chunk(text: str, chunk_size: int) -> List[str]:
+    """Semantic chunking via chonkie (optional dep). Returns [] if not installed."""
+    try:
+        from chonkie import SemanticChunker
+        chunker = SemanticChunker(chunk_size=chunk_size)
+        return [c.text for c in chunker.chunk(text)]
+    except Exception:
+        return []
+
+
 def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> List[str]:
-    """Greedy sentence-aware chunking with overlap.
+    """Semantic chunking when chonkie is installed, else greedy sentence-aware with overlap.
 
     Tries to keep sentences whole; falls back to a sliding window over
     character-based "tokens" (~4 chars each) when a single sentence is
     longer than `chunk_size`.
     """
+    if os.environ.get("USE_SEMANTIC_CHUNKER", "").lower() in ("1", "true"):
+        result = _chonkie_chunk(text, chunk_size)
+        if result:
+            return result
     if not text:
         return []
     text = text.strip()
@@ -78,6 +104,16 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVE
     if cur:
         chunks.append(cur.strip())
     return [c for c in chunks if c]
+
+
+async def chunk_document(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> List[str]:
+    """Short text stays whole; long text is split by topic (semantic chunker) or, without it, by size."""
+    text = (text or "").strip()
+    if not text:
+        return []
+    if _approx_tokens(text) <= chunk_size:
+        return [text]
+    return await asyncio.to_thread(semantic_chunks, text) or chunk_text(text, chunk_size, overlap)
 
 
 def dict_to_text(d: dict, fields: Optional[list[str]] = None) -> str:
@@ -159,6 +195,7 @@ async def ingest_documents(
             return
         vecs = await embed_texts(pending_texts, model=embed_model)
         upsert_documents(collection, pending_ids, pending_texts, vecs, pending_metas)
+        await _qdrant_upsert(collection, pending_ids, pending_texts, pending_metas)
         all_ids.extend(pending_ids)
         all_docs.extend(pending_texts)
         all_metas.extend(pending_metas)
@@ -173,7 +210,7 @@ async def ingest_documents(
         text = dict_to_text(d, text_fields)
         if not text:
             continue
-        pieces = chunk_text(text, chunk_size, chunk_overlap) if chunk else [text]
+        pieces = await chunk_document(text, chunk_size, chunk_overlap) if chunk else [text]
         for idx, piece in enumerate(pieces):
             doc_id = f"{make_id(ns, raw_key)}-{idx}" if len(pieces) > 1 else make_id(ns, raw_key)
             meta = {**base_meta, "source_key": raw_key, "chunk_index": idx, "chunks": len(pieces)}

@@ -13,7 +13,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from rate_limit import RateLimit
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import google_kg
 from ai_marketplace import marketplace
@@ -22,6 +22,8 @@ from config import SUPPORT_PHONE
 from db import db
 from eva_tools import get_application_fee, lookup_country, search_universities
 from local_llm import local_chat_with_info
+from student_memory import student_memory
+from observability import observe, propagate_attributes, get_callback_handler
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
@@ -74,6 +76,7 @@ RE_VISA_KEYWORDS = re.compile(
 RAG_COLLECTIONS = ["wehive_kb", "wehive_countries", "wehive_universities", "kg_entities"]
 
 
+@observe("gather_context")
 async def _gather_context(user_prompt: str) -> str:
     from agents.orchestrator import RE_COUNTRY_NAME, COUNTRY_ALIASES
     snippets = []
@@ -151,7 +154,7 @@ class ChatStartResponse(BaseModel):
 
 
 class ChatMessageRequest(BaseModel):
-    text: str
+    text: str = Field(..., min_length=1, max_length=2000)
 
 
 class ChatMessageResponse(BaseModel):
@@ -224,9 +227,35 @@ async def list_messages(session_id: str, user=Depends(get_current_user_optional)
 
 
 @router.post("/sessions/{session_id}/messages", response_model=ChatMessageResponse)
+@observe("eva_chat")
 async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(get_current_user_optional), _=Depends(_message_limiter)):
     if not req.text or not req.text.strip():
         raise HTTPException(400, "Empty message")
+
+    # ── Guardrails: domain restriction + injection detection ─────────────────
+    from guardrails import check_input
+    allowed, guard_result = check_input(req.text)
+    if not allowed:
+        # Return the guardrail message as a synthetic assistant reply without
+        # storing the blocked user message or calling any LLM/DB.
+        now = datetime.utcnow()
+        blocked_user_msg = {
+            "_id": str(uuid.uuid4()), "session_id": session_id,
+            "role": "user", "text": req.text.strip(), "created_at": now,
+        }
+        blocked_assistant_msg = {
+            "_id": str(uuid.uuid4()), "session_id": session_id,
+            "role": "assistant", "text": guard_result, "created_at": now,
+        }
+        await chat_messages.insert_many([blocked_user_msg, blocked_assistant_msg])
+        return ChatMessageResponse(
+            user_message={"id": blocked_user_msg["_id"], "role": "user",
+                          "text": req.text.strip(), "created_at": now.isoformat()},
+            assistant_message={"id": blocked_assistant_msg["_id"], "role": "assistant",
+                               "text": guard_result, "created_at": now.isoformat()},
+            provider_info={"provider": "guardrails"},
+        )
+
     sess = await chat_sessions.find_one({"_id": session_id})
     if not sess:
         raise HTTPException(404, "Session not found")
@@ -236,7 +265,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     if not sess.get("user_id") and user:
         await chat_sessions.update_one({"_id": session_id}, {"$set": {"user_id": user["_id"]}})
 
-    text = req.text.strip()
+    text = guard_result  # sanitised text from guardrails
     now = datetime.utcnow()
 
     user_msg = {
@@ -250,6 +279,74 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
 
     context = await _gather_context(text)
 
+    # LangGraph path (enabled via USE_LANGGRAPH=true env var)
+    user_id = user["_id"] if user else None
+    if os.environ.get("USE_LANGGRAPH", "").lower() in ("true", "1"):
+        try:
+            from langchain_core.messages import HumanMessage
+            from agents.langgraph.supervisor import supervisor_app
+
+            memories = student_memory.search(user_id=user_id or "anon", query=text, limit=5)
+            memory_ctx = "\n".join(m["memory"] for m in memories if "memory" in m)
+
+            lg_state = {
+                "messages": [HumanMessage(content=text)],
+                "user_id": user_id or "anon",
+                "session_id": session_id,
+                "intent": "",
+                "retrieved_docs": [],
+                "retrieval_quality": "none",
+                "retry_count": 0,
+                "reformulated_query": "",
+                "final_answer": "",
+                "requires_human": False,
+                "agent_name": "",
+                "memory_context": memory_ctx,
+            }
+            lf_handler = get_callback_handler(
+                user_id=user_id or "anon",
+                session_id=session_id,
+                metadata={"source": "langgraph"},
+            )
+            lg_config = {"callbacks": [lf_handler]} if lf_handler else {}
+            with propagate_attributes(
+                user_id=user_id or "anon",
+                session_id=session_id,
+                metadata={"source": "langgraph"},
+            ):
+                lg_result = await supervisor_app.ainvoke(lg_state, config=lg_config)
+            reply_text = lg_result.get("final_answer") or ""
+            if reply_text:
+                student_memory.add(user_id or "anon", f"Asked: {text}")
+                student_memory.add(user_id or "anon", f"Intent: {lg_result.get('intent','')}", role="assistant")
+                provider_info = {
+                    "provider": "langgraph",
+                    "intent": lg_result.get("intent", ""),
+                    "agent": lg_result.get("agent_name", ""),
+                }
+                assistant_msg = {
+                    "_id": str(uuid.uuid4()),
+                    "session_id": session_id,
+                    "role": "assistant",
+                    "text": reply_text,
+                    "created_at": datetime.utcnow(),
+                }
+                await chat_messages.insert_one(assistant_msg)
+                new_title = sess.get("title") or "New chat"
+                if new_title in ("New chat", None, ""):
+                    new_title = text[:40] + ("…" if len(text) > 40 else "")
+                await chat_sessions.update_one(
+                    {"_id": session_id},
+                    {"$set": {"title": new_title, "last_message": reply_text[:140], "updated_at": datetime.utcnow()}},
+                )
+                return ChatMessageResponse(
+                    user_message={"id": user_msg["_id"], "role": "user", "text": text, "created_at": user_msg["created_at"].isoformat()},
+                    assistant_message={"id": assistant_msg["_id"], "role": "assistant", "text": reply_text, "created_at": assistant_msg["created_at"].isoformat()},
+                    provider_info=provider_info,
+                )
+        except Exception as e:
+            logger.warning("LangGraph path failed, falling back: %s", e)
+
     from rag_service import retrieve_conversation_history
 
     history = await retrieve_conversation_history(session_id, limit=6)
@@ -257,9 +354,10 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     if history:
         enriched_system = SYSTEM_PROMPT + f"\n\nRecent conversation:\n{history}"
 
-    enriched_prompt = text
+    from guardrails import fence
+    enriched_prompt = fence(text)
     if context:
-        enriched_prompt = f"Current data from our system:\n{context}\n\nUser question: {text}"
+        enriched_prompt = f"Current data from our system:\n{context}\n\nUser question: {fence(text)}"
 
     try:
         user_id = user["_id"] if user else None
@@ -296,6 +394,14 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
                 f"{SUPPORT_PHONE} for an immediate answer."
             )
             provider_info = {}
+
+    # Persist to student memory (legacy path — LangGraph path saves its own)
+    if reply_text and user_id:
+        try:
+            student_memory.add(str(user_id), f"Asked: {text}")
+            student_memory.add(str(user_id), f"Eva replied: {reply_text[:200]}", role="assistant")
+        except Exception:
+            pass
 
     assistant_msg = {
         "_id": str(uuid.uuid4()),

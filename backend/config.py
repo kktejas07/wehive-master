@@ -34,7 +34,7 @@ CONSULTANT_AUTO_REPLY = os.environ.get(
 # Public site + contact details used in emails, receipts and share links.
 FRONTEND_URL = (os.environ.get('FRONTEND_URL') or os.environ.get('PUBLIC_APP_URL') or 'https://wehive.co.in').rstrip('/')
 SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', 'info@wehive.co.in')
-SUPPORT_PHONE = os.environ.get('SUPPORT_PHONE', '+91 91132 56726')
+SUPPORT_PHONE = os.environ.get('SUPPORT_PHONE', '+91 91214 95077')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@wehive.co.in')
 TELEGRAM_COMMUNITY_URL = os.environ.get('TELEGRAM_COMMUNITY_URL', 'https://t.me/wehivecommunity')
 # Where the admin R2 sync pulls destination images from (comma-separated base URLs, tried in order).
@@ -49,3 +49,16 @@ DESTINATION_IMAGE_BASE_URLS = [
 
 FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID', '')
 FIREBASE_CREDENTIALS = os.environ.get('FIREBASE_CREDENTIALS', '')
+
+# Vector store (Qdrant)
+QDRANT_URL = os.environ.get('QDRANT_URL', 'http://localhost:6333')
+QDRANT_API_KEY = os.environ.get('QDRANT_API_KEY', '')
+
+# Observability (Langfuse)
+LANGFUSE_PUBLIC_KEY = os.environ.get('LANGFUSE_PUBLIC_KEY', '')
+LANGFUSE_SECRET_KEY = os.environ.get('LANGFUSE_SECRET_KEY', '')
+LANGFUSE_HOST = os.environ.get('LANGFUSE_HOST', 'http://localhost:3010')
+
+# Ollama (local LLM for grading, reformulation, and prompt optimization)
+OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
+OLLAMA_GRADE_MODEL = os.environ.get('OLLAMA_GRADE_MODEL', 'llama3.2')

@@ -45,3 +45,23 @@ export function countryFlag(code) {
   const OFFSET = 0x1F1E6 - 65;
   return String.fromCodePoint(c.charCodeAt(0) + OFFSET, c.charCodeAt(1) + OFFSET);
 }
+
+/** Alias for countryFlag — converts a 2-letter ISO code to a flag emoji. */
+export function countryFlagEmoji(code = '') {
+  return countryFlag(code);
+}
+
+/** Human-readable relative time from an ISO date string. e.g. "2d ago", "just now" */
+export function relativeTime(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return 'just now';
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const d = Math.floor(hr / 24);
+  if (d < 30) return `${d}d ago`;
+  return `${Math.floor(d / 30)}mo ago`;
+}

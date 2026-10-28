@@ -30,6 +30,76 @@ from upload_limits import read_capped
 logger = logging.getLogger('wehive.admin_ops')
 router = APIRouter(prefix='/admin', tags=['admin-ops'])
 
+email_log = db['email_log']
+
+JOURNEY_STAGES = ['registered', 'enquiry_submitted', 'application_started', 'docs_uploaded',
+                   'submitted', 'in_review', 'appointment_scheduled', 'visa_approved']
+
+
+async def _build_user_360(user_id: str, u: dict, apps: list, pays: list) -> dict:
+    """Extra keys for the 360° profile: journey stage, inactivity, heatmap, email history."""
+    from constants import AppStatus
+
+    # Journey stage
+    stage = 'registered'
+    if any(a['status'] == AppStatus.APPROVED.value for a in apps):
+        stage = 'visa_approved'
+    elif any(a['status'] == 'appointment_scheduled' for a in apps):
+        stage = 'appointment_scheduled'
+    elif any(a['status'] == AppStatus.IN_REVIEW.value for a in apps):
+        stage = 'in_review'
+    elif any(a['status'] != AppStatus.DRAFT.value for a in apps):
+        stage = 'submitted'
+    elif any(d for a in apps for d in (a.get('documents') or [])):
+        stage = 'docs_uploaded'
+    elif apps:
+        stage = 'application_started'
+    elif await db['leads'].count_documents({'email': u.get('email')}, limit=1):
+        stage = 'enquiry_submitted'
+
+    # Inactivity
+    last_active = u.get('last_login_at') or u.get('created_at')
+    days_inactive = (datetime.utcnow() - last_active).days if last_active and isinstance(last_active, datetime) else None
+    if days_inactive is None:
+        drop_off_signal = None
+    elif days_inactive > 30:
+        drop_off_signal = 'call_user'
+    elif days_inactive > 14:
+        drop_off_signal = 'assign_agent'
+    elif days_inactive > 7:
+        drop_off_signal = 'send_reminder'
+    else:
+        drop_off_signal = None
+
+    # 90-day activity heatmap from audit log
+    since = datetime.utcnow() - timedelta(days=90)
+    heatmap: dict[str, int] = {}
+    async for r in audit_col.find({'entity_type': {'$in': ['user', 'document', 'application']},
+                                   '$or': [{'entity_id': user_id}, {'extra.user_id': user_id}],
+                                   'at': {'$gte': since}}, {'at': 1}):
+        day = r['at'].date().isoformat() if isinstance(r.get('at'), datetime) else None
+        if day:
+            heatmap[day] = heatmap.get(day, 0) + 1
+    activity_heatmap = [{'date': k, 'count': v} for k, v in sorted(heatmap.items())]
+
+    # Email history (last 20)
+    email_history = [{
+        'id': str(r.get('_id')),
+        'kind': r.get('kind'),
+        'subject': r.get('subject'),
+        'sent_at': _iso(r.get('sent_at')),
+        'status': r.get('status', 'sent'),
+    } async for r in email_log.find({'user_id': user_id}).sort('sent_at', -1).limit(20)]
+
+    return {
+        'journey_stage': stage,
+        'journey_stages': JOURNEY_STAGES,
+        'days_inactive': days_inactive,
+        'drop_off_signal': drop_off_signal,
+        'activity_heatmap': activity_heatmap,
+        'email_history': email_history,
+    }
+
 KB_COLLECTION = 'wehive_kb'  # admin-uploaded documents; searched by the chatbot
 
 
@@ -82,12 +152,14 @@ async def admin_user_profile(user_id: str, _=Depends(get_current_admin_flex)):
         'diff': r.get('diff'),
         'extra': r.get('extra'),
     } async for r in audit_col.find({'entity_type': 'user', 'entity_id': user_id}).sort('at', -1).limit(30)]
+    extra = await _build_user_360(user_id, u, apps, pays)
     return {
         'user': _user_out(u),
         'applications': apps,
         'payments': pays,
         'paid_total_inr': sum((p['amount_inr'] or 0) - (p['refunded_inr'] or 0) for p in pays if p['status'] in PAID_STATES),
         'history': history,
+        **extra,
     }
 
 
@@ -116,6 +188,11 @@ async def admin_suspend_user(user_id: str, body: SuspendBody, admin=Depends(requ
     }})
     await audit_record(admin, 'suspend', 'user', user_id, before={'suspended': False}, after={'suspended': True},
                        extra={'email': u.get('email'), 'reason': reason})
+    try:
+        from viewmodels.email_viewmodel import send_suspension
+        await send_suspension(user_id, u.get('email') or '', u.get('name') or 'there', reason)
+    except Exception as _e:
+        logger.warning('suspension email failed: %s', _e)
     return _user_out(await users.find_one({'_id': user_id}))
 
 
@@ -135,6 +212,28 @@ async def admin_unsuspend_user(user_id: str, admin=Depends(require_role(['manage
     await audit_record(admin, 'unsuspend', 'user', user_id, before={'suspended': True}, after={'suspended': False},
                        extra={'email': u.get('email')})
     return _user_out(await users.find_one({'_id': user_id}))
+
+
+class ReminderBody(BaseModel):
+    template: str = Field(default='generic', max_length=50)
+    note: Optional[str] = Field(default=None, max_length=500)
+
+
+@router.post('/users/{user_id}/send-reminder')
+async def admin_send_reminder(user_id: str, body: ReminderBody, admin=Depends(get_current_admin_flex)):
+    u = await users.find_one({'_id': user_id})
+    if not u:
+        raise HTTPException(404, 'User not found')
+    try:
+        from viewmodels.email_viewmodel import send_reminder
+        await send_reminder(user_id, u.get('email') or '', u.get('name') or 'there',
+                            body.template, body.note or '')
+    except Exception as e:
+        logger.warning('reminder email failed: %s', e)
+        raise HTTPException(503, 'Email could not be sent — check email service configuration')
+    await audit_record(admin, 'reminder_sent', 'user', user_id,
+                       extra={'template': body.template, 'email': u.get('email')})
+    return {'ok': True}
 
 
 # ---------- funnel ----------

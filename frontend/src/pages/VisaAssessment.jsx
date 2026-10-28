@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ArrowLeft, CheckCircle2, Award, ClipboardCheck, Users, HelpCircle, FileText, Sparkles, Send, ShieldCheck, GraduationCap } from 'lucide-react';
+import { ArrowRight, ArrowLeft, CheckCircle2, Award, ClipboardCheck, Users, HelpCircle, FileText, Sparkles, Send, ShieldCheck, GraduationCap, Globe2, TrendingUp } from 'lucide-react';
 import axios from 'axios';
 import { API, useAuth } from '../context/AuthContext';
 import { CRS_MAX, IRCC_ROUNDS_URL, crsScore, crsVerdict } from '../lib/crs';
@@ -19,19 +19,30 @@ const COUNTRIES = [
 export default function VisaAssessment() {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
-  const [pathway, setPathway] = useState(''); // 'pr' or 'student'
-  
+  const [pathway, setPathway] = useState(''); // 'pr' | 'student' | 'us_immigration' | 'australia_pr'
+
   // PR Pathway fields
   const [prAge, setPrAge] = useState('28');
   const [prEdu, setPrEdu] = useState('masters');
   const [prLanguage, setPrLanguage] = useState('clb9'); // IELTS CLB 9+
   const [prExp, setPrExp] = useState('3plus');
-  
+
   // Student Pathway fields
   const [studentCountry, setStudentCountry] = useState('ca');
   const [studentEdu, setStudentEdu] = useState('bachelors');
   const [studentGpa, setStudentGpa] = useState('80'); // Percentage/GPA
   const [studentBudget, setStudentBudget] = useState('mid'); // 'low', 'mid', 'high'
+
+  // US Immigration fields (EB1A / EB5 / O1)
+  const [usSubType, setUsSubType] = useState('eb1a');
+  const [usCriteria, setUsCriteria] = useState({});
+  const [usInvestment, setUsInvestment] = useState('');
+
+  // Australia PR fields (Subclass 189 points test)
+  const [auAge, setAuAge] = useState('25-32');
+  const [auEdu, setAuEdu] = useState('bachelors');
+  const [auEnglish, setAuEnglish] = useState('proficient');
+  const [auExp, setAuExp] = useState('3-4');
   
   // Contact details
   const [name, setName] = useState('');
@@ -74,6 +85,40 @@ export default function VisaAssessment() {
     return { level: 'Good Match', color: 'text-emerald-700 bg-emerald-50', pct: 75, text: 'Standard entry requirements met for many college and university programmes.' };
   };
 
+  // ── Australia PR points ──────────────────────────────────────
+  const auPts = {
+    age: { '18-24': 25, '25-32': 30, '33-39': 25, '40-44': 15, '45+': 0 }[auAge] ?? 0,
+    edu: { phd: 20, bachelors: 15, diploma: 10 }[auEdu] ?? 0,
+    english: { superior: 20, proficient: 10, competent: 0 }[auEnglish] ?? 0,
+    exp: { '8+': 20, '5-7': 15, '3-4': 10, '1-2': 5, under1: 0 }[auExp] ?? 0,
+  };
+  const auTotal = Object.values(auPts).reduce((a, b) => a + b, 0);
+  const auVerdict = auTotal >= 90
+    ? { label: 'Excellent — recent draws invite at this range', color: 'text-emerald-700 bg-emerald-50' }
+    : auTotal >= 65
+    ? { label: 'Eligible to apply — most invitations go above 85', color: 'text-amber-700 bg-amber-50' }
+    : { label: 'Below minimum 65 pts — consider boosting points first', color: 'text-red-700 bg-red-50' };
+
+  // ── US immigration eligibility ────────────────────────────────
+  const EB1A_CRITERIA = [
+    'Recipient of a nationally / internationally recognised major award',
+    'Member of associations requiring outstanding achievement',
+    'Published material about you in major trade or professional media',
+    'Judged the work of others (peer review, panel, editorial board)',
+    'Original contributions of major significance in your field',
+    'Commanded a high salary or remuneration relative to peers',
+  ];
+  const usCriteriaCount = Object.values(usCriteria).filter(Boolean).length;
+  const usVerdict = usSubType === 'eb5'
+    ? (usInvestment === 'tea' || usInvestment === 'standard')
+      ? { label: 'Investment amount confirmed — further review needed', color: 'text-emerald-700 bg-emerald-50' }
+      : { label: 'Investment threshold not met — consult for alternatives', color: 'text-red-700 bg-red-50' }
+    : usCriteriaCount >= 3
+    ? { label: 'Strong candidate — meets the 3-criteria threshold', color: 'text-emerald-700 bg-emerald-50' }
+    : usCriteriaCount >= 1
+    ? { label: 'Borderline — detailed attorney review recommended', color: 'text-amber-700 bg-amber-50' }
+    : { label: 'More qualifications needed before applying', color: 'text-red-700 bg-red-50' };
+
   const handleNext = () => setStep((s) => s + 1);
   const handleBack = () => setStep((s) => s - 1);
 
@@ -86,6 +131,7 @@ export default function VisaAssessment() {
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ') || '';
 
+    // Build assessment message
     const message = pathway === 'pr'
       ? `Visa Assessment Pathway: Permanent Residency (PR)
 Age Group: ${prAge}
@@ -94,12 +140,26 @@ Language Level: ${prLanguage}
 Work Experience: ${prExp}
 Estimated CRS Score: ${calculateCRS()} / ${CRS_MAX}
 Phone: ${phone}`
-      : `Visa Assessment Pathway: Student Visa
+      : pathway === 'student'
+      ? `Visa Assessment Pathway: Student Visa
 Target Country: ${COUNTRIES.find(c => c.id === studentCountry)?.name || studentCountry}
 Current Education: ${studentEdu}
 Academic Score: ${studentGpa}%
 Budget: ${studentBudget}
-Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)`;
+Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)
+Phone: ${phone}`
+      : pathway === 'us_immigration'
+      ? `Visa Assessment Pathway: US Immigration (${usSubType.toUpperCase()})
+Sub-type: ${usSubType === 'eb1a' ? 'EB-1A Extraordinary Ability' : usSubType === 'eb5' ? 'EB-5 Investor Visa' : 'O-1 Extraordinary Ability'}
+${usSubType === 'eb5' ? `Investment: ${usInvestment === 'tea' ? '$800K (TEA)' : usInvestment === 'standard' ? '$1.05M (Standard)' : 'Not confirmed'}` : `Criteria met: ${usCriteriaCount} of 6\nVisa verdict: ${usVerdict.label}`}
+Phone: ${phone}`
+      : `Visa Assessment Pathway: Australia PR (Subclass 189)
+Age: ${auAge}
+Education: ${auEdu}
+English: ${auEnglish}
+Work Experience: ${auExp}
+Points Total: ${auTotal} (${auVerdict.label})
+Phone: ${phone}`;
 
     try {
       await axios.post(`${API}/leads`, {
@@ -136,7 +196,7 @@ Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)`;
               Visa Eligibility Assessment
             </h1>
             <p className="mt-2.5 text-[15px] text-muted-foreground max-w-lg mx-auto">
-              Check your Express Entry (CRS) points or how your profile fits study destinations, in under 2 minutes.
+              Check your Canada PR / Australia PR points, US immigration eligibility (EB-1A, EB-5, O-1), or student visa profile match — in under 2 minutes.
             </p>
           </div>
 
@@ -179,9 +239,35 @@ Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)`;
                           }`}
                         >
                           <ShieldCheck className="w-8 h-8 text-[hsl(var(--blue-700))] mb-3" />
-                          <div className="font-bold text-[16px]">Permanent Residency (PR)</div>
+                          <div className="font-bold text-[16px]">Canada PR (Express Entry)</div>
                           <div className="text-[13px] text-muted-foreground mt-1">
-                            Assess Express Entry CRS points for Canada PR or points-based immigration.
+                            Calculate your CRS score for Canadian Permanent Residency via Express Entry.
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setPathway('australia_pr'); handleNext(); }}
+                          className={`flex flex-col text-left p-5 sm:p-6 rounded-2xl border transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] ${
+                            pathway === 'australia_pr' ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] shadow-sm' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'
+                          }`}
+                        >
+                          <Globe2 className="w-8 h-8 text-[hsl(var(--blue-700))] mb-3" />
+                          <div className="font-bold text-[16px]">Australia PR (Subclass 189/190)</div>
+                          <div className="text-[13px] text-muted-foreground mt-1">
+                            Points test for skilled independent migration to Australia.
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setPathway('us_immigration'); handleNext(); }}
+                          className={`flex flex-col text-left p-5 sm:p-6 rounded-2xl border transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--blue-700))] ${
+                            pathway === 'us_immigration' ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] shadow-sm' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'
+                          }`}
+                        >
+                          <TrendingUp className="w-8 h-8 text-[hsl(var(--blue-700))] mb-3" />
+                          <div className="font-bold text-[16px]">US Immigration Visa</div>
+                          <div className="text-[13px] text-muted-foreground mt-1">
+                            Check eligibility for EB-1A, EB-5 Investor, or O-1 Extraordinary Ability.
                           </div>
                         </button>
                         <button
@@ -420,6 +506,148 @@ Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)`;
                     </motion.div>
                   )}
 
+                  {/* ── Australia PR Steps ── */}
+                  {step === 2 && pathway === 'australia_pr' && (
+                    <motion.div key="step2-aupra" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+                      <h2 className="text-[20px] font-display font-bold leading-tight">Age & Education</h2>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Your age group</label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {[['18-24','18–24 (25 pts)'],['25-32','25–32 (30 pts)'],['33-39','33–39 (25 pts)'],['40-44','40–44 (15 pts)'],['45+','45+ (0 pts)']].map(([val,lbl]) => (
+                              <button key={val} type="button" onClick={() => setAuAge(val)}
+                                className={`px-3 min-h-[44px] rounded-xl border text-[13px] transition-colors ${auAge === val ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] font-bold text-[hsl(var(--blue-700))]' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'}`}>
+                                {lbl}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Highest education level</label>
+                          <select value={auEdu} onChange={(e) => setAuEdu(e.target.value)} className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[14px] bg-white outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20">
+                            <option value="phd">PhD / Doctorate (20 pts)</option>
+                            <option value="bachelors">Bachelor's degree (15 pts)</option>
+                            <option value="diploma">Trade qualification / Diploma (10 pts)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="pt-4 flex justify-between">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 min-h-[44px] px-1 text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))]"><ArrowLeft className="w-4 h-4" /> Back</button>
+                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">Continue <ArrowRight className="w-4 h-4" /></button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {step === 3 && pathway === 'australia_pr' && (
+                    <motion.div key="step3-aupra" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+                      <h2 className="text-[20px] font-display font-bold leading-tight">English & Work Experience</h2>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">English proficiency</label>
+                          <div className="grid sm:grid-cols-3 gap-2">
+                            {[['superior','Superior (IELTS 8+, 20 pts)'],['proficient','Proficient (IELTS 7+, 10 pts)'],['competent','Competent (IELTS 6+, 0 pts)']].map(([val,lbl]) => (
+                              <button key={val} type="button" onClick={() => setAuEnglish(val)}
+                                className={`px-3 min-h-[44px] rounded-xl border text-[13px] text-left transition-colors ${auEnglish === val ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] font-bold text-[hsl(var(--blue-700))]' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'}`}>
+                                {lbl}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Skilled work experience (nominated occupation)</label>
+                          <select value={auExp} onChange={(e) => setAuExp(e.target.value)} className="w-full h-12 rounded-xl border border-[hsl(var(--border))] px-4 text-[14px] bg-white outline-none focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20">
+                            <option value="8+">8 or more years (20 pts)</option>
+                            <option value="5-7">5–7 years (15 pts)</option>
+                            <option value="3-4">3–4 years (10 pts)</option>
+                            <option value="1-2">1–2 years (5 pts)</option>
+                            <option value="under1">Less than 1 year (0 pts)</option>
+                          </select>
+                        </div>
+                        <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--soft-bg))] px-4 py-3 text-[13px] text-[hsl(var(--blue-900))]">
+                          <strong>Running total:</strong> {auTotal} points
+                          {' — '}
+                          <span className={`font-bold ${auVerdict.color.split(' ')[0]}`}>{auVerdict.label}</span>
+                          <p className="mt-1 text-[12px] text-muted-foreground">Minimum to lodge: 65 pts · Most invitations: 85–100 pts · Max shown here (excluding state nomination): 90 pts</p>
+                        </div>
+                      </div>
+                      <div className="pt-4 flex justify-between">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 min-h-[44px] px-1 text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))]"><ArrowLeft className="w-4 h-4" /> Back</button>
+                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">Get Assessment <ArrowRight className="w-4 h-4" /></button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* ── US Immigration Steps ── */}
+                  {step === 2 && pathway === 'us_immigration' && (
+                    <motion.div key="step2-usimm" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+                      <h2 className="text-[20px] font-display font-bold leading-tight">Choose US Visa Category</h2>
+                      <div className="grid sm:grid-cols-3 gap-4">
+                        {[
+                          { id: 'eb1a', title: 'EB-1A', sub: 'Extraordinary Ability', desc: 'Exceptional talent in sciences, arts, education, business or athletics.' },
+                          { id: 'eb5', title: 'EB-5', sub: 'Investor Visa', desc: 'Minimum $800K (TEA) or $1.05M investment + 10 US jobs created.' },
+                          { id: 'o1', title: 'O-1', sub: 'Extraordinary Ability', desc: 'Temporary work visa for individuals with extraordinary achievement.' },
+                        ].map((v) => (
+                          <button key={v.id} type="button" onClick={() => setUsSubType(v.id)}
+                            className={`flex flex-col text-left p-4 rounded-2xl border transition-colors ${usSubType === v.id ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] shadow-sm' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'}`}>
+                            <span className="font-display font-bold text-[20px] text-[hsl(var(--blue-700))]">{v.title}</span>
+                            <span className="font-bold text-[13px] text-[hsl(var(--blue-900))]">{v.sub}</span>
+                            <span className="mt-1 text-[12px] text-muted-foreground leading-snug">{v.desc}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="pt-4 flex justify-between">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 min-h-[44px] px-1 text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))]"><ArrowLeft className="w-4 h-4" /> Back</button>
+                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">Continue <ArrowRight className="w-4 h-4" /></button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {step === 3 && pathway === 'us_immigration' && (
+                    <motion.div key="step3-usimm" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+                      <h2 className="text-[20px] font-display font-bold leading-tight">
+                        {usSubType === 'eb5' ? 'Investment Eligibility (EB-5)' : `Eligibility Criteria (${usSubType.toUpperCase()})`}
+                      </h2>
+                      {usSubType === 'eb5' ? (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Investment amount you can commit</label>
+                            <div className="grid sm:grid-cols-3 gap-2">
+                              {[
+                                ['tea', '$800,000 — Targeted Employment Area (rural / high unemployment)'],
+                                ['standard', '$1,050,000 — Standard (non-TEA)'],
+                                ['neither', 'Neither / Not sure yet'],
+                              ].map(([val, lbl]) => (
+                                <button key={val} type="button" onClick={() => setUsInvestment(val)}
+                                  className={`px-3 py-3 min-h-[44px] rounded-xl border text-[12px] text-left leading-snug transition-colors ${usInvestment === val ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))] font-bold text-[hsl(var(--blue-700))]' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'}`}>
+                                  {lbl}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-[12px] text-muted-foreground">EB-5 also requires creating or preserving at least 10 full-time US jobs and investing in a new commercial enterprise or troubled business.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-[13px] text-muted-foreground">Select all that apply to you — you need at least <strong>3 of 6</strong> to meet the prima facie standard:</p>
+                          {EB1A_CRITERIA.map((crit, i) => (
+                            <label key={i} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${usCriteria[i] ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]' : 'border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--blue-200))]'}`}>
+                              <input type="checkbox" checked={!!usCriteria[i]} onChange={(e) => setUsCriteria((p) => ({ ...p, [i]: e.target.checked }))} className="mt-0.5 h-4 w-4 accent-[hsl(var(--blue-700))]" />
+                              <span className="text-[13px] text-[hsl(var(--blue-900))]">{crit}</span>
+                            </label>
+                          ))}
+                          <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--soft-bg))] px-4 py-3 text-[13px]">
+                            <strong>{usCriteriaCount} of 6 criteria met — </strong>
+                            <span className={`font-bold ${usVerdict.color.split(' ')[0]}`}>{usVerdict.label}</span>
+                          </div>
+                        </div>
+                      )}
+                      <div className="pt-4 flex justify-between">
+                        <button type="button" onClick={handleBack} className="inline-flex items-center gap-1 min-h-[44px] px-1 text-[14px] font-semibold text-muted-foreground hover:text-[hsl(var(--blue-900))]"><ArrowLeft className="w-4 h-4" /> Back</button>
+                        <button type="button" onClick={handleNext} className="inline-flex items-center gap-1 rounded-xl btn-primary text-white h-11 px-5 font-semibold text-[14px]">Get Assessment <ArrowRight className="w-4 h-4" /></button>
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Step 4: Contact Lead Generation Form */}
                   {step === 4 && (
                     <motion.div
@@ -513,9 +741,9 @@ Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)`;
                   </p>
                 </div>
 
-                {pathway === 'pr' ? (
+                {pathway === 'pr' && (
                   <div className="max-w-md mx-auto rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-6 space-y-4">
-                    <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Estimated Express Entry CRS Points</div>
+                    <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Estimated Express Entry CRS Points — Canada PR</div>
                     <div className="text-[64px] font-display font-bold text-[hsl(var(--blue-700))] leading-none">
                       {calculateCRS()}
                       <span className="text-[16px] text-muted-foreground font-bold"> / {CRS_MAX}</span>
@@ -532,21 +760,66 @@ Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)`;
                       <a href={IRCC_ROUNDS_URL} target="_blank" rel="noopener noreferrer" className="underline font-semibold">See recent draw cut-offs (IRCC)</a>.
                     </div>
                   </div>
-                ) : (
+                )}
+
+                {pathway === 'australia_pr' && (
+                  <div className="max-w-md mx-auto rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-6 space-y-4">
+                    <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Australia PR Points — Subclass 189/190</div>
+                    <div className="text-[64px] font-display font-bold text-[hsl(var(--blue-700))] leading-none">
+                      {auTotal}
+                      <span className="text-[16px] text-muted-foreground font-bold"> pts</span>
+                    </div>
+                    <ul className="text-[13px] text-left text-[hsl(var(--blue-900))] space-y-1">
+                      <li>Age ({auAge}): {auPts.age} pts</li>
+                      <li>Education: {auPts.edu} pts</li>
+                      <li>English ({auEnglish}): {auPts.english} pts</li>
+                      <li>Work experience ({auExp} yrs): {auPts.exp} pts</li>
+                    </ul>
+                    <div className={`text-[13px] font-bold px-3 py-1.5 rounded-lg text-left ${auVerdict.color}`}>{auVerdict.label}</div>
+                    <div className="text-[12px] text-muted-foreground pt-2 border-t border-[hsl(var(--border))]">
+                      Minimum 65 pts to lodge an EOI. Most recent invitations: 85–100 pts. State nomination (Subclass 190) adds 5 pts. Note: occupation must be on the MLTSSL/STSOL list.
+                    </div>
+                  </div>
+                )}
+
+                {pathway === 'us_immigration' && (
+                  <div className="max-w-md mx-auto rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-6 space-y-4">
+                    <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">
+                      US {usSubType.toUpperCase()} Eligibility Assessment
+                    </div>
+                    {usSubType === 'eb5' ? (
+                      <>
+                        <div className={`text-[15px] font-bold px-3 py-2 rounded-lg ${usVerdict.color}`}>{usVerdict.label}</div>
+                        <div className="text-[13px] text-muted-foreground leading-relaxed">
+                          EB-5 requires a minimum $800K (TEA) or $1.05M investment in a new commercial enterprise that creates 10+ full-time jobs for US workers. A WeHive immigration attorney will walk you through the Regional Center vs. direct investment options.
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-[40px] font-display font-bold text-[hsl(var(--blue-700))] leading-none">
+                          {usCriteriaCount}<span className="text-[16px] text-muted-foreground font-bold"> / 6 criteria</span>
+                        </div>
+                        <div className={`text-[13px] font-bold px-3 py-1.5 rounded-lg ${usVerdict.color}`}>{usVerdict.label}</div>
+                        <div className="text-[12px] text-muted-foreground pt-2 border-t border-[hsl(var(--border))]">
+                          {usSubType === 'eb1a'
+                            ? 'EB-1A is an immigrant visa (green card) for extraordinary ability. No job offer needed. USCIS requires evidence of 3+ criteria. A strong petition letter is critical.'
+                            : 'O-1 is a non-immigrant (temporary) work visa. Employer sponsorship required. Renewal possible. Often a stepping stone toward EB-1A.'}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {pathway === 'student' && (
                   <div className="max-w-md mx-auto rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-6 space-y-4">
                     <div className="text-[12px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Student Matching Analysis</div>
-                    
                     {(() => {
                       const match = getStudentMatchStrength();
                       return (
                         <div className="space-y-4">
                           <div className="flex items-center justify-center gap-3">
-                            <span className={`text-[13px] font-bold px-3 py-1 rounded-full ${match.color}`}>
-                              {match.level}
-                            </span>
-                            <span className="text-[28px] font-display font-bold text-[hsl(var(--blue-700))]" title="Profile fit, not a visa approval chance">
-                              {match.pct}% fit
-                            </span>
+                            <span className={`text-[13px] font-bold px-3 py-1 rounded-full ${match.color}`}>{match.level}</span>
+                            <span className="text-[28px] font-display font-bold text-[hsl(var(--blue-700))]" title="Profile fit, not a visa approval chance">{match.pct}% fit</span>
                           </div>
                           <div className="text-[13px] text-muted-foreground leading-relaxed pt-2 border-t border-[hsl(var(--border))]">
                             {match.text} This is a profile fit, not a visa decision: the embassy decides. A WeHive consultant will suggest universities and scholarships for your budget.
@@ -558,11 +831,11 @@ Match: ${getStudentMatchStrength().level} (${getStudentMatchStrength().pct}%)`;
                 )}
 
                 <div className="pt-4 flex flex-wrap gap-3 justify-center">
-                  <button 
+                  <button
                     onClick={() => {
-                      setStep(1);
-                      setPathway('');
-                      setSubmitted(false);
+                      setStep(1); setPathway(''); setSubmitted(false);
+                      setUsCriteria({}); setUsInvestment(''); setUsSubType('eb1a');
+                      setAuAge('25-32'); setAuEdu('bachelors'); setAuEnglish('proficient'); setAuExp('3-4');
                     }}
                     className="rounded-xl border border-[hsl(var(--border))] hover:border-[hsl(var(--blue-700))] text-[14px] font-semibold px-6 h-11"
                   >
