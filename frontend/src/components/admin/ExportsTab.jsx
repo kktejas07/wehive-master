@@ -49,8 +49,8 @@ export default function ExportsTab() {
                     <Icon className="w-5 h-5" />
                   </span>
                   <div>
-                    <div className="text-[15px] font-display font-bold text-white">{x.title}</div>
-                    <div className="text-[12.5px] text-slate-400 max-w-[260px]">{x.sub}</div>
+                    <div className="text-[15px] font-display font-bold text-[var(--text-primary)]">{x.title}</div>
+                    <div className="text-[12.5px] text-[var(--text-secondary)] max-w-[260px]">{x.sub}</div>
                   </div>
                 </div>
                 <button

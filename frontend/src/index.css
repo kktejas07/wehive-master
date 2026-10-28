@@ -81,6 +81,108 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
+/* ── Admin panel light theme design tokens ───────────────────────────── */
+.admin-theme {
+  --admin-bg: #F8FAFF;
+  --admin-sidebar: #F0F4FF;
+  --admin-navy: #1B2B5E;
+  --admin-blue: #011CB5;
+  --admin-amber: #D97706;
+  --admin-red: #FF0302;
+  --glass: #FFFFFF;
+  --glass-border: #E8EDF8;
+  --glass-hover: #F5F7FF;
+  --panel-bg: #FFFFFF;
+  --panel-border: #E8EDF8;
+  --text-primary: #1B2B5E;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+}
+
+/* Admin light-theme card-lift: subtle blue shadow */
+.admin-theme .card-lift:hover {
+  box-shadow: 0 4px 20px rgba(1, 28, 181, 0.10);
+  transform: translateY(-1px);
+  border-color: #BDD0FF !important;
+  background: #FFFFFF;
+}
+
+/* No radial mesh on light admin — clean white */
+.admin-theme main::before { content: none; }
+.admin-theme main > * { position: relative; z-index: 1; }
+
+/* Eyebrow in admin context: navy brand underline */
+.admin-theme .eyebrow {
+  color: #011CB5;
+  background-image: linear-gradient(90deg, #011CB5, rgba(1,28,181,0.3));
+}
+
+/* Skeleton-stagger in admin: same fade-in, slightly faster */
+.admin-theme .skeleton-stagger > * { animation-duration: 0.25s; }
+
+/* Light page background for admin main content */
+.admin-theme main {
+  background: #F8FAFF;
+  background-image: none;
+}
+
+/* Admin light panels — hover lift with brand border */
+.admin-theme .panel-hover {
+  position: relative;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+.admin-theme .panel-hover:hover {
+  transform: translateY(-1px);
+  border-color: #BDD0FF !important;
+  box-shadow: 0 4px 20px rgba(1, 28, 181, 0.10);
+}
+
+/* Admin primary button — solid brand blue */
+.admin-theme .btn-admin-primary {
+  background: #011CB5;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: background 200ms ease, box-shadow 200ms ease;
+  box-shadow: 0 2px 8px -4px rgba(1, 28, 181, 0.40);
+}
+.admin-theme .btn-admin-primary:hover:not(:disabled) {
+  background: #0122D4;
+  box-shadow: 0 4px 14px -6px rgba(1, 28, 181, 0.55);
+}
+.admin-theme .btn-admin-primary:active:not(:disabled) {
+  transform: translateY(1px);
+  filter: brightness(0.92);
+}
+
+/* Entrance stagger for admin tab content */
+@keyframes adminFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.admin-stagger > * { animation: adminFadeUp 320ms ease both; }
+.admin-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.admin-stagger > *:nth-child(2) { animation-delay: 50ms; }
+.admin-stagger > *:nth-child(3) { animation-delay: 100ms; }
+.admin-stagger > *:nth-child(4) { animation-delay: 150ms; }
+.admin-stagger > *:nth-child(5) { animation-delay: 200ms; }
+.admin-stagger > *:nth-child(6) { animation-delay: 250ms; }
+.admin-stagger > *:nth-child(7) { animation-delay: 300ms; }
+.admin-stagger > *:nth-child(8) { animation-delay: 350ms; }
+.admin-kpi-enter { animation: adminFadeUp 280ms ease both; }
+
+/* Admin bento grid helpers */
+.admin-bento-featured { grid-column: span 8; grid-row: span 2; }
+.admin-bento-sidebar  { grid-column: span 4; }
+.admin-bento-full     { grid-column: 1 / -1; }
+@media (max-width: 1024px) {
+  .admin-bento-featured, .admin-bento-sidebar, .admin-bento-full {
+    grid-column: 1 / -1;
+    grid-row: span 1;
+  }
+}
+
 @layer base {
   :root {
     /* We Hive brand palette (hex values in --wehive-* below). Text-bearing reds use festive red
@@ -532,33 +634,33 @@ div[class*="emergent" i][style*="position: fixed"] { display: none !important; }
 .text-flip-container { perspective: 1000px; display: inline-block; }
 .text-flip-word { transform-style: preserve-3d; backface-visibility: hidden; }
 
-/* Dark admin scrollbar — matches theme */
+/* Light admin scrollbar */
 .admin-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 .admin-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
+  background: #F0F4FF;
   border-radius: 3px;
 }
 .admin-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #C8D5F0;
   border-radius: 3px;
   transition: background 0.2s;
 }
 .admin-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: #A5BDEC;
 }
 .admin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) rgba(255, 255, 255, 0.03);
+  scrollbar-color: #C8D5F0 #F0F4FF;
 }
 
 /* Visible keyboard focus for controls that strip the outline without adding
    their own focus style (WCAG 2.4.7). Elements with focus:ring / focus-visible: /
    focus:border classes keep their own styling. */
 :root { --focus-ring: hsl(var(--ring)); }
-.admin-theme { --focus-ring: hsl(var(--blue-100)); }
+.admin-theme { --focus-ring: #011CB5; }
 :is(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible:not([class*="focus:ring"]):not([class*="focus-visible:"]):not([class*="focus:border"]):not(label[class*="focus-within:"] *) {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;

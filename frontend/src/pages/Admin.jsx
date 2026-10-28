@@ -14,6 +14,7 @@ import CountriesTab from '../components/admin/CountriesTab';
 import StaffTab from '../components/admin/StaffTab';
 import AdminsTab from '../components/admin/AdminsTab';
 import NewsletterTab from '../components/admin/NewsletterTab';
+import AnnouncementsTab from '../components/admin/AnnouncementsTab';
 import IntegrationsTab from '../components/admin/IntegrationsTab';
 import ExportsTab from '../components/admin/ExportsTab';
 import UniversitiesTab from '../components/admin/UniversitiesTab';
@@ -35,6 +36,11 @@ import HiveLearningTab from '../components/admin/HiveLearningTab';
 import LeadsTab from '../components/admin/LeadsTab';
 import PaymentsTab from '../components/admin/PaymentsTab';
 import AuditTab from '../components/admin/AuditTab';
+import MonitoringTab from '../components/admin/MonitoringTab';
+import AgenticTab from '../components/admin/AgenticTab';
+import SlotMonitorTab from '../components/admin/SlotMonitorTab';
+import ReferralsTab from '../components/admin/ReferralsTab';
+import VisaSchedulingTab from '../components/admin/VisaSchedulingTab';
 import AdminLogin from './AdminLogin';
 import AdminSignup from './AdminSignup';
 import AdminForgotPassword from './AdminForgotPassword';
@@ -108,11 +114,13 @@ function AdminRoutes() {
                 <Route path="staff" element={<StaffTab />} />
                 <Route path="admins" element={<SuperOnly><AdminsTab /></SuperOnly>} />
                 <Route path="newsletter" element={<NewsletterTab />} />
+          <Route path="announcements" element={<AnnouncementsTab />} />
                 <Route path="integrations" element={<SuperOnly><IntegrationsTab /></SuperOnly>} />
                 <Route path="exports" element={<ExportsTab />} />
                 <Route path="leads" element={<LeadsTab />} />
                 <Route path="payments" element={<PaymentsTab />} />
                 <Route path="audit" element={<AuditTab />} />
+                <Route path="monitoring" element={<MonitoringTab />} />
                 <Route path="health" element={<HealthTab />} />
                 <Route path="security" element={<SecurityTab />} />
                 <Route path="review" element={<ReviewQueueTab />} />
@@ -124,6 +132,12 @@ function AdminRoutes() {
                 <Route path="agents-v2" element={<AgentsV2Tab />} />
                 <Route path="hive-learning" element={<HiveLearningTab />} />
                 <Route path="destinations" element={<DestinationsTab />} />
+                <Route path="agentic" element={<AgenticTab />} />
+                <Route path="slot-monitor" element={<SlotMonitorTab />} />
+                <Route path="referrals" element={<ReferralsTab />} />
+                <Route path="visa-scheduling" element={<VisaSchedulingTab />} />
+                <Route path="doc-review" element={<Navigate to="/admin/review" replace />} />
+                <Route path="hero-events" element={<Navigate to="/admin/events" replace />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />
               </Routes>
             </AdminShell>

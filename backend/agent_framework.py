@@ -29,7 +29,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Any, Optional
 
-import observability as obs
+import observability_internal as obs
 
 logger = logging.getLogger("wehive.agent_framework")
 
@@ -335,12 +335,14 @@ async def _llm_call(
 # ---------------------------------------------------------------------------
 
 
-async def _retrieve_rag_context(query: str, collections: list[str], k: int = 4) -> str:
-    """Pull top-k chunks from each requested collection. Returns formatted text."""
+async def _retrieve_rag_context(
+    query: str, collections: list[str], k: int = 4, user_id: str = ""
+) -> str:
+    """Pull top-k chunks from each collection. Tries Qdrant hybrid search first,
+    falls back to ChromaDB when Qdrant is unavailable.
+    When user_id is provided, wehive_user_docs is also searched with a user filter."""
     if not collections:
         return ""
-    from embeddings_bge import embed_query
-    from vector_store import query_collection
 
     span_id = ""
     try:
@@ -351,6 +353,42 @@ async def _retrieve_rag_context(query: str, collections: list[str], k: int = 4) 
     except Exception:
         pass
 
+    # ── Qdrant hybrid path ──────────────────────────────────────────────────
+    try:
+        import asyncio as _asyncio
+        from qdrant_store import hybrid_search, rrf_merge
+        from reranker import reranker
+        searches = [hybrid_search(col, query, top_k=k * 3) for col in collections]
+        if user_id:
+            searches.append(
+                hybrid_search(
+                    "wehive_user_docs", query, top_k=k,
+                    filter_dict={"user_id": user_id},
+                )
+            )
+        per_col = await _asyncio.gather(*searches, return_exceptions=True)
+        valid = [r for r in per_col if isinstance(r, list)]
+        if valid:
+            merged = rrf_merge(valid) if len(valid) > 1 else valid[0]
+            top = reranker.rerank(query, merged, top_n=k)
+            snippets = []
+            for h in top:
+                payload = h.get("payload") or {}
+                label = payload.get("name") or payload.get("source_key") or h.get("id") or "source"
+                snippets.append(f"[{label}] {payload.get('text', '')}")
+            if snippets:
+                if span_id:
+                    try:
+                        await obs.end_span(span_id, {"chunks": len(snippets), "backend": "qdrant"})
+                    except Exception:
+                        pass
+                return "\n\n".join(snippets)
+    except Exception as e:
+        logger.debug("Qdrant retrieval skipped, falling back to ChromaDB: %s", e)
+
+    # ── ChromaDB fallback ───────────────────────────────────────────────────
+    from ollama_embeddings import embed_query
+    from vector_store import query_collection
     try:
         vec = await embed_query(query)
     except Exception as e:
@@ -454,7 +492,9 @@ async def run_agent(
         tools_desc = get_tool_descriptions(spec.tools)
         rag_context = ""
         if spec.rag_collections:
-            rag_context = await _retrieve_rag_context(user_input, spec.rag_collections)
+            rag_context = await _retrieve_rag_context(
+                user_input, spec.rag_collections, user_id=user_id
+            )
         if context:
             rag_context = (rag_context + "\n\n" + context).strip() if rag_context else context
 

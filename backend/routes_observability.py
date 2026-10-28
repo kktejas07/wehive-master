@@ -21,7 +21,7 @@ from fastapi import APIRouter, Depends, Query
 
 from admin_auth import get_current_admin_flex
 from db import db
-from observability import (
+from observability_internal import (
     get_cost_by_provider,
     get_error_rate,
     get_latency_percentiles,

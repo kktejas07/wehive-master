@@ -68,8 +68,8 @@ function PreviewModal({ item, onClose, onRefresh }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div {...dialogProps} className="relative max-w-lg w-full rounded-2xl bg-[#111632] border border-white/10 overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <button aria-label="Close" onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition">
+      <div {...dialogProps} className="relative max-w-lg w-full rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <button aria-label="Close" onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-[var(--glass)] flex items-center justify-center text-[var(--text-primary)] hover:bg-black/60 transition">
           <X className="w-4 h-4" />
         </button>
         <div className="aspect-[2/3] bg-black/50">
@@ -83,21 +83,21 @@ function PreviewModal({ item, onClose, onRefresh }) {
         <div className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-[16px] font-bold text-white">{item.country}</h3>
-              <p className="text-[11px] text-slate-400 font-mono">{item.filename}</p>
+              <h3 className="text-[16px] font-bold text-[var(--text-primary)]">{item.country}</h3>
+              <p className="text-[11px] text-[var(--text-secondary)] font-mono">{item.filename}</p>
             </div>
             {item.onR2 ? (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold">
                 <CheckCircle2 className="w-3 h-3" /> on R2
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-500/15 text-slate-400 text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-500/15 text-[var(--text-secondary)] text-[11px] font-bold">
                 <Cloud className="w-3 h-3" /> local only
               </span>
             )}
           </div>
           <div className="flex gap-2 flex-wrap">
-            <label className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[12px] font-bold transition cursor-pointer">
+            <label className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] text-[12px] font-bold transition cursor-pointer">
               {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileUp className="w-3.5 h-3.5" />}
               {uploading ? 'Uploading...' : 'Replace Image'}
               <input type="file" accept="image/webp,image/png,image/jpeg" className="hidden" onChange={handleUpload} />
@@ -308,7 +308,7 @@ export default function DestinationsTab() {
               <button
                 onClick={handleRefreshR2}
                 disabled={loading}
-                className="inline-flex items-center gap-2 h-11 px-4 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white font-bold text-[12px] transition"
+                className="inline-flex items-center gap-2 h-11 px-4 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[12px] transition"
                 title="Force refresh R2 status cache"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
@@ -318,7 +318,7 @@ export default function DestinationsTab() {
             <button
               onClick={handleSync}
               disabled={syncing}
-              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
             >
               {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
               {syncing ? 'Uploading...' : 'Upload All to R2'}
@@ -331,23 +331,23 @@ export default function DestinationsTab() {
         <Panel className="mb-4 border-[hsl(var(--blue-700))]/20">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-[13px] font-bold text-white flex items-center gap-2">
+              <h4 className="text-[13px] font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-300" />
                 Syncing to R2 ({syncProgress.current}/{syncProgress.total})
               </h4>
               <div className="flex items-center gap-3 text-[11px]">
                 <span className="text-emerald-400 font-semibold">{syncProgress.uploaded} new</span>
-                <span className="text-slate-400">{syncProgress.skipped} already there</span>
+                <span className="text-[var(--text-secondary)]">{syncProgress.skipped} already there</span>
                 {syncProgress.failed > 0 && <span className="text-red-400 font-semibold">{syncProgress.failed} failed</span>}
               </div>
             </div>
-            <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-[var(--glass-hover)] rounded-full h-1.5 overflow-hidden">
               <div
                 className="h-full rounded-full bg-[hsl(var(--blue-500))] transition-all duration-300"
                 style={{ width: `${syncProgress.total > 0 ? (syncProgress.current / syncProgress.total) * 100 : 0}%` }}
               />
             </div>
-            <div className="max-h-32 overflow-y-auto space-y-0.5 text-[11px] text-slate-400 font-mono">
+            <div className="max-h-32 overflow-y-auto space-y-0.5 text-[11px] text-[var(--text-secondary)] font-mono">
               {syncProgress.log.slice(-8).map((line, i) => (
                 <div key={i}>{line}</div>
               ))}
@@ -361,15 +361,15 @@ export default function DestinationsTab() {
           <div className="flex items-center gap-6 flex-wrap">
             <div className="flex items-center gap-2">
               <Cloud className="w-5 h-5 text-blue-300" />
-              <span className="text-[15px] font-bold text-white">Sync Complete</span>
+              <span className="text-[15px] font-bold text-[var(--text-primary)]">Sync Complete</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span className="text-[13px] text-emerald-400 font-semibold">{results.uploaded} uploaded</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-slate-400" />
-              <span className="text-[13px] text-slate-400 font-semibold">{results.skipped} already existed</span>
+              <CheckCircle2 className="w-4 h-4 text-[var(--text-secondary)]" />
+              <span className="text-[13px] text-[var(--text-secondary)] font-semibold">{results.skipped} already existed</span>
             </div>
             {results.failed > 0 && (
               <div className="flex items-center gap-2">
@@ -389,7 +389,7 @@ export default function DestinationsTab() {
               <div key={r.filename} className="flex items-center gap-2 text-[12px] text-red-300">
                 <XCircle className="w-3 h-3 shrink-0" />
                 <span className="font-mono">{r.filename}</span>
-                <span className="text-slate-400">— {r.error}</span>
+                <span className="text-[var(--text-secondary)]">— {r.error}</span>
               </div>
             ))}
           </div>
@@ -398,20 +398,20 @@ export default function DestinationsTab() {
 
       <div className="flex items-center gap-4 mb-5 flex-wrap">
         <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search countries..."
-            className="w-full h-10 pl-9 pr-4 rounded-xl bg-black/30 border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-[hsl(var(--blue-700))] transition"
+            className="w-full h-10 pl-9 pr-4 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[hsl(var(--blue-700))] transition"
           />
         </div>
 
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] font-semibold text-slate-300 outline-none focus:border-[hsl(var(--blue-700))] transition cursor-pointer"
+          className="h-10 px-3 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] text-[12px] font-semibold text-[var(--text-secondary)] outline-none focus:border-[hsl(var(--blue-700))] transition cursor-pointer"
         >
           <option value="all">All Status</option>
           <option value="r2">On R2</option>
@@ -421,7 +421,7 @@ export default function DestinationsTab() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="h-10 px-3 rounded-xl bg-black/30 border border-white/10 text-[12px] font-semibold text-slate-300 outline-none focus:border-[hsl(var(--blue-700))] transition cursor-pointer"
+          className="h-10 px-3 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] text-[12px] font-semibold text-[var(--text-secondary)] outline-none focus:border-[hsl(var(--blue-700))] transition cursor-pointer"
         >
           <option value="name-asc">A → Z</option>
           <option value="name-desc">Z → A</option>
@@ -432,24 +432,24 @@ export default function DestinationsTab() {
         <div className="flex items-center gap-1 ml-auto">
           <button
             onClick={() => setViewMode('grid')}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${viewMode === 'grid' ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white'}`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${viewMode === 'grid' ? 'bg-[var(--glass-border)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
           >
             <Grid3X3 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${viewMode === 'list' ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-white'}`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${viewMode === 'list' ? 'bg-[var(--glass-border)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
           >
             <List className="w-3.5 h-3.5" />
           </button>
         </div>
 
         <div className="flex items-center gap-3 text-[12px]">
-          <span className="text-slate-400">{items.length} total</span>
+          <span className="text-[var(--text-secondary)]">{items.length} total</span>
           <span className="flex items-center gap-1 text-emerald-400 font-semibold">
             <CheckCircle2 className="w-3 h-3" /> {r2Count} on R2
           </span>
-          <span className="flex items-center gap-1 text-slate-400 font-semibold">
+          <span className="flex items-center gap-1 text-[var(--text-secondary)] font-semibold">
             <Cloud className="w-3 h-3" /> {localCount} local
           </span>
         </div>
@@ -467,7 +467,7 @@ export default function DestinationsTab() {
               return (
                 <div
                   key={item.filename}
-                  className="rounded-xl overflow-hidden bg-black/30 border border-white/5 group cursor-pointer hover:border-white/20 transition"
+                  className="rounded-xl overflow-hidden bg-[var(--glass)] border border-[var(--glass-border)] group cursor-pointer hover:border-[var(--glass-border)] transition"
                   onClick={() => setPreview({ ...item, onR2 })}
                 >
                   <div className="aspect-[2/3] bg-black/50 overflow-hidden relative">
@@ -479,19 +479,19 @@ export default function DestinationsTab() {
                     />
                     <div className="absolute top-2 right-2">
                       {onR2 ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/60 backdrop-blur-sm text-white text-[11px] font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/60 backdrop-blur-sm text-[var(--text-primary)] text-[11px] font-bold">
                           <CheckCircle2 className="w-2.5 h-2.5" /> R2
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-500/60 backdrop-blur-sm text-white text-[11px] font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-500/60 backdrop-blur-sm text-[var(--text-primary)] text-[11px] font-bold">
                           <Cloud className="w-2.5 h-2.5" /> local
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="p-2.5">
-                    <div className="text-[11px] font-bold text-white truncate">{item.country}</div>
-                    <div className="text-[11px] text-slate-400 truncate font-mono">{item.filename}</div>
+                    <div className="text-[11px] font-bold text-[var(--text-primary)] truncate">{item.country}</div>
+                    <div className="text-[11px] text-[var(--text-secondary)] truncate font-mono">{item.filename}</div>
                   </div>
                 </div>
               );
@@ -499,7 +499,7 @@ export default function DestinationsTab() {
           </div>
         ) : (
           <div className="space-y-1">
-            <div className="grid grid-cols-[40px_1fr_120px_100px] gap-3 px-4 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/5">
+            <div className="grid grid-cols-[40px_1fr_120px_100px] gap-3 px-4 py-2 text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider border-b border-[var(--glass-border)]">
               <span></span>
               <span>Country</span>
               <span>Status</span>
@@ -510,15 +510,15 @@ export default function DestinationsTab() {
               return (
                 <div
                   key={item.filename}
-                  className="grid grid-cols-[40px_1fr_120px_100px] gap-3 px-4 py-2.5 items-center rounded-lg hover:bg-white/5 cursor-pointer transition"
+                  className="grid grid-cols-[40px_1fr_120px_100px] gap-3 px-4 py-2.5 items-center rounded-lg hover:bg-[var(--glass-hover)] cursor-pointer transition"
                   onClick={() => setPreview({ ...item, onR2 })}
                 >
                   <span className="text-[11px] text-slate-600 font-mono w-8 text-center">{idx + page * pageSize + 1}</span>
                   <div>
-                    <div className="text-[12px] font-semibold text-white">{item.country}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">{item.filename}</div>
+                    <div className="text-[12px] font-semibold text-[var(--text-primary)]">{item.country}</div>
+                    <div className="text-[11px] text-[var(--text-secondary)] font-mono">{item.filename}</div>
                   </div>
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${onR2 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-500/10 text-slate-400'}`}>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${onR2 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-500/10 text-[var(--text-secondary)]'}`}>
                     {onR2 ? <CheckCircle2 className="w-2.5 h-2.5" /> : <Cloud className="w-2.5 h-2.5" />}
                     {onR2 ? 'R2' : 'Local'}
                   </span>
@@ -530,14 +530,14 @@ export default function DestinationsTab() {
         )}
 
         {items.length === 0 && (
-          <div className="text-center py-16 text-slate-400">
+          <div className="text-center py-16 text-[var(--text-secondary)]">
             <Database className="w-10 h-10 mx-auto mb-3 opacity-40" />
-            <p className="text-[16px] font-bold text-white mb-1">No Destination Data</p>
+            <p className="text-[16px] font-bold text-[var(--text-primary)] mb-1">No Destination Data</p>
             <p className="text-[13px] mb-5">manifest.json not found on server. Seed the data from the Git repository.</p>
             <button
               onClick={handleSeed}
               disabled={seeding}
-              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
             >
               {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               {seeding ? 'Seeding...' : 'Seed Manifest from Repo'}
@@ -545,7 +545,7 @@ export default function DestinationsTab() {
           </div>
         )}
         {items.length > 0 && filtered.length === 0 && (
-          <div className="text-center py-16 text-slate-400">
+          <div className="text-center py-16 text-[var(--text-secondary)]">
             <ImageIcon className="w-8 h-8 mx-auto mb-3 opacity-50" />
             <p className="text-[14px] font-semibold">No countries match "{search}"</p>
           </div>

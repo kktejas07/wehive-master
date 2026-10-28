@@ -9,6 +9,7 @@ from pathlib import Path
 from fastapi import FastAPI, APIRouter, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 
@@ -58,8 +59,12 @@ from routes_reviews import router as reviews_router  # noqa: E402
 from routes_community import router as community_router  # noqa: E402
 from routes_interview_score import router as interview_score_router  # noqa: E402
 from routes_newsletter import router as newsletter_router  # noqa: E402
-from routes_newsletter_campaigns import router as newsletter_campaigns_router, mark_interrupted_on_boot  # noqa: E402
+from routes_newsletter_campaigns import router as newsletter_campaigns_router  # noqa: E402
+from routes_announcements import router as announcements_router  # noqa: E402
+from broadcast_scheduler import mark_interrupted_on_boot, start_broadcast_scheduler  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
+from routes_visa_requirements import router as visa_requirements_router  # noqa: E402
+from routes_embassy import router as embassy_router  # noqa: E402
 from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
 from routes_rag import router as rag_router  # noqa: E402
 from routes_prompts import router as prompts_router  # noqa: E402
@@ -82,6 +87,8 @@ from routes_adapters import router as adapters_router  # noqa: E402
 from routes_travel import router as travel_router  # noqa: E402
 from routes_intakes import router as intakes_router  # noqa: E402
 from routes_financials import router as financials_router  # noqa: E402
+from routes_admin_observability import router as admin_observability_router  # noqa: E402
+from routes_admin_monitoring import router as admin_monitoring_router  # noqa: E402
 from routes_observability import router as observability_router  # noqa: E402
 from routes_rag_eval import router as rag_eval_router  # noqa: E402
 from routes_student_memory import router as student_memory_router  # noqa: E402
@@ -92,7 +99,33 @@ from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
 
+from starlette.middleware.base import BaseHTTPMiddleware  # noqa: E402
+
+
+_MIN_APP_VERSION = (1, 0, 0)
+
+
+def _parse_version(v: str):
+    try:
+        return tuple(int(x) for x in v.split('.')[:3])
+    except Exception:
+        return None
+
+
+class AppVersionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        client_v = request.headers.get('X-App-Version')
+        if client_v:
+            response.headers['X-Min-App-Version'] = '.'.join(str(x) for x in _MIN_APP_VERSION)
+            parsed = _parse_version(client_v)
+            if parsed and parsed < _MIN_APP_VERSION:
+                response.headers['X-Update-Required'] = 'true'
+        return response
+
+
 app = FastAPI(title='We Hive API', version='1.0.0')
+app.add_middleware(AppVersionMiddleware)
 
 api_router = APIRouter(prefix='/api')
 
@@ -113,7 +146,13 @@ async def health():
         checks['database'] = 'ok'
     except Exception:
         checks['database'] = 'error'
-    ok = all(v == 'ok' for v in checks.values())
+    try:
+        from qdrant_store import get_client
+        await get_client().get_collections()
+        checks['qdrant'] = 'ok'
+    except Exception:
+        checks['qdrant'] = 'unavailable'  # non-fatal: degrades to ChromaDB
+    ok = all(v == 'ok' for v in checks.values() if v != 'unavailable')
     status_code = 200 if ok else 503
     return JSONResponse(status_code=status_code, content={'ok': ok, 'checks': checks})
 
@@ -162,7 +201,10 @@ api_router.include_router(community_router)
 api_router.include_router(interview_score_router)
 api_router.include_router(newsletter_router)
 api_router.include_router(newsletter_campaigns_router)
+api_router.include_router(announcements_router)
 api_router.include_router(i18n_router)
+api_router.include_router(visa_requirements_router)
+api_router.include_router(embassy_router)
 api_router.include_router(agents_ai_router)
 api_router.include_router(rag_router)
 api_router.include_router(prompts_router)
@@ -186,6 +228,8 @@ api_router.include_router(adapters_router)
 api_router.include_router(travel_router)
 api_router.include_router(intakes_router)
 api_router.include_router(financials_router)
+api_router.include_router(admin_observability_router)
+api_router.include_router(admin_monitoring_router)
 api_router.include_router(observability_router)
 api_router.include_router(rag_eval_router)
 api_router.include_router(student_memory_router)
@@ -195,11 +239,61 @@ api_router.include_router(content_pipeline_router)
 
 app.include_router(api_router)
 
+import asyncio as _asyncio
+
+
+def _start_ragas_scheduler():
+    """Schedule nightly RAGAS eval at 02:00 UTC and prompt optimization at 03:00 UTC."""
+    import asyncio
+
+    async def _loop():
+        from eval.ragas_evaluator import evaluate as ragas_evaluate
+        from eval.prompt_optimizer import optimize_prompts
+        while True:
+            now = datetime.now(timezone.utc)
+            # Fire RAGAS at 02:00, optimizer at 03:00 (after RAGAS completes)
+            target_h = 2
+            secs_until = ((target_h - now.hour) % 24) * 3600 - now.minute * 60 - now.second
+            if secs_until <= 0:
+                secs_until += 86400
+            await asyncio.sleep(secs_until)
+            try:
+                await ragas_evaluate()
+            except Exception as exc:
+                logging.getLogger("wehive.ragas_scheduler").warning("RAGAS eval failed: %s", exc)
+            await asyncio.sleep(3600)  # wait 1 h → 03:00 UTC
+            try:
+                await optimize_prompts()
+            except Exception as exc:
+                logging.getLogger("wehive.prompt_optimizer").warning("Prompt opt failed: %s", exc)
+
+    try:
+        loop = _asyncio.get_event_loop()
+        loop.create_task(_loop())
+    except Exception as exc:
+        logging.getLogger("wehive.ragas_scheduler").debug("RAGAS scheduler not started: %s", exc)
+
+
+async def _index_rejection_patterns() -> None:
+    from rejection_indexer import index_rejection_patterns
+    await index_rejection_patterns()
+
+
 @app.on_event("startup")
 async def startup():
     start_scheduler()
     from slot_monitor import start_slot_monitor
     start_slot_monitor()
+    # Qdrant collections init (non-blocking — degrades gracefully if unavailable)
+    try:
+        from qdrant_store import init_qdrant_collections
+        await init_qdrant_collections()
+    except Exception as exc:
+        logging.getLogger("wehive").debug("Qdrant init skipped: %s", exc)
+    # Nightly RAGAS eval scheduler
+    _start_ragas_scheduler()
+    # Index rejection patterns from MongoDB → Qdrant (background, best-effort)
+    _asyncio.ensure_future(_index_rejection_patterns())
 
 _raw_origins = os.environ.get('ALLOWED_ORIGINS', '').strip()
 _exact_origins: list[str] = []
@@ -243,6 +337,62 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+def _cors_headers_for(request: Request) -> dict:
+    """Return CORS response headers for the request's Origin if it is allowed.
+
+    CORSMiddleware handles the normal path, but custom exception handlers bypass
+    middleware — they run before the middleware wraps the response.  Adding headers
+    here ensures that 4xx / 5xx JSON error bodies still carry CORS headers so that
+    browser clients can read the error detail rather than seeing a CORS block.
+    """
+    origin = request.headers.get("origin", "")
+    if not origin:
+        return {}
+    if '*' in _allow_origins:
+        return {"Access-Control-Allow-Origin": "*"}
+    if origin in _allow_origins:
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Vary": "Origin",
+        }
+    if _origin_regex and re.match(_origin_regex, origin):
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Vary": "Origin",
+        }
+    return {}
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=_cors_headers_for(request),
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+        headers=_cors_headers_for(request),
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logging.getLogger("wehive").error("Unhandled exception on %s %s: %s", request.method, request.url.path, exc, exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+        headers=_cors_headers_for(request),
+    )
 
 
 @app.middleware('http')
@@ -302,6 +452,27 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     return JSONResponse(status_code=500, content={'ok': False, 'detail': 'Internal server error'})
 
 
+def _start_ragas_scheduler():
+    """Schedule RAGAS eval to run once daily at 02:00 UTC. No-op when ragas not installed."""
+    import asyncio
+    from datetime import datetime, timezone, timedelta
+
+    async def _loop():
+        while True:
+            now = datetime.now(timezone.utc)
+            next_run = now.replace(hour=2, minute=0, second=0, microsecond=0)
+            if next_run <= now:
+                next_run += timedelta(days=1)
+            await asyncio.sleep((next_run - now).total_seconds())
+            try:
+                from eval.ragas_evaluator import evaluate
+                await evaluate()
+            except Exception as exc:
+                logger.warning("RAGAS nightly eval failed: %s", exc)
+
+    asyncio.get_event_loop().create_task(_loop())
+
+
 async def _warm_up_and_bootstrap_rag():
     try:
         # Choose and load the embedding model before anything is ingested.
@@ -355,6 +526,13 @@ async def on_startup():
             logger.info('Universities collection has %d docs', uni_count)
     except Exception as e:
         logger.exception('Startup failure: %s', e)
+    start_broadcast_scheduler()
+
+    try:
+        from qdrant_store import init_qdrant_collections
+        await init_qdrant_collections()
+    except Exception as e:
+        logger.warning('Qdrant init skipped: %s', e)
 
     try:
         # ReAct agents (agents-v2) resolve tools by name from this registry.
@@ -378,8 +556,31 @@ async def on_startup():
     except Exception as e:
         logger.exception('Promotional event seed failed: %s', e)
 
+    _start_ragas_scheduler()
+
+    async def _reminder_scheduler_loop():
+        import logging as _log
+        _rlog = _log.getLogger('wehive.reminders')
+        while True:
+            try:
+                from agents.reminder_agent import dispatch_reminders
+                from db import db as _db
+                sent = await dispatch_reminders(_db)
+                if sent:
+                    _rlog.info('Dispatched %d email reminders', sent)
+            except Exception as _exc:
+                _rlog.warning('Reminder scheduler error: %s', _exc)
+            await asyncio.sleep(6 * 3600)
+
+    asyncio.create_task(_reminder_scheduler_loop())
+
 
 @app.on_event('shutdown')
 async def on_shutdown():
     from db import client
     client.close()
+    try:
+        from observability import flush
+        await flush()  # flush() calls get_client().flush() which drains the queue
+    except Exception:
+        pass

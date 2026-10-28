@@ -8,9 +8,9 @@ from typing import Literal, Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from auth_utils import normalize_phone
+from auth_utils import normalize_phone, get_current_user
 from config import SUPPORT_EMAIL
-from db import leads
+from db import leads, db
 from models import LeadCreate
 from rate_limit import RateLimit
 
@@ -157,3 +157,27 @@ async def create_enquiry(req: EnquiryCreate, bg: BackgroundTasks, _=Depends(_lea
     await leads.insert_one(rec)
     bg.add_task(_ack_email, req)
     return {'ok': True, 'id': rec['_id']}
+
+
+# ---------- document assistance request ----------
+class DocHelpCreate(BaseModel):
+    doc_type: str = Field(min_length=2, max_length=100)
+    application_id: Optional[str] = Field(default=None, max_length=100)
+    message: Optional[str] = Field(default=None, max_length=500)
+
+
+@router.post('/doc-help', status_code=201)
+async def create_doc_help_request(req: DocHelpCreate, user=Depends(get_current_user)):
+    now = datetime.utcnow()
+    rec = {
+        '_id': str(uuid.uuid4()),
+        'type': 'doc_help',
+        'status': 'pending',
+        'user_id': user['_id'],
+        'doc_type': req.doc_type,
+        'application_id': req.application_id,
+        'message': req.message,
+        'created_at': now,
+    }
+    await db['doc_help_requests'].insert_one(rec)
+    return {'id': rec['_id'], 'ok': True}

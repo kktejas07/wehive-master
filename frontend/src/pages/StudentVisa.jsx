@@ -457,6 +457,12 @@ export default function StudentVisa() {
           <p className="mt-2 text-[15px] text-muted-foreground">
             Explore programs offered by universities in {selectedCountry?.name}. Select multiple universities and apply with a single application.
           </p>
+          <Link
+            to="/apply/universities"
+            className="mt-4 inline-flex items-center gap-2 h-11 px-5 rounded-xl btn-accent font-semibold text-[14px]"
+          >
+            <GraduationCap className="w-4 h-4" /> Start university application
+          </Link>
 
           {/* ── Filters ── */}
           <div className="mt-6 flex flex-wrap gap-3 items-center bg-white rounded-2xl border border-[hsl(var(--border))] p-4">

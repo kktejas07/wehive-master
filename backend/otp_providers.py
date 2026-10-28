@@ -10,6 +10,18 @@ import httpx
 
 logger = logging.getLogger('wehive.otp')
 
+WHATSAPP_FOOTER = (
+    '\n----------------------------------'
+    '\nVisit website: https://wehive.co.in'
+    '\n© WeHive. All rights reserved. · Powered by Axiss Groups'
+)
+
+
+def _with_footer(body: str) -> str:
+    if WHATSAPP_FOOTER.strip() in body:
+        return body
+    return body + WHATSAPP_FOOTER
+
 
 def _env(k: str, default: str = '') -> str:
     v = os.environ.get(k, default)
@@ -48,7 +60,7 @@ async def _send_openwa_whatsapp(to: str, body: str) -> bool:
     endpoint = f'{api_url.rstrip("/")}/api/sessions/{instance_id}/messages/send-text'
     payload = {
         'chatId': f'{phone}@c.us',
-        'text': body,
+        'text': _with_footer(body),
     }
 
     headers = {

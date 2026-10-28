@@ -2,7 +2,6 @@ import { Button } from '../ui/button';
 import { Clock, Calendar, CreditCard, Loader2, LucideIcon } from 'lucide-react';
 import { BRAND, COUNTRIES } from '../../data/mock';
 import { landmarkFor } from '../../lib/landmarks';
-import DeliveryCountdown from '../DeliveryCountdown';
 import { computeFees } from '../FeeBreakdown';
 
 interface VisaCategory {
@@ -76,9 +75,10 @@ export default function CategoryDetails({
           which makes the decision.
         </p>
 
-        {country.delivery?.same_day && (
-          <div className="mt-5">
-            <DeliveryCountdown deliveryDays={cat.processing_days} />
+        {cat.processing_days != null && (
+          <div className="mt-5 flex items-center gap-2 text-[13px] text-muted-foreground">
+            <Clock className="w-4 h-4 shrink-0" />
+            <span>Processing time: <strong className="text-[hsl(var(--blue-900))]">{cat.processing_days} working day{cat.processing_days !== 1 ? 's' : ''}</strong></span>
           </div>
         )}
 
@@ -110,8 +110,15 @@ export default function CategoryDetails({
         </div>
       </div>
       <div className="lg:col-span-5">
-        <div className="relative rounded-2xl overflow-hidden aspect-[4/5] border border-[hsl(var(--border))] shadow-sm">
-          <img src={fallbackImg} alt={country.name} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="relative rounded-2xl overflow-hidden aspect-[4/5] border border-[hsl(var(--border))] shadow-sm bg-[hsl(var(--blue-50))]">
+          {fallbackImg && (
+            <img
+              src={fallbackImg}
+              alt={country.name}
+              className="absolute inset-0 h-full w-full object-cover"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute bottom-5 left-5 right-5 text-white">
             <div className="text-[12px] uppercase tracking-[0.14em] text-white/70 font-bold">Multi-entry</div>

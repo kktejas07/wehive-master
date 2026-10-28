@@ -47,50 +47,50 @@ function PromptEditor({ initial, onSave, onCancel, saving }) {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">ID</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">ID</span>
           <input value={form.id} onChange={e => update('id', e.target.value)} disabled={!!initial}
-            placeholder="system.hive" className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono disabled:opacity-50" />
+            placeholder="system.hive" className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none font-mono disabled:opacity-50" />
         </label>
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Version</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Version</span>
           <input type="number" min={1} value={form.version} onChange={e => update('version', e.target.value)}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Description</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Description</span>
         <input value={form.description} onChange={e => update('description', e.target.value)}
-          className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+          className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tags (comma-separated)</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Tags (comma-separated)</span>
           <input value={form.tags} onChange={e => update('tags', e.target.value)} placeholder="agent, react"
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
         </label>
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Variables (comma-separated)</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Variables (comma-separated)</span>
           <input value={form.variables} onChange={e => update('variables', e.target.value)} placeholder="user_input, context"
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none font-mono" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">System Prompt</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">System Prompt</span>
         <textarea value={form.system} onChange={e => update('system', e.target.value)} rows={6}
           placeholder="You are {{ agent_name }}, {{ agent_role }}."
-          className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[12px] text-white outline-none font-mono resize-y" />
+          className="w-full rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 py-2 text-[12px] text-[var(--text-primary)] outline-none font-mono resize-y" />
       </label>
       <label className="block">
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">User Template</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">User Template</span>
         <textarea value={form.user} onChange={e => update('user', e.target.value)} rows={4}
           placeholder="{{ user_input }}"
-          className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[12px] text-white outline-none font-mono resize-y" />
+          className="w-full rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 py-2 text-[12px] text-[var(--text-primary)] outline-none font-mono resize-y" />
       </label>
       <div className="flex gap-2 pt-1">
-        <button onClick={onCancel} className="flex-1 h-10 rounded-full bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300 inline-flex items-center justify-center gap-1.5">
+        <button onClick={onCancel} className="flex-1 h-10 rounded-full bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[13px] font-bold text-[var(--text-secondary)] inline-flex items-center justify-center gap-1.5">
           <X className="w-3.5 h-3.5" /> Cancel
         </button>
-        <button onClick={submit} disabled={saving || !form.id.trim()} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-white disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
+        <button onClick={submit} disabled={saving || !form.id.trim()} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-[var(--text-primary)] disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
           {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           Save Prompt
         </button>
@@ -167,7 +167,7 @@ export default function PromptsTab() {
         subtitle="Versioned prompt templates. YAML defaults + Mongo overrides. Used by agents and Hive."
         right={
           <div className="flex gap-2">
-            <button onClick={reloadAll} className="h-10 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 inline-flex items-center gap-1.5">
+            <button onClick={reloadAll} className="h-10 px-3 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[12px] text-[var(--text-primary)] inline-flex items-center gap-1.5">
               <RefreshCw className="w-3.5 h-3.5" /> Reload
             </button>
             <button onClick={() => openEditor(null)} className="h-10 px-3 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white inline-flex items-center gap-1.5">
@@ -181,7 +181,7 @@ export default function PromptsTab() {
         <Panel>
           <div className="flex items-center gap-2 mb-3">
             <Edit3 className="w-4 h-4 text-emerald-400" />
-            <div className="text-[12px] font-bold uppercase tracking-wider text-slate-300">
+            <div className="text-[12px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
               {editing.id ? `Edit ${editing.id}` : 'New Prompt'}
             </div>
           </div>
@@ -193,42 +193,42 @@ export default function PromptsTab() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-emerald-400" />
-            <div className="text-[12px] font-bold uppercase tracking-wider text-slate-300">All Prompts ({prompts.length})</div>
+            <div className="text-[12px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">All Prompts ({prompts.length})</div>
           </div>
         </div>
         {loading ? (
-          <div className="flex items-center gap-2 text-slate-400 py-4"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</div>
+          <div className="flex items-center gap-2 text-[var(--text-secondary)] py-4"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</div>
         ) : prompts.length === 0 ? (
-          <div className="text-[12px] text-slate-400 py-3">No prompts yet.</div>
+          <div className="text-[12px] text-[var(--text-secondary)] py-3">No prompts yet.</div>
         ) : (
           <div className="space-y-2">
             {prompts.map(p => (
-              <div key={p.id} className="p-3 rounded-xl bg-white/5 hover:bg-white/[0.07]">
+              <div key={p.id} className="p-3 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)]">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <code className="text-[13px] font-mono text-white font-bold">{p.id}</code>
-                      <span className="px-1.5 py-0.5 rounded bg-white/10 text-[11px] text-slate-300 font-mono">v{p.version}</span>
+                      <code className="text-[13px] font-mono text-[var(--text-primary)] font-bold">{p.id}</code>
+                      <span className="px-1.5 py-0.5 rounded bg-[var(--glass-hover)] text-[11px] text-[var(--text-secondary)] font-mono">v{p.version}</span>
                       {p.source && (
                         <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-[11px] text-emerald-300 font-mono">{p.source}</span>
                       )}
                     </div>
-                    {p.description && <div className="text-[12px] text-slate-300 mb-1.5">{p.description}</div>}
+                    {p.description && <div className="text-[12px] text-[var(--text-secondary)] mb-1.5">{p.description}</div>}
                     {p.tags?.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-1">
                         {p.tags.map(t => (
-                          <span key={t} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 text-[11px] text-slate-400">
+                          <span key={t} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[var(--glass-hover)] text-[11px] text-[var(--text-secondary)]">
                             <Tag className="w-2.5 h-2.5" /> {t}
                           </span>
                         ))}
                       </div>
                     )}
                     {p.variables?.length > 0 && (
-                      <div className="text-[11px] text-slate-400 font-mono">vars: {p.variables.join(', ')}</div>
+                      <div className="text-[11px] text-[var(--text-secondary)] font-mono">vars: {p.variables.join(', ')}</div>
                     )}
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => openEditor(p)} className="px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 text-[11px] text-slate-200 inline-flex items-center gap-1">
+                    <button onClick={() => openEditor(p)} className="px-2.5 py-1 rounded-full bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[11px] text-[var(--text-primary)] inline-flex items-center gap-1">
                       <Edit3 className="w-3 h-3" /> Edit
                     </button>
                     <button onClick={() => remove(p.id, p.version)} className="px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 hover:bg-red-500/25 text-[11px] font-bold inline-flex items-center gap-1">

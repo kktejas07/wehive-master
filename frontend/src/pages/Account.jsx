@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot, ClipboardList, Clock, CheckCircle, XCircle, Send, Briefcase, GraduationCap, Receipt } from 'lucide-react';
+import { User as UserIcon, FileText, Compass, Settings, Loader2, ChevronRight, Check, Pencil, Save, X, ScanLine, Sparkles, Share2, Copy, Users, Gift, Bot, ClipboardList, Clock, CheckCircle, XCircle, Send, Briefcase, GraduationCap, Receipt, ArrowRight } from 'lucide-react';
 import { avatarUrl, HERO_PRESETS } from '../lib/avatars';
 import { statusColor } from '../lib/utils';
 import ScansTab from '../components/account/ScansTab';
@@ -281,51 +281,186 @@ function EditSelect({ label, value, onChange, children, testid }) {
   );
 }
 
+const COUNTRY_FLAGS = {
+  us: '🇺🇸', usa: '🇺🇸', 'united states': '🇺🇸',
+  gb: '🇬🇧', uk: '🇬🇧', 'united kingdom': '🇬🇧',
+  ca: '🇨🇦', canada: '🇨🇦',
+  au: '🇦🇺', australia: '🇦🇺',
+  de: '🇩🇪', germany: '🇩🇪',
+  fr: '🇫🇷', france: '🇫🇷',
+  jp: '🇯🇵', japan: '🇯🇵',
+  in: '🇮🇳', india: '🇮🇳',
+  sg: '🇸🇬', singapore: '🇸🇬',
+  nz: '🇳🇿', 'new zealand': '🇳🇿',
+  ie: '🇮🇪', ireland: '🇮🇪',
+  nl: '🇳🇱', netherlands: '🇳🇱',
+};
+
+function countryFlagEmoji(id) {
+  return COUNTRY_FLAGS[(id || '').toLowerCase()] || '🌍';
+}
+
+const APP_STATUS_STYLES = {
+  draft: 'bg-slate-100 text-slate-600',
+  submitted: 'bg-blue-50 text-blue-700',
+  in_review: 'bg-amber-50 text-amber-700',
+  awaiting_docs: 'bg-orange-50 text-orange-700',
+  appointment_scheduled: 'bg-purple-50 text-purple-700',
+  biometrics_done: 'bg-indigo-50 text-indigo-700',
+  interview_scheduled: 'bg-violet-50 text-violet-700',
+  visa_approved: 'bg-emerald-50 text-emerald-700',
+  visa_rejected: 'bg-red-50 text-red-700',
+  cancelled: 'bg-slate-100 text-slate-400',
+};
+
+function AppStatusBadge({ status }) {
+  const cls = APP_STATUS_STYLES[status] || APP_STATUS_STYLES.draft;
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-bold capitalize ${cls}`}>
+      {(status || 'draft').replace(/_/g, ' ')}
+    </span>
+  );
+}
+
+function ApplicationCard({ a }) {
+  const flag = countryFlagEmoji(a.country_id);
+  const university = a.form_data?.university_name || a.form_data?.university || null;
+  const program = a.form_data?.program || a.form_data?.course || a.visa_type || '';
+  const updatedAt = a.updated_at || a.created_at;
+  return (
+    <Link
+      to={`/account/applications/${a.id}`}
+      className="block rounded-2xl bg-white border border-border hover:border-[hsl(var(--blue-700))]/30 hover:shadow-md p-5 transition-all duration-200"
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-bold text-[hsl(var(--blue-900))] truncate">
+            {university || a.country_id.toUpperCase()}
+          </div>
+          {program && (
+            <div className="text-[12px] text-muted-foreground mt-0.5 truncate">{program}</div>
+          )}
+        </div>
+        <span className="text-2xl shrink-0 mt-0.5">{flag}</span>
+      </div>
+      <AppStatusBadge status={a.status} />
+      {a.status === 'visa_approved' && (
+        <Link
+          to={`/post-approval/${a.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-[hsl(var(--blue-700))] hover:underline"
+        >
+          Plan your journey <ArrowRight className="w-3 h-3" />
+        </Link>
+      )}
+      <div className="mt-2 text-[11.5px] text-muted-foreground">
+        #{a.id?.slice(0, 8).toUpperCase()} · {updatedAt ? new Date(updatedAt).toLocaleDateString() : '\u2014'}
+      </div>
+    </Link>
+  );
+}
+
 function ApplicationsTab({ token }) {
   const [items, setItems] = useState(null);
+  const [showScholarshipOnly, setShowScholarshipOnly] = useState(false);
+
   useEffect(() => {
     axios
       .get(`${API}/users/me/applications`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => setItems(r.data))
+      .then((r) => setItems(Array.isArray(r.data) ? r.data : (r.data?.items || [])))
       .catch(() => setItems([]));
   }, [token]);
+
   if (!items) return <Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" />;
+
   if (items.length === 0) {
     return (
-      <EmptyState
-        title="No applications yet"
-        sub="Start a visa application from any country page \u2014 it will show up here."
-        cta={{ to: '/', label: 'Browse countries' }}
-      />
+      <>
+        <EmptyState
+          title="No applications yet"
+          sub="Start a visa application from any country page \u2014 it will show up here."
+          cta={{ to: '/', label: 'Browse countries' }}
+        />
+        <SOPTeaser />
+      </>
     );
   }
+
+  const filtered = showScholarshipOnly
+    ? items.filter((a) => a.university?.has_scholarship === true || a.scholarship_available === true)
+    : items;
+
   return (
-    <div className="space-y-3">
-      {items.map((a) => (
-        <Link
-          key={a.id}
-          to={`/account/applications/${a.id}`}
-          className="block rounded-2xl bg-white border border-border hover:border-[hsl(var(--blue-700))]/20 p-5 transition"
+    <div className="space-y-5">
+      {/* Scholarship filter toggle */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => setShowScholarshipOnly((v) => !v)}
+          className={`inline-flex items-center gap-2 rounded-xl px-4 h-9 text-[13px] font-semibold border transition ${
+            showScholarshipOnly
+              ? 'bg-[#011CB5] text-white border-[#011CB5]'
+              : 'bg-white text-[#1B2B5E] border-[#E8EDF8] hover:bg-[#F0F4FF]'
+          }`}
         >
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
-                  {a.country_id.toUpperCase()} · {a.visa_type}
-                </span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold capitalize ${statusColor(a.status)}`}>
-                  {(a.status || 'draft').replace('_', ' ')}
-                </span>
-              </div>
-              <div className="mt-0.5 text-[12.5px] text-muted-foreground">
-                #{a.id?.slice(0, 8).toUpperCase()} · created {new Date(a.created_at).toLocaleDateString()}
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-[hsl(var(--blue-900))]/40 shrink-0" />
-          </div>
-        </Link>
-      ))}
+          <GraduationCap className="w-4 h-4" />
+          Scholarships only
+        </button>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl bg-white border border-dashed border-black/15 p-8 text-center text-[14px] text-muted-foreground">
+          No scholarship-eligible applications yet.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map((a) => (
+            <ApplicationCard key={a.id} a={a} />
+          ))}
+        </div>
+      )}
+
+      <SOPTeaser />
+      <ReferralTeaser />
     </div>
+  );
+}
+
+function SOPTeaser() {
+  return (
+    <Link
+      to="/sop-builder"
+      className="flex items-center justify-between gap-4 rounded-2xl bg-white border border-[#E8EDF8] hover:border-[#011CB5]/30 hover:shadow-sm p-5 transition group"
+    >
+      <div className="min-w-0">
+        <div className="text-[14px] font-bold text-[#1B2B5E]">Write your Statement of Purpose</div>
+        <div className="text-[12.5px] text-gray-500 mt-0.5">Guided SOP builder with word counts and one-click download.</div>
+      </div>
+      <ChevronRight className="w-4 h-4 text-[#1B2B5E]/30 group-hover:text-[#011CB5] shrink-0" />
+    </Link>
+  );
+}
+
+function ReferralTeaser() {
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', 'referrals');
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }}
+      className="w-full flex items-center justify-between gap-4 rounded-2xl bg-[hsl(var(--blue-50))] border border-[hsl(var(--blue-700))]/15 hover:border-[hsl(var(--blue-700))]/40 p-5 text-left transition group"
+    >
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <Gift className="w-4 h-4 text-[hsl(var(--blue-700))]" />
+          <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">Refer a friend, earn \u20b9500</div>
+        </div>
+        <div className="text-[12.5px] text-muted-foreground mt-0.5">Share your referral code \u2014 earn credit for every friend who applies.</div>
+      </div>
+      <ChevronRight className="w-4 h-4 text-[hsl(var(--blue-900))]/30 group-hover:text-[hsl(var(--blue-700))] shrink-0" />
+    </button>
   );
 }
 

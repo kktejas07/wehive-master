@@ -184,3 +184,64 @@ async def validate_application_docs(
         "summary": {"critical": critical, "warnings": warnings, "passed": len(checks)},
         "checks": checks,
     }
+
+
+async def validate_document_background(
+    application_id: str,
+    doc_id: str,
+    user_id: str,
+    content: bytes,
+    filename: str,
+    size: int,
+) -> None:
+    """Background task: validate just-uploaded doc and set status to verified/needs_reupload."""
+    import asyncio as _aio
+    import uuid as _uuid
+    from datetime import datetime
+    from db import applications, notifications_col
+
+    await _aio.sleep(0)  # yield to event loop
+
+    issues = []
+    if size == 0:
+        issues.append("File is empty")
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+    if not issues and ext in ('jpg', 'jpeg', 'png', 'webp'):
+        # Heuristic: a 600×600 JPEG at standard quality is ≥ 20 KB
+        if size < 20_000:
+            issues.append("Image resolution too low — please use a scan at least 600 px on the short edge")
+
+    new_status = 'needs_reupload' if issues else 'verified'
+    note = issues[0] if issues else 'Auto-validated OK'
+    now = datetime.utcnow()
+
+    await applications.update_one(
+        {'_id': application_id, 'documents._id': doc_id},
+        {'$set': {
+            'documents.$.status': new_status,
+            'documents.$.note': note,
+            'updated_at': now,
+        }},
+    )
+
+    sev = 'warning' if issues else 'info'
+    title = 'Document needs re-upload' if issues else 'Document verified'
+    body = issues[0] if issues else f'{filename} passed our automatic checks.'
+    notif = {
+        '_id': str(_uuid.uuid4()),
+        'user_id': user_id,
+        'type': 'doc_validation',
+        'title': title,
+        'body': body,
+        'severity': sev,
+        'application_id': application_id,
+        'action_link': f'/account/applications/{application_id}',
+        'read': False,
+        'created_at': now,
+    }
+    await notifications_col.insert_one(notif)
+    try:
+        from notify import _publish
+        _publish(user_id, notif)
+    except Exception:
+        pass

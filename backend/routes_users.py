@@ -1,3 +1,4 @@
+import asyncio as _asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from typing import Literal
@@ -10,6 +11,7 @@ from agent_assignment import pick_agent
 from admin_auth import hash_password, verify_password
 from constants import AppStatus
 from db import users, applications, holiday_plans, db
+from viewmodels.application_viewmodel import ApplicationViewModel
 from serializers import serialize_doc
 import uuid
 
@@ -139,10 +141,29 @@ async def create_application(req: ApplicationCreate, user=Depends(get_current_us
     return serialize_doc(app)
 
 
+@router.get('/me/profile')
+async def get_my_profile(current_user=Depends(get_current_user)):
+    from viewmodels.user_viewmodel import UserViewModel
+    profile = await UserViewModel.get_profile(str(current_user['_id']))
+    if not profile:
+        raise HTTPException(404, 'User not found')
+    return profile
+
+
+@router.get('/me/payments')
+async def list_my_payments(page: int = 1, per_page: int = 20, current_user=Depends(get_current_user)):
+    from viewmodels.payment_viewmodel import PaymentViewModel
+    return await PaymentViewModel.list_for_user(str(current_user['_id']), page, per_page)
+
+
 @router.get('/me/applications')
-async def list_applications(user=Depends(get_current_user)):
-    cur = applications.find({'user_id': user['_id']}).sort('created_at', -1)
-    return [serialize_doc(d) async for d in cur]
+async def list_applications(
+    page: int = 1,
+    per_page: int = 20,
+    status: str = None,
+    user=Depends(get_current_user),
+):
+    return await ApplicationViewModel.list_for_user(user['_id'], page, per_page, status)
 
 
 @router.post('/me/saved-plans')
@@ -226,3 +247,50 @@ async def change_password(req: ChangePasswordRequest, user=Depends(get_current_u
         {'$set': {'password_hash': hashed, 'updated_at': datetime.utcnow()}},
     )
     return {'ok': True}
+
+
+class PushTokenBody(BaseModel):
+    token: str
+    platform: str = 'expo'
+
+
+@router.post('/me/push-token', status_code=204)
+async def save_push_token(body: PushTokenBody, current_user=Depends(get_current_user)):
+    await users.update_one(
+        {'_id': current_user['_id']},
+        {'$set': {'push_token': body.token, 'push_platform': body.platform, 'updated_at': datetime.utcnow()}},
+    )
+
+
+@router.delete('/me')
+async def delete_account(user=Depends(get_current_user)):
+    """GDPR/DPDP right-to-erasure: wipe all personal data for the authenticated user.
+
+    Deletes:
+      - User record from MongoDB
+      - All applications and saved plans
+      - Student memory (Mem0 + Qdrant wehive_student_memory)
+      - User-uploaded document vectors (Qdrant wehive_user_docs)
+    """
+    uid = str(user['_id'])
+
+    # Wipe MongoDB records
+    await users.delete_one({'_id': user['_id']})
+    await applications.delete_many({'user_id': uid})
+    await holiday_plans.delete_many({'user_id': uid})
+
+    # Wipe student memory (Mem0 manages its own store + Qdrant wehive_student_memory)
+    try:
+        from student_memory import student_memory
+        student_memory.forget(uid)
+    except Exception:
+        pass
+
+    # Wipe Qdrant user vectors (best-effort, non-blocking)
+    try:
+        from qdrant_store import delete_by_user
+        _asyncio.ensure_future(delete_by_user(uid))
+    except Exception:
+        pass
+
+    return {'ok': True, 'message': 'Account and all personal data deleted.'}

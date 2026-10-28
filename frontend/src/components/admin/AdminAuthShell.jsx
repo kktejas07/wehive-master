@@ -47,7 +47,7 @@ export function Field({ label, testid, type = 'text', value, onChange, placehold
           placeholder={placeholder}
           autoComplete={autoComplete}
           disabled={disabled}
-          className="w-full h-12 px-4 rounded-xl bg-white border border-slate-300 focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-slate-400 outline-none transition-colors disabled:opacity-60 pr-11"
+          className="w-full h-12 px-4 rounded-xl bg-white border border-slate-300 focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 text-[15px] text-[hsl(var(--blue-900))] placeholder:text-[var(--text-secondary)] outline-none transition-colors disabled:opacity-60 pr-11"
         />
         {isPassword && (
           <button
@@ -97,7 +97,7 @@ export function PrimaryButton({ children, disabled, onClick, testid, type = 'but
       data-testid={testid}
       disabled={disabled}
       onClick={onClick}
-      className="w-full h-12 rounded-xl btn-accent disabled:opacity-60 text-white font-semibold text-[15px] transition-colors"
+      className="w-full h-12 rounded-xl btn-accent disabled:opacity-60 text-[var(--text-primary)] font-semibold text-[15px] transition-colors"
     >
       {children}
     </button>

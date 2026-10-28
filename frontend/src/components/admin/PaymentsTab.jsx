@@ -16,7 +16,7 @@ const PILL = {
   partially_refunded: 'bg-blue-500/15 text-blue-200',
   created: 'bg-amber-500/15 text-amber-300',
   failed: 'bg-red-500/15 text-red-300',
-  mock: 'bg-white/10 text-slate-300',
+  mock: 'bg-[var(--glass-hover)] text-[var(--text-secondary)]',
 };
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
 
@@ -48,29 +48,29 @@ function RefundDialog({ payment, token, onClose, onDone }) {
     }
   };
 
-  const field = 'w-full h-10 px-3 rounded-xl bg-black/30 border border-white/10 text-[14px] text-white outline-none focus:border-[hsl(var(--blue-700))]';
+  const field = 'w-full h-10 px-3 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] text-[14px] text-[var(--text-primary)] outline-none focus:border-[hsl(var(--blue-700))]';
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60" onClick={onClose}>
       <form {...dialogProps} onSubmit={submit} onClick={(e) => e.stopPropagation()} data-testid="refund-dialog"
-        className="w-full max-w-md rounded-2xl bg-[#111632] border border-white/10 p-6 space-y-3">
-        <h3 className="text-[16px] font-semibold text-white">Refund {payment.user?.name || payment.user?.email || 'payment'}</h3>
-        <p className="text-[12.5px] text-slate-400">
+        className="w-full max-w-md rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] p-6 space-y-3">
+        <h3 className="text-[16px] font-semibold text-[var(--text-primary)]">Refund {payment.user?.name || payment.user?.email || 'payment'}</h3>
+        <p className="text-[12.5px] text-[var(--text-secondary)]">
           Paid {inr(payment.amount_inr)}{payment.refunded_inr ? `, ${inr(payment.refunded_inr)} already refunded` : ''}. Goes back to the original card/UPI through Razorpay.
         </p>
-        <label htmlFor="refund-amount" className="block text-[12px] font-semibold text-slate-300">Amount (₹, at most {left.toLocaleString('en-IN')})</label>
+        <label htmlFor="refund-amount" className="block text-[12px] font-semibold text-[var(--text-secondary)]">Amount (₹, at most {left.toLocaleString('en-IN')})</label>
         <input id="refund-amount" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} className={field} />
-        <label htmlFor="refund-reason" className="block text-[12px] font-semibold text-slate-300">Reason (kept in the audit log)</label>
+        <label htmlFor="refund-reason" className="block text-[12px] font-semibold text-[var(--text-secondary)]">Reason (kept in the audit log)</label>
         <textarea id="refund-reason" rows={2} maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} className={`${field} h-auto py-2`} />
         {full && (
-          <label className="flex items-center gap-2 text-[13px] text-slate-200">
+          <label className="flex items-center gap-2 text-[13px] text-[var(--text-primary)]">
             <input type="checkbox" checked={revoke} onChange={(e) => setRevoke(e.target.checked)} />
             Remove premium access (unless another paid order covers them)
           </label>
         )}
         <div className="flex gap-2 pt-2">
-          <button type="button" onClick={onClose} className="flex-1 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[13px] font-semibold">Cancel</button>
+          <button type="button" onClick={onClose} className="flex-1 h-10 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] text-[13px] font-semibold">Cancel</button>
           <button type="submit" disabled={!valid || busy} data-testid="refund-submit"
-            className="flex-1 h-10 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-[13px] font-semibold inline-flex items-center justify-center gap-1.5">
+            className="flex-1 h-10 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-[var(--text-primary)] text-[13px] font-semibold inline-flex items-center justify-center gap-1.5">
             {busy && <Loader2 className="w-4 h-4 animate-spin" />} Refund {valid ? inr(n) : ''}
           </button>
         </div>
@@ -117,14 +117,14 @@ export default function PaymentsTab() {
 
       <div className="grid sm:grid-cols-2 gap-4 mb-4">
         <Panel>
-          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Total paid (net of refunds)</div>
+          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Total paid (net of refunds)</div>
           <div data-testid="admin-payments-total-paid" className="mt-1 text-[26px] font-display font-bold text-emerald-300 tabular-nums">
             {totals ? inr(totals.paid_inr) : '…'}
           </div>
         </Panel>
         <Panel>
-          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Paid orders</div>
-          <div data-testid="admin-payments-paid-count" className="mt-1 text-[26px] font-display font-bold text-white tabular-nums">
+          <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Paid orders</div>
+          <div data-testid="admin-payments-paid-count" className="mt-1 text-[26px] font-display font-bold text-[var(--text-primary)] tabular-nums">
             {totals ? totals.paid_count : '…'}
           </div>
         </Panel>
@@ -133,13 +133,13 @@ export default function PaymentsTab() {
       <Panel>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
             <input
               data-testid="admin-payments-search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search payer, email or Razorpay id…"
-              className="w-full h-10 pl-9 pr-3 rounded-xl bg-white/5 border border-white/10 focus:border-[hsl(var(--blue-700))] text-[13.5px] text-white placeholder:text-slate-500 outline-none"
+              className="w-full h-10 pl-9 pr-3 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] focus:border-[hsl(var(--blue-700))] text-[13.5px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none"
             />
           </div>
           <select
@@ -147,12 +147,12 @@ export default function PaymentsTab() {
             aria-label="Filter by status"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-[13.5px] text-white"
+            className="h-10 px-3 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] text-[13.5px] text-[var(--text-primary)]"
           >
             {STATUSES.map((s) => <option key={s} value={s}>{s === 'all' ? 'All statuses' : s}</option>)}
           </select>
         </div>
-        <p className="mt-3 text-[12px] text-slate-400">
+        <p className="mt-3 text-[12px] text-[var(--text-secondary)]">
           {isSuper ? 'Refunds go through Razorpay and are recorded in the audit log.' : 'Only a super admin can issue refunds.'}
         </p>
       </Panel>
@@ -160,7 +160,7 @@ export default function PaymentsTab() {
       <Panel className="mt-4 overflow-x-auto p-0">
         <table className="min-w-full text-[13.5px]">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-slate-400 bg-white/5">
+            <tr className="text-left text-[11px] uppercase tracking-[0.16em] font-bold text-[var(--text-secondary)] bg-[var(--glass-hover)]">
               <th className="px-5 py-3">Payer</th>
               <th className="px-5 py-3">Plan</th>
               <th className="px-5 py-3">Amount</th>
@@ -177,39 +177,39 @@ export default function PaymentsTab() {
             {error && (
               <tr><td colSpan={7} className="px-5 py-10 text-center text-red-300" role="alert">
                 <AlertTriangle className="w-4 h-4 inline mr-1.5" /> Could not load payments: {error}{' '}
-                <button onClick={load} className="underline text-slate-200 ml-1">Retry</button>
+                <button onClick={load} className="underline text-[var(--text-primary)] ml-1">Retry</button>
               </td></tr>
             )}
             {data && !error && data.items.length === 0 && (
-              <tr><td colSpan={7} className="px-5 py-10 text-center text-slate-400">
+              <tr><td colSpan={7} className="px-5 py-10 text-center text-[var(--text-secondary)]">
                 <CreditCard className="w-5 h-5 inline mr-2" /> No payments found.
               </td></tr>
             )}
             {data?.items.map((p) => (
-              <tr key={p.id} data-testid={`admin-payment-row-${p.id}`} className="border-t border-white/5 hover:bg-white/5">
+              <tr key={p.id} data-testid={`admin-payment-row-${p.id}`} className="border-t border-[var(--glass-border)] hover:bg-[var(--glass-hover)]">
                 <td className="px-5 py-3">
-                  <div className="font-bold text-white">{p.user?.name || '—'}</div>
-                  <div className="text-[12px] text-slate-400">{p.user?.email || p.user?.phone || '—'}</div>
+                  <div className="font-bold text-[var(--text-primary)]">{p.user?.name || '—'}</div>
+                  <div className="text-[12px] text-[var(--text-secondary)]">{p.user?.email || p.user?.phone || '—'}</div>
                 </td>
-                <td className="px-5 py-3 text-slate-300">{p.plan_id || '—'}</td>
-                <td className="px-5 py-3 font-bold text-white tabular-nums">
+                <td className="px-5 py-3 text-[var(--text-secondary)]">{p.plan_id || '—'}</td>
+                <td className="px-5 py-3 font-bold text-[var(--text-primary)] tabular-nums">
                   {inr(p.amount_inr)}
                   {p.refunded_inr > 0 && <div className="text-[11.5px] font-normal text-blue-200">−{inr(p.refunded_inr)} refunded</div>}
                 </td>
                 <td className="px-5 py-3">
                   <span className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-[0.12em] font-bold whitespace-nowrap ${PILL[p.status] || PILL.mock}`}>{(p.status || '').replace('_', ' ')}</span>
                 </td>
-                <td className="px-5 py-3 font-mono text-[11.5px] text-slate-400">
+                <td className="px-5 py-3 font-mono text-[11.5px] text-[var(--text-secondary)]">
                   <div>{p.razorpay_order_id || '—'}</div>
                   <div>{p.razorpay_payment_id || ''}</div>
                 </td>
-                <td className="px-5 py-3 text-slate-400 text-[12.5px] whitespace-nowrap">{fmt(p.created_at)}</td>
+                <td className="px-5 py-3 text-[var(--text-secondary)] text-[12.5px] whitespace-nowrap">{fmt(p.created_at)}</td>
                 <td className="px-5 py-3 text-right">
                   {isSuper && ['paid', 'partially_refunded'].includes(p.status) && (
                     <button
                       data-testid={`refund-${p.id}`}
                       onClick={() => setRefunding(p)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-white/5 hover:bg-white/10 px-2.5 py-1.5 text-[11.5px] font-bold text-slate-200"
+                      className="inline-flex items-center gap-1 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] px-2.5 py-1.5 text-[11.5px] font-bold text-[var(--text-primary)]"
                     >
                       <Undo2 className="w-3 h-3" /> Refund
                     </button>

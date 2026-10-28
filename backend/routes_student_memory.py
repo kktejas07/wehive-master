@@ -21,10 +21,7 @@ from admin_auth import get_current_admin_flex
 from auth_utils import get_current_user
 from db import db
 
-from student_memory import (
-    delete_memory,
-    get_student_profile,
-)
+from student_memory import student_memory
 
 router = APIRouter(prefix="/student-memory", tags=["student-memory"])
 logger = logging.getLogger("wehive.routes_student_memory")
@@ -39,8 +36,8 @@ COLL = "student_memories"
 
 @router.get("/me/profile")
 async def my_profile(user=Depends(get_current_user)):
-    profile = await get_student_profile(user["id"])
-    return {"ok": True, "profile": profile}
+    summary = student_memory.get_profile_summary(user["_id"])
+    return {"ok": True, "profile": {"summary": summary}}
 
 
 @router.get("/me/memories")
@@ -59,12 +56,10 @@ async def my_memories(
     return {"ok": True, "items": items, "total": total}
 
 
-@router.delete("/me/memories/{key:path}")
-async def delete_my_memory(key: str, user=Depends(get_current_user)):
-    deleted = await delete_memory(user["id"], key)
-    if not deleted:
-        raise HTTPException(404, "Memory not found")
-    return {"ok": True, "deleted": key}
+@router.delete("/me/memories")
+async def delete_my_memories(user=Depends(get_current_user)):
+    student_memory.forget(user["_id"])
+    return {"ok": True}
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +97,7 @@ async def admin_profiles(
 @router.get("/admin/profiles/{user_id}")
 async def admin_user_profile(user_id: str, _admin=Depends(get_current_admin_flex)):
     coll = db[COLL]
-    profile = await get_student_profile(user_id)
+    profile = {"summary": student_memory.get_profile_summary(user_id)}
     memories = [doc async for doc in coll.find({"user_id": user_id}, {"_id": 0}).sort("extracted_at", -1)]
     if not memories:
         raise HTTPException(404, "No memories for this user")

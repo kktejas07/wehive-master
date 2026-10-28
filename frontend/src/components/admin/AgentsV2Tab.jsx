@@ -52,84 +52,84 @@ function AgentEditor({ initial, onSave, onCancel, saving }) {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">ID</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">ID</span>
           <input value={form.id} onChange={e => update('id', e.target.value)} disabled={!!initial}
-            placeholder="hive_scholarship_match" className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono disabled:opacity-50" />
+            placeholder="hive_scholarship_match" className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none font-mono disabled:opacity-50" />
         </label>
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Name</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Name</span>
           <input value={form.name} onChange={e => update('name', e.target.value)} placeholder="Scholarship Matchmaker"
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Role</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Role</span>
         <input value={form.role} onChange={e => update('role', e.target.value)} placeholder="a scholarship matching assistant for Indian students"
-          className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+          className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
       </label>
       <label className="block">
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Description</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Description</span>
         <input value={form.description} onChange={e => update('description', e.target.value)}
-          className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+          className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Prompt ID</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Prompt ID</span>
           <input value={form.prompt_id} onChange={e => update('prompt_id', e.target.value)}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none font-mono" />
         </label>
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Provider</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Provider</span>
           <select value={form.provider_id} onChange={e => update('provider_id', e.target.value)}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none">
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none">
             {PROVIDERS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </label>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Model</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Model</span>
           <input value={form.model} onChange={e => update('model', e.target.value)}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none font-mono" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none font-mono" />
         </label>
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Max Iterations</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Max Iterations</span>
           <input type="number" min={1} max={20} value={form.max_iterations} onChange={e => update('max_iterations', e.target.value)}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
         </label>
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Max Tokens</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Max Tokens</span>
           <input type="number" min={50} max={4096} value={form.max_tokens} onChange={e => update('max_tokens', e.target.value)}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tools (comma-separated registry names)</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Tools (comma-separated registry names)</span>
         <input value={form.tools} onChange={e => update('tools', e.target.value)} placeholder="lookup_country, search_universities"
-          className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none font-mono" />
+          className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[12px] text-[var(--text-primary)] outline-none font-mono" />
       </label>
       <label className="block">
-        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">RAG Collections (comma-separated)</span>
+        <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">RAG Collections (comma-separated)</span>
         <input value={form.rag_collections} onChange={e => update('rag_collections', e.target.value)} placeholder="wehive_countries, wehive_universities"
-          className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[12px] text-white outline-none font-mono" />
+          className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[12px] text-[var(--text-primary)] outline-none font-mono" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Temperature (0-1)</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Temperature (0-1)</span>
           <input type="number" step="0.1" min={0} max={1} value={form.temperature} onChange={e => update('temperature', e.target.value)}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
         </label>
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Tags (comma-separated)</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Tags (comma-separated)</span>
           <input value={form.tags} onChange={e => update('tags', e.target.value)}
-            className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px] text-white outline-none" />
+            className="w-full h-10 rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 text-[13px] text-[var(--text-primary)] outline-none" />
         </label>
       </div>
       <div className="flex gap-2 pt-1">
-        <button onClick={onCancel} className="flex-1 h-10 rounded-full bg-white/5 hover:bg-white/10 text-[13px] font-bold text-slate-300 inline-flex items-center justify-center gap-1.5">
+        <button onClick={onCancel} className="flex-1 h-10 rounded-full bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[13px] font-bold text-[var(--text-secondary)] inline-flex items-center justify-center gap-1.5">
           <X className="w-3.5 h-3.5" /> Cancel
         </button>
-        <button onClick={submit} disabled={saving || !form.id.trim() || !form.name.trim()} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-white disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
+        <button onClick={submit} disabled={saving || !form.id.trim() || !form.name.trim()} className="flex-1 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-[13px] font-bold text-[var(--text-primary)] disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
           {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           Save Agent
         </button>
@@ -162,21 +162,21 @@ function RunPanel({ agent, token, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
-      <div {...dialogProps} className="bg-[#111632] rounded-2xl border border-white/10 w-full max-w-3xl max-h-[85vh] overflow-y-auto p-6 space-y-4 admin-scrollbar" onClick={e => e.stopPropagation()}>
+      <div {...dialogProps} className="bg-[var(--panel-bg)] rounded-2xl border border-[var(--glass-border)] w-full max-w-3xl max-h-[85vh] overflow-y-auto p-6 space-y-4 admin-scrollbar" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <div>
-            <div className="font-bold text-white text-[16px]">{agent.name}</div>
-            <div className="text-[11px] text-slate-400 font-mono">{agent.id} · {agent.provider_id}/{agent.model}</div>
+            <div className="font-bold text-[var(--text-primary)] text-[16px]">{agent.name}</div>
+            <div className="text-[11px] text-[var(--text-secondary)] font-mono">{agent.id} · {agent.provider_id}/{agent.model}</div>
           </div>
-          <button aria-label="Close" onClick={onClose} className="text-slate-400 hover:text-white"><X className="w-4 h-4" /></button>
+          <button aria-label="Close" onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"><X className="w-4 h-4" /></button>
         </div>
         <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400 mb-1">Input</span>
+          <span className="block text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-1">Input</span>
           <textarea value={input} onChange={e => setInput(e.target.value)} rows={3}
             placeholder="Ask the agent anything…"
-            className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-[13px] text-white outline-none focus:border-emerald-500/50 resize-y" />
+            className="w-full rounded-xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-3 py-2 text-[13px] text-[var(--text-primary)] outline-none focus:border-emerald-500/50 resize-y" />
         </label>
-        <button onClick={run} disabled={busy || !input.trim()} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white disabled:opacity-50 inline-flex items-center gap-1.5">
+        <button onClick={run} disabled={busy || !input.trim()} className="h-10 px-4 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-[var(--text-primary)] disabled:opacity-50 inline-flex items-center gap-1.5">
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
           Run Agent
         </button>
@@ -186,32 +186,32 @@ function RunPanel({ agent, token, onClose }) {
             <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-[11px] uppercase tracking-wider text-emerald-300 font-bold">Final Answer</div>
-                <div className="text-[11px] text-slate-400 font-mono">{result.duration_ms}ms</div>
+                <div className="text-[11px] text-[var(--text-secondary)] font-mono">{result.duration_ms}ms</div>
               </div>
-              <div className="text-[13px] text-white whitespace-pre-wrap">{result.final_answer}</div>
+              <div className="text-[13px] text-[var(--text-primary)] whitespace-pre-wrap">{result.final_answer}</div>
             </div>
             {result.steps?.length > 0 && (
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-2">Trace ({result.steps.length} steps)</div>
+                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-bold mb-2">Trace ({result.steps.length} steps)</div>
                 <div className="space-y-2">
                   {result.steps.map((s, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-white/5 text-[12px]">
+                    <div key={i} className="p-3 rounded-xl bg-[var(--glass-hover)] text-[12px]">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-slate-400 font-mono">#{s.iteration}</span>
+                        <span className="text-[var(--text-secondary)] font-mono">#{s.iteration}</span>
                         {s.tool_name && <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-mono text-[11px]">TOOL: {s.tool_name}</span>}
                         {s.error && <span className="px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 font-mono text-[11px]">error</span>}
-                        <span className="text-slate-400 ml-auto text-[11px]">{s.duration_ms}ms</span>
+                        <span className="text-[var(--text-secondary)] ml-auto text-[11px]">{s.duration_ms}ms</span>
                       </div>
                       {s.tool_args && Object.keys(s.tool_args).length > 0 && (
-                        <div className="text-slate-400 font-mono text-[11px] mb-1">args: {JSON.stringify(s.tool_args)}</div>
+                        <div className="text-[var(--text-secondary)] font-mono text-[11px] mb-1">args: {JSON.stringify(s.tool_args)}</div>
                       )}
                       {s.observation && (
-                        <div className="text-slate-300 whitespace-pre-wrap border-l-2 border-emerald-500/30 pl-2 mt-1">
+                        <div className="text-[var(--text-secondary)] whitespace-pre-wrap border-l-2 border-emerald-500/30 pl-2 mt-1">
                           {String(s.observation).slice(0, 800)}
                         </div>
                       )}
                       {!s.tool_name && s.thought && (
-                        <div className="text-slate-300 whitespace-pre-wrap">{String(s.thought).slice(0, 800)}</div>
+                        <div className="text-[var(--text-secondary)] whitespace-pre-wrap">{String(s.thought).slice(0, 800)}</div>
                       )}
                     </div>
                   ))}
@@ -282,10 +282,10 @@ export default function AgentsV2Tab() {
         subtitle="Composable tool-using LLM agents. ReAct loop, RAG context, pluggable model."
         right={
           <div className="flex gap-2">
-            <button onClick={refresh} className="h-10 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-[12px] text-slate-200 inline-flex items-center gap-1.5">
+            <button onClick={refresh} className="h-10 px-3 rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[12px] text-[var(--text-primary)] inline-flex items-center gap-1.5">
               <RefreshCw className="w-3.5 h-3.5" /> Refresh
             </button>
-            <button onClick={() => setEditing(EMPTY_FORM)} className="h-10 px-3 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-white inline-flex items-center gap-1.5">
+            <button onClick={() => setEditing(EMPTY_FORM)} className="h-10 px-3 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[12px] font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5">
               <Plus className="w-3.5 h-3.5" /> New Agent
             </button>
           </div>
@@ -296,7 +296,7 @@ export default function AgentsV2Tab() {
         <Panel>
           <div className="flex items-center gap-2 mb-3">
             <Bot className="w-4 h-4 text-emerald-400" />
-            <div className="text-[12px] font-bold uppercase tracking-wider text-slate-300">
+            <div className="text-[12px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
               {editing.id ? `Edit ${editing.id}` : 'New Agent'}
             </div>
           </div>
@@ -307,28 +307,28 @@ export default function AgentsV2Tab() {
       <Panel>
         <div className="flex items-center gap-2 mb-3">
           <Bot className="w-4 h-4 text-emerald-400" />
-          <div className="text-[12px] font-bold uppercase tracking-wider text-slate-300">All Agents ({agents.length})</div>
+          <div className="text-[12px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">All Agents ({agents.length})</div>
         </div>
         {loading ? (
-          <div className="flex items-center gap-2 text-slate-400 py-4"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</div>
+          <div className="flex items-center gap-2 text-[var(--text-secondary)] py-4"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</div>
         ) : agents.length === 0 ? (
-          <div className="text-[12px] text-slate-400 py-3">No agents yet. Create one to get started.</div>
+          <div className="text-[12px] text-[var(--text-secondary)] py-3">No agents yet. Create one to get started.</div>
         ) : (
           <div className="space-y-2">
             {agents.map(a => (
-              <div key={a.id} className="p-3 rounded-xl bg-white/5 hover:bg-white/[0.07]">
+              <div key={a.id} className="p-3 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)]">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <code className="text-[13px] font-mono text-white font-bold">{a.id}</code>
-                      <span className="text-[12px] text-slate-300">{a.name}</span>
+                      <code className="text-[13px] font-mono text-[var(--text-primary)] font-bold">{a.id}</code>
+                      <span className="text-[12px] text-[var(--text-secondary)]">{a.name}</span>
                     </div>
-                    {a.description && <div className="text-[12px] text-slate-400 mb-1.5">{a.description}</div>}
+                    {a.description && <div className="text-[12px] text-[var(--text-secondary)] mb-1.5">{a.description}</div>}
                     <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                      <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono inline-flex items-center gap-1">
+                      <span className="px-1.5 py-0.5 rounded bg-[var(--glass-hover)] text-[var(--text-secondary)] font-mono inline-flex items-center gap-1">
                         <Cpu className="w-2.5 h-2.5" /> {a.provider_id}/{a.model || 'default'}
                       </span>
-                      <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono">
+                      <span className="px-1.5 py-0.5 rounded bg-[var(--glass-hover)] text-[var(--text-secondary)] font-mono">
                         prompt: {a.prompt_id}
                       </span>
                       {a.tools?.length > 0 && (
@@ -344,10 +344,10 @@ export default function AgentsV2Tab() {
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button onClick={() => setRunning(a)} className="px-2.5 py-1 rounded-full bg-emerald-600/80 hover:bg-emerald-500 text-[11px] font-bold text-white inline-flex items-center gap-1">
+                    <button onClick={() => setRunning(a)} className="px-2.5 py-1 rounded-full bg-emerald-600/80 hover:bg-emerald-500 text-[11px] font-bold text-[var(--text-primary)] inline-flex items-center gap-1">
                       <Play className="w-3 h-3" /> Run
                     </button>
-                    <button onClick={() => setEditing(a)} className="px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 text-[11px] text-slate-200">
+                    <button onClick={() => setEditing(a)} className="px-2.5 py-1 rounded-full bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[11px] text-[var(--text-primary)]">
                       Edit
                     </button>
                     <button onClick={() => remove(a.id)} className="px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 hover:bg-red-500/25 text-[11px] font-bold inline-flex items-center gap-1">
