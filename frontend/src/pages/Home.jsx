@@ -15,7 +15,7 @@ import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
 import EnquirySection from '../components/EnquirySection';
 import { updateSEO } from '../lib/seo';
-import ExamPrepSection from '../components/ExamPrepSection';
+import SeasonalBanners from '../components/SeasonalBanners';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
