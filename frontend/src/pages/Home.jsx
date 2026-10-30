@@ -15,6 +15,7 @@ import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
 import EnquirySection from '../components/EnquirySection';
 import { updateSEO } from '../lib/seo';
+import ExamPrepSection from '../components/ExamPrepSection';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -37,6 +38,7 @@ export default function Home() {
       <StatsStrip />
       <SchengenCarousel />
       <AIServices />
+      <ExamPrepSection />
       <HowItWorks />
       <EnquirySection />
       <DealsSection />
