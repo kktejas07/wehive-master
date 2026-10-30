@@ -37,6 +37,7 @@ export default function Home() {
       <CountryGrid filters={filters} />
       <StatsStrip />
       <SchengenCarousel />
+      <SeasonalBanners />
       <AIServices />
       <ExamPrepSection />
       <HowItWorks />
