@@ -95,6 +95,8 @@ from routes_student_memory import router as student_memory_router  # noqa: E402
 from routes_graph_rag import router as graph_rag_router  # noqa: E402
 from routes_scraping import router as scraping_router  # noqa: E402
 from routes_content_pipeline import router as content_pipeline_router  # noqa: E402
+from routes_landing import router as landing_router  # noqa: E402
+from routes_application_builder import router as application_builder_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -236,6 +238,8 @@ api_router.include_router(student_memory_router)
 api_router.include_router(graph_rag_router)
 api_router.include_router(scraping_router)
 api_router.include_router(content_pipeline_router)
+api_router.include_router(application_builder_router)
+api_router.include_router(landing_router)
 
 app.include_router(api_router)
 

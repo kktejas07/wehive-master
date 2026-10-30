@@ -16,6 +16,7 @@ import SchengenCarousel from '../components/SchengenCarousel';
 import EnquirySection from '../components/EnquirySection';
 import { updateSEO } from '../lib/seo';
 import SeasonalBanners from '../components/SeasonalBanners';
+import ApplicationBuilder from '../components/ApplicationBuilder';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -41,6 +42,7 @@ export default function Home() {
       <AIServices />
       <HowItWorks />
       <EnquirySection />
+      <ApplicationBuilder />
       <DealsSection />
       <Newsroom />
       <Faq />
