@@ -18,6 +18,10 @@ import { updateSEO } from '../lib/seo';
 import PartnersBanner from '../components/PartnersBanner';
 import ExamPrepSection from '../components/ExamPrepSection';
 import SeasonalBanners from '../components/SeasonalBanners';
+import ChristmasBanners from '../components/ChristmasBanners';
+import GermanyVisaBanner from '../components/GermanyVisaBanner';
+import PartnerBanners from '../components/PartnerBanners';
+import GlobalTrends from '../components/GlobalTrends';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -40,9 +44,13 @@ export default function Home() {
       <StatsStrip />
       <SchengenCarousel />
       <SeasonalBanners />
+      <ChristmasBanners />
+      <GermanyVisaBanner />
       <AIServices />
       <ExamPrepSection />
+      <PartnerBanners />
       <PartnersBanner />
+      <GlobalTrends />
       <HowItWorks />
       <EnquirySection />
       <DealsSection />
