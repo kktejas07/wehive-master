@@ -25,14 +25,14 @@ echo ""
 echo "── [2/6] Type Check ─────────────────────────"
 if cd frontend && npx tsc --noEmit 2>/dev/null; then pass "Frontend TS"; else fail "Frontend TS"; fi
 cd "$ROOT_DIR"
-if mypy backend/ --config-file=backend/mypy.ini 2>/dev/null; then pass "Backend mypy"; else fail "Backend mypy"; fi
+if python3 -m mypy backend/ --config-file=backend/mypy.ini 2>/dev/null; then pass "Backend mypy"; else fail "Backend mypy"; fi
 
 # 3. Lint
 echo ""
 echo "── [3/6] Lint ───────────────────────────────"
 if cd frontend && npx eslint src/ 2>/dev/null; then pass "Frontend ESLint"; else fail "Frontend ESLint"; fi
 cd "$ROOT_DIR"
-if flake8 backend/ --config=backend/.flake8 2>/dev/null; then pass "Backend flake8"; else fail "Backend flake8"; fi
+if python3 -m flake8 backend/ --config=backend/.flake8 2>/dev/null; then pass "Backend flake8"; else fail "Backend flake8"; fi
 
 # 4. Test suite
 echo ""
