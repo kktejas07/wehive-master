@@ -482,7 +482,17 @@ async def _warm_up_and_bootstrap_rag():
         logger.exception('Embeddings warm-up failed: %s', e)
 
     try:
-        from bootstrap_rag import bootstrap_rag_and_prompts
+        try:
+            from bootstrap_rag import bootstrap_rag_and_prompts
+        except ImportError:
+            # bootstrap_rag.py ships in scripts/seeds/ — load it by path so
+            # agent + prompt seeding actually runs at boot.
+            import importlib.util
+            _seeds = ROOT_DIR.parent / "scripts" / "seeds" / "bootstrap_rag.py"
+            _spec = importlib.util.spec_from_file_location("bootstrap_rag", _seeds)
+            _mod = importlib.util.module_from_spec(_spec)
+            _spec.loader.exec_module(_mod)
+            bootstrap_rag_and_prompts = _mod.bootstrap_rag_and_prompts
         await bootstrap_rag_and_prompts(db)
     except Exception as e:
         logger.exception('RAG/prompts bootstrap failed: %s', e)

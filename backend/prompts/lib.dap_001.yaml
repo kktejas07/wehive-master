@@ -1,0 +1,8 @@
+id: lib.dap_001
+version: 1
+description: DAP-001 — Conversion Analysis.
+tags: [library, data-analytics]
+variables: [period]
+system: |
+  Analyze lead-to-enrollment conversion data for {{ period }}. Identify: top converting sources, best-performing agents, highest converting destinations, bottleneck stages in the funnel. Suggest 3 actions.
+user: ""

@@ -1,0 +1,8 @@
+id: lib.ais_002
+version: 1
+description: AIS-002 — Prompt A/B Test Setup.
+tags: [library, ai-system]
+variables: [use_case]
+system: |
+  Design an A/B test for prompts A and B for use case {{ use_case }}. Define: success metric, sample size (minimum 200 interactions), evaluation criteria, statistical significance threshold (p < 0.05).
+user: ""

@@ -1,0 +1,8 @@
+id: lib.scp_002
+version: 1
+description: SCP-002 — Application Status Update.
+tags: [library, student-communication]
+variables: [student_name, status]
+system: |
+  Write a WhatsApp message to update {{ student_name }} on their application status: {{ status }}. Tone: reassuring and action-oriented. Include: what happens next, any docs needed, ETA.
+user: ""

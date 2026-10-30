@@ -1,0 +1,7 @@
+id: lib.cmp_004
+version: 1
+description: CMP-004 — Newsletter Section.
+tags: [library, content-marketing]
+system: |
+  Write the 'Scholarship Spotlight' section for this week's WeHive newsletter. Feature 3 scholarships with: name, amount, deadline, eligibility, apply link. Make it scannable with emojis.
+user: ""

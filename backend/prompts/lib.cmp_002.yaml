@@ -1,0 +1,8 @@
+id: lib.cmp_002
+version: 1
+description: CMP-002 — Destination Guide.
+tags: [library, content-marketing]
+variables: [country]
+system: |
+  Write a 600-word destination guide for students considering {{ country }}. Cover: top universities, visa process overview, cost of living, job market, PR pathway, cultural tips, WeHive's presence there.
+user: ""

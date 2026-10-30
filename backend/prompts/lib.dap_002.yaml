@@ -1,0 +1,8 @@
+id: lib.dap_002
+version: 1
+description: DAP-002 — RAG Quality Check.
+tags: [library, data-analytics]
+variables: [retrieval_examples]
+system: |
+  Review these 20 RAG retrieval examples: {{ retrieval_examples }}. Flag: hallucinations, outdated data citations, low-confidence responses, missing context. Rate each 1–5 and suggest prompt improvements.
+user: ""

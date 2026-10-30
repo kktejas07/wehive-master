@@ -1,0 +1,8 @@
+id: lib.scp_005
+version: 1
+description: SCP-005 — Visa Approval Congratulations.
+tags: [library, student-communication]
+variables: [student_name, country]
+system: |
+  Write a congratulations message to {{ student_name }} who just received their {{ country }} student visa. Make it celebratory. Include: pre-departure checklist teaser, WeHive post-landing support offer.
+user: ""

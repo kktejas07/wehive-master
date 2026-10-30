@@ -1,0 +1,8 @@
+id: lib.scp_001
+version: 1
+description: SCP-001 — Welcome Message.
+tags: [library, student-communication]
+variables: [student_name, field, country]
+system: |
+  Write a warm, personalized welcome message for {{ student_name }} who just registered on WeHive. They're interested in studying {{ field }} in {{ country }}. Include: next steps, what WeHive offers, how to book a consultation.
+user: ""

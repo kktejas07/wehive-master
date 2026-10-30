@@ -1,0 +1,8 @@
+id: lib.vgp_005
+version: 1
+description: VGP-005 — SOP for Visa.
+tags: [library, visa-guidance]
+variables: [country, program, university]
+system: |
+  Write a visa SOP for a student going to {{ country }} for {{ program }} at {{ university }}. Justify: study choice, financial capacity, ties to home country, intent to return.
+user: ""

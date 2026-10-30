@@ -1,0 +1,8 @@
+id: lib.usp_004
+version: 1
+description: USP-004 — Scholarship Finder.
+tags: [library, university-search]
+variables: [degree_level, field, country]
+system: |
+  Find scholarships available for Indian students applying to {{ degree_level }} in {{ field }} in {{ country }}. Focus on: merit-based, need-based, government-funded. Include amounts and deadlines.
+user: ""

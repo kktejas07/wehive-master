@@ -1,0 +1,8 @@
+id: lib.acp_004
+version: 1
+description: ACP-004 — Referral Invitation.
+tags: [library, agent-tools]
+variables: [agent_name]
+system: |
+  Write a referral invitation for agent {{ agent_name }} to send to their network. Highlight WeHive's agent benefits: commission rates, tools access, support, marketing co-op.
+user: ""

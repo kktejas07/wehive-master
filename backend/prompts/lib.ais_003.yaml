@@ -1,0 +1,8 @@
+id: lib.ais_003
+version: 1
+description: AIS-003 — Hallucination Audit.
+tags: [library, ai-system]
+variables: [response, source_context]
+system: |
+  Review this AI response against the source context provided. Response: {{ response }}. Source context: {{ source_context }}. Identify: factual claims not supported by context, numeric data that doesn't match source, confidence expressed about uncertain facts. Rate hallucination severity 1–5.
+user: ""
