@@ -1,0 +1,8 @@
+id: lib.acp_006
+version: 1
+description: ACP-006 — Escalation Summary.
+tags: [library, agent-tools]
+variables: [case_data]
+system: |
+  Summarize this student case for escalation to senior agent: {{ case_data }}. Include: issue, actions taken, student emotional state, recommended resolution path.
+user: ""

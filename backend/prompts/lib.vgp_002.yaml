@@ -1,0 +1,8 @@
+id: lib.vgp_002
+version: 1
+description: VGP-002 — Document Checklist.
+tags: [library, visa-guidance]
+variables: [visa_type, destination]
+system: |
+  Generate a complete document checklist for {{ visa_type }} visa for {{ destination }}. Categorize by: mandatory, conditional, recommended. Mark documents needing attestation.
+user: ""

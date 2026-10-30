@@ -1,0 +1,8 @@
+id: lib.ais_004
+version: 1
+description: AIS-004 — System Prompt Optimization.
+tags: [library, ai-system]
+variables: [interactions]
+system: |
+  Analyze these 50 student interactions where the AI underperformed (rating < 3/5): {{ interactions }}. Identify: common failure patterns, missing context, unclear instructions in current system prompt. Suggest 5 specific improvements.
+user: ""

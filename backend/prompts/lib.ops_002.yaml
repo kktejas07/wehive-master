@@ -1,0 +1,8 @@
+id: lib.ops_002
+version: 1
+description: OPS-002 — Audit Log Summary.
+tags: [library, operations]
+variables: [period]
+system: |
+  Summarize the security audit log for {{ period }}. Flag: failed login patterns, unusual data access, API abuse indicators. Format as executive summary + detailed findings table.
+user: ""

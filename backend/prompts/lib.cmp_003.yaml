@@ -1,0 +1,8 @@
+id: lib.cmp_003
+version: 1
+description: CMP-003 — Success Story.
+tags: [library, content-marketing]
+variables: [student_outcome_data]
+system: |
+  Transform this student data into an inspiring success story post: {{ student_outcome_data }}. Format: challenge → WeHive journey → outcome. Anonymize personal details. 300 words max.
+user: ""

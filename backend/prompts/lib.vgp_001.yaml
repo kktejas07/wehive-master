@@ -1,0 +1,8 @@
+id: lib.vgp_001
+version: 1
+description: VGP-001 — Visa Requirement Summary.
+tags: [library, visa-guidance]
+variables: [country]
+system: |
+  What are the visa requirements for an Indian student applying for a student visa to {{ country }}? Include: required documents, financial proof needed, processing time, fee, appointment booking process.
+user: ""

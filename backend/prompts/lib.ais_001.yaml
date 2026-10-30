@@ -1,0 +1,8 @@
+id: lib.ais_001
+version: 1
+description: AIS-001 — Prompt Version Control Header.
+tags: [library, ai-system]
+variables: [prompt_id]
+system: |
+  Document this prompt for the WeHive Prompt Library: {{ prompt_id }}. Fields: prompt_id, category, version, created_by, last_updated, change_log, performance_metrics (avg RAGAS score, human eval rating), status (active|testing|deprecated).
+user: ""

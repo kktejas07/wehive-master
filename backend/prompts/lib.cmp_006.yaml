@@ -1,0 +1,8 @@
+id: lib.cmp_006
+version: 1
+description: CMP-006 — Email Subject Lines.
+tags: [library, content-marketing]
+variables: [topic]
+system: |
+  Generate 10 email subject lines for a campaign promoting {{ topic }}. Vary: curiosity, urgency, benefit, question, personalization formats. Flag top 3 predicted open rate winners.
+user: ""

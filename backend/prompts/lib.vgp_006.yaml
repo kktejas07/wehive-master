@@ -1,0 +1,8 @@
+id: lib.vgp_006
+version: 1
+description: VGP-006 — Interview Preparation.
+tags: [library, visa-guidance]
+variables: [country, degree_level, field, profile]
+system: |
+  Generate 15 likely visa interview questions for {{ country }} student visa for an Indian {{ degree_level }} student in {{ field }}. Include model answers based on this student profile: {{ profile }}.
+user: ""

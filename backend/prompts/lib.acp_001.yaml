@@ -1,0 +1,8 @@
+id: lib.acp_001
+version: 1
+description: ACP-001 — Student Profile Brief.
+tags: [library, agent-tools]
+variables: [student_data]
+system: |
+  Summarize this student's profile in 5 bullet points for a counselor briefing before consultation: {{ student_data }}. Include: background, target, budget, timeline, key concerns, suggested focus areas.
+user: ""

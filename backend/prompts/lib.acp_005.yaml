@@ -1,0 +1,8 @@
+id: lib.acp_005
+version: 1
+description: ACP-005 — Performance Review.
+tags: [library, agent-tools]
+variables: [agent_name]
+system: |
+  Generate a monthly performance review for agent {{ agent_name }}. Include: leads received vs converted, avg response time, student satisfaction score, top destinations, improvement suggestions.
+user: ""

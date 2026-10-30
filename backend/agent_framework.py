@@ -37,6 +37,23 @@ DEFAULT_MAX_ITERATIONS = 6
 DEFAULT_MAX_TOKENS = 1024
 TOOL_CALL_RE = re.compile(r'TOOL:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)', re.S)
 
+# Prompt variables the ReAct runner does not supply but admin-configured
+# prompts may reference (lead_data, content, student_memory, workflow, …).
+# They default to the runner input or available context so cards keep
+# running instead of failing render. Admins can override via the UI.
+_PROMPT_VAR_ALIASES: dict[str, str] = {
+    "lead_data": "user_input",
+    "content": "user_input",
+    "content_request": "user_input",
+    "student_profile": "user_input",
+    "student_memory": "context",
+    "workflow": "user_input",
+    "scholarships": "context",
+    "universities": "context",
+    "user_profile": "user_input",
+    "candidates": "context",
+}
+
 
 @dataclass
 class AgentSpec:
@@ -506,6 +523,9 @@ async def run_agent(
             "context": rag_context,
             "today": datetime.now().strftime("%B %d, %Y"),
         }
+        for name, source in _PROMPT_VAR_ALIASES.items():
+            if name in prompt.variables and name not in variables:
+                variables[name] = variables[source]
         rendered = render_prompt(prompt, variables)
         system_prompt = rendered["system"]
         user_prompt = rendered["user"]

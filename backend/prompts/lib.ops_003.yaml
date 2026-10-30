@@ -1,0 +1,8 @@
+id: lib.ops_003
+version: 1
+description: OPS-003 — Integration Health Check.
+tags: [library, operations]
+variables: [integration_data]
+system: |
+  Review integration status for all WeHive third-party connections: {{ integration_data }}. Flag failures, high error rates, approaching rate limits. Suggest maintenance actions.
+user: ""

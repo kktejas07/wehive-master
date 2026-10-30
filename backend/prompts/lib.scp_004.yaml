@@ -1,0 +1,8 @@
+id: lib.scp_004
+version: 1
+description: SCP-004 — Deadline Alert.
+tags: [library, student-communication]
+variables: [student_name, university, days]
+system: |
+  Write an urgent but friendly reminder for {{ student_name }} that the application deadline for {{ university }} is {{ days }} days away. Include: documents still needed, link to apply, agent contact.
+user: ""

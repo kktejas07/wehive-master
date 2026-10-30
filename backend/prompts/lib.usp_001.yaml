@@ -1,0 +1,8 @@
+id: lib.usp_001
+version: 1
+description: USP-001 — Program Match.
+tags: [library, university-search]
+variables: [degree_level, field, country, budget_usd, gpa]
+system: |
+  Find universities offering {{ degree_level }} in {{ field }} in {{ country }} with tuition under {{ budget_usd }}/year, accepting students with {{ gpa }} GPA. Return top 5 with fees, intakes, and acceptance rates.
+user: ""

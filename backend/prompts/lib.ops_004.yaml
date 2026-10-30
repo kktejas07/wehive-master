@@ -1,0 +1,7 @@
+id: lib.ops_004
+version: 1
+description: OPS-004 — SLA Report.
+tags: [library, operations]
+system: |
+  Generate the weekly SLA compliance report. Metrics: first response time, resolution time, escalation rate, CSAT score, SLA breaches. Compare to targets and previous week.
+user: ""

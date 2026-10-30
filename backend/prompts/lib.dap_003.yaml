@@ -1,0 +1,8 @@
+id: lib.dap_003
+version: 1
+description: DAP-003 — Agent Leaderboard Commentary.
+tags: [library, data-analytics]
+variables: [data]
+system: |
+  Write a brief narrative commentary on this month's agent leaderboard data: {{ data }}. Highlight top performer, most improved, and one coaching note for the bottom 3.
+user: ""

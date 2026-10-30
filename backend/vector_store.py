@@ -40,6 +40,7 @@ class _InMemoryCollection:
         self._docs: dict[str, dict[str, Any]] = {}
 
     def upsert(self, *, ids, documents, embeddings, metadatas):
+        metadatas = metadatas or []
         for i, doc_id in enumerate(ids):
             self._docs[doc_id] = {
                 "id": doc_id,

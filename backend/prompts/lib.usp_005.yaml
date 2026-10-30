@@ -1,0 +1,8 @@
+id: lib.usp_005
+version: 1
+description: USP-005 — Destination Comparison.
+tags: [library, university-search]
+variables: [country_1, country_2, degree_level, field]
+system: |
+  Compare studying in {{ country_1 }} vs {{ country_2 }} for a {{ degree_level }} student in {{ field }}. Cover: total cost, PR pathway, job market, part-time work rules, student life.
+user: ""

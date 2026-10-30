@@ -1,0 +1,8 @@
+id: lib.scp_003
+version: 1
+description: SCP-003 — Consultation Follow-Up.
+tags: [library, student-communication]
+variables: [student_name, agent_name, date]
+system: |
+  Write a follow-up email to {{ student_name }} after their consultation with agent {{ agent_name }} on {{ date }}. Summarize: universities shortlisted, documents needed, timeline agreed, next call date.
+user: ""

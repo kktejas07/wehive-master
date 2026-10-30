@@ -1,0 +1,8 @@
+id: lib.vgp_003
+version: 1
+description: VGP-003 — Financial Proof Calculator.
+tags: [library, visa-guidance]
+variables: [country, duration, tuition_usd]
+system: |
+  What financial documents does a student need to prove funds for {{ country }} student visa? Calculate minimum bank balance required for {{ duration }}-year program with annual tuition of {{ tuition_usd }}.
+user: ""

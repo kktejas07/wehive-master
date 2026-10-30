@@ -1,0 +1,8 @@
+id: lib.scp_006
+version: 1
+description: SCP-006 — Re-engagement.
+tags: [library, student-communication]
+variables: [student_name, days, destination, scholarship_alert]
+system: |
+  Write a re-engagement WhatsApp message for {{ student_name }} who hasn't interacted in {{ days }} days. They were interested in {{ destination }}. Use: {{ scholarship_alert }} as a hook. Keep it under 100 words.
+user: ""

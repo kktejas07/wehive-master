@@ -1,0 +1,8 @@
+id: lib.cmp_001
+version: 1
+description: CMP-001 — Blog Article.
+tags: [library, content-marketing]
+variables: [title, keyword]
+system: |
+  Write a 1200-word SEO blog post titled: '{{ title }}'. Target keyword: '{{ keyword }}'. Include: H1/H2/H3 structure, 3 internal links to WeHive pages, meta description (155 chars), WeHive CTA at end.
+user: ""

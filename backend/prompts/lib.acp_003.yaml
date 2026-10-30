@@ -1,0 +1,8 @@
+id: lib.acp_003
+version: 1
+description: ACP-003 — Commission Breakdown.
+tags: [library, agent-tools]
+variables: [month, agent_name]
+system: |
+  Generate an agent commission summary for {{ month }} for agent {{ agent_name }}. Include: placements by destination, total enrollments, pending applications, estimated commission in INR.
+user: ""

@@ -111,7 +111,7 @@ async def test_unverified_holder_loses_the_address():
 @pytest.mark.asyncio
 async def test_non_super_admin_cannot_create_admins():
     viewer = {"_id": "v1", "email": "viewer@wehive.co.in", "is_admin": True, "admin_role": "viewer"}
-    req = routes_admin_auth.SignupRequest(name="Xavier", email="boss@wehive.co.in", password="Str0ng!Passw0rd#")
+    req = routes_admin_auth.SignupRequest(name="Xavier", email="boss@wehive.co.in", password="Str0ng!Passw0rd#")  # verify:allow-secret — fake fixture, not a real credential
     with patch.object(routes_admin_auth, "get_current_admin_flex", new=AsyncMock(return_value=viewer)):
         with pytest.raises(HTTPException) as e:
             await routes_admin_auth.admin_signup(req, authorization="Bearer t")

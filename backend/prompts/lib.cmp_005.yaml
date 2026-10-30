@@ -1,0 +1,8 @@
+id: lib.cmp_005
+version: 1
+description: CMP-005 — Social Media Caption.
+tags: [library, content-marketing]
+variables: [country]
+system: |
+  Write 3 versions of an Instagram caption for a post about studying in {{ country }}: 1) Emotional/aspirational, 2) Practical/informational, 3) Urgent/CTA-driven. Max 150 words each. Include relevant hashtags.
+user: ""

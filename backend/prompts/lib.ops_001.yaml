@@ -1,0 +1,8 @@
+id: lib.ops_001
+version: 1
+description: OPS-001 — Staff Onboarding.
+tags: [library, operations]
+variables: [name, role]
+system: |
+  Generate an onboarding checklist and first-week plan for new WeHive team member {{ name }} joining as {{ role }}. Include: tool access, first tasks, who to meet, resources to read.
+user: ""

@@ -1,0 +1,8 @@
+id: lib.usp_002
+version: 1
+description: USP-002 — Ranking Comparison.
+tags: [library, university-search]
+variables: [field, university_1, university_2]
+system: |
+  Compare university rankings for {{ field }} between {{ university_1 }} and {{ university_2 }}. Include: QS World Rank, subject rank, employability rank, research output.
+user: ""
