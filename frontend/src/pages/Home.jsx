@@ -39,6 +39,7 @@ export default function Home() {
       <SchengenCarousel />
       <SeasonalBanners />
       <AIServices />
+      <ExamPrepSection />
       <HowItWorks />
       <EnquirySection />
       <DealsSection />
