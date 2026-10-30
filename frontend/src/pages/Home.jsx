@@ -15,6 +15,10 @@ import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
 import EnquirySection from '../components/EnquirySection';
 import { updateSEO } from '../lib/seo';
+import SeasonalBanners from '../components/SeasonalBanners';
+import ExamPrepSection from '../components/ExamPrepSection';
+import PartnersBanner from '../components/PartnersBanner';
+import GlobalTrends from '../components/GlobalTrends';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -36,7 +40,11 @@ export default function Home() {
       <CountryGrid filters={filters} />
       <StatsStrip />
       <SchengenCarousel />
+      <SeasonalBanners />
       <AIServices />
+      <ExamPrepSection />
+      <PartnersBanner />
+      <GlobalTrends />
       <HowItWorks />
       <EnquirySection />
       <DealsSection />
