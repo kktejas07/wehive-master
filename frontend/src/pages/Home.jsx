@@ -15,12 +15,9 @@ import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
 import EnquirySection from '../components/EnquirySection';
 import { updateSEO } from '../lib/seo';
-import PartnersBanner from '../components/PartnersBanner';
-import ExamPrepSection from '../components/ExamPrepSection';
 import SeasonalBanners from '../components/SeasonalBanners';
-import ChristmasBanners from '../components/ChristmasBanners';
-import GermanyVisaBanner from '../components/GermanyVisaBanner';
-import PartnerBanners from '../components/PartnerBanners';
+import ExamPrepSection from '../components/ExamPrepSection';
+import PartnersBanner from '../components/PartnersBanner';
 import GlobalTrends from '../components/GlobalTrends';
 
 export default function Home() {
@@ -44,11 +41,8 @@ export default function Home() {
       <StatsStrip />
       <SchengenCarousel />
       <SeasonalBanners />
-      <ChristmasBanners />
-      <GermanyVisaBanner />
       <AIServices />
       <ExamPrepSection />
-      <PartnerBanners />
       <PartnersBanner />
       <GlobalTrends />
       <HowItWorks />
