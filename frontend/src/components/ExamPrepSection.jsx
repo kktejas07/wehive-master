@@ -1,274 +1,161 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-const primaryExams = [
+const STATIC_EXAMS = [
   {
-    name: 'TOEFL iBT',
-    color: '#003A70',
-    icon: '🎓',
-    score: '0 – 120',
-    fee: '$235 USD',
-    validity: '2 years',
-    link: 'https://www.ets.org/toefl/register/',
-    cta: 'Register Now →',
-    minScores: 'USA 80+ · UK 72+ · Canada 86+ · Australia 79+',
-    description: 'Accepted by 12,000+ universities in 160+ countries. Home edition available.',
+    id: "toefl",
+    name: "TOEFL",
+    full_name: "Test of English as a Foreign Language",
+    fee_usd: 205,
+    fee_inr: 17000,
+    registration_url: "https://www.ets.org/toefl",
+    logo_color: "#005A9C",
+    description: "Widely accepted by 11,000+ universities in 150 countries.",
+    validity_years: 2,
+    score_range: "0–120",
+    accepted_by: ["USA", "Canada", "UK", "Australia"],
   },
   {
-    name: 'IELTS Academic',
-    color: '#C8102E',
-    icon: '📝',
-    score: '0 – 9 Bands',
-    fee: '₹17,000 INR',
-    validity: '2 years',
-    link: 'https://www.ielts.org/book-a-test',
-    cta: 'Book Test →',
-    minScores: 'UK 6.0+ · Canada 6.5+ · Australia 6.5+ · Germany 6.0+',
-    description: 'Offered by British Council, IDP & Cam. Assessment. Computer-based available.',
+    id: "ielts",
+    name: "IELTS",
+    full_name: "International English Language Testing System",
+    fee_usd: 215,
+    fee_inr: 17000,
+    registration_url: "https://www.ielts.org",
+    logo_color: "#E31837",
+    description: "Most popular English test for study & immigration globally.",
+    validity_years: 2,
+    score_range: "0–9",
+    accepted_by: ["UK", "Australia", "Canada", "New Zealand"],
   },
   {
-    name: 'GRE General',
-    color: '#009B77',
-    icon: '🧪',
-    score: '260 – 340',
-    fee: '$228 USD',
-    validity: '5 years',
-    link: 'https://www.ets.org/gre/test-takers/general-test/register/',
-    cta: 'Schedule GRE →',
-    minScores: 'Top US MS programs: V 155+ · Q 162+ · AWA 4.0+',
-    description: 'Required for most US & Canada MS/PhD programs. Home edition available.',
+    id: "gre",
+    name: "GRE",
+    full_name: "Graduate Record Examination",
+    fee_usd: 220,
+    fee_inr: 22500,
+    registration_url: "https://www.ets.org/gre",
+    logo_color: "#003B71",
+    description: "Required for most US/Canada graduate school admissions.",
+    validity_years: 5,
+    score_range: "260–340",
+    accepted_by: ["USA", "Canada", "UK"],
   },
   {
-    name: 'GMAT Focus',
-    color: '#0077C8',
-    icon: '💼',
-    score: '205 – 805',
-    fee: '$275 USD',
-    validity: '5 years',
-    link: 'https://www.mba.com/exams/gmat-focus-edition',
-    cta: 'Register GMAT →',
-    minScores: 'Top MBA programs: 650+ (good) · 700+ (competitive)',
-    description: 'New GMAT Focus Edition. 3 sections, 2h15m. Online proctored available.',
-  },
-];
-
-const secondaryExams = [
-  {
-    name: 'PTE Academic',
-    color: '#007DC3',
-    link: 'https://pearsonpte.com/test-takers/pte-academic',
-    detail: 'Results in 48 hrs · UK, AUS, CA, NZ',
-    fee: '₹15,900',
+    id: "gmat-focus",
+    name: "GMAT Focus",
+    full_name: "Graduate Management Admission Test Focus Edition",
+    fee_usd: 275,
+    fee_inr: 22000,
+    registration_url: "https://www.mba.com/exams/gmat",
+    logo_color: "#005587",
+    description: "Premier MBA admissions test accepted worldwide.",
+    validity_years: 5,
+    score_range: "205–805",
+    accepted_by: ["USA", "UK", "EU", "Australia"],
   },
   {
-    name: 'Duolingo English',
-    color: '#58CC02',
-    link: 'https://englishtest.duolingo.com',
-    detail: '$65 USD · At-home · 5,000+ unis',
-    fee: '$65 USD',
+    id: "pte",
+    name: "PTE",
+    full_name: "Pearson Test of English Academic",
+    fee_usd: 185,
+    fee_inr: 15900,
+    registration_url: "https://www.pearsonpte.com",
+    logo_color: "#0066CC",
+    description: "AI-scored English test with fast results in 48 hours.",
+    validity_years: 2,
+    score_range: "10–90",
+    accepted_by: ["Australia", "UK", "New Zealand", "USA"],
   },
   {
-    name: 'SAT',
-    color: '#E8702A',
-    link: 'https://www.collegeboard.org/sat',
-    detail: '400–1600 · For UG admissions',
-    fee: '~$60 USD',
+    id: "duolingo",
+    name: "Duolingo English Test",
+    full_name: "Duolingo English Test",
+    fee_usd: 59,
+    fee_inr: 4900,
+    registration_url: "https://englishtest.duolingo.com",
+    logo_color: "#58CC02",
+    description: "Affordable online English test accepted by 4,000+ programs.",
+    validity_years: 2,
+    score_range: "10–160",
+    accepted_by: ["USA", "Canada", "UK", "Australia"],
   },
   {
-    name: 'ACT',
-    color: '#D00000',
-    link: 'https://www.act.org',
-    detail: '1–36 · UG admissions US/CA',
-    fee: '~$63 USD',
+    id: "sat",
+    name: "SAT",
+    full_name: "Scholastic Assessment Test",
+    fee_usd: 60,
+    fee_inr: 7500,
+    registration_url: "https://satsuite.collegeboard.org/sat",
+    logo_color: "#009CDE",
+    description: "Standard undergraduate admissions test for US universities.",
+    validity_years: 5,
+    score_range: "400–1600",
+    accepted_by: ["USA", "Canada"],
+  },
+  {
+    id: "act",
+    name: "ACT",
+    full_name: "American College Testing",
+    fee_usd: 63,
+    fee_inr: 7900,
+    registration_url: "https://www.act.org",
+    logo_color: "#E8001C",
+    description: "Alternative to SAT; widely accepted by US colleges.",
+    validity_years: 5,
+    score_range: "1–36",
+    accepted_by: ["USA"],
   },
 ];
 
 export default function ExamPrepSection() {
-  const [apiExams, setApiExams] = useState(null);
+  const [exams, setExams] = useState(STATIC_EXAMS);
 
   useEffect(() => {
-    fetch('/api/exam-prep')
+    fetch("/api/exam-prep")
       .then((r) => r.json())
-      .then((data) => { if (data?.exams?.length) setApiExams(data.exams); })
-      .catch(() => { /* fallback to static */ });
+      .then((data) => {
+        if (data?.exams?.length) setExams(data.exams);
+      })
+      .catch(() => {
+        /* fallback to static data already set */
+      });
   }, []);
 
   return (
-    <section className="exam-section py-16 px-4" aria-labelledby="exam-title">
-      <style>{`
-        .exam-section {
-          background: white;
-        }
-        .exam-title {
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(1.4rem, 2.5vw, 2rem);
-          font-weight: 800;
-          color: #011CB5;
-          text-align: center;
-          margin-bottom: 0.4rem;
-        }
-        .exam-sub {
-          text-align: center;
-          color: #666;
-          margin-bottom: 2.5rem;
-          font-size: 0.95rem;
-        }
-        .exam-primary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 1.25rem;
-          max-width: 1100px;
-          margin: 0 auto 2rem;
-        }
-        .exam-card {
-          border-radius: 16px;
-          border: 2px solid;
-          padding: 1.5rem;
-          position: relative;
-          transition: box-shadow 0.3s, transform 0.3s;
-          background: white;
-        }
-        .exam-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 32px rgba(0,0,0,0.12);
-        }
-        .exam-icon {
-          font-size: 1.8rem;
-          margin-bottom: 0.5rem;
-          display: block;
-        }
-        .exam-name {
-          font-size: 1.15rem;
-          font-weight: 800;
-          margin-bottom: 0.4rem;
-        }
-        .exam-desc {
-          font-size: 0.77rem;
-          color: #666;
-          margin-bottom: 0.8rem;
-          line-height: 1.4;
-        }
-        .exam-meta {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.4rem;
-          margin-bottom: 0.8rem;
-        }
-        .exam-chip {
-          font-size: 0.7rem;
-          font-weight: 600;
-          padding: 0.2rem 0.5rem;
-          border-radius: 8px;
-          background: rgba(0,0,0,0.06);
-          color: #333;
-        }
-        .exam-min-scores {
-          font-size: 0.72rem;
-          color: #555;
-          margin-bottom: 1rem;
-          line-height: 1.4;
-        }
-        .exam-cta {
-          display: block;
-          text-align: center;
-          padding: 0.55rem 1rem;
-          border-radius: 50px;
-          font-size: 0.82rem;
-          font-weight: 700;
-          text-decoration: none;
-          color: white;
-          transition: opacity 0.2s;
-        }
-        .exam-cta:hover { opacity: 0.85; }
-        .exam-secondary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
-          max-width: 900px;
-          margin: 0 auto;
-        }
-        .exam-secondary-card {
-          background: #f8f9ff;
-          border-radius: 12px;
-          padding: 1rem 1.2rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.3rem;
-          border: 1px solid #e8eaf6;
-          transition: box-shadow 0.2s;
-        }
-        .exam-secondary-card:hover {
-          box-shadow: 0 4px 16px rgba(1,28,181,0.1);
-        }
-        .exam-secondary-name {
-          font-weight: 700;
-          font-size: 0.92rem;
-        }
-        .exam-secondary-detail {
-          font-size: 0.75rem;
-          color: #666;
-        }
-        .exam-secondary-link {
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-decoration: none;
-          margin-top: 0.2rem;
-        }
-        .exam-secondary-link:hover { text-decoration: underline; }
-        .exam-secondary-title {
-          font-size: 1rem;
-          font-weight: 700;
-          color: #444;
-          max-width: 900px;
-          margin: 0 auto 1rem;
-          padding-left: 0.25rem;
-        }
-        @media (max-width: 600px) {
-          .exam-primary-grid, .exam-secondary-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
-
-      <h2 className="exam-title" id="exam-title">Ace Your Entrance Exams</h2>
-      <p className="exam-sub">Register directly on official portals — WeHive guides your prep timeline</p>
-
-      <div className="exam-primary-grid">
-        {primaryExams.map((exam) => (
-          <div key={exam.name} className="exam-card" style={{ borderColor: exam.color }}>
-            <span className="exam-icon">{exam.icon}</span>
-            <p className="exam-name" style={{ color: exam.color }}>{exam.name}</p>
-            <p className="exam-desc">{exam.description}</p>
-            <div className="exam-meta">
-              <span className="exam-chip">Score: {exam.score}</span>
-              <span className="exam-chip">Fee: {exam.fee}</span>
-              <span className="exam-chip">Valid: {exam.validity}</span>
+    <section className="exam-prep-section">
+      <h2>Exam Preparation</h2>
+      <div className="exam-grid">
+        {exams.map((exam) => (
+          <div
+            key={exam.id}
+            className="exam-card"
+            style={{ borderTop: `4px solid ${exam.logo_color}` }}
+          >
+            <div className="exam-name" style={{ color: exam.logo_color }}>
+              {exam.name}
             </div>
-            <p className="exam-min-scores">📊 {exam.minScores}</p>
+            <div className="exam-full-name">{exam.full_name}</div>
+            <p className="exam-description">{exam.description}</p>
+            <div className="exam-meta">
+              <span>Score: {exam.score_range}</span>
+              <span>Valid: {exam.validity_years} yrs</span>
+              <span>Fee: ${exam.fee_usd}</span>
+            </div>
+            <div className="exam-countries">
+              {exam.accepted_by.map((c) => (
+                <span key={c} className="country-badge">
+                  {c}
+                </span>
+              ))}
+            </div>
             <a
-              href={exam.link}
+              href={exam.registration_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="exam-cta"
-              style={{ background: exam.color }}
+              className="exam-register-btn"
+              style={{ backgroundColor: exam.logo_color }}
             >
-              {exam.cta}
-            </a>
-          </div>
-        ))}
-      </div>
-
-      <p className="exam-secondary-title">Also accepted at leading universities:</p>
-      <div className="exam-secondary-grid">
-        {secondaryExams.map((exam) => (
-          <div key={exam.name} className="exam-secondary-card">
-            <span className="exam-secondary-name" style={{ color: exam.color }}>{exam.name}</span>
-            <span className="exam-secondary-detail">{exam.detail}</span>
-            <a
-              href={exam.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="exam-secondary-link"
-              style={{ color: exam.color }}
-            >
-              Official Site →
+              Register
             </a>
           </div>
         ))}
