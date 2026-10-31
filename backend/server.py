@@ -64,6 +64,7 @@ from routes_announcements import router as announcements_router  # noqa: E402
 from broadcast_scheduler import mark_interrupted_on_boot, start_broadcast_scheduler  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
 from routes_visa_requirements import router as visa_requirements_router  # noqa: E402
+from routes_exam_prep import router as exam_prep_router  # noqa: E402
 from routes_embassy import router as embassy_router  # noqa: E402
 from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
 from routes_rag import router as rag_router  # noqa: E402
@@ -206,6 +207,7 @@ api_router.include_router(newsletter_campaigns_router)
 api_router.include_router(announcements_router)
 api_router.include_router(i18n_router)
 api_router.include_router(visa_requirements_router)
+api_router.include_router(exam_prep_router)
 api_router.include_router(embassy_router)
 api_router.include_router(agents_ai_router)
 api_router.include_router(rag_router)

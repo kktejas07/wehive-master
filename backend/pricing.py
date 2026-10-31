@@ -22,6 +22,7 @@ async def load_pricing() -> dict:
         'gst_rate': float(doc.get('gst_rate', DEFAULT_GST_RATE)),
         'currency': doc.get('currency', 'INR'),
         'updated_at': doc.get('updated_at'),
+        'updated_by': doc.get('updated_by'),
     }
     with _pricing_lock:
         _pricing_cache = cfg

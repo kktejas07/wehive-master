@@ -615,6 +615,7 @@ async def admin_get_pricing(_=Depends(get_current_admin)):
         'gst_rate': cfg['gst_rate'],
         'currency': cfg['currency'],
         'updated_at': cfg['updated_at'].isoformat() if isinstance(cfg.get('updated_at'), datetime) else cfg.get('updated_at'),
+        'updated_by': cfg.get('updated_by'),
         'defaults': {
             'base_fees': DEFAULT_BASE_FEE_BY_TYPE,
             'surcharge_inr': DEFAULT_SURCHARGE_INR,
@@ -641,6 +642,14 @@ async def admin_update_pricing(patch: PricingPatch, admin=Depends(require_role([
                 raise HTTPException(400, f'base_fees.{k} must be an integer')
         update['base_fees'] = clean
     update['updated_at'] = datetime.utcnow()
+    update['updated_by'] = admin.get('email') or admin.get('username') or str(admin.get('_id', ''))
+    # Archive current value to config_history before overwriting
+    current_doc = await settings_col.find_one({'_id': 'pricing'})
+    if current_doc:
+        history_entry = {k: v for k, v in current_doc.items() if k != '_id'}
+        history_entry['config_key'] = 'pricing'
+        history_entry['archived_at'] = datetime.utcnow()
+        await db['config_history'].insert_one(history_entry)
     await settings_col.update_one(
         {'_id': 'pricing'}, {'$set': update}, upsert=True,
     )
