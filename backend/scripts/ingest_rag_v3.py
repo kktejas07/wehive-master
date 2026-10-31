@@ -57,6 +57,12 @@ SECTION_NAMESPACE_MAP: dict[str, str] = {
     "wehive-interview-prep": "wehive-interview-prep",
     "wehive-exam-prep":      "wehive-exam-prep",
     "wehive-partners":       "wehive-partners",
+    # v3-expanded namespaces
+    "wehive-student-docs":   "wehive-student-docs",
+    "wehive-scholarships":   "wehive-scholarships",
+    "wehive-cost-of-living": "wehive-cost-of-living",
+    "wehive-sop-templates":  "wehive-sop-templates",
+    "wehive-wehive-faq":     "wehive-wehive-faq",
 }
 
 V3_NAMESPACES = list(SECTION_NAMESPACE_MAP.values())
