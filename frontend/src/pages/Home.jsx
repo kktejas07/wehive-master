@@ -17,6 +17,7 @@ import EnquirySection from '../components/EnquirySection';
 import { updateSEO } from '../lib/seo';
 import SeasonalBanners from '../components/SeasonalBanners';
 import ApplicationBuilder from '../components/ApplicationBuilder';
+import ExamPrepSection from '../components/ExamPrepSection';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
