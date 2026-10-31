@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const trends = [
   {
@@ -48,6 +48,15 @@ const trends = [
 ];
 
 export default function GlobalTrends() {
+  const [apiTrends, setApiTrends] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/global-trends')
+      .then((r) => r.json())
+      .then((data) => { if (data?.trends?.length) setApiTrends(data.trends); })
+      .catch(() => { /* fallback to static */ });
+  }, []);
+
   return (
     <section className="trends-section py-14 px-4" aria-labelledby="trends-title">
       <style>{`

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const primaryExams = [
   {
@@ -83,6 +83,15 @@ const secondaryExams = [
 ];
 
 export default function ExamPrepSection() {
+  const [apiExams, setApiExams] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/exam-prep')
+      .then((r) => r.json())
+      .then((data) => { if (data?.exams?.length) setApiExams(data.exams); })
+      .catch(() => { /* fallback to static */ });
+  }, []);
+
   return (
     <section className="exam-section py-16 px-4" aria-labelledby="exam-title">
       <style>{`

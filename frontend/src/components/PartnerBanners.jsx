@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function PartnerBanners() {
+  const [apiPartners, setApiPartners] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/partners')
+      .then((r) => r.json())
+      .then((data) => { if (data?.partners?.length) setApiPartners(data.partners); })
+      .catch(() => { /* fallback to static */ });
+  }, []);
+
   return (
     <section className="partner-section py-16 px-4" aria-labelledby="partners-title">
       <style>{`
