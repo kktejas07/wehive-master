@@ -11,6 +11,8 @@ from typing import List, Optional
 
 from data import get_country
 
+INDIAN_PASSPORT_EXTRA_DOCS = ["aadhaar_card", "pan_card"]
+
 REQUIRED_DOCS = {
     "tourist": [
         "Passport (6mo validity)",
@@ -145,11 +147,38 @@ def check_required_docs(uploaded_docs: List[dict], visa_type: str) -> List[dict]
     return results
 
 
+def get_required_doc_types(visa_type: str, passport_country: str = "IN") -> list[str]:
+    """Return the machine-readable doc-type keys required for a visa + nationality."""
+    base = {
+        "tourist": ["passport", "photographs", "bank_statement", "flight_booking", "hotel_booking", "travel_insurance"],
+        "business": ["passport", "photographs", "bank_statement", "invitation_letter", "cover_letter", "employment_letter"],
+        "student": ["passport", "photographs", "transcripts", "financial_documents", "ielts_results"],
+        "work": ["passport", "photographs", "employment_letter", "degree_certificate", "police_clearance"],
+    }
+    docs = list(base.get(visa_type.lower(), base["tourist"]))
+    if passport_country.upper() == "IN":
+        for d in INDIAN_PASSPORT_EXTRA_DOCS:
+            if d not in docs:
+                docs.append(d)
+    return docs
+
+
+def check_user_contact_fields(user: dict) -> list[str]:
+    """Return names of missing contact fields."""
+    missing = []
+    if not (user.get("email") or "").strip():
+        missing.append("email")
+    if not (user.get("phone") or "").strip():
+        missing.append("phone")
+    return missing
+
+
 async def validate_application_docs(
     country_id: str,
     visa_type: str,
     uploaded_docs: List[dict],
     passport_expiry: Optional[str] = None,
+    passport_country: str = "IN",
 ) -> dict:
     """Full document validation for a visa application."""
     checks = []

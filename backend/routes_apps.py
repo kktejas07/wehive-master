@@ -20,7 +20,11 @@ from db import db, applications
 import asyncio
 from routes_chatbot import notify_status_change
 from serializers import serialize_doc
-from agents.document_validator import validate_document_background
+from agents.document_validator import (
+    validate_document_background,
+    get_required_doc_types,
+    check_user_contact_fields,
+)
 _serialize = serialize_doc
 import storage as r2
 
@@ -149,7 +153,8 @@ _ALLOWED_DOC_TYPES = {
     "birth_certificate", "marriage_certificate", "degree_certificate",
     "transcripts", "ielts_results", "toefl_results", "financial_documents",
     "tax_returns", "police_clearance", "medical_certificate", "sponsorship_letter",
-    "proof_of_accommodation", "proof_of_funds", "cover_letter", "itinerary", "other",
+    "proof_of_accommodation", "proof_of_funds", "cover_letter", "itinerary",
+    "aadhaar_card", "pan_card", "other",
 }
 
 
@@ -288,12 +293,52 @@ async def download_document(application_id: str, doc_id: str, user=Depends(get_c
     return FileResponse(str(p), media_type=doc.get('mime', 'application/octet-stream'), filename=doc['filename'])
 
 
+# ---------- Required documents check ----------
+OPTIONAL_DOC_TYPES = [
+    "travel_insurance", "cover_letter", "itinerary",
+    "medical_certificate", "proof_of_accommodation",
+]
+
+
+def _build_doc_report(app: dict, user: dict) -> dict:
+    """Build the required-documents report for an application."""
+    passport_country = app.get("passport_country", "IN")
+    visa_type = app.get("visa_type", "tourist")
+    mandatory = get_required_doc_types(visa_type, passport_country)
+    uploaded_types = [d.get("doc_type") for d in app.get("documents", [])]
+    missing_docs = [d for d in mandatory if d not in uploaded_types]
+    contact_missing = check_user_contact_fields(user)
+    return {
+        "mandatory": mandatory,
+        "optional": OPTIONAL_DOC_TYPES,
+        "uploaded": uploaded_types,
+        "missing_docs": missing_docs,
+        "contact_info_required": ["email", "phone"],
+        "contact_info_missing": contact_missing,
+        "is_complete": len(missing_docs) == 0 and len(contact_missing) == 0,
+    }
+
+
+@router.get('/{application_id}/required-documents')
+async def required_documents(application_id: str, user=Depends(get_current_user)):
+    app = await _get_app_for_user(application_id, user["_id"])
+    return _build_doc_report(app, user)
+
+
 # ---------- Status timeline ----------
 @router.post('/{application_id}/submit')
 async def submit_application(application_id: str, user=Depends(get_current_user)):
     app = await _get_app_for_user(application_id, user["_id"])
     if not app.get('documents'):
         raise HTTPException(400, 'Upload at least one document before submitting')
+
+    report = _build_doc_report(app, user)
+    if report["missing_docs"]:
+        raise HTTPException(400, detail={
+            "detail": "Missing required documents",
+            "missing": report["missing_docs"],
+        })
+
     now = datetime.utcnow()
     events = app.get('timeline') or _initial_timeline()
     events.append({'id': str(uuid.uuid4()), 'status': 'submitted', 'label': 'Application submitted', 'at': now, 'note': 'Your application is queued for review.'})
