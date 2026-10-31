@@ -72,6 +72,11 @@ SECTION_NAMESPACE_MAP: dict[str, str] = {
     "wehive-application-builder": "wehive-application-builder",
     "wehive-health-insurance":    "wehive-health-insurance",
     "wehive-travel-and-arrival":  "wehive-travel-and-arrival",
+    # v3-expanded namespaces batch 4 (Tier 1 gap-fill — live feature coverage)
+    "wehive-amadeus-travel":      "wehive-amadeus-travel",
+    "wehive-community-hive":      "wehive-community-hive",
+    "wehive-agent-portal":        "wehive-agent-portal",
+    "wehive-post-arrival":        "wehive-post-arrival",
 }
 
 V3_NAMESPACES = list(SECTION_NAMESPACE_MAP.values())
