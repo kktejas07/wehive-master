@@ -70,13 +70,16 @@ const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
 const PostApprovalHub = lazy(() => import('./pages/PostApprovalHub'));
 const PreDeparture = lazy(() => import('./pages/PreDeparture'));
 
+let _pricingLoaded = false;
 function PricingLoader() {
   useEffect(() => {
+    if (_pricingLoaded) return;
     const timer = setTimeout(() => {
+      _pricingLoaded = true;
       axios.get(`${API}/public/pricing`).then((r) => {
         setPricing(r.data);
         if (r.data.currency) setCurrency(r.data.currency);
-      }).catch(() => {});
+      }).catch(() => { _pricingLoaded = false; });
     }, 5000);
     return () => clearTimeout(timer);
   }, []);
@@ -134,10 +137,6 @@ function AnimatedRoutes() {
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
           <Route path="/visa-interview" element={<PrivateRoute><PageTransition><VisaInterview /></PageTransition></PrivateRoute>} />
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
-          {/* Bug 5: /signin was returning 404 — redirect to the real login route */}
-          <Route path="/signin" element={<Navigate to="/login" replace />} />
-          {/* Bug 6: /tools/visa-checker was returning 404 — redirect to the real route */}
-          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/tools/:tool" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/programs/:universityId" element={<PageTransition><ProgramList /></PageTransition>} />
@@ -166,9 +165,6 @@ function AnimatedRoutes() {
           <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
-          {/* Legacy URL redirects */}
-          <Route path="/signin" element={<Navigate to="/login" replace />} />
-          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>

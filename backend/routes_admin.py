@@ -1675,3 +1675,32 @@ async def admin_re_seed_universities(admin=Depends(get_current_admin_flex)):
         return {'ok': True, 'result': result}
     except Exception as e:
         raise HTTPException(500, f'Re-seed failed: {e}')
+
+
+# ---------- Interview Q&A CRUD ----------
+
+@router.get('/interview-qa')
+async def list_interview_qa(country: str = None, _admin=Depends(get_current_admin)):
+    q = {'country': country} if country else {}
+    docs = await db.interview_qa.find(q).to_list(200)
+    return [{**d, '_id': str(d['_id'])} for d in docs]
+
+
+@router.post('/interview-qa')
+async def create_interview_qa(body: dict, _admin=Depends(get_current_admin)):
+    r = await db.interview_qa.insert_one(body)
+    return {'id': str(r.inserted_id)}
+
+
+@router.patch('/interview-qa/{qa_id}')
+async def update_interview_qa(qa_id: str, body: dict, _admin=Depends(get_current_admin)):
+    from bson import ObjectId
+    await db.interview_qa.update_one({'_id': ObjectId(qa_id)}, {'$set': body})
+    return {'ok': True}
+
+
+@router.delete('/interview-qa/{qa_id}')
+async def delete_interview_qa(qa_id: str, _admin=Depends(get_current_admin)):
+    from bson import ObjectId
+    await db.interview_qa.delete_one({'_id': ObjectId(qa_id)})
+    return {'ok': True}
