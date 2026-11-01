@@ -93,179 +93,87 @@ export default function ExamPrepSection() {
   }, []);
 
   return (
-    <section className="exam-section py-16 px-4" aria-labelledby="exam-title">
-      <style>{`
-        .exam-section {
-          background: white;
-        }
-        .exam-title {
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(1.4rem, 2.5vw, 2rem);
-          font-weight: 800;
-          color: #011CB5;
-          text-align: center;
-          margin-bottom: 0.4rem;
-        }
-        .exam-sub {
-          text-align: center;
-          color: #666;
-          margin-bottom: 2.5rem;
-          font-size: 0.95rem;
-        }
-        .exam-primary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 1.25rem;
-          max-width: 1100px;
-          margin: 0 auto 2rem;
-        }
-        .exam-card {
-          border-radius: 16px;
-          border: 2px solid;
-          padding: 1.5rem;
-          position: relative;
-          transition: box-shadow 0.3s, transform 0.3s;
-          background: white;
-        }
-        .exam-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 32px rgba(0,0,0,0.12);
-        }
-        .exam-icon {
-          font-size: 1.8rem;
-          margin-bottom: 0.5rem;
-          display: block;
-        }
-        .exam-name {
-          font-size: 1.15rem;
-          font-weight: 800;
-          margin-bottom: 0.4rem;
-        }
-        .exam-desc {
-          font-size: 0.77rem;
-          color: #666;
-          margin-bottom: 0.8rem;
-          line-height: 1.4;
-        }
-        .exam-meta {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.4rem;
-          margin-bottom: 0.8rem;
-        }
-        .exam-chip {
-          font-size: 0.7rem;
-          font-weight: 600;
-          padding: 0.2rem 0.5rem;
-          border-radius: 8px;
-          background: rgba(0,0,0,0.06);
-          color: #333;
-        }
-        .exam-min-scores {
-          font-size: 0.72rem;
-          color: #555;
-          margin-bottom: 1rem;
-          line-height: 1.4;
-        }
-        .exam-cta {
-          display: block;
-          text-align: center;
-          padding: 0.55rem 1rem;
-          border-radius: 50px;
-          font-size: 0.82rem;
-          font-weight: 700;
-          text-decoration: none;
-          color: white;
-          transition: opacity 0.2s;
-        }
-        .exam-cta:hover { opacity: 0.85; }
-        .exam-secondary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
-          max-width: 900px;
-          margin: 0 auto;
-        }
-        .exam-secondary-card {
-          background: #f8f9ff;
-          border-radius: 12px;
-          padding: 1rem 1.2rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.3rem;
-          border: 1px solid #e8eaf6;
-          transition: box-shadow 0.2s;
-        }
-        .exam-secondary-card:hover {
-          box-shadow: 0 4px 16px rgba(1,28,181,0.1);
-        }
-        .exam-secondary-name {
-          font-weight: 700;
-          font-size: 0.92rem;
-        }
-        .exam-secondary-detail {
-          font-size: 0.75rem;
-          color: #666;
-        }
-        .exam-secondary-link {
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-decoration: none;
-          margin-top: 0.2rem;
-        }
-        .exam-secondary-link:hover { text-decoration: underline; }
-        .exam-secondary-title {
-          font-size: 1rem;
-          font-weight: 700;
-          color: #444;
-          max-width: 900px;
-          margin: 0 auto 1rem;
-          padding-left: 0.25rem;
-        }
-        @media (max-width: 600px) {
-          .exam-primary-grid, .exam-secondary-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
+    <section className="bg-white py-16 px-4" aria-labelledby="exam-title">
+      {/* Header */}
+      <h2
+        id="exam-title"
+        className="text-center font-extrabold text-2xl md:text-3xl mb-2"
+        style={{ color: '#011CB5', fontFamily: 'Inter, sans-serif' }}
+      >
+        Ace Your Entrance Exams
+      </h2>
+      <p className="text-center text-gray-500 text-sm mb-10">
+        Register directly on official portals — WeHive guides your prep timeline
+      </p>
 
-      <h2 className="exam-title" id="exam-title">Ace Your Entrance Exams</h2>
-      <p className="exam-sub">Register directly on official portals — WeHive guides your prep timeline</p>
-
-      <div className="exam-primary-grid">
+      {/* Primary exam cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto mb-8">
         {primaryExams.map((exam) => (
-          <div key={exam.name} className="exam-card" style={{ borderColor: exam.color }}>
-            <span className="exam-icon">{exam.icon}</span>
-            <p className="exam-name" style={{ color: exam.color }}>{exam.name}</p>
-            <p className="exam-desc">{exam.description}</p>
-            <div className="exam-meta">
-              <span className="exam-chip">Score: {exam.score}</span>
-              <span className="exam-chip">Fee: {exam.fee}</span>
-              <span className="exam-chip">Valid: {exam.validity}</span>
+          <div
+            key={exam.name}
+            className="flex flex-col rounded-2xl border-2 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+            style={{ borderColor: exam.color }}
+          >
+            {/* Icon + name */}
+            <span className="text-3xl mb-2">{exam.icon}</span>
+            <p className="text-base font-extrabold mb-1" style={{ color: exam.color }}>
+              {exam.name}
+            </p>
+            <p className="text-xs text-gray-500 leading-snug mb-3">{exam.description}</p>
+
+            {/* Score / Fee / Validity chips */}
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-black/5 text-gray-700">
+                Score: {exam.score}
+              </span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-black/5 text-gray-700">
+                Fee: {exam.fee}
+              </span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-black/5 text-gray-700">
+                Valid: {exam.validity}
+              </span>
             </div>
-            <p className="exam-min-scores">📊 {exam.minScores}</p>
-            <a
-              href={exam.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="exam-cta"
-              style={{ background: exam.color }}
-            >
-              {exam.cta}
-            </a>
+
+            {/* Min scores */}
+            <p className="text-xs text-gray-500 leading-snug mb-4">
+              📊 {exam.minScores}
+            </p>
+
+            {/* CTA — pushed to bottom */}
+            <div className="mt-auto">
+              <a
+                href={exam.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-center text-white text-sm font-bold py-2 px-4 rounded-full transition-opacity hover:opacity-85"
+                style={{ background: exam.color }}
+              >
+                {exam.cta}
+              </a>
+            </div>
           </div>
         ))}
       </div>
 
-      <p className="exam-secondary-title">Also accepted at leading universities:</p>
-      <div className="exam-secondary-grid">
+      {/* Secondary exams */}
+      <p className="text-sm font-bold text-gray-600 max-w-3xl mx-auto mb-3 pl-1">
+        Also accepted at leading universities:
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
         {secondaryExams.map((exam) => (
-          <div key={exam.name} className="exam-secondary-card">
-            <span className="exam-secondary-name" style={{ color: exam.color }}>{exam.name}</span>
-            <span className="exam-secondary-detail">{exam.detail}</span>
+          <div
+            key={exam.name}
+            className="flex flex-col gap-1 rounded-xl bg-slate-50 border border-indigo-100 p-4 transition-shadow hover:shadow-md"
+          >
+            <span className="font-bold text-sm" style={{ color: exam.color }}>
+              {exam.name}
+            </span>
+            <span className="text-xs text-gray-500">{exam.detail}</span>
             <a
               href={exam.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="exam-secondary-link"
+              className="text-xs font-semibold mt-1 hover:underline"
               style={{ color: exam.color }}
             >
               Official Site →
