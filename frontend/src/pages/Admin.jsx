@@ -28,6 +28,7 @@ import DestinationsTab from '../components/admin/DestinationsTab';
 import RequestsTab from '../components/admin/RequestsTab';
 import PromotionsTab from '../components/admin/PromotionsTab';
 import PromoCodesTab from '../components/admin/PromoCodesTab';
+import SocialStudioTab from '../components/admin/SocialStudioTab';
 import AgentsTab from '../components/admin/AgentsTab';
 import RAGTab from '../components/admin/RAGTab';
 import PromptsTab from '../components/admin/PromptsTab';
@@ -117,6 +118,7 @@ function AdminRoutes() {
                 <Route path="requests" element={<RequestsTab />} />
                 <Route path="promotions" element={<PromotionsTab />} />
                 <Route path="promocodes" element={<PromoCodesTab />} />
+                <Route path="social-studio" element={<SocialStudioTab />} />
                 <Route path="agents" element={<AgentsTab />} />
                 <Route path="staff" element={<RoleGuard allowed={['manager']}><StaffTab /></RoleGuard>} />
                 <Route path="admins" element={<SuperOnly><AdminsTab /></SuperOnly>} />

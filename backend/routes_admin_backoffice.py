@@ -3,11 +3,15 @@
 Endpoints (all admin-only):
   GET   /api/admin/leads                 — paginated leads inbox (status, search)
   PATCH /api/admin/leads/{id}            — set status (new/contacted/closed) and/or append a note
+  POST  /api/admin/leads                 — log an enquiry by hand (Social Studio: DMs, calls, walk-ins)
+  GET   /api/admin/social-studio         — post-calendar status and branch phone numbers
+  PUT   /api/admin/social-studio         — update either of them
   GET   /api/admin/export/leads.csv      — leads CSV
   GET   /api/admin/payments              — paginated payments with payer and totals
   GET   /api/admin/audit/log             — paginated audit trail (filter by entity type / admin)
 """
 import re
+import uuid
 from datetime import datetime
 from typing import Literal, Optional
 
@@ -43,6 +47,9 @@ def _lead(d: dict) -> dict:
         'travel_date': d.get('travel_date'),
         'travellers': d.get('travellers'),
         'branch': d.get('branch'),
+        'source': d.get('source'),
+        'ref': d.get('ref'),
+        'interest': d.get('interest'),
         'message': d.get('message', ''),
         'status': d.get('status', 'new'),
         'notes': [{**n, 'at': _iso(n.get('at'))} for n in d.get('notes', [])],
@@ -64,7 +71,7 @@ def _lead_filter(status: Optional[str], q: Optional[str], purpose: Optional[str]
         filt['status'] = status
     if q:
         filt['$or'] = [{'name': _rx(q)}, {'surname': _rx(q)}, {'email': _rx(q)}, {'message': _rx(q)},
-                       {'phone': _rx(q)}, {'destination': _rx(q)}]
+                       {'phone': _rx(q)}, {'destination': _rx(q)}, {'ref': _rx(q)}]
     return filt
 
 
@@ -108,6 +115,63 @@ async def admin_update_lead(lead_id: str, patch: LeadPatch, admin=Depends(requir
                        before={'status': lead.get('status', 'new')}, after={'status': patch.status or lead.get('status', 'new')},
                        extra={'note_added': bool(patch.note)})
     return _lead(await leads.find_one({'_id': lead_id}))
+
+
+class SocialLeadCreate(BaseModel):
+    """An enquiry staff log by hand from a social post (DM, call or walk-in)."""
+    name: str = Field(min_length=1, max_length=80)
+    phone: str = Field(min_length=5, max_length=20)
+    interest: str = Field(default='', max_length=60)
+    destination: str = Field(default='', max_length=60)
+    ref: str = Field(default='', max_length=20)        # post reference code, e.g. WH-1102
+    platform: str = Field(default='', max_length=30)   # Instagram, WhatsApp, Walk-in…
+    branch: Optional[Literal['miyapur', 'habsiguda', 'manikonda', 'ballari', 'anantapur', 'east-windsor']] = None
+    status: Literal['new', 'contacted', 'closed'] = 'new'
+    note: str = Field(default='', max_length=2000)
+
+
+@router.post('/leads')
+async def admin_create_lead(body: SocialLeadCreate, admin=Depends(require_role(['manager', 'support']))):
+    now = datetime.utcnow()
+    via = ' '.join(p for p in (body.platform, f'(ref {body.ref})' if body.ref else '') if p)
+    rec = {
+        '_id': str(uuid.uuid4()), 'type': 'social', 'name': body.name, 'email': '', 'phone': body.phone,
+        'interest': body.interest, 'destination': body.destination, 'ref': body.ref.upper(),
+        'source': body.platform or 'social', 'branch': body.branch, 'status': body.status,
+        'message': ' · '.join(p for p in (f'Social enquiry via {via}' if via else 'Social enquiry', body.interest,
+                                          body.destination, body.note) if p),
+        'created_at': now, 'updated_at': now,
+    }
+    await leads.insert_one(rec)
+    await audit_record(admin, 'create', 'lead', rec['_id'], extra={'ref': rec['ref'], 'source': rec['source']})
+    return _lead(rec)
+
+
+# ---------- social studio (post calendar status + branch phone numbers) ----------
+class StudioPatch(BaseModel):
+    calendar: Optional[dict[str, Literal['planned', 'designed', 'posted']]] = None
+    branches: Optional[dict[str, str]] = None
+
+
+@router.get('/social-studio')
+async def admin_get_social_studio(_=Depends(get_current_admin_flex)):
+    from settings_service import get_all
+    cfg = await get_all('social_studio')
+    return {'calendar': cfg.get('calendar', {}), 'branches': cfg.get('branches', {})}
+
+
+@router.put('/social-studio')
+async def admin_put_social_studio(body: StudioPatch, admin=Depends(require_role(['manager', 'support']))):
+    from settings_service import get_all, set_all
+    cfg = await get_all('social_studio')
+    if body.calendar:
+        cfg['calendar'] = {**cfg.get('calendar', {}), **body.calendar}
+    if body.branches is not None:
+        cfg['branches'] = {k: v[:20] for k, v in body.branches.items()}
+    await set_all('social_studio', cfg)
+    await audit_record(admin, 'update', 'settings', 'social_studio',
+                       extra={'calendar': sorted(body.calendar or {}), 'branches': body.branches is not None})
+    return {'calendar': cfg.get('calendar', {}), 'branches': cfg.get('branches', {})}
 
 
 @router.get('/export/leads.csv')
