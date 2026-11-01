@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import Reveal from "./Reveal";
+import { GraduationCap, ExternalLink, Clock, DollarSign, Target } from "lucide-react";
 
 const STATIC_EXAMS = [
   {
@@ -107,6 +109,82 @@ const STATIC_EXAMS = [
   },
 ];
 
+function ExamCard({ exam }) {
+  return (
+    <div className="flex flex-col h-full rounded-2xl bg-white border border-[hsl(var(--border))] overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+      {/* Color accent bar */}
+      <div className="h-1.5 w-full" style={{ backgroundColor: exam.logo_color }} />
+
+      <div className="flex flex-col flex-1 p-5">
+        {/* Header */}
+        <div className="flex items-start gap-3 mb-3">
+          <div
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl shrink-0 text-white font-bold text-[13px]"
+            style={{ backgroundColor: exam.logo_color }}
+          >
+            {exam.name.slice(0, 2)}
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-display font-bold text-[17px] text-[hsl(var(--blue-900))] leading-tight">
+              {exam.name}
+            </h3>
+            <p className="text-[12px] text-muted-foreground leading-snug mt-0.5 line-clamp-1">
+              {exam.full_name}
+            </p>
+          </div>
+        </div>
+
+        {/* Description */}
+        <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1">
+          {exam.description}
+        </p>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="flex flex-col items-center rounded-xl bg-[hsl(var(--soft-bg))] py-2.5 px-1">
+            <Target className="w-3.5 h-3.5 text-[hsl(var(--blue-700))] mb-1" />
+            <span className="text-[11px] text-muted-foreground">Score</span>
+            <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{exam.score_range}</span>
+          </div>
+          <div className="flex flex-col items-center rounded-xl bg-[hsl(var(--soft-bg))] py-2.5 px-1">
+            <Clock className="w-3.5 h-3.5 text-[hsl(var(--blue-700))] mb-1" />
+            <span className="text-[11px] text-muted-foreground">Valid</span>
+            <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">{exam.validity_years} yrs</span>
+          </div>
+          <div className="flex flex-col items-center rounded-xl bg-[hsl(var(--soft-bg))] py-2.5 px-1">
+            <DollarSign className="w-3.5 h-3.5 text-[hsl(var(--blue-700))] mb-1" />
+            <span className="text-[11px] text-muted-foreground">Fee</span>
+            <span className="text-[12px] font-bold text-[hsl(var(--blue-900))]">${exam.fee_usd}</span>
+          </div>
+        </div>
+
+        {/* Country badges */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {exam.accepted_by.map((c) => (
+            <span
+              key={c}
+              className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-[hsl(var(--blue-700))]/8 text-[hsl(var(--blue-700))]"
+            >
+              {c}
+            </span>
+          ))}
+        </div>
+
+        {/* Register button */}
+        <a
+          href={exam.registration_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-1.5 w-full rounded-xl py-2.5 text-[13px] font-bold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: exam.logo_color }}
+        >
+          Register <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function ExamPrepSection() {
   const [exams, setExams] = useState(STATIC_EXAMS);
 
@@ -116,49 +194,34 @@ export default function ExamPrepSection() {
       .then((data) => {
         if (data?.exams?.length) setExams(data.exams);
       })
-      .catch(() => {
-        /* fallback to static data already set */
-      });
+      .catch(() => {});
   }, []);
 
   return (
-    <section className="exam-prep-section">
-      <h2>Exam Preparation</h2>
-      <div className="exam-grid">
-        {exams.map((exam) => (
-          <div
-            key={exam.id}
-            className="exam-card"
-            style={{ borderTop: `4px solid ${exam.logo_color}` }}
-          >
-            <div className="exam-name" style={{ color: exam.logo_color }}>
-              {exam.name}
+    <section className="py-16 sm:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <Reveal>
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(var(--blue-700))]/8 text-[hsl(var(--blue-700))] text-[13px] font-bold mb-3">
+              <GraduationCap className="w-4 h-4" />
+              Exam Preparation
             </div>
-            <div className="exam-full-name">{exam.full_name}</div>
-            <p className="exam-description">{exam.description}</p>
-            <div className="exam-meta">
-              <span>Score: {exam.score_range}</span>
-              <span>Valid: {exam.validity_years} yrs</span>
-              <span>Fee: ${exam.fee_usd}</span>
-            </div>
-            <div className="exam-countries">
-              {exam.accepted_by.map((c) => (
-                <span key={c} className="country-badge">
-                  {c}
-                </span>
-              ))}
-            </div>
-            <a
-              href={exam.registration_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="exam-register-btn"
-              style={{ backgroundColor: exam.logo_color }}
-            >
-              Register
-            </a>
+            <h2 className="font-display font-bold text-[28px] sm:text-[34px] tracking-[-0.02em] text-[hsl(var(--blue-900))]">
+              Prepare for Your Exams
+            </h2>
+            <p className="text-[15px] text-muted-foreground mt-2 max-w-xl mx-auto">
+              Compare fees, score ranges, and accepted countries for every major study-abroad exam.
+            </p>
           </div>
-        ))}
+        </Reveal>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {exams.map((exam) => (
+            <Reveal key={exam.id}>
+              <ExamCard exam={exam} />
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );
