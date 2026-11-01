@@ -189,7 +189,7 @@ export default function ExamPrepSection() {
   const [exams, setExams] = useState(STATIC_EXAMS);
 
   useEffect(() => {
-    fetch("/api/exam-prep")
+    fetch("/api/exam-prep/list")
       .then((r) => r.json())
       .then((data) => {
         if (data?.exams?.length) setExams(data.exams);
