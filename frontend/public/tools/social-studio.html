@@ -267,6 +267,10 @@ textarea{resize:vertical;min-height:64px}
           </div>
           <div class="row"><button class="pri" id="pubGo">Publish now</button></div>
           <p class="hint" id="pubMsgOut"></p>
+          <details><summary style="cursor:pointer;font-weight:600">Record opt-outs (people who replied STOP)</summary>
+            <div class="form" style="margin-top:8px"><textarea id="optText" rows="3" placeholder="Paste numbers or emails that asked to stop"></textarea>
+            <div class="row" style="align-items:center"><button id="optGo" style="flex:0 0 auto">Save opt-outs</button><span class="hint" id="optMsg">Opted-out people are skipped on every send to leads and uploaded lists. Email links opt people out automatically.</span></div></div>
+          </details>
         </div>
       </div>
     </div>
@@ -1226,13 +1230,14 @@ async function loadHist(){if(!BRIDGE)return;try{const items=await BRIDGE.history
 if(BRIDGE){
   $('navAgent').hidden=false;$('pubCard').hidden=false;fillPub();
   $('tpl').addEventListener('change',()=>fillPub());
-  const AUD_HINT={leads:'Everyone who sent an enquiry. Email goes to all leads with an email; WhatsApp only to leads who ticked the consent box on the website or were logged here from their own message. No in-app message (leads have no account).',
-    custom:'Only the contacts you upload or paste. No in-app message. WhatsApp needs the consent box ticked.',subscribers:'Email only, each with an unsubscribe link.'};
+  const AUD_HINT={leads:'Leads who ticked "Send me visa news, offers and event invites" on the enquiry form, plus enquiries your team logged here. Opted-out people are skipped. No in-app message (leads have no account).',
+    custom:'Only the contacts you upload or paste. Opted-out people are skipped, and each email has an unsubscribe link. WhatsApp needs the consent box ticked.',subscribers:'Email only, each with an unsubscribe link.'};
   $('pubAud').onchange=()=>{const a=$('pubAud').value;$('custBox').hidden=a!=='custom';$('audHint').textContent=AUD_HINT[a]||'Registered users: email unless they turned it off, WhatsApp only if they opted in, plus an in-app notification.';};$('pubAud').onchange();
   $('custFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;$('custCount').textContent='Reading '+f.name+'…';
     try{addContacts(await BRIDGE.parseContacts(f));toast('Contacts added');}catch(err){$('custCount').textContent=errText(err);}e.target.value='';};
   $('custAdd').onclick=()=>{const t=$('custPaste').value;const emails=(t.match(EMAIL_RX)||[]).map(x=>x.toLowerCase());const phones=(t.replace(EMAIL_RX,' ').match(PHONE_RX)||[]).map(normPhone).filter(Boolean);
     if(!emails.length&&!phones.length){$('custCount').textContent='No emails or phone numbers found in the pasted text.';return;}addContacts({emails,phones});$('custPaste').value='';};
+  $('optGo').onclick=async()=>{const t=$('optText').value.trim();if(!t)return;try{const r=await BRIDGE.recordOptOuts(t);$('optMsg').textContent=`${r.added} new opt-outs saved (${r.total} in total).`;$('optText').value='';}catch(e){$('optMsg').textContent=errText(e);}};
   $('custClear').onclick=()=>{CUST={emails:[],phones:[]};addContacts({});};
   $('pubTest').onclick=async()=>{try{await BRIDGE.testEmail({title:$('pubTitle').value,message:$('pubMsg').value,link:'https://wehive.co.in'});$('pubMsgOut').textContent='Test email sent to you (without the poster image).';}catch(e){$('pubMsgOut').textContent=errText(e);}};
   $('pubWaTest').onclick=async()=>{const n=$('pubWaNum').value.trim();if(!n){$('pubMsgOut').textContent='Enter a WhatsApp number with country code.';return;}

@@ -74,6 +74,7 @@ class EnquiryCreate(BaseModel):
     travellers: int = Field(default=1, ge=1, le=20)
     message: Optional[str] = Field(default=None, max_length=1000)
     consent: bool
+    marketing_consent: bool = False  # separate opt-in for offers and updates (Social Studio sends)
     source: str = Field(default='landing', max_length=40)
     branch: Optional[Branch] = None  # which WeHive location referred this enquiry
     website: Optional[str] = Field(default=None, max_length=200)  # honeypot: humans never see or fill it
@@ -155,6 +156,7 @@ async def create_enquiry(req: EnquiryCreate, bg: BackgroundTasks, _=Depends(_lea
         'source': req.source,
         'branch': req.branch,
         'consent_at': now,
+        'marketing_consent_at': now if req.marketing_consent else None,
         'created_at': now,
     }
     await leads.insert_one(rec)

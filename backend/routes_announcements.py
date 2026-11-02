@@ -83,10 +83,36 @@ async def audience_sizes() -> dict:
     }
 
 
-# Leads have no account: email anyone who left an address; WhatsApp only those who agreed to be
-# contacted on the enquiry form (consent_at) or were logged by staff from their own message (social).
-LEADS_QUERY = {'$or': [{'email': {'$nin': [None, '']}}, {'phone': {'$nin': [None, '']}}]}
-LEADS_WA_OK = {'$or': [{'consent_at': {'$exists': True}}, {'type': 'social'}]}
+# Leads have no account. Promotional sends go only to leads who ticked "send me offers" on the
+# enquiry form (marketing_consent_at) or were logged by staff from their own message (social),
+# and never to anyone on the opt-out list.
+LEADS_QUERY = {'$and': [
+    {'$or': [{'email': {'$nin': [None, '']}}, {'phone': {'$nin': [None, '']}}]},
+    {'$or': [{'marketing_consent_at': {'$exists': True, '$ne': None}}, {'type': 'social'}]},
+]}
+opt_outs_col = db['contact_opt_outs']
+
+
+def _opt_out_sig(value: str) -> str:
+    import hashlib
+    import hmac
+    from config import JWT_SECRET
+    return hmac.new(JWT_SECRET.encode(), f'optout:{value}'.encode(), hashlib.sha256).hexdigest()[:24]
+
+
+def opt_out_url(value: str) -> str:
+    from urllib.parse import urlencode
+    from config import FRONTEND_URL
+    return f"{FRONTEND_URL}/api/announcements/opt-out?{urlencode({'v': value, 't': _opt_out_sig(value)})}"
+
+
+async def add_opt_outs(values: list[str], source: str) -> int:
+    now = datetime.utcnow()
+    n = 0
+    for v in {x.strip().lower() for x in values if x and x.strip()}:
+        res = await opt_outs_col.update_one({'_id': v}, {'$setOnInsert': {'source': source, 'at': now}}, upsert=True)
+        n += 1 if res.upserted_id else 0
+    return n
 
 
 def build_html(title: str, message: str, link: str = '', image_url: str = '',
@@ -224,12 +250,19 @@ async def _contact_targets(a: dict) -> tuple[list[str], list[str]]:
         c = a.get('custom') or {}
         return c.get('emails', []), (c.get('phones', []) if a.get('whatsapp_consent') else [])
     emails, phones = set(), set()
-    async for d in leads.find(LEADS_QUERY, {'email': 1, 'phone': 1, 'consent_at': 1, 'type': 1}):
+    async for d in leads.find(LEADS_QUERY, {'email': 1, 'phone': 1}):
         if d.get('email'):
             emails.add(d['email'].strip().lower())
-        if d.get('phone') and (d.get('consent_at') or d.get('type') == 'social'):
+        if d.get('phone'):
             phones.add(d['phone'].strip())
     return sorted(emails), sorted(phones)
+
+
+async def _without_opt_outs(values: list[str]) -> list[str]:
+    if not values:
+        return []
+    blocked = {d['_id'] async for d in opt_outs_col.find({'_id': {'$in': [v.lower() for v in values]}}, {'_id': 1})}
+    return [v for v in values if v.lower() not in blocked]
 
 
 async def _deliver_contacts(a: dict, channels: dict, url: str) -> tuple[int, int, int, int]:
@@ -238,14 +271,16 @@ async def _deliver_contacts(a: dict, channels: dict, url: str) -> tuple[int, int
     from email_service import send_email
     from otp_providers import deliver_whatsapp_message
     emails, phones = await _contact_targets(a)
+    emails, phones = await _without_opt_outs(emails), await _without_opt_outs(phones)
     es = ef = ws = wf = 0
     footer = '\n\nYou are receiving this because you contacted WeHive. Reply STOP to opt out.'
     if channels.get('email'):
         for e in emails:
+            unsub = opt_out_url(e)
             try:
                 ok = await send_email(to_email=e, subject=f"WeHive: {a['title']}",
-                                      html_body=build_html(a['title'], a['message'] + footer, url, a.get('image_url', '')),
-                                      text_body=a['message'] + footer)
+                                      html_body=build_html(a['title'], a['message'], url, a.get('image_url', ''), unsub),
+                                      text_body=f"{a['message']}\n\nUnsubscribe: {unsub}")
             except Exception:
                 ok = False
             es, ef = (es + 1, ef) if ok else (es, ef + 1)
@@ -336,3 +371,19 @@ async def dispatch_due_announcements() -> int:
 async def mark_interrupted_on_boot() -> Optional[int]:
     res = await announcements_col.update_many({'status': 'sending'}, {'$set': {'status': 'interrupted', 'finished_at': datetime.utcnow()}})
     return res.modified_count
+
+
+# ---------- public opt-out link (leads and uploaded lists) ----------
+public_router = APIRouter(prefix='/announcements', tags=['announcements'])
+
+
+@public_router.get('/opt-out')
+async def opt_out(v: str = Query(..., max_length=200), t: str = Query(..., max_length=64)):
+    import hmac
+    from fastapi.responses import HTMLResponse
+    if not hmac.compare_digest(t, _opt_out_sig(v.strip().lower())):
+        raise HTTPException(400, 'This link is not valid.')
+    await add_opt_outs([v], 'email_link')
+    return HTMLResponse('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">'
+                        '<body style="font-family:system-ui;padding:40px;color:#0B1240">'
+                        '<h2>You are unsubscribed</h2><p>WeHive will not send you offers or updates any more.</p></body>')

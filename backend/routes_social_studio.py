@@ -2,6 +2,7 @@
 
   POST /api/admin/social-studio/draft  — AI-written post fields from a news item or a topic
   POST /api/admin/social-studio/image  — upload a generated poster PNG to R2, returns a public URL
+  POST /api/admin/social-studio/opt-outs — record people who replied STOP (skipped on every send)
   POST /api/admin/social-studio/contacts — pull emails and phone numbers out of an uploaded
        Excel (.xlsx), CSV, Word (.docx), text, PDF or image (OCR) file, for a custom send list
 
@@ -182,3 +183,16 @@ async def parse_contacts(file: UploadFile = File(...), _=Depends(_writer)):
     if not found['emails'] and not found['phones']:
         raise HTTPException(400, 'No email addresses or phone numbers found in this file.')
     return found
+
+
+class OptOuts(BaseModel):
+    text: str = Field(min_length=3, max_length=20000)
+
+
+@router.post('/opt-outs')
+async def record_opt_outs(body: OptOuts, _=Depends(_writer)):
+    from routes_announcements import add_opt_outs, opt_outs_col
+    found = contacts_from_text(body.text)
+    added = await add_opt_outs(found['emails'] + found['phones'], 'staff')
+    return {'added': added, 'found': len(found['emails']) + len(found['phones']),
+            'total': await opt_outs_col.count_documents({})}
