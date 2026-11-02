@@ -20,6 +20,11 @@ const bridge = {
     fd.append('file', blob, name);
     return adminClient().post('/social-studio/image', fd).then((r) => r.data);
   },
+  parseContacts: (file) => {
+    const fd = new FormData();
+    fd.append('file', file, file.name);
+    return adminClient().post('/social-studio/contacts', fd).then((r) => r.data);
+  },
   publish: (body) => apiClient().post('/announcements/admin', body).then((r) => r.data),
   testEmail: (body) => apiClient().post('/announcements/admin/test', body).then((r) => r.data),
   testWhatsapp: (body) => apiClient().post('/announcements/admin/test-whatsapp', body).then((r) => r.data),

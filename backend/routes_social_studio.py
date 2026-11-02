@@ -2,6 +2,8 @@
 
   POST /api/admin/social-studio/draft  — AI-written post fields from a news item or a topic
   POST /api/admin/social-studio/image  — upload a generated poster PNG to R2, returns a public URL
+  POST /api/admin/social-studio/contacts — pull emails and phone numbers out of an uploaded
+       Excel (.xlsx), CSV, Word (.docx), text, PDF or image (OCR) file, for a custom send list
 
 Publishing and scheduling reuse Announcements (POST /api/announcements/admin): email,
 WhatsApp and in-app delivery, with the existing broadcast scheduler for future times.
@@ -113,3 +115,70 @@ async def upload_poster(file: UploadFile = File(...), _=Depends(_writer)):
     _r2_client_from_settings(cfg).put_object(Bucket=cfg.get('bucket', ''), Key=key, Body=data,
                                              ContentType=file.content_type, ServerSideEncryption='AES256')
     return {'url': f'{public}/{key}', 'key': key}
+
+
+# ---------- contact lists ----------
+_EMAIL = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
+_PHONE = re.compile(r'\+?\d[\d \-().]{8,18}\d')
+
+
+def _norm_phone(raw: str) -> Optional[str]:
+    plus = raw.strip().startswith('+')
+    d = re.sub(r'\D', '', raw)
+    if plus and 8 <= len(d) <= 15:
+        return '+' + d
+    if len(d) == 10 and d[0] in '6789':          # Indian mobile without country code
+        return '+91' + d
+    if len(d) == 12 and d.startswith('91') and d[2] in '6789':
+        return '+' + d
+    if len(d) == 11 and d.startswith('1'):       # US number with country code
+        return '+' + d
+    return None
+
+
+def contacts_from_text(text: str) -> dict:
+    emails = sorted({e.lower().rstrip('.') for e in _EMAIL.findall(text)})
+    stripped = _EMAIL.sub(' ', text)
+    phones = sorted({p for p in (_norm_phone(m) for m in _PHONE.findall(stripped)) if p})
+    return {'emails': emails[:5000], 'phones': phones[:5000]}
+
+
+def _office_text(data: bytes) -> str:
+    """Text of an .xlsx or .docx: both are zipped XML, so read every part and drop the tags."""
+    import io
+    import zipfile
+    out = []
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        for name in z.namelist():
+            if name.endswith('.xml') and (name.startswith('xl/') or name.startswith('word/')):
+                xml = z.read(name).decode('utf-8', errors='replace')
+                out.append(re.sub(r'<[^>]+>', ' ', xml))
+    return '\n'.join(out)
+
+
+@router.post('/contacts')
+async def parse_contacts(file: UploadFile = File(...), _=Depends(_writer)):
+    from upload_limits import read_capped
+    data = await read_capped(file, 10)
+    name = (file.filename or '').lower()
+    mime = file.content_type or ''
+    if name.endswith(('.xlsx', '.docx')):
+        try:
+            text = _office_text(data)
+        except Exception:
+            raise HTTPException(400, 'Could not open this file. Save it again as .xlsx, .docx or .csv.')
+    elif name.endswith(('.csv', '.txt', '.vcf')) or mime.startswith('text/'):
+        text = data.decode('utf-8', errors='replace')
+    elif name.endswith(('.xls', '.doc')):
+        raise HTTPException(400, 'Old .xls/.doc files are not supported. Save as .xlsx, .docx or .csv and upload again.')
+    elif name.endswith('.pdf') or mime.startswith('image/'):
+        from user_doc_indexer import _extract_text
+        text = await _extract_text(data, 'application/pdf' if name.endswith('.pdf') else mime, name)
+        if not text:
+            raise HTTPException(400, 'No readable text found. For photos, make sure OCR (tesseract) is installed on the server.')
+    else:
+        raise HTTPException(400, 'Upload Excel (.xlsx), CSV, Word (.docx), text, PDF or an image.')
+    found = contacts_from_text(text)
+    if not found['emails'] and not found['phones']:
+        raise HTTPException(400, 'No email addresses or phone numbers found in this file.')
+    return found

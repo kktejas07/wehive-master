@@ -44,3 +44,19 @@ def test_user_email_carries_poster_image():
     html = notify._email_html('Diwali offer', 'Up to 4 travellers.', 'https://wehive.co.in', 'https://cdn.x/p.png')
     assert '<img src="https://cdn.x/p.png"' in html and 'Open in WeHive' in html
     assert '<img' not in notify._email_html('t', 'b', None)
+
+
+@pytest.mark.asyncio
+async def test_custom_list_whatsapp_needs_consent(monkeypatch):
+    import routes_announcements as ra
+    from fastapi import BackgroundTasks, HTTPException
+    monkeypatch.setattr(ra, 'announcements_col', MagicMock(find_one=AsyncMock(return_value=None), insert_one=AsyncMock()))
+    monkeypatch.setattr(ra, 'audit_record', AsyncMock())
+    body = dict(title='Diwali offer', message='Up to 4 travellers for 999.', audience='custom',
+                channels={'inapp': False, 'email': True, 'whatsapp': True},
+                recipients={'emails': ['A@x.com', 'a@x.com'], 'phones': ['+919000666149']})
+    with pytest.raises(HTTPException) as exc:
+        await ra.send_announcement(ra.SendBody(**body), BackgroundTasks(), admin={'_id': 'a'})
+    assert exc.value.status_code == 400 and 'WhatsApp' in exc.value.detail
+    out = await ra.send_announcement(ra.SendBody(**body, whatsapp_consent=True), BackgroundTasks(), admin={'_id': 'a'})
+    assert out['recipients'] == 2  # one email after de-duplication + one phone
