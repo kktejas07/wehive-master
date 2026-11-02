@@ -615,6 +615,7 @@ async def admin_get_pricing(_=Depends(get_current_admin)):
         'gst_rate': cfg['gst_rate'],
         'currency': cfg['currency'],
         'updated_at': cfg['updated_at'].isoformat() if isinstance(cfg.get('updated_at'), datetime) else cfg.get('updated_at'),
+        'updated_by': cfg.get('updated_by'),
         'defaults': {
             'base_fees': DEFAULT_BASE_FEE_BY_TYPE,
             'surcharge_inr': DEFAULT_SURCHARGE_INR,
@@ -641,6 +642,14 @@ async def admin_update_pricing(patch: PricingPatch, admin=Depends(require_role([
                 raise HTTPException(400, f'base_fees.{k} must be an integer')
         update['base_fees'] = clean
     update['updated_at'] = datetime.utcnow()
+    update['updated_by'] = admin.get('email') or admin.get('username') or str(admin.get('_id', ''))
+    # Archive current value to config_history before overwriting
+    current_doc = await settings_col.find_one({'_id': 'pricing'})
+    if current_doc:
+        history_entry = {k: v for k, v in current_doc.items() if k != '_id'}
+        history_entry['config_key'] = 'pricing'
+        history_entry['archived_at'] = datetime.utcnow()
+        await db['config_history'].insert_one(history_entry)
     await settings_col.update_one(
         {'_id': 'pricing'}, {'$set': update}, upsert=True,
     )
@@ -1659,6 +1668,27 @@ async def export_revenue_csv(_=Depends(get_current_admin)):
     return _csv_response(rows, 'wehive-revenue.csv')
 
 
+@router.get('/export/leads.csv')
+async def export_leads_csv(_=Depends(get_current_admin)):
+    rows = [['date', 'name', 'surname', 'email', 'phone', 'destination', 'travellers', 'notes', 'status', 'source']]
+    async for lead in leads.find({}).sort('created_at', -1):
+        created = lead.get('created_at')
+        date_str = created.strftime('%Y-%m-%d') if isinstance(created, datetime) else str(created or '')
+        rows.append([
+            date_str,
+            lead.get('name') or '',
+            lead.get('surname') or '',
+            lead.get('email') or '',
+            lead.get('phone') or '',
+            lead.get('destination') or lead.get('country') or '',
+            str(lead.get('travellers') or lead.get('adults') or ''),
+            (lead.get('notes') or lead.get('message') or '').replace('\n', ' '),
+            lead.get('status') or 'new',
+            lead.get('source') or '',
+        ])
+    return _csv_response(rows, 'wehive-leads.csv')
+
+
 @router.post('/re-seed-universities')
 async def admin_re_seed_universities(admin=Depends(get_current_admin_flex)):
     try:
@@ -1666,3 +1696,32 @@ async def admin_re_seed_universities(admin=Depends(get_current_admin_flex)):
         return {'ok': True, 'result': result}
     except Exception as e:
         raise HTTPException(500, f'Re-seed failed: {e}')
+
+
+# ---------- Interview Q&A CRUD ----------
+
+@router.get('/interview-qa')
+async def list_interview_qa(country: str = None, _admin=Depends(get_current_admin)):
+    q = {'country': country} if country else {}
+    docs = await db.interview_qa.find(q).to_list(200)
+    return [{**d, '_id': str(d['_id'])} for d in docs]
+
+
+@router.post('/interview-qa')
+async def create_interview_qa(body: dict, _admin=Depends(get_current_admin)):
+    r = await db.interview_qa.insert_one(body)
+    return {'id': str(r.inserted_id)}
+
+
+@router.patch('/interview-qa/{qa_id}')
+async def update_interview_qa(qa_id: str, body: dict, _admin=Depends(get_current_admin)):
+    from bson import ObjectId
+    await db.interview_qa.update_one({'_id': ObjectId(qa_id)}, {'$set': body})
+    return {'ok': True}
+
+
+@router.delete('/interview-qa/{qa_id}')
+async def delete_interview_qa(qa_id: str, _admin=Depends(get_current_admin)):
+    from bson import ObjectId
+    await db.interview_qa.delete_one({'_id': ObjectId(qa_id)})
+    return {'ok': True}

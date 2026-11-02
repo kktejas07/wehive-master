@@ -250,6 +250,7 @@ export default function PricingTab() {
       {data.updated_at && (
         <p className="mt-3 text-right text-[11.5px] text-[var(--text-secondary)]">
           Last updated: {new Date(data.updated_at).toLocaleString('en-IN')}
+          {data.updated_by && <> by <span className="font-medium">{data.updated_by}</span></>}
         </p>
       )}
     </div>

@@ -5,15 +5,19 @@ import { Text } from '@/core/ui/text';
 import type { ApplicationStatus } from '../model/types';
 
 const STATUS_CONFIG: Record<ApplicationStatus, { label: string; bg: string; color: string }> = {
-  draft:           { label: 'Draft',        bg: '#1e293b', color: '#94a3b8' },
-  submitted:       { label: 'Submitted',    bg: '#1e3a5f', color: '#7dd3fc' },
-  docs_pending:    { label: 'Docs needed',  bg: '#451a03', color: '#fcd34d' },
-  payment_pending: { label: 'Payment due',  bg: '#451a03', color: '#fcd34d' },
-  in_review:       { label: 'In review',    bg: '#1e3a5f', color: '#93c5fd' },
-  embassy:         { label: 'At embassy',   bg: '#1e1b4b', color: '#a5b4fc' },
-  approved:        { label: 'Approved',     bg: '#052e16', color: '#86efac' },
-  visa_issued:     { label: 'Visa issued',  bg: '#052e16', color: '#4ade80' },
-  rejected:        { label: 'Rejected',     bg: '#450a0a', color: '#fca5a5' },
+  draft:                 { label: 'Draft',           bg: '#1e293b', color: '#94a3b8' },
+  submitted:             { label: 'Submitted',       bg: '#1e3a5f', color: '#7dd3fc' },
+  docs_pending:          { label: 'Docs needed',     bg: '#451a03', color: '#fcd34d' },
+  payment_pending:       { label: 'Payment due',     bg: '#451a03', color: '#fcd34d' },
+  in_review:             { label: 'In review',       bg: '#1e3a5f', color: '#93c5fd' },
+  embassy:               { label: 'At embassy',      bg: '#1e1b4b', color: '#a5b4fc' },
+  approved:              { label: 'Approved',        bg: '#052e16', color: '#86efac' },
+  visa_issued:           { label: 'Visa issued',     bg: '#052e16', color: '#4ade80' },
+  rejected:              { label: 'Rejected',        bg: '#450a0a', color: '#fca5a5' },
+  visa_approved:         { label: 'Visa approved',   bg: '#052e16', color: '#86efac' },
+  visa_rejected:         { label: 'Visa rejected',   bg: '#450a0a', color: '#fca5a5' },
+  appointment_scheduled: { label: 'Appointment set', bg: '#1e1b4b', color: '#a5b4fc' },
+  withdrawn:             { label: 'Withdrawn',       bg: '#1e293b', color: '#94a3b8' },
 };
 
 export function StatusPill({ status }: { status: ApplicationStatus }) {

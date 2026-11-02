@@ -4,6 +4,26 @@ import { Upload, Check, AlertCircle, Loader2, X, Trash2, HelpCircle } from 'luci
 import { useToast } from '../hooks/use-toast';
 import { API, useAuth } from '../context/AuthContext';
 
+const DOC_LABELS = {
+  passport: 'Passport (all pages)',
+  aadhaar_card: 'Aadhaar Card',
+  pan_card: 'PAN Card',
+  bank_statement: 'Bank Statement (last 6 months)',
+  transcripts: 'Academic Transcripts',
+  ielts_results: 'IELTS Results',
+  toefl_results: 'TOEFL Results',
+  financial_documents: 'Financial Documents',
+  employment_letter: 'Employment Letter',
+  invitation_letter: 'Invitation Letter',
+  photographs: 'Passport-size Photographs',
+  flight_booking: 'Flight Booking',
+  hotel_booking: 'Hotel Booking',
+  travel_insurance: 'Travel Insurance',
+  cover_letter: 'Cover Letter',
+  degree_certificate: 'Degree Certificate',
+  police_clearance: 'Police Clearance',
+};
+
 const STATUS_COLORS = {
   uploaded: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Reviewing' },
   reviewing: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Reviewing' },
@@ -40,7 +60,7 @@ function DocRow({ docType, file, onUpload, onRemove, onHelp, busy }) {
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{docType}</div>
+            <div className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{DOC_LABELS[docType] || docType}</div>
             {has && <StatusBadge status={file.status} />}
           </div>
           {has ? (
@@ -267,11 +287,26 @@ export function DocumentExpirationWarnings({ docs }) {
   );
 }
 
-export default function DocumentChecklist({ applicationId, requiredDocs, token, onDocsChange }) {
+export default function DocumentChecklist({ applicationId, requiredDocs: requiredDocsProp, token, onDocsChange }) {
   const [docs, setDocs] = useState([]);
   const [busy, setBusy] = useState({});
   const [helpDoc, setHelpDoc] = useState(null);
+  const [docReport, setDocReport] = useState(null);
   const { toast } = useToast();
+
+  const requiredDocs = docReport?.mandatory || requiredDocsProp || [];
+  const contactMissing = docReport?.contact_info_missing || [];
+
+  const fetchReport = async () => {
+    try {
+      const r = await axios.get(`${API}/users/me/applications/${applicationId}/required-documents`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDocReport(r.data);
+    } catch {
+      // Fall back to prop-based list
+    }
+  };
 
   const refresh = async () => {
     try {
@@ -285,7 +320,10 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
   };
 
   useEffect(() => {
-    if (applicationId && token) refresh();
+    if (applicationId && token) {
+      fetchReport();
+      refresh();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applicationId, token]);
 
@@ -304,6 +342,7 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
       });
       toast({ title: 'Uploaded', description: `${file.name}` });
       await refresh();
+      fetchReport();
     } catch (e) {
       toast({ title: 'Upload failed', description: e?.response?.data?.detail || 'Try a smaller file (max 10MB).' });
     } finally {
@@ -318,14 +357,15 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
       });
       toast({ title: 'Removed' });
       await refresh();
+      fetchReport();
     } catch {
       toast({ title: 'Could not remove' });
     }
   };
 
   const byType = docs.reduce((m, d) => ({ ...m, [d.doc_type]: d }), {});
-  const completed = (requiredDocs || []).filter((d) => !!byType[d]).length;
-  const total = (requiredDocs || []).length;
+  const completed = requiredDocs.filter((d) => !!byType[d]).length;
+  const total = requiredDocs.length;
 
   return (
     <section className="rounded-2xl bg-white border border-border shadow-sm p-5 sm:p-8">
@@ -346,10 +386,17 @@ export default function DocumentChecklist({ applicationId, requiredDocs, token, 
         </div>
       </div>
 
+      {contactMissing.length > 0 && (
+        <div className="mt-4 flex items-start gap-3 rounded-xl px-4 py-3 text-[13px] bg-amber-50 border border-amber-200 text-amber-700">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>Please ensure your {contactMissing.join(' and ')} {contactMissing.length === 1 ? 'is' : 'are'} on file before submitting.</span>
+        </div>
+      )}
+
       <DocumentExpirationWarnings docs={docs} />
 
       <ul className="mt-4 space-y-3">
-        {(requiredDocs || []).map((d) => (
+        {requiredDocs.map((d) => (
           <DocRow
             key={d}
             docType={d}

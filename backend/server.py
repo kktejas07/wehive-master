@@ -16,6 +16,13 @@ from starlette.middleware.cors import CORSMiddleware
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+import sys
+REQUIRED_ENV = ["MONGO_URL", "JWT_SECRET"]
+_missing = [k for k in REQUIRED_ENV if not os.getenv(k)]
+if _missing and 'pytest' not in sys.modules:
+    print(f"[STARTUP ERROR] Missing env vars: {', '.join(_missing)}", file=sys.stderr)
+    sys.exit(1)
+
 from config import FRONTEND_URL, IS_DEV  # noqa: E402
 from db import ensure_indexes  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
@@ -29,6 +36,8 @@ from routes_scan import router as scan_router  # noqa: E402
 from routes_flights import router as flights_router  # noqa: E402
 from routes_admin import router as admin_router  # noqa: E402
 from routes_admin_backoffice import router as admin_backoffice_router  # noqa: E402
+from routes_social_studio import router as social_studio_router  # noqa: E402
+from routes_announcements import public_router as announcements_public_router  # noqa: E402
 from routes_admin_cases import router as admin_cases_router  # noqa: E402
 from routes_admin_ops import router as admin_ops_router  # noqa: E402
 from routes_admin_refunds import router as admin_refunds_router  # noqa: E402
@@ -67,6 +76,7 @@ from routes_announcements import router as announcements_router  # noqa: E402
 from broadcast_scheduler import mark_interrupted_on_boot, start_broadcast_scheduler  # noqa: E402
 from routes_i18n import router as i18n_router  # noqa: E402
 from routes_visa_requirements import router as visa_requirements_router  # noqa: E402
+from routes_exam_prep import router as exam_prep_router  # noqa: E402
 from routes_embassy import router as embassy_router  # noqa: E402
 from routes_agents_ai import router as agents_ai_router, start_scheduler  # noqa: E402
 from routes_rag import router as rag_router  # noqa: E402
@@ -98,6 +108,11 @@ from routes_student_memory import router as student_memory_router  # noqa: E402
 from routes_graph_rag import router as graph_rag_router  # noqa: E402
 from routes_scraping import router as scraping_router  # noqa: E402
 from routes_content_pipeline import router as content_pipeline_router  # noqa: E402
+from routes_landing import router as landing_router  # noqa: E402
+from routes_documents import router as documents_router  # noqa: E402
+from routes_application_builder import router as application_builder_router  # noqa: E402
+from routes_sop_templates import router as sop_templates_router  # noqa: E402
+from routes_webhooks import router as webhooks_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -172,6 +187,8 @@ api_router.include_router(countries_router)
 api_router.include_router(leads_router)
 api_router.include_router(admin_router)
 api_router.include_router(admin_backoffice_router)
+api_router.include_router(social_studio_router)
+api_router.include_router(announcements_public_router)
 api_router.include_router(admin_cases_router)
 api_router.include_router(admin_ops_router)
 api_router.include_router(admin_refunds_router)
@@ -211,6 +228,7 @@ api_router.include_router(newsletter_campaigns_router)
 api_router.include_router(announcements_router)
 api_router.include_router(i18n_router)
 api_router.include_router(visa_requirements_router)
+api_router.include_router(exam_prep_router)
 api_router.include_router(embassy_router)
 api_router.include_router(agents_ai_router)
 api_router.include_router(rag_router)
@@ -243,6 +261,11 @@ api_router.include_router(student_memory_router)
 api_router.include_router(graph_rag_router)
 api_router.include_router(scraping_router)
 api_router.include_router(content_pipeline_router)
+api_router.include_router(application_builder_router)
+api_router.include_router(sop_templates_router)
+api_router.include_router(documents_router)
+api_router.include_router(landing_router)
+api_router.include_router(webhooks_router)
 
 app.include_router(api_router)
 

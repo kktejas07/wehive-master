@@ -41,11 +41,11 @@ export default function LoginScreen() {
           />
         </View>
 
-        {error ? <Text tone="error">{error}</Text> : null}
+        {error ? <Text tone="danger">{error}</Text> : null}
 
         <Button
           label="Sign in"
-          loading={loading}
+          busy={loading}
           onPress={() => login(email, password)}
         />
 

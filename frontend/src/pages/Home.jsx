@@ -15,6 +15,10 @@ import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
 import EnquirySection from '../components/EnquirySection';
 import { updateSEO } from '../lib/seo';
+import SeasonalBanners from '../components/SeasonalBanners';
+import ApplicationBuilder from '../components/ApplicationBuilder';
+import ExamPrepSection from '../components/ExamPrepSection';
+import FeaturedDestinations from '../components/FeaturedDestinations';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -33,12 +37,16 @@ export default function Home() {
       {/* Hero → proof → destinations/services → how it works → extras → FAQ → CTA */}
       <Hero filters={filters} onFilters={setFilters} />
       <LiveTickerMarquee />
+      <FeaturedDestinations />
       <CountryGrid filters={filters} />
       <StatsStrip />
       <SchengenCarousel />
+      <SeasonalBanners />
       <AIServices />
+      <ExamPrepSection />
       <HowItWorks />
       <EnquirySection />
+      <ApplicationBuilder />
       <DealsSection />
       <Newsroom />
       <Faq />
