@@ -73,13 +73,23 @@ const PreDeparture = lazy(() => import('./pages/PreDeparture'));
 let _pricingLoaded = false;
 function PricingLoader() {
   useEffect(() => {
-    if (_pricingLoaded) return;
+    let cached = null;
+    try { cached = sessionStorage.getItem('wh_pricing'); } catch {}
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        setPricing(parsed);
+        if (parsed.currency) setCurrency(parsed.currency);
+        return;
+      } catch {}
+    }
     const timer = setTimeout(() => {
       _pricingLoaded = true;
       axios.get(`${API}/public/pricing`).then((r) => {
         setPricing(r.data);
         if (r.data.currency) setCurrency(r.data.currency);
-      }).catch(() => { _pricingLoaded = false; });
+        try { sessionStorage.setItem('wh_pricing', JSON.stringify(r.data)); } catch {}
+      }).catch(() => {});
     }, 5000);
     return () => clearTimeout(timer);
   }, []);
@@ -161,7 +171,7 @@ function AnimatedRoutes() {
           <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
           <Route path="/hive" element={<PageTransition><Hive /></PageTransition>} />
           <Route path="/us-visa-slots" element={<PrivateRoute><PageTransition><USVisaSlots /></PageTransition></PrivateRoute>} />
-          <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
+          <Route path="/agent-portal/login" element={<Navigate to="/agent/login" replace />} />
           <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
