@@ -68,7 +68,7 @@ const News = lazy(() => import('./pages/News'));
 const ApplicantFlow = lazy(() => import('./pages/ApplicantFlow'));
 const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
 const PostApprovalHub = lazy(() => import('./pages/PostApprovalHub'));
-const PreDeparture = lazy(() => import('./pages/PreDeparture'));
+const Offers = lazy(() => import('./pages/Offers'));
 
 let _pricingLoaded = false;
 function PricingLoader() {
@@ -166,6 +166,7 @@ function AnimatedRoutes() {
           <Route path="/post-approval/:applicationId" element={<PrivateRoute><PageTransition><PostApprovalHub /></PageTransition></PrivateRoute>} />
           <Route path="/pre-departure" element={<PrivateRoute><PageTransition><PreDeparture /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
+          <Route path="/offers" element={<PageTransition><Offers /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
           <Route path="/community" element={<PageTransition><Community /></PageTransition>} />

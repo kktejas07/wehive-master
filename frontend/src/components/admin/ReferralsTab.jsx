@@ -12,7 +12,8 @@ export default function ReferralsTab() {
   const load = useCallback(async () => {
     setLoading(true); setErr('');
     try {
-      const data = await adminClient('/referrals/stats');
+      const r = await adminClient().get('/referrals/stats');
+      const data = r.data;
       setStats(data);
       if (Array.isArray(data?.codes)) setCodes(data.codes);
       else if (Array.isArray(data?.top_codes)) setCodes(data.top_codes);
