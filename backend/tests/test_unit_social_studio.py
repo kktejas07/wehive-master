@@ -37,3 +37,10 @@ async def test_social_studio_state_merges_calendar(monkeypatch):
 def test_social_studio_rejects_unknown_status():
     with pytest.raises(Exception):
         bo.StudioPatch(calendar={'WH-1102': 'published'})
+
+
+def test_user_email_carries_poster_image():
+    import notify
+    html = notify._email_html('Diwali offer', 'Up to 4 travellers.', 'https://wehive.co.in', 'https://cdn.x/p.png')
+    assert '<img src="https://cdn.x/p.png"' in html and 'Open in WeHive' in html
+    assert '<img' not in notify._email_html('t', 'b', None)

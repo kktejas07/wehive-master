@@ -226,7 +226,8 @@ async def deliver(announcement_id: str) -> None:
                     sent = await notify_user(
                         u['_id'], title=a['title'], body=a['message'], kind='announcement',
                         link=url, dedupe_key=f"ann:{announcement_id}:{u['_id']}",
-                        email=channels.get('email', True), whatsapp=channels.get('whatsapp', False))
+                        email=channels.get('email', True), whatsapp=channels.get('whatsapp', False),
+                        image_url=a.get('image_url', ''))
                 except Exception:
                     logger.exception('Announcement %s failed for user %s', announcement_id, u.get('_id'))
                     continue

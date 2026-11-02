@@ -22,7 +22,7 @@ from config import FRONTEND_URL
 logger = logging.getLogger("wehive.notify")
 
 
-def _email_html(title: str, body: str, url: Optional[str]) -> str:
+def _email_html(title: str, body: str, url: Optional[str], image_url: str = '') -> str:
     from email_service import _wrap_html
     button = (
         f'<div style="text-align:center;margin:24px 0"><a href="{html.escape(url)}" '
@@ -30,8 +30,13 @@ def _email_html(title: str, body: str, url: Optional[str]) -> str:
         'font-weight:700;font-size:14px;padding:12px 32px;border-radius:8px">Open in WeHive</a></div>'
         if url else ""
     )
+    image = (
+        f'<div style="text-align:center;margin:0 0 16px 0"><img src="{html.escape(image_url)}" alt="" '
+        'style="max-width:100%;height:auto;border-radius:12px"></div>'
+        if image_url else ""
+    )
     content = (
-        '<tr><td style="padding:0 32px;text-align:left">'
+        f'<tr><td style="padding:0 32px;text-align:left">{image}'
         f'<p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">{html.escape(body)}</p>'
         f"{button}</td></tr>"
     )
@@ -57,6 +62,7 @@ async def notify_user(
     dedupe_key: Optional[str] = None,
     email: bool = True,
     whatsapp: bool = True,
+    image_url: str = "",
 ) -> dict:
     """Returns which channels were used, e.g. {"app": True, "email": True}."""
     from db import notifications_col, users
@@ -89,7 +95,7 @@ async def notify_user(
         try:
             from email_service import send_email
             sent["email"] = await send_email(
-                user["email"], f"WeHive: {title}", _email_html(title, body, url),
+                user["email"], f"WeHive: {title}", _email_html(title, body, url, image_url),
                 text_body=f"{body}\n\n{url or ''}".strip(),
             )
         except Exception as e:
