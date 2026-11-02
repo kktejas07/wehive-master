@@ -186,7 +186,7 @@ async def send_reset_email_or_log(to_email: str, raw_token: str, frontend_url: s
 # their endpoint allows. Paths are relative to /api.
 ADMIN_ROLES = {
     'manager': 'Full access (except super-admin settings)',
-    'support': 'Applications, cases, leads, document review, profile requests',
+    'support': 'Applications, cases, leads, Social Studio, document review, profile requests',
     'finance': 'Payments, pricing and promo codes',
     'doc_reviewer': 'Document review and read-only application access',
     'viewer': 'Read-only',
@@ -196,7 +196,7 @@ _ANY_ROLE_WRITES = re.compile(
     r'|^/rag/(retrieve|query)$|^/newsletter/admin/campaigns/(preview|test)$'  # POSTs that only read
 )
 _ROLE_WRITES = {
-    'support': re.compile(r'^/admin/(applications|leads|review-queue|profile-requests)(/|$)'),
+    'support': re.compile(r'^/admin/(applications|leads|review-queue|profile-requests|social-studio)(/|$)'),
     'finance': re.compile(r'^/admin/(payments|pricing)(/|$)|^/promotions/'),
     'doc_reviewer': re.compile(r'^/admin/(review-queue)(/|$)'),
 }

@@ -68,7 +68,9 @@ const News = lazy(() => import('./pages/News'));
 const ApplicantFlow = lazy(() => import('./pages/ApplicantFlow'));
 const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
 const PostApprovalHub = lazy(() => import('./pages/PostApprovalHub'));
+const PreDeparture = lazy(() => import('./pages/PreDeparture'));
 
+let _pricingLoaded = false;
 function PricingLoader() {
   useEffect(() => {
     let cached = null;
@@ -82,6 +84,7 @@ function PricingLoader() {
       } catch {}
     }
     const timer = setTimeout(() => {
+      _pricingLoaded = true;
       axios.get(`${API}/public/pricing`).then((r) => {
         setPricing(r.data);
         if (r.data.currency) setCurrency(r.data.currency);
@@ -161,6 +164,7 @@ function AnimatedRoutes() {
           <Route path="/apply" element={<PrivateRoute><PageTransition><ApplicantFlow /></PageTransition></PrivateRoute>} />
           <Route path="/sop-builder" element={<PrivateRoute><PageTransition><SOPBuilder /></PageTransition></PrivateRoute>} />
           <Route path="/post-approval/:applicationId" element={<PrivateRoute><PageTransition><PostApprovalHub /></PageTransition></PrivateRoute>} />
+          <Route path="/pre-departure" element={<PrivateRoute><PageTransition><PreDeparture /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />

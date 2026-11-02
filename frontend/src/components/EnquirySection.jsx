@@ -20,7 +20,7 @@ const PURPOSES = [
 ];
 
 const GROUP_PROMO_PURPOSES = new Set(['tourist', 'business', 'family']);
-const EMPTY = { purpose: '', name: '', email: '', phone: '', destination: '', travel_date: '', travellers: 1, message: '', branch: '', consent: false, website: '' };
+const EMPTY = { purpose: '', name: '', email: '', phone: '', destination: '', travel_date: '', travellers: 1, message: '', branch: '', consent: false, marketing_consent: false, website: '' };
 
 const inputCls = 'w-full h-12 rounded-xl border border-[hsl(var(--border))] bg-white px-4 text-[16px] text-[hsl(var(--blue-900))] placeholder:text-[hsl(var(--blue-900))]/45 outline-none transition-colors hover:border-[hsl(var(--blue-200))] focus:border-[hsl(var(--blue-700))] focus:ring-[3px] focus:ring-[hsl(var(--blue-700))]/20';
 const labelCls = 'block text-[14px] font-semibold text-[hsl(var(--blue-900))] mb-1.5';
@@ -231,6 +231,10 @@ export default function EnquirySection({ source = 'landing' }) {
                 <label className="mt-4 flex items-start gap-2.5 text-[14px] text-muted-foreground">
                   <input type="checkbox" checked={form.consent} onChange={set('consent')} className="mt-1 h-4 w-4 accent-[hsl(var(--blue-700))]" data-testid="enquiry-consent" />
                   <span>I agree to be contacted by We Hive by phone, WhatsApp or email about this enquiry. *</span>
+                </label>
+                <label className="mt-2 flex items-start gap-2.5 text-[14px] text-muted-foreground">
+                  <input type="checkbox" checked={form.marketing_consent} onChange={set('marketing_consent')} className="mt-1 h-4 w-4 accent-[hsl(var(--blue-700))]" data-testid="enquiry-marketing-consent" />
+                  <span>Send me visa news, offers and event invites by email or WhatsApp. I can opt out any time.</span>
                 </label>
 
                 {error && <p role="alert" className="mt-4 text-[14px] font-medium text-[#E10600]" data-testid="enquiry-error">{error}</p>}

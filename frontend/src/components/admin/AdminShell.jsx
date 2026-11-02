@@ -1,3 +1,23 @@
+/**
+ * AdminShell.jsx — WeHive Admin Panel (Social Studio Visual Language)
+ *
+ * DESIGN TOKENS applied (from Social Studio / we-hive design system):
+ *   Fonts: Poppins (display/headings) + Figtree (body)
+ *   --bg:#F4F6FC  --panel:#FFFFFF  --ink:#0B1240  --muted:#5A6283
+ *   --line:#E1E6F5  --blue:#011CB5  --red:#E10600  --gold:#F2A900
+ *   --soft:#EAEFFF  --ok:#0F8A4B  --warn:#B86A00
+ *
+ * Key changes vs. the original:
+ *  ✅ Poppins + Figtree fonts (added to index.html or import in index.css)
+ *  ✅ Deep navy sidebar (#0B1240) matching Social Studio dark rail
+ *  ✅ Boarding-pass item rows with 44px icon column
+ *  ✅ .pill badge pattern (ok/red/gold/blue/muted)
+ *  ✅ Smooth CSS-transition collapse (248px ↔ 60px)
+ *  ✅ localStorage persistence of collapsed state
+ *  ✅ Flag stripe accent under logo
+ *  ✅ AdminHeader, Panel, StatCard, Pill exports for tab components
+ */
+
 import { Link, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -6,15 +26,20 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { adminClient, canWrite, canViewTab, ROLE_NAMES } from '../../lib/admin';
 import {
   LayoutDashboard, Users as UsersIcon, FileStack, Globe, Plug, Download, UserCog,
-  LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
-  Key, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
-  Inbox, CreditCard, History, Activity, ScanSearch, Lock, BarChart3, ChevronLeft, ChevronRight, Pencil, Clock, Share2, CalendarCheck,
-  Eye, Target, UserCheck, GitBranch, Radar, PenTool,
+  LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase,
+  Image as ImageIcon, Key, Building2, BookOpen, Database, FileText, Bot, Brain,
+  Newspaper, ShieldCheck, Mail, Inbox, CreditCard, History, Activity, ScanSearch,
+  Lock, BarChart3, ChevronLeft, ChevronRight, Pencil, Clock, Share2, CalendarCheck,
+  Eye, Target, UserCheck, GitBranch, Radar, PenTool, Sparkles,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
 
-// Groups define sidebar section order and headers
+/* ─── Sidebar width constants ──────────────────────────────────────────── */
+const SIDEBAR_OPEN   = 248;
+const SIDEBAR_CLOSED =  60;
+
+/* ─── Nav groups & tabs ────────────────────────────────────────────────── */
 const GROUPS = [
   'Overview',
   'Users & Applications',
@@ -25,68 +50,68 @@ const GROUPS = [
 ];
 
 const TABS = [
-  { id: 'overview',      to: '/admin',                label: 'Overview',      Icon: LayoutDashboard, testid: 'admin-nav-overview',      group: 'Overview' },
-  { id: 'monitoring',    to: '/admin/monitoring',     label: 'Monitoring',    Icon: BarChart3,       testid: 'admin-nav-monitoring',    group: 'Overview' },
-  { id: 'users',         to: '/admin/users',          label: 'Users',         Icon: UsersIcon,       testid: 'admin-nav-users',         group: 'Users & Applications' },
-  { id: 'applications',  to: '/admin/applications',   label: 'Applications',  Icon: FileStack,       testid: 'admin-nav-applications',  group: 'Users & Applications' },
-  { id: 'review',        to: '/admin/review',         label: 'Doc review',    Icon: ScanSearch,      testid: 'admin-nav-review',        group: 'Users & Applications' },
-  { id: 'leads',         to: '/admin/leads',          label: 'Leads',         Icon: Inbox,           testid: 'admin-nav-leads',         group: 'Users & Applications' },
-  { id: 'countries',     to: '/admin/countries',      label: 'Countries',     Icon: Globe,           testid: 'admin-nav-countries',     group: 'Content & Destinations' },
-  { id: 'universities',  to: '/admin/universities',   label: 'Universities',  Icon: Building2,       testid: 'admin-nav-universities',  group: 'Content & Destinations' },
-  { id: 'programs',      to: '/admin/programs',       label: 'Programs',      Icon: BookOpen,        testid: 'admin-nav-programs',      group: 'Content & Destinations' },
-  { id: 'destinations',  to: '/admin/destinations',   label: 'Destinations',  Icon: ImageIcon,       testid: 'admin-nav-destinations',  group: 'Content & Destinations' },
-  { id: 'events',        to: '/admin/events',         label: 'Hero Events',   Icon: Megaphone,       testid: 'admin-nav-events',        group: 'Content & Destinations' },
-  { id: 'global-events', to: '/admin/global-events',  label: 'Global Events', Icon: Globe,           testid: 'admin-nav-global-events', group: 'Content & Destinations' },
-  { id: 'announcements', to: '/admin/announcements', label: 'Announcements', Icon: Megaphone,    testid: 'admin-nav-announcements', group: 'Content & Destinations' },
-  { id: 'hive-learning', to: '/admin/hive-learning',  label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning', group: 'Content & Destinations' },
-  { id: 'moderation',    to: '/admin/moderation',     label: 'Moderation',    Icon: Newspaper,       testid: 'admin-nav-moderation',    group: 'Content & Destinations' },
-  { id: 'payments',      to: '/admin/payments',       label: 'Payments',      Icon: CreditCard,      testid: 'admin-nav-payments',      group: 'Commercial' },
-  { id: 'pricing',       to: '/admin/pricing',        label: 'Pricing',       Icon: Banknote,        testid: 'admin-nav-pricing',       group: 'Commercial' },
-  { id: 'promotions',    to: '/admin/promotions',     label: 'Promotions',    Icon: Tag,             testid: 'admin-nav-promotions',    group: 'Commercial' },
-  { id: 'promocodes',    to: '/admin/promocodes',     label: 'Promo Codes',   Icon: Tag,             testid: 'admin-nav-promocodes',    group: 'Commercial' },
-  { id: 'requests',      to: '/admin/requests',       label: 'Requests',      Icon: ClipboardList,   testid: 'admin-nav-requests',      group: 'Commercial' },
-  { id: 'agents',        to: '/admin/agents',         label: 'Agents',        Icon: Briefcase,       testid: 'admin-nav-agents',        group: 'Commercial' },
-  { id: 'referrals',     to: '/admin/referrals',     label: 'Referrals',     Icon: Share2,       testid: 'admin-nav-referrals',     group: 'Commercial' },
-  { id: 'exports',       to: '/admin/exports',        label: 'Exports',       Icon: Download,        testid: 'admin-nav-exports',       group: 'Commercial' },
-  { id: 'rag',           to: '/admin/rag',            label: 'RAG & Vectors', Icon: Database,        testid: 'admin-nav-rag',           group: 'AI & System' },
-  { id: 'prompts',       to: '/admin/prompts',        label: 'Prompts',       Icon: FileText,        testid: 'admin-nav-prompts',       group: 'AI & System' },
-  { id: 'agents-v2',     to: '/admin/agents-v2',      label: 'Agents V2',     Icon: Bot,             testid: 'admin-nav-agents-v2',     group: 'AI & System' },
-  { id: 'agentic',        to: '/admin/agentic',        label: 'Agentic AI',    Icon: Bot,             testid: 'admin-nav-agentic',       group: 'AI & System' },
-  { id: 'observability',   to: '/admin/observability',     label: 'Observability',     Icon: Eye,            testid: 'admin-nav-observability',  group: 'AI & System' },
-  { id: 'rag-eval',        to: '/admin/rag-eval',          label: 'RAG Eval',          Icon: Target,         testid: 'admin-nav-rag-eval',       group: 'AI & System' },
-  { id: 'student-memory',  to: '/admin/student-memory',    label: 'Student Memory',    Icon: UserCheck,      testid: 'admin-nav-student-memory', group: 'AI & System' },
-  { id: 'graph-rag',       to: '/admin/graph-rag',         label: 'Graph RAG',         Icon: GitBranch,      testid: 'admin-nav-graph-rag',      group: 'AI & System' },
-  { id: 'scraping',        to: '/admin/scraping',          label: 'Scraping',          Icon: Radar,          testid: 'admin-nav-scraping',       group: 'AI & System' },
-  { id: 'content-pipeline',to: '/admin/content-pipeline',  label: 'Content Pipeline',  Icon: PenTool,        testid: 'admin-nav-content-pipeline',group: 'AI & System' },
-  { id: 'slot-monitor',      to: '/admin/slot-monitor',      label: 'Slot Monitor',      Icon: Clock,          testid: 'admin-nav-slot-monitor',      group: 'AI & System' },
-  { id: 'visa-scheduling',   to: '/admin/visa-scheduling',   label: 'Visa Scheduling',   Icon: CalendarCheck,  testid: 'admin-nav-visa-scheduling',   group: 'AI & System' },
-  { id: 'newsletter',    to: '/admin/newsletter',     label: 'Newsletter',    Icon: Mail,            testid: 'admin-nav-newsletter',    group: 'AI & System' },
-  { id: 'health',        to: '/admin/health',         label: 'System health', Icon: Activity,        testid: 'admin-nav-health',        group: 'AI & System' },
-  { id: 'integrations',  to: '/admin/integrations',   label: 'Integrations',  Icon: Plug,            testid: 'admin-nav-integrations',  group: 'AI & System', superOnly: true },
-  { id: 'staff',         to: '/admin/staff',          label: 'Staff',         Icon: UserCog,         testid: 'admin-nav-staff',         group: 'Admin' },
-  { id: 'admins',        to: '/admin/admins',         label: 'Admins',        Icon: ShieldCheck,     testid: 'admin-nav-admins',        group: 'Admin', superOnly: true },
-  { id: 'audit',         to: '/admin/audit',          label: 'Audit log',     Icon: History,         testid: 'admin-nav-audit',         group: 'Admin' },
-  { id: 'security',      to: '/admin/security',       label: 'My security',   Icon: Lock,            testid: 'admin-nav-security',      group: 'Admin' },
-  { id: 'settings',      to: '/admin/settings',       label: 'Settings',      Icon: Settings,        testid: 'admin-nav-settings',      group: 'Admin', superOnly: true },
+  { id: 'overview',          to: '/admin',                   label: 'Overview',          Icon: LayoutDashboard, group: 'Overview' },
+  { id: 'monitoring',        to: '/admin/monitoring',        label: 'Monitoring',        Icon: BarChart3,       group: 'Overview' },
+  { id: 'users',             to: '/admin/users',             label: 'Users',             Icon: UsersIcon,       group: 'Users & Applications' },
+  { id: 'applications',      to: '/admin/applications',      label: 'Applications',      Icon: FileStack,       group: 'Users & Applications' },
+  { id: 'review',            to: '/admin/review',            label: 'Doc Review',        Icon: ScanSearch,      group: 'Users & Applications' },
+  { id: 'leads',             to: '/admin/leads',             label: 'Leads',             Icon: Inbox,           group: 'Users & Applications' },
+  { id: 'countries',         to: '/admin/countries',         label: 'Countries',         Icon: Globe,           group: 'Content & Destinations' },
+  { id: 'universities',      to: '/admin/universities',      label: 'Universities',      Icon: Building2,       group: 'Content & Destinations' },
+  { id: 'programs',          to: '/admin/programs',          label: 'Programs',          Icon: BookOpen,        group: 'Content & Destinations' },
+  { id: 'destinations',      to: '/admin/destinations',      label: 'Destinations',      Icon: ImageIcon,       group: 'Content & Destinations' },
+  { id: 'events',            to: '/admin/events',            label: 'Hero Events',       Icon: Megaphone,       group: 'Content & Destinations' },
+  { id: 'global-events',     to: '/admin/global-events',     label: 'Global Events',     Icon: Globe,           group: 'Content & Destinations' },
+  { id: 'announcements',     to: '/admin/announcements',     label: 'Announcements',     Icon: Megaphone,       group: 'Content & Destinations' },
+  { id: 'social-studio',    to: '/admin/social-studio',     label: 'Social Studio',     Icon: Sparkles,        group: 'Content & Destinations' },
+  { id: 'hive-learning',     to: '/admin/hive-learning',     label: 'Hive Learning',     Icon: Brain,           group: 'Content & Destinations' },
+  { id: 'moderation',        to: '/admin/moderation',        label: 'Moderation',        Icon: Newspaper,       group: 'Content & Destinations' },
+  { id: 'payments',          to: '/admin/payments',          label: 'Payments',          Icon: CreditCard,      group: 'Commercial' },
+  { id: 'pricing',           to: '/admin/pricing',           label: 'Pricing',           Icon: Banknote,        group: 'Commercial' },
+  { id: 'promotions',        to: '/admin/promotions',        label: 'Promotions',        Icon: Tag,             group: 'Commercial' },
+  { id: 'promocodes',        to: '/admin/promocodes',        label: 'Promo Codes',       Icon: Tag,             group: 'Commercial' },
+  { id: 'requests',          to: '/admin/requests',          label: 'Requests',          Icon: ClipboardList,   group: 'Commercial' },
+  { id: 'agents',            to: '/admin/agents',            label: 'Agents',            Icon: Briefcase,       group: 'Commercial' },
+  { id: 'referrals',         to: '/admin/referrals',         label: 'Referrals',         Icon: Share2,          group: 'Commercial' },
+  { id: 'exports',           to: '/admin/exports',           label: 'Exports',           Icon: Download,        group: 'Commercial' },
+  { id: 'rag',               to: '/admin/rag',               label: 'RAG & Vectors',     Icon: Database,        group: 'AI & System' },
+  { id: 'prompts',           to: '/admin/prompts',           label: 'Prompts',           Icon: FileText,        group: 'AI & System' },
+  { id: 'agents-v2',         to: '/admin/agents-v2',         label: 'Agents V2',         Icon: Bot,             group: 'AI & System' },
+  { id: 'agentic',           to: '/admin/agentic',           label: 'Agentic AI',        Icon: Bot,             group: 'AI & System' },
+  { id: 'observability',     to: '/admin/observability',     label: 'Observability',     Icon: Eye,             group: 'AI & System' },
+  { id: 'rag-eval',          to: '/admin/rag-eval',          label: 'RAG Eval',          Icon: Target,          group: 'AI & System' },
+  { id: 'student-memory',    to: '/admin/student-memory',    label: 'Student Memory',    Icon: UserCheck,       group: 'AI & System' },
+  { id: 'graph-rag',         to: '/admin/graph-rag',         label: 'Graph RAG',         Icon: GitBranch,       group: 'AI & System' },
+  { id: 'scraping',          to: '/admin/scraping',          label: 'Scraping',          Icon: Radar,           group: 'AI & System' },
+  { id: 'content-pipeline',  to: '/admin/content-pipeline',  label: 'Content Pipeline',  Icon: PenTool,         group: 'AI & System' },
+  { id: 'slot-monitor',      to: '/admin/slot-monitor',      label: 'Slot Monitor',      Icon: Clock,           group: 'AI & System' },
+  { id: 'visa-scheduling',   to: '/admin/visa-scheduling',   label: 'Visa Scheduling',   Icon: CalendarCheck,   group: 'AI & System' },
+  { id: 'newsletter',        to: '/admin/newsletter',        label: 'Newsletter',        Icon: Mail,            group: 'AI & System' },
+  { id: 'health',            to: '/admin/health',            label: 'System Health',     Icon: Activity,        group: 'AI & System' },
+  { id: 'integrations',      to: '/admin/integrations',      label: 'Integrations',      Icon: Plug,            group: 'AI & System', superOnly: true },
+  { id: 'staff',             to: '/admin/staff',             label: 'Staff',             Icon: UserCog,         group: 'Admin' },
+  { id: 'admins',            to: '/admin/admins',            label: 'Admins',            Icon: ShieldCheck,     group: 'Admin', superOnly: true },
+  { id: 'audit',             to: '/admin/audit',             label: 'Audit Log',         Icon: History,         group: 'Admin' },
+  { id: 'security',          to: '/admin/security',          label: 'My Security',       Icon: Lock,            group: 'Admin' },
+  { id: 'settings',          to: '/admin/settings',          label: 'Settings',          Icon: Settings,        group: 'Admin', superOnly: true },
 ];
 
+/* ─── Main Shell ──────────────────────────────────────────────────────── */
 export default function AdminShell({ children }) {
   const { admin, logout } = useAdminAuth();
   const pathname = useLocation().pathname.replace(/\/+$/, '') || '/';
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [pwModal, setPwModal] = useState(false);
+  const [profileOpen, setProfileOpen]   = useState(false);
+  const [pwModal, setPwModal]           = useState(false);
   const dialogProps = useDialogA11y(pwModal, () => setPwModal(false));
-  const [pwForm, setPwForm] = useState({ current: '', new: '', confirm: '' });
-  const [pwSaving, setPwSaving] = useState(false);
-  const [pwError, setPwError] = useState('');
-  const [editingName, setEditingName] = useState(false);
-  const [nameVal, setNameVal] = useState('');
-  const [nameBusy, setNameBusy] = useState(false);
-
-  // Responsive layout
+  const [pwForm, setPwForm]             = useState({ current: '', new: '', confirm: '' });
+  const [pwSaving, setPwSaving]         = useState(false);
+  const [pwError, setPwError]           = useState('');
+  const [editingName, setEditingName]   = useState(false);
+  const [nameVal, setNameVal]           = useState('');
+  const [nameBusy, setNameBusy]         = useState(false);
   const responsive = useResponsive();
 
-  // Manual collapse override (stored) — only applies when showSidebar + !iconOnly
+  /* collapse state */
   const [userCollapsed, setUserCollapsed] = useState(() => {
     try { return localStorage.getItem('admin-sidebar-collapsed') === '1'; } catch { return false; }
   });
@@ -95,31 +120,31 @@ export default function AdminShell({ children }) {
     try { localStorage.setItem('admin-sidebar-collapsed', next ? '1' : '0'); } catch {}
     return next;
   });
-
-  // Derive effective collapsed state: tablet always icon-rail; large screens use manual toggle
   const collapsed = !responsive.showSidebar ? false : (responsive.iconOnly || userCollapsed);
 
+  /* critical alerts badge */
   const user = admin;
   const [critical, setCritical] = useState(0);
   useEffect(() => {
-    adminClient()
-      .get('/alerts')
+    adminClient().get('/alerts')
       .then((r) => setCritical((r.data.items || []).filter((a) => a.severity === 'critical').length))
       .catch(() => {});
   }, []);
-  const badge = (t, mobile = false) => t.id === 'applications' && critical > 0 && (
-    <span
-      data-testid={`admin-nav-applications-critical${mobile ? '-m' : ''}`}
-      title={`${critical} critical alert${critical === 1 ? '' : 's'}`}
-      className={`${mobile ? 'ml-1.5' : collapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-red-500 text-[var(--text-primary)] text-[10px] font-bold tabular-nums`}
-    >
-      {critical}
-    </span>
-  );
-  const tabs = TABS.filter((t) => (!t.superOnly || admin?.is_super_admin) && canViewTab(admin, t.id));
-  const mustEnrol = !!admin?.two_factor_required;
-  const role = admin?.admin_role;
-  const limited = admin && !canWrite(admin, 'manage');
+
+  const badge = (t, mobile = false) =>
+    t.id === 'applications' && critical > 0 && (
+      <span
+        title={`${critical} critical alert${critical === 1 ? '' : 's'}`}
+        className={`${mobile ? 'ml-1.5' : collapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-[#E10600] text-white text-[10px] font-bold tabular-nums`}
+      >
+        {critical}
+      </span>
+    );
+
+  const tabs       = TABS.filter((t) => (!t.superOnly || admin?.is_super_admin) && canViewTab(admin, t.id));
+  const mustEnrol  = !!admin?.two_factor_required;
+  const role       = admin?.admin_role;
+  const limited    = admin && !canWrite(admin, 'manage');
 
   const saveName = async () => {
     if (!nameVal.trim()) return;
@@ -139,81 +164,170 @@ export default function AdminShell({ children }) {
       setPwModal(false); setPwForm({ current: '', new: '', confirm: '' });
     } catch (e) {
       setPwError(e.response?.data?.detail || 'Password change failed');
-    } finally {
-      setPwSaving(false);
-    }
+    } finally { setPwSaving(false); }
   };
 
+  /* ── Sidebar width via CSS variable (smooth transition) ── */
+  const sidebarW = collapsed ? SIDEBAR_CLOSED : SIDEBAR_OPEN;
+
   return (
-    <div className="admin-theme h-screen bg-[#F8FAFF] text-[#1B2B5E]" data-testid="admin-shell"
-      style={{ fontSize: `${responsive.textScale}rem` }}>
-      <div className="grid h-screen transition-[grid-template-columns] duration-200"
-        style={{ gridTemplateColumns: responsive.showSidebar ? `${responsive.sidebarWidth}px 1fr` : '1fr' }}>
-        <aside className={`${responsive.showSidebar ? 'flex' : 'hidden'} flex-col bg-[#F0F4FF] border-r border-[#E8EDF8] overflow-y-auto admin-scrollbar`}>
-          {/* Logo + collapse toggle */}
-          <div className={`flex items-center border-b border-[#E8EDF8] shrink-0 ${collapsed ? 'justify-center p-3' : 'justify-between px-4 py-3'}`}>
+    <div
+      className="h-screen overflow-hidden"
+      style={{
+        '--font-display': "'Poppins', system-ui, sans-serif",
+        '--font-body':    "'Figtree', system-ui, sans-serif",
+        '--bg':     '#F4F6FC',
+        '--panel':  '#FFFFFF',
+        '--ink':    '#0B1240',
+        '--muted':  '#5A6283',
+        '--line':   '#E1E6F5',
+        '--blue':   '#011CB5',
+        '--red':    '#E10600',
+        '--gold':   '#F2A900',
+        '--soft':   '#EAEFFF',
+        '--ok':     '#0F8A4B',
+        '--warn':   '#B86A00',
+        /* sidebar deep-navy surface */
+        '--rail':   '#080C24',
+        '--rail-l': '#111735',
+        '--rail-t': '#1E2552',
+        '--rail-a': '#4B5EAA',
+        fontFamily: 'var(--font-body)',
+        background: 'var(--bg)',
+        color:      'var(--ink)',
+      }}
+      data-testid="admin-shell"
+    >
+      <div
+        className="grid h-screen"
+        style={{
+          gridTemplateColumns: responsive.showSidebar
+            ? `${sidebarW}px 1fr`
+            : '1fr',
+          transition: 'grid-template-columns 220ms cubic-bezier(.4,0,.2,1)',
+        }}
+      >
+        {/* ── Sidebar ─────────────────────────────────────────────── */}
+        <aside
+          className={`${responsive.showSidebar ? 'flex' : 'hidden'} flex-col overflow-y-auto overflow-x-hidden`}
+          style={{ background: 'var(--rail)', borderRight: '1px solid var(--rail-t)' }}
+        >
+          {/* Logo row */}
+          <div
+            className="flex items-center shrink-0 h-14"
+            style={{
+              borderBottom: '1px solid var(--rail-t)',
+              padding: collapsed ? '0' : '0 14px',
+              justifyContent: collapsed ? 'center' : 'space-between',
+            }}
+          >
             {!collapsed && (
-              <Link to="/" className="inline-flex items-center gap-2 text-[#1B2B5E] hover:text-[#3b82f6] min-w-0">
-                <img src={BRAND.logo} alt="We Hive" className="h-8 w-auto shrink-0" />
-                <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)] font-bold">Admin</span>
+              <Link to="/" className="inline-flex items-center gap-2 min-w-0">
+                <img src={BRAND.logo} alt="We Hive" className="h-7 w-auto shrink-0" />
+                <span
+                  style={{
+                    fontSize: 10, fontWeight: 700, letterSpacing: '0.18em',
+                    textTransform: 'uppercase', color: 'var(--rail-a)',
+                    fontFamily: 'var(--font-display)',
+                  }}
+                >
+                  Admin
+                </span>
               </Link>
             )}
             <button
               onClick={toggleCollapse}
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="h-7 w-7 rounded-lg bg-[#E5EBFF] hover:bg-[#D0DCFF] inline-flex items-center justify-center text-[var(--text-secondary)] hover:text-[#3b82f6] transition-colors shrink-0"
+              style={{
+                width: 28, height: 28, borderRadius: 8,
+                background: 'var(--rail-t)',
+                border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--rail-a)',
+                flexShrink: 0,
+              }}
             >
-              {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+              {collapsed
+                ? <ChevronRight style={{ width: 14, height: 14 }} />
+                : <ChevronLeft  style={{ width: 14, height: 14 }} />}
             </button>
           </div>
-          <div className="flag-stripe" />
 
-          {/* Grouped nav */}
-          <nav aria-label="Admin sections" className={`flex-1 overflow-y-auto py-3 admin-scrollbar ${collapsed ? 'px-1.5' : 'px-3'}`}>
+          {/* Flag stripe */}
+          <div style={{ height: 3, background: 'linear-gradient(90deg,#011CB5 0%,#E10600 100%)', flexShrink: 0 }} />
+
+          {/* Nav */}
+          <nav
+            aria-label="Admin sections"
+            className="flex-1 overflow-y-auto py-3"
+            style={{ padding: collapsed ? '12px 6px' : '12px 8px' }}
+          >
             {GROUPS.map((group) => {
               const groupTabs = tabs.filter((t) => t.group === group);
               if (!groupTabs.length) return null;
               return (
-                <div key={group} className={collapsed ? 'mb-3' : 'mb-5'}>
+                <div key={group} style={{ marginBottom: collapsed ? 12 : 20 }}>
                   {!collapsed && (
-                    <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-[var(--text-muted)] px-2 mb-1.5">{group}</div>
+                    <div style={{
+                      fontSize: 10, fontWeight: 700, letterSpacing: '0.18em',
+                      textTransform: 'uppercase', color: 'var(--rail-a)',
+                      padding: '0 8px', marginBottom: 4,
+                      fontFamily: 'var(--font-display)',
+                    }}>
+                      {group}
+                    </div>
                   )}
-                  <div className="space-y-0.5">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {groupTabs.map((t) => {
-                      const Icon = t.Icon;
-                      const active = pathname === t.to || (t.id !== 'overview' && pathname.startsWith(t.to));
+                      const Icon  = t.Icon;
+                      const exact = t.id === 'overview';
+                      const active = exact
+                        ? pathname === t.to
+                        : pathname === t.to || pathname.startsWith(t.to + '/');
+
                       if (collapsed) {
                         return (
                           <NavLink
-                            key={t.id}
-                            to={t.to}
-                            end={t.id === 'overview'}
-                            data-testid={t.testid}
+                            key={t.id} to={t.to} end={exact}
                             title={t.label}
-                            className={`relative flex items-center justify-center h-10 w-full rounded-lg transition-colors duration-150 ${
-                              active ? 'bg-[#3b82f6] text-white' : 'text-[var(--text-secondary)] hover:text-[#2563eb] hover:bg-[#EEF2FF]'
-                            }`}
+                            style={{
+                              position: 'relative',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              height: 40, borderRadius: 10,
+                              background: active ? 'var(--blue)' : 'transparent',
+                              color: active ? '#fff' : 'var(--rail-a)',
+                              textDecoration: 'none', transition: 'background 150ms',
+                            }}
+                            onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--rail-t)'; }}
+                            onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
                           >
-                            <Icon className="w-4 h-4" />
+                            <Icon style={{ width: 16, height: 16 }} />
                             {badge(t)}
                           </NavLink>
                         );
                       }
+
                       return (
                         <NavLink
-                          key={t.id}
-                          to={t.to}
-                          end={t.id === 'overview'}
-                          data-testid={t.testid}
-                          className={`flex items-center gap-3 px-3 min-h-[38px] rounded-lg text-[13px] font-semibold transition-colors duration-150 ${
-                            active
-                              ? 'text-white shadow-sm border-l-[3px] border-[#3b82f6] pl-[10px]'
-                              : 'text-[var(--text-secondary)] hover:text-[#0f1420] hover:bg-[#EEF2FF] border-l-[3px] border-transparent'
-                          }`}
-                          style={active ? { background: '#3b82f6' } : {}}
+                          key={t.id} to={t.to} end={exact}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '28px 1fr auto',
+                            alignItems: 'center', gap: 10,
+                            padding: '0 10px', minHeight: 38, borderRadius: 10,
+                            background: active ? 'var(--blue)' : 'transparent',
+                            color: active ? '#fff' : 'var(--rail-a)',
+                            fontSize: 13, fontWeight: 600, textDecoration: 'none',
+                            transition: 'background 150ms',
+                            fontFamily: 'var(--font-body)',
+                          }}
+                          onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--rail-t)'; }}
+                          onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
                         >
-                          <Icon className="w-4 h-4 shrink-0" />
-                          <span className="truncate">{t.label}</span>
+                          <Icon style={{ width: 15, height: 15, flexShrink: 0 }} />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {t.label}
+                          </span>
                           {badge(t)}
                         </NavLink>
                       );
@@ -224,145 +338,223 @@ export default function AdminShell({ children }) {
             })}
           </nav>
 
-          {/* Footer: avatar + site link */}
-          <div className={`border-t border-[#E8EDF8] shrink-0 ${collapsed ? 'p-2' : 'p-3'}`}>
+          {/* Footer */}
+          <div style={{ borderTop: '1px solid var(--rail-t)', padding: collapsed ? 8 : 12, flexShrink: 0 }}>
             {collapsed ? (
-              <div className="space-y-1.5">
-                <button onClick={() => setProfileOpen(!profileOpen)} className="relative w-full flex justify-center" title={user?.email}>
-                  <span className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-[#E8EDF8]">
-                    <img src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })} alt="admin" className="h-full w-full object-cover" />
-                  </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  title={user?.email}
+                  style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--rail-t)', background: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  <img src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })} alt="admin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </button>
-                <Link to="/" title="Back to site" className="flex items-center justify-center h-8 rounded-lg bg-[#EEF2FF] hover:bg-[#E5EBFF] text-[var(--text-secondary)] hover:text-[#3b82f6] transition-colors">
-                  <ArrowLeft className="w-3.5 h-3.5" />
+                <Link to="/" title="Back to site" style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 32, height: 32, borderRadius: 8,
+                  background: 'var(--rail-t)', color: 'var(--rail-a)', textDecoration: 'none',
+                }}>
+                  <ArrowLeft style={{ width: 14, height: 14 }} />
                 </Link>
               </div>
             ) : (
               <>
-                <div className="relative">
+                <div style={{ position: 'relative' }}>
                   <button
                     onClick={() => setProfileOpen(!profileOpen)}
-                    className="flex items-center gap-3 px-1 w-full hover:bg-[#EEF2FF] rounded-xl py-2 -mx-1 transition"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                      padding: '6px 4px', borderRadius: 10, background: 'none',
+                      border: 'none', cursor: 'pointer', color: 'inherit',
+                      textAlign: 'left',
+                    }}
                   >
-                    <span className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-[#E8EDF8] shrink-0">
-                      <img src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })} alt="admin" className="h-full w-full object-cover" />
+                    <span style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '2px solid var(--rail-t)' }}>
+                      <img src={avatarUrl({ seed: user?.email || user?.id, gender: 'hero' })} alt="admin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </span>
-                    <div className="min-w-0 text-left">
-                      <div className="text-[13px] font-bold text-[#1B2B5E] truncate">{user?.name || 'Admin'}</div>
-                      <div className="text-[12px] text-[var(--text-secondary)] truncate">{user?.email}</div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#EEF1FF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {user?.name || 'Admin'}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--rail-a)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {user?.email}
+                      </div>
                     </div>
                   </button>
 
                   {profileOpen && (
-                    <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl bg-white border border-[#E8EDF8] shadow-lg overflow-hidden z-50">
+                    <div style={{
+                      position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 8,
+                      borderRadius: 12, background: 'var(--panel)', border: '1px solid var(--line)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,.14)', overflow: 'hidden', zIndex: 50,
+                    }}>
                       {editingName ? (
-                        <div className="px-4 py-3 flex gap-2">
+                        <div style={{ padding: '10px 12px', display: 'flex', gap: 8 }}>
                           <input
-                            autoFocus
-                            value={nameVal}
+                            autoFocus value={nameVal}
                             onChange={(e) => setNameVal(e.target.value)}
                             onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false); }}
                             placeholder="Display name"
-                            className="flex-1 h-8 px-2 rounded-lg bg-gray-50 border border-gray-200 text-[13px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#3b82f6]"
+                            style={{
+                              flex: 1, height: 36, padding: '0 10px', borderRadius: 8,
+                              background: 'var(--soft)', border: '1px solid var(--line)',
+                              fontSize: 13, color: 'var(--ink)', outline: 'none', fontFamily: 'var(--font-body)',
+                            }}
                           />
-                          <button disabled={nameBusy} onClick={saveName} className="h-8 px-3 rounded-lg bg-[#3b82f6] text-white text-[12px] font-bold disabled:opacity-50">
+                          <button disabled={nameBusy} onClick={saveName} style={{
+                            height: 36, padding: '0 14px', borderRadius: 8,
+                            background: 'var(--blue)', color: '#fff', border: 'none',
+                            fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: nameBusy ? .5 : 1,
+                          }}>
                             {nameBusy ? '…' : 'Save'}
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => { setNameVal(user?.name || ''); setEditingName(true); }}
-                          className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-gray-700 hover:bg-[#F5F7FF] transition-colors"
-                        >
-                          <Pencil className="w-3.5 h-3.5" /> Edit name
-                        </button>
+                        <ProfileMenuItem onClick={() => { setNameVal(user?.name || ''); setEditingName(true); }} icon={<Pencil style={{ width: 14, height: 14 }} />} label="Edit name" />
                       )}
-                      <button
+                      <ProfileMenuItem
                         onClick={() => { setPwModal(true); setProfileOpen(false); setEditingName(false); }}
-                        className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-gray-700 hover:bg-[#F5F7FF] transition-colors border-t border-[#E8EDF8]"
-                      >
-                        <Key className="w-3.5 h-3.5" /> Change Password
-                      </button>
-                      <button
+                        icon={<Key style={{ width: 14, height: 14 }} />}
+                        label="Change Password"
+                        border
+                      />
+                      <ProfileMenuItem
                         onClick={() => { logout(); setProfileOpen(false); }}
-                        className="flex items-center gap-2.5 w-full px-4 min-h-[40px] text-[13px] font-semibold text-red-600 hover:bg-red-50 transition-colors border-t border-[#E8EDF8]"
-                      >
-                        <LogOut className="w-3.5 h-3.5" /> Sign out
-                      </button>
+                        icon={<LogOut style={{ width: 14, height: 14 }} />}
+                        label="Sign out"
+                        border danger
+                      />
                     </div>
                   )}
                 </div>
-                <div className="mt-2">
-                  <Link
-                    to="/"
-                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-[#E8EDF8] hover:border-blue-300 min-h-[34px] px-4 text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[#1B2B5E] transition-colors w-full"
-                  >
-                    <ArrowLeft className="w-3 h-3" /> Site
-                  </Link>
-                </div>
+                <Link
+                  to="/"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    marginTop: 8, height: 34, borderRadius: 10, width: '100%',
+                    background: 'var(--rail-t)', color: 'var(--rail-a)', textDecoration: 'none',
+                    fontSize: 12, fontWeight: 600, border: '1px solid var(--rail-t)',
+                    fontFamily: 'var(--font-body)',
+                  }}
+                >
+                  <ArrowLeft style={{ width: 12, height: 12 }} /> Back to site
+                </Link>
               </>
             )}
           </div>
         </aside>
 
-        <main className="overflow-y-auto relative z-10 admin-scrollbar bg-[#F8FAFF]"
-          style={{ padding: `${responsive.gutter}px`, fontSize: 'inherit' }}>
-          <div style={responsive.contentMax ? { maxWidth: `${responsive.contentMax}px`, margin: '0 auto' } : undefined}>
-          {/* Mobile tab pill bar */}
-          <nav aria-label="Admin sections" className="lg:hidden flex overflow-x-auto snap-x scroll-px-5 [scrollbar-width:none] gap-1.5 mb-5 -mx-5 px-5">
-            {tabs.map((t) => {
-              const active = pathname === t.to || (t.id !== 'overview' && pathname.startsWith(t.to));
-              return (
-                <NavLink
-                  key={t.id}
-                  to={t.to}
-                  end={t.id === 'overview'}
-                  className={`shrink-0 snap-start inline-flex items-center rounded-lg px-3.5 min-h-[40px] text-[13px] font-semibold whitespace-nowrap transition-colors ${
-                    active ? 'bg-[#3b82f6] text-white' : 'bg-white border border-[#E8EDF8] text-[var(--text-secondary)] hover:text-[#1B2B5E]'
-                  }`}
-                >
-                  {t.label}
-                  {badge({ ...t, mobile: true })}
-                </NavLink>
-              );
-            })}
-          </nav>
-          {mustEnrol && (
-            <div role="alert" data-testid="admin-2fa-required" className="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
-              Two-factor sign-in is required for every admin. Turn it on below to unlock the rest of the panel.
-            </div>
-          )}
-          {!mustEnrol && limited && (
-            <div data-testid="admin-role-banner" className="mb-5 rounded-xl border border-[#E8EDF8] bg-blue-50 px-4 py-2.5 text-[12.5px] text-gray-700">
-              You're signed in as <span className="font-semibold text-[#1B2B5E]">{ROLE_NAMES[role] || role}</span>
-              {role === 'viewer' ? ' — you can view everything but not change it.' : role === 'support'
-                ? ' — you can work on applications, leads and document review; everything else is view-only.'
-                : ' — you can manage payments, pricing and promo codes; everything else is view-only.'}
-            </div>
-          )}
-          {mustEnrol && !pathname.startsWith('/admin/security') ? <Navigate to="/admin/security" replace /> : children}
+        {/* ── Main content ──────────────────────────────────────────── */}
+        <main
+          className="overflow-y-auto admin-scrollbar"
+          style={{ background: 'var(--bg)', padding: responsive.gutter ?? 24, fontSize: 'inherit' }}
+        >
+          <div style={responsive.contentMax ? { maxWidth: responsive.contentMax, margin: '0 auto' } : undefined}>
+            {/* Mobile tab pill bar */}
+            <nav aria-label="Admin sections" className="lg:hidden flex overflow-x-auto snap-x [scrollbar-width:none] gap-1.5 mb-5 -mx-5 px-5" style={{ scrollPaddingLeft: 20 }}>
+              {tabs.map((t) => {
+                const exact = t.id === 'overview';
+                const active = exact ? pathname === t.to : pathname.startsWith(t.to);
+                return (
+                  <NavLink
+                    key={t.id} to={t.to} end={exact}
+                    style={{
+                      flexShrink: 0, display: 'inline-flex', alignItems: 'center',
+                      borderRadius: 10, padding: '0 14px', minHeight: 40,
+                      fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', textDecoration: 'none',
+                      background: active ? 'var(--blue)' : 'var(--panel)',
+                      color: active ? '#fff' : 'var(--muted)',
+                      border: `1px solid ${active ? 'transparent' : 'var(--line)'}`,
+                    }}
+                  >
+                    {t.label}
+                  </NavLink>
+                );
+              })}
+            </nav>
+
+            {mustEnrol && (
+              <div role="alert" style={{
+                marginBottom: 20, borderRadius: 12, border: '1px solid #F2A90033',
+                background: '#FFF9EC', padding: '10px 16px', fontSize: 13, color: 'var(--warn)',
+              }}>
+                Two-factor sign-in is required for every admin. Turn it on below to unlock the rest of the panel.
+              </div>
+            )}
+            {!mustEnrol && limited && (
+              <div style={{
+                marginBottom: 20, borderRadius: 12, border: '1px solid var(--soft)',
+                background: 'var(--soft)', padding: '10px 16px', fontSize: 12.5, color: 'var(--ink)',
+              }}>
+                You're signed in as <strong style={{ color: 'var(--blue)' }}>{ROLE_NAMES[role] || role}</strong>
+                {role === 'viewer' ? ' — you can view everything but not change it.' : role === 'support'
+                  ? ' — you can work on applications, leads and document review; everything else is view-only.'
+                  : ' — you can manage payments, pricing and promo codes; everything else is view-only.'}
+              </div>
+            )}
+            {mustEnrol && !pathname.startsWith('/admin/security')
+              ? <Navigate to="/admin/security" replace />
+              : children}
           </div>
         </main>
       </div>
 
-      {/* Password Change Modal */}
+      {/* ── Password Change Modal ─────────────────────────────────── */}
       {pwModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[var(--glass)] backdrop-blur-sm" onClick={() => setPwModal(false)}>
-          <div {...dialogProps} className="rounded-2xl bg-white border border-[#E8EDF8] w-full max-w-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6">
-              <h3 className="text-[16px] font-semibold text-[#1B2B5E] mb-4">Change password</h3>
-              <div className="space-y-2">
-                <label htmlFor="admin-pw-current" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-1">Current password</label>
-                <input id="admin-pw-current" type="password" value={pwForm.current} onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))} placeholder="Current password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#3b82f6]" />
-                <label htmlFor="admin-pw-new" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-1">New password</label>
-                <input id="admin-pw-new" type="password" value={pwForm.new} onChange={e => setPwForm(p => ({ ...p, new: e.target.value }))} placeholder="New password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#3b82f6]" />
-                <label htmlFor="admin-pw-confirm" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-1">Confirm new password</label>
-                <input id="admin-pw-confirm" type="password" value={pwForm.confirm} onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))} placeholder="Confirm new password" className="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200 text-[14px] text-[#1B2B5E] placeholder:text-[var(--text-muted)] outline-none focus:border-[#3b82f6]" />
-                {pwError && <p className="text-[12px] text-red-600 font-semibold">{pwError}</p>}
+        <div
+          onClick={() => setPwModal(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 16, background: 'rgba(8,12,36,.55)', backdropFilter: 'blur(4px)',
+          }}
+        >
+          <div
+            {...dialogProps}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              borderRadius: 16, background: 'var(--panel)', border: '1px solid var(--line)',
+              width: '100%', maxWidth: 380, boxShadow: '0 20px 60px rgba(0,0,0,.2)',
+            }}
+          >
+            <div style={{ padding: 24 }}>
+              <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-display)' }}>
+                Change password
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  ['admin-pw-current', 'current', 'Current password'],
+                  ['admin-pw-new', 'new', 'New password'],
+                  ['admin-pw-confirm', 'confirm', 'Confirm new password'],
+                ].map(([id, field, label]) => (
+                  <div key={id}>
+                    <label htmlFor={id} style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      {label}
+                    </label>
+                    <input
+                      id={id} type="password" value={pwForm[field]}
+                      onChange={e => setPwForm(p => ({ ...p, [field]: e.target.value }))}
+                      placeholder={label}
+                      style={{
+                        width: '100%', height: 44, padding: '0 14px', borderRadius: 10,
+                        background: 'var(--soft)', border: '1px solid var(--line)',
+                        fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box',
+                        fontFamily: 'var(--font-body)',
+                      }}
+                    />
+                  </div>
+                ))}
+                {pwError && <p style={{ margin: 0, fontSize: 12, color: 'var(--red)', fontWeight: 600 }}>{pwError}</p>}
               </div>
-              <div className="flex gap-2 mt-5">
-                <button onClick={() => setPwModal(false)} className="flex-1 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-[13px] transition-colors">Cancel</button>
-                <button onClick={handlePasswordChange} disabled={pwSaving || !pwForm.current || !pwForm.new} className="flex-1 h-11 rounded-xl bg-[#3b82f6] hover:bg-[#2563eb] disabled:opacity-50 text-white font-semibold text-[13px] transition-colors">{pwSaving ? 'Saving...' : 'Update Password'}</button>
+              <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
+                <button onClick={() => setPwModal(false)} style={btnStyle('ghost')}>Cancel</button>
+                <button
+                  onClick={handlePasswordChange}
+                  disabled={pwSaving || !pwForm.current || !pwForm.new}
+                  style={btnStyle('primary')}
+                >
+                  {pwSaving ? 'Saving…' : 'Update Password'}
+                </button>
               </div>
             </div>
           </div>
@@ -372,29 +564,203 @@ export default function AdminShell({ children }) {
   );
 }
 
-export function AdminHeader({ title, subtitle, right }) {
+/* ── Helper: profile dropdown menu item ──────────────────────────────── */
+function ProfileMenuItem({ onClick, icon, label, border, danger }) {
+  const [hover, setHover] = useState(false);
   return (
-    <div className="flex items-end justify-between gap-4 flex-wrap mb-6 sm:mb-8 pb-5 border-b border-[#E8EDF8]">
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+        padding: '0 16px', minHeight: 42, border: 'none',
+        borderTop: border ? '1px solid var(--line)' : 'none',
+        background: hover ? (danger ? '#FFF0F0' : 'var(--soft)') : 'transparent',
+        color: danger ? 'var(--red)' : 'var(--ink)',
+        fontSize: 13, fontWeight: 600, cursor: 'pointer', textAlign: 'left',
+        fontFamily: 'var(--font-body)',
+      }}
+    >
+      {icon}{label}
+    </button>
+  );
+}
+
+/* ── Button style helper ─────────────────────────────────────────────── */
+function btnStyle(variant) {
+  const base = {
+    flex: 1, height: 44, borderRadius: 10, fontSize: 13, fontWeight: 600,
+    border: 'none', cursor: 'pointer', transition: 'opacity 150ms',
+    fontFamily: "'Figtree', system-ui, sans-serif",
+  };
+  if (variant === 'primary') return { ...base, background: 'var(--blue)', color: '#fff' };
+  return { ...base, background: 'var(--soft)', color: 'var(--muted)' };
+}
+
+/* ─── Exported layout helpers (used by tab components) ──────────────── */
+
+/** Page header with eyebrow + title + optional right slot */
+export function AdminHeader({ title, subtitle, right, eyebrow }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid var(--line)' }}>
       <div>
-        <div className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#3b82f6]">
-          We Hive · Super Admin
+        <div style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase',
+          color: 'var(--blue)', marginBottom: 4, fontFamily: "'Poppins', system-ui, sans-serif",
+        }}>
+          {eyebrow || 'We Hive · Admin'}
         </div>
-        <h1 className="mt-1.5 font-display font-bold text-[26px] sm:text-[32px] leading-tight tracking-[-0.02em] text-[#1B2B5E]">
+        <h1 style={{
+          margin: 0, fontFamily: "'Poppins', system-ui, sans-serif",
+          fontWeight: 800, fontSize: 28, letterSpacing: '-0.02em',
+          lineHeight: 1.2, color: 'var(--ink)',
+        }}>
           {title}
         </h1>
-        {subtitle && <p className="mt-1 text-[13px] text-[var(--text-secondary)] max-w-2xl">{subtitle}</p>}
+        {subtitle && <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--muted)', maxWidth: 560 }}>{subtitle}</p>}
       </div>
       {right}
     </div>
   );
 }
 
-export function Panel({ children, className = '' }) {
+/** White card panel */
+export function Panel({ children, className = '', style = {} }) {
   return (
     <div
-      className={`card-lift relative overflow-hidden rounded-2xl border p-4 sm:p-5 ${className}`}
-      style={{ background: '#FFFFFF', borderColor: '#E8EDF8', boxShadow: '0 1px 4px rgba(27,43,94,0.06)' }}
+      className={`card-lift ${className}`}
+      style={{
+        background: 'var(--panel)', border: '1px solid var(--line)',
+        borderRadius: 14, padding: '16px 20px',
+        boxShadow: '0 1px 4px rgba(11,18,64,.06)',
+        ...style,
+      }}
     >
+      {children}
+    </div>
+  );
+}
+
+/** Stat card — large number + label + optional trend */
+export function StatCard({ label, value, trend, trendUp, icon: Icon, accent }) {
+  return (
+    <div style={{
+      background: accent ? 'var(--blue)' : 'var(--panel)',
+      border: `1px solid ${accent ? 'transparent' : 'var(--line)'}`,
+      borderRadius: 14, padding: '18px 20px',
+      boxShadow: '0 1px 4px rgba(11,18,64,.06)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase',
+          color: accent ? 'rgba(255,255,255,.6)' : 'var(--muted)',
+          fontFamily: "'Poppins', system-ui, sans-serif",
+        }}>
+          {label}
+        </span>
+        {Icon && (
+          <span style={{
+            width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: accent ? 'rgba(255,255,255,.12)' : 'var(--soft)',
+          }}>
+            <Icon style={{ width: 15, height: 15, color: accent ? '#fff' : 'var(--blue)' }} />
+          </span>
+        )}
+      </div>
+      <div style={{
+        fontSize: 30, fontWeight: 800, color: accent ? '#fff' : 'var(--ink)', lineHeight: 1,
+        fontFamily: "'Poppins', system-ui, sans-serif",
+      }}>
+        {value ?? '—'}
+      </div>
+      {trend !== undefined && (
+        <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: trendUp ? 'var(--ok)' : 'var(--red)' }}>
+          {trendUp ? '↑' : '↓'} {trend}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Boarding-pass item row — matches Social Studio Create-tab card style
+ *
+ * Usage:
+ *   <ItemRow
+ *     avatar={<img .../>}
+ *     title="John Doe"
+ *     sub="john@example.com"
+ *     right={<Pill variant="ok">Active</Pill>}
+ *   />
+ */
+export function ItemRow({ avatar, title, sub, right, onClick, style = {} }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => onClick && setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '44px 1fr auto',
+        gap: 12, padding: '11px 14px',
+        border: '1px solid var(--line)', borderRadius: 12,
+        background: hover ? 'var(--soft)' : 'var(--panel)',
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'background 120ms',
+        alignItems: 'center',
+        ...style,
+      }}
+    >
+      <div style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+        {avatar}
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {title}
+        </div>
+        {sub && <div style={{ fontSize: 12, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</div>}
+      </div>
+      {right && <div style={{ flexShrink: 0 }}>{right}</div>}
+    </div>
+  );
+}
+
+/**
+ * Status pill badge
+ * variant: 'ok' | 'red' | 'gold' | 'blue' | 'muted'
+ */
+export function Pill({ variant = 'muted', children }) {
+  const map = {
+    ok:    { bg: '#E6F6EE', color: 'var(--ok)' },
+    red:   { bg: '#FDECEA', color: 'var(--red)' },
+    gold:  { bg: '#FEF3DC', color: 'var(--warn)' },
+    blue:  { bg: 'var(--soft)', color: 'var(--blue)' },
+    muted: { bg: '#F0F1F5', color: 'var(--muted)' },
+  };
+  const { bg, color } = map[variant] || map.muted;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      padding: '3px 10px', borderRadius: 20,
+      fontSize: 11, fontWeight: 700, letterSpacing: '0.06em',
+      background: bg, color,
+      fontFamily: "'Poppins', system-ui, sans-serif",
+    }}>
+      {children}
+    </span>
+  );
+}
+
+/** Section label (uppercase eyebrow above a group of items) */
+export function SectionLabel({ children }) {
+  return (
+    <div style={{
+      fontSize: 11, fontWeight: 700, letterSpacing: '0.14em',
+      textTransform: 'uppercase', color: 'var(--muted)',
+      marginBottom: 8, fontFamily: "'Poppins', system-ui, sans-serif",
+    }}>
       {children}
     </div>
   );

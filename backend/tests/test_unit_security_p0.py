@@ -23,19 +23,33 @@ import routes_users  # noqa: E402
 from models import UpdateProfileRequest  # noqa: E402
 
 
-def _paths():
-    from server import app
-    return {(m, r.path) for r in app.routes for m in getattr(r, "methods", set())}
+def _all_paths():
+    from fastapi.routing import APIRoute
+    import server
+
+    def collect(router):
+        results = []
+        for r in router.routes:
+            if isinstance(r, APIRoute):
+                for m in r.methods:
+                    results.append((m, r.path))
+            elif hasattr(r, 'original_router'):
+                results.extend(collect(r.original_router))
+            elif hasattr(r, 'routes'):
+                results.extend(collect(r))
+        return results
+
+    return set(collect(server.app))
 
 
 def test_removed_endpoints_are_gone():
-    paths = _paths()
-    for method, path in [("POST", "/api/users/me/upgrade"), ("POST", "/api/agent/signup"),
-                         ("POST", "/api/communication/telegram/send-code"),
-                         ("POST", "/api/communication/discord/notify")]:
+    paths = _all_paths()
+    for method, path in [("POST", "/users/me/upgrade"), ("POST", "/agent/signup"),
+                         ("POST", "/communication/telegram/send-code"),
+                         ("POST", "/communication/discord/notify")]:
         assert (method, path) not in paths, path
-    assert ("POST", "/api/agent/admin/agents") in paths
-    assert ("POST", "/api/users/me/contact/confirm") in paths
+    assert ("POST", "/agent/admin/agents") in paths
+    assert ("POST", "/users/me/contact/confirm") in paths
 
 
 # ------------------------------------------------------------ premium: free tries, then pay
