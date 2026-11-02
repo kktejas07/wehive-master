@@ -248,9 +248,16 @@ textarea{resize:vertical;min-height:64px}
             <label class="chk"><input type="checkbox" id="chApp" checked> In-app</label>
           </div>
           <div class="row">
-            <label class="f">Audience<select id="pubAud"><option value="all">All users</option><option value="regular">Regular users</option><option value="subscribers">Newsletter subscribers (email only)</option><option value="admins">Admins only</option></select></label>
+            <label class="f">Audience<select id="pubAud"><option value="all">All users</option><option value="regular">Regular users</option><option value="subscribers">Newsletter subscribers (email only)</option><option value="leads">Leads (enquiries)</option><option value="custom">My list (upload or paste)</option><option value="admins">Admins only</option></select></label>
             <label class="f">When<input type="datetime-local" id="pubAt"></label>
           </div>
+          <div id="custBox" class="form" hidden style="border:1px dashed var(--line);border-radius:12px;padding:12px">
+            <label class="f">Upload a contact file (Excel .xlsx, CSV, Word .docx, text, PDF or a photo/screenshot)<input type="file" id="custFile" accept=".xlsx,.csv,.docx,.txt,.vcf,.pdf,image/*"></label>
+            <label class="f">Or paste emails and phone numbers<textarea id="custPaste" rows="3" placeholder="ravi@gmail.com, 9000666149&#10;+91 90007 77149"></textarea></label>
+            <div class="row" style="align-items:center"><button id="custAdd" style="flex:0 0 auto">Add pasted contacts</button><span class="hint" id="custCount">No contacts yet.</span><button id="custClear" style="flex:0 0 auto">Clear</button></div>
+            <label class="chk"><input type="checkbox" id="custConsent"> These people agreed to receive WhatsApp messages from WeHive</label>
+          </div>
+          <p class="hint" id="audHint"></p>
           <label class="f">Title<input id="pubTitle" maxlength="100"></label>
           <label class="f">Message<textarea id="pubMsg" rows="6" maxlength="5000"></textarea></label>
           <div class="row">
@@ -260,6 +267,10 @@ textarea{resize:vertical;min-height:64px}
           </div>
           <div class="row"><button class="pri" id="pubGo">Publish now</button></div>
           <p class="hint" id="pubMsgOut"></p>
+          <details><summary style="cursor:pointer;font-weight:600">Record opt-outs (people who replied STOP)</summary>
+            <div class="form" style="margin-top:8px"><textarea id="optText" rows="3" placeholder="Paste numbers or emails that asked to stop"></textarea>
+            <div class="row" style="align-items:center"><button id="optGo" style="flex:0 0 auto">Save opt-outs</button><span class="hint" id="optMsg">Opted-out people are skipped on every send to leads and uploaded lists. Email links opt people out automatically.</span></div></div>
+          </details>
         </div>
       </div>
     </div>
@@ -1173,7 +1184,13 @@ function errText(e){const d=e&&e.response&&e.response.data&&e.response.data.deta
 function capFor(){const p=S.plat;S.plat='whatsapp';const t=caption();S.plat=p;return t;}
 function fillPub(when){$('pubTitle').value=plain(S.vals.headline).slice(0,100);$('pubMsg').value=capFor().replace(/\*/g,'').slice(0,5000);
   $('pubAt').value=localInput(when||new Date(Date.now()+3600e3));$('pubGo').textContent=new Date($('pubAt').value)>new Date(Date.now()+60e3)?'Schedule':'Publish now';}
-function pubSettings(){return {channels:{email:$('chEmail').checked,whatsapp:$('chWa').checked,inapp:$('chApp').checked},audience:$('pubAud').value};}
+let CUST={emails:[],phones:[]};
+const PHONE_RX=/\+?\d[\d \-().]{8,18}\d/g,EMAIL_RX=/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+function normPhone(r){const plus=r.trim().startsWith('+'),d=r.replace(/\D/g,'');if(plus&&d.length>=8&&d.length<=15)return '+'+d;if(d.length===10&&/[6-9]/.test(d[0]))return '+91'+d;if(d.length===12&&d.startsWith('91')&&/[6-9]/.test(d[2]))return '+'+d;if(d.length===11&&d[0]==='1')return '+'+d;return null;}
+function addContacts(c){CUST.emails=[...new Set(CUST.emails.concat(c.emails||[]))];CUST.phones=[...new Set(CUST.phones.concat(c.phones||[]))];
+  $('custCount').textContent=CUST.emails.length||CUST.phones.length?`${CUST.emails.length} emails · ${CUST.phones.length} phone numbers`:'No contacts yet.';}
+function pubSettings(){const aud=$('pubAud').value,o={channels:{email:$('chEmail').checked,whatsapp:$('chWa').checked,inapp:$('chApp').checked&&!['leads','custom','subscribers'].includes(aud)},audience:aud};
+  if(aud==='custom'){o.recipients={emails:CUST.emails,phones:CUST.phones};o.whatsapp_consent=$('custConsent').checked;}return o;}
 async function publishCurrent(title,message,when,setMsg){
   setMsg('Rendering and uploading the poster…');
   const blob=await blobOf(S.size==='st'||S.size==='yt'?'sq':S.size);
@@ -1213,11 +1230,21 @@ async function loadHist(){if(!BRIDGE)return;try{const items=await BRIDGE.history
 if(BRIDGE){
   $('navAgent').hidden=false;$('pubCard').hidden=false;fillPub();
   $('tpl').addEventListener('change',()=>fillPub());
+  const AUD_HINT={leads:'Leads who ticked "Send me visa news, offers and event invites" on the enquiry form, plus enquiries your team logged here. Opted-out people are skipped. No in-app message (leads have no account).',
+    custom:'Only the contacts you upload or paste. Opted-out people are skipped, and each email has an unsubscribe link. WhatsApp needs the consent box ticked.',subscribers:'Email only, each with an unsubscribe link.'};
+  $('pubAud').onchange=()=>{const a=$('pubAud').value;$('custBox').hidden=a!=='custom';$('audHint').textContent=AUD_HINT[a]||'Registered users: email unless they turned it off, WhatsApp only if they opted in, plus an in-app notification.';};$('pubAud').onchange();
+  $('custFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;$('custCount').textContent='Reading '+f.name+'…';
+    try{addContacts(await BRIDGE.parseContacts(f));toast('Contacts added');}catch(err){$('custCount').textContent=errText(err);}e.target.value='';};
+  $('custAdd').onclick=()=>{const t=$('custPaste').value;const emails=(t.match(EMAIL_RX)||[]).map(x=>x.toLowerCase());const phones=(t.replace(EMAIL_RX,' ').match(PHONE_RX)||[]).map(normPhone).filter(Boolean);
+    if(!emails.length&&!phones.length){$('custCount').textContent='No emails or phone numbers found in the pasted text.';return;}addContacts({emails,phones});$('custPaste').value='';};
+  $('optGo').onclick=async()=>{const t=$('optText').value.trim();if(!t)return;try{const r=await BRIDGE.recordOptOuts(t);$('optMsg').textContent=`${r.added} new opt-outs saved (${r.total} in total).`;$('optText').value='';}catch(e){$('optMsg').textContent=errText(e);}};
+  $('custClear').onclick=()=>{CUST={emails:[],phones:[]};addContacts({});};
   $('pubTest').onclick=async()=>{try{await BRIDGE.testEmail({title:$('pubTitle').value,message:$('pubMsg').value,link:'https://wehive.co.in'});$('pubMsgOut').textContent='Test email sent to you (without the poster image).';}catch(e){$('pubMsgOut').textContent=errText(e);}};
   $('pubWaTest').onclick=async()=>{const n=$('pubWaNum').value.trim();if(!n){$('pubMsgOut').textContent='Enter a WhatsApp number with country code.';return;}
     try{await BRIDGE.testWhatsapp({title:$('pubTitle').value,message:$('pubMsg').value,link:'https://wehive.co.in',whatsapp:n});$('pubMsgOut').textContent='Test WhatsApp sent to '+n+'.';}catch(e){$('pubMsgOut').textContent=errText(e);}};
   $('pubAt').addEventListener('change',()=>{const d=new Date($('pubAt').value);$('pubGo').textContent=d>new Date(Date.now()+60e3)?'Schedule':'Publish now';});
   $('pubGo').onclick=async()=>{const ch=pubSettings().channels;if(!ch.email&&!ch.whatsapp&&!ch.inapp){$('pubMsgOut').textContent='Pick at least one channel.';return;}
+    if($('pubAud').value==='custom'&&!CUST.emails.length&&!CUST.phones.length){$('pubMsgOut').textContent='Upload or paste at least one contact.';return;}
     $('pubGo').disabled=true;try{const out=await publishCurrent($('pubTitle').value.trim(),$('pubMsg').value.trim(),new Date($('pubAt').value),m=>$('pubMsgOut').textContent=m);
       $('pubMsgOut').textContent=out.scheduled?'Scheduled. It will go out at the chosen time.':'Sending now. Delivery counts appear under Agent → Scheduled and sent.';toast(out.scheduled?'Scheduled':'Published');}
     catch(e){$('pubMsgOut').textContent=errText(e);}$('pubGo').disabled=false;};

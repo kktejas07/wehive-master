@@ -152,17 +152,27 @@ async def test_gate_applies_role_to_request(monkeypatch):
 
 def test_new_super_admin_endpoints_are_gated():
     from fastapi.routing import APIRoute
-    import server
-    guarded = {('PATCH', '/api/admin-auth/admins/{user_id}/role'), ('DELETE', '/api/admin-auth/admins/{user_id}/2fa'),
-               ('POST', '/api/admin/payments/{payment_id}/refund'), ('POST', '/api/newsletter/admin/campaigns')}
-    found = set()
-    for r in server.app.routes:
-        if isinstance(r, APIRoute):
-            for m in r.methods:
-                if (m, r.path) in guarded:
-                    assert admin_auth.get_super_admin in {d.call for d in r.dependant.dependencies}, (m, r.path)
-                    found.add((m, r.path))
-    assert found == guarded
+    import routes_admin_refunds
+    import routes_admin_auth as raa_routes
+    import routes_newsletter_campaigns
+    guarded = [
+        ('PATCH', '/admin-auth/admins/{user_id}/role', raa_routes.router),
+        ('DELETE', '/admin-auth/admins/{user_id}/2fa', raa_routes.router),
+        ('POST', '/admin/payments/{payment_id}/refund', routes_admin_refunds.router),
+        ('POST', '/newsletter/admin/campaigns', routes_newsletter_campaigns.router),
+    ]
+    found = 0
+    for method, path, sub_router in guarded:
+        matched = False
+        for r in sub_router.routes:
+            if isinstance(r, APIRoute) and r.path == path:
+                if method in r.methods:
+                    deps = {d.call for d in r.dependant.dependencies}
+                    assert admin_auth.get_super_admin in deps, (method, r.path)
+                    matched = True
+        assert matched, f'{method} {path} not found on router'
+        found += 1
+    assert found == len(guarded)
 
 
 # ── refunds ───────────────────────────────────────────────────────────────────

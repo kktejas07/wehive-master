@@ -50,11 +50,11 @@ export default function SignupScreen() {
           />
         </View>
 
-        {error ? <Text tone="error">{error}</Text> : null}
+        {error ? <Text tone="danger">{error}</Text> : null}
 
         <Button
           label="Create account"
-          loading={loading}
+          busy={loading}
           onPress={() => signup(name, email, password)}
         />
 

@@ -41,3 +41,21 @@ async def test_draft_needs_news_or_topic(monkeypatch):
     with pytest.raises(HTTPException) as exc:
         await ss.draft_post(ss.DraftReq(), _={})
     assert exc.value.status_code == 400
+
+
+def test_contacts_from_text_finds_emails_and_phones():
+    text = 'Ravi ravi@x.com, 9000666149; Sita +91 90007 77149 / sita@y.in; US +1 (609) 555-0142; date 2026-11-02'
+    out = ss.contacts_from_text(text)
+    assert out['emails'] == ['ravi@x.com', 'sita@y.in']
+    assert out['phones'] == ['+16095550142', '+919000666149', '+919000777149']
+
+
+def test_office_files_are_read_as_zipped_xml():
+    import io
+    import zipfile
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, 'w') as z:
+        z.writestr('xl/sharedStrings.xml', '<sst><si><t>lead@a.com</t></si></sst>')
+        z.writestr('xl/worksheets/sheet1.xml', '<sheetData><c><v>9121495077</v></c></sheetData>')
+    out = ss.contacts_from_text(ss._office_text(buf.getvalue()))
+    assert out == {'emails': ['lead@a.com'], 'phones': ['+919121495077']}

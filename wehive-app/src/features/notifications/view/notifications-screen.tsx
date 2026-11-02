@@ -61,7 +61,7 @@ export function NotificationsScreen() {
         onRefresh={refetch}
         refreshing={loading}
         ListEmptyComponent={
-          !loading ? <Text variant="body" tone="muted" style={styles.empty}>No notifications.</Text> : null
+          !loading ? <Text variant="body" tone="muted" style={styles.empty}>No notifications.</Text> : undefined
         }
       />
     </Screen>
