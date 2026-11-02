@@ -104,10 +104,10 @@ export function canWrite(admin, area = 'manage') {
 // Which sidebar sections a role can see. Manager / super_admin see everything.
 // Others see a curated list. Returns true if the nav item should be visible.
 const ROLE_VISIBLE_TABS = {
-  support:      ['overview', 'applications', 'review', 'leads', 'users', 'staff', 'audit', 'health', 'security'],
+  support:      ['overview', 'applications', 'review', 'leads', 'social-studio', 'users', 'staff', 'audit', 'health', 'security'],
   finance:      ['overview', 'applications', 'payments', 'pricing', 'promocodes', 'exports', 'audit', 'health', 'security'],
   doc_reviewer: ['overview', 'applications', 'review', 'audit', 'security'],
-  viewer:       ['overview', 'applications', 'users', 'leads', 'payments', 'countries', 'pricing', 'events', 'universities', 'programs', 'exports', 'audit', 'health', 'security'],
+  viewer:       ['overview', 'applications', 'users', 'leads', 'social-studio', 'payments', 'countries', 'pricing', 'events', 'universities', 'programs', 'exports', 'audit', 'health', 'security'],
 };
 export function canViewTab(admin, tabId) {
   if (!admin) return false;

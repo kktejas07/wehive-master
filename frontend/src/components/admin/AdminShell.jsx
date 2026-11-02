@@ -9,7 +9,7 @@ import {
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
   Key, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
   Inbox, CreditCard, History, Activity, ScanSearch, Lock, BarChart3, ChevronLeft, ChevronRight, Pencil, Clock, Share2, CalendarCheck,
-  Eye, Target, UserCheck, GitBranch, Radar, PenTool,
+  Eye, Target, UserCheck, GitBranch, Radar, PenTool, Sparkles,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
@@ -38,6 +38,7 @@ const TABS = [
   { id: 'events',        to: '/admin/events',         label: 'Hero Events',   Icon: Megaphone,       testid: 'admin-nav-events',        group: 'Content & Destinations' },
   { id: 'global-events', to: '/admin/global-events',  label: 'Global Events', Icon: Globe,           testid: 'admin-nav-global-events', group: 'Content & Destinations' },
   { id: 'announcements', to: '/admin/announcements', label: 'Announcements', Icon: Megaphone,    testid: 'admin-nav-announcements', group: 'Content & Destinations' },
+  { id: 'social-studio', to: '/admin/social-studio',  label: 'Social Studio', Icon: Sparkles,        testid: 'admin-nav-social-studio', group: 'Content & Destinations' },
   { id: 'hive-learning', to: '/admin/hive-learning',  label: 'Hive Learning', Icon: Brain,           testid: 'admin-nav-hive-learning', group: 'Content & Destinations' },
   { id: 'moderation',    to: '/admin/moderation',     label: 'Moderation',    Icon: Newspaper,       testid: 'admin-nav-moderation',    group: 'Content & Destinations' },
   { id: 'payments',      to: '/admin/payments',       label: 'Payments',      Icon: CreditCard,      testid: 'admin-nav-payments',      group: 'Commercial' },
