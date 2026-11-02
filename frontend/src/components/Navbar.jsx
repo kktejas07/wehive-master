@@ -21,7 +21,8 @@ import {
   Mic,
   Award,
   Newspaper,
-  Users
+  Users,
+  Gift
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -51,6 +52,7 @@ const NAV = [
       { id: 'blog', label: 'Blog', to: '/blog', icon: FileText },
       { id: 'news', label: 'News', to: '/news', icon: Newspaper },
       { id: 'events', label: 'Global Events', to: '/events', icon: Calendar },
+      { id: 'offers', label: 'Offers & Campus', to: '/offers', icon: Gift },
       { id: 'community', label: 'Community', to: '/community', icon: Users },
     ]
   },

@@ -9,7 +9,7 @@ import {
   LogOut, ArrowLeft, Banknote, Megaphone, Settings, ClipboardList, Tag, Briefcase, Image as ImageIcon,
   Key, Building2, BookOpen, Database, FileText, Bot, Brain, Newspaper, ShieldCheck, Mail,
   Inbox, CreditCard, History, Activity, ScanSearch, Lock, BarChart3, ChevronLeft, ChevronRight, Pencil, Clock, Share2, CalendarCheck,
-  Eye, Target, UserCheck, GitBranch, Radar, PenTool,
+  Eye, Target, UserCheck, GitBranch, Radar, PenTool, Gift, GraduationCap,
 } from 'lucide-react';
 import { avatarUrl } from '../../lib/avatars';
 import { useDialogA11y } from '../../hooks/use-dialog-a11y';
@@ -47,6 +47,8 @@ const TABS = [
   { id: 'requests',      to: '/admin/requests',       label: 'Requests',      Icon: ClipboardList,   testid: 'admin-nav-requests',      group: 'Commercial' },
   { id: 'agents',        to: '/admin/agents',         label: 'Agents',        Icon: Briefcase,       testid: 'admin-nav-agents',        group: 'Commercial' },
   { id: 'referrals',     to: '/admin/referrals',     label: 'Referrals',     Icon: Share2,       testid: 'admin-nav-referrals',     group: 'Commercial' },
+  { id: 'offers',        to: '/admin/offers',        label: 'Offers',        Icon: Gift,         testid: 'admin-nav-offers',        group: 'Commercial' },
+  { id: 'campus',        to: '/admin/campus',        label: 'Campus',        Icon: GraduationCap, testid: 'admin-nav-campus',      group: 'Commercial' },
   { id: 'exports',       to: '/admin/exports',        label: 'Exports',       Icon: Download,        testid: 'admin-nav-exports',       group: 'Commercial' },
   { id: 'rag',           to: '/admin/rag',            label: 'RAG & Vectors', Icon: Database,        testid: 'admin-nav-rag',           group: 'AI & System' },
   { id: 'prompts',       to: '/admin/prompts',        label: 'Prompts',       Icon: FileText,        testid: 'admin-nav-prompts',       group: 'AI & System' },

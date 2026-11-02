@@ -42,6 +42,9 @@ from routes_ai_docs import router as ai_docs_router  # noqa: E402
 from routes_payments import router as payments_router  # noqa: E402
 from routes_notifications import router as notifications_router  # noqa: E402
 from routes_referrals import router as referrals_router  # noqa: E402
+import routes_offers  # noqa: E402
+from routes_offers import router as offers_router, admin_router as admin_offers_router  # noqa: E402
+from routes_campus import router as campus_router, admin_router as admin_campus_router  # noqa: E402
 from routes_ai_marketplace import router as ai_marketplace_router  # noqa: E402
 from routes_third_party import router as third_party_router  # noqa: E402
 from routes_universities import router as universities_router  # noqa: E402
@@ -182,6 +185,10 @@ api_router.include_router(ai_docs_router)
 api_router.include_router(payments_router)
 api_router.include_router(notifications_router)
 api_router.include_router(referrals_router)
+api_router.include_router(offers_router)
+api_router.include_router(admin_offers_router)
+api_router.include_router(campus_router)
+api_router.include_router(admin_campus_router)
 api_router.include_router(ai_marketplace_router)
 api_router.include_router(third_party_router)
 api_router.include_router(universities_router)
@@ -583,6 +590,19 @@ async def on_startup():
             await asyncio.sleep(6 * 3600)
 
     asyncio.create_task(_reminder_scheduler_loop())
+
+    async def _offer_bot_loop():
+        import logging as _log
+        _olog = _log.getLogger('wehive.offers')
+        while True:
+            try:
+                await asyncio.sleep(6 * 3600)
+                result = await routes_offers.run_offer_bot()
+                _olog.info('Offer bot cycle: %s', result)
+            except Exception as _exc:
+                _olog.warning('Offer bot cycle error: %s', _exc)
+
+    asyncio.create_task(_offer_bot_loop())
 
 
 @app.on_event('shutdown')
