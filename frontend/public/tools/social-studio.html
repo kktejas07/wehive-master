@@ -269,8 +269,9 @@ textarea{resize:vertical;min-height:64px}
   <section class="view" id="v-agent" hidden>
     <div class="grid2">
       <div class="card" style="display:flex;flex-direction:column;gap:10px">
-        <div class="row" style="align-items:center"><h2 style="flex:1 1 160px">Latest visa news</h2><button id="agNews" style="flex:0 0 auto">Refresh</button></div>
-        <p class="note">Approved items from the WeHive news feed. The agent writes a post from the article and keeps the real source line.</p>
+        <div class="row" style="align-items:center"><h2 style="flex:1 1 160px">Latest visa news</h2><button id="agRun" style="flex:0 0 auto">Fetch fresh news</button><button id="agNews" style="flex:0 0 auto">Refresh</button></div>
+        <p class="note">Approved items from the WeHive news aggregator (official immigration feeds and Google News). The agent writes a post from the article and keeps the real source line.</p>
+        <p class="hint" id="agAggr"></p>
         <div id="agNewsList" style="display:flex;flex-direction:column;gap:8px"><div class="empty">Loading news…</div></div>
       </div>
       <div class="card form">
@@ -1204,6 +1205,9 @@ async function addToQueue(when,ai){const cv=document.createElement('canvas');dra
 async function scheduleQueued(i){const q=agQueue[i];if(q.done)return;const keep=snapshotState();restoreState(q.st);
   try{const S2=S.plat;await publishCurrent(plain(S.vals.headline).slice(0,100),capFor().replace(/\*/g,'').slice(0,5000),new Date(q.when),m=>$('agMsg').textContent=m);S.plat=S2;q.done=true;$('agMsg').textContent='Scheduled.';}
   catch(e){$('agMsg').textContent=errText(e);throw e;}finally{restoreState(keep);renderQueue();}}
+async function loadAggr(){if(!BRIDGE)return;try{const st=await BRIDGE.aggregatorStatus();const last=(st.recent_runs||[])[0];const n=(st.counts||{}).global_news||{};
+  const fmt=t=>t?new Date(/Z$|[+-]\d\d:\d\d$/.test(t)?t:t+'Z').toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}):'not yet';
+  $('agAggr').textContent=`${st.running?'Aggregator running now. ':''}Runs automatically every 30 minutes. Last run: ${fmt(last&&last.ts)} (${(last&&last.status)||'unknown'}). Next: ${fmt(st.next_scheduled_run_utc)}. News stored: ${n.total||0}, waiting for approval in Moderation: ${n.pending||0}.`;return st;}catch(e){$('agAggr').textContent='';return null;}}
 async function loadHist(){if(!BRIDGE)return;try{const items=await BRIDGE.history();$('agHistBody').innerHTML=items.map(a=>{const ch=a.channels||{};
   return `<tr><td>${esc(a.title)}</td><td>${esc(new Date(a.scheduled_at||a.created_at).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}))}</td><td>${['email','whatsapp','inapp'].filter(k=>ch[k]).join(', ')}</td><td>${esc(a.status||'')}</td><td>${(a.emails_sent||0)} email · ${(a.whatsapp_sent||0)} WhatsApp · ${(a.inapp||0)} in-app</td></tr>`;}).join('')||'<tr><td colspan="5" class="note">Nothing sent yet.</td></tr>';}catch(e){}}
 if(BRIDGE){
@@ -1218,6 +1222,10 @@ if(BRIDGE){
       $('pubMsgOut').textContent=out.scheduled?'Scheduled. It will go out at the chosen time.':'Sending now. Delivery counts appear under Agent → Scheduled and sent.';toast(out.scheduled?'Scheduled':'Published');}
     catch(e){$('pubMsgOut').textContent=errText(e);}$('pubGo').disabled=false;};
   $('agNews').onclick=loadNews;$('agHist').onclick=loadHist;
+  $('agRun').onclick=async()=>{$('agRun').disabled=true;$('agRun').textContent='Fetching…';
+    try{await BRIDGE.runAggregator();}catch(e){const st=e&&e.response&&e.response.status;if(st!==409){$('agAggr').textContent=errText(e);$('agRun').disabled=false;$('agRun').textContent='Fetch fresh news';return;}}
+    for(let i=0;i<40;i++){await new Promise(r=>setTimeout(r,6000));const st=await loadAggr();if(st&&!st.running)break;}
+    await loadNews();$('agRun').disabled=false;$('agRun').textContent='Fetch fresh news';toast('News updated');};
   $('agNewsList').onclick=async e=>{const b=e.target.closest('button[data-news]');if(!b)return;b.disabled=true;b.textContent='Writing…';
     try{await draftToState({template:'alert',news_id:b.dataset.news});openInCreate();}catch(err){toast(errText(err));}b.disabled=false;b.textContent='Draft post';};
   $('agTopicGo').onclick=async()=>{const t=$('agTopic').value.trim();if(!t){$('agMsg').textContent='Type a topic first.';return;}$('agTopicGo').disabled=true;$('agMsg').textContent='Writing…';
@@ -1235,7 +1243,7 @@ if(BRIDGE){
     if(b.dataset.qx){agQueue.splice(+b.dataset.qx,1);renderQueue();}
     if(b.dataset.qs){b.disabled=true;try{await scheduleQueued(+b.dataset.qs);}catch(err){}b.disabled=false;}};
   $('agSchedAll').onclick=async()=>{for(let i=0;i<agQueue.length;i++){try{await scheduleQueued(i);}catch(e){break;}}};
-  loadNews();loadHist();
+  loadNews();loadHist();loadAggr();
 }
 
 /* ---------- routing ---------- */

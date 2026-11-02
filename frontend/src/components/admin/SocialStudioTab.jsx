@@ -12,6 +12,8 @@ const bridge = {
   createLead: (lead) => adminClient().post('/leads', lead).then((r) => r.data),
   patchLead: (id, status) => adminClient().patch(`/leads/${id}`, { status }).then((r) => r.data),
   listNews: () => apiClient().get('/news', { params: { limit: 12 } }).then((r) => r.data.items || []),
+  runAggregator: () => apiClient().post('/agents/aggregators/run').then((r) => r.data),
+  aggregatorStatus: () => apiClient().get('/agents/aggregators/status').then((r) => r.data),
   draft: (body) => adminClient().post('/social-studio/draft', body).then((r) => r.data),
   uploadImage: (blob, name) => {
     const fd = new FormData();
