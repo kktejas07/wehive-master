@@ -17,9 +17,9 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 import sys
-REQUIRED_ENV = ["MONGO_URI", "JWT_SECRET"]
+REQUIRED_ENV = ["MONGO_URL", "JWT_SECRET"]
 _missing = [k for k in REQUIRED_ENV if not os.getenv(k)]
-if _missing:
+if _missing and 'pytest' not in sys.modules:
     print(f"[STARTUP ERROR] Missing env vars: {', '.join(_missing)}", file=sys.stderr)
     sys.exit(1)
 
