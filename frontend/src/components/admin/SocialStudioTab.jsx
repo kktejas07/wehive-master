@@ -26,6 +26,8 @@ const bridge = {
     return adminClient().post('/social-studio/contacts', fd).then((r) => r.data);
   },
   recordOptOuts: (text) => adminClient().post('/social-studio/opt-outs', { text }).then((r) => r.data),
+  runDailyDrafts: () => adminClient().post('/social-studio/daily-drafts').then((r) => r.data),
+  listDrafts: (skip = 0) => adminClient().get('/social-studio/drafts', { params: { skip } }).then((r) => r.data),
   publish: (body) => apiClient().post('/announcements/admin', body).then((r) => r.data),
   testEmail: (body) => apiClient().post('/announcements/admin/test', body).then((r) => r.data),
   testWhatsapp: (body) => apiClient().post('/announcements/admin/test-whatsapp', body).then((r) => r.data),

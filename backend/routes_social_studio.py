@@ -1,9 +1,11 @@
 """Social Studio agent: drafts posts from the latest visa news and hosts poster images.
 
-  POST /api/admin/social-studio/draft  — AI-written post fields from a news item or a topic
-  POST /api/admin/social-studio/image  — upload a generated poster PNG to R2, returns a public URL
-  POST /api/admin/social-studio/opt-outs — record people who replied STOP (skipped on every send)
-  POST /api/admin/social-studio/contacts — pull emails and phone numbers out of an uploaded
+  POST /api/admin/social-studio/draft        — AI-written post fields from a news item or a topic
+  POST /api/admin/social-studio/daily-drafts  — auto-generate drafts from recent undrafted news
+  GET  /api/admin/social-studio/drafts        — list pending drafts (skip, limit)
+  POST /api/admin/social-studio/image         — upload a generated poster PNG to R2, returns a public URL
+  POST /api/admin/social-studio/opt-outs      — record people who replied STOP (skipped on every send)
+  POST /api/admin/social-studio/contacts      — pull emails and phone numbers out of an uploaded
        Excel (.xlsx), CSV, Word (.docx), text, PDF or image (OCR) file, for a custom send list
 
 Publishing and scheduling reuse Announcements (POST /api/announcements/admin): email,
@@ -183,6 +185,23 @@ async def parse_contacts(file: UploadFile = File(...), _=Depends(_writer)):
     if not found['emails'] and not found['phones']:
         raise HTTPException(400, 'No email addresses or phone numbers found in this file.')
     return found
+
+
+# ---------- daily drafts ----------
+@router.post('/daily-drafts')
+async def trigger_daily_drafts(_=Depends(_writer)):
+    from daily_drafts_agent import run_daily_drafts
+    result = await run_daily_drafts(limit=5)
+    return result
+
+
+@router.get('/drafts')
+async def list_drafts(skip: int = 0, limit: int = 20, _=Depends(_writer)):
+    from daily_drafts_agent import social_drafts_col
+    cursor = social_drafts_col.find({}, {'_id': 0}).sort('created_at', -1).skip(skip).limit(limit)
+    items = await cursor.to_list(length=limit)
+    total = await social_drafts_col.count_documents({})
+    return {'items': items, 'total': total}
 
 
 class OptOuts(BaseModel):

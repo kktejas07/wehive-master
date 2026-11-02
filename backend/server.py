@@ -109,6 +109,7 @@ from routes_landing import router as landing_router  # noqa: E402
 from routes_documents import router as documents_router  # noqa: E402
 from routes_application_builder import router as application_builder_router  # noqa: E402
 from routes_sop_templates import router as sop_templates_router  # noqa: E402
+from routes_webhooks import router as webhooks_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -257,6 +258,7 @@ api_router.include_router(application_builder_router)
 api_router.include_router(sop_templates_router)
 api_router.include_router(documents_router)
 api_router.include_router(landing_router)
+api_router.include_router(webhooks_router)
 
 app.include_router(api_router)
 
