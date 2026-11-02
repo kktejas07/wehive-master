@@ -106,6 +106,7 @@ textarea{resize:vertical;min-height:64px}
     <nav class="tabs" aria-label="Views">
       <a href="#plan" data-v="plan">Plan</a>
       <a href="#create" data-v="create">Create</a>
+      <a href="#agent" data-v="agent" hidden id="navAgent">Agent</a>
       <a href="#enquiries" data-v="enquiries">Enquiries</a>
     </nav>
   </header>
@@ -238,7 +239,64 @@ textarea{resize:vertical;min-height:64px}
           <div class="cap" id="caption"></div>
           <div class="row"><button id="copyCap">Copy caption</button></div>
         </div>
+        <div class="card form" id="pubCard" hidden>
+          <h3>Publish or schedule</h3>
+          <p class="note">Sends this poster with the WhatsApp caption to WeHive users. Email carries the poster image; WhatsApp gets the caption text and link. Only super admins can send.</p>
+          <div class="row">
+            <label class="chk"><input type="checkbox" id="chEmail" checked> Email</label>
+            <label class="chk"><input type="checkbox" id="chWa"> WhatsApp</label>
+            <label class="chk"><input type="checkbox" id="chApp" checked> In-app</label>
+          </div>
+          <div class="row">
+            <label class="f">Audience<select id="pubAud"><option value="all">All users</option><option value="regular">Regular users</option><option value="subscribers">Newsletter subscribers (email only)</option><option value="admins">Admins only</option></select></label>
+            <label class="f">When<input type="datetime-local" id="pubAt"></label>
+          </div>
+          <label class="f">Title<input id="pubTitle" maxlength="100"></label>
+          <label class="f">Message<textarea id="pubMsg" rows="6" maxlength="5000"></textarea></label>
+          <div class="row">
+            <button id="pubTest">Email me a test</button>
+            <input id="pubWaNum" placeholder="WhatsApp test number, e.g. +919121495077" style="flex:2 1 200px">
+            <button id="pubWaTest">Test WhatsApp</button>
+          </div>
+          <div class="row"><button class="pri" id="pubGo">Publish now</button></div>
+          <p class="hint" id="pubMsgOut"></p>
+        </div>
       </div>
+    </div>
+  </section>
+
+  <!-- AGENT (admin only) -->
+  <section class="view" id="v-agent" hidden>
+    <div class="grid2">
+      <div class="card" style="display:flex;flex-direction:column;gap:10px">
+        <div class="row" style="align-items:center"><h2 style="flex:1 1 160px">Latest visa news</h2><button id="agNews" style="flex:0 0 auto">Refresh</button></div>
+        <p class="note">Approved items from the WeHive news feed. The agent writes a post from the article and keeps the real source line.</p>
+        <div id="agNewsList" style="display:flex;flex-direction:column;gap:8px"><div class="empty">Loading news…</div></div>
+      </div>
+      <div class="card form">
+        <h2>Draft from a topic</h2>
+        <label class="f">Topic or brief<textarea id="agTopic" rows="3" placeholder="e.g. Canada study permit: what changed for January intake"></textarea></label>
+        <div class="row">
+          <label class="f">Post type<select id="agTpl"><option value="alert">Visa news alert</option><option value="tips">Numbered tips</option><option value="service">Service spotlight</option><option value="myth">Myth vs fact</option><option value="enquiry">Free consultation</option><option value="destination">Destination stats</option></select></label>
+          <div style="display:flex;align-items:flex-end"><button class="pri" id="agTopicGo">Draft post</button></div>
+        </div>
+        <h2 style="margin-top:10px">Auto-schedule</h2>
+        <p class="note">Draft posts from the newest news items and schedule one a day at the time below, using the channels and audience set under Create → Publish.</p>
+        <div class="row">
+          <label class="f">How many<select id="agN"><option>1</option><option>2</option><option selected>3</option><option>5</option></select></label>
+          <label class="f">Daily time (IST)<input type="time" id="agTime" value="10:00"></label>
+          <div style="display:flex;align-items:flex-end"><button id="agAuto">Draft and queue</button></div>
+        </div>
+        <p class="hint" id="agMsg"></p>
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <div class="row" style="align-items:center"><h2 style="flex:1 1 160px">Queue</h2><button class="pri" id="agSchedAll" style="flex:0 0 auto">Schedule all</button></div>
+      <div id="agQueue" class="tiles" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))"><div class="empty">Drafts from the agent appear here for review.</div></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <div class="row" style="align-items:center"><h2 style="flex:1 1 160px">Scheduled and sent</h2><button id="agHist" style="flex:0 0 auto">Refresh</button></div>
+      <div class="scroll"><table><thead><tr><th>Title</th><th>When</th><th>Channels</th><th>Status</th><th>Delivered</th></tr></thead><tbody id="agHistBody"></tbody></table></div>
     </div>
   </section>
 
@@ -968,6 +1026,7 @@ function loadPlan(p){
   S.theme = pil==='fest'?'festive':(S.theme==='festive'?'royal':S.theme);
   S.bg=(look&&look.bg)||'theme'; S.lm=(look&&look.lm)||'none'; if(look&&look.theme)S.theme=look.theme; syncBg();
   $('tpl').value=tpl;$('theme').value=S.theme;$('ref').value=S.ref;renderFields();location.hash='create';redraw();window.scrollTo(0,0);
+  if(BRIDGE)fillPub(new Date(Math.max(istAt(d,'10:00').getTime(),Date.now()+3600e3)));
 }
 
 let downloads=null;
@@ -1069,7 +1128,7 @@ $('libFilters').innerHTML=LF.map(f=>`<button data-f="${f[0]}" aria-pressed="${f[
 $('libFilters').onclick=e=>{const b=e.target.closest('button');if(!b)return;libFilter=b.dataset.f;$('libFilters').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderLib();};
 $('library').onclick=e=>{const b=e.target.closest('button[data-l]');if(!b)return;const p=LIB.find(l=>l[0]===b.dataset.l);
   S.tpl=p[4];S.vals=Object.assign(defaults(p[4]),p[5]);S.ref='WH-'+p[0];S.foot=p[6]||(S.tpl==='branch'?'habsiguda':'all');
-  if(S.theme==='festive')S.theme='royal';const look=p[7]||{};S.bg=look.bg||'theme';S.lm=look.lm||'none';if(look.theme)S.theme=look.theme;syncBg();$('tpl').value=S.tpl;$('theme').value=S.theme;$('ref').value=S.ref;$('foot').value=S.foot;renderFields();location.hash='create';redraw();window.scrollTo(0,0);};
+  if(S.theme==='festive')S.theme='royal';const look=p[7]||{};S.bg=look.bg||'theme';S.lm=look.lm||'none';if(look.theme)S.theme=look.theme;syncBg();$('tpl').value=S.tpl;$('theme').value=S.theme;$('ref').value=S.ref;$('foot').value=S.foot;renderFields();location.hash='create';redraw();window.scrollTo(0,0);if(BRIDGE)fillPub();};
 
 /* ---------- visa access data ---------- */
 let vaF='all', vaSel=new Set();
@@ -1102,9 +1161,86 @@ $('numsSave').onclick=async()=>{
   $('numsSave').disabled=true;try{await setDb.collection('settings').doc('branches').set(Object.assign({updatedAt:new Date().toISOString()},m));$('numsMsg').textContent='Saved for everyone.';applyNums(m);}
   catch(err){$('numsMsg').textContent='Could not save. You may have view-only access.';}$('numsSave').disabled=false;};
 
+/* ---------- agent + publishing (WeHive admin only) ---------- */
+const plain=t=>String(t||'').replace(/\*/g,'');
+const pad2=n=>String(n).padStart(2,'0');
+function localInput(d){return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;}
+function istAt(dateISO,hhmm){return new Date(`${dateISO}T${hhmm}:00+05:30`);}
+function errText(e){const d=e&&e.response&&e.response.data&&e.response.data.detail;const st=e&&e.response&&e.response.status;
+  if(st===403)return 'Only a super admin can send announcements. Ask one to publish, or download the poster instead.';
+  return typeof d==='string'?d:(Array.isArray(d)?d.map(x=>x.msg).join('; '):'Something went wrong. Try again.');}
+function capFor(){const p=S.plat;S.plat='whatsapp';const t=caption();S.plat=p;return t;}
+function fillPub(when){$('pubTitle').value=plain(S.vals.headline).slice(0,100);$('pubMsg').value=capFor().replace(/\*/g,'').slice(0,5000);
+  $('pubAt').value=localInput(when||new Date(Date.now()+3600e3));$('pubGo').textContent=new Date($('pubAt').value)>new Date(Date.now()+60e3)?'Schedule':'Publish now';}
+function pubSettings(){return {channels:{email:$('chEmail').checked,whatsapp:$('chWa').checked,inapp:$('chApp').checked},audience:$('pubAud').value};}
+async function publishCurrent(title,message,when,setMsg){
+  setMsg('Rendering and uploading the poster…');
+  const blob=await blobOf(S.size==='st'||S.size==='yt'?'sq':S.size);
+  const img=await BRIDGE.uploadImage(blob,fname(S.size));
+  const body=Object.assign({title,message,link:'https://wehive.co.in',image_url:img.url},pubSettings());
+  if(when&&when>new Date(Date.now()+60e3))body.scheduled_at=when.toISOString();
+  const r=await BRIDGE.publish(body);loadHist();return {img,r,scheduled:!!body.scheduled_at};
+}
+let agQueue=[];
+function snapshotState(){return JSON.parse(JSON.stringify({tpl:S.tpl,vals:S.vals,ref:S.ref,bg:S.bg,lm:S.lm,theme:S.theme,foot:S.foot,size:S.size}));}
+function restoreState(st){Object.assign(S,JSON.parse(JSON.stringify(st)));$('tpl').value=S.tpl;$('theme').value=S.theme;$('ref').value=S.ref;$('foot').value=S.foot;$('size').value=S.size;syncBg();renderFields();}
+async function draftToState(body){const d=await BRIDGE.draft(body);const tpl=body.template==='alert'?'alert':body.template;
+  S.tpl=tpl;S.vals=Object.assign(defaults(tpl),d.fields);const now=new Date();S.ref='WH-N'+pad2(now.getMonth()+1)+pad2(now.getDate());S.bg='theme';S.lm='none';if(S.theme==='festive')S.theme='royal';
+  return d;}
+function openInCreate(){$('tpl').value=S.tpl;$('theme').value=S.theme;$('ref').value=S.ref;syncBg();renderFields();location.hash='create';redraw();window.scrollTo(0,0);if(BRIDGE)fillPub();}
+async function loadNews(){if(!BRIDGE)return;$('agNewsList').innerHTML='<div class="empty">Loading news…</div>';
+  try{const items=await BRIDGE.listNews();if(!items.length){$('agNewsList').innerHTML='<div class="empty">No approved news yet. Run the news aggregator from Content Pipeline, then refresh.</div>';return;}
+    $('agNewsList').innerHTML=items.map(n=>`<div class="item" style="grid-template-columns:1fr auto"><div class="t"><div>${esc(n.title)}</div><div class="meta"><span>${esc(n.source_name||'')}</span><span>${esc(n.date||'')}</span><span>${esc(n.country_id||'')}</span></div></div>
+      <div class="acts"><button class="pri" data-news="${esc(n.id)}">Draft post</button></div></div>`).join('');AG_NEWS=items;}
+  catch(e){$('agNewsList').innerHTML=`<div class="empty">${esc(errText(e))}</div>`;}}
+let AG_NEWS=[];
+function renderQueue(){
+  if(!agQueue.length){$('agQueue').innerHTML='<div class="empty">Drafts from the agent appear here for review.</div>';return;}
+  $('agQueue').innerHTML=agQueue.map((q,i)=>`<div class="tile" style="display:flex;flex-direction:column;gap:8px"><img alt="Draft poster" src="${q.thumb}" style="width:100%;border-radius:8px">
+    <b style="font-size:15px;font-family:var(--body)">${esc(plain(q.st.vals.headline))}</b><span class="note">${q.ai?'Written by AI from the source':'From the news text (AI unavailable)'} · ${esc(q.st.ref)}</span>
+    <label class="f">When<input type="datetime-local" data-qt="${i}" value="${q.when}"></label>
+    <div class="row"><button data-qe="${i}">Edit</button><button data-qd="${i}">Download</button><button data-qs="${i}" class="pri">${q.done?'Scheduled ✓':'Schedule'}</button><button data-qx="${i}">Remove</button></div></div>`).join('');}
+async function addToQueue(when,ai){const cv=document.createElement('canvas');draw(cv,'sq',S.theme);agQueue.push({st:snapshotState(),thumb:cv.toDataURL('image/jpeg',.7),when:localInput(when),ai,done:false});renderQueue();}
+async function scheduleQueued(i){const q=agQueue[i];if(q.done)return;const keep=snapshotState();restoreState(q.st);
+  try{const S2=S.plat;await publishCurrent(plain(S.vals.headline).slice(0,100),capFor().replace(/\*/g,'').slice(0,5000),new Date(q.when),m=>$('agMsg').textContent=m);S.plat=S2;q.done=true;$('agMsg').textContent='Scheduled.';}
+  catch(e){$('agMsg').textContent=errText(e);throw e;}finally{restoreState(keep);renderQueue();}}
+async function loadHist(){if(!BRIDGE)return;try{const items=await BRIDGE.history();$('agHistBody').innerHTML=items.map(a=>{const ch=a.channels||{};
+  return `<tr><td>${esc(a.title)}</td><td>${esc(new Date(a.scheduled_at||a.created_at).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}))}</td><td>${['email','whatsapp','inapp'].filter(k=>ch[k]).join(', ')}</td><td>${esc(a.status||'')}</td><td>${(a.emails_sent||0)} email · ${(a.whatsapp_sent||0)} WhatsApp · ${(a.inapp||0)} in-app</td></tr>`;}).join('')||'<tr><td colspan="5" class="note">Nothing sent yet.</td></tr>';}catch(e){}}
+if(BRIDGE){
+  $('navAgent').hidden=false;$('pubCard').hidden=false;fillPub();
+  $('tpl').addEventListener('change',()=>fillPub());
+  $('pubTest').onclick=async()=>{try{await BRIDGE.testEmail({title:$('pubTitle').value,message:$('pubMsg').value,link:'https://wehive.co.in'});$('pubMsgOut').textContent='Test email sent to you (without the poster image).';}catch(e){$('pubMsgOut').textContent=errText(e);}};
+  $('pubWaTest').onclick=async()=>{const n=$('pubWaNum').value.trim();if(!n){$('pubMsgOut').textContent='Enter a WhatsApp number with country code.';return;}
+    try{await BRIDGE.testWhatsapp({title:$('pubTitle').value,message:$('pubMsg').value,link:'https://wehive.co.in',whatsapp:n});$('pubMsgOut').textContent='Test WhatsApp sent to '+n+'.';}catch(e){$('pubMsgOut').textContent=errText(e);}};
+  $('pubAt').addEventListener('change',()=>{const d=new Date($('pubAt').value);$('pubGo').textContent=d>new Date(Date.now()+60e3)?'Schedule':'Publish now';});
+  $('pubGo').onclick=async()=>{const ch=pubSettings().channels;if(!ch.email&&!ch.whatsapp&&!ch.inapp){$('pubMsgOut').textContent='Pick at least one channel.';return;}
+    $('pubGo').disabled=true;try{const out=await publishCurrent($('pubTitle').value.trim(),$('pubMsg').value.trim(),new Date($('pubAt').value),m=>$('pubMsgOut').textContent=m);
+      $('pubMsgOut').textContent=out.scheduled?'Scheduled. It will go out at the chosen time.':'Sending now. Delivery counts appear under Agent → Scheduled and sent.';toast(out.scheduled?'Scheduled':'Published');}
+    catch(e){$('pubMsgOut').textContent=errText(e);}$('pubGo').disabled=false;};
+  $('agNews').onclick=loadNews;$('agHist').onclick=loadHist;
+  $('agNewsList').onclick=async e=>{const b=e.target.closest('button[data-news]');if(!b)return;b.disabled=true;b.textContent='Writing…';
+    try{await draftToState({template:'alert',news_id:b.dataset.news});openInCreate();}catch(err){toast(errText(err));}b.disabled=false;b.textContent='Draft post';};
+  $('agTopicGo').onclick=async()=>{const t=$('agTopic').value.trim();if(!t){$('agMsg').textContent='Type a topic first.';return;}$('agTopicGo').disabled=true;$('agMsg').textContent='Writing…';
+    try{await draftToState({template:$('agTpl').value,topic:t});$('agMsg').textContent='';openInCreate();}catch(e){$('agMsg').textContent=errText(e);}$('agTopicGo').disabled=false;};
+  $('agAuto').onclick=async()=>{const n=+$('agN').value;if(!AG_NEWS.length)await loadNews();const pick=AG_NEWS.slice(0,n);if(!pick.length){$('agMsg').textContent='No news to draft from.';return;}
+    $('agAuto').disabled=true;const keep=snapshotState();const today=new Date(Date.now()+5.5*3600e3).toISOString().slice(0,10);
+    try{for(let i=0;i<pick.length;i++){$('agMsg').textContent=`Drafting ${i+1} of ${pick.length}…`;const d=await draftToState({template:'alert',news_id:pick[i].id});S.size='sq';
+      const day=new Date(istAt(today,$('agTime').value).getTime()+(i+1)*864e5);await addToQueue(day,d.ai);}
+      $('agMsg').textContent=`${pick.length} drafts queued. Review them, then press Schedule or Schedule all.`;}
+    catch(e){$('agMsg').textContent=errText(e);}finally{restoreState(keep);redraw();$('agAuto').disabled=false;}};
+  $('agQueue').addEventListener('change',e=>{const t=e.target.closest('input[data-qt]');if(t)agQueue[+t.dataset.qt].when=t.value;});
+  $('agQueue').onclick=async e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.qe){restoreState(agQueue[+b.dataset.qe].st);openInCreate();fillPub(new Date(agQueue[+b.dataset.qe].when));}
+    if(b.dataset.qd){const keep=snapshotState();restoreState(agQueue[+b.dataset.qd].st);await save(S.size);restoreState(keep);}
+    if(b.dataset.qx){agQueue.splice(+b.dataset.qx,1);renderQueue();}
+    if(b.dataset.qs){b.disabled=true;try{await scheduleQueued(+b.dataset.qs);}catch(err){}b.disabled=false;}};
+  $('agSchedAll').onclick=async()=>{for(let i=0;i<agQueue.length;i++){try{await scheduleQueued(i);}catch(e){break;}}};
+  loadNews();loadHist();
+}
+
 /* ---------- routing ---------- */
-function route(){const v=(location.hash||'#plan').slice(1);const ok=['plan','create','enquiries'].includes(v)?v:'plan';
-  ['plan','create','enquiries'].forEach(n=>$('v-'+n).hidden=n!==ok);
+function route(){const v=(location.hash||'#plan').slice(1);const VIEWS=['plan','create','enquiries'].concat(BRIDGE?['agent']:[]);const ok=VIEWS.includes(v)?v:'plan';
+  ['plan','create','enquiries','agent'].forEach(n=>$('v-'+n).hidden=n!==ok);
   document.querySelectorAll('nav.tabs a').forEach(a=>{if(a.dataset.v===ok)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   if(ok==='create')redraw();}
 window.addEventListener('hashchange',route);
