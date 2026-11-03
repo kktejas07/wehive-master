@@ -68,6 +68,7 @@ const News = lazy(() => import('./pages/News'));
 const ApplicantFlow = lazy(() => import('./pages/ApplicantFlow'));
 const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
 const PostApprovalHub = lazy(() => import('./pages/PostApprovalHub'));
+const PreDeparture = lazy(() => import('./pages/PreDeparture'));
 const Offers = lazy(() => import('./pages/Offers'));
 
 let _pricingLoaded = false;
