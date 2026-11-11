@@ -43,7 +43,7 @@ const STATIC_EXAMS = [
     accepted_by: ["USA", "Canada", "UK"],
   },
   {
-    id: "gmat-focus",
+    id: "gmat",
     name: "GMAT Focus",
     full_name: "Graduate Management Admission Test Focus Edition",
     fee_usd: 275,
@@ -108,6 +108,22 @@ const STATIC_EXAMS = [
     accepted_by: ["USA"],
   },
 ];
+
+const STATIC_BY_ID = Object.fromEntries(STATIC_EXAMS.map((e) => [e.id, e]));
+
+// Backend returns accepted_countries/register_url; cards render accepted_by/registration_url.
+function normalizeExam(apiExam) {
+  const base = STATIC_BY_ID[apiExam.id] || {};
+  return {
+    ...base,
+    ...apiExam,
+    full_name: apiExam.full_name || base.full_name || apiExam.org || "",
+    description: apiExam.description || base.description || "",
+    logo_color: apiExam.logo_color || base.logo_color || "#005A9C",
+    registration_url: apiExam.registration_url || apiExam.register_url || base.registration_url,
+    accepted_by: apiExam.accepted_by || apiExam.accepted_countries || base.accepted_by || [],
+  };
+}
 
 function ExamCard({ exam }) {
   return (
@@ -192,7 +208,9 @@ export default function ExamPrepSection() {
     fetch("/api/exam-prep/list")
       .then((r) => r.json())
       .then((data) => {
-        if (data?.exams?.length) setExams(data.exams);
+        if (Array.isArray(data?.exams) && data.exams.length) {
+          setExams(data.exams.map(normalizeExam));
+        }
       })
       .catch(() => {});
   }, []);
