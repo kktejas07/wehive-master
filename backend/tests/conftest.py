@@ -48,57 +48,29 @@ def _inject_fake_modules():
 
     # ------------------------------------------------------------------ db
     db_mod = types.ModuleType("db")
-    # All collections referenced by any route module under test
+    # Complete list derived from db.py collection assignments + extras used by routes
     for col in (
-        # wise-specific
-        "wise_packs_col",
-        "visa_knowledge_col",
-        "travel_plans_col",
-        "ai_feeds_col",
-        "interview_sessions_col",
-        "interview_questions_col",
-        "users_col",
-        "pipeline_runs_col",
-        "countries_col",
-        "countries_v2",
-        # core collections (also used by admin routes)
-        "applications",
-        "users",
-        "otps",
-        "scans",
-        "payments",
-        "notifications_col",
-        "referrals_col",
-        "universities_col",
-        "holiday_plans",
-        "leads",
-        "flights_cache",
-        "ai_settings",
-        "third_party_settings",
-        "profile_change_requests",
-        "agents_col",
-        "agent_students_col",
-        "commissions_col",
-        "usvisa_slots_col",
-        "usvisa_subscriptions_col",
-        "training_enrollments_col",
-        "training_certificates_col",
-        "kg_entity_cache_col",
-        "kg_insight_runs_col",
-        "promotions_col",
-        "referrals_col",
-        # global content / community
-        "global_events_col",
-        "global_blogs_col",
-        "global_news_col",
-        "newsletter_col",
-        # offers
-        "offers_col",
-        "offer_claims_col",
-        "offer_bot_runs_col",
-        # campus
-        "campus_tpos_col",
-        "campus_leaders_col",
+        # --- from db.py (all `x = db['...']` assignments) ---
+        "agent_students_col", "agents_col", "ai_feeds_col", "ai_settings",
+        "ai_token_usage", "amadeus_cache_col", "applications",
+        "campus_ambassadors_col", "campus_clubs_col", "campus_leaders_col",
+        "campus_tpos_col", "commissions_col", "content_pipeline_runs_col",
+        "flights_cache", "global_blogs_col", "global_events_col",
+        "global_news_col", "graph_rag_meta_col", "holiday_plans",
+        "interview_questions_col", "interview_sessions_col",
+        "kg_entity_cache_col", "kg_insight_runs_col", "leads",
+        "llm_traces_col", "mcp_configs_col", "newsletter_col",
+        "notifications_col", "offer_bot_runs_col", "offer_claims_col",
+        "offers_col", "otps", "payments", "pipeline_runs_col",
+        "profile_change_requests", "promotions_col", "rag_evaluations_col",
+        "referrals_col", "scans", "scrape_runs_col", "scrape_targets_col",
+        "student_memories_col", "third_party_settings",
+        "training_certificates_col", "training_enrollments_col",
+        "travel_plans_col", "universities_col", "users",
+        "usvisa_slots_col", "usvisa_subscriptions_col",
+        "visa_knowledge_col", "wise_packs_col", "wise_sessions_col",
+        # --- additional names used by route files but aliased / extra ---
+        "countries_col", "countries_v2", "users_col",
     ):
         setattr(db_mod, col, _make_async_collection(col))
     # 'db' itself is the motor database object — stub it as a MagicMock
