@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, AsyncMock
 # insecure JWT_SECRET default.
 os.environ.setdefault("APP_ENV", "test")
 os.environ.setdefault("JWT_SECRET", "test-secret-for-unit-tests")
+os.environ.setdefault("ADMIN_EMAILS", "admin@test.com")
 
 
 def _make_async_collection(name: str):
@@ -40,6 +41,12 @@ def _inject_fake_modules():
             sys.modules[mod_name] = types.ModuleType(mod_name)
     sys.modules["motor.motor_asyncio"].AsyncIOMotorClient = MagicMock(
         name="AsyncIOMotorClient"
+    )
+    sys.modules["motor.motor_asyncio"].AsyncIOMotorCollection = MagicMock(
+        name="AsyncIOMotorCollection"
+    )
+    sys.modules["motor.motor_asyncio"].AsyncIOMotorDatabase = MagicMock(
+        name="AsyncIOMotorDatabase"
     )
     # pymongo top-level symbols used by route files
     sys.modules["pymongo"].MongoClient = MagicMock(name="MongoClient")
@@ -99,7 +106,17 @@ def _inject_fake_modules():
     mr_mod.chat_with_profile = AsyncMock(
         return_value='{"score": 70, "feedback": "Good answer.", "method": "llm"}'
     )
+    # Circuit breaker symbols used by test_unit_ai_agents_fixes
+    _CircuitBreaker = MagicMock(name="CircuitBreaker")
+    mr_mod._orchestrator_breaker = MagicMock(name="_orchestrator_breaker")
+    mr_mod.CircuitBreaker = _CircuitBreaker
     sys.modules["model_router"] = mr_mod
+
+    # orchestrator.failover — must expose the SAME CircuitBreaker as model_router
+    for mod_name in ("orchestrator", "orchestrator.failover"):
+        if mod_name not in sys.modules:
+            sys.modules[mod_name] = types.ModuleType(mod_name)
+    sys.modules["orchestrator.failover"].CircuitBreaker = _CircuitBreaker
 
     # ------------------------------------------------------------------ apscheduler
     for mod_name in (
