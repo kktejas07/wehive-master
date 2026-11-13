@@ -68,13 +68,28 @@ const News = lazy(() => import('./pages/News'));
 const ApplicantFlow = lazy(() => import('./pages/ApplicantFlow'));
 const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
 const PostApprovalHub = lazy(() => import('./pages/PostApprovalHub'));
+const PreDeparture = lazy(() => import('./pages/PreDeparture'));
+const Offers = lazy(() => import('./pages/Offers'));
 
+let _pricingLoaded = false;
 function PricingLoader() {
   useEffect(() => {
+    let cached = null;
+    try { cached = sessionStorage.getItem('wh_pricing'); } catch {}
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        setPricing(parsed);
+        if (parsed.currency) setCurrency(parsed.currency);
+        return;
+      } catch {}
+    }
     const timer = setTimeout(() => {
+      _pricingLoaded = true;
       axios.get(`${API}/public/pricing`).then((r) => {
         setPricing(r.data);
         if (r.data.currency) setCurrency(r.data.currency);
+        try { sessionStorage.setItem('wh_pricing', JSON.stringify(r.data)); } catch {}
       }).catch(() => {});
     }, 5000);
     return () => clearTimeout(timer);
@@ -133,10 +148,6 @@ function AnimatedRoutes() {
           <Route path="/student-visa" element={<PageTransition><StudentVisa /></PageTransition>} />
           <Route path="/visa-interview" element={<PrivateRoute><PageTransition><VisaInterview /></PageTransition></PrivateRoute>} />
           <Route path="/universities" element={<Navigate to="/student-visa" replace />} />
-          {/* Bug 5: /signin was returning 404 — redirect to the real login route */}
-          <Route path="/signin" element={<Navigate to="/login" replace />} />
-          {/* Bug 6: /tools/visa-checker was returning 404 — redirect to the real route */}
-          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/tools/:tool" element={<Navigate to="/visa-checker" replace />} />
           <Route path="/university/:id" element={<PageTransition><UniversityDetail /></PageTransition>} />
           <Route path="/programs/:universityId" element={<PageTransition><ProgramList /></PageTransition>} />
@@ -154,19 +165,18 @@ function AnimatedRoutes() {
           <Route path="/apply" element={<PrivateRoute><PageTransition><ApplicantFlow /></PageTransition></PrivateRoute>} />
           <Route path="/sop-builder" element={<PrivateRoute><PageTransition><SOPBuilder /></PageTransition></PrivateRoute>} />
           <Route path="/post-approval/:applicationId" element={<PrivateRoute><PageTransition><PostApprovalHub /></PageTransition></PrivateRoute>} />
+          <Route path="/pre-departure" element={<PrivateRoute><PageTransition><PreDeparture /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
+          <Route path="/offers" element={<PageTransition><Offers /></PageTransition>} />
           <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
           <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
           <Route path="/hive" element={<PageTransition><Hive /></PageTransition>} />
           <Route path="/us-visa-slots" element={<PrivateRoute><PageTransition><USVisaSlots /></PageTransition></PrivateRoute>} />
-          <Route path="/agent-portal/login" element={<PageTransition><AgentLogin /></PageTransition>} />
+          <Route path="/agent-portal/login" element={<Navigate to="/agent/login" replace />} />
           <Route path="/agent/login" element={<PageTransition><AgentLogin /></PageTransition>} />
           <Route path="/agent/*" element={<PageTransition><AgentPortal /></PageTransition>} />
           <Route path="/admin/*" element={<Admin />} />
-          {/* Legacy URL redirects */}
-          <Route path="/signin" element={<Navigate to="/login" replace />} />
-          <Route path="/tools/visa-checker" element={<Navigate to="/visa-checker" replace />} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>

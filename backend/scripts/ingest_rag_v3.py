@@ -57,6 +57,26 @@ SECTION_NAMESPACE_MAP: dict[str, str] = {
     "wehive-interview-prep": "wehive-interview-prep",
     "wehive-exam-prep":      "wehive-exam-prep",
     "wehive-partners":       "wehive-partners",
+    # v3-expanded namespaces
+    "wehive-student-docs":   "wehive-student-docs",
+    "wehive-scholarships":   "wehive-scholarships",
+    "wehive-cost-of-living": "wehive-cost-of-living",
+    "wehive-sop-templates":  "wehive-sop-templates",
+    "wehive-wehive-faq":     "wehive-wehive-faq",
+    # v3-expanded namespaces batch 2
+    "wehive-universities":   "wehive-universities",
+    "wehive-jobs-and-pr":    "wehive-jobs-and-pr",
+    # v3-expanded namespaces batch 3 (Tier 1 gap-fill)
+    "wehive-visa-timelines":      "wehive-visa-timelines",
+    "wehive-financial-aid":       "wehive-financial-aid",
+    "wehive-application-builder": "wehive-application-builder",
+    "wehive-health-insurance":    "wehive-health-insurance",
+    "wehive-travel-and-arrival":  "wehive-travel-and-arrival",
+    # v3-expanded namespaces batch 4 (Tier 1 gap-fill — live feature coverage)
+    "wehive-amadeus-travel":      "wehive-amadeus-travel",
+    "wehive-community-hive":      "wehive-community-hive",
+    "wehive-agent-portal":        "wehive-agent-portal",
+    "wehive-post-arrival":        "wehive-post-arrival",
 }
 
 V3_NAMESPACES = list(SECTION_NAMESPACE_MAP.values())

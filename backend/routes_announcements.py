@@ -23,13 +23,14 @@ from pydantic import BaseModel, Field
 
 from admin_auth import get_current_admin_flex, get_super_admin
 from audit import record as audit_record
-from db import db, newsletter_col, users
+from db import db, leads, newsletter_col, users
 
 logger = logging.getLogger('wehive.announcements')
 router = APIRouter(prefix='/announcements/admin', tags=['announcements'])
 announcements_col = db['announcements']
 
-Audience = Literal['all', 'regular', 'admins', 'subscribers']
+Audience = Literal['all', 'regular', 'admins', 'subscribers', 'leads', 'custom']
+MAX_LIST = 5000
 
 
 class ChannelFlags(BaseModel):
@@ -47,9 +48,17 @@ class AnnouncementBody(BaseModel):
     channels: ChannelFlags = Field(default_factory=ChannelFlags)
 
 
+class Recipients(BaseModel):
+    emails: list[str] = Field(default_factory=list, max_length=MAX_LIST)
+    phones: list[str] = Field(default_factory=list, max_length=MAX_LIST)
+
+
 class SendBody(AnnouncementBody):
     # ISO datetime; when in the future the announcement waits in 'scheduled' for the dispatcher.
     scheduled_at: Optional[datetime] = None
+    # audience 'custom': an uploaded/pasted list. WhatsApp to it needs the sender to confirm consent.
+    recipients: Optional[Recipients] = None
+    whatsapp_consent: bool = False
 
 
 class TestWhatsappBody(AnnouncementBody):
@@ -70,7 +79,40 @@ async def audience_sizes() -> dict:
         'regular': await users.count_documents(_audience_query('regular')),
         'admins': await users.count_documents(_audience_query('admins')),
         'subscribers': await newsletter_col.count_documents({'status': 'active'}),
+        'leads': await leads.count_documents(LEADS_QUERY),
     }
+
+
+# Leads have no account. Promotional sends go only to leads who ticked "send me offers" on the
+# enquiry form (marketing_consent_at) or were logged by staff from their own message (social),
+# and never to anyone on the opt-out list.
+LEADS_QUERY = {'$and': [
+    {'$or': [{'email': {'$nin': [None, '']}}, {'phone': {'$nin': [None, '']}}]},
+    {'$or': [{'marketing_consent_at': {'$exists': True, '$ne': None}}, {'type': 'social'}]},
+]}
+opt_outs_col = db['contact_opt_outs']
+
+
+def _opt_out_sig(value: str) -> str:
+    import hashlib
+    import hmac
+    from config import JWT_SECRET
+    return hmac.new(JWT_SECRET.encode(), f'optout:{value}'.encode(), hashlib.sha256).hexdigest()[:24]
+
+
+def opt_out_url(value: str) -> str:
+    from urllib.parse import urlencode
+    from config import FRONTEND_URL
+    return f"{FRONTEND_URL}/api/announcements/opt-out?{urlencode({'v': value, 't': _opt_out_sig(value)})}"
+
+
+async def add_opt_outs(values: list[str], source: str) -> int:
+    now = datetime.utcnow()
+    n = 0
+    for v in {x.strip().lower() for x in values if x and x.strip()}:
+        res = await opt_outs_col.update_one({'_id': v}, {'$setOnInsert': {'source': source, 'at': now}}, upsert=True)
+        n += 1 if res.upserted_id else 0
+    return n
 
 
 def build_html(title: str, message: str, link: str = '', image_url: str = '',
@@ -168,8 +210,16 @@ async def send_announcement(req: SendBody, bg: BackgroundTasks, admin=Depends(ge
         raise HTTPException(409, 'Another announcement is still sending. Wait for it to finish.')
     if not (req.channels.inapp or req.channels.email or req.channels.whatsapp):
         raise HTTPException(400, 'Enable at least one delivery channel.')
-    sizes = await audience_sizes()
-    recipients = sizes[req.audience]
+    custom = None
+    if req.audience == 'custom':
+        rc = req.recipients or Recipients()
+        custom = {'emails': sorted({e.strip().lower() for e in rc.emails if '@' in e}),
+                  'phones': sorted({p.strip() for p in rc.phones if p.strip()})}
+        recipients = len(custom['emails']) + len(custom['phones'])
+        if req.channels.whatsapp and custom['phones'] and not req.whatsapp_consent:
+            raise HTTPException(400, 'Confirm these people agreed to get WhatsApp messages from WeHive, or turn WhatsApp off.')
+    else:
+        recipients = (await audience_sizes())[req.audience]
     if recipients < 1:
         raise HTTPException(400, f'The {req.audience} audience is empty.')
     now = datetime.utcnow()
@@ -182,6 +232,7 @@ async def send_announcement(req: SendBody, bg: BackgroundTasks, admin=Depends(ge
         'link': req.link, 'image_url': req.image_url, 'audience': req.audience,
         'channels': {'inapp': req.channels.inapp, 'email': req.channels.email, 'whatsapp': req.channels.whatsapp},
         'status': status, 'recipients': recipients,
+        'custom': custom, 'whatsapp_consent': req.whatsapp_consent,
         'inapp': 0, 'emails_sent': 0, 'emails_failed': 0, 'whatsapp_sent': 0, 'whatsapp_failed': 0,
         'scheduled_at': scheduled_at,
         'created_by': admin.get('email') or admin['_id'], 'created_at': now,
@@ -192,6 +243,57 @@ async def send_announcement(req: SendBody, bg: BackgroundTasks, admin=Depends(ge
     if status == 'sending':
         bg.add_task(deliver, doc['_id'])
     return _out(doc)
+
+
+async def _contact_targets(a: dict) -> tuple[list[str], list[str]]:
+    if a['audience'] == 'custom':
+        c = a.get('custom') or {}
+        return c.get('emails', []), (c.get('phones', []) if a.get('whatsapp_consent') else [])
+    emails, phones = set(), set()
+    async for d in leads.find(LEADS_QUERY, {'email': 1, 'phone': 1}):
+        if d.get('email'):
+            emails.add(d['email'].strip().lower())
+        if d.get('phone'):
+            phones.add(d['phone'].strip())
+    return sorted(emails), sorted(phones)
+
+
+async def _without_opt_outs(values: list[str]) -> list[str]:
+    if not values:
+        return []
+    blocked = {d['_id'] async for d in opt_outs_col.find({'_id': {'$in': [v.lower() for v in values]}}, {'_id': 1})}
+    return [v for v in values if v.lower() not in blocked]
+
+
+async def _deliver_contacts(a: dict, channels: dict, url: str) -> tuple[int, int, int, int]:
+    """Email/WhatsApp people who have no WeHive account (leads or an uploaded list)."""
+    import asyncio
+    from email_service import send_email
+    from otp_providers import deliver_whatsapp_message
+    emails, phones = await _contact_targets(a)
+    emails, phones = await _without_opt_outs(emails), await _without_opt_outs(phones)
+    es = ef = ws = wf = 0
+    footer = '\n\nYou are receiving this because you contacted WeHive. Reply STOP to opt out.'
+    if channels.get('email'):
+        for e in emails:
+            unsub = opt_out_url(e)
+            try:
+                ok = await send_email(to_email=e, subject=f"WeHive: {a['title']}",
+                                      html_body=build_html(a['title'], a['message'], url, a.get('image_url', ''), unsub),
+                                      text_body=f"{a['message']}\n\nUnsubscribe: {unsub}")
+            except Exception:
+                ok = False
+            es, ef = (es + 1, ef) if ok else (es, ef + 1)
+    if channels.get('whatsapp'):
+        text = build_whatsapp_text(a['title'], a['message'], url) + footer
+        for p in phones:
+            try:
+                ok = bool((await deliver_whatsapp_message(p, text)).get('ok'))
+            except Exception:
+                ok = False
+            ws, wf = (ws + 1, wf) if ok else (ws, wf + 1)
+            await asyncio.sleep(1.5)  # pace WhatsApp sends so the number is not flagged
+    return es, ef, ws, wf
 
 
 async def deliver(announcement_id: str) -> None:
@@ -207,7 +309,9 @@ async def deliver(announcement_id: str) -> None:
         url = a.get('link') or None
         if url and url.startswith('/'):
             url = f'{FRONTEND_URL}{url}'
-        if a['audience'] == 'subscribers':
+        if a['audience'] in ('leads', 'custom'):
+            emails_sent, emails_failed, wa_sent, wa_failed = await _deliver_contacts(a, channels, url or '')
+        elif a['audience'] == 'subscribers':
             from routes_newsletter_campaigns import _unsubscribe_url
             async for sub in newsletter_col.find({'status': 'active'}, {'email': 1, 'unsubscribe_token': 1}):
                 try:
@@ -226,7 +330,8 @@ async def deliver(announcement_id: str) -> None:
                     sent = await notify_user(
                         u['_id'], title=a['title'], body=a['message'], kind='announcement',
                         link=url, dedupe_key=f"ann:{announcement_id}:{u['_id']}",
-                        email=channels.get('email', True), whatsapp=channels.get('whatsapp', False))
+                        email=channels.get('email', True), whatsapp=channels.get('whatsapp', False),
+                        image_url=a.get('image_url', ''))
                 except Exception:
                     logger.exception('Announcement %s failed for user %s', announcement_id, u.get('_id'))
                     continue
@@ -266,3 +371,19 @@ async def dispatch_due_announcements() -> int:
 async def mark_interrupted_on_boot() -> Optional[int]:
     res = await announcements_col.update_many({'status': 'sending'}, {'$set': {'status': 'interrupted', 'finished_at': datetime.utcnow()}})
     return res.modified_count
+
+
+# ---------- public opt-out link (leads and uploaded lists) ----------
+public_router = APIRouter(prefix='/announcements', tags=['announcements'])
+
+
+@public_router.get('/opt-out')
+async def opt_out(v: str = Query(..., max_length=200), t: str = Query(..., max_length=64)):
+    import hmac
+    from fastapi.responses import HTMLResponse
+    if not hmac.compare_digest(t, _opt_out_sig(v.strip().lower())):
+        raise HTTPException(400, 'This link is not valid.')
+    await add_opt_outs([v], 'email_link')
+    return HTMLResponse('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">'
+                        '<body style="font-family:system-ui;padding:40px;color:#0B1240">'
+                        '<h2>You are unsubscribed</h2><p>WeHive will not send you offers or updates any more.</p></body>')

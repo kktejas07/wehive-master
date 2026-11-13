@@ -28,12 +28,15 @@ import DestinationsTab from '../components/admin/DestinationsTab';
 import RequestsTab from '../components/admin/RequestsTab';
 import PromotionsTab from '../components/admin/PromotionsTab';
 import PromoCodesTab from '../components/admin/PromoCodesTab';
+import SocialStudioTab from '../components/admin/SocialStudioTab';
 import AgentsTab from '../components/admin/AgentsTab';
 import RAGTab from '../components/admin/RAGTab';
 import PromptsTab from '../components/admin/PromptsTab';
 import AgentsV2Tab from '../components/admin/AgentsV2Tab';
 import HiveLearningTab from '../components/admin/HiveLearningTab';
 import LeadsTab from '../components/admin/LeadsTab';
+import OffersTab from '../components/admin/OffersTab';
+import CampusTab from '../components/admin/CampusTab';
 import PaymentsTab from '../components/admin/PaymentsTab';
 import AuditTab from '../components/admin/AuditTab';
 import MonitoringTab from '../components/admin/MonitoringTab';
@@ -117,6 +120,7 @@ function AdminRoutes() {
                 <Route path="requests" element={<RequestsTab />} />
                 <Route path="promotions" element={<PromotionsTab />} />
                 <Route path="promocodes" element={<PromoCodesTab />} />
+                <Route path="social-studio" element={<SocialStudioTab />} />
                 <Route path="agents" element={<AgentsTab />} />
                 <Route path="staff" element={<RoleGuard allowed={['manager']}><StaffTab /></RoleGuard>} />
                 <Route path="admins" element={<SuperOnly><AdminsTab /></SuperOnly>} />
@@ -142,6 +146,8 @@ function AdminRoutes() {
                 <Route path="agentic" element={<AgenticTab />} />
                 <Route path="slot-monitor" element={<SlotMonitorTab />} />
                 <Route path="referrals" element={<ReferralsTab />} />
+                <Route path="offers" element={<OffersTab />} />
+                <Route path="campus" element={<CampusTab />} />
                 <Route path="visa-scheduling" element={<VisaSchedulingTab />} />
                 <Route path="observability" element={<ObservabilityTab />} />
                 <Route path="rag-eval" element={<RAGEvalTab />} />

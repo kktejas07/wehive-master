@@ -16,6 +16,13 @@ from starlette.middleware.cors import CORSMiddleware
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+import sys
+REQUIRED_ENV = ["MONGO_URL", "JWT_SECRET"]
+_missing = [k for k in REQUIRED_ENV if not os.getenv(k)]
+if _missing and 'pytest' not in sys.modules:
+    print(f"[STARTUP ERROR] Missing env vars: {', '.join(_missing)}", file=sys.stderr)
+    sys.exit(1)
+
 from config import FRONTEND_URL, IS_DEV  # noqa: E402
 from db import ensure_indexes  # noqa: E402
 from routes_auth import router as auth_router  # noqa: E402
@@ -29,6 +36,8 @@ from routes_scan import router as scan_router  # noqa: E402
 from routes_flights import router as flights_router  # noqa: E402
 from routes_admin import router as admin_router  # noqa: E402
 from routes_admin_backoffice import router as admin_backoffice_router  # noqa: E402
+from routes_social_studio import router as social_studio_router  # noqa: E402
+from routes_announcements import public_router as announcements_public_router  # noqa: E402
 from routes_admin_cases import router as admin_cases_router  # noqa: E402
 from routes_admin_ops import router as admin_ops_router  # noqa: E402
 from routes_admin_refunds import router as admin_refunds_router  # noqa: E402
@@ -42,6 +51,9 @@ from routes_ai_docs import router as ai_docs_router  # noqa: E402
 from routes_payments import router as payments_router  # noqa: E402
 from routes_notifications import router as notifications_router  # noqa: E402
 from routes_referrals import router as referrals_router  # noqa: E402
+import routes_offers  # noqa: E402
+from routes_offers import router as offers_router, admin_router as admin_offers_router  # noqa: E402
+from routes_campus import router as campus_router, admin_router as admin_campus_router  # noqa: E402
 from routes_ai_marketplace import router as ai_marketplace_router  # noqa: E402
 from routes_third_party import router as third_party_router  # noqa: E402
 from routes_universities import router as universities_router  # noqa: E402
@@ -97,6 +109,10 @@ from routes_graph_rag import router as graph_rag_router  # noqa: E402
 from routes_scraping import router as scraping_router  # noqa: E402
 from routes_content_pipeline import router as content_pipeline_router  # noqa: E402
 from routes_landing import router as landing_router  # noqa: E402
+from routes_documents import router as documents_router  # noqa: E402
+from routes_application_builder import router as application_builder_router  # noqa: E402
+from routes_sop_templates import router as sop_templates_router  # noqa: E402
+from routes_webhooks import router as webhooks_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -171,6 +187,8 @@ api_router.include_router(countries_router)
 api_router.include_router(leads_router)
 api_router.include_router(admin_router)
 api_router.include_router(admin_backoffice_router)
+api_router.include_router(social_studio_router)
+api_router.include_router(announcements_public_router)
 api_router.include_router(admin_cases_router)
 api_router.include_router(admin_ops_router)
 api_router.include_router(admin_refunds_router)
@@ -184,6 +202,10 @@ api_router.include_router(ai_docs_router)
 api_router.include_router(payments_router)
 api_router.include_router(notifications_router)
 api_router.include_router(referrals_router)
+api_router.include_router(offers_router)
+api_router.include_router(admin_offers_router)
+api_router.include_router(campus_router)
+api_router.include_router(admin_campus_router)
 api_router.include_router(ai_marketplace_router)
 api_router.include_router(third_party_router)
 api_router.include_router(universities_router)
@@ -239,7 +261,11 @@ api_router.include_router(student_memory_router)
 api_router.include_router(graph_rag_router)
 api_router.include_router(scraping_router)
 api_router.include_router(content_pipeline_router)
+api_router.include_router(application_builder_router)
+api_router.include_router(sop_templates_router)
+api_router.include_router(documents_router)
 api_router.include_router(landing_router)
+api_router.include_router(webhooks_router)
 
 app.include_router(api_router)
 
@@ -587,6 +613,19 @@ async def on_startup():
             await asyncio.sleep(6 * 3600)
 
     asyncio.create_task(_reminder_scheduler_loop())
+
+    async def _offer_bot_loop():
+        import logging as _log
+        _olog = _log.getLogger('wehive.offers')
+        while True:
+            try:
+                await asyncio.sleep(6 * 3600)
+                result = await routes_offers.run_offer_bot()
+                _olog.info('Offer bot cycle: %s', result)
+            except Exception as _exc:
+                _olog.warning('Offer bot cycle error: %s', _exc)
+
+    asyncio.create_task(_offer_bot_loop())
 
 
 @app.on_event('shutdown')

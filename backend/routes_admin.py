@@ -1668,6 +1668,27 @@ async def export_revenue_csv(_=Depends(get_current_admin)):
     return _csv_response(rows, 'wehive-revenue.csv')
 
 
+@router.get('/export/leads.csv')
+async def export_leads_csv(_=Depends(get_current_admin)):
+    rows = [['date', 'name', 'surname', 'email', 'phone', 'destination', 'travellers', 'notes', 'status', 'source']]
+    async for lead in leads.find({}).sort('created_at', -1):
+        created = lead.get('created_at')
+        date_str = created.strftime('%Y-%m-%d') if isinstance(created, datetime) else str(created or '')
+        rows.append([
+            date_str,
+            lead.get('name') or '',
+            lead.get('surname') or '',
+            lead.get('email') or '',
+            lead.get('phone') or '',
+            lead.get('destination') or lead.get('country') or '',
+            str(lead.get('travellers') or lead.get('adults') or ''),
+            (lead.get('notes') or lead.get('message') or '').replace('\n', ' '),
+            lead.get('status') or 'new',
+            lead.get('source') or '',
+        ])
+    return _csv_response(rows, 'wehive-leads.csv')
+
+
 @router.post('/re-seed-universities')
 async def admin_re_seed_universities(admin=Depends(get_current_admin_flex)):
     try:

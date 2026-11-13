@@ -35,11 +35,15 @@ def classify_identifier(identifier: str) -> str:
     raise HTTPException(status_code=400, detail='Invalid email or phone number')
 
 
+_PHONE_RE = re.compile(r'^\+[1-9]\d{9,14}$')
+
+
 def normalize_phone(phone: str) -> str:
     p = phone.strip().replace(' ', '').replace('-', '')
     if not p.startswith('+'):
-        # Default to India country code if missing
         p = '+91' + p.lstrip('0')
+    if not _PHONE_RE.match(p):
+        raise ValueError('phone must be E.164 format, e.g. +919876543210')
     return p
 
 

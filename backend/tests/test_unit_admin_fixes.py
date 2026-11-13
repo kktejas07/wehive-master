@@ -27,23 +27,29 @@ async def test_super_admin_gate(monkeypatch):
 
 def test_dangerous_endpoints_require_super_admin():
     from fastapi.routing import APIRoute
-    import server
-    guarded = {
-        ('GET', '/api/admin/settings/{namespace}'), ('PUT', '/api/admin/settings/{namespace}'),
-        ('PATCH', '/api/admin/integrations'), ('DELETE', '/api/admin/users/{user_id}'),
-        ('POST', '/api/admin-auth/admins'), ('DELETE', '/api/admin-auth/admins/{user_id}'),
-        ('DELETE', '/api/rag/collections/{name}'),
-    }
-    found = set()
-    for r in server.app.routes:
-        if not isinstance(r, APIRoute):
-            continue
-        deps = {d.call for d in r.dependant.dependencies}
-        for m in r.methods:
-            if (m, r.path) in guarded:
-                assert admin_auth.get_super_admin in deps, (m, r.path)
-                found.add((m, r.path))
-    assert found == guarded
+    import routes_admin
+    import routes_admin_auth as raa
+    import routes_rag
+    guarded = [
+        ('GET', '/admin/settings/{namespace}', routes_admin.router),
+        ('PUT', '/admin/settings/{namespace}', routes_admin.router),
+        ('PATCH', '/admin/integrations', routes_admin.router),
+        ('DELETE', '/admin/users/{user_id}', routes_admin.router),
+        ('POST', '/admin-auth/admins', raa.router),
+        ('DELETE', '/admin-auth/admins/{user_id}', raa.router),
+        ('DELETE', '/rag/collections/{name}', routes_rag.router),
+    ]
+    found = 0
+    for method, path, sub_router in guarded:
+        matched = False
+        for r in sub_router.routes:
+            if isinstance(r, APIRoute) and r.path == path and method in r.methods:
+                deps = {d.call for d in r.dependant.dependencies}
+                assert admin_auth.get_super_admin in deps, (method, r.path)
+                matched = True
+        assert matched, f'{method} {path} not found on router'
+        found += 1
+    assert found == len(guarded)
 
 
 # ── secrets ───────────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Compass, GraduationCap, Newspaper, Plane, Search, type LucideIcon } from 'lucide-react-native';
+import { BookOpen, Calendar, Compass, DollarSign, FileText, GraduationCap, HelpCircle, Newspaper, Plane, Search, Shield, Users, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { Platform, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInUp, useReducedMotion } from 'react-native-reanimated';
@@ -16,11 +16,18 @@ import { Text } from '@/core/ui/text';
 import { NewsCard } from '@/features/news/view/news-card';
 import { useNews } from '@/features/news/viewmodel/use-news';
 
-const SHORTCUTS: { icon: LucideIcon; title: string; body: string; href: '/destinations' | '/news' | '/account' }[] = [
+const SHORTCUTS: { icon: LucideIcon; title: string; body: string; href: string }[] = [
   { icon: Compass, title: 'Destinations', body: 'Visa rules and decision times for 190+ countries', href: '/destinations' },
-  { icon: GraduationCap, title: 'Study abroad', body: 'Apply to partner universities with expert help', href: '/account' },
-  { icon: Plane, title: 'Visa applications', body: 'Track every step, documents to decision', href: '/account' },
+  { icon: GraduationCap, title: 'Universities', body: 'Browse partner universities worldwide', href: '/universities' },
+  { icon: Shield, title: 'Visa Checker', body: 'Check requirements for any country', href: '/visa-checker' },
+  { icon: FileText, title: 'SOP Builder', body: 'AI-powered statement of purpose', href: '/sop-builder' },
+  { icon: Plane, title: 'Applications', body: 'Track every step, documents to decision', href: '/applications' },
+  { icon: BookOpen, title: 'Blog', body: 'Study abroad tips and visa guides', href: '/blog' },
+  { icon: Calendar, title: 'Events', body: 'Webinars, fairs and deadlines', href: '/events' },
+  { icon: Users, title: 'Community', body: 'Student stories and interview prep', href: '/community' },
   { icon: Newspaper, title: 'News', body: 'Rule changes and embassy updates', href: '/news' },
+  { icon: DollarSign, title: 'Financial Tools', body: 'Cost calculators and forex', href: '/financial' },
+  { icon: HelpCircle, title: 'Help', body: 'FAQs and support', href: '/help' },
 ];
 
 export function HomeScreen() {

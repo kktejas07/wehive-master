@@ -50,6 +50,13 @@ global_events_col = db['global_events']
 global_blogs_col = db['global_blogs']
 global_news_col = db['global_news']
 newsletter_col = db['newsletter_subscribers']
+offers_col = db['offers']
+offer_claims_col = db['offer_claims']
+offer_bot_runs_col = db['offer_bot_runs']
+campus_tpos_col = db['campus_tpos']
+campus_leaders_col = db['campus_leaders']
+campus_clubs_col = db['campus_clubs']
+campus_ambassadors_col = db['campus_ambassadors']
 
 # --- New AI stack collections ---
 llm_traces_col = db['llm_traces']
@@ -164,3 +171,15 @@ async def ensure_indexes():
     await scrape_runs_col.create_index([('changed', 1), ('scraped_at', -1)])
     await content_pipeline_runs_col.create_index([('status', 1), ('created_at', -1)])
     await content_pipeline_runs_col.create_index([('created_at', -1)])
+    # Offer & campus marketplace
+    await offers_col.create_index([('brand', 1), ('status', 1)])
+    await offers_col.create_index('status')
+    await offers_col.create_index('expires_at', sparse=True)
+    await offer_claims_col.create_index([('offer_id', 1), ('user_id', 1)], unique=True)
+    await offer_claims_col.create_index([('user_id', 1), ('created_at', -1)])
+    await offer_claims_col.create_index('score')
+    await offer_bot_runs_col.create_index([('ran_at', -1)])
+    await campus_tpos_col.create_index([('status', 1)])
+    await campus_leaders_col.create_index([('status', 1)])
+    await campus_clubs_col.create_index([('status', 1), ('college', 1)])
+    await campus_ambassadors_col.create_index([('status', 1)])
