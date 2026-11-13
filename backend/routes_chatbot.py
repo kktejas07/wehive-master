@@ -163,6 +163,16 @@ async def _rag_context(user_prompt: str) -> str:
     return f"From our knowledge base:\n{text}" if text else ""
 
 
+async def _rag_chunks(user_prompt: str) -> list[str]:
+    """Return raw RAG chunks for eval storage (faithfulness / context-precision scoring)."""
+    from agent_framework import _retrieve_rag_context
+    try:
+        text = await asyncio.wait_for(_retrieve_rag_context(user_prompt, RAG_COLLECTIONS, k=3), timeout=8)
+        return [c.strip() for c in text.split("\n\n") if c.strip()] if text else []
+    except Exception:
+        return []
+
+
 class ChatStartRequest(BaseModel):
     title: Optional[str] = "New chat"
 
@@ -298,7 +308,10 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     await chat_messages.insert_one(user_msg)
 
     uid = user["_id"] if user else None
-    context = await _gather_context(text, user_id=uid)
+    context, rag_chunks = await asyncio.gather(
+        _gather_context(text, user_id=uid),
+        _rag_chunks(text),
+    )
 
     # LangGraph path (enabled via USE_LANGGRAPH=true env var)
     user_id = user["_id"] if user else None
@@ -428,6 +441,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
         "session_id": session_id,
         "role": "assistant",
         "text": reply_text,
+        "rag_contexts": rag_chunks,   # stored for faithfulness / context-precision eval
         "created_at": datetime.utcnow(),
     }
     await chat_messages.insert_one(assistant_msg)
@@ -446,7 +460,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
                 message_id=assistant_msg["_id"],
                 question=text,
                 answer=reply_text,
-                context=context,
+                contexts=rag_chunks,   # pass raw chunks (not full context string)
             ))
         except Exception:
             pass
