@@ -44,11 +44,12 @@ def _inject_fake_modules():
 
     # ------------------------------------------------------------------ db
     db_mod = types.ModuleType("db")
+    # All collections referenced by any route module under test
     for col in (
+        # wise-specific
         "wise_packs_col",
         "visa_knowledge_col",
         "travel_plans_col",
-        "applications",
         "ai_feeds_col",
         "interview_sessions_col",
         "interview_questions_col",
@@ -56,8 +57,39 @@ def _inject_fake_modules():
         "pipeline_runs_col",
         "countries_col",
         "countries_v2",
+        # core collections (also used by admin routes)
+        "applications",
+        "users",
+        "otps",
+        "scans",
+        "payments",
+        "notifications_col",
+        "referrals_col",
+        "universities_col",
+        "holiday_plans",
+        "leads",
+        "flights_cache",
+        "ai_settings",
+        "third_party_settings",
+        "profile_change_requests",
+        "agents_col",
+        "agent_students_col",
+        "commissions_col",
+        "usvisa_slots_col",
+        "usvisa_subscriptions_col",
+        "training_enrollments_col",
+        "training_certificates_col",
+        "kg_entity_cache_col",
+        "kg_insight_runs_col",
+        "promotions_col",
+        "referrals_col",
     ):
         setattr(db_mod, col, _make_async_collection(col))
+    # 'db' itself is the motor database object — stub it as a MagicMock
+    # so code that does `db['collection_name']` or `db.some_col` doesn't crash
+    db_obj = MagicMock(name="db")
+    db_obj.__getitem__ = MagicMock(side_effect=lambda k: _make_async_collection(k))
+    db_mod.db = db_obj
     sys.modules["db"] = db_mod
 
     # ------------------------------------------------------------------ model_router
