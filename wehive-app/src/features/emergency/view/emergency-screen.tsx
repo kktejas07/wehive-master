@@ -24,9 +24,9 @@ export function EmergencyScreen() {
             <AlertTriangle size={14} color="#FFC531" />
             <Text variant="small" style={{ color: 'rgba(255,255,255,0.8)' }}>Emergency Support</Text>
           </View>
-          <Text variant="hero" style={styles.white}>Emergency visa?{'\n'}We're on it</Text>
+          <Text variant="hero" style={styles.white}>{"Emergency visa?\nWe're on it"}</Text>
           <Text style={styles.whiteMuted}>
-            Crisis doesn't wait for paperwork. Talk to a visa specialist now and get your application moving.
+            {"Crisis doesn't wait for paperwork. Talk to a visa specialist now and get your application moving."}
           </Text>
         </GradientHero>
       }>

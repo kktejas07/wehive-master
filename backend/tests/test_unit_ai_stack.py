@@ -118,7 +118,7 @@ class TestObservability:
             return x * 2
 
         import asyncio
-        result = asyncio.get_event_loop().run_until_complete(_fn(5))
+        result = asyncio.run(_fn(5))
         assert result == 10
 
     def test_observe_preserves_return_value(self):
@@ -129,7 +129,7 @@ class TestObservability:
             return v
 
         import asyncio
-        assert asyncio.get_event_loop().run_until_complete(_echo("hi")) == "hi"
+        assert asyncio.run(_echo("hi")) == "hi"
 
 
 # ─── student_memory ──────────────────────────────────────────────────────────

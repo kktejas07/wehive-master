@@ -39,7 +39,9 @@ export async function signIn(page: Page, api: ApiMock, user = TEST_USER) {
   await page.addInitScript(() => window.localStorage.setItem('wehive_token', 'e2e-token'));
 }
 
-export const test = base.extend<{ api: ApiMock; pageErrors: Error[] }>({
+type SignInFn = (opts?: { user?: typeof TEST_USER }) => Promise<void>;
+
+export const test = base.extend<{ api: ApiMock; pageErrors: Error[]; signIn: SignInFn }>({
   api: [
     async ({ page, baseURL }, use) => {
       const api = new ApiMock();
@@ -50,6 +52,11 @@ export const test = base.extend<{ api: ApiMock; pageErrors: Error[] }>({
     },
     { auto: true },
   ],
+  signIn: async ({ page, api }, use) => {
+    await use(async (opts?: { user?: typeof TEST_USER }) => {
+      await signIn(page, api, opts?.user ?? TEST_USER);
+    });
+  },
   pageErrors: [
     async ({ page }, use) => {
       const errors: Error[] = [];

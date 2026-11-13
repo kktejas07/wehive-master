@@ -38,7 +38,7 @@ export function EnquiryScreen() {
         <GradientHero compact>
           <Text variant="hero" tone="onPrimary">Start your journey</Text>
           <Text variant="body" tone="onPrimary" style={{ opacity: 0.8 }}>
-            Tell us what you need — visas, study abroad or immigration. We'll take it from there.
+            {"Tell us what you need — visas, study abroad or immigration. We'll take it from there."}
           </Text>
         </GradientHero>
       }>

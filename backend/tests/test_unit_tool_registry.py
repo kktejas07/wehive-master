@@ -35,6 +35,9 @@ class _Cursor:
     def limit(self, n):
         return _Cursor(self._docs[:n])
 
+    def sort(self, *args, **kwargs):
+        return self
+
     def __aiter__(self):
         self._it = iter(self._docs)
         return self
@@ -52,6 +55,9 @@ class _Collection:
 
     async def find_one(self, query, projection=None):
         return next((d for d in self._docs if all(d.get(k) == v for k, v in query.items())), None)
+
+    def find(self, query=None, projection=None):
+        return _Cursor(self._docs)
 
     def find(self, query=None, projection=None):
         return _Cursor(self._docs)
@@ -90,7 +96,8 @@ async def test_every_registered_tool_runs(tool_name):
 
     with patch("eva_tools.db", FAKE_DB), \
          patch("ollama_embeddings.embed_query", new=AsyncMock(return_value=[0.1] * 8)), \
-         patch("vector_store.query_collection", return_value=[{"id": "c1", "document": "doc", "metadata": {}, "distance": 0.1}]):
+         patch("vector_store.query_collection", return_value=[{"id": "c1", "document": "doc", "metadata": {}, "distance": 0.1}]), \
+         patch("db.global_news_col", _Collection([])):
         result, error = await call_tool_by_name(tool_name, args)
 
     assert error is None, f"{tool_name} raised: {error}"

@@ -77,7 +77,7 @@ export function SopDetailScreen() {
       <Card>
         <Text variant="heading">Personalise with AI</Text>
         <Text variant="small" tone="muted" style={{ marginBottom: spacing.sm }}>
-          Fill in your details and we'll generate a tailored SOP.
+          {"Fill in your details and we'll generate a tailored SOP."}
         </Text>
         <TextField label="Your name" value={name} onChangeText={setName} placeholder="Full name" />
         <TextField label="University" value={university} onChangeText={setUniversity} placeholder="Target university" />

@@ -50,7 +50,7 @@ export default function LoginScreen() {
         />
 
         <View style={styles.footer}>
-          <Text tone="muted">Don't have an account? </Text>
+          <Text tone="muted">{"Don't have an account? "}</Text>
           <Link href="/(auth)/signup">
             <Text style={{ color: c.primary }}>Create one</Text>
           </Link>

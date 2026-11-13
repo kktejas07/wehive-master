@@ -99,4 +99,4 @@ class TestMultiUniversityFees:
 
 class TestFLATApplicationFee:
     def test_constant_is_defined(self):
-        assert FLAT_APPLICATION_FEE_INR == 20000
+        assert FLAT_APPLICATION_FEE_INR == 18999

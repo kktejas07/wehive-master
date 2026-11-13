@@ -58,7 +58,10 @@ export function useInterview() {
   );
 
   useEffect(() => {
-    if (phase === 'interview' && timeLeft === 0) advance('(skipped)');
+    if (phase === 'interview' && timeLeft === 0) {
+      const t = setTimeout(() => advance('(skipped)'), 0);
+      return () => clearTimeout(t);
+    }
   }, [phase, timeLeft, advance]);
 
   const submitAnswer = useCallback(() => advance(answer), [answer, advance]);
