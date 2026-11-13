@@ -81,82 +81,60 @@ def _inject_fake_modules():
         name="AsyncIOScheduler"
     )
 
-    # ------------------------------------------------------------------ anyio stubs
-    # anyio's _typedattr imports `sentinel` from typing_extensions but the
-    # installed typing_extensions uses `Sentinel` (capital S).  Stub enough
-    # of anyio so fastapi can import without hitting that incompatibility.
-    anyio_mods = [
-        "anyio",
-        "anyio.abc",
-        "anyio._core",
-        "anyio._core._typedattr",
-        "anyio._core._eventloop",
-        "anyio._core._tasks",
-        "anyio._backends",
-        "anyio._backends._asyncio",
-        "anyio.streams",
-        "anyio.streams.memory",
-    ]
-    for m in anyio_mods:
-        if m not in sys.modules:
-            sys.modules[m] = types.ModuleType(m)
-    # Minimal attrs fastapi needs
-    abc_mod = sys.modules["anyio.abc"]
-    abc_mod.ObjectReceiveStream = MagicMock(name="ObjectReceiveStream")
+    # ------------------------------------------------------------------ anyio / starlette / fastapi
+    # If the real packages are installed (they are in CI), import them normally
+    # so other test files that use real route modules aren't broken.
+    # Only fall back to hollow stubs when the real package is absent.
+    _use_fastapi_stub = False
+    try:
+        import fastapi as _fastapi_real  # noqa: F401
+    except Exception:
+        _use_fastapi_stub = True
 
-    # ------------------------------------------------------------------ starlette / fastapi stubs
-    # fastapi pulls in starlette which also pulls anyio; easier to stub both.
-    starlette_mods = [
-        "starlette",
-        "starlette.routing",
-        "starlette.requests",
-        "starlette.responses",
-        "starlette.background",
-        "starlette.exceptions",
-        "starlette.middleware",
-        "starlette.middleware.base",
-        "starlette.concurrency",
-        "starlette.datastructures",
-        "starlette.types",
-        "starlette.status",
-        "starlette.websockets",
-        "starlette.testclient",
-        "starlette.convertors",
-    ]
-    for m in starlette_mods:
-        if m not in sys.modules:
-            sys.modules[m] = types.ModuleType(m)
+    if _use_fastapi_stub:
+        # anyio stubs (only needed when fastapi isn't installed)
+        anyio_mods = [
+            "anyio", "anyio.abc", "anyio._core", "anyio._core._typedattr",
+            "anyio._core._eventloop", "anyio._core._tasks",
+            "anyio._backends", "anyio._backends._asyncio",
+            "anyio.streams", "anyio.streams.memory",
+        ]
+        for m in anyio_mods:
+            if m not in sys.modules:
+                sys.modules[m] = types.ModuleType(m)
+        sys.modules["anyio.abc"].ObjectReceiveStream = MagicMock(name="ObjectReceiveStream")
 
-    fastapi_mods = [
-        "fastapi",
-        "fastapi.routing",
-        "fastapi.params",
-        "fastapi.dependencies",
-        "fastapi.dependencies.utils",
-        "fastapi.security",
-        "fastapi.security.oauth2",
-        "fastapi.security.http",
-        "fastapi.exceptions",
-        "fastapi.encoders",
-        "fastapi.responses",
-        "fastapi.middleware",
-        "fastapi.middleware.cors",
-        "fastapi.staticfiles",
-        "fastapi.openapi",
-        "fastapi.openapi.utils",
-    ]
-    for m in fastapi_mods:
-        if m not in sys.modules:
-            sys.modules[m] = types.ModuleType(m)
+        starlette_mods = [
+            "starlette", "starlette.routing", "starlette.requests",
+            "starlette.responses", "starlette.background", "starlette.exceptions",
+            "starlette.middleware", "starlette.middleware.base",
+            "starlette.concurrency", "starlette.datastructures", "starlette.types",
+            "starlette.status", "starlette.websockets", "starlette.testclient",
+            "starlette.convertors",
+        ]
+        for m in starlette_mods:
+            if m not in sys.modules:
+                sys.modules[m] = types.ModuleType(m)
 
-    # Minimal symbols used in wise/*.py imports
-    fastapi_mod = sys.modules["fastapi"]
-    fastapi_mod.APIRouter = MagicMock(name="APIRouter")
-    fastapi_mod.Depends = MagicMock(name="Depends")
-    fastapi_mod.HTTPException = type("HTTPException", (Exception,), {"status_code": 400})
-    fastapi_mod.BackgroundTasks = MagicMock(name="BackgroundTasks")
-    fastapi_mod.Request = MagicMock(name="Request")
-    fastapi_mod.FastAPI = MagicMock(name="FastAPI")
+        fastapi_mods = [
+            "fastapi", "fastapi.routing", "fastapi.params",
+            "fastapi.dependencies", "fastapi.dependencies.utils",
+            "fastapi.security", "fastapi.security.oauth2", "fastapi.security.http",
+            "fastapi.exceptions", "fastapi.encoders", "fastapi.responses",
+            "fastapi.middleware", "fastapi.middleware.cors",
+            "fastapi.staticfiles", "fastapi.openapi", "fastapi.openapi.utils",
+        ]
+        for m in fastapi_mods:
+            if m not in sys.modules:
+                sys.modules[m] = types.ModuleType(m)
+
+        fastapi_mod = sys.modules["fastapi"]
+        fastapi_mod.APIRouter = MagicMock(name="APIRouter")
+        fastapi_mod.Depends = MagicMock(name="Depends")
+        fastapi_mod.HTTPException = type("HTTPException", (Exception,), {"status_code": 400})
+        fastapi_mod.BackgroundTasks = MagicMock(name="BackgroundTasks")
+        fastapi_mod.Request = MagicMock(name="Request")
+        fastapi_mod.FastAPI = MagicMock(name="FastAPI")
 
     # ------------------------------------------------------------------ jose / passlib stubs
     for m in ("jose", "jose.jwt", "passlib", "passlib.context"):
