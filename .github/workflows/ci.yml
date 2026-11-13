@@ -41,9 +41,11 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements.txt
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Unit tests
-        run: python -m pytest tests/test_unit_*.py -q
+        run: pip install -r requirements.txt pytest-cov==7.1.0
+      - name: Unit tests with coverage
+        # The floor sits just under today's figure (47%) so coverage cannot quietly
+        # fall; raise it as tests are added. Settings: [tool.coverage] in pyproject.toml.
+        run: python -m pytest tests/test_unit_*.py -q --cov=. --cov-report=term:skip-covered --cov-fail-under=45
 
   frontend:
     name: Frontend (lint, types, tests, build)
@@ -65,7 +67,7 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
       - name: Unit tests
-        run: npx craco test --watchAll=false --passWithNoTests
+        run: npx craco test --watchAll=false --passWithNoTests --coverage --coverageReporters=text-summary
         env:
           CI: "true"
       - name: Build
