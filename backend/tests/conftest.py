@@ -41,6 +41,10 @@ def _inject_fake_modules():
     sys.modules["motor.motor_asyncio"].AsyncIOMotorClient = MagicMock(
         name="AsyncIOMotorClient"
     )
+    # pymongo.errors.DuplicateKeyError used by some route files
+    sys.modules["pymongo.errors"].DuplicateKeyError = type(
+        "DuplicateKeyError", (Exception,), {}
+    )
 
     # ------------------------------------------------------------------ db
     db_mod = types.ModuleType("db")
@@ -83,6 +87,18 @@ def _inject_fake_modules():
         "kg_insight_runs_col",
         "promotions_col",
         "referrals_col",
+        # global content / community
+        "global_events_col",
+        "global_blogs_col",
+        "global_news_col",
+        "newsletter_col",
+        # offers
+        "offers_col",
+        "offer_claims_col",
+        "offer_bot_runs_col",
+        # campus
+        "campus_tpos_col",
+        "campus_leaders_col",
     ):
         setattr(db_mod, col, _make_async_collection(col))
     # 'db' itself is the motor database object — stub it as a MagicMock
@@ -90,6 +106,8 @@ def _inject_fake_modules():
     db_obj = MagicMock(name="db")
     db_obj.__getitem__ = MagicMock(side_effect=lambda k: _make_async_collection(k))
     db_mod.db = db_obj
+    # ensure_indexes is an async coroutine in db.py — stub it
+    db_mod.ensure_indexes = AsyncMock(return_value=None)
     sys.modules["db"] = db_mod
 
     # ------------------------------------------------------------------ model_router
