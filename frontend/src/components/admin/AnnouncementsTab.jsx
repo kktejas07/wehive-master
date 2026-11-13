@@ -27,13 +27,11 @@ const AUDIENCES = [
 
 function Stat({ icon: Icon, name, value }) {
   return (
-    <div className="rounded-2xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-4 py-3 flex items-center gap-3">
-      <span className="w-9 h-9 rounded-xl bg-[hsl(var(--blue-700))]/20 flex items-center justify-center shrink-0">
-        <Icon className="w-4.5 h-4.5 text-blue-300" />
-      </span>
+    <div className="card-surface px-4 py-3 flex items-center gap-3">
+      <span className="icon-tile"><Icon className="w-5 h-5" aria-hidden="true" /></span>
       <span>
-        <span className="block text-[11px] uppercase tracking-[0.12em] text-[var(--text-secondary)] font-bold">{name}</span>
-        <span className="block text-[20px] font-bold text-[var(--text-primary)] tabular-nums leading-tight">{value ?? '…'}</span>
+        <span className="block text-[12px] font-medium text-muted-foreground">{name}</span>
+        <span className="block text-[20px] font-display font-bold text-[hsl(var(--blue-900))] tabular-nums leading-tight">{value ?? '…'}</span>
       </span>
     </div>
   );
@@ -150,7 +148,7 @@ export default function AnnouncementsTab() {
                   const on = audience === a.id;
                   return (
                     <button key={a.id} type="button" onClick={() => setAudience(a.id)}
-                      className={`text-left rounded-xl border px-3.5 py-2.5 transition-colors ${on ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))]/10' : 'border-[var(--glass-border)] bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)]'}`}>
+                      className={`text-left rounded-xl border px-3.5 py-2.5 transition-colors ${on ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]' : 'border-[var(--glass-border)] bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)]'}`}>
                       <span className="block text-[13.5px] font-semibold text-[var(--text-primary)]">{a.name}
                         <span className="ml-1.5 text-[11.5px] text-[var(--text-secondary)] tabular-nums">{sizes ? `· ${sizes[a.id] ?? 0}` : ''}</span>
                       </span>
@@ -213,7 +211,7 @@ export default function AnnouncementsTab() {
                 <span className="text-[13px] text-amber-100">
                   {scheduledISO ? `Schedule “${title.trim()}” for ${count} recipients?` : `Send “${title.trim()}” to ${count} recipients now?`} This can&apos;t be undone.
                 </span>
-                <button className={`${btn} bg-red-600 hover:bg-red-700 text-[var(--text-primary)] h-9`} disabled={!!busy} data-testid="announcement-confirm-send"
+                <button className={`${btn} bg-red-600 hover:bg-red-700 text-white h-9`} disabled={!!busy} data-testid="announcement-confirm-send"
                   onClick={() => act('send', async () => {
                     await apiClient(token).post('/announcements/admin', { ...payload, scheduled_at: scheduledISO });
                     toast({ title: scheduledISO ? 'Scheduled' : 'Sending started', description: scheduledISO ? 'It will go out automatically.' : 'Progress shows below.' });

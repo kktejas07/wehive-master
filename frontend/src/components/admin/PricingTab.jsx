@@ -203,7 +203,7 @@ export default function PricingTab() {
                   onClick={() => setDraft({ ...draft, currency: c.code, _currencySearch: '' })}
                   className={`w-full text-left px-3 py-2 rounded-lg text-[13px] font-bold transition ${
                     (draft.currency || 'INR') === c.code
-                      ? 'bg-[hsl(var(--blue-700))]/20 text-white'
+                      ? 'bg-[hsl(var(--blue-50))] text-white'
                       : 'text-[var(--text-secondary)] hover:bg-[var(--glass-hover)] hover:text-[var(--text-primary)]'
                   }`}
                 >

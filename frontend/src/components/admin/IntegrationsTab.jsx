@@ -311,7 +311,7 @@ export default function IntegrationsTab() {
                 onClick={() => setChannel(c.id)}
                 className={`text-left rounded-xl border p-3 transition ${
                   active
-                    ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-700))]/10'
+                    ? 'border-[hsl(var(--blue-700))] bg-[hsl(var(--blue-50))]'
                     : 'border-[var(--glass-border)] bg-[var(--glass-hover)] hover:border-[hsl(var(--blue-700))]/50'
                 }`}
               >

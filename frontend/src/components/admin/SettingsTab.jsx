@@ -365,7 +365,7 @@ export default function SettingsTab() {
         subtitle="Configure all platform integrations — saved to database, applied instantly without redeployment"
       />
 
-      <div className="sticky top-0 z-10 bg-[#0b1020] pt-4 pb-3 flex gap-1 overflow-x-auto scrollbar-none border-b border-[var(--glass-border)] mb-6">
+      <div className="sticky top-0 z-10 bg-[hsl(var(--soft-bg))] pt-4 pb-3 flex gap-1 overflow-x-auto scrollbar-none border-b border-[var(--glass-border)] mb-6">
         {NAMESPACES.map((n) => {
           const m = SECTION_META[n] || { label: n, icon: Globe };
           const Icon = m.icon;
@@ -376,7 +376,7 @@ export default function SettingsTab() {
               onClick={() => setActiveTab(n)}
               className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 h-10 rounded-lg text-[12px] font-semibold transition ${
                 activeTab === n
-                  ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)]'
+                  ? 'bg-[hsl(var(--blue-700))] text-white'
                   : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-hover)]'
               }`}
             >
@@ -392,7 +392,7 @@ export default function SettingsTab() {
         <Panel className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-xl bg-[hsl(var(--blue-700))]/15 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-xl bg-[hsl(var(--blue-50))] flex items-center justify-center">
                 <TabIcon className="w-4.5 h-4.5 text-blue-300" />
               </div>
               <h3 className="text-[16px] font-bold text-[var(--text-primary)]">{meta.title}</h3>
@@ -406,7 +406,7 @@ export default function SettingsTab() {
               <button
                 onClick={handleSave}
                 disabled={saving === ns || !hasChanges}
-                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
               >
                 {saving === ns ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 Save {meta.label}

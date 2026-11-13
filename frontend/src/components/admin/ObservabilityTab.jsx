@@ -6,8 +6,8 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 const S = {
   page: { fontFamily: "'Noto Sans', sans-serif" },
   card: {
-    background: '#ffffff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14,
-    padding: 17, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    background: '#ffffff', border: '1px solid hsl(var(--border))', borderRadius: 16,
+    padding: 20, boxShadow: '0 1px 2px rgba(15,23,42,0.05)',
   },
   heading: { fontFamily: "'Figtree', sans-serif", fontSize: 18, fontWeight: 700, color: '#0f1420' },
   label: { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#9aa0b8' },
@@ -15,7 +15,7 @@ const S = {
   secondary: { fontSize: 13, color: '#5a6480' },
   muted: { fontSize: 12, color: '#9aa0b8' },
   btn: {
-    background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 7,
+    background: 'hsl(var(--blue-700))', color: '#fff', border: 'none', borderRadius: 7,
     padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
     boxShadow: '0 1px 6px rgba(59,130,246,0.25)', display: 'inline-flex', alignItems: 'center', gap: 5,
   },
@@ -33,23 +33,9 @@ const S = {
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 },
 };
 
-function IconWell({ color, children }) {
-  const colors = {
-    blue: { bg: 'rgba(59,130,246,0.10)', fg: '#3b82f6' },
-    red: { bg: 'rgba(239,68,68,0.10)', fg: '#ef4444' },
-    green: { bg: 'rgba(34,197,94,0.10)', fg: '#22c55e' },
-    yellow: { bg: 'rgba(234,179,8,0.10)', fg: '#eab308' },
-    purple: { bg: 'rgba(168,85,247,0.10)', fg: '#a855f7' },
-  };
-  const c = colors[color] || colors.blue;
-  return (
-    <div style={{
-      width: 30, height: 30, borderRadius: 8, display: 'flex',
-      alignItems: 'center', justifyContent: 'center', background: c.bg, color: c.fg, flexShrink: 0,
-    }}>
-      {children}
-    </div>
-  );
+// Single icon style, as on the landing pages (.icon-tile)
+function IconWell({ children }) {
+  return <div className="icon-tile">{children}</div>;
 }
 
 function StatusPill({ status }) {

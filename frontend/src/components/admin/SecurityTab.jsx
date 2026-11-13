@@ -180,7 +180,7 @@ export default function SecurityTab() {
                   <input id="2fa-disable-pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} autoComplete="current-password" />
                   <CodeInput id="2fa-disable-code" value={code} onChange={setCode} />
                   <div className="flex gap-2">
-                    <button onClick={disable} disabled={busy || !password || code.length !== 6} className={`${btn} bg-red-600 hover:bg-red-700 text-[var(--text-primary)]`} data-testid="2fa-disable">Turn off</button>
+                    <button onClick={disable} disabled={busy || !password || code.length !== 6} className={`${btn} bg-red-600 hover:bg-red-700 text-white`} data-testid="2fa-disable">Turn off</button>
                     <button onClick={() => { setDisabling(false); setCode(''); }} className={`${btn} bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)]`}>Cancel</button>
                   </div>
                 </>

@@ -9,8 +9,8 @@ const s = {
   sub: { fontSize: 13, color: '#9aa0b8', marginTop: 2 },
   grid4: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 },
   card: {
-    background: '#ffffff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14,
-    padding: 17, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    background: '#ffffff', border: '1px solid hsl(var(--border))', borderRadius: 16,
+    padding: 20, boxShadow: '0 1px 2px rgba(15,23,42,0.05)',
   },
   statLabel: {
     fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#9aa0b8',
@@ -19,12 +19,13 @@ const s = {
     fontFamily: "'Figtree', sans-serif", fontSize: 30, fontWeight: 800,
     letterSpacing: '-0.02em', color: '#0f1420', marginTop: 4,
   },
-  iconWell: (bg, fg) => ({
-    width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center',
-    justifyContent: 'center', background: bg, color: fg, flexShrink: 0,
+  // single icon style, as on the landing pages (.icon-tile)
+  iconWell: () => ({
+    width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: 'hsl(var(--blue-50))', color: 'hsl(var(--blue-700))', flexShrink: 0,
   }),
   btn: {
-    background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 7,
+    background: 'hsl(var(--blue-700))', color: '#fff', border: 'none', borderRadius: 7,
     padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
     boxShadow: '0 1px 6px rgba(59,130,246,0.25)', display: 'inline-flex',
     alignItems: 'center', gap: 6,

@@ -77,7 +77,7 @@ function ReviewRow({ item, token, onDecided, readOnly }) {
           <textarea id={`review-note-${item.id}`} rows={2} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)}
             className="w-full px-3 py-2 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] text-[13.5px] text-[var(--text-primary)] outline-none focus:border-[hsl(var(--blue-700))]" />
           <div className="flex gap-2">
-            <button type="submit" disabled={busy || note.trim().length < 3} className="inline-flex items-center gap-1 rounded-lg bg-red-600 hover:bg-red-700 px-3 py-1.5 text-[12px] font-bold text-[var(--text-primary)] disabled:opacity-50">
+            <button type="submit" disabled={busy || note.trim().length < 3} className="inline-flex items-center gap-1 rounded-lg bg-red-600 hover:bg-red-700 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-50">
               {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Mark suspicious
             </button>
             <button type="button" onClick={() => setFlagging(false)} className="rounded-lg bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] px-3 py-1.5 text-[12px] font-bold text-[var(--text-primary)]">Cancel</button>

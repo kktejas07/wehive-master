@@ -81,23 +81,34 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* ── Admin panel light theme design tokens ───────────────────────────── */
+/* ── Admin panel theme — aliases onto the landing/account tokens ──────── */
 .admin-theme {
-  --admin-bg: #F8FAFF;
-  --admin-sidebar: #F0F4FF;
-  --admin-navy: #1B2B5E;
-  --admin-blue: #011CB5;
+  --admin-bg: hsl(var(--soft-bg));
+  --admin-sidebar: #FFFFFF;
+  --admin-navy: hsl(var(--blue-900));
+  --admin-blue: hsl(var(--blue-700));
   --admin-amber: #D97706;
   --admin-red: #FF0302;
   --glass: #FFFFFF;
-  --glass-border: #E8EDF8;
+  --glass-border: hsl(var(--border));
   --glass-hover: #F5F7FF;
   --panel-bg: #FFFFFF;
-  --panel-border: #E8EDF8;
-  --text-primary: #1B2B5E;
-  --text-secondary: #4B5563;
-  --text-muted: #9CA3AF;
+  --panel-border: hsl(var(--border));
+  --text-primary: hsl(var(--blue-900));
+  --text-secondary: hsl(var(--muted-foreground));
+  --text-muted: #6B7391;
 }
+
+/* Admin panels are containers, not links: no hover shadow unless .card-lift */
+.admin-theme .card-surface:not(.card-lift):hover { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05); }
+
+/* Pale icon/text shades left from the old dark admin are unreadable on white
+   cards — map them to the readable tone of the same hue. */
+.admin-theme :is(.text-blue-200, .text-blue-300, .text-sky-300) { color: hsl(var(--blue-700)); }
+.admin-theme :is(.text-emerald-200, .text-emerald-300) { color: #047857; }
+.admin-theme :is(.text-amber-200, .text-amber-300) { color: #B45309; }
+.admin-theme :is(.text-red-200, .text-red-300) { color: #B91C1C; }
+.admin-theme .text-slate-300 { color: hsl(var(--muted-foreground)); }
 
 /* Admin light-theme card-lift: subtle blue shadow */
 .admin-theme .card-lift:hover {

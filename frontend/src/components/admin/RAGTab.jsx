@@ -441,7 +441,7 @@ export default function RAGTab() {
           </div>
           <div className="flex items-center gap-2">
             {isSuper && (
-              <button onClick={runOptimizer} disabled={optRunning} className="h-8 px-3 rounded-lg bg-violet-700 hover:bg-violet-800 disabled:opacity-50 text-[11px] font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5">
+              <button onClick={runOptimizer} disabled={optRunning} className="h-8 px-3 rounded-lg bg-violet-700 hover:bg-violet-800 disabled:opacity-50 text-[11px] font-semibold text-white inline-flex items-center gap-1.5">
                 {optRunning ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                 Run Optimizer
               </button>

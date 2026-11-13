@@ -14,7 +14,7 @@ import { useToast } from '../../hooks/use-toast';
 // ─── chart helpers ────────────────────────────────────────────────────────────
 
 function SvgAreaChart({ data = [], series = [], height = 80 }) {
-  if (!data || data.length === 0) return <div className="h-20 flex items-center justify-center text-[12px] text-[var(--text-muted)]">No data</div>;
+  if (!data || data.length === 0) return <div className="h-20 flex items-center justify-center text-[12px] text-muted-foreground">No data</div>;
   const W = 300;
   const H = height;
   const pad = 4;
@@ -95,32 +95,38 @@ function SvgDonut({ segments = [] }) {
   );
 }
 
+function PanelTitle({ Icon, children, right }) {
+  return (
+    <div className="flex items-center gap-2.5 mb-4">
+      {Icon && <span className="icon-tile !w-8 !h-8 !rounded-lg"><Icon className="w-4 h-4" aria-hidden="true" /></span>}
+      <h3 className="text-[14px] font-semibold text-[hsl(var(--blue-900))]">{children}</h3>
+      {right && <div className="ml-auto">{right}</div>}
+    </div>
+  );
+}
+
 // ─── row 1 ────────────────────────────────────────────────────────────────────
 
 function WelcomeBanner({ admin, alertCount, onRunAggregators, running }) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   return (
-    <div className="relative overflow-hidden rounded-2xl border bg-white p-6 h-full" style={{ borderColor: '#BDD0FF' }}>
-      <div className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(1,28,181,0.06), transparent 70%)', transform: 'translate(30%, -30%)' }} />
-      <div className="relative">
-        <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-[#011CB5] mb-1">{greeting}</div>
-        <div className="w-8 h-0.5 bg-[#011CB5] rounded mb-3" />
-        <h2 className="text-[22px] font-display font-bold text-[#1B2B5E]">{admin?.name || admin?.email || 'Admin'}</h2>
-        {alertCount > 0 && (
-          <div className="mt-2 text-[13px] text-amber-600 font-semibold flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5" /> {alertCount} alert{alertCount !== 1 ? 's' : ''} need attention
-          </div>
-        )}
-        <button
-          onClick={onRunAggregators}
-          disabled={running}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12.5px] font-bold bg-[#011CB5] hover:bg-[#0122D4] text-white disabled:opacity-50 transition-colors"
-        >
-          {running ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-          Run aggregators
-        </button>
-      </div>
+    <div className="card-surface p-6 h-full">
+      <div className="eyebrow">{greeting}</div>
+      <h2 className="h-card mt-3">{admin?.name || admin?.email || 'Admin'}</h2>
+      {alertCount > 0 && (
+        <div className="mt-2 text-[13px] text-amber-700 font-semibold flex items-center gap-1.5">
+          <AlertTriangle className="w-3.5 h-3.5" /> {alertCount} alert{alertCount !== 1 ? 's' : ''} need attention
+        </div>
+      )}
+      <button
+        onClick={onRunAggregators}
+        disabled={running}
+        className="btn-primary mt-5 inline-flex items-center gap-2 h-11 px-5 rounded-xl text-[14px] font-semibold disabled:opacity-50"
+      >
+        {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+        Run aggregators
+      </button>
     </div>
   );
 }
@@ -128,7 +134,7 @@ function WelcomeBanner({ admin, alertCount, onRunAggregators, running }) {
 function QuickStats({ monitoring }) {
   if (!monitoring) return (
     <Panel className="h-full flex items-center justify-center">
-      <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
+      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
     </Panel>
   );
   const tiles = [
@@ -142,11 +148,11 @@ function QuickStats({ monitoring }) {
       <div className="grid grid-cols-2 gap-3">
         {tiles.map((t) => (
           <Link key={t.label} to="/admin/monitoring"
-            className="rounded-xl bg-[#F8FAFF] border border-[#E8EDF8] px-3 py-2.5 hover:bg-[#EEF2FF] transition-colors flex items-center gap-2">
-            <t.Icon className={`w-4 h-4 shrink-0 ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-[var(--text-muted)]'}`} />
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-[var(--text-muted)] leading-none">{t.label}</div>
-              <div className={`text-[18px] font-display font-bold leading-snug ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-[#1B2B5E]'}`}>{t.value ?? '—'}</div>
+            className="rounded-xl bg-white border border-border p-3 hover:border-[hsl(var(--blue-700))]/30 hover:shadow-sm transition flex items-center gap-3">
+            <span className="icon-tile"><t.Icon className="w-5 h-5" aria-hidden="true" /></span>
+            <div className="min-w-0">
+              <div className="text-[12px] font-medium text-muted-foreground">{t.label}</div>
+              <div className={`text-[20px] font-display font-bold tabular-nums leading-snug ${t.red ? 'text-red-600' : t.amber ? 'text-amber-700' : 'text-[hsl(var(--blue-900))]'}`}>{t.value ?? '—'}</div>
             </div>
           </Link>
         ))}
@@ -157,29 +163,16 @@ function QuickStats({ monitoring }) {
 
 // ─── row 2 ────────────────────────────────────────────────────────────────────
 
-const METRIC_ACCENTS = {
-  users:    { border: '#BDD0FF', icon: 'text-[#011CB5]', ring: 'bg-blue-50',    value: 'text-[#011CB5]' },
-  apps:     { border: '#FDE68A', icon: 'text-amber-600', ring: 'bg-amber-50',   value: 'text-amber-700' },
-  revenue:  { border: '#A7F3D0', icon: 'text-emerald-600', ring: 'bg-emerald-50', value: 'text-emerald-700' },
-  countries:{ border: '#BAE6FD', icon: 'text-sky-600',   ring: 'bg-sky-50',     value: 'text-sky-700' },
-};
-
-function KPICard({ label, value, sub, Icon, accentKey = 'users', delta, testid }) {
-  const a = METRIC_ACCENTS[accentKey] || METRIC_ACCENTS.users;
+function KPICard({ label, value, sub, Icon, delta, testid }) {
   return (
-    <div className="card-lift relative overflow-hidden rounded-2xl border bg-white p-5 cursor-default"
-      style={{ borderColor: a.border }}>
-      <div className="flex items-center justify-between">
-        <div className="text-[11px] uppercase tracking-[0.16em] font-bold text-[var(--text-muted)]">{label}</div>
-        <span className={`h-9 w-9 inline-flex items-center justify-center rounded-xl ${a.ring} ${a.icon}`}>
-          <Icon className="w-4 h-4" />
-        </span>
-      </div>
-      <div className={`mt-4 text-[32px] font-display font-bold tracking-[-0.02em] ${a.value}`} data-testid={testid}>{value}</div>
-      <div className="mt-1 flex items-center gap-2">
-        {sub && <span className="text-[12px] text-[var(--text-secondary)]">{sub}</span>}
+    <div className="card-surface card-lift p-5 h-full">
+      <span className="icon-tile"><Icon className="w-5 h-5" aria-hidden="true" /></span>
+      <div className="mt-4 text-[12px] font-medium text-muted-foreground">{label}</div>
+      <div className="mt-1 text-[28px] font-display font-bold tabular-nums text-[hsl(var(--blue-900))]" data-testid={testid}>{value}</div>
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[12px]">
+        {sub && <span className="text-muted-foreground">{sub}</span>}
         {delta != null && (
-          <span className={`text-[11px] font-bold ${delta > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+          <span className={`font-bold ${delta > 0 ? 'text-emerald-700' : 'text-red-600'}`}>
             {delta > 0 ? '↑' : '↓'} {Math.abs(delta)}
           </span>
         )}
@@ -202,13 +195,13 @@ const FUNNEL_STEPS = [
 function FunnelPanel({ funnel }) {
   if (!funnel) return (
     <Panel className="flex items-center justify-center h-full">
-      <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
+      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
     </Panel>
   );
   const max = Math.max(1, ...FUNNEL_STEPS.map((s) => funnel[s.key] || 0));
   return (
     <Panel>
-      <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-3">User funnel (90d)</div>
+      <PanelTitle Icon={Users}>User funnel (90d)</PanelTitle>
       <div className="space-y-2">
         {FUNNEL_STEPS.map((s, i) => {
           const count = funnel[s.key] || 0;
@@ -217,15 +210,15 @@ function FunnelPanel({ funnel }) {
           const pct = Math.round((count / max) * 100);
           return (
             <Link key={s.key} to={`/admin/users?stage=${s.key}`}
-              className="block hover:bg-[#F0F4FF] rounded-lg px-2 py-1 -mx-2 transition-colors group">
+              className="block hover:bg-[hsl(var(--blue-50))] rounded-lg px-2 py-1 -mx-2 transition-colors group">
               <div className="flex justify-between text-[12px] mb-1">
-                <span className="text-[var(--text-secondary)] group-hover:text-[#1B2B5E]">{s.label}</span>
-                <span className="text-[#1B2B5E] font-semibold">{count.toLocaleString()}
+                <span className="text-muted-foreground group-hover:text-[hsl(var(--blue-900))]">{s.label}</span>
+                <span className="text-[hsl(var(--blue-900))] font-semibold tabular-nums">{count.toLocaleString()}
                   {drop != null && <span className="text-red-600 ml-1.5 font-normal">↓{drop}%</span>}
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-[#E8EDF8]">
-                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #011CB5, #F59E0B)' }} />
+              <div className="h-1.5 rounded-full bg-[hsl(var(--blue-50))]">
+                <div className="h-full rounded-full bg-[hsl(var(--blue-700))]" style={{ width: `${pct}%` }} />
               </div>
             </Link>
           );
@@ -238,33 +231,30 @@ function FunnelPanel({ funnel }) {
 function AlertsPanel({ alerts }) {
   if (!alerts) return (
     <Panel className="flex items-center justify-center h-full">
-      <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
+      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
     </Panel>
   );
   const items = (alerts.items || []).slice(0, 8);
   const SEV_DOT = { critical: 'bg-red-400', high: 'bg-amber-400', low: 'bg-blue-400' };
   return (
     <Panel className="flex flex-col">
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Alerts ({alerts.total ?? items.length})</div>
-        {alerts.total > 8 && (
-          <Link to="/admin/alerts" className="text-[11px] text-blue-700 hover:text-blue-200 flex items-center gap-0.5">
-            View all <ArrowUpRight className="w-3 h-3" />
-          </Link>
-        )}
-      </div>
-      {items.length === 0 && <div className="text-[13px] text-[var(--text-muted)]">No active alerts.</div>}
+      <PanelTitle Icon={AlertTriangle} right={alerts.total > 8 && (
+        <Link to="/admin/alerts" className="link-primary text-[12px] inline-flex items-center gap-0.5">
+          View all <ArrowUpRight className="w-3 h-3" />
+        </Link>
+      )}>Alerts ({alerts.total ?? items.length})</PanelTitle>
+      {items.length === 0 && <div className="text-[13px] text-muted-foreground">No active alerts.</div>}
       <div className="space-y-2">
         {items.map((al) => (
           <div key={al.id} className="flex items-start gap-2 text-[12.5px]">
             <span className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${SEV_DOT[al.severity] || SEV_DOT.low}`} />
             <div className="min-w-0">
-              <div className="text-gray-700 truncate">{al.message || ALERT_KIND_LABEL?.[al.kind] || al.kind}</div>
-              {al.applicant_name && <div className="text-[var(--text-muted)] text-[11px]">{al.applicant_name}{al.days != null ? ` · ${al.days}d` : ''}</div>}
+              <div className="text-[hsl(var(--blue-900))] truncate">{al.message || ALERT_KIND_LABEL?.[al.kind] || al.kind}</div>
+              {al.applicant_name && <div className="text-muted-foreground text-[11px]">{al.applicant_name}{al.days != null ? ` · ${al.days}d` : ''}</div>}
             </div>
             {al.case_id && (
               <Link to={`/admin/applications/${al.case_id}`}
-                className="ml-auto shrink-0 text-[11px] text-blue-700 hover:text-blue-200 whitespace-nowrap">
+                className="link-primary ml-auto shrink-0 text-[12px] whitespace-nowrap">
                 View case
               </Link>
             )}
@@ -278,10 +268,7 @@ function AlertsPanel({ alerts }) {
 function TrendPanel({ trend }) {
   return (
     <Panel>
-      <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="w-4 h-4 text-[var(--text-secondary)]" />
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">90-day trend</div>
-      </div>
+      <PanelTitle Icon={TrendingUp}>90-day trend</PanelTitle>
       <SvgAreaChart
         data={trend || []}
         height={120}
@@ -291,10 +278,10 @@ function TrendPanel({ trend }) {
         ]}
       />
       <div className="mt-2 flex gap-4">
-        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
+        <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <span className="h-2 w-2 rounded-full bg-[#011CB5] inline-block" /> Signups
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
+        <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <span className="h-2 w-2 rounded-full bg-[#F59E0B] inline-block" /> Applications
         </span>
       </div>
@@ -309,22 +296,19 @@ function TopDestinations({ countries }) {
   const max = Math.max(1, ...items.map((c) => c.count || 0));
   return (
     <Panel>
-      <div className="flex items-center gap-2 mb-3">
-        <Globe className="w-4 h-4 text-[var(--text-secondary)]" />
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Top destinations</div>
-      </div>
-      {items.length === 0 && <div className="text-[13px] text-[var(--text-muted)]">No data yet.</div>}
+      <PanelTitle Icon={Globe}>Top destinations</PanelTitle>
+      {items.length === 0 && <div className="text-[13px] text-muted-foreground">No data yet.</div>}
       <div className="space-y-2.5">
         {items.map((c) => {
           const pct = Math.round((c.count / max) * 100);
           return (
             <div key={c.country_id || c.name}>
               <div className="flex justify-between text-[12.5px] mb-1">
-                <span className="text-gray-700">{c.flag ? `${c.flag} ` : ''}{c.name || c.country_id}</span>
-                <span className="text-[#1B2B5E] font-semibold">{c.count}</span>
+                <span className="text-[hsl(var(--blue-900))]">{c.flag ? `${c.flag} ` : ''}{c.name || c.country_id}</span>
+                <span className="text-[hsl(var(--blue-900))] font-semibold tabular-nums">{c.count}</span>
               </div>
-              <div className="h-1.5 rounded-full bg-[#E8EDF8]">
-                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #F59E0B, rgba(245,158,11,0.4))' }} />
+              <div className="h-1.5 rounded-full bg-[hsl(var(--blue-50))]">
+                <div className="h-full rounded-full bg-[hsl(var(--blue-700))]" style={{ width: `${pct}%` }} />
               </div>
             </div>
           );
@@ -346,15 +330,15 @@ function AppStatusPanel({ applications }) {
   const segments = DONUT_SEGMENTS.map((s) => ({ ...s, value: applications?.[s.key] || 0 }));
   return (
     <Panel>
-      <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)] mb-3">App status</div>
+      <PanelTitle Icon={FileStack}>App status</PanelTitle>
       <div className="flex items-center gap-4">
         <SvgDonut segments={segments} />
         <div className="space-y-1.5">
           {segments.map((s) => (
             <div key={s.key} className="flex items-center gap-1.5 text-[11.5px]">
               <span className="h-2 w-2 rounded-full shrink-0" style={{ background: s.color }} />
-              <span className="text-[var(--text-secondary)]">{s.label}</span>
-              <span className="ml-auto text-[#1B2B5E] font-semibold">{s.value}</span>
+              <span className="text-muted-foreground">{s.label}</span>
+              <span className="ml-auto text-[hsl(var(--blue-900))] font-semibold tabular-nums">{s.value}</span>
             </div>
           ))}
         </div>
@@ -373,23 +357,19 @@ function RecentAuditFeed({ activity }) {
   const items = (activity || []).slice(0, 10);
   return (
     <Panel>
-      <div className="flex items-center gap-2 mb-3">
-        <History className="w-4 h-4 text-[var(--text-secondary)]" />
-        <div className="text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-secondary)]">Recent audit</div>
-      </div>
-      {items.length === 0 && <div className="text-[13px] text-[var(--text-muted)]">No recent activity.</div>}
+      <PanelTitle Icon={History}>Recent audit</PanelTitle>
+      {items.length === 0 && <div className="text-[13px] text-muted-foreground">No recent activity.</div>}
       <div className="space-y-2.5">
         {items.map((e, i) => (
           <div key={i} className="flex items-start gap-2.5">
-            <span className="h-7 w-7 rounded-full inline-flex items-center justify-center text-[10px] font-bold text-[var(--text-primary)] shrink-0"
-              style={{ background: 'linear-gradient(135deg, #1B2B5E, #011CB5)' }}>
+            <span className="icon-tile !w-8 !h-8 !rounded-full text-[11px] font-bold">
               {initials(e.admin_email)}
             </span>
             <div className="min-w-0">
-              <div className="text-[12.5px] text-gray-700 truncate capitalize">
+              <div className="text-[12.5px] text-[hsl(var(--blue-900))] truncate capitalize">
                 {e.action} {e.entity_type ? `on ${e.entity_type}` : ''}{e.entity_id ? ` #${e.entity_id}` : ''}
               </div>
-              <div className="text-[11px] text-[var(--text-muted)]">{e.admin_email} · {relativeTime(e.at)}</div>
+              <div className="text-[11px] text-muted-foreground">{e.admin_email} · {relativeTime(e.at)}</div>
             </div>
           </div>
         ))}
@@ -435,7 +415,7 @@ export default function OverviewTab() {
   if (loading || !metrics) return (
     <div>
       <AdminHeader title="Overview" />
-      <Panel className="flex items-center justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-blue-700" /></Panel>
+      <Panel className="flex items-center justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[hsl(var(--blue-700))]" /></Panel>
     </div>
   );
 
@@ -466,22 +446,22 @@ export default function OverviewTab() {
         <div className="col-span-12 sm:col-span-6 lg:col-span-3">
           <KPICard testid="metric-users" label="Total users" value={users?.total ?? '—'}
             sub={`${users?.new_7d ?? 0} this week · ${users?.premium ?? 0} premium`}
-            Icon={Users} accentKey="users" delta={users?.new_7d} />
+            Icon={Users} delta={users?.new_7d} />
         </div>
         <div className="col-span-12 sm:col-span-6 lg:col-span-3">
           <KPICard testid="metric-applications" label="Applications" value={applications?.total ?? '—'}
             sub={`${applications?.new_30d ?? 0} in 30d`}
-            Icon={FileStack} accentKey="apps" delta={applications?.new_30d} />
+            Icon={FileStack} delta={applications?.new_30d} />
         </div>
         <div className="col-span-12 sm:col-span-6 lg:col-span-3">
           <KPICard testid="metric-revenue" label="Revenue (est.)" value={inr(revenue?.total_inr ?? 0)}
             sub={`${inr(revenue?.last_30d_inr ?? 0)} in 30d${forecast != null ? ` · ↗ ${inr(forecast)} forecast` : ''}`}
-            Icon={Banknote} accentKey="revenue" />
+            Icon={Banknote} />
         </div>
         <div className="col-span-12 sm:col-span-6 lg:col-span-3">
           <KPICard testid="metric-countries" label="Countries live" value={countries?.total ?? '—'}
             sub={`${countries?.no_visa ?? 0} visa-free`}
-            Icon={Globe} accentKey="countries" />
+            Icon={Globe} />
         </div>
 
         {/* Row 3: Alerts narrow + TrendPanel featured wide */}
@@ -527,17 +507,14 @@ function StaffWorkloadCard() {
 
   return (
     <Panel>
-      <div className="flex items-center gap-2 mb-4">
-        <Users className="w-4 h-4 text-[#011CB5]" />
-        <h3 className="text-[14px] font-bold text-[#1B2B5E]">Staff workload</h3>
-      </div>
+      <PanelTitle Icon={Users}>Staff workload</PanelTitle>
       {rows === null && <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-[#011CB5]" /></div>}
-      {rows !== null && rows.length === 0 && <p className="text-[13px] text-[var(--text-muted)]">No workload data available.</p>}
+      {rows !== null && rows.length === 0 && <p className="text-[13px] text-muted-foreground">No workload data available.</p>}
       {rows !== null && rows.length > 0 && (
         <div className="overflow-x-auto">
           <table className="min-w-full text-[13px]">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-[0.14em] font-bold text-[var(--text-muted)] border-b border-[#E8EDF8]">
+              <tr className="text-left text-[11px] uppercase tracking-[0.14em] font-bold text-muted-foreground border-b border-border">
                 <th className="pb-2 pr-4">Staff</th>
                 <th className="pb-2 pr-4 text-right">Open cases</th>
                 <th className="pb-2 text-right">Avg days open</th>
@@ -545,17 +522,17 @@ function StaffWorkloadCard() {
             </thead>
             <tbody>
               {rows.map((s) => (
-                <tr key={s.id} className="border-b border-[#F0F4FF] last:border-0">
+                <tr key={s.id} className="border-b border-border last:border-0">
                   <td className="py-2.5 pr-4">
-                    <div className="font-semibold text-[#1B2B5E]">{s.name || s.email || s.id}</div>
-                    {s.name && s.email && <div className="text-[11px] text-[var(--text-muted)]">{s.email}</div>}
+                    <div className="font-semibold text-[hsl(var(--blue-900))]">{s.name || s.email || s.id}</div>
+                    {s.name && s.email && <div className="text-[11px] text-muted-foreground">{s.email}</div>}
                   </td>
                   <td className="py-2.5 pr-4 text-right">
-                    <span className={`font-bold text-[14px] ${s.open_cases > 10 ? 'text-red-600' : s.open_cases > 5 ? 'text-amber-600' : 'text-[#1B2B5E]'}`}>
+                    <span className={`font-bold text-[14px] ${s.open_cases > 10 ? 'text-red-600' : s.open_cases > 5 ? 'text-amber-600' : 'text-[hsl(var(--blue-900))]'}`}>
                       {s.open_cases ?? 0}
                     </span>
                   </td>
-                  <td className="py-2.5 text-right text-[var(--text-secondary)]">
+                  <td className="py-2.5 text-right text-muted-foreground">
                     {s.avg_days != null ? `${Number(s.avg_days).toFixed(1)}d` : '—'}
                   </td>
                 </tr>

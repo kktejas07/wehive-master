@@ -278,7 +278,7 @@ export default function UsersTab() {
                           <button
                             disabled={remindBusy}
                             onClick={() => sendReminder(u)}
-                            className="w-full h-9 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] text-[12.5px] font-bold transition-colors"
+                            className="w-full h-9 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white text-[12.5px] font-bold transition-colors"
                           >
                             {remindBusy ? 'Sending…' : 'Send'}
                           </button>
@@ -331,7 +331,7 @@ export default function UsersTab() {
           <button
             disabled={bulkBusy}
             onClick={bulkPremium}
-            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-[var(--text-primary)] text-[12.5px] font-bold"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-[12.5px] font-bold"
           >
             <Crown className="w-3.5 h-3.5" /> Grant Premium
           </button>
