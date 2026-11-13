@@ -70,6 +70,7 @@ const SOPBuilder = lazy(() => import('./pages/SOPBuilder'));
 const PostApprovalHub = lazy(() => import('./pages/PostApprovalHub'));
 const PreDeparture = lazy(() => import('./pages/PreDeparture'));
 const Offers = lazy(() => import('./pages/Offers'));
+const WisePage = lazy(() => import('./features/wise/WisePage'));
 
 let _pricingLoaded = false;
 function PricingLoader() {
@@ -165,6 +166,8 @@ function AnimatedRoutes() {
           <Route path="/apply" element={<PrivateRoute><PageTransition><ApplicantFlow /></PageTransition></PrivateRoute>} />
           <Route path="/sop-builder" element={<PrivateRoute><PageTransition><SOPBuilder /></PageTransition></PrivateRoute>} />
           <Route path="/post-approval/:applicationId" element={<PrivateRoute><PageTransition><PostApprovalHub /></PageTransition></PrivateRoute>} />
+          <Route path="/wise" element={<PrivateRoute><PageTransition><WisePage /></PageTransition></PrivateRoute>} />
+          <Route path="/wise/:tab" element={<PrivateRoute><PageTransition><WisePage /></PageTransition></PrivateRoute>} />
           <Route path="/pre-departure" element={<PrivateRoute><PageTransition><PreDeparture /></PageTransition></PrivateRoute>} />
           <Route path="/events" element={<PageTransition><GlobalEvents /></PageTransition>} />
           <Route path="/offers" element={<PageTransition><Offers /></PageTransition>} />

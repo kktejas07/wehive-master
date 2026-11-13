@@ -42,7 +42,7 @@ export function ConsultationScreen() {
           </View>
           <Text variant="title" style={styles.white}>Talk to a visa consultant, free</Text>
           <Text style={styles.whiteMuted}>
-            No sign-in needed. Tell us where you're going and we'll get back within one working day.
+            {"No sign-in needed. Tell us where you're going and we'll get back within one working day."}
           </Text>
         </GradientHero>
       }>

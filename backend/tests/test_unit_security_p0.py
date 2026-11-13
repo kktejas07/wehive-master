@@ -44,12 +44,12 @@ def _all_paths():
 
 def test_removed_endpoints_are_gone():
     paths = _all_paths()
-    for method, path in [("POST", "/users/me/upgrade"), ("POST", "/agent/signup"),
-                         ("POST", "/communication/telegram/send-code"),
-                         ("POST", "/communication/discord/notify")]:
+    for method, path in [("POST", "/api/users/me/upgrade"), ("POST", "/api/agent/signup"),
+                         ("POST", "/api/communication/telegram/send-code"),
+                         ("POST", "/api/communication/discord/notify")]:
         assert (method, path) not in paths, path
-    assert ("POST", "/agent/admin/agents") in paths
-    assert ("POST", "/users/me/contact/confirm") in paths
+    assert ("POST", "/api/agent/admin/agents") in paths
+    assert ("POST", "/api/users/me/contact/confirm") in paths
 
 
 # ------------------------------------------------------------ premium: free tries, then pay

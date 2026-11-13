@@ -247,7 +247,7 @@ httpx-sse==0.4.3
     # via
     #   langchain-community
     #   langchain-mistralai
-huggingface-hub==1.9.2
+huggingface-hub==0.26.2
     # via
     #   -r backend/requirements.txt
     #   tokenizers
@@ -788,3 +788,8 @@ yarl==1.23.0
     #   aiohttp
 zstandard==0.25.0
     # via langsmith
+
+# --- Wise with RAG ---
+apscheduler==3.10.4
+    # via wise/pipeline.py (nightly country rules cron)
+

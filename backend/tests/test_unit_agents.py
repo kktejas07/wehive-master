@@ -408,4 +408,4 @@ class TestToolRegistry:
                         with patch("eva_tools.get_application_fee", new=AsyncMock()):
                             with patch("eva_tools.lookup_university", new=AsyncMock()):
                                 tr.register_all()
-        assert len(tr.list_tools()) == 8
+        assert len(tr.list_tools()) == 9

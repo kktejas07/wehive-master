@@ -67,6 +67,16 @@ scrape_targets_col = db['scrape_targets']
 scrape_runs_col = db['scrape_runs']
 content_pipeline_runs_col = db['content_pipeline_runs']
 
+# --- Wise with RAG collections ---
+ai_feeds_col = db['ai_feeds']                      # Agent feed log (Hive Learning)
+visa_knowledge_col = db['visa_knowledge']          # RAG chunks + embeddings
+wise_sessions_col = db['wise_sessions']            # Chat session history
+wise_packs_col = db['wise_packs']                  # Predefined conversation packs
+interview_questions_col = db['interview_questions']# Q bank
+interview_sessions_col = db['interview_sessions']  # Mock interview runs
+pipeline_runs_col = db['pipeline_runs']            # Country rules pipeline audit
+travel_plans_col = db['travel_plans']              # Post-approval travel plans
+
 async def ensure_indexes():
     await users.create_index('email', unique=True, sparse=True)
     await users.create_index('phone', unique=True, sparse=True)
