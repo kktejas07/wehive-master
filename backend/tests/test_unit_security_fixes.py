@@ -25,7 +25,7 @@ from upload_limits import read_capped  # noqa: E402
 # ── /auth/firebase-sync ───────────────────────────────────────────────────────
 class TestFirebaseSync:
     @pytest.fixture(autouse=True)
-    def _firebase(self, monkeypatch):
+    async def _firebase(self, monkeypatch):
         import firebase_admin
         monkeypatch.setattr(firebase_admin, '_apps', {'[DEFAULT]': object()})
         monkeypatch.setattr(firebase_utils, '_get_firebase_creds', AsyncMock(return_value=('proj', '{}')))
