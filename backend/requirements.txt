@@ -788,3 +788,10 @@ yarl==1.23.0
     #   aiohttp
 zstandard==0.25.0
     # via langsmith
+
+# --- Wise with RAG ---
+apscheduler==3.10.4
+    # via wise/pipeline.py (nightly country rules cron)
+sentence-transformers==3.3.1
+    # via wise/embeddings.py (dev fallback embedder; prod uses BGE via Ollama)
+

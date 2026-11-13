@@ -113,6 +113,9 @@ from routes_documents import router as documents_router  # noqa: E402
 from routes_application_builder import router as application_builder_router  # noqa: E402
 from routes_sop_templates import router as sop_templates_router  # noqa: E402
 from routes_webhooks import router as webhooks_router  # noqa: E402
+from wise.router import router as wise_router  # noqa: E402
+from wise.interview import router as wise_interview_router  # noqa: E402
+from wise.travel import router as wise_travel_router  # noqa: E402
 from seed_countries import seed as seed_countries  # noqa: E402
 from seed_universities import seed as seed_universities  # noqa: E402
 from db import countries_v2, db  # noqa: E402
@@ -266,6 +269,10 @@ api_router.include_router(sop_templates_router)
 api_router.include_router(documents_router)
 api_router.include_router(landing_router)
 api_router.include_router(webhooks_router)
+# Wise with RAG
+api_router.include_router(wise_router)
+api_router.include_router(wise_interview_router)
+api_router.include_router(wise_travel_router)
 
 app.include_router(api_router)
 
@@ -324,6 +331,22 @@ async def startup():
     _start_ragas_scheduler()
     # Index rejection patterns from MongoDB → Qdrant (background, best-effort)
     _asyncio.ensure_future(_index_rejection_patterns())
+    # --- Wise with RAG ---
+    try:
+        from wise.packs import seed_packs
+        from wise.interview import seed_questions
+        await seed_packs()
+        await seed_questions()
+    except Exception as exc:
+        logging.getLogger("wehive.wise").warning("Wise seed failed: %s", exc)
+    try:
+        from apscheduler.schedulers.asyncio import AsyncIOScheduler
+        from wise.pipeline import schedule_pipeline
+        _wise_scheduler = AsyncIOScheduler()
+        schedule_pipeline(_wise_scheduler)
+        _wise_scheduler.start()
+    except Exception as exc:
+        logging.getLogger("wehive.wise").warning("Wise pipeline scheduler not started: %s", exc)
 
 _raw_origins = os.environ.get('ALLOWED_ORIGINS', '').strip()
 _exact_origins: list[str] = []
