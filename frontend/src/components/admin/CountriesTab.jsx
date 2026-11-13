@@ -122,7 +122,7 @@ function AddCategoryButton({ existing, onAdd }) {
             onClick={() => { setPicked(v); setCustom(''); }}
             className={`rounded-full px-2.5 py-1 text-[11px] font-bold border ${
               picked === v
-                ? 'bg-[hsl(var(--blue-700))] text-[var(--text-primary)] border-[hsl(var(--blue-700))]'
+                ? 'bg-[hsl(var(--blue-700))] text-white border-[hsl(var(--blue-700))]'
                 : 'border-[var(--glass-border)] text-[var(--text-secondary)] hover:border-[hsl(var(--blue-700))]/50'
             }`}
           >{v}</button>
@@ -142,7 +142,7 @@ function AddCategoryButton({ existing, onAdd }) {
           data-testid="add-category-confirm"
           onClick={add}
           disabled={!picked && !custom}
-          className="rounded-md bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 px-3 py-1 text-[11.5px] font-bold text-[var(--text-primary)]"
+          className="rounded-md bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 px-3 py-1 text-[11.5px] font-bold text-white"
         >
           Add
         </button>
@@ -249,7 +249,7 @@ function CountryRow({ c, onSaved }) {
                 data-testid={`save-country-${c.id}`}
                 disabled={busy}
                 onClick={save}
-                className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] px-2.5 py-1.5 text-[11.5px] font-bold text-[var(--text-primary)]"
+                className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] px-2.5 py-1.5 text-[11.5px] font-bold text-white"
               >
                 {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Save className="w-3 h-3" /> Save</>}
               </button>

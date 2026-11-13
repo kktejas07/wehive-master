@@ -124,7 +124,7 @@ export default function ProgramsTab() {
       <div className="flex items-center gap-3 mb-4">
         <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Filter by university ID..." className="flex-1 h-10 px-4 rounded-xl bg-[var(--panel-bg)] border border-[var(--glass-border)] text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[#011CB5] max-w-sm" />
         <button onClick={() => load()} className="h-10 px-4 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] text-[13px] font-bold">Filter</button>
-        <button onClick={openCreate} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-[var(--text-primary)] text-[13px] font-bold flex items-center gap-1.5 ml-auto"><Plus className="w-4 h-4" /> New Program</button>
+        <button onClick={openCreate} className="h-10 px-4 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white text-[13px] font-bold flex items-center gap-1.5 ml-auto"><Plus className="w-4 h-4" /> New Program</button>
       </div>
 
       <Panel className="overflow-hidden">
@@ -227,7 +227,7 @@ export default function ProgramsTab() {
                 <div role="group" aria-labelledby="programstab-intake-months" className="flex flex-wrap gap-1.5">
                   {MONTHS.map(m => (
                     <button key={m} onClick={() => toggleIntake(m)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${form.intake_months.includes(m) ? 'bg-emerald-600 text-[var(--text-primary)]' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)]'}`}>{m}</button>
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${form.intake_months.includes(m) ? 'bg-emerald-600 text-white' : 'bg-[var(--glass-hover)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)]'}`}>{m}</button>
                   ))}
                 </div>
               </div>
@@ -246,7 +246,7 @@ export default function ProgramsTab() {
             </div>
             <div className="sticky bottom-0 bg-[var(--panel-bg)] flex justify-end gap-2 p-5 border-t border-[var(--glass-border)]">
               <button onClick={() => setShowForm(false)} className="h-10 px-5 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] text-[13px] font-bold">Cancel</button>
-              <button disabled={saving} onClick={handleSave} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] text-[13px] font-bold">
+              <button disabled={saving} onClick={handleSave} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white text-[13px] font-bold">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {saving ? 'Saving...' : 'Save'}
               </button>

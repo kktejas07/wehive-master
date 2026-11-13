@@ -14,7 +14,7 @@ const s = {
   g3: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 },
   bar: { height: 7, background: '#e2e8f0', borderRadius: 4, marginTop: 10 },
   barFill: (pct, color) => ({ height: '100%', borderRadius: 4, background: color, width: `${Math.min(100, pct)}%`, transition: 'width 0.4s ease' }),
-  btn: { background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 6px rgba(59,130,246,0.25)', display: 'inline-flex', alignItems: 'center', gap: 5 },
+  btn: { background: 'hsl(var(--blue-700))', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 6px rgba(59,130,246,0.25)', display: 'inline-flex', alignItems: 'center', gap: 5 },
   ghostBtn: { background: 'rgba(0,0,0,0.04)', color: '#5a6480', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
   th: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#9aa0b8', padding: '7px 10px', borderBottom: '1px solid rgba(0,0,0,0.07)', textAlign: 'left' },
   td: { padding: '9px 10px', fontSize: 12.5, color: '#5a6480', borderBottom: '1px solid rgba(0,0,0,0.04)' },

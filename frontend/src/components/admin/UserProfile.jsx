@@ -126,7 +126,7 @@ function ReminderModal({ vm, onClose }) {
         <div className="flex gap-2 mt-5">
           <button onClick={onClose} className="flex-1 h-10 rounded-xl bg-[var(--glass-hover)] text-[var(--text-primary)] text-[13px] font-semibold">Cancel</button>
           <button onClick={send} disabled={vm.busy}
-            className="flex-1 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-[var(--text-primary)] text-[13px] font-semibold disabled:opacity-50">
+            className="flex-1 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-semibold disabled:opacity-50">
             {vm.busy ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Send'}
           </button>
         </div>
@@ -163,7 +163,7 @@ function SuspendForm({ vm, onCancel }) {
         className="w-full px-3 py-2 rounded-xl bg-[var(--glass)] border border-[var(--glass-border)] text-[13.5px] text-[var(--text-primary)] outline-none"
       />
       <div className="flex gap-2">
-        <button type="submit" disabled={vm.busy || reason.trim().length < 3} className={`${btn} bg-red-600 hover:bg-red-700 text-[var(--text-primary)]`}>
+        <button type="submit" disabled={vm.busy || reason.trim().length < 3} className={`${btn} bg-red-600 hover:bg-red-700 text-white`}>
           {vm.busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />} Suspend account
         </button>
         <button type="button" onClick={onCancel} className={`${btn} bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)]`}>Cancel</button>
@@ -452,7 +452,7 @@ export default function UserProfile() {
           {!u.is_super_admin && canWrite(admin, 'manage') && (
             u.suspended ? (
               <button data-testid="unsuspend-user" disabled={vm.busy} onClick={handleUnsuspend}
-                className={`${btn} bg-emerald-600 hover:bg-emerald-700 text-[var(--text-primary)]`}>
+                className={`${btn} bg-emerald-600 hover:bg-emerald-700 text-white`}>
                 <RotateCcw className="w-3.5 h-3.5" /> Reinstate
               </button>
             ) : !suspending ? (

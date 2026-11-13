@@ -136,7 +136,7 @@ function InactiveUsers({ token }) {
             <button
               onClick={bulkRemind}
               disabled={reminding}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[hsl(var(--blue-700))] text-[var(--text-primary)] text-[12px] font-semibold disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[hsl(var(--blue-700))] text-white text-[12px] font-semibold disabled:opacity-50"
             >
               {reminding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bell className="w-3.5 h-3.5" />}
               Remind {selected.size}
@@ -198,7 +198,7 @@ function AnomaliesPanel({ token }) {
         <div className="text-[15px] font-display font-bold text-[#1B2B5E] flex items-center gap-2">
           AI anomalies
           {items.length > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-[var(--text-primary)] text-[10px] font-bold">
+            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
               {items.length}
             </span>
           )}

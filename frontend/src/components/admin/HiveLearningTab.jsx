@@ -19,13 +19,11 @@ const AGENT_OPTIONS = [
 
 function StatCard({ label, value, hint, Icon }) {
   return (
-    <div className="rounded-2xl bg-[var(--panel-bg)] border border-[var(--glass-border)] p-4">
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] font-bold text-[var(--text-secondary)]">
-        {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
-        {label}
-      </div>
-      <div className="mt-2 text-[26px] font-bold text-[var(--text-primary)] tracking-tight">{value}</div>
-      {hint ? <div className="mt-1 text-[11.5px] text-[var(--text-secondary)]">{hint}</div> : null}
+    <div className="card-surface p-5">
+      {Icon ? <span className="icon-tile"><Icon className="w-5 h-5" aria-hidden="true" /></span> : null}
+      <div className={`${Icon ? 'mt-4 ' : ''}text-[12px] font-medium text-muted-foreground`}>{label}</div>
+      <div className="mt-1 text-[26px] font-display font-bold tabular-nums text-[hsl(var(--blue-900))]">{value}</div>
+      {hint ? <div className="mt-1 text-[12px] text-muted-foreground">{hint}</div> : null}
     </div>
   );
 }
@@ -47,9 +45,9 @@ function Pill({ children, tone = 'slate' }) {
 
 function ActionButton({ onClick, loading, children, Icon, tone = 'navy', disabled }) {
   const tones = {
-    navy: 'bg-blue-600 hover:bg-blue-500 text-[var(--text-primary)] border-blue-500',
-    red: 'bg-red-600 hover:bg-red-500 text-[var(--text-primary)] border-red-500',
-    green: 'bg-emerald-600 hover:bg-emerald-500 text-[var(--text-primary)] border-emerald-500',
+    navy: 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500',
+    red: 'bg-red-600 hover:bg-red-500 text-white border-red-500',
+    green: 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500',
     slate: 'bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] border-[var(--glass-border)]',
   };
   return (
@@ -430,7 +428,7 @@ export default function HiveLearningTab() {
               <select
                 value={proposeAgent}
                 onChange={(e) => setProposeAgent(e.target.value)}
-                className="h-10 rounded-lg bg-[#0a0e1e] border border-[var(--glass-border)] px-3 text-[12px] text-[var(--text-primary)] outline-none"
+                className="h-10 rounded-lg bg-white border border-[var(--glass-border)] px-3 text-[12px] text-[var(--text-primary)] outline-none"
               >
                 {AGENT_OPTIONS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
               </select>
@@ -613,7 +611,7 @@ export default function HiveLearningTab() {
                         <button
                           onClick={() => decide(p, 'approve')}
                           disabled={deciding === p.id}
-                          className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-[var(--text-primary)] text-[11.5px] font-bold disabled:opacity-60"
+                          className="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11.5px] font-bold disabled:opacity-60"
                         >
                           {deciding === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />} Approve & apply
                         </button>

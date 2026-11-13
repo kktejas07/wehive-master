@@ -12,7 +12,7 @@ const s = {
   label: { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#9aa0b8', marginBottom: 4 },
   val: { fontFamily: "'Figtree', sans-serif", fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em', color: '#0f1420' },
   card: { background: '#ffffff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: 17, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
-  btn: { background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 6px rgba(59,130,246,0.25)', display: 'inline-flex', alignItems: 'center', gap: 6 },
+  btn: { background: 'hsl(var(--blue-700))', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 6px rgba(59,130,246,0.25)', display: 'inline-flex', alignItems: 'center', gap: 6 },
   btnGhost: { background: 'rgba(0,0,0,0.04)', color: '#5a6480', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 },
   btnDanger: { background: 'rgba(239,68,68,0.10)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 },
   input: { background: '#ffffff', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 8, padding: '7px 12px', color: '#0f1420', fontSize: 12.5, width: '100%', boxSizing: 'border-box', outline: 'none' },

@@ -20,13 +20,11 @@ const label = 'block text-[12px] font-semibold text-[var(--text-secondary)] mb-1
 
 function Stat({ icon: Icon, name, value }) {
   return (
-    <div className="rounded-2xl bg-[var(--glass-hover)] border border-[var(--glass-border)] px-4 py-3 flex items-center gap-3">
-      <span className="w-9 h-9 rounded-xl bg-[hsl(var(--blue-700))]/20 flex items-center justify-center shrink-0">
-        <Icon className="w-4.5 h-4.5 text-blue-300" />
-      </span>
+    <div className="card-surface px-4 py-3 flex items-center gap-3">
+      <span className="icon-tile"><Icon className="w-5 h-5" aria-hidden="true" /></span>
       <span>
-        <span className="block text-[11px] uppercase tracking-[0.12em] text-[var(--text-secondary)] font-bold">{name}</span>
-        <span className="block text-[20px] font-bold text-[var(--text-primary)] tabular-nums leading-tight">{value ?? '…'}</span>
+        <span className="block text-[12px] font-medium text-muted-foreground">{name}</span>
+        <span className="block text-[20px] font-display font-bold text-[hsl(var(--blue-900))] tabular-nums leading-tight">{value ?? '…'}</span>
       </span>
     </div>
   );
@@ -189,7 +187,7 @@ export default function NewsletterCompose() {
               <span className="text-[13px] text-amber-100">
                 {scheduledISO ? `Schedule “${subject.trim()}” for ${audience} confirmed subscribers?` : `Send “${subject.trim()}” to ${audience} confirmed subscribers now?`} This can&apos;t be undone.
               </span>
-              <button className={`${btn} bg-red-600 hover:bg-red-700 text-[var(--text-primary)] h-9`} disabled={!!busy} data-testid="newsletter-confirm-send"
+              <button className={`${btn} bg-red-600 hover:bg-red-700 text-white h-9`} disabled={!!busy} data-testid="newsletter-confirm-send"
                 onClick={() => act('send', async () => {
                   await apiClient(token).post('/newsletter/admin/campaigns', { ...payload, expected_recipients: audience, scheduled_at: scheduledISO });
                   toast({ title: scheduledISO ? 'Scheduled' : 'Sending started', description: scheduledISO ? 'It will go out automatically.' : 'Progress shows below.' });

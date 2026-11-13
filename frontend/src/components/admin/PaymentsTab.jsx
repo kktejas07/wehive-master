@@ -70,7 +70,7 @@ function RefundDialog({ payment, token, onClose, onDone }) {
         <div className="flex gap-2 pt-2">
           <button type="button" onClick={onClose} className="flex-1 h-10 rounded-xl bg-[var(--glass-hover)] hover:bg-[var(--glass-hover)] text-[var(--text-primary)] text-[13px] font-semibold">Cancel</button>
           <button type="submit" disabled={!valid || busy} data-testid="refund-submit"
-            className="flex-1 h-10 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-[var(--text-primary)] text-[13px] font-semibold inline-flex items-center justify-center gap-1.5">
+            className="flex-1 h-10 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-[13px] font-semibold inline-flex items-center justify-center gap-1.5">
             {busy && <Loader2 className="w-4 h-4 animate-spin" />} Refund {valid ? inr(n) : ''}
           </button>
         </div>

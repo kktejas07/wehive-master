@@ -105,7 +105,7 @@ function PreviewModal({ item, onClose, onRefresh }) {
             <button
               onClick={handleRegenerate}
               disabled={regenerating}
-              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[hsl(var(--blue-700))]/15 hover:bg-[hsl(var(--blue-700))]/25 text-blue-300 text-[12px] font-bold transition disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[hsl(var(--blue-50))] hover:bg-[hsl(var(--blue-700))]/25 text-blue-300 text-[12px] font-bold transition disabled:opacity-50"
             >
               {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
               {regenerating ? 'Generating...' : 'Regen via AI'}
@@ -318,7 +318,7 @@ export default function DestinationsTab() {
             <button
               onClick={handleSync}
               disabled={syncing}
-              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
             >
               {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
               {syncing ? 'Uploading...' : 'Upload All to R2'}
@@ -537,7 +537,7 @@ export default function DestinationsTab() {
             <button
               onClick={handleSeed}
               disabled={seeding}
-              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-[var(--text-primary)] font-bold text-[13px] transition"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] disabled:opacity-50 text-white font-bold text-[13px] transition"
             >
               {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               {seeding ? 'Seeding...' : 'Seed Manifest from Repo'}
