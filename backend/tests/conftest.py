@@ -41,9 +41,21 @@ def _inject_fake_modules():
     sys.modules["motor.motor_asyncio"].AsyncIOMotorClient = MagicMock(
         name="AsyncIOMotorClient"
     )
-    # pymongo.errors.DuplicateKeyError used by some route files
+    # pymongo top-level symbols used by route files
+    sys.modules["pymongo"].MongoClient = MagicMock(name="MongoClient")
+    sys.modules["pymongo"].UpdateOne = MagicMock(name="UpdateOne")
+    sys.modules["pymongo"].InsertOne = MagicMock(name="InsertOne")
+    sys.modules["pymongo"].DeleteOne = MagicMock(name="DeleteOne")
+    sys.modules["pymongo"].ReplaceOne = MagicMock(name="ReplaceOne")
+    # pymongo.errors exception classes
     sys.modules["pymongo.errors"].DuplicateKeyError = type(
         "DuplicateKeyError", (Exception,), {}
+    )
+    sys.modules["pymongo.errors"].BulkWriteError = type(
+        "BulkWriteError", (Exception,), {}
+    )
+    sys.modules["pymongo.errors"].OperationFailure = type(
+        "OperationFailure", (Exception,), {}
     )
 
     # ------------------------------------------------------------------ db
