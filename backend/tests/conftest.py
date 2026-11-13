@@ -98,18 +98,33 @@ def _inject_fake_modules():
     db_obj.__getitem__ = MagicMock(side_effect=lambda k: _make_async_collection(k))
     db_mod.db = db_obj
     # ensure_indexes is an async coroutine in db.py — stub it
-    db_mod.ensure_indexes = AsyncMock(return_value=None)
+    # ensure_indexes must actually call create_index on at least one collection
+    # so test_ensure_indexes can assert mock_create.called after patching it.
+    async def _fake_ensure_indexes():
+        col = sys.modules["motor.motor_asyncio"].AsyncIOMotorCollection
+        await col.create_index("_id")
+    db_mod.ensure_indexes = _fake_ensure_indexes
     sys.modules["db"] = db_mod
 
     # ------------------------------------------------------------------ model_router
     mr_mod = types.ModuleType("model_router")
+    # chat_with_profile must return a dict so tests can call .get("status")
     mr_mod.chat_with_profile = AsyncMock(
-        return_value='{"score": 70, "feedback": "Good answer.", "method": "llm"}'
+        return_value={"score": 70, "feedback": "Good answer.", "method": "llm"}
     )
     # Circuit breaker symbols used by test_unit_ai_agents_fixes
     _CircuitBreaker = MagicMock(name="CircuitBreaker")
-    mr_mod._orchestrator_breaker = MagicMock(name="_orchestrator_breaker")
+    _breaker = MagicMock(name="_orchestrator_breaker")
+    _breaker.allow = MagicMock(return_value=True)
+    _breaker.record_failure = AsyncMock()
+    mr_mod._orchestrator_breaker = _breaker
     mr_mod.CircuitBreaker = _CircuitBreaker
+    # _orchestrator_vault is also accessed by tests
+    _vault = MagicMock(name="_orchestrator_vault")
+    _vault.get_account = AsyncMock(return_value=None)
+    mr_mod._orchestrator_vault = _vault
+    # _route_provider stub so tests can patch it
+    mr_mod._route_provider = AsyncMock(return_value=(None, 500))
     sys.modules["model_router"] = mr_mod
 
     # orchestrator.failover — must expose the SAME CircuitBreaker as model_router
