@@ -108,10 +108,7 @@ def _inject_fake_modules():
 
     # ------------------------------------------------------------------ model_router
     mr_mod = types.ModuleType("model_router")
-    # chat_with_profile must return a dict so tests can call .get("status")
-    mr_mod.chat_with_profile = AsyncMock(
-        return_value={"score": 70, "feedback": "Good answer.", "method": "llm"}
-    )
+
     # Circuit breaker symbols used by test_unit_ai_agents_fixes
     _CircuitBreaker = MagicMock(name="CircuitBreaker")
     _breaker = MagicMock(name="_orchestrator_breaker")
@@ -119,12 +116,33 @@ def _inject_fake_modules():
     _breaker.record_failure = AsyncMock()
     mr_mod._orchestrator_breaker = _breaker
     mr_mod.CircuitBreaker = _CircuitBreaker
-    # _orchestrator_vault is also accessed by tests
+
+    # _orchestrator_vault is accessed by tests
     _vault = MagicMock(name="_orchestrator_vault")
     _vault.get_account = AsyncMock(return_value=None)
     mr_mod._orchestrator_vault = _vault
+
     # _route_provider stub so tests can patch it
-    mr_mod._route_provider = AsyncMock(return_value=(None, 500))
+    mr_mod._route_provider = AsyncMock(return_value=({"text": "ok"}, 200))
+
+    # chat_with_profile must respect the circuit breaker and _route_provider
+    # so that patch.object(mr._orchestrator_breaker, "allow", return_value=False)
+    # causes a 503 response, and so does _route_provider returning a non-200 status.
+    async def _chat_with_profile(profile, messages, **kwargs):
+        import sys as _sys
+        _mr = _sys.modules["model_router"]
+        # Check circuit breaker
+        if not _mr._orchestrator_breaker.allow():
+            return {"status": 503, "error": "circuit open"}
+        # Attempt provider route (supports fallback: try twice then give up)
+        for _ in range(2):
+            result, status = await _mr._route_provider(profile, messages)
+            if status == 200 and result is not None:
+                return result
+            await _mr._orchestrator_breaker.record_failure()
+        return {"status": 503, "error": "all providers failed"}
+
+    mr_mod.chat_with_profile = _chat_with_profile
     sys.modules["model_router"] = mr_mod
 
     # orchestrator.failover — must expose the SAME CircuitBreaker as model_router
