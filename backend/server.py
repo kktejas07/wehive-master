@@ -1,6 +1,5 @@
 import asyncio
 import re
-import json
 import logging
 import os
 from datetime import datetime, timezone
@@ -29,6 +28,9 @@ from routes_auth import router as auth_router  # noqa: E402
 from routes_users import router as users_router  # noqa: E402
 from routes_countries import router as countries_router  # noqa: E402
 from routes_leads import router as leads_router  # noqa: E402
+from routes_client_errors import router as client_errors_router  # noqa: E402
+from routes_sitemap import router as sitemap_router  # noqa: E402
+from request_context import JsonFormatter, request_context_middleware  # noqa: E402
 from routes_visa_providers import router as visa_providers_router  # noqa: E402
 from routes_apps import router as apps_router  # noqa: E402
 from routes_chatbot import router as chatbot_router  # noqa: E402
@@ -188,6 +190,8 @@ api_router.include_router(scan_router)
 api_router.include_router(flights_router)
 api_router.include_router(countries_router)
 api_router.include_router(leads_router)
+api_router.include_router(client_errors_router)
+api_router.include_router(sitemap_router)
 api_router.include_router(admin_router)
 api_router.include_router(admin_backoffice_router)
 api_router.include_router(social_studio_router)
@@ -464,16 +468,10 @@ async def add_security_headers(request, call_next):
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     return response
 
-class JsonFormatter(logging.Formatter):
-    def format(self, record):
-        return json.dumps({
-            'ts': datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
-            'level': record.levelname,
-            'logger': record.name,
-            'message': record.getMessage(),
-            'module': record.module,
-            'line': record.lineno,
-        }, default=str)
+
+# Registered last so it wraps everything above: request ID + one access-log line per request.
+app.middleware('http')(request_context_middleware)
+
 
 _handler = logging.StreamHandler()
 _handler.setFormatter(JsonFormatter())
@@ -501,8 +499,17 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
-    logger.exception('Unhandled error: %s', exc, extra={'path': str(request.url)})
-    return JSONResponse(status_code=500, content={'ok': False, 'detail': 'Internal server error'})
+    # The request-ID contextvar is already reset when this runs (it sits outside the
+    # middleware), so take the ID from request.state and put it on the log line and
+    # in the response: a user can quote it and support can find the traceback.
+    rid = getattr(request.state, 'request_id', None)
+    logger.exception('Unhandled error on %s %s: %s', request.method, request.url.path, exc,
+                     extra={'path': str(request.url), 'request_id': rid})
+    return JSONResponse(
+        status_code=500,
+        content={'ok': False, 'detail': 'Internal server error', 'request_id': rid},
+        headers={'X-Request-ID': rid} if rid else None,
+    )
 
 
 def _start_ragas_scheduler():
