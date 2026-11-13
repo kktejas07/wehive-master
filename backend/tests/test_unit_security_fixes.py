@@ -31,6 +31,11 @@ class TestFirebaseSync:
         monkeypatch.setattr(firebase_utils, '_get_firebase_creds', AsyncMock(return_value=('proj', '{}')))
         self.users = MagicMock(find_one=AsyncMock(return_value=None), insert_one=AsyncMock())
         monkeypatch.setattr(routes_auth, 'users', self.users)
+        # Also mock db['email_verifications'] so _backend_email_verified never
+        # hits real Motor (which would use a closed event loop in test isolation).
+        fake_col = MagicMock(find_one=AsyncMock(return_value=None))
+        import routes_auth as _ra
+        monkeypatch.setattr(_ra, 'db', {'email_verifications': fake_col}, raising=False)
         self.monkeypatch = monkeypatch
 
     def _token(self, **claims):
