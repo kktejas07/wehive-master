@@ -1,18 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Share2, Gift, Users, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
 import { adminClient } from '../../lib/admin';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import { Panel } from './AdminShell';
 
 export default function ReferralsTab() {
+  const { token } = useAdminAuth();
   const [stats, setStats] = useState(null);
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
 
   const load = useCallback(async () => {
+    if (!token) return;
     setLoading(true); setErr('');
     try {
-      const r = await adminClient().get('/referrals/stats');
+      const r = await adminClient(token).get('/referrals/stats');
       const data = r.data;
       setStats(data);
       if (Array.isArray(data?.codes)) setCodes(data.codes);
@@ -20,7 +23,7 @@ export default function ReferralsTab() {
     } catch (ex) {
       setErr(ex?.response?.data?.detail || 'Failed to load referral data');
     } finally { setLoading(false); }
-  }, []);
+  }, [token]);
 
   useEffect(() => { load(); }, [load]);
 

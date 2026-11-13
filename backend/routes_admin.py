@@ -29,7 +29,7 @@ from admin_auth import get_current_admin_flex, get_super_admin, require_role
 from config import ADMIN_EMAILS, DESTINATION_IMAGE_BASE_URLS, IS_DEV
 from constants import AppStatus, BILLABLE_STATUSES, STATUS_LABELS
 from audit import record as audit_record, recent as audit_recent
-from db import db, users, applications, holiday_plans, leads, otps, universities_col
+from db import db, users, applications, holiday_plans, leads, otps, universities_col, referrals_col
 from serializers import public_user, serialize_event
 from pricing import load_pricing, invalidate_pricing_cache
 from seed_universities import seed as seed_universities
@@ -1698,30 +1698,41 @@ async def admin_re_seed_universities(admin=Depends(get_current_admin_flex)):
         raise HTTPException(500, f'Re-seed failed: {e}')
 
 
-# ---------- Interview Q&A CRUD ----------
+# ---------------------------------------------------------------------------
+# Referral stats (admin-scoped)
+# ---------------------------------------------------------------------------
 
-@router.get('/interview-qa')
-async def list_interview_qa(country: str = None, _admin=Depends(get_current_admin)):
-    q = {'country': country} if country else {}
-    docs = await db.interview_qa.find(q).to_list(200)
-    return [{**d, '_id': str(d['_id'])} for d in docs]
+@router.get('/referrals/stats')
+async def admin_referral_stats(admin=Depends(get_current_admin_flex)):
+    """Aggregate referral code and claim stats for the admin dashboard."""
+    total_codes = await referrals_col.count_documents({})
+    total_claims = await referrals_col.count_documents({'claim_count': {'$gt': 0}})
 
+    pipeline = [
+        {'$group': {'_id': None,
+                    'total_claims': {'$sum': '$claim_count'},
+                    'total_rewards': {'$sum': {'$ifNull': ['$reward_count', 0]}}}},
+    ]
+    agg = await referrals_col.aggregate(pipeline).to_list(1)
+    totals = agg[0] if agg else {}
 
-@router.post('/interview-qa')
-async def create_interview_qa(body: dict, _admin=Depends(get_current_admin)):
-    r = await db.interview_qa.insert_one(body)
-    return {'id': str(r.inserted_id)}
+    # Top 20 codes by claim count
+    cursor = referrals_col.find(
+        {}, {'code': 1, 'user_email': 1, 'owner_email': 1,
+             'claim_count': 1, 'reward_count': 1, 'created_at': 1}
+    ).sort('claim_count', -1).limit(20)
+    top_codes = []
+    async for doc in cursor:
+        doc['_id'] = str(doc['_id'])
+        top_codes.append(doc)
 
+    total_code_claims = totals.get('total_claims', 0)
+    conversion_rate = (total_claims / total_codes) if total_codes else 0
 
-@router.patch('/interview-qa/{qa_id}')
-async def update_interview_qa(qa_id: str, body: dict, _admin=Depends(get_current_admin)):
-    from bson import ObjectId
-    await db.interview_qa.update_one({'_id': ObjectId(qa_id)}, {'$set': body})
-    return {'ok': True}
-
-
-@router.delete('/interview-qa/{qa_id}')
-async def delete_interview_qa(qa_id: str, _admin=Depends(get_current_admin)):
-    from bson import ObjectId
-    await db.interview_qa.delete_one({'_id': ObjectId(qa_id)})
-    return {'ok': True}
+    return {
+        'total_codes': total_codes,
+        'total_claims': total_code_claims,
+        'total_rewards': totals.get('total_rewards', 0),
+        'conversion_rate': conversion_rate,
+        'top_codes': top_codes,
+    }
