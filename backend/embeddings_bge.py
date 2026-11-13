@@ -83,30 +83,58 @@ def _tokenize(text: str) -> list[str]:
     return re.findall(r"\w+", text.lower())
 
 
-def _sparse_vec(text: str) -> dict[str, float]:
-    """Return token-string → tf score map (for FlagEmbedding mock compatibility)."""
+def _token_to_idx(token: str) -> int:
+    """Hash a token string to a deterministic int index in [0, 65535]."""
+    return int(hashlib.md5(token.encode()).hexdigest()[:4], 16)
+
+
+def _sparse_vec(text: str) -> dict[int, float]:
+    """Return token-idx → tf score map with int keys in [0, 65535].
+
+    When the BGE model is active it queries the model for lexical weights;
+    keys from the model (which may be int or string) are coerced to int.
+    In ollama/fallback mode returns a BM25-style TF map with hashed int keys.
+    """
     tokens = _tokenize(text)
     if not tokens:
         return {}
-    # When BGE is active it returns lexical weights keyed by token-string; we
-    # reproduce the same shape here so tests can assert dict equality.
+    # When BGE is active use the model's own lexical weights
     if _active == "bge-m3" and _model is not None:
         try:
             result = _model.encode([text], return_sparse=True)
-            return result["lexical_weights"][0]
+            raw = result["lexical_weights"][0]
+            # Coerce keys to int regardless of whether model returns int or str
+            return {int(k): float(v) for k, v in raw.items()}
         except Exception:
             pass
-    # Fallback: BM25-style tf map keyed by token string
-    tf: dict[str, int] = {}
+    # Ollama / fallback: BM25-style TF map with hashed int keys
+    tf: dict[int, int] = {}
     for t in tokens:
-        tf[t] = tf.get(t, 0) + 1
+        idx = _token_to_idx(t)
+        tf[idx] = tf.get(idx, 0) + 1
     total = len(tokens)
-    return {tok: count / total for tok, count in tf.items()}
+    return {idx: count / total for idx, count in tf.items()}
 
 
-def sparse_vectors(texts: list[str]) -> list[dict[str, float]]:
+def sparse_vectors(texts: list[str]) -> list[dict]:
+    """Return sparse vectors for a batch of texts.
+
+    In bge-m3 mode: returns lexical_weights from the model with string keys
+    (Qdrant payload format).  In ollama/fallback mode returns empty dicts —
+    sparse search is unavailable without the BGE model's lexical weights.
+    """
     warm_up()
-    return [_sparse_vec(t) for t in texts]
+    if _active != "bge-m3" or _model is None:
+        return [{} for _ in texts]
+    # Use the model's encode directly for sparse; convert keys to strings for Qdrant
+    results = []
+    for text in texts:
+        try:
+            raw = _model.encode([text], return_sparse=True)["lexical_weights"][0]
+            results.append({str(k): float(v) for k, v in raw.items()})
+        except Exception:
+            results.append(_sparse_vec(text))
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -129,7 +157,7 @@ async def embed_query(text: str, model: Optional[str] = None) -> list[float]:
     backend = current_backend()
     if backend == "bge-m3" and _model is not None:
         try:
-            result = _model.encode([text], max_length=512)
+            result = _model.encode_queries([text], max_length=512)
             return result["dense_vecs"][0].tolist()
         except Exception as exc:
             logger.warning("BGE query encode failed (%s), falling back to ollama", exc)
