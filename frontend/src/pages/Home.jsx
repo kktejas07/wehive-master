@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Hero from '../components/Hero';
@@ -14,7 +14,6 @@ import LiveTickerMarquee from '../components/LiveTickerMarquee';
 import { DEFAULT_FILTERS } from '../components/FilterBar';
 import SchengenCarousel from '../components/SchengenCarousel';
 import EnquirySection from '../components/EnquirySection';
-import { updateSEO } from '../lib/seo';
 import SeasonalBanners from '../components/SeasonalBanners';
 import ApplicationBuilder from '../components/ApplicationBuilder';
 import ExamPrepSection from '../components/ExamPrepSection';
@@ -22,14 +21,6 @@ import FeaturedDestinations from '../components/FeaturedDestinations';
 
 export default function Home() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-
-  useEffect(() => {
-    // Screen views are tracked centrally in App.js (trackScreen) — don't double-count here.
-    updateSEO({
-      title: 'We Hive — One Visa to Access 29 Schengen Countries | Study Abroad & Visas',
-      description: 'Explore 29 Schengen countries on one visa. Compare top European universities, discover AI visa services, and step into wonder with We Hive.',
-    });
-  }, []);
 
   return (
     <div className="bg-white">

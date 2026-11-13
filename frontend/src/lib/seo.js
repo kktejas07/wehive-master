@@ -3,6 +3,11 @@
  * Supports Title, Meta Description, Open Graph, Twitter Cards, Canonical URLs, and JSON-LD Structured Data.
  */
 
+import { COUNTRIES, FAQS } from '../data/mock';
+import ROUTES from '../data/seo-routes.json';
+import { getPageTitle } from './pageTitles';
+import { routeSeo } from './seoCore';
+
 const SITE_URL = (process.env.REACT_APP_SITE_URL || 'https://wehive.co.in').replace(/\/$/, '');
 
 export const DEFAULT_SEO = {
@@ -45,6 +50,7 @@ export function updateSEO(customSEO = {}) {
   if (seo.keywords) {
     setMetaTag('meta[name="keywords"]', 'name', 'keywords', seo.keywords);
   }
+  setMetaTag('meta[name="robots"]', 'name', 'robots', seo.noindex ? 'noindex, nofollow' : 'index, follow');
 
   // 3. Open Graph Tags
   setMetaTag('meta[property="og:title"]', 'property', 'og:title', seo.title);
@@ -70,18 +76,19 @@ export function updateSEO(customSEO = {}) {
   canonicalEl.setAttribute('href', seo.canonicalUrl || window.location.href);
 
   // 6. JSON-LD Structured Data
-  injectStructuredData({
+  injectStructuredData(seo.jsonLd || {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: seo.siteName,
     url: seo.ogUrl || window.location.href,
     description: seo.description,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${SITE_URL}/search?q={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
   });
+}
+
+/** Set title, description, canonical, robots, social tags and JSON-LD for a route. Called on every navigation. */
+export function applyRouteSeo(pathname) {
+  const seo = routeSeo(pathname, { routes: ROUTES, countries: COUNTRIES, faqs: FAQS, getTitle: getPageTitle, siteUrl: SITE_URL });
+  updateSEO({ ...seo, ogUrl: seo.canonicalUrl });
 }
 
 /**

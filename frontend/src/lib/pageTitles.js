@@ -32,6 +32,8 @@ const EXACT_TITLES = {
   '/blog': `Blog | ${SITE_NAME}`,
   '/news': `News | ${SITE_NAME}`,
   '/hive': `The Hive | ${SITE_NAME}`,
+  '/community': `Community | ${SITE_NAME}`,
+  '/offers': `Offers | ${SITE_NAME}`,
   '/us-visa-slots': `US Visa Slot Tracker | ${SITE_NAME}`,
   '/agent-portal/login': `Agent Portal Login | ${SITE_NAME}`,
   '/agent/login': `Agent Portal Login | ${SITE_NAME}`,

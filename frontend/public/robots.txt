@@ -1,3 +1,13 @@
+# All crawlers, including AI assistants (GPTBot, ClaudeBot, PerplexityBot, Google-Extended), are welcome.
+# See /llms.txt for a plain-text map of the site.
 User-agent: *
 Allow: /
+Allow: /api/sitemap.xml
+Disallow: /admin
+Disallow: /account
+Disallow: /agent/
+Disallow: /api/
+
+# Fixed pages (written at build time) and database-driven pages (countries, universities).
 Sitemap: https://wehive.co.in/sitemap.xml
+Sitemap: https://wehive.co.in/api/sitemap.xml
