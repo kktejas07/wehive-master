@@ -14,6 +14,7 @@ Endpoints:
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import datetime
 from typing import Optional
@@ -133,7 +134,7 @@ async def scrape_one(target_id: str):
             })
             ingested = True
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'scrape_one', exc_info=True)
 
     run_id = uuid.uuid4().hex[:16]
     await db["scrape_runs"].insert_one({

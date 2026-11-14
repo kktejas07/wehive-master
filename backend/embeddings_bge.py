@@ -106,7 +106,7 @@ def _sparse_vec(text: str) -> dict[int, float]:
             # Coerce keys to int regardless of whether model returns int or str
             return {int(k): float(v) for k, v in raw.items()}
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, '_sparse_vec', exc_info=True)
     # Ollama / fallback: BM25-style TF map with hashed int keys
     tf: dict[int, int] = {}
     for t in tokens:

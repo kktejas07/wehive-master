@@ -4,13 +4,26 @@ import { Send, Loader2, MessageCircle, Calendar, Clock, Video, CheckCircle2, X }
 import { API } from '../context/AuthContext';
 import { Button } from './ui/button';
 
-const TIME_SLOTS = [
-  { day: 'Mon, Jun 15', slots: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'] },
-  { day: 'Tue, Jun 16', slots: ['10:00 AM', '1:00 PM', '3:00 PM', '5:00 PM'] },
-  { day: 'Wed, Jun 17', slots: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'] },
-  { day: 'Thu, Jun 18', slots: ['10:00 AM', '12:00 PM', '3:00 PM', '5:00 PM'] },
-  { day: 'Fri, Jun 19', slots: ['9:00 AM', '11:00 AM', '2:00 PM'] },
-];
+const SLOTS_BY_WEEKDAY = {
+  1: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'],
+  2: ['10:00 AM', '1:00 PM', '3:00 PM', '5:00 PM'],
+  3: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'],
+  4: ['10:00 AM', '12:00 PM', '3:00 PM', '5:00 PM'],
+  5: ['9:00 AM', '11:00 AM', '2:00 PM'],
+  6: ['10:00 AM', '12:00 PM'],
+};
+
+/** The next five working days (Mon–Sat) after today, as preferred-time choices. */
+function upcomingSlots(from = new Date()) {
+  const days = [];
+  const d = new Date(from);
+  while (days.length < 5) {
+    d.setDate(d.getDate() + 1);
+    const slots = SLOTS_BY_WEEKDAY[d.getDay()];
+    if (slots) days.push({ day: d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }), slots });
+  }
+  return days;
+}
 
 export default function ConsultantChat({ applicationId, token }) {
   const [messages, setMessages] = useState([]);
@@ -22,6 +35,7 @@ export default function ConsultantChat({ applicationId, token }) {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const scroller = useRef(null);
+  const [timeSlots] = useState(upcomingSlots);
 
   const scrollDown = () => {
     setTimeout(() => {
@@ -46,16 +60,33 @@ export default function ConsultantChat({ applicationId, token }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applicationId, token]);
 
+  const post = (body) => axios.post(
+    `${API}/users/me/applications/${applicationId}/messages`,
+    { text: body },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
   const onSend = async () => {
     if (!text.trim()) return;
     setSending(true);
     try {
-      await axios.post(
-        `${API}/users/me/applications/${applicationId}/messages`,
-        { text: text.trim() },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await post(text.trim());
       setText('');
+      await refresh();
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // There is no calendar integration: a call request is sent to the consultant as a
+  // message, and they confirm the time. (This used to show "Call booked" and "calendar
+  // invite sent" without telling anyone.)
+  const onRequestCall = async () => {
+    if (!selectedDay || !selectedSlot) return;
+    setSending(true);
+    try {
+      await post(`Call request: I would like a video call on ${selectedDay} at ${selectedSlot} IST.`);
+      setBookingConfirmed(true);
       await refresh();
     } finally {
       setSending(false);
@@ -93,12 +124,12 @@ export default function ConsultantChat({ applicationId, token }) {
               <div className="inline-flex h-12 w-12 rounded-full bg-emerald-100 items-center justify-center mb-3">
                 <CheckCircle2 className="w-6 h-6 text-emerald-600" />
               </div>
-              <h3 className="font-bold text-[15px] text-[hsl(var(--blue-900))]">Call booked!</h3>
+              <h3 className="font-bold text-[15px] text-[hsl(var(--blue-900))]">Call requested</h3>
               <p className="text-[13px] text-muted-foreground mt-1">
                 {selectedDay} at {selectedSlot}
               </p>
               <p className="text-[12px] text-muted-foreground mt-1">
-                A calendar invite has been sent. We&apos;ll send a Google Meet link 15 min before.
+                Your consultant will confirm the time here in the chat.
               </p>
               <button
                 onClick={() => { setShowBooking(false); setBookingConfirmed(false); }}
@@ -111,7 +142,7 @@ export default function ConsultantChat({ applicationId, token }) {
             <>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Book a 1:1 video call</div>
+                  <div className="text-[13px] font-bold text-[hsl(var(--blue-900))]">Request a 1:1 video call</div>
                   <div className="text-[12px] text-muted-foreground">Free for application holders</div>
                 </div>
                 <button onClick={() => setShowBooking(false)} aria-label="Close booking" className="p-1 hover:bg-black/5 rounded-full">
@@ -119,7 +150,7 @@ export default function ConsultantChat({ applicationId, token }) {
                 </button>
               </div>
               <div className="space-y-2 max-h-[240px] overflow-y-auto">
-                {TIME_SLOTS.map(day => (
+                {timeSlots.map(day => (
                   <div key={day.day}>
                     <div className="text-[12px] font-bold text-muted-foreground mb-1.5 flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5" /> {day.day}
@@ -146,11 +177,11 @@ export default function ConsultantChat({ applicationId, token }) {
                 ))}
               </div>
               <Button
-                onClick={() => { if (selectedDay && selectedSlot) setBookingConfirmed(true); }}
-                disabled={!selectedDay || !selectedSlot}
+                onClick={onRequestCall}
+                disabled={!selectedDay || !selectedSlot || sending}
                 className="mt-3 w-full h-10 rounded-xl btn-accent text-white font-bold text-[13px]"
               >
-                <Video className="w-4 h-4 mr-1.5" /> Confirm booking
+                <Video className="w-4 h-4 mr-1.5" /> Request this time
               </Button>
             </>
           )}

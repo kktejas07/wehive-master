@@ -1,4 +1,5 @@
 """Application document, timeline, messaging + PDF receipt routes."""
+import logging
 import os
 import io
 import re
@@ -246,7 +247,7 @@ async def upload_document(
                 mime=mime,
             ))
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'upload_document', exc_info=True)
 
     return _serialize(doc)
 
@@ -263,7 +264,7 @@ async def delete_document(application_id: str, doc_id: str, user=Depends(get_cur
         try:
             Path(doc['storage_path']).unlink(missing_ok=True)
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'delete_document', exc_info=True)
     await applications.update_one(
         {'_id': application_id},
         {'$pull': {'documents': {'_id': doc_id}}},
@@ -274,7 +275,7 @@ async def delete_document(application_id: str, doc_id: str, user=Depends(get_cur
         from qdrant_store import delete_document as qdrant_delete_doc
         _aio.ensure_future(qdrant_delete_doc("wehive_user_docs", doc_id))
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'delete_document', exc_info=True)
     return {'ok': True}
 
 

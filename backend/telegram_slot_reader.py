@@ -123,7 +123,7 @@ async def parse_slot_message(text: str) -> Optional[dict]:
         import json
         return json.loads(content)
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'parse_slot_message', exc_info=True)
 
     dates = _extract_dates(text)
     consulate = _detect_consulate(text)

@@ -296,7 +296,7 @@ async def _llm_call(
              "provider_id": provider_id, "model": model},
         )
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_llm_call', exc_info=True)
 
     reply_text = ""
     reply_info: dict = {}
@@ -342,7 +342,7 @@ async def _llm_call(
                 metadata={"user_id": user_id},
             )
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_llm_call', exc_info=True)
 
     return reply_text, reply_info
 
@@ -368,7 +368,7 @@ async def _retrieve_rag_context(
             {"query": query[:300], "collections": collections, "k": k},
         )
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_retrieve_rag_context', exc_info=True)
 
     # ── Qdrant hybrid path ──────────────────────────────────────────────────
     try:
@@ -398,7 +398,7 @@ async def _retrieve_rag_context(
                     try:
                         await obs.end_span(span_id, {"chunks": len(snippets), "backend": "qdrant"})
                     except Exception:
-                        pass
+                        logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_retrieve_rag_context', exc_info=True)
                 return "\n\n".join(snippets)
     except Exception as e:
         logger.debug("Qdrant retrieval skipped, falling back to ChromaDB: %s", e)
@@ -414,14 +414,14 @@ async def _retrieve_rag_context(
             try:
                 await obs.end_span(span_id, {}, error=str(e))
             except Exception:
-                pass
+                logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_retrieve_rag_context', exc_info=True)
         return ""
     if not vec:
         if span_id:
             try:
                 await obs.end_span(span_id, {"chunks": 0}, error="empty embedding")
             except Exception:
-                pass
+                logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_retrieve_rag_context', exc_info=True)
         return ""
     snippets: list[str] = []
     for coll in collections:
@@ -439,7 +439,7 @@ async def _retrieve_rag_context(
         try:
             await obs.end_span(span_id, {"chunks": len(snippets), "collections_queried": len(collections)})
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_retrieve_rag_context', exc_info=True)
 
     return "\n\n".join(snippets)
 
@@ -484,7 +484,7 @@ async def run_agent(
             {"agent_id": spec.id, "user_id": user_id},
         )
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, 'run_agent', exc_info=True)
 
     try:
         store = get_store()
@@ -627,7 +627,7 @@ async def run_agent(
         try:
             await obs.end_trace(trace_id)
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, 'run_agent', exc_info=True)
 
     return run
 

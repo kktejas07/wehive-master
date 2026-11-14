@@ -195,6 +195,15 @@ async def claim_offer(body: ClaimIn, user=Depends(get_current_user)):
 # Admin routes
 # ---------------------------------------------------------------------------
 
+@admin_router.get('', response_model=list[OfferOut])
+async def admin_list_offers(admin=Depends(get_current_admin_flex)):
+    """Every offer, active or not. The admin Offers tab loads this; without it the tab got a 405."""
+    out = [_out(o) async for o in offers_col.find({}).sort('created_at', -1).limit(500)]
+    for o in out:
+        o['claim_count'] = await offer_claims_col.count_documents({'offer_id': o['id']})
+    return out
+
+
 @admin_router.post('', response_model=OfferOut)
 async def create_offer(body: OfferIn, admin=Depends(get_current_admin_flex)):
     doc = body.model_dump(exclude_none=True)

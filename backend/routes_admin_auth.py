@@ -85,7 +85,7 @@ async def _seed_one(email: str, pwd: str, name: str) -> None:
     try:
         await login_attempts.delete_one({'_id': f'admin:{email}'})
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, '_seed_one', exc_info=True)
     pwd_hash = hash_password(pwd)
     existing = await users.find_one({'email': email})
     if existing is None:

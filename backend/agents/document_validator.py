@@ -6,6 +6,7 @@ Validates:
 - Documents: required docs present for visa type, file validity
 """
 
+import logging
 from datetime import datetime, timedelta
 from typing import List, Optional
 
@@ -223,7 +224,12 @@ async def validate_document_background(
     filename: str,
     size: int,
 ) -> None:
-    """Background task: validate just-uploaded doc and set status to verified/needs_reupload."""
+    """Background task: basic file checks on a just-uploaded doc.
+
+    A pass only means the file is usable (not empty, not a thumbnail). It does not
+    mean the document is the right one or acceptable to an embassy, so the status
+    becomes "reviewing"; only a consultant marks a document "verified".
+    """
     import asyncio as _aio
     import uuid as _uuid
     from datetime import datetime
@@ -240,8 +246,8 @@ async def validate_document_background(
         if size < 20_000:
             issues.append("Image resolution too low — please use a scan at least 600 px on the short edge")
 
-    new_status = 'needs_reupload' if issues else 'verified'
-    note = issues[0] if issues else 'Auto-validated OK'
+    new_status = 'needs_reupload' if issues else 'reviewing'
+    note = issues[0] if issues else 'Passed automatic checks; awaiting consultant review'
     now = datetime.utcnow()
 
     await applications.update_one(
@@ -254,8 +260,8 @@ async def validate_document_background(
     )
 
     sev = 'warning' if issues else 'info'
-    title = 'Document needs re-upload' if issues else 'Document verified'
-    body = issues[0] if issues else f'{filename} passed our automatic checks.'
+    title = 'Document needs re-upload' if issues else 'Document received'
+    body = issues[0] if issues else f'{filename} passed our automatic checks. A consultant will review it next.'
     notif = {
         '_id': str(_uuid.uuid4()),
         'user_id': user_id,
@@ -273,4 +279,4 @@ async def validate_document_background(
         from notify import _publish
         _publish(user_id, notif)
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'validate_document_background', exc_info=True)

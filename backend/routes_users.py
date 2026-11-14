@@ -1,3 +1,4 @@
+import logging
 import asyncio as _asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
@@ -284,13 +285,13 @@ async def delete_account(user=Depends(get_current_user)):
         from student_memory import student_memory
         student_memory.forget(uid)
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'delete_account', exc_info=True)
 
     # Wipe Qdrant user vectors (best-effort, non-blocking)
     try:
         from qdrant_store import delete_by_user
         _asyncio.ensure_future(delete_by_user(uid))
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'delete_account', exc_info=True)
 
     return {'ok': True, 'message': 'Account and all personal data deleted.'}

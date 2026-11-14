@@ -48,6 +48,7 @@ test.describe('Visa Checker page', () => {
     await page.goto('/visa-checker');
     // Should have at minimum one select/dropdown or search input
     const inputs = page.locator('input, select');
+    await expect(inputs.first()).toBeVisible(); // the page is lazy-loaded: wait before counting
     const count = await inputs.count();
     expect(count).toBeGreaterThanOrEqual(1);
   });

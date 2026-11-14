@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bot, Send, Loader2, Zap } from 'lucide-react';
-import { adminClient } from '../../lib/admin';
+import { apiClient } from '../../lib/admin';
 import { Panel } from './AdminShell';
 
 const AGENTS = [
@@ -19,22 +19,22 @@ export default function AgenticTab() {
 
   async function fetchStatus() {
     try {
-      const data = await adminClient('/agentic/status');
+      // /agentic/* lives under /api, not /api/admin; and the client must be asked for a request.
+      const { data } = await apiClient().get('/agentic/status');
       setStatus(data);
     } catch { setStatus(null); }
   }
 
-  useState(() => { fetchStatus(); }, []);
+  useEffect(() => { fetchStatus(); }, []);
 
   async function handleRun(e) {
     e.preventDefault();
     if (!query.trim()) return;
     setLoading(true); setErr(''); setResult(null);
     try {
-      const data = await adminClient(agent.endpoint, {
-        method: 'POST',
-        body: JSON.stringify({ query: query.trim(), message: query.trim() }),
-      });
+      // Each agent names its input differently: Hive `question`, Stark `query`, Workflow `task`.
+      const q = query.trim();
+      const { data } = await apiClient().post(agent.endpoint, { question: q, query: q, task: q });
       setResult(data);
     } catch (ex) {
       setErr(ex?.response?.data?.detail || ex.message || 'Request failed');

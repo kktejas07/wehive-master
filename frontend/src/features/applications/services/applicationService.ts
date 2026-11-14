@@ -23,7 +23,7 @@ export async function updateApplicationStatus(
   status: string,
   note?: string
 ) {
-  const r = await adminClient(token).post(`/admin/applications/${appId}/status`, { status, note });
+  const r = await adminClient(token).post(`/applications/${appId}/status`, { status, note });
   return r.data;
 }
 

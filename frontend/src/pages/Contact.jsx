@@ -219,7 +219,7 @@ export default function Contact() {
                 </ul>
                 <div className="mt-5 pt-4 border-t border-[hsl(var(--border))]">
                   <p className="text-[13px] text-muted-foreground">Office hours</p>
-                  <p className="text-[15px] mt-0.5 text-[hsl(var(--blue-900))]">Mon – Sat, 9:00 AM – 7:00 PM IST</p>
+                  <p className="text-[15px] mt-0.5 text-[hsl(var(--blue-900))]">{BRAND.hours}</p>
                 </div>
               </div>
 

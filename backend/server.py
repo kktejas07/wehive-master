@@ -31,6 +31,8 @@ from routes_leads import router as leads_router  # noqa: E402
 from routes_client_errors import router as client_errors_router  # noqa: E402
 from routes_sitemap import router as sitemap_router  # noqa: E402
 from request_context import JsonFormatter, request_context_middleware  # noqa: E402
+from ai_marketplace import AIUnavailableError  # noqa: E402
+from alerting import install_alerting  # noqa: E402
 from routes_visa_providers import router as visa_providers_router  # noqa: E402
 from routes_apps import router as apps_router  # noqa: E402
 from routes_chatbot import router as chatbot_router  # noqa: E402
@@ -479,6 +481,7 @@ root = logging.getLogger()
 root.handlers.clear()
 root.addHandler(_handler)
 root.setLevel(logging.INFO)
+install_alerting(root)  # ERROR-level lines also go to ALERT_WEBHOOK_URL, when set
 logger = logging.getLogger('wehive')
 
 
@@ -495,6 +498,17 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     errors = [{k: v for k, v in err.items() if k != 'ctx'} for err in exc.errors()]
     logger.warning('Validation error: %s', errors, extra={'path': str(request.url)})
     return JSONResponse(status_code=422, content={'ok': False, 'detail': errors})
+
+
+@app.exception_handler(AIUnavailableError)
+async def ai_unavailable_handler(request: Request, exc: AIUnavailableError):
+    # No model could answer. That is an outage of a dependency, not a bug in the request:
+    # say so plainly (503) rather than "Internal server error" or a made-up document.
+    logger.warning('AI unavailable on %s %s: %s', request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=503,
+        content={'ok': False, 'detail': 'Our AI assistant is unavailable right now. Please try again in a little while.'},
+    )
 
 
 @app.exception_handler(Exception)
@@ -666,4 +680,4 @@ async def on_shutdown():
         from observability import flush
         await flush()  # flush() calls get_client().flush() which drains the queue
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, 'on_shutdown', exc_info=True)

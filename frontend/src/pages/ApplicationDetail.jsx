@@ -246,6 +246,7 @@ export default function ApplicationDetail() {
   const [loadError, setLoadError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [docs, setDocs] = useState([]);
+  const [mandatoryDocs, setMandatoryDocs] = useState(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
   const [itineraryOpen, setItineraryOpen] = useState(false);
@@ -274,6 +275,13 @@ export default function ApplicationDetail() {
     }
     setLoadError(false);
     setApp(r.data);
+    // The checklist's document types come from the backend report. Use the same list here:
+    // the country's display names ("Passport (6mo validity)") never match an uploaded doc_type,
+    // which left the counter at 0 and the Submit button disabled for good.
+    axios
+      .get(`${API}/users/me/applications/${id}/required-documents`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((rr) => setMandatoryDocs(rr.data?.mandatory || null))
+      .catch(() => {});
     try {
       const cr = await axios.get(`${API}/countries/${r.data.country_id}`);
       setCountry(cr.data);
@@ -291,7 +299,7 @@ export default function ApplicationDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
 
-  const requiredDocs = country?.categories?.[app?.visa_type]?.documents || [];
+  const requiredDocs = mandatoryDocs || country?.categories?.[app?.visa_type]?.documents || [];
   const readyCount = getReadyCount(docs, requiredDocs);
   const canSubmit = requiredDocs.length > 0 && readyCount === requiredDocs.length && app?.status === 'draft';
 
@@ -303,7 +311,7 @@ export default function ApplicationDetail() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast({ title: 'Submitted', description: 'Your file is on its way to the embassy.' });
+      toast({ title: 'Submitted', description: 'Your application is queued for review by a consultant.' });
       await refresh();
     } catch (e) {
       toast({ title: 'Could not submit', description: e?.response?.data?.detail || 'Try again' });

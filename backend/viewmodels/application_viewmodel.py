@@ -16,8 +16,12 @@ def _derive_alert(app: dict) -> Optional[str]:
 def _serialize_app(app: dict) -> dict:
     return {
         "id": str(app["_id"]),
+        "country_id": app.get("country_id", ""),
         "visa_type": app.get("visa_type", ""),
-        "destination": app.get("form_data", {}).get("destination", app.get("destination", "")),
+        "travel_date": app.get("travel_date"),
+        "applicants": app.get("applicants", 1),
+        "form_data": app.get("form_data") or {},
+        "destination": (app.get("form_data") or {}).get("destination", app.get("destination", "")),
         "status": app.get("status", "draft"),
         "created_at": app["created_at"].isoformat() if hasattr(app.get("created_at"), "isoformat") else str(app.get("created_at", "")),
         "updated_at": app["updated_at"].isoformat() if hasattr(app.get("updated_at"), "isoformat") else str(app.get("updated_at", "")),

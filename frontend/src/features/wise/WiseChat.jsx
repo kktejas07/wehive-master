@@ -20,7 +20,9 @@ const WELCOME_MESSAGE = {
 
 function renderMarkdown(text) {
   // Minimal inline markdown: bold, newlines
+  // Escape first: this string goes into innerHTML and model output is not trusted markup.
   return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n/g, '<br/>');
 }

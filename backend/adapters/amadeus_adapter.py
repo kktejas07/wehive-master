@@ -184,7 +184,7 @@ async def _cache_to_mongo(collection_name: str, key: str, data: dict, ttl_hours:
             upsert=True,
         )
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_cache_to_mongo', exc_info=True)
 
 
 async def _get_from_mongo(collection_name: str, key: str, ttl_hours: int = 6) -> Optional[dict]:
@@ -194,7 +194,7 @@ async def _get_from_mongo(collection_name: str, key: str, ttl_hours: int = 6) ->
         if doc and (datetime.utcnow() - doc["cached_at"]).total_seconds() < ttl_hours * 3600:
             return doc["data"]
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, '_get_from_mongo', exc_info=True)
     return None
 
 

@@ -157,3 +157,121 @@ def test_crash_reports_have_defaults_and_hard_size_limits():
 
 def test_crash_intake_is_rate_limited_per_ip():
     assert (ce._limiter.max_calls, ce._limiter.window, ce._limiter.by) == (20, 600, 'ip')
+
+
+# ── error alerts to a chat webhook ────────────────────────────────────────────
+
+import threading  # noqa: E402
+
+import alerting  # noqa: E402
+
+
+class _Clock:
+    def __init__(self):
+        self.now = 1000.0
+
+    def __call__(self):
+        return self.now
+
+
+def _alert_handler(cooldown=600, send=None):
+    sent = []
+    done = threading.Event()
+
+    def _send(url, text):
+        sent.append((url, text))
+        done.set()
+
+    clock = _Clock()
+    handler = alerting.WebhookAlertHandler('https://hooks.example/abc', cooldown=cooldown, send=send or _send, clock=clock, env='prod')
+    return handler, sent, done, clock
+
+
+def _record(msg='payment email failed for %s', args=('u1',), level=logging.ERROR, name='wehive.payments', **extra):
+    record = logging.LogRecord(name, level, __file__, 1, msg, args, None)
+    for k, v in extra.items():
+        setattr(record, k, v)
+    return record
+
+
+def _emit_and_wait(handler, done, record):
+    done.clear()
+    handler.emit(record)
+    return done.wait(2)
+
+
+def test_an_error_is_posted_with_environment_logger_message_and_request_id():
+    handler, sent, done, _ = _alert_handler()
+    assert _emit_and_wait(handler, done, _record(request_id='req-123'))
+    url, text = sent[0]
+    assert url == 'https://hooks.example/abc'
+    assert text == '[prod] ERROR wehive.payments: payment email failed for u1 (request req-123)'
+
+
+def test_only_errors_alert_and_alerting_never_alerts_about_itself():
+    handler, sent, done, _ = _alert_handler()
+    assert handler.level == logging.ERROR, 'warnings and info never reach the webhook'
+    handler.emit(_record(name='wehive.alerting', msg='could not deliver alert'))
+    assert not done.wait(0.2) and sent == []
+
+
+def test_repeats_are_held_back_then_reported_as_a_count():
+    handler, sent, done, clock = _alert_handler(cooldown=600)
+    assert _emit_and_wait(handler, done, _record(args=('u1',)))
+    for user in ('u2', 'u3', 'u4'):  # same log call, different arguments: still the same problem
+        handler.emit(_record(args=(user,)))
+    assert not done.wait(0.2) or len(sent) == 1
+    assert len(sent) == 1
+
+    assert _emit_and_wait(handler, done, _record(msg='a different failure', args=())), 'another problem alerts at once'
+    clock.now += 601
+    assert _emit_and_wait(handler, done, _record(args=('u5',)))
+    assert sent[-1][1].endswith('(+3 more of the same since the last alert)')
+
+
+def test_a_failing_webhook_never_breaks_the_code_that_logged(caplog):
+    failed = threading.Event()
+
+    def boom(url, text):
+        failed.set()
+        raise OSError('webhook down')
+
+    handler, _, _, _ = _alert_handler(send=boom)
+    with caplog.at_level(logging.WARNING, logger='wehive.alerting'):
+        handler.emit(_record())  # must not raise
+        assert failed.wait(2)
+        for _ in range(50):
+            if caplog.records:
+                break
+            threading.Event().wait(0.02)
+    assert 'could not deliver alert: webhook down' in caplog.text
+
+
+def test_discord_webhooks_get_the_field_name_they_expect(monkeypatch):
+    seen = []
+
+    class _Resp:
+        def close(self):
+            pass
+
+    def fake_urlopen(req, timeout):
+        seen.append((req.full_url, json.loads(req.data), req.get_method(), timeout))
+        return _Resp()
+
+    monkeypatch.setattr(alerting.urllib.request, 'urlopen', fake_urlopen)
+    alerting._post('https://hooks.slack.com/services/x', 'hello')
+    alerting._post('https://discord.com/api/webhooks/x', 'hello')
+    assert seen[0][1] == {'text': 'hello'} and seen[1][1] == {'content': 'hello'}
+    assert seen[0][2] == 'POST' and seen[0][3] == 5
+
+
+def test_alerting_is_off_without_a_url_and_refuses_plain_http(monkeypatch):
+    root = logging.Logger('test-root')
+    monkeypatch.delenv('ALERT_WEBHOOK_URL', raising=False)
+    assert alerting.install_alerting(root) is None and root.handlers == []
+    monkeypatch.setenv('ALERT_WEBHOOK_URL', 'http://insecure.example/hook')
+    assert alerting.install_alerting(root) is None and root.handlers == []
+    monkeypatch.setenv('ALERT_WEBHOOK_URL', 'https://hooks.example/abc')
+    monkeypatch.setenv('ALERT_COOLDOWN_SECONDS', '120')
+    handler = alerting.install_alerting(root)
+    assert root.handlers == [handler] and handler.cooldown == 120

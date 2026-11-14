@@ -115,7 +115,7 @@ class CircuitBreaker:
                 upsert=True,
             )
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, '_persist', exc_info=True)
 
     def allow(self, provider: str) -> bool:
         state = self._circuits[provider.lower()]

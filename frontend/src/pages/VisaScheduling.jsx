@@ -39,7 +39,8 @@ export default function VisaScheduling() {
   useEffect(() => {
     if (isAuthed) {
       axios.get(`${API}/users/me/applications`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => setApplications(r.data || []))
+        // The API returns { items, total, … }; treating it as an array crashed the page on .filter().
+        .then(r => setApplications(Array.isArray(r.data) ? r.data : (r.data?.items || [])))
         .catch(() => toast({ title: 'Could not load your applications', description: 'Please refresh and try again.' }));
     }
   }, [isAuthed, token, toast]);

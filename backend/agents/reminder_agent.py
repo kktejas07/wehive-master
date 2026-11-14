@@ -7,6 +7,7 @@ Checks:
 - Intake deadlines for student visa applications
 """
 
+import logging
 from datetime import datetime, timedelta
 from typing import List
 
@@ -94,5 +95,5 @@ async def dispatch_reminders(db) -> int:
             )
             sent += 1
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'dispatch_reminders', exc_info=True)
     return sent

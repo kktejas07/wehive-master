@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Plane, TrendingUp, Sparkles, Clock, Loader2, ExternalLink, RefreshCw } from 'lucide-react';
-import { API } from '../context/AuthContext';
+import { API, useAuth } from '../context/AuthContext';
 import { inr } from '../lib/utils';
 
 const FALLBACK = {
@@ -77,6 +77,7 @@ function FlightCard({ flight, index }) {
 }
 
 export default function FlightSuggestions({ country }) {
+  const { token } = useAuth();
   const [routes, setRoutes] = useState(null);
   const [origin, setOrigin] = useState('BLR');
   const [loading, setLoading] = useState(true);
@@ -89,6 +90,9 @@ export default function FlightSuggestions({ country }) {
     try {
       const r = await axios.get(`${API}/flights/suggest`, {
         params: { country: country.id, origin, ...(forceRefresh ? { refresh: true } : {}) },
+        // The endpoint needs a signed-in user; without the token every call was a 401 and
+        // even signed-in users only ever saw the built-in fallback routes.
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       setRoutes(r.data?.routes || []);
       setCached(!!r.data?.cached);

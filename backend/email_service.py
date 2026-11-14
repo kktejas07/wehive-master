@@ -6,6 +6,7 @@ subscription updates, and manual admin notifications.
 """
 
 import base64
+from html import escape  # names come from user input and go into HTML email
 import logging
 import smtplib
 import ssl
@@ -247,7 +248,7 @@ def build_newsletter_confirm_html(confirm_url: str, unsubscribe_url: str) -> str
 
 
 def build_email_verification_html(name: str, verify_url: str) -> str:
-    greeting = f'Hi{name},' if name else 'Hello,'
+    greeting = f'Hi {escape(name)},' if name else 'Hello,'
     content = f"""
     <tr><td style="padding:8px 36px;text-align:left">
       <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">{greeting}</p>
@@ -261,7 +262,7 @@ def build_email_verification_html(name: str, verify_url: str) -> str:
 
 
 def build_password_reset_html(name: str, reset_url: str, expiry_minutes: int = 30) -> str:
-    greeting = f'Hi{name},' if name else 'Hello,'
+    greeting = f'Hi {escape(name)},' if name else 'Hello,'
     content = f"""
     <tr><td style="padding:8px 36px;text-align:left">
       <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">{greeting}</p>
@@ -276,7 +277,7 @@ def build_password_reset_html(name: str, reset_url: str, expiry_minutes: int = 3
 def build_welcome_html(name: str) -> str:
     content = f"""
     <tr><td style="padding:8px 36px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {name}' if name else ''}, welcome aboard!</p>
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {escape(name)}' if name else ''}, welcome aboard!</p>
       <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6"><strong>Our Ambition. Our Guidance. No Frontiers</strong> — your all-in-one platform for visas, universities and immigration.</p>
       <ul style="font-size:14px;color:#475569;margin:0 0 8px 0;padding-left:20px;line-height:1.8">
         <li>Explore 190+ countries and check visa requirements</li>
@@ -294,7 +295,7 @@ def build_welcome_html(name: str) -> str:
 def build_payment_success_html(name: str, plan_name: str, amount: int, currency: str, invoice_id: str) -> str:
     content = f"""
     <tr><td style="padding:8px 36px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {name}' if name else ''}, payment confirmed!</p>
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {escape(name)}' if name else ''}, payment confirmed!</p>
       <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Thank you for upgrading to <strong>{plan_name}</strong>. Your receipt is below and the invoice PDF is attached.</p>
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin:16px 0">
         <table width="100%" cellpadding="0" cellspacing="0">
@@ -313,7 +314,7 @@ def build_payment_success_html(name: str, plan_name: str, amount: int, currency:
 def build_payment_failed_html(name: str, plan_name: str, amount: int, currency: str) -> str:
     content = f"""
     <tr><td style="padding:8px 36px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {name}' if name else ''}, your payment didn't go through.</p>
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {escape(name)}' if name else ''}, your payment didn't go through.</p>
       <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px;margin:16px 0">
         <p style="font-size:13px;color:#991b1b;margin:0 0 8px 0;font-weight:700">{plan_name} — {currency} {amount:,} · unsuccessful</p>
         <p style="font-size:13px;color:#991b1b;margin:0;line-height:1.6">Usually low balance, card limits or a network blip. You have not been charged.</p>
@@ -327,7 +328,7 @@ def build_payment_failed_html(name: str, plan_name: str, amount: int, currency: 
 def build_subscription_activated_html(name: str, plan_name: str, since: str) -> str:
     content = f"""
     <tr><td style="padding:8px 36px;text-align:left">
-      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {name}' if name else ''}, your <strong>{plan_name}</strong> is active 🎉</p>
+      <p style="font-size:15px;color:#1a1a2e;margin:0 0 12px 0;line-height:1.6">Hi{f' {escape(name)}' if name else ''}, your <strong>{plan_name}</strong> is active 🎉</p>
       <p style="font-size:14px;color:#475569;margin:0 0 12px 0;line-height:1.6">Effective {since}. Here's what's unlocked:</p>
       <ul style="font-size:14px;color:#475569;margin:0 0 8px 0;padding-left:20px;line-height:1.8">
         <li>Priority application processing</li>

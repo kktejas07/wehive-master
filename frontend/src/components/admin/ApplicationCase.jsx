@@ -429,7 +429,8 @@ export default function ApplicationCase() {
   const updateStatus = async (note) => {
     setBusy(true);
     try {
-      await adminClient(token).patch(`/applications/${id}`, { status: change.status, ...(note ? { note } : {}) });
+      // Same endpoint as the Status Control panel: PATCH only knows five of the statuses offered here.
+      await adminClient(token).post(`/applications/${id}/status`, { status: change.status, ...(note ? { note } : {}) });
       toast({ title: `Marked as ${label(change.status)}`, description: 'The applicant has been notified.' });
       setChange(null);
       await load();
@@ -448,11 +449,12 @@ export default function ApplicationCase() {
     }
     setStatusBusy(true);
     try {
-      await adminClient(token).post(`/admin/applications/${id}/status`, {
+      // adminClient's base URL already ends in /admin; the extra prefix made every update a 404.
+      await adminClient(token).post(`/applications/${id}/status`, {
         status: target,
         note: statusNote || undefined,
-        visa_validity_from: visaFrom || undefined,
-        visa_validity_until: visaUntil || undefined,
+        visa_valid_from: visaFrom || undefined,
+        visa_valid_to: visaUntil || undefined,
       });
       toast({ title: 'Status updated', description: 'The applicant has been notified.' });
       setStatusNote('');
