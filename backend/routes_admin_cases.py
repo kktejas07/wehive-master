@@ -307,13 +307,12 @@ async def admin_set_status(
         'biometrics_done': ('Biometrics Done', 'Your biometrics have been recorded.', 'info'),
         'interview_scheduled': ('Interview Scheduled', f'Your visa interview has been scheduled. {payload.note}'.strip(), 'info'),
     }
-    if payload.status in _notify_map:
-        title, body, sev = _notify_map[payload.status]
-        await _notify(app, f'status_{payload.status}', title, body, severity=sev)
-
+    # One notification per change: the status-specific wording when we have it.
+    title, body, _sev = _notify_map.get(payload.status, (None, None, None))
     from routes_chatbot import notify_status_change
     try:
-        await notify_status_change(app.get('user_id'), application_id, payload.status)
+        if app.get('user_id'):
+            await notify_status_change(app['user_id'], application_id, payload.status, title=title, body=body)
     except Exception:
         logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'admin_set_status', exc_info=True)
 

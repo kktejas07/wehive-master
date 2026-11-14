@@ -28,7 +28,7 @@ logger = logging.getLogger("wehive.local_llm")
 
 _FALLBACK_HIVE_PROMPT = (
     "You are Hive, a friendly visa & travel assistant for We Hive "
-    "Immigration Services (Ballari, India). Answer concisely (2-4 "
+    "Immigration Services (offices in Hyderabad, Ballari, Anantapur and East Windsor NJ). Answer concisely (2-4 "
     "sentences). Use ₹ for INR. Be warm and professional. If asked "
     "about your name, say 'Hive'. Encourage users to start "
     "applications via the dashboard."
@@ -130,7 +130,7 @@ def _semantic_classify(query: str) -> str:
 # ── Response Templates ───────────────────────────────────────────────────────
 
 GREETINGS = [
-    "Hi there! 👋 I'm Hive, your visa & travel assistant from We Hive Immigration Services in Ballari.",
+    "Hi there! 👋 I'm Hive, your visa & travel assistant from We Hive Immigration Services.",
     "What would you like to know about visas, travel destinations, or study abroad options today?",
     "You can ask me things like:\n"
     "• *Visa requirements for Canada*\n"
@@ -236,13 +236,12 @@ def _fees_response(country_data: dict) -> str:
         days = cat.get("processing_days", "N/A")
         lines.append(f"  • **{cat.get('name')}** — {inr} / {usd}, {days} days")
 
-    app_fee = country_data.get("application_fee")
-    if app_fee:
-        lines.append(f"\n📋 Flat application fee: {_fmt_money(app_fee)} per applicant")
-
-    embassy_fee = country_data.get("embassy_fee")
-    if embassy_fee:
-        lines.append(f"🏛 Embassy fee: ~{_fmt_money(embassy_fee)}")
+    lines.append("\nThe amounts above are embassy fees per applicant"
+                 + (f"; this embassy also charges a {_fmt_money(country_data['appointment_fee_inr'])} appointment fee."
+                    if country_data.get("requires_appointment") and country_data.get("appointment_fee_inr") else "."))
+    service_fee = country_data.get("application_fee")
+    if service_fee:
+        lines.append(f"🧾 We Hive service fee: from {_fmt_money(service_fee)} per applicant + 18% GST, due on delivery.")
 
     disclaimer = country_data.get("fee_disclaimer")
     if disclaimer:

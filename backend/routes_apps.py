@@ -308,7 +308,9 @@ def _build_doc_report(app: dict, user: dict) -> dict:
     mandatory = get_required_doc_types(visa_type, passport_country)
     uploaded_types = [d.get("doc_type") for d in app.get("documents", [])]
     missing_docs = [d for d in mandatory if d not in uploaded_types]
-    contact_missing = check_user_contact_fields(user)
+    # A phone or email given on the apply form (primary_applicant) counts as being on file.
+    primary = app.get("primary_applicant") or {}
+    contact_missing = [f for f in check_user_contact_fields(user) if not str(primary.get(f) or "").strip()]
     return {
         "mandatory": mandatory,
         "optional": OPTIONAL_DOC_TYPES,
@@ -340,13 +342,22 @@ async def submit_application(application_id: str, user=Depends(get_current_user)
             "missing": report["missing_docs"],
         })
 
+    # The embassy and appointment fees are paid before submitting (routes_application_fee).
+    from routes_application_fee import fee_due_inr, fee_paid, fee_quote
+    due = await fee_due_inr(app)
+    if due:
+        raise HTTPException(402, detail={'detail': 'Pay the application fee to submit', 'amount_inr': due})
+
     now = datetime.utcnow()
     events = app.get('timeline') or _initial_timeline()
     events.append({'id': str(uuid.uuid4()), 'status': 'submitted', 'label': 'Application submitted', 'at': now, 'note': 'Your application is queued for review.'})
-    await applications.update_one(
-        {'_id': application_id},
-        {'$set': {'status': 'submitted', 'timeline': events, 'updated_at': now}},
-    )
+    update = {'status': 'submitted', 'submitted_at': now, 'timeline': events, 'updated_at': now}
+    if not fee_paid(app):
+        # No online payment was possible (or nothing was due): record what the team still has to collect.
+        owed = (await fee_quote(app))['pay_now_inr']
+        if owed:
+            update['fee'] = {'status': 'due', 'amount_inr': owed}
+    await applications.update_one({'_id': application_id}, {'$set': update})
     await notify_status_change(user['_id'], application_id, 'submitted')
     return {'ok': True, 'status': 'submitted'}
 
@@ -371,18 +382,24 @@ async def post_message(application_id: str, payload: _MessageRequest, user=Depen
         raise HTTPException(400, 'Empty message')
     now = datetime.utcnow()
     msg = {'_id': str(uuid.uuid4()), 'from': 'user', 'text': text, 'at': now}
-    auto = {
-        '_id': str(uuid.uuid4()),
-        'from': 'consultant',
-        'name': CONSULTANT_NAME,
-        'text': CONSULTANT_AUTO_REPLY,
-        'at': now,
-    }
+    new = [msg]
+    # Acknowledge automatically only when the last thing in the thread is not already
+    # our acknowledgement, and say plainly that it is automatic.
+    previous = (app.get('messages') or [])[-1:] or [{}]
+    if not previous[0].get('auto'):
+        new.append({
+            '_id': str(uuid.uuid4()),
+            'from': 'consultant',
+            'name': CONSULTANT_NAME,
+            'text': CONSULTANT_AUTO_REPLY,
+            'auto': True,
+            'at': now,
+        })
     await applications.update_one(
         {'_id': application_id},
-        {'$push': {'messages': {'$each': [msg, auto]}}, '$set': {'updated_at': now}},
+        {'$push': {'messages': {'$each': new}}, '$set': {'updated_at': now}},
     )
-    return [_serialize(msg), _serialize(auto)]
+    return [_serialize(m) for m in new]
 
 
 # ---------- PDF receipt ----------

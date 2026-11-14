@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Loader2, Info, ArrowRight, GraduationCap, UserPlus, LogIn } from 'lucide-react';
 import { Button } from './ui/button';
@@ -7,11 +7,10 @@ import { inr } from '../lib/utils';
 import axios from 'axios';
 import { useDialogA11y } from '../hooks/use-dialog-a11y';
 
-function computeFee(count) {
+function computeFee(count, price) {
   const n = Math.max(1, count);
-  if (n <= 3) return { application: 20000, gst: Math.round(20000 * 0.18), total: 20000 + Math.round(20000 * 0.18) };
-  const app = 20000 + (n - 3) * 3000;
-  const gst = Math.round(app * 0.18);
+  const app = price.flat_inr + Math.max(0, n - price.included) * price.extra_inr;
+  const gst = Math.round(app * price.gst_rate);
   return { application: app, gst, total: app + gst };
 }
 
@@ -28,7 +27,19 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
   const COUNTRY_IDS = [...new Set(universities.map(u => u.country))];
   const primaryCountry = COUNTRY_IDS[0] || 'us';
 
-  const fees = computeFee(universities.length);
+  // The price is set on the server (fee_calculator.py) so this modal, the API and the
+  // chatbot all quote the same figure.
+  const [price, setPrice] = useState(null);
+  useEffect(() => {
+    let live = true;
+    axios.get(`${API}/public/pricing`).then((r) => {
+      const u = r.data?.university_application;
+      if (live && u) setPrice({ ...u, gst_rate: r.data.gst_rate ?? 0.18 });
+    }).catch(() => {});
+    return () => { live = false; };
+  }, []);
+  const fees = price ? computeFee(universities.length, price) : null;
+  const extra = price ? Math.max(0, universities.length - price.included) : 0;
 
   const handleSubmit = async () => {
     if (!isAuthed) { navigate('/signup'); return; }
@@ -88,15 +99,17 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
 
             <div className="rounded-2xl bg-[hsl(var(--soft-bg))] border border-[hsl(var(--border))] p-4">
               <h3 className="text-[14px] font-bold text-[hsl(var(--blue-900))] mb-3">Application Fee</h3>
+              {!fees && <p className="text-[13px] text-muted-foreground">Your consultant will confirm the fee before any payment.</p>}
+              {fees && (
               <div className="space-y-2 text-[13px]">
                 <div className="flex justify-between text-muted-foreground">
-                  <span>1–3 universities (flat fee)</span>
-                  <span className="font-bold">₹20,000</span>
+                  <span>Up to {price.included} universities (flat fee)</span>
+                  <span className="font-bold">{inr(price.flat_inr)}</span>
                 </div>
-                {universities.length > 3 && (
+                {extra > 0 && (
                   <div className="flex justify-between text-muted-foreground">
-                    <span>Additional {universities.length - 3} universit{universities.length - 3 === 1 ? 'y' : 'ies'} (₹3,000 each)</span>
-                    <span className="font-bold">₹{(universities.length - 3) * 3000}</span>
+                    <span>Additional {extra} universit{extra === 1 ? 'y' : 'ies'} ({inr(price.extra_inr)} each)</span>
+                    <span className="font-bold">{inr(extra * price.extra_inr)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-muted-foreground pt-2 border-t border-[hsl(var(--border))]">
@@ -112,6 +125,7 @@ export default function MultiUniversityApplyModal({ universities, onClose }) {
                   <span className="font-bold">₹{fees.total.toLocaleString('en-IN')}</span>
                 </div>
               </div>
+              )}
             </div>
 
             {!isAuthed && (

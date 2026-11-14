@@ -109,6 +109,8 @@ function Overview({ c, onPatchAppt, readOnly }) {
         <Row k="Travel date" v={fmtDate(c.travel_date)} />
         <Row k="Applicants" v={c.applicants} />
         <Row k="Fee" v={c.fee_inr != null ? inr(c.fee_inr) : null} />
+        <Row k="Embassy fee" v={c.fee?.amount_inr ? `${inr(c.fee.amount_inr)} · ${({ paid: 'paid online', refunded: 'refunded' })[c.fee.status] || 'to collect'}` : null} />
+        <Row k="Service fee" v={c.service_fee?.amount_inr ? `${inr(c.service_fee.amount_inr)} · ${({ paid: 'paid online', refunded: 'refunded' })[c.service_fee.status] || 'to collect'}` : null} />
         <Row k="Appointment" v={appt.date ? `${fmtDate(appt.date)}${appt.time ? ` · ${appt.time}` : ''}` : null} />
         {!readOnly && (
           <ApptDateInput
@@ -469,9 +471,7 @@ export default function ApplicationCase() {
   };
 
   const patchAppt = async (date) => {
-    await adminClient(token).patch(`/applications/${id}`, {
-      form_data: { visa_appointment: { date } },
-    });
+    await adminClient(token).patch(`/applications/${id}`, { appointment_date: date || '' });
     await load();
   };
 

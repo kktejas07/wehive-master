@@ -28,15 +28,16 @@ from observability import observe, propagate_attributes, get_callback_handler
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
 
-async def notify_status_change(user_id: str, application_id: str, status: str) -> None:
+async def notify_status_change(user_id: str, application_id: str, status: str,
+                               title: Optional[str] = None, body: Optional[str] = None) -> None:
     """Tell the user their application status changed: in-app, email, and WhatsApp
-    when they opted in (see notify.py)."""
+    when they opted in (see notify.py). Pass title/body for a status-specific message."""
     from notify import notify_user
     label = status.replace("_", " ").capitalize()
     await notify_user(
         user_id,
-        title=f"Application update: {label}",
-        body=f"Your application status is now: {label}.",
+        title=title or f"Application update: {label}",
+        body=body or f"Your application status is now: {label}.",
         kind="status_change",
         link=f"/account/applications/{application_id}",
         application_id=application_id,
@@ -49,7 +50,7 @@ chat_sessions = db["chat_sessions"]
 chat_messages = db["chat_messages"]
 logger = logging.getLogger("wehive.chatbot")
 
-SYSTEM_PROMPT = """You are Hive — the friendly visa & travel assistant for We Hive Immigration Services (Ballari, India).
+SYSTEM_PROMPT = """You are Hive — the friendly visa & travel assistant for We Hive Immigration Services (offices in Hyderabad, Ballari, Anantapur and East Windsor, New Jersey).
 
 Your role:
 - Help Indian passport holders understand visa requirements for any country.
@@ -134,7 +135,10 @@ async def _gather_context(user_prompt: str, user_id: str = None) -> str:
         fee_data = await get_application_fee(country_codes[0].lower())
         if fee_data:
             snippets.append(
-                f"Application fee: ₹{fee_data.get('fee_inr', 'N/A')} (embassy: ₹{fee_data.get('embassy_fee', 'N/A')})"
+                f"Fees for one {fee_data['visa_type']} applicant: embassy ₹{fee_data['embassy_fee_inr']:,} + appointment "
+                f"₹{fee_data['appointment_fee_inr']:,} are paid when the application is submitted (₹{fee_data['pay_at_submit_inr']:,}); "
+                f"We Hive service fee ₹{fee_data['service_fee_inr']:,} + GST ₹{fee_data['gst_inr']:,} are due on delivery "
+                f"(₹{fee_data['due_on_delivery_inr']:,}). Total ₹{fee_data['total_inr']:,}."
             )
 
     snippets.extend(s for s in await asyncio.gather(_rag_context(user_prompt), google_kg.context_for(user_prompt)) if s)
@@ -302,7 +306,8 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
 
     # LangGraph path (enabled via USE_LANGGRAPH=true env var)
     user_id = user["_id"] if user else None
-    if os.environ.get("USE_LANGGRAPH", "").lower() in ("true", "1"):
+    from application_status_answer import is_status_question
+    if os.environ.get("USE_LANGGRAPH", "").lower() in ("true", "1") and not is_status_question(text):
         try:
             from langchain_core.messages import HumanMessage
             from agents.langgraph.supervisor import supervisor_app
@@ -383,7 +388,11 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
     try:
         has_api_key = bool(os.environ.get("DEFAULT_LLM_KEY", "").strip())
 
-        if has_api_key and uid:
+        from application_status_answer import is_status_question, status_answer
+        if is_status_question(text):
+            reply_text = await status_answer(user)
+            provider_info = {"id": "wehive", "name": "Hive", "model": "account-lookup"}
+        elif has_api_key and uid:
             reply_text, provider_info = await marketplace.chat_with_info(
                 user_id=uid,
                 system_prompt=enriched_system,

@@ -318,7 +318,7 @@ function PaymentHistory({ payments, paidTotal }) {
           <div key={p.id} className="flex items-start justify-between gap-3 py-1.5 border-t first:border-t-0 border-[var(--glass-border)]">
             <div className="min-w-0">
               <div className="text-[13px] font-semibold text-emerald-300">{inr(p.amount_inr || 0)}</div>
-              <div className="text-[11.5px] text-[var(--text-secondary)]">{fmtDate(p.created_at)} · {p.plan_id || '—'}</div>
+              <div className="text-[11.5px] text-[var(--text-secondary)]">{fmtDate(p.created_at)} · {({ application_fee: 'Visa application fee', service_fee: 'Service fee + GST' })[p.plan_id] || p.plan_id || '—'}</div>
               {p.razorpay_id && (
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="font-mono text-[11px] text-[var(--text-muted)] truncate max-w-[140px]">{p.razorpay_id}</span>

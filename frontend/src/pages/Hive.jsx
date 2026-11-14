@@ -153,7 +153,7 @@ function AssistantBlock({ m, onSpeak, speaking, ttsEnabled, checkedAt }) {
       )}
 
       <div className="mt-4 pt-3 border-t border-[hsl(var(--border))] flex flex-wrap items-center gap-2 text-[12px] text-muted-foreground">
-        <span className="font-semibold">Sources</span>
+        {sources.length > 0 && <span className="font-semibold">Sources</span>}
         {sources.length > 0 ? (
           sources.map((s) => (
             <span
@@ -163,9 +163,7 @@ function AssistantBlock({ m, onSpeak, speaking, ttsEnabled, checkedAt }) {
               {s === 'visa_lookup' ? 'Live visa API' : s.replace(/_/g, ' ')}
             </span>
           ))
-        ) : (
-          <span className="text-muted-foreground">RAG knowledge base</span>
-        )}
+        ) : null}
         <span className="ml-auto font-semibold text-muted-foreground">
           {checkedAt || `Checked today · confirm with the embassy`}
         </span>

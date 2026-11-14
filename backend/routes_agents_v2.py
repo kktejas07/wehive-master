@@ -19,6 +19,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from datetime import datetime
+
 from auth_utils import get_current_user
 from admin_auth import get_current_admin_flex
 from rate_limit import RateLimit
@@ -98,13 +100,22 @@ async def run_agent_endpoint(
         raise HTTPException(404, f"Agent not found: {agent_id}")
     user_id = str(user.get("_id", ""))
     try:
-        run = await run_agent(
-            spec,
-            req.input,
-            user_id=user_id,
-            context=req.context or "",
-            conversation_history=req.conversation_history,
-        )
+        from application_status_answer import is_status_question, status_answer
+        if is_status_question(req.input):
+            # Account questions are answered from the user's own records, not by a model.
+            from agent_framework import AgentRun, AgentStep
+            now = datetime.utcnow().isoformat()
+            run = AgentRun(agent_id=agent_id, input=req.input, final_answer=await status_answer(user),
+                           steps=[AgentStep(iteration=1, thought='', tool_name='your_applications')],
+                           provider='wehive', model='account-lookup', started_at=now, finished_at=now, user_id=user_id)
+        else:
+            run = await run_agent(
+                spec,
+                req.input,
+                user_id=user_id,
+                context=req.context or "",
+                conversation_history=req.conversation_history,
+            )
     except Exception as e:
         logger.exception("Agent run failed: %s", e)
         # Capture the failure in the feed too — errors are the most

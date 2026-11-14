@@ -25,10 +25,11 @@ RESET_TOKEN_TTL_MIN = int(os.environ.get('RESET_TOKEN_TTL_MINUTES', '30'))
 OTP_TTL_MIN = int(os.environ.get('OTP_TTL_MINUTES') or os.environ.get('OTP_EXPIRY_MINUTES') or '10')
 OTP_LENGTH = int(os.environ.get('OTP_LENGTH', '6'))
 
-CONSULTANT_NAME = os.environ.get('CONSULTANT_NAME', 'Kiran · Senior consultant')
+# Label on the automatic acknowledgement in the applicant chat. Real replies carry the staff member's name.
+CONSULTANT_NAME = os.environ.get('CONSULTANT_NAME', 'We Hive · Automatic reply')
 CONSULTANT_AUTO_REPLY = os.environ.get(
     'CONSULTANT_AUTO_REPLY',
-    "Got it — I'll review and get back within 4 hours during business hours (Mon–Sat 09:00–18:00 IST)."
+    "Thanks, your message has reached the We Hive team. A consultant will reply here within 4 business hours (Mon–Sat 09:00–18:00 IST)."
 )
 
 # Public site + contact details used in emails, receipts and share links.

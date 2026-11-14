@@ -34,6 +34,16 @@ PLANS = {
 }
 
 
+def _item_name(payment: dict) -> str:
+    """Line-item name for payments that are not a membership plan."""
+    ref = str(payment.get('application_id') or '')[:8].upper()
+    if payment.get('kind') == 'application_fee':
+        return f"Visa application fee (#{ref})"
+    if payment.get('kind') == 'service_fee':
+        return f"We Hive service fee incl. GST (#{ref})"
+    return 'Service'
+
+
 async def _get_razorpay():
     from settings_service import get_razorpay_keys
     try:
@@ -346,7 +356,11 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str = Header(
             }},
             return_document=True,
         )
-        if doc:
+        if doc and doc.get('kind') in ('application_fee', 'service_fee'):
+            # A visa application's fees settle that application; they never grant premium.
+            from routes_application_fee import mark_fee_paid
+            await mark_fee_paid(doc)
+        elif doc:
             await users.update_one(
                 {'_id': doc['user_id']},
                 {'$set': {
@@ -392,7 +406,9 @@ async def my_subscription(user=Depends(get_current_user)):
         payments_list.append({
             'id': p['_id'],
             'plan_id': p.get('plan_id'),
-            'plan_name': PLANS.get(p.get('plan_id') or '', {}).get('name'),
+            'plan_name': PLANS.get(p.get('plan_id') or '', {}).get('name') or (_item_name(p) if p.get('kind') else None),
+            'kind': p.get('kind') or 'plan',
+            'application_id': p.get('application_id'),
             'amount_inr': p.get('amount_inr', p.get('amount_usd')),
             'status': p.get('status'),
             'created_at': p.get('created_at').isoformat() if p.get('created_at') else None,
@@ -422,7 +438,7 @@ async def invoice_pdf(payment_id: str, user=Depends(get_current_user)):
         invoice_id=payment_id[:8].upper(),
         customer_name=user.get('name', 'Customer'),
         customer_email=user.get('email', ''),
-        items=[{'name': plan.get('name', 'Service'), 'amount': payment.get('amount_inr', 0)}],
+        items=[{'name': plan.get('name') or _item_name(payment), 'amount': payment.get('amount_inr', 0)}],
         amount_paid=payment.get('amount_inr', 0),
         currency='INR',
         payment_method='Razorpay',

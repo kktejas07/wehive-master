@@ -191,7 +191,7 @@ export default function PaymentsTab() {
                   <div className="font-bold text-[var(--text-primary)]">{p.user?.name || '—'}</div>
                   <div className="text-[12px] text-[var(--text-secondary)]">{p.user?.email || p.user?.phone || '—'}</div>
                 </td>
-                <td className="px-5 py-3 text-[var(--text-secondary)]">{p.plan_id || '—'}</td>
+                <td className="px-5 py-3 text-[var(--text-secondary)]">{({ application_fee: 'Visa application fee', service_fee: 'Service fee + GST' })[p.plan_id] || p.plan_id || '—'}</td>
                 <td className="px-5 py-3 font-bold text-[var(--text-primary)] tabular-nums">
                   {inr(p.amount_inr)}
                   {p.refunded_inr > 0 && <div className="text-[11.5px] font-normal text-blue-200">−{inr(p.refunded_inr)} refunded</div>}

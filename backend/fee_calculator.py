@@ -11,8 +11,12 @@ DEFAULT_BASE_FEE_BY_TYPE = {
 }
 DEFAULT_SURCHARGE_INR = 350
 DEFAULT_GST_RATE = 0.18
-FLAT_APPLICATION_FEE_INR = 18999
-EXTRA_UNIVERSITY_FEE_INR = 3000
+# University (study-abroad) application service: one flat price for the first
+# UNIVERSITIES_INCLUDED universities, then a fee per extra one. GST is added on top.
+# This is the single source for the price: the apply modal, the API and the chatbot read it.
+FLAT_APPLICATION_FEE_INR = int(os.environ.get('UNIVERSITY_APPLICATION_FEE_INR', '18999'))
+EXTRA_UNIVERSITY_FEE_INR = int(os.environ.get('UNIVERSITY_EXTRA_FEE_INR', '3000'))
+UNIVERSITIES_INCLUDED = 3
 # Indicative FX rate used to show embassy fees (stored in USD) in INR.
 USD_TO_INR = float(os.environ.get('USD_TO_INR', '83'))
 
@@ -65,14 +69,11 @@ def compute_fees(
 
 def compute_multi_university_fees(university_count: int) -> dict:
     """Fee for multi-university applications.
-    1–3 universities: flat ₹20,000
-    4+ universities: ₹20,000 + ₹3,000 per extra university
+    Up to UNIVERSITIES_INCLUDED universities: FLAT_APPLICATION_FEE_INR.
+    Each extra university: EXTRA_UNIVERSITY_FEE_INR. GST on top.
     """
     count = max(1, university_count)
-    if count <= 3:
-        application_fee = FLAT_APPLICATION_FEE_INR
-    else:
-        application_fee = FLAT_APPLICATION_FEE_INR + (count - 3) * EXTRA_UNIVERSITY_FEE_INR
+    application_fee = FLAT_APPLICATION_FEE_INR + max(0, count - UNIVERSITIES_INCLUDED) * EXTRA_UNIVERSITY_FEE_INR
     gst = round(application_fee * DEFAULT_GST_RATE)
     total = application_fee + gst
     return {

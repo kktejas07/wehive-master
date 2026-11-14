@@ -14,6 +14,7 @@ import VisaBreadcrumb from '../components/visa/VisaBreadcrumb';
 import CategoryTabs from '../components/visa/CategoryTabs';
 import CategoryDetails from '../components/visa/CategoryDetails';
 import DocsList from '../components/visa/DocsList';
+import { DOC_LABELS } from '../components/DocumentChecklist';
 import AssistCard from '../components/visa/AssistCard';
 import VisaFaqSection from '../components/visa/VisaFaqSection';
 import OtherCountries from '../components/visa/OtherCountries';
@@ -40,6 +41,16 @@ export default function VisaDetail() {
   const [type, setType] = useState('Tourist');
   const [applicants, setApplicants] = useState(1);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [uploadList, setUploadList] = useState([]);
+
+  // The checklist the applicant will be asked to upload, so this page and the application agree.
+  useEffect(() => {
+    let live = true;
+    axios.get(`${API}/public/required-documents`, { params: { visa_type: type } })
+      .then((r) => { if (live) setUploadList(r.data?.documents || []); })
+      .catch(() => { if (live) setUploadList([]); });
+    return () => { live = false; };
+  }, [type]);
 
   useEffect(() => {
     let mounted = true;
@@ -156,6 +167,19 @@ export default function VisaDetail() {
               Documents you will need
             </h2>
             {cat && <DocsList docs={cat.documents} />}
+            {uploadList.length > 0 && (
+              <div className="mt-6 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--soft-bg))] p-5" data-testid="upload-checklist">
+                <h3 className="text-[15px] font-bold text-[hsl(var(--blue-900))]">
+                  Your upload checklist with We Hive ({uploadList.length} documents)
+                </h3>
+                <p className="mt-1 text-[13px] text-muted-foreground">
+                  The list above is what the embassy asks for. When you apply with us you upload these, which include the ID proofs we need from Indian passport holders.
+                </p>
+                <ul className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[14px] text-[hsl(var(--blue-900))] list-disc pl-5">
+                  {uploadList.map((d) => <li key={d}>{DOC_LABELS[d] || d.replace(/_/g, ' ')}</li>)}
+                </ul>
+              </div>
+            )}
             <div className="mt-8">
               <Button
                 onClick={onApply}
