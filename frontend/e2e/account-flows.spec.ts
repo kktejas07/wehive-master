@@ -63,6 +63,7 @@ test.describe('Account dashboard (authenticated)', () => {
 
   test('unauthenticated access to /account redirects to login', async ({ page }) => {
     await page.goto('/account');
+    await page.waitForURL(/\/(login|signin)/).catch(() => {}); // the redirect happens after the auth check
     // Should either show login or redirect there
     const url = page.url();
     const isLoginPage = url.includes('/login') || url.includes('/signin');
@@ -124,6 +125,7 @@ test.describe('Track application portal', () => {
   test('has reference number / email input', async ({ page }) => {
     await page.goto('/track');
     const inputs = page.locator('input');
+    await expect(inputs.first()).toBeVisible(); // the page is lazy-loaded: wait before counting
     const count = await inputs.count();
     expect(count).toBeGreaterThanOrEqual(1);
   });
@@ -205,6 +207,7 @@ test.describe('Signup flow', () => {
   test('has name/email inputs', async ({ page }) => {
     await page.goto('/signup');
     const inputs = page.locator('input');
+    await expect(inputs.first()).toBeVisible(); // the page is lazy-loaded: wait before counting
     const count = await inputs.count();
     expect(count).toBeGreaterThanOrEqual(2);
   });

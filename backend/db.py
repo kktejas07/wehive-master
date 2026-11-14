@@ -102,6 +102,7 @@ async def ensure_indexes():
     await db['password_reset_tokens'].create_index('token_hash')
     await db['password_reset_tokens'].create_index('expires_at', expireAfterSeconds=0)
     await db['login_attempts'].create_index('last_attempt_at', expireAfterSeconds=60 * 60)
+    await db['client_errors'].create_index('created_at', expireAfterSeconds=30 * 24 * 60 * 60)  # crash reports: keep 30 days
     await ai_settings.create_index('user_id')
     await third_party_settings.create_index('_id')
     await db['settings'].create_index('_id')

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Clock, RefreshCw, Bell, MapPin, Loader2, AlertCircle } from 'lucide-react';
-import { adminClient } from '../../lib/admin';
+import { apiClient } from '../../lib/admin';
 import { Panel } from './AdminShell';
 
 export default function SlotMonitorTab() {
@@ -17,9 +17,10 @@ export default function SlotMonitorTab() {
     setErr('');
     try {
       const [slotsData, summaryData, consulatesData] = await Promise.all([
-        adminClient('/usvisa/slots?limit=50'),
-        adminClient('/usvisa/slots/summary'),
-        adminClient('/usvisa/consulates'),
+        // /usvisa/* lives under /api, not /api/admin; and the client must be asked for a request.
+        apiClient().get('/usvisa/slots?limit=50').then((r) => r.data),
+        apiClient().get('/usvisa/slots/summary').then((r) => r.data),
+        apiClient().get('/usvisa/consulates').then((r) => r.data),
       ]);
       setSlots(Array.isArray(slotsData) ? slotsData : slotsData?.slots || []);
       setSummary(summaryData);

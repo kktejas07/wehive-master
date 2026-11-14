@@ -1,6 +1,5 @@
 import asyncio
 import re
-import json
 import logging
 import os
 from datetime import datetime, timezone
@@ -29,6 +28,11 @@ from routes_auth import router as auth_router  # noqa: E402
 from routes_users import router as users_router  # noqa: E402
 from routes_countries import router as countries_router  # noqa: E402
 from routes_leads import router as leads_router  # noqa: E402
+from routes_client_errors import router as client_errors_router  # noqa: E402
+from routes_sitemap import router as sitemap_router  # noqa: E402
+from request_context import JsonFormatter, request_context_middleware  # noqa: E402
+from ai_marketplace import AIUnavailableError  # noqa: E402
+from alerting import install_alerting  # noqa: E402
 from routes_visa_providers import router as visa_providers_router  # noqa: E402
 from routes_apps import router as apps_router  # noqa: E402
 from routes_chatbot import router as chatbot_router  # noqa: E402
@@ -188,6 +192,8 @@ api_router.include_router(scan_router)
 api_router.include_router(flights_router)
 api_router.include_router(countries_router)
 api_router.include_router(leads_router)
+api_router.include_router(client_errors_router)
+api_router.include_router(sitemap_router)
 api_router.include_router(admin_router)
 api_router.include_router(admin_backoffice_router)
 api_router.include_router(social_studio_router)
@@ -464,16 +470,10 @@ async def add_security_headers(request, call_next):
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     return response
 
-class JsonFormatter(logging.Formatter):
-    def format(self, record):
-        return json.dumps({
-            'ts': datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
-            'level': record.levelname,
-            'logger': record.name,
-            'message': record.getMessage(),
-            'module': record.module,
-            'line': record.lineno,
-        }, default=str)
+
+# Registered last so it wraps everything above: request ID + one access-log line per request.
+app.middleware('http')(request_context_middleware)
+
 
 _handler = logging.StreamHandler()
 _handler.setFormatter(JsonFormatter())
@@ -481,6 +481,7 @@ root = logging.getLogger()
 root.handlers.clear()
 root.addHandler(_handler)
 root.setLevel(logging.INFO)
+install_alerting(root)  # ERROR-level lines also go to ALERT_WEBHOOK_URL, when set
 logger = logging.getLogger('wehive')
 
 
@@ -499,10 +500,30 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(status_code=422, content={'ok': False, 'detail': errors})
 
 
+@app.exception_handler(AIUnavailableError)
+async def ai_unavailable_handler(request: Request, exc: AIUnavailableError):
+    # No model could answer. That is an outage of a dependency, not a bug in the request:
+    # say so plainly (503) rather than "Internal server error" or a made-up document.
+    logger.warning('AI unavailable on %s %s: %s', request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=503,
+        content={'ok': False, 'detail': 'Our AI assistant is unavailable right now. Please try again in a little while.'},
+    )
+
+
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
-    logger.exception('Unhandled error: %s', exc, extra={'path': str(request.url)})
-    return JSONResponse(status_code=500, content={'ok': False, 'detail': 'Internal server error'})
+    # The request-ID contextvar is already reset when this runs (it sits outside the
+    # middleware), so take the ID from request.state and put it on the log line and
+    # in the response: a user can quote it and support can find the traceback.
+    rid = getattr(request.state, 'request_id', None)
+    logger.exception('Unhandled error on %s %s: %s', request.method, request.url.path, exc,
+                     extra={'path': str(request.url), 'request_id': rid})
+    return JSONResponse(
+        status_code=500,
+        content={'ok': False, 'detail': 'Internal server error', 'request_id': rid},
+        headers={'X-Request-ID': rid} if rid else None,
+    )
 
 
 def _start_ragas_scheduler():
@@ -659,4 +680,4 @@ async def on_shutdown():
         from observability import flush
         await flush()  # flush() calls get_client().flush() which drains the queue
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').debug('Ignored error in %s.%s', __name__, 'on_shutdown', exc_info=True)

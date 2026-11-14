@@ -257,7 +257,8 @@ def _student_response(country_data: dict, unis: list) -> str:
 
     sm = country_data.get("student_meta")
     if sm:
-        lines.append(f"  ⏱ Processing: {sm.get('processing_weeks', 'N/A')} weeks")
+        weeks = str(sm.get('processing_weeks', 'N/A')).removesuffix(' weeks')  # some records already say "3-5 weeks"
+        lines.append(f"  ⏱ Processing: {weeks} weeks")
         lines.append(f"  💼 Post-study work: {sm.get('post_study_months', 0)} months")
         intakes = sm.get("intakes", [])
         if intakes:

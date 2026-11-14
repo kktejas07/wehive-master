@@ -127,6 +127,7 @@ export default function AdminShell({ children }) {
     t.id === 'applications' && critical > 0 && (
       <span
         title={`${critical} critical alert${critical === 1 ? '' : 's'}`}
+        data-testid={mobile ? undefined : 'admin-nav-applications-critical'}
         className={`${mobile ? 'ml-1.5' : collapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-[#E10600] text-white text-[10px] font-bold tabular-nums`}
       >
         {critical}
@@ -279,7 +280,7 @@ export default function AdminShell({ children }) {
                       if (collapsed) {
                         return (
                           <NavLink
-                            key={t.id} to={t.to} end={exact}
+                            key={t.id} to={t.to} end={exact} data-testid={t.testid}
                             title={t.label}
                             style={{
                               position: 'relative',
@@ -300,7 +301,7 @@ export default function AdminShell({ children }) {
 
                       return (
                         <NavLink
-                          key={t.id} to={t.to} end={exact}
+                          key={t.id} to={t.to} end={exact} data-testid={t.testid}
                           style={{
                             display: 'grid',
                             gridTemplateColumns: '16px 1fr auto',
@@ -465,7 +466,7 @@ export default function AdminShell({ children }) {
             </nav>
 
             {mustEnrol && (
-              <div role="alert" style={{
+              <div role="alert" data-testid="admin-2fa-required" style={{
                 marginBottom: 20, borderRadius: 12, border: '1px solid #F2A90033',
                 background: '#FFF9EC', padding: '10px 16px', fontSize: 13, color: 'var(--warn)',
               }}>
@@ -473,7 +474,7 @@ export default function AdminShell({ children }) {
               </div>
             )}
             {!mustEnrol && limited && (
-              <div style={{
+              <div data-testid="admin-role-banner" style={{
                 marginBottom: 20, borderRadius: 12, border: '1px solid var(--soft)',
                 background: 'var(--soft)', padding: '10px 16px', fontSize: 12.5, color: 'var(--ink)',
               }}>

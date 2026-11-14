@@ -224,7 +224,7 @@ async def _store_in_mongo(query: str, entities: list[dict]):
                 upsert=True,
             )
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, '_store_in_mongo', exc_info=True)
 
 
 async def _store_enrichment(topic: str, result: dict):
@@ -236,4 +236,4 @@ async def _store_enrichment(topic: str, result: dict):
             "run_at": datetime.utcnow(),
         })
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, '_store_enrichment', exc_info=True)

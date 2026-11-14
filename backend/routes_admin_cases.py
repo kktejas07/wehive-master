@@ -223,19 +223,27 @@ async def admin_request_reupload(
                 ),
             )
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'admin_request_reupload', exc_info=True)
     await audit_record(admin, 'doc_reupload_requested', 'document', doc_id, extra={'application_id': application_id})
     return {'ok': True}
 
 
 # ---------- admin status control ----------
+# Must cover every status the admin case page offers (STATUSES in ApplicationCase.jsx):
+# anything missing here made that option fail with a 400.
 VALID_STATUSES = [
-    'submitted', 'in_review', 'appointment_scheduled', 'docs_pending',
-    'approved', 'rejected', 'visa_approved', 'visa_rejected', 'withdrawn',
+    'draft', 'submitted', 'in_review', 'awaiting_docs', 'docs_pending',
+    'appointment_scheduled', 'biometrics_done', 'interview_scheduled',
+    'approved', 'rejected', 'visa_approved', 'visa_rejected', 'withdrawn', 'cancelled',
 ]
 
 _STATUS_LABELS = {
+    'draft': 'Returned to Draft',
     'submitted': 'Application Submitted',
+    'awaiting_docs': 'Awaiting Documents',
+    'biometrics_done': 'Biometrics Done',
+    'interview_scheduled': 'Interview Scheduled',
+    'cancelled': 'Cancelled',
     'in_review': 'In Consular Review',
     'appointment_scheduled': 'Appointment Scheduled',
     'docs_pending': 'Documents Pending',
@@ -294,6 +302,10 @@ async def admin_set_status(
         'rejected': ('Application Update', f'Your application: {payload.note}', 'warning'),
         'in_review': ('Application in Review', 'A consular officer is reviewing your case.', 'info'),
         'appointment_scheduled': ('Appointment Scheduled', 'Your embassy appointment has been scheduled.', 'info'),
+        'awaiting_docs': ('Documents Needed', f'We need more documents from you. {payload.note}'.strip(), 'warning'),
+        'docs_pending': ('Documents Needed', f'We need more documents from you. {payload.note}'.strip(), 'warning'),
+        'biometrics_done': ('Biometrics Done', 'Your biometrics have been recorded.', 'info'),
+        'interview_scheduled': ('Interview Scheduled', f'Your visa interview has been scheduled. {payload.note}'.strip(), 'info'),
     }
     if payload.status in _notify_map:
         title, body, sev = _notify_map[payload.status]
@@ -303,7 +315,7 @@ async def admin_set_status(
     try:
         await notify_status_change(app.get('user_id'), application_id, payload.status)
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'admin_set_status', exc_info=True)
 
     await audit_record(admin, 'status_changed', 'application', application_id,
                        extra={'new_status': payload.status, 'note': payload.note})

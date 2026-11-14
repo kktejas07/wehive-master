@@ -496,7 +496,7 @@ export default function UserProfile() {
               <div key={i} className="py-1.5 border-t first:border-t-0 border-[var(--glass-border)] text-[13px]">
                 <span className="text-[var(--text-primary)] font-semibold capitalize">{h.action}</span>
                 <span className="text-[var(--text-secondary)]"> by {h.admin_email || 'system'} · {fmt(h.at)}</span>
-                {h.extra?.reason && <div className="text-[var(--text-secondary)] text-[12.5px]">"{h.extra.reason}"</div>}
+                {h.extra?.reason && <div className="text-[var(--text-secondary)] text-[12.5px]">“{h.extra.reason}”</div>}
               </div>
             ))}
           </Panel>

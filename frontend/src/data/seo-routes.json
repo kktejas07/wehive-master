@@ -1,0 +1,102 @@
+{
+  "/": {
+    "label": "We Hive",
+    "description": "We Hive helps Indian travellers and students with visas, study-abroad applications and travel planning. Check requirements, apply online and track your application."
+  },
+  "/about": {
+    "label": "About We Hive",
+    "description": "Who We Hive is, the promises behind every application, and where to visit our walk-in branches in Hyderabad, Ballari and East Windsor, New Jersey."
+  },
+  "/pricing": {
+    "label": "Pricing",
+    "description": "We Hive service plans and what each one includes, with transparent fees shown before you pay."
+  },
+  "/visa-checker": {
+    "label": "Visa Checker",
+    "description": "Check whether you need a visa for your destination and what kind, based on your passport and where you are travelling."
+  },
+  "/student-visa": {
+    "label": "Student Visa & Universities",
+    "description": "Explore universities and courses abroad, compare intakes and requirements, and get help with your student visa application."
+  },
+  "/intake-calendar": {
+    "label": "Intake Calendar",
+    "description": "University intake seasons by country, with the application windows to plan your study-abroad timeline around."
+  },
+  "/resources": {
+    "label": "Student Resources",
+    "description": "Guides, checklists and tools for students preparing to study abroad, from choosing a course to arriving on campus."
+  },
+  "/map": {
+    "label": "Explore Destinations",
+    "description": "Browse destinations on a map and open the visa requirements and travel details for each country."
+  },
+  "/events": {
+    "label": "Global Events",
+    "description": "Upcoming education fairs, university events and travel-related events from around the world."
+  },
+  "/blog": {
+    "label": "Blog",
+    "description": "Articles on visas, studying abroad and travel from the We Hive team."
+  },
+  "/news": {
+    "label": "News",
+    "description": "Visa, immigration and study-abroad news that affects travellers and students."
+  },
+  "/community": {
+    "label": "Community",
+    "description": "Questions, answers and experiences shared by We Hive travellers and students."
+  },
+  "/hive": {
+    "label": "The Hive",
+    "description": "Ask The Hive, We Hive's AI assistant, about visas, universities and travel planning."
+  },
+  "/offers": {
+    "label": "Offers",
+    "description": "Current offers and campus marketplace deals for We Hive students and travellers."
+  },
+  "/free-consultation": {
+    "label": "Free Visa Consultation",
+    "description": "Book a free consultation with a We Hive visa consultant to talk through your travel or study plans."
+  },
+  "/track": {
+    "label": "Track Your Application",
+    "description": "Check the status of your We Hive visa application with your reference number."
+  },
+  "/emergency": {
+    "label": "Emergency Care",
+    "description": "Urgent help from We Hive for travellers and students abroad, and how to reach us quickly."
+  },
+  "/agent-training": {
+    "label": "Agent Training",
+    "description": "Training material for We Hive partner agents on visa processes and the agent portal."
+  },
+  "/help": {
+    "label": "Help Center",
+    "description": "Answers to common questions about We Hive applications, documents, payments and tracking."
+  },
+  "/contact": {
+    "label": "Contact Us",
+    "description": "Phone, WhatsApp, email and branch addresses for We Hive in Hyderabad, Ballari and East Windsor, New Jersey."
+  },
+  "/destinations/ca": {
+    "label": "Canada Destination Guide",
+    "description": "Canada guide from We Hive: visa pathways for students, workers, visitors and permanent residence."
+  },
+  "/destinations/gb": {
+    "label": "United Kingdom Destination Guide",
+    "description": "United Kingdom guide from We Hive: visa pathways for students, workers and visitors."
+  },
+  "/destinations/us": {
+    "label": "United States Destination Guide",
+    "description": "United States guide from We Hive: visa pathways for students, workers and visitors."
+  },
+  "/destinations/au": {
+    "label": "Australia Destination Guide",
+    "description": "Australia guide from We Hive: visa pathways for students, workers, visitors and permanent residence."
+  },
+  "/destinations/de": {
+    "label": "Germany Destination Guide",
+    "description": "Germany guide from We Hive: visa pathways for students, workers and visitors."
+  }
+}

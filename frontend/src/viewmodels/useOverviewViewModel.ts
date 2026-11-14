@@ -27,23 +27,24 @@ export function useOverviewViewModel(): OverviewVM {
     let live = true;
     setLoading(true);
     const client = adminClient(token);
+    // Each panel loads on its own: one failing endpoint must not blank the whole overview.
+    let metricsError: string | null = null;
+    const soft = (req: Promise<any>) => req.then((r) => r.data).catch(() => null);
     Promise.all([
-      client.get('/metrics'),
-      client.get('/alerts'),
-      client.get('/funnel', { params: { days: 90 } }),
-      client.get('/monitoring/dashboard').catch(() => ({ data: null })),
+      client.get('/metrics').then((r: any) => r.data)
+        .catch((e: any) => { metricsError = e?.response?.data?.detail || e.message; return {}; }),
+      soft(client.get('/alerts')),
+      soft(client.get('/funnel', { params: { days: 90 } })),
+      soft(client.get('/monitoring/dashboard')),
     ]).then(([m, a, f, mo]) => {
       if (!live) return;
-      setMetrics(m.data);
-      setAlerts(a.data);
-      setFunnel(f.data);
-      setMonitoring(mo.data);
-      setError(null);
-    }).catch((e: any) => {
-      if (!live) return;
-      setError(e?.response?.data?.detail || e.message);
-    }).finally(() => {
-      if (live) setLoading(false);
+      setMetrics(m);
+      setAlerts(a);
+      setFunnel(f);
+      setMonitoring(mo);
+      // Only a page with nothing to show is an error.
+      setError(metricsError && !a && !f ? metricsError : null);
+      setLoading(false);
     });
     return () => { live = false; };
   }, [token, tick]);

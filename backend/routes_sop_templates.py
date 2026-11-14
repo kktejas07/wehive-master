@@ -9,7 +9,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from ai_marketplace import marketplace
+from ai_marketplace import AIUnavailableError, marketplace
 from auth_utils import get_current_user
 from rate_limit import RateLimit
 
@@ -169,6 +169,8 @@ Do NOT use markdown formatting — write in plain paragraphs with section headin
             user_prompt=prompt,
             max_tokens=3000,
         )
+    except AIUnavailableError:
+        raise  # server.py answers 503 "AI assistant is unavailable"
     except Exception as e:
         logger.error('SOP personalisation failed: %s', e)
         raise HTTPException(502, 'Could not generate SOP. Please try again.')

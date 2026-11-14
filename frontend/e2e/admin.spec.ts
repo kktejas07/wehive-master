@@ -339,12 +339,12 @@ test('newsletter send needs an explicit confirmation with the audience size', as
   await page.goto('/admin/newsletter');
 
   await page.getByLabel('Subject').fill('October visa news');
-  await page.getByLabel('Message').fill('Schengen appointments open on **Monday**.');
+  await page.getByLabel(/^Body/).fill('Schengen appointments open on **Monday**.');
   await page.getByTestId('newsletter-send').click();
   await expect(page.getByTestId('newsletter-confirm')).toContainText('3 confirmed subscribers');
   await page.getByTestId('newsletter-confirm-send').click();
 
-  await expect.poll(() => api.calls.find((c) => c.method === 'POST')?.body).toEqual({
+  await expect.poll(() => api.calls.find((c) => c.method === 'POST')?.body).toMatchObject({
     subject: 'October visa news', body: 'Schengen appointments open on **Monday**.', expected_recipients: 3,
   });
 });

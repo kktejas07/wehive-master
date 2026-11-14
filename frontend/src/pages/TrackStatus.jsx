@@ -5,26 +5,45 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SuccessRibbon from '../components/SuccessRibbon';
 import { API } from '../context/AuthContext';
-import { Loader2, CheckCircle2, Clock, XCircle, AlertCircle, ChevronRight, ShieldCheck, Upload, Bell, Calendar, FileText, ListChecks, BellRing } from 'lucide-react';
+import { Loader2, CheckCircle2, Clock, XCircle, AlertCircle, ChevronRight, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { BRAND } from '../data/mock';
 
+const BLUE = { color: 'blue', bg: 'bg-[hsl(var(--blue-100))]', text: 'text-[hsl(var(--blue-700))]' };
+const AMBER = { color: 'amber', bg: 'bg-amber-100', text: 'text-amber-700' };
+const GREEN = { color: 'emerald', bg: 'bg-emerald-100', text: 'text-emerald-700' };
+const RED = { color: 'red', bg: 'bg-red-100', text: 'text-red-700' };
+
+// Every status the backend can set (routes_admin_cases.VALID_STATUSES + draft).
 const STATUS_CONFIG = {
   draft: { color: 'slate', bg: 'bg-[hsl(var(--soft-bg))]', text: 'text-slate-700', icon: Clock, label: 'Draft', desc: 'Application started but not yet submitted' },
-  submitted: { color: 'blue', bg: 'bg-[hsl(var(--blue-100))]', text: 'text-[hsl(var(--blue-700))]', icon: Clock, label: 'Submitted to Embassy', desc: 'Your application has been submitted and is being processed' },
-  in_review: { color: 'amber', bg: 'bg-amber-100', text: 'text-amber-700', icon: AlertCircle, label: 'In Consular Review', desc: 'Your application is under review by the embassy/consulate' },
-  approved: { color: 'emerald', bg: 'bg-emerald-100', text: 'text-emerald-700', icon: CheckCircle2, label: 'Visa Approved', desc: 'Congratulations! Your visa has been approved' },
-  rejected: { color: 'red', bg: 'bg-red-100', text: 'text-red-700', icon: XCircle, label: 'Visa Rejected', desc: 'Your visa application was not approved this time' },
+  submitted: { ...BLUE, icon: Clock, label: 'Submitted', desc: 'We have your application. A consultant will review it before it goes to the embassy.' },
+  in_review: { ...AMBER, icon: AlertCircle, label: 'In Consular Review', desc: 'Your application is under review by the embassy/consulate' },
+  appointment_scheduled: { ...BLUE, icon: Clock, label: 'Appointment Scheduled', desc: 'Your embassy or visa-centre appointment is booked' },
+  docs_pending: { ...AMBER, icon: AlertCircle, label: 'Documents Pending', desc: 'We need more documents from you before this can move forward' },
+  awaiting_docs: { ...AMBER, icon: AlertCircle, label: 'Awaiting Documents', desc: 'We need more documents from you before this can move forward' },
+  biometrics_done: { ...BLUE, icon: CheckCircle2, label: 'Biometrics Done', desc: 'Your biometrics have been recorded' },
+  interview_scheduled: { ...BLUE, icon: Clock, label: 'Interview Scheduled', desc: 'Your visa interview is booked' },
+  cancelled: { color: 'slate', bg: 'bg-[hsl(var(--soft-bg))]', text: 'text-slate-700', icon: XCircle, label: 'Cancelled', desc: 'This application was cancelled' },
+  approved: { ...GREEN, icon: CheckCircle2, label: 'Application Approved', desc: 'Your application has been approved' },
+  visa_approved: { ...GREEN, icon: CheckCircle2, label: 'Visa Approved', desc: 'Congratulations! Your visa has been approved' },
+  rejected: { ...RED, icon: XCircle, label: 'Application Rejected', desc: 'Your application was not approved this time' },
+  visa_rejected: { ...RED, icon: XCircle, label: 'Visa Rejected', desc: 'Your visa application was not approved this time' },
+  withdrawn: { color: 'slate', bg: 'bg-[hsl(var(--soft-bg))]', text: 'text-slate-700', icon: XCircle, label: 'Withdrawn', desc: 'This application was withdrawn' },
 };
 
-const STATUS_ORDER = ['draft', 'submitted', 'in_review', 'approved', 'rejected'];
+// A status this page does not know yet is shown by name, never as "Draft".
+function statusConfig(status) {
+  return STATUS_CONFIG[status] || {
+    ...BLUE, icon: Clock, desc: '',
+    label: String(status || 'In progress').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()),
+  };
+}
 
-function TimelineStep({ step, currentStatus, isLast }) {
-  const order = STATUS_ORDER.indexOf(currentStatus);
-  const stepOrder = STATUS_ORDER.indexOf(step.key);
-  const isDone = stepOrder <= order;
-  const isCurrent = step.key === currentStatus;
-  const cfg = STATUS_CONFIG[step.key];
+function TimelineStep({ step, isLast }) {
+  const isDone = true; // every step shown is an event that has happened
+  const isCurrent = isLast;
+  const cfg = statusConfig(step.status);
   const Icon = cfg.icon;
 
   return (
@@ -34,7 +53,7 @@ function TimelineStep({ step, currentStatus, isLast }) {
           <Icon className={`w-5 h-5 ${isDone ? cfg.text : 'text-muted-foreground'}`} />
         </div>
         {!isLast && (
-          <div className={`w-0.5 flex-1 my-1 ${isDone && stepOrder < order ? 'bg-emerald-300' : 'bg-[hsl(var(--border))]'}`} />
+          <div className="w-0.5 flex-1 my-1 bg-emerald-300" />
         )}
       </div>
       <div className="pb-6 flex-1">
@@ -65,21 +84,6 @@ export default function TrackStatus() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccessRibbon, setShowSuccessRibbon] = useState(false);
-  const [notifications, setNotifications] = useState({ email: true, sms: false, push: true });
-  const [deadlines] = useState([
-    { label: 'Document submission', days: 14, critical: true },
-    { label: 'Embassy appointment', days: 30, critical: false },
-    { label: 'Expected decision', days: 60, critical: false },
-  ]);
-  const [documents, setDocuments] = useState([
-    { id: 'passport', label: 'Passport copy', uploaded: true },
-    { id: 'photo', label: 'Passport photo', uploaded: true },
-    { id: 'bank', label: 'Bank statements', uploaded: false },
-    { id: 'admit', label: 'Admission letter', uploaded: false },
-    { id: 'sop', label: 'Statement of Purpose', uploaded: false },
-    { id: 'insurance', label: 'Travel insurance', uploaded: false },
-  ]);
-
   useEffect(() => {
     axios.get(`${API}/public/track/${id}`)
       .then((r) => {
@@ -125,13 +129,16 @@ export default function TrackStatus() {
     );
   }
 
-  const cfg = STATUS_CONFIG[app.status] || STATUS_CONFIG.draft;
+  const cfg = statusConfig(app.status);
   const Icon = cfg.icon;
-  const timeline = app.timeline || [];
-  const timelineSteps = STATUS_ORDER.map((key) => {
-    const entry = timeline.find((t) => t.status === key);
-    return { key, label: STATUS_CONFIG[key].label, note: entry?.note, at: entry?.at };
-  });
+  // The real history from the server, oldest first; the last entry is the current state.
+  const timelineSteps = (app.timeline || []).map((entry, i) => ({
+    key: entry.id || i,
+    status: entry.status,
+    label: entry.label || statusConfig(entry.status).label,
+    note: entry.note,
+    at: entry.at,
+  }));
 
   return (
     <div className="bg-[hsl(var(--soft-bg))] min-h-screen">
@@ -194,106 +201,9 @@ export default function TrackStatus() {
                 <TimelineStep
                   key={step.key}
                   step={step}
-                  currentStatus={app.status}
                   isLast={i === timelineSteps.length - 1}
                 />
               ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3"
-          >
-            {deadlines.map(d => {
-              const urgent = d.days <= 7 && d.critical;
-              return (
-                <div key={d.label} className={`rounded-2xl p-4 text-center border ${urgent ? 'bg-red-50 border-red-200' : 'bg-white border-[hsl(var(--border))]'}`}>
-                  <div className={`text-[24px] font-display font-bold ${urgent ? 'text-red-600' : 'text-[hsl(var(--blue-900))]'}`}>
-                    {d.days}d
-                  </div>
-                  <div className="text-[12px] text-muted-foreground mt-0.5">{d.label}</div>
-                  {urgent && <AlertCircle className="w-3.5 h-3.5 text-red-500 mx-auto mt-1" />}
-                </div>
-              );
-            })}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6 rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8"
-          >
-            <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-4">
-              <ListChecks className="w-4 h-4" /> Document Checklist
-            </div>
-            <div className="space-y-2">
-              {documents.map(doc => (
-                <label key={doc.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-[hsl(var(--soft-bg))] cursor-pointer transition">
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${doc.uploaded ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-[hsl(var(--border))]'}`}>
-                    {doc.uploaded ? <CheckCircle2 className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-[hsl(var(--border))]" />}
-                  </div>
-                  <span className={`flex-1 text-[14px] ${doc.uploaded ? 'text-[hsl(var(--blue-900))] line-through opacity-50' : 'text-[hsl(var(--blue-900))]'}`}>
-                    {doc.label}
-                  </span>
-                  {!doc.uploaded && (
-                    <button
-                      onClick={() => setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, uploaded: true } : d))}
-                      className="text-[13px] px-3 h-9 rounded-xl bg-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-800))] text-white font-semibold transition-colors"
-                    >
-                      <Upload className="w-3 h-3 mr-1 inline" /> Upload
-                    </button>
-                  )}
-                </label>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-[hsl(var(--border))] flex items-center justify-between text-[13px]">
-              <span className="text-muted-foreground">
-                {documents.filter(d => d.uploaded).length}/{documents.length} uploaded
-              </span>
-              <div className="w-32 h-2 rounded-full bg-[hsl(var(--soft-bg))] overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 rounded-full transition-all"
-                  style={{ width: `${(documents.filter(d => d.uploaded).length / documents.length) * 100}%` }}
-                />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="mt-6 rounded-2xl bg-white border border-[hsl(var(--border))] p-6 sm:p-8"
-          >
-            <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-4">
-              <Bell className="w-4 h-4" /> Notification Preferences
-            </div>
-            <div className="space-y-3">
-              {[
-                { key: 'email', label: 'Email updates', desc: 'Get notified about status changes via email' },
-                { key: 'sms', label: 'SMS alerts', desc: 'Receive text message for urgent updates' },
-                { key: 'push', label: 'Push notifications', desc: 'Browser notifications for real-time updates' },
-              ].map(n => (
-                <label key={n.key} className="flex items-center justify-between p-3 rounded-xl hover:bg-[hsl(var(--soft-bg))] cursor-pointer transition">
-                  <div>
-                    <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">{n.label}</div>
-                    <div className="text-[12px] text-muted-foreground">{n.desc}</div>
-                  </div>
-                  <div
-                    onClick={() => setNotifications(prev => ({ ...prev, [n.key]: !prev[n.key] }))}
-                    className={`relative w-11 h-6 rounded-full transition cursor-pointer ${notifications[n.key] ? 'bg-[hsl(var(--blue-700))]' : 'bg-[hsl(var(--border))]'}`}
-                  >
-                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition ${notifications[n.key] ? 'left-[22px]' : 'left-0.5'}`} />
-                  </div>
-                </label>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-[hsl(var(--border))] flex items-center gap-2 text-[12px] text-muted-foreground">
-              <BellRing className="w-3.5 h-3.5" /> You&apos;ll receive deadline reminders and status updates.
             </div>
           </motion.div>
 

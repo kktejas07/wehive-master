@@ -15,7 +15,7 @@ import RouteFallback from './components/RouteFallback';
 import { Toaster } from './components/ui/toaster';
 import { setPricing } from './components/FeeBreakdown';
 import { setCurrency } from './lib/utils';
-import { getPageTitle } from './lib/pageTitles';
+import { applyRouteSeo } from './lib/seo';
 import { AnalyticsRoot } from './analytics/components/AnalyticsRoot';
 import { trackScreen } from './analytics';
 
@@ -116,7 +116,7 @@ function AnimatedRoutes() {
   const location = useLocation();
 
   useEffect(() => {
-    document.title = getPageTitle(location.pathname);
+    applyRouteSeo(location.pathname);
     trackScreen(location.pathname.replace('/', '') || 'home', { path: location.pathname });
   }, [location.pathname]);
 

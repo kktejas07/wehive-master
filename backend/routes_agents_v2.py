@@ -121,7 +121,7 @@ async def run_agent_endpoint(
                 error=str(e),
             )
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'run_agent_endpoint', exc_info=True)
         raise HTTPException(500, "Agent run failed")
     doc = run.to_dict()
     try:

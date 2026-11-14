@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from './ui/button';
+import { captureError } from '../analytics/errors/captureError';
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -14,6 +15,12 @@ export class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Render errors caught here never reach window.onerror, so report them explicitly.
+    captureError(error, {
+      scope: 'react_error_boundary',
+      severity: 'fatal',
+      props: { component_stack: errorInfo?.componentStack },
+    });
   }
 
   componentDidUpdate(prevProps) {

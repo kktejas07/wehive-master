@@ -421,7 +421,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
             student_memory.add(str(user_id), f"Asked: {text}")
             student_memory.add(str(user_id), f"Eva replied: {reply_text[:200]}", role="assistant")
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'send_message', exc_info=True)
 
     assistant_msg = {
         "_id": str(uuid.uuid4()),
@@ -438,7 +438,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
             student_memory.add(str(uid), f"Asked: {text}")
             student_memory.add(str(uid), f"Eva replied: {reply_text[:200]}", role="assistant")
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'send_message', exc_info=True)
         try:
             from rag_eval import auto_evaluate_hook
             asyncio.create_task(auto_evaluate_hook(
@@ -449,7 +449,7 @@ async def send_message(session_id: str, req: ChatMessageRequest, user=Depends(ge
                 context=context,
             ))
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'send_message', exc_info=True)
 
     new_title = sess.get("title") or "New chat"
     if new_title in ("New chat", None, ""):

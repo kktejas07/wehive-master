@@ -207,7 +207,8 @@ export default function VisaDetail() {
       )}
       <GuidedFormSection countryName={country.name} />
       <InterviewPrep countryName={country.name} />
-      <EligibilityChecker countryName={country.name} />
+      {/* Interview-waiver ("dropbox") renewal is a US scheme and the questions are about US visas. */}
+      {country.id === 'us' && <EligibilityChecker countryName={country.name} />}
       <FlightSuggestions country={country} />
       <CategorySuggestions currentId={country.id} />
       <OtherCountries list={others} />

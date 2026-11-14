@@ -116,7 +116,7 @@ function WelcomeBanner({ admin, alertCount, onRunAggregators, running }) {
       <h2 className="h-card mt-3">{admin?.name || admin?.email || 'Admin'}</h2>
       {alertCount > 0 && (
         <div className="mt-2 text-[13px] text-amber-700 font-semibold flex items-center gap-1.5">
-          <AlertTriangle className="w-3.5 h-3.5" /> {alertCount} alert{alertCount !== 1 ? 's' : ''} need attention
+          <AlertTriangle className="w-3.5 h-3.5" /> {alertCount} alert{alertCount !== 1 ? 's need' : ' needs'} attention
         </div>
       )}
       <button
@@ -183,46 +183,69 @@ function KPICard({ label, value, sub, Icon, delta, testid }) {
 
 // ─── row 3 ────────────────────────────────────────────────────────────────────
 
-const FUNNEL_STEPS = [
-  { key: 'registered',       label: 'Registered' },
-  { key: 'verified',         label: 'Verified' },
-  { key: 'profile_complete', label: 'Profile' },
-  { key: 'applied',          label: 'Applied' },
-  { key: 'paid',             label: 'Paid' },
-  { key: 'approved',         label: 'Approved' },
+const FUNNEL_WINDOWS = [
+  { days: 30, label: '30 days' },
+  { days: 90, label: '90 days' },
+  { days: 365, label: '12 months' },
 ];
 
-function FunnelPanel({ funnel }) {
+// GET /admin/funnel returns { days, steps: [{ key, label, count, from_previous }], revenue }.
+// (This panel used to read funnel.registered / funnel.verified, which the API never sent, so every bar showed 0.)
+function FunnelPanel({ funnel: initial }) {
+  const { token } = useAdminAuth();
+  const [funnel, setFunnel] = useState(initial);
+  const [days, setDays] = useState(initial?.days || 90);
+  useEffect(() => { setFunnel(initial); }, [initial]);
+
+  const pick = (d) => {
+    setDays(d);
+    adminClient(token).get('/funnel', { params: { days: d } }).then((r) => setFunnel(r.data)).catch(() => {});
+  };
+
   if (!funnel) return (
-    <Panel className="flex items-center justify-center h-full">
-      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+    <Panel>
+      <PanelTitle Icon={Users}>User funnel</PanelTitle>
+      <div className="text-[13px] text-muted-foreground">Funnel data is unavailable right now.</div>
     </Panel>
   );
-  const max = Math.max(1, ...FUNNEL_STEPS.map((s) => funnel[s.key] || 0));
+  const steps = funnel.steps || [];
+  const max = Math.max(1, ...steps.map((st) => st.count || 0));
+  const revenue = funnel.revenue || {};
   return (
     <Panel>
-      <PanelTitle Icon={Users}>User funnel (90d)</PanelTitle>
+      <PanelTitle Icon={Users}>User funnel</PanelTitle>
+      <div className="flex gap-1.5 mb-4" role="group" aria-label="Funnel window">
+        {FUNNEL_WINDOWS.map((w) => (
+          <button key={w.days} type="button" aria-pressed={days === w.days} onClick={() => pick(w.days)}
+            className={`h-8 px-3 rounded-lg text-[12px] font-semibold border transition-colors ${days === w.days
+              ? 'bg-[hsl(var(--blue-50))] border-[hsl(var(--blue-700))]/30 text-[hsl(var(--blue-700))]'
+              : 'bg-white border-border text-muted-foreground hover:text-[hsl(var(--blue-900))]'}`}>
+            {w.label}
+          </button>
+        ))}
+      </div>
       <div className="space-y-2">
-        {FUNNEL_STEPS.map((s, i) => {
-          const count = funnel[s.key] || 0;
-          const prev = i === 0 ? count : (funnel[FUNNEL_STEPS[i - 1].key] || count);
-          const drop = prev > 0 && i > 0 ? Math.round((1 - count / prev) * 100) : null;
-          const pct = Math.round((count / max) * 100);
+        {steps.map((st) => {
+          const pct = Math.round(((st.count || 0) / max) * 100);
           return (
-            <Link key={s.key} to={`/admin/users?stage=${s.key}`}
-              className="block hover:bg-[hsl(var(--blue-50))] rounded-lg px-2 py-1 -mx-2 transition-colors group">
+            <div key={st.key} data-testid={`funnel-${st.key}`} className="px-2 py-1 -mx-2">
               <div className="flex justify-between text-[12px] mb-1">
-                <span className="text-muted-foreground group-hover:text-[hsl(var(--blue-900))]">{s.label}</span>
-                <span className="text-[hsl(var(--blue-900))] font-semibold tabular-nums">{count.toLocaleString()}
-                  {drop != null && <span className="text-red-600 ml-1.5 font-normal">↓{drop}%</span>}
+                <span className="text-muted-foreground">{st.label}</span>
+                <span className="text-[hsl(var(--blue-900))] font-semibold tabular-nums">{(st.count || 0).toLocaleString()}
+                  {st.from_previous != null && <span className="text-muted-foreground ml-1.5 font-normal">{st.from_previous}%</span>}
                 </span>
               </div>
               <div className="h-1.5 rounded-full bg-[hsl(var(--blue-50))]">
                 <div className="h-full rounded-full bg-[hsl(var(--blue-700))]" style={{ width: `${pct}%` }} />
               </div>
-            </Link>
+            </div>
           );
         })}
+        {steps.length === 0 && <div className="text-[13px] text-muted-foreground">No data for this period.</div>}
+      </div>
+      <div className="mt-4 pt-3 border-t border-border flex items-baseline justify-between" data-testid="funnel-paid-revenue">
+        <span className="text-[12px] text-muted-foreground">Payments received · {revenue.paid_count ?? 0}</span>
+        <span className="text-[15px] font-display font-bold tabular-nums text-[hsl(var(--blue-900))]">{inr(revenue.paid_inr ?? 0)}</span>
       </div>
     </Panel>
   );
@@ -230,30 +253,40 @@ function FunnelPanel({ funnel }) {
 
 function AlertsPanel({ alerts }) {
   if (!alerts) return (
-    <Panel className="flex items-center justify-center h-full">
-      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+    <Panel>
+      <PanelTitle Icon={AlertTriangle}>Alerts</PanelTitle>
+      <div className="text-[13px] text-muted-foreground">Alerts are unavailable right now.</div>
     </Panel>
   );
   const items = (alerts.items || []).slice(0, 8);
+  const counts = Object.entries(alerts.counts || {});
   const SEV_DOT = { critical: 'bg-red-400', high: 'bg-amber-400', low: 'bg-blue-400' };
   return (
     <Panel className="flex flex-col">
-      <PanelTitle Icon={AlertTriangle} right={alerts.total > 8 && (
-        <Link to="/admin/alerts" className="link-primary text-[12px] inline-flex items-center gap-0.5">
-          View all <ArrowUpRight className="w-3 h-3" />
-        </Link>
-      )}>Alerts ({alerts.total ?? items.length})</PanelTitle>
+      <PanelTitle Icon={AlertTriangle}>Alerts ({alerts.total ?? items.length})</PanelTitle>
+      {counts.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {counts.map(([kind, n]) => (
+            <span key={kind} data-testid={`alerts-count-${kind}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-2.5 py-0.5 text-[11.5px] text-muted-foreground">
+              {ALERT_KIND_LABEL?.[kind] || kind} <strong className="text-[hsl(var(--blue-900))] tabular-nums">{n}</strong>
+            </span>
+          ))}
+        </div>
+      )}
       {items.length === 0 && <div className="text-[13px] text-muted-foreground">No active alerts.</div>}
       <div className="space-y-2">
         {items.map((al) => (
-          <div key={al.id} className="flex items-start gap-2 text-[12.5px]">
+          <div key={`${al.application_id}-${al.kind}`} className="flex items-start gap-2 text-[12.5px]">
             <span className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${SEV_DOT[al.severity] || SEV_DOT.low}`} />
             <div className="min-w-0">
               <div className="text-[hsl(var(--blue-900))] truncate">{al.message || ALERT_KIND_LABEL?.[al.kind] || al.kind}</div>
-              {al.applicant_name && <div className="text-muted-foreground text-[11px]">{al.applicant_name}{al.days != null ? ` · ${al.days}d` : ''}</div>}
+              <div className="text-muted-foreground text-[11px] truncate">
+                {[al.applicant, al.country && `${al.country} · ${al.visa_type || ''}`.trim()].filter(Boolean).join(' · ')}
+              </div>
             </div>
-            {al.case_id && (
-              <Link to={`/admin/applications/${al.case_id}`}
+            {al.application_id && (
+              <Link to={`/admin/applications/${al.application_id}`} data-testid={`alert-link-${al.application_id}-${al.kind}`}
                 className="link-primary ml-auto shrink-0 text-[12px] whitespace-nowrap">
                 View case
               </Link>

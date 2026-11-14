@@ -41,7 +41,7 @@ class TokenPoolManager:
             try:
                 await col.create_index(keys, background=True)
             except Exception:
-                pass
+                logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'ensure_indexes', exc_info=True)
 
     async def log_usage(
         self,

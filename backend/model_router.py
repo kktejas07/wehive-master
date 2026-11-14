@@ -392,14 +392,14 @@ async def _resolve_provider_key(provider_id: str, user_id: str = "") -> str:
         if acct and acct.get("api_key"):
             return acct["api_key"]
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, '_resolve_provider_key', exc_info=True)
     try:
         from byok_vault import resolve_key
         key = await resolve_key(provider_id, user_id)
         if key:
             return key
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, '_resolve_provider_key', exc_info=True)
     return ""
 
 

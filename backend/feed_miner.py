@@ -75,7 +75,7 @@ async def record_feed(
             await coll.create_index([("agent_id", 1), ("ts", -1)])
             await coll.create_index([("ts", -1)])
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'record_feed', exc_info=True)
         return doc
     except Exception as e:
         logger.warning("record_feed failed: %s", e)
@@ -161,7 +161,7 @@ async def feed_stats(*, days: int = 7) -> dict:
         async for d in coll.aggregate(tool_pipeline):
             by_tool.append({"tool": d["_id"], "count": d["count"]})
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'feed_stats', exc_info=True)
 
     return {
         "total": total,
@@ -429,7 +429,7 @@ async def save_proposal(kind: str, payload: dict) -> dict:
     try:
         await coll.create_index([("kind", 1), ("ts", -1)])
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'save_proposal', exc_info=True)
     return {k: v for k, v in doc.items() if k != "_id"}
 
 
@@ -479,7 +479,7 @@ async def apply_prompt_edit(*, agent_id: str, new_system: str, proposed_version:
     try:
         store.reload()
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'apply_prompt_edit', exc_info=True)
     await save_proposal("prompt_edit", {
         "agent_id": agent_id,
         "prompt_id": current.id,

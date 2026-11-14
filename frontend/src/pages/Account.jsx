@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { COUNTRIES } from '../data/mock';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
@@ -296,6 +297,9 @@ const COUNTRY_FLAGS = {
   nl: '🇳🇱', netherlands: '🇳🇱',
 };
 
+// Country names for application cards (the list API returns only the country id).
+const COUNTRY_NAMES = Object.fromEntries(COUNTRIES.map((c) => [c.id, c.name]));
+
 function countryFlagEmoji(id) {
   return COUNTRY_FLAGS[(id || '').toLowerCase()] || '🌍';
 }
@@ -335,7 +339,7 @@ function ApplicationCard({ a }) {
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0 flex-1">
           <div className="text-[15px] font-bold text-[hsl(var(--blue-900))] truncate">
-            {university || a.country_id.toUpperCase()}
+            {university || COUNTRY_NAMES[a.country_id] || (a.country_id || a.destination || 'Application').toUpperCase()}
           </div>
           {program && (
             <div className="text-[12px] text-muted-foreground mt-0.5 truncate">{program}</div>
@@ -378,7 +382,7 @@ function ApplicationsTab({ token }) {
       <>
         <EmptyState
           title="No applications yet"
-          sub="Start a visa application from any country page \u2014 it will show up here."
+          sub="Start a visa application from any country page — it will show up here."
           cta={{ to: '/', label: 'Browse countries' }}
         />
         <SOPTeaser />
@@ -455,9 +459,9 @@ function ReferralTeaser() {
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Gift className="w-4 h-4 text-[hsl(var(--blue-700))]" />
-          <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">Refer a friend, earn \u20b9500</div>
+          <div className="text-[14px] font-bold text-[hsl(var(--blue-900))]">Refer a friend, earn ₹500</div>
         </div>
-        <div className="text-[12.5px] text-muted-foreground mt-0.5">Share your referral code \u2014 earn credit for every friend who applies.</div>
+        <div className="text-[12.5px] text-muted-foreground mt-0.5">Share your referral code — earn credit for every friend who applies.</div>
       </div>
       <ChevronRight className="w-4 h-4 text-[hsl(var(--blue-900))]/30 group-hover:text-[hsl(var(--blue-700))] shrink-0" />
     </button>
@@ -486,7 +490,7 @@ function PlansTab({ token }) {
     <div className="grid sm:grid-cols-2 gap-4">
       {items.map((p) => (
         <Link key={p.id} to={`/holiday/${p.country_id}`} className="rounded-2xl bg-white border border-border p-5 hover:border-[hsl(var(--blue-700))]/20">
-          <div className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{p.country_id.toUpperCase()}</div>
+          <div className="text-[15px] font-bold text-[hsl(var(--blue-900))]">{(p.country_id || '').toUpperCase()}</div>
           <div className="mt-1 text-[12.5px] text-muted-foreground">{p.duration_days} days</div>
         </Link>
       ))}
@@ -504,7 +508,7 @@ function AIToolsTab({ token, isPremium }) {
   useEffect(() => {
     axios
       .get(`${API}/users/me/applications`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => setApps(r.data || []))
+      .then((r) => setApps(Array.isArray(r.data) ? r.data : (r.data?.items || [])))
       .catch(() => setApps([]));
   }, [token]);
 

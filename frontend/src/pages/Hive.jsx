@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { renderInlineMarkdown } from '../lib/inlineMarkdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import {
@@ -142,7 +143,7 @@ function AssistantBlock({ m, onSpeak, speaking, ttsEnabled, checkedAt }) {
       </div>
 
       <div className="text-[15px] leading-relaxed text-[hsl(var(--blue-900))] whitespace-pre-wrap">
-        {parts.main}
+        {renderInlineMarkdown(parts.main)}
       </div>
 
       {parts.reminder && (

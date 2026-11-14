@@ -794,6 +794,14 @@ PROVIDER_REGISTRY: dict[str, dict] = {
 # Abstract provider
 # ---------------------------------------------------------------------------
 
+class AIUnavailableError(RuntimeError):
+    """No language model can answer right now (no key, quota spent, providers down).
+
+    Subclasses RuntimeError so existing `except RuntimeError` / `except Exception`
+    callers keep working; server.py turns an uncaught one into a 503.
+    """
+
+
 class BaseProvider(abc.ABC):
     """Abstract LLM provider."""
 
@@ -1252,7 +1260,7 @@ class AIMarketplace:
                     default_model = llm_cfg.get("model", "").strip()
                     pool.insert(0, (get_provider(default_provider, key=default_key, model=default_model), default_provider))
         except Exception:
-            pass
+            logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'get_active_provider', exc_info=True)
 
         if pool:
             return FallbackRouterProvider(pool), "router"
@@ -1313,13 +1321,16 @@ class AIMarketplace:
             from local_llm import local_chat_with_info
             content, _info = await local_chat_with_info(user_prompt, context=system_prompt)
             content = (content or "").strip()
-            if content:
+            # Only a real local model (Ollama) may stand in here. "template-v1" is the
+            # visa-FAQ rule engine: it answered cover-letter and SOP requests with a fee
+            # table, which the app then showed as a finished document.
+            if content and _info.get("model") != "template-v1":
                 return content
         except Exception as e:
             logger.warning("Tier 2 local LLM failed: %s", e)
             
         # 4. Tier 3: Exhausted / Unavailable -> BYOK Prompt
-        raise RuntimeError("Daily free token limit reached and local fallback is unavailable. Please configure your own API key in Settings (BYOK).")
+        raise AIUnavailableError("Daily free token limit reached and local fallback is unavailable. Please configure your own API key in Settings (BYOK).")
 
     async def chat_with_info(self, user_id: str, system_prompt: str, user_prompt: str, max_tokens: int = 1024) -> tuple[str, dict]:
         """Returns (reply_text, provider_info) so callers can include the tagline."""
@@ -1373,7 +1384,7 @@ class AIMarketplace:
             logger.warning("Tier 2 local LLM failed: %s", e)
             
         # 4. Tier 3: Exhausted
-        raise RuntimeError("Daily free token limit reached and local fallback is unavailable. Please configure your own API key in Settings (BYOK).")
+        raise AIUnavailableError("Daily free token limit reached and local fallback is unavailable. Please configure your own API key in Settings (BYOK).")
 
     async def chat_with_image(self, user_id: str, system_prompt: str, user_prompt: str, image_b64: str, mime: str, max_tokens: int = 1024) -> str:
         provider, pid = await self.get_active_provider(user_id)
@@ -1393,7 +1404,7 @@ class AIMarketplace:
                 logger.warning("Tier 1 free pool image chat failed: %s", e)
                 
         # (Local LLM image fallback not supported, go straight to BYOK)
-        raise RuntimeError("Daily free token limit reached or free vision models unavailable. Please configure your own API key in Settings (BYOK).")
+        raise AIUnavailableError("Daily free token limit reached or free vision models unavailable. Please configure your own API key in Settings (BYOK).")
 
 
 marketplace = AIMarketplace()

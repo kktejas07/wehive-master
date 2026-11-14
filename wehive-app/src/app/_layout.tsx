@@ -2,17 +2,27 @@ import { Figtree_600SemiBold, Figtree_700Bold, Figtree_800ExtraBold } from '@exp
 import { NotoSans_400Regular, NotoSans_500Medium } from '@expo-google-fonts/noto-sans';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, ErrorBoundary as RouteErrorView, Stack, ThemeProvider, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
 import { SessionProvider } from '@/core/auth/session';
+import { installCrashHandler, reportError } from '@/core/crash/report';
 import { fonts } from '@/core/theme/tokens';
 import { useTheme } from '@/core/theme/use-theme';
 
 SplashScreen.preventAutoHideAsync();
+installCrashHandler();
+
+/** Expo Router renders this when a screen throws while rendering: report it, then show the standard retry view. */
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+  useEffect(() => {
+    reportError(props.error, { fatal: true });
+  }, [props.error]);
+  return <RouteErrorView {...props} />;
+}
 
 export default function RootLayout() {
   const [loaded, fontError] = useFonts({

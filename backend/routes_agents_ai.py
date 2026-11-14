@@ -163,7 +163,7 @@ async def agent_status(user=Depends(get_current_user)):
         cursor = aggregator_runs_col.find({}, {"_id": 0}).sort("ts", -1).limit(5)
         agg_runs = [doc async for doc in cursor]
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, 'agent_status', exc_info=True)
 
     return {
         "scheduler_active": _scheduler_task is not None and not _scheduler_task.done(),

@@ -6,6 +6,7 @@ not ISO "gb") and broad course categories ("stem", "business", "engineering", "m
 """
 from __future__ import annotations
 
+import logging
 import json
 import re
 from functools import lru_cache
@@ -37,7 +38,7 @@ def _country_names() -> dict[str, str]:
                 if n and code:
                     names[n.lower()] = code
     except Exception:
-        pass
+        logging.getLogger('wehive.suppressed').warning('Ignored error in %s.%s', __name__, '_country_names', exc_info=True)
     return names
 
 
