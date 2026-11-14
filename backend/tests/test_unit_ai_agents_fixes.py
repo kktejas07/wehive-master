@@ -29,7 +29,7 @@ def _country(code):
 async def test_chatbot_gather_context_with_country_code():
     import routes_chatbot as rc
     with patch.object(rc, "lookup_country", new=AsyncMock(side_effect=lambda c: _country(c))), \
-         patch.object(rc, "get_application_fee", new=AsyncMock(return_value={"fee_inr": 20000})), \
+         patch.object(rc, "get_application_fee", new=AsyncMock(return_value={"visa_type": "Tourist", "embassy_fee_inr": 15000, "appointment_fee_inr": 0, "pay_at_submit_inr": 15000, "service_fee_inr": 3500, "gst_inr": 630, "due_on_delivery_inr": 4130, "total_inr": 19130})), \
          patch.object(rc, "search_universities", new=AsyncMock(return_value=[])):
         ctx = await rc._gather_context("What is the visa fee for us?")
     assert "United States" in ctx

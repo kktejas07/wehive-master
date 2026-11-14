@@ -36,8 +36,11 @@ PLANS = {
 
 def _item_name(payment: dict) -> str:
     """Line-item name for payments that are not a membership plan."""
+    ref = str(payment.get('application_id') or '')[:8].upper()
     if payment.get('kind') == 'application_fee':
-        return f"Visa application fee (#{str(payment.get('application_id') or '')[:8].upper()})"
+        return f"Visa application fee (#{ref})"
+    if payment.get('kind') == 'service_fee':
+        return f"We Hive service fee incl. GST (#{ref})"
     return 'Service'
 
 
@@ -353,8 +356,8 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str = Header(
             }},
             return_document=True,
         )
-        if doc and doc.get('kind') == 'application_fee':
-            # A visa application fee settles that application; it never grants premium.
+        if doc and doc.get('kind') in ('application_fee', 'service_fee'):
+            # A visa application's fees settle that application; they never grant premium.
             from routes_application_fee import mark_fee_paid
             await mark_fee_paid(doc)
         elif doc:

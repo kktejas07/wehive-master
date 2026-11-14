@@ -372,3 +372,81 @@ async def test_refunding_an_application_fee_marks_the_application_and_leaves_pre
     users.update_one.assert_not_awaited()
     query, update = apps.update_one.await_args.args
     assert query == {'_id': 'app-12345678', 'fee.payment_id': 'p1'} and update['$set']['fee.status'] == 'refunded'
+
+
+# ── service fee + GST, payable online after submission ────────────────────────
+
+@pytest.mark.asyncio
+async def test_service_fee_is_only_payable_once_the_application_is_submitted(world):
+    assert await fee.service_fee_due_inr(await _app(world)) == 0
+    with pytest.raises(HTTPException) as e:
+        await fee.create_order('app-12345678', fee.CreateFeeOrder(part='service_fee'), user=USER)
+    assert e.value.status_code == 400
+
+    await world.apps.update_one({'_id': 'app-12345678'}, {'$set': {'status': 'submitted'}})
+    later = (await fee.fee_quote(await _app(world)))['pay_later_inr']
+    assert await fee.service_fee_due_inr(await _app(world)) == later > 0
+
+
+@pytest.mark.asyncio
+async def test_paying_the_service_fee_is_recorded_separately_from_the_embassy_fee(world, monkeypatch):
+    monkeypatch.setattr(rp, 'PAYMENT_BYPASS_ENABLED', True)
+    await world.apps.update_one({'_id': 'app-12345678'}, {'$set': {'status': 'visa_approved'}})
+    later = (await fee.fee_quote(await _app(world)))['pay_later_inr']
+    order = await fee.create_order('app-12345678', fee.CreateFeeOrder(part='service_fee'), user=USER)
+    assert order['amount_inr'] == later and order['part'] == 'service_fee'
+    assert world.pays.docs[0]['kind'] == world.pays.docs[0]['plan_id'] == 'service_fee'
+
+    await fee.verify(fee.VerifyFee(razorpay_order_id=order['order_id']), user=USER)
+    app = await _app(world)
+    assert app['service_fee']['status'] == 'paid' and app['service_fee']['amount_inr'] == later
+    assert 'fee' not in app  # the embassy fee is a separate payment
+    assert app['timeline'][-1]['label'] == 'Service fee received'
+    q = await fee.quote('app-12345678', user=USER)
+    assert q['service_paid'] is True and q['service_due_inr'] == 0 and q['paid'] is False
+    with pytest.raises(HTTPException) as e:
+        await fee.create_order('app-12345678', fee.CreateFeeOrder(part='service_fee'), user=USER)
+    assert e.value.status_code == 409
+    assert rp._item_name(world.pays.docs[0]) == 'We Hive service fee incl. GST (#APP-1234)'
+
+
+@pytest.mark.asyncio
+async def test_a_plan_order_cannot_be_verified_as_an_application_payment(world):
+    world.pays.docs.append({'_id': 'p1', 'user_id': 'u1', 'plan_id': 'standard', 'razorpay_order_id': 'order_plan', 'status': 'created'})
+    with pytest.raises(HTTPException) as e:
+        await fee.verify(fee.VerifyFee(razorpay_order_id='order_plan'), user=USER)
+    assert e.value.status_code == 404
+
+
+# ── one price for university applications; phone on the apply form ────────────
+
+def test_university_application_price_has_one_source():
+    import fee_calculator as fc
+    assert fc.compute_multi_university_fees(3)['application_fee'] == fc.FLAT_APPLICATION_FEE_INR
+    five = fc.compute_multi_university_fees(5)
+    assert five['application_fee'] == fc.FLAT_APPLICATION_FEE_INR + 2 * fc.EXTRA_UNIVERSITY_FEE_INR
+    assert five['total'] == five['application_fee'] + round(five['application_fee'] * 0.18)
+
+
+@pytest.mark.asyncio
+async def test_public_pricing_carries_the_university_application_price(monkeypatch):
+    import fee_calculator as fc
+    import routes_public
+    monkeypatch.setattr(routes_public, 'load_pricing', AsyncMock(return_value={**PRICING, 'currency': 'INR'}))
+    out = await routes_public.public_pricing()
+    assert out['university_application'] == {'flat_inr': fc.FLAT_APPLICATION_FEE_INR, 'included': 3, 'extra_inr': fc.EXTRA_UNIVERSITY_FEE_INR}
+
+
+def test_visa_countries_no_longer_carry_the_university_flat_fee():
+    import data
+    fr = data.get_country('fr')
+    assert fr['application_fee'] == 3500  # our service fee, not ₹18,999 / ₹20,000
+    assert '20,000' not in fr['fee_disclaimer'] and 'due on delivery' in fr['fee_disclaimer']
+
+
+def test_a_phone_given_on_the_apply_form_counts_as_on_file():
+    import routes_apps
+    user = {'email': 'priya@example.com'}  # no phone on the account
+    assert routes_apps._build_doc_report({'visa_type': 'Tourist'}, user)['contact_info_missing'] == ['phone']
+    app = {'visa_type': 'Tourist', 'primary_applicant': {'phone': '+91 98765 43210'}}
+    assert routes_apps._build_doc_report(app, user)['contact_info_missing'] == []

@@ -105,9 +105,10 @@ class TestChatbotHelpers:
         }
         with patch("routes_chatbot.lookup_country", new=AsyncMock(return_value=country_data)):
             with patch("routes_chatbot.search_universities", new=AsyncMock(return_value=[])):
-                with patch("routes_chatbot.get_application_fee", new=AsyncMock(return_value={"fee_inr": 15000, "embassy_fee": 12000})):
+                with patch("routes_chatbot.get_application_fee", new=AsyncMock(return_value={"visa_type": "Tourist", "embassy_fee_inr": 15000, "appointment_fee_inr": 0, "pay_at_submit_inr": 15000, "service_fee_inr": 3500, "gst_inr": 630, "due_on_delivery_inr": 4130, "total_inr": 19130})):
                     result = await _gather_context("visa for UK")
-                    assert "15000" in result
+                    # the real split, not one flat "application fee"
+                    assert "₹15,000" in result and "due on delivery (₹4,130)" in result
 
     @pytest.mark.asyncio
     async def test_notify_status_change(self):

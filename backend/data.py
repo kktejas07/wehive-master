@@ -2464,10 +2464,11 @@ def get_country(country_id: str):
     country = next((c for c in COUNTRIES if c['id'] == country_id), None)
     if country:
         country = copy.deepcopy(country)  # never mutate the shared static COUNTRIES entries
-        from fee_calculator import FLAT_APPLICATION_FEE_INR, USD_TO_INR
-        country['application_fee'] = FLAT_APPLICATION_FEE_INR
+        from fee_calculator import DEFAULT_BASE_FEE_BY_TYPE, USD_TO_INR
+        # We Hive service fee per applicant (tourist visa). The embassy fee is per category (fees_inr).
+        country['application_fee'] = DEFAULT_BASE_FEE_BY_TYPE['Tourist']
         country['embassy_fee'] = round((country.get('fees_usd') or 0) * USD_TO_INR)
-        country['fee_disclaimer'] = 'Flat ₹20,000 application fee per applicant — includes our service fees and the applicable government/embassy fee.'
+        country['fee_disclaimer'] = 'Embassy and appointment fees are paid when you submit. The We Hive service fee and GST are due on delivery. Government fees can change, so we confirm the amount when you apply.'
     return country
 
 

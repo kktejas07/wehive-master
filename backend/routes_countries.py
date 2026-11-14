@@ -4,7 +4,8 @@ import logging
 
 from data import COUNTRIES as STATIC_COUNTRIES, get_country as static_get, get_holiday_plan
 from db import db
-from fee_calculator import FLAT_APPLICATION_FEE_INR, USD_TO_INR
+from fee_calculator import DEFAULT_BASE_FEE_BY_TYPE, USD_TO_INR
+from pricing import load_pricing
 
 router = APIRouter(prefix='/countries', tags=['countries'])
 logger = logging.getLogger('wehive')
@@ -55,6 +56,23 @@ async def _get_one(country_id: str) -> Optional[dict]:
     if doc:
         return doc
     return static_get(country_id)
+
+
+async def _service_fee_inr() -> int:
+    """We Hive service fee per applicant for a tourist visa (admin-configurable pricing)."""
+    try:
+        return int((await load_pricing())['base_fees']['Tourist'])
+    except Exception:
+        logger.warning('Could not load pricing; using the default service fee', exc_info=True)
+        return DEFAULT_BASE_FEE_BY_TYPE['Tourist']
+
+
+def _add_fee_fields(c: dict, service_fee: int) -> None:
+    # `application_fee` is our service fee (older clients show it as "service fee");
+    # the embassy fee for each visa type is categories[type].fees_inr.
+    c['application_fee'] = service_fee
+    c['embassy_fee'] = round((c.get('fees_usd') or 0) * USD_TO_INR)
+    c['fee_disclaimer'] = ('Embassy and appointment fees are paid when you submit. The We Hive service fee and GST are due on delivery. Government fees can change, so we confirm the amount when you apply.')
 
 
 async def _corrected(items: list[dict]) -> list[dict]:
@@ -123,10 +141,9 @@ async def list_countries(
         items = [c for c in items if c.get('no_visa')]
     if limit:
         items = items[:limit]
+    service_fee = await _service_fee_inr()
     for c in items:
-        c['application_fee'] = FLAT_APPLICATION_FEE_INR
-        c['embassy_fee'] = round((c.get('fees_usd') or 0) * USD_TO_INR)
-        c['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
+        _add_fee_fields(c, service_fee)
     return items
 
 
@@ -142,9 +159,7 @@ async def country_detail(country_id: str):
         c['applicant_rules'] = visa_rules.applicant_rules(iso2, await visa_rules.load_detail(iso2))
     except Exception:
         c['applicant_rules'] = []
-    c['application_fee'] = FLAT_APPLICATION_FEE_INR
-    c['embassy_fee'] = round((c.get('fees_usd') or 0) * USD_TO_INR)
-    c['fee_disclaimer'] = 'Fees may vary based on government regulations and service charges. Please verify current rates at the time of application.'
+    _add_fee_fields(c, await _service_fee_inr())
     return _strip_mongo(c)
 
 

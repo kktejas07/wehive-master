@@ -113,17 +113,18 @@ async def admin_refund(payment_id: str, body: RefundBody, bg: BackgroundTasks, a
         await payments.update_one({'_id': payment_id}, {'$unset': {'refund_lock': ''}})
 
     revoked = False
-    is_app_fee = p.get('kind') == 'application_fee'
+    is_app_fee = p.get('kind') in ('application_fee', 'service_fee')
     if full and is_app_fee and p.get('application_id'):
-        # A visa application fee has nothing to do with premium: mark the application instead.
+        # A visa application's fees have nothing to do with premium: mark the application instead.
         from db import applications
+        field = 'fee' if p['kind'] == 'application_fee' else 'service_fee'
         await applications.update_one(
-            {'_id': p['application_id'], 'fee.payment_id': payment_id},
-            {'$set': {'fee.status': 'refunded', 'updated_at': now}})
+            {'_id': p['application_id'], f'{field}.payment_id': payment_id},
+            {'$set': {f'{field}.status': 'refunded', 'updated_at': now}})
     if full and body.revoke_premium and not is_app_fee:
         # Only drop premium if no other paid plan order still covers this user.
         other = await payments.find_one({'user_id': p['user_id'], 'status': 'paid', '_id': {'$ne': payment_id},
-                                         'kind': {'$ne': 'application_fee'}})
+                                         'kind': {'$nin': ['application_fee', 'service_fee']}})
         if not other:
             await users.update_one({'_id': p['user_id']}, {'$set': {'is_premium': False, 'updated_at': now},
                                                            '$unset': {'premium_since': '', 'plan_id': ''}})

@@ -308,7 +308,9 @@ def _build_doc_report(app: dict, user: dict) -> dict:
     mandatory = get_required_doc_types(visa_type, passport_country)
     uploaded_types = [d.get("doc_type") for d in app.get("documents", [])]
     missing_docs = [d for d in mandatory if d not in uploaded_types]
-    contact_missing = check_user_contact_fields(user)
+    # A phone or email given on the apply form (primary_applicant) counts as being on file.
+    primary = app.get("primary_applicant") or {}
+    contact_missing = [f for f in check_user_contact_fields(user) if not str(primary.get(f) or "").strip()]
     return {
         "mandatory": mandatory,
         "optional": OPTIONAL_DOC_TYPES,

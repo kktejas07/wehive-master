@@ -58,13 +58,46 @@ async def get_visa_requirements(country_id: str, visa_type: Optional[str] = None
     return data
 
 
-async def get_application_fee(country_id: str) -> Optional[dict]:
-    """Get application fee using the same comprehensive lookup as lookup_country."""
-    data = await lookup_country(country_id)
+async def get_application_fee(country_id: str, visa_type: str = 'Tourist', applicants: int = 1) -> Optional[dict]:
+    """Visa fee breakdown in INR, the same figures the visa page and checkout use:
+    embassy + appointment fees are paid at submit, service fee + GST on delivery."""
+    from fee_calculator import compute_fees
+    from pricing import load_pricing
+    data = await lookup_country((country_id or '').lower())
     if not data:
         return None
+    cats = data.get('categories') or {}
+    items = cats.items() if isinstance(cats, dict) else ((c.get('type') or c.get('name', ''), c) for c in cats if isinstance(c, dict))
+    wanted = (visa_type or 'Tourist').strip().lower()
+    key, cat = next(((k, c) for k, c in items if isinstance(c, dict) and wanted in (str(k).lower(), str(c.get('name', '')).lower())),
+                    (visa_type, {}))
+    visa_type = str(key or 'Tourist').title() if not cat else str(key)
+    requires_appt = bool(data.get('requires_appointment')) and not data.get('no_visa')
+    try:
+        pricing = await load_pricing()
+    except Exception:  # pricing settings unreadable: fall back to the built-in defaults
+        from fee_calculator import DEFAULT_BASE_FEE_BY_TYPE, DEFAULT_GST_RATE, DEFAULT_SURCHARGE_INR
+        pricing = {'base_fees': DEFAULT_BASE_FEE_BY_TYPE, 'surcharge_inr': DEFAULT_SURCHARGE_INR, 'gst_rate': DEFAULT_GST_RATE}
+    fees = compute_fees(
+        applicants=applicants, visa_type=visa_type,
+        govt_fee_inr=0 if data.get('no_visa') else int(cat.get('fees_inr') or 0),
+        requires_appointment=requires_appt,
+        appointment_fee_inr=int(data.get('appointment_fee_inr') or 0) if requires_appt else 0,
+        base_fees_override=pricing['base_fees'], surcharge_inr=pricing['surcharge_inr'], gst_rate=pricing['gst_rate'],
+    )
+    pay_now = fees['govt'] + fees['appointment']
     return {
         'country': data.get('name'),
-        'fee_inr': data.get('application_fee'),
-        'embassy_fee': data.get('embassy_fee'),
+        'visa_type': visa_type,
+        'applicants': fees['applicants'],
+        'embassy_fee_inr': fees['govt'],
+        'appointment_fee_inr': fees['appointment'],
+        'service_fee_inr': fees['base'],
+        'gst_inr': fees['gst'],
+        'pay_at_submit_inr': pay_now,
+        'due_on_delivery_inr': fees['total'] - pay_now,
+        'total_inr': fees['total'],
+        # Older callers read these two names.
+        'fee_inr': fees['total'],
+        'embassy_fee': fees['govt'],
     }

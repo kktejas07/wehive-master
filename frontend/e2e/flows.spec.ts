@@ -220,7 +220,7 @@ test('application fee is paid before the application is submitted', async ({ pag
   page.on('request', (r) => { if (r.url().endsWith('/payments/application/verify')) paid = true; });
   await page.getByRole('button', { name: 'Pay ₹9,800 & submit' }).click();
 
-  await expect(page.getByText('Payment received and application submitted')).toBeVisible();
+  await expect(page.getByText('Payment received and application submitted').first()).toBeVisible(); // the toast also has a screen-reader copy
   const posts = api.calls.filter((c) => c.method === 'POST' && /payments|submit/.test(c.path)).map((c) => c.path);
   expect(paid).toBe(true);
   expect(posts).toEqual([
@@ -228,4 +228,27 @@ test('application fee is paid before the application is submitted', async ({ pag
     '/payments/application/verify',
     '/users/me/applications/app-fee-1/submit',
   ]);
+});
+
+test('service fee and GST can be paid online after the application is submitted', async ({ page, api, signIn }) => {
+  await signIn();
+  const app = { id: 'app-fee-2', country_id: 'fr', visa_type: 'Tourist', status: 'submitted', applicants: 1, form_data: {}, timeline: [], documents: [] };
+  api
+    .on('GET', /^\/users\/me\/applications\/app-fee-2$/, app)
+    .on('GET', /^\/users\/me\/applications\/app-fee-2\/(documents|messages)$/, [])
+    .on('GET', /^\/users\/me\/applications\/app-fee-2\/required-documents$/, { mandatory: ['passport'], missing_docs: [] })
+    .on('GET', /^\/countries\/fr$/, { id: 'fr', name: 'France', flag: '🇫🇷', categories: { Tourist: { documents: [] } } })
+    .on('GET', /^\/payments\/application\/app-fee-2\/quote$/, {
+      pay_now_inr: 9800, pay_later_inr: 4472, total_inr: 14272, due_now_inr: 0, paid: true, paid_inr: 9800,
+      service_due_inr: 4472, service_paid: false, service_paid_inr: 0, online_payment: true,
+    })
+    .on('POST', /^\/payments\/application\/app-fee-2\/create-order$/,
+      { order_id: 'mock-2', amount: 447200, amount_inr: 4472, currency: 'INR', razorpay_key: 'mock', application_id: 'app-fee-2', part: 'service_fee' })
+    .on('POST', /^\/payments\/application\/verify$/, { ok: true, paid: true, amount_inr: 4472 });
+  await page.goto('/account/applications/app-fee-2');
+
+  await expect(page.getByTestId('application-fee-note')).toContainText('Application fee paid: ₹9,800');
+  await page.getByTestId('pay-service-fee').click();
+  await expect(page.getByText('Service fee paid', { exact: true }).first()).toBeVisible();
+  expect(api.calls.find((c) => c.method === 'POST' && c.path.endsWith('/create-order'))?.body).toEqual({ part: 'service_fee' });
 });

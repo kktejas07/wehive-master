@@ -354,6 +354,21 @@ export default function ApplicationDetail() {
     }
   };
 
+  const onPayServiceFee = async () => {
+    setSubmitting(true);
+    try {
+      const order = await payApplicationFee({ applicationId: id, token, user, part: 'service_fee' });
+      toast({ title: 'Service fee paid', description: `We received ${inr(order.amount_inr)}. Nothing more is due. The invoice is under My Account → Payments.` });
+      await refresh();
+    } catch (e) {
+      const d = e?.response?.data?.detail;
+      toast({ title: 'Payment not completed', description: (typeof d === 'string' ? d : null) || e.message, variant: 'destructive' });
+    } finally {
+      await loadFee();
+      setSubmitting(false);
+    }
+  };
+
   const onDownloadReceipt = async () => {
     try {
       const r = await axios.get(`${API}/users/me/applications/${id}/receipt.pdf`, {
@@ -414,6 +429,7 @@ export default function ApplicationDetail() {
         submitting={submitting}
         canSubmit={canSubmit}
         fee={fee}
+        onPayServiceFee={onPayServiceFee}
         onScan={() => setScanOpen(true)}
         onCoverLetter={() => setCoverOpen(true)}
         onItinerary={() => setItineraryOpen(true)}

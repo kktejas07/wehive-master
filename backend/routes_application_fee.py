@@ -1,8 +1,9 @@
-"""Visa application fee, paid when the applicant submits.
+"""Online payment of the two parts of a visa application's fees.
 
-What is charged is the "to be paid now" amount shown on the visa page: the embassy
-(government) fee plus any appointment fee, per applicant. The We Hive service fee and
-GST are due later, on delivery, and are not collected here.
+- "application_fee": the "to be paid now" amount shown on the visa page, i.e. the embassy
+  (government) fee plus any appointment fee, per applicant. Paid before submitting.
+- "service_fee": the We Hive service fee plus GST, due on delivery. Payable any time
+  after the application has been submitted.
 
 The amount is always computed on the server from the application and the country
 data; nothing the client sends decides it.
@@ -12,6 +13,7 @@ import hmac
 import logging
 import uuid
 from datetime import datetime
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -25,6 +27,12 @@ router = APIRouter(prefix='/payments/application', tags=['payments'])
 logger = logging.getLogger('wehive.payments')
 
 KIND = 'application_fee'
+SERVICE_KIND = 'service_fee'
+# payment kind -> (field on the application, timeline label, what the money is for)
+PARTS = {
+    KIND: ('fee', 'Application fee received', 'embassy and appointment fees'),
+    SERVICE_KIND: ('service_fee', 'Service fee received', 'We Hive service fee and GST'),
+}
 
 
 async def _gateway() -> str:
@@ -82,8 +90,16 @@ async def fee_quote(app: dict) -> dict:
     }
 
 
-def fee_paid(app: dict) -> bool:
-    return (app.get('fee') or {}).get('status') == 'paid'
+def fee_paid(app: dict, kind: str = KIND) -> bool:
+    return (app.get(PARTS[kind][0]) or {}).get('status') == 'paid'
+
+
+async def service_fee_due_inr(app: dict) -> int:
+    """Service fee + GST still payable online: only once the application is submitted."""
+    if fee_paid(app, SERVICE_KIND) or (app.get('status') or 'draft') in ('draft', 'cancelled'):
+        return 0
+    amount = (await fee_quote(app))['pay_later_inr']
+    return amount if amount > 0 and await _gateway() else 0
 
 
 async def fee_due_inr(app: dict) -> int:
@@ -99,24 +115,28 @@ async def fee_due_inr(app: dict) -> int:
 
 
 async def mark_fee_paid(payment: dict) -> None:
-    """Record a settled application-fee payment on its application. Safe to call twice."""
+    """Record a settled fee payment (either part) on its application. Safe to call twice."""
+    kind = payment.get('kind') if payment.get('kind') in PARTS else KIND
+    field, label, what = PARTS[kind]
     app = await applications.find_one({'_id': payment.get('application_id')})
-    if not app or fee_paid(app):
+    if not app or fee_paid(app, kind):
         return
     now = datetime.utcnow()
     amount = int(payment.get('amount_inr') or 0)
     events = list(app.get('timeline') or [])
-    events.append({'id': str(uuid.uuid4()), 'status': app.get('status') or 'draft', 'label': 'Application fee received',
-                   'at': now, 'note': f'₹{amount:,} paid (embassy and appointment fees).'})
+    events.append({'id': str(uuid.uuid4()), 'status': app.get('status') or 'draft', 'label': label,
+                   'at': now, 'note': f'₹{amount:,} paid ({what}).'})
     await applications.update_one({'_id': app['_id']}, {'$set': {
-        'fee': {'status': 'paid', 'amount_inr': amount, 'payment_id': payment['_id'], 'paid_at': now},
+        field: {'status': 'paid', 'amount_inr': amount, 'payment_id': payment['_id'], 'paid_at': now},
         'timeline': events, 'updated_at': now,
     }})
     try:
         from notify import notify_user
+        ref = str(app['_id'])[:8].upper()
         await notify_user(
-            app['user_id'], title='Application fee received',
-            body=f'We received ₹{amount:,} for application #{str(app["_id"])[:8].upper()}. You can submit it now.',
+            app['user_id'], title=label,
+            body=(f'We received ₹{amount:,} for application #{ref}. You can submit it now.' if kind == KIND
+                  else f'We received ₹{amount:,} ({what}) for application #{ref}. Nothing more is due.'),
             kind='payment', link=f"/account/applications/{app['_id']}", application_id=app['_id'],
             dedupe_key=f"fee-paid-{payment['_id']}",
         )
@@ -141,16 +161,30 @@ async def quote(application_id: str, user=Depends(get_current_user)):
         'paid': paid,
         'paid_inr': (app.get('fee') or {}).get('amount_inr', 0) if paid else 0,
         'due_now_inr': await fee_due_inr(app),
+        'service_paid': fee_paid(app, SERVICE_KIND),
+        'service_paid_inr': (app.get('service_fee') or {}).get('amount_inr', 0) if fee_paid(app, SERVICE_KIND) else 0,
+        'service_due_inr': await service_fee_due_inr(app),
         'online_payment': bool(await _gateway()),
     }
 
 
+class CreateFeeOrder(BaseModel):
+    part: Literal['application_fee', 'service_fee'] = KIND
+
+
 @router.post('/{application_id}/create-order')
-async def create_order(application_id: str, user=Depends(get_current_user)):
+async def create_order(application_id: str, req: Optional[CreateFeeOrder] = None, user=Depends(get_current_user)):
+    kind = req.part if req else KIND
     app = await _own_app(application_id, user)
-    if fee_paid(app):
-        raise HTTPException(409, 'The fee for this application is already paid')
-    amount = (await fee_quote(app))['pay_now_inr']
+    if fee_paid(app, kind):
+        raise HTTPException(409, 'This fee is already paid')
+    q = await fee_quote(app)
+    if kind == SERVICE_KIND:
+        if (app.get('status') or 'draft') in ('draft', 'cancelled'):
+            raise HTTPException(400, 'The service fee can be paid once the application is submitted')
+        amount = q['pay_later_inr']
+    else:
+        amount = q['pay_now_inr']
     if amount <= 0:
         raise HTTPException(400, 'No fee is due for this application')
     gateway = await _gateway()
@@ -159,7 +193,7 @@ async def create_order(application_id: str, user=Depends(get_current_user)):
 
     now = datetime.utcnow()
     doc = {
-        '_id': str(uuid.uuid4()), 'user_id': user['_id'], 'kind': KIND, 'plan_id': KIND,
+        '_id': str(uuid.uuid4()), 'user_id': user['_id'], 'kind': kind, 'plan_id': kind,
         'application_id': application_id, 'razorpay_payment_id': None, 'amount_inr': amount,
         'created_at': now, 'updated_at': now,
     }
@@ -177,7 +211,7 @@ async def create_order(application_id: str, user=Depends(get_current_user)):
             order = client.order.create({
                 'amount': amount * 100, 'currency': 'INR',
                 'receipt': f'wehive-app-{application_id[:8]}-{uuid.uuid4().hex[:8]}',
-                'notes': {'user_id': user['_id'], 'kind': KIND, 'application_id': application_id},
+                'notes': {'user_id': user['_id'], 'kind': kind, 'application_id': application_id},
             })
         except Exception:
             logger.exception('Razorpay order creation failed (application fee)')
@@ -185,7 +219,7 @@ async def create_order(application_id: str, user=Depends(get_current_user)):
         doc.update(razorpay_order_id=order.get('id'), status='created')
     await payments.insert_one(doc)
     return {'order_id': doc['razorpay_order_id'], 'amount': amount * 100, 'amount_inr': amount,
-            'currency': 'INR', 'razorpay_key': key, 'application_id': application_id}
+            'currency': 'INR', 'razorpay_key': key, 'application_id': application_id, 'part': kind}
 
 
 class VerifyFee(BaseModel):
@@ -197,8 +231,8 @@ class VerifyFee(BaseModel):
 @router.post('/verify')
 async def verify(req: VerifyFee, user=Depends(get_current_user)):
     import routes_payments
-    doc = await payments.find_one({'razorpay_order_id': req.razorpay_order_id, 'user_id': user['_id'], 'kind': KIND})
-    if not doc:
+    doc = await payments.find_one({'razorpay_order_id': req.razorpay_order_id, 'user_id': user['_id']})
+    if not doc or doc.get('kind') not in PARTS:
         raise HTTPException(404, 'Order not found')
     if doc.get('status') == 'paid':
         await mark_fee_paid(doc)

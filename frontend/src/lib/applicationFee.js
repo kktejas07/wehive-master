@@ -1,4 +1,5 @@
-// Pays the visa application fee (embassy + appointment fees) for one application.
+// Pays one part of a visa application's fees: 'application_fee' (embassy + appointment fees,
+// before submitting) or 'service_fee' (We Hive service fee + GST, after submitting).
 // The amount is decided by the server; this only opens the checkout and confirms it.
 import axios from 'axios';
 import { API } from '../context/AuthContext';
@@ -16,9 +17,9 @@ function loadCheckout() {
 }
 
 /** Resolves once the fee is paid; rejects with an Error (message is user-facing) otherwise. */
-export async function payApplicationFee({ applicationId, token, user }) {
+export async function payApplicationFee({ applicationId, token, user, part = 'application_fee' }) {
   const headers = { Authorization: `Bearer ${token}` };
-  const { data: order } = await axios.post(`${API}/payments/application/${applicationId}/create-order`, {}, { headers });
+  const { data: order } = await axios.post(`${API}/payments/application/${applicationId}/create-order`, { part }, { headers });
   const verify = (res) => axios.post(`${API}/payments/application/verify`, {
     razorpay_order_id: res.razorpay_order_id,
     razorpay_payment_id: res.razorpay_payment_id || '',
@@ -39,7 +40,7 @@ export async function payApplicationFee({ applicationId, token, user }) {
       amount: order.amount,
       currency: order.currency,
       name: 'We Hive',
-      description: `Visa application fee #${applicationId.slice(0, 8).toUpperCase()}`,
+      description: `${part === 'service_fee' ? 'Service fee' : 'Visa application fee'} #${applicationId.slice(0, 8).toUpperCase()}`,
       order_id: order.order_id,
       handler: (res) => verify(res).then(resolve, () => reject(new Error('We could not confirm the payment. If money was deducted, contact support before paying again.'))),
       modal: { ondismiss: () => reject(new Error('Payment was cancelled. Nothing was charged.')) },

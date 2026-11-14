@@ -23,7 +23,11 @@ interface ApplicationHeroProps {
   submitting?: boolean;
   canSubmit?: boolean;
   /** GET /payments/application/:id/quote, or null when it could not be loaded. */
-  fee?: { due_now_inr: number; pay_now_inr: number; pay_later_inr: number; paid: boolean; paid_inr: number } | null;
+  fee?: {
+    due_now_inr: number; pay_now_inr: number; pay_later_inr: number; paid: boolean; paid_inr: number;
+    service_due_inr?: number; service_paid?: boolean; service_paid_inr?: number;
+  } | null;
+  onPayServiceFee?: () => void;
   onScan: () => void;
   onCoverLetter: () => void;
   onItinerary: () => void;
@@ -40,6 +44,7 @@ export default function ApplicationHero({
   submitting,
   canSubmit,
   fee,
+  onPayServiceFee,
   onScan,
   onCoverLetter,
   onItinerary,
@@ -146,6 +151,19 @@ export default function ApplicationHero({
               )}
             </Button>
           </div>
+          {fee && (fee.service_due_inr ?? 0) > 0 && (
+            <div className="mt-3">
+              <Button
+                onClick={onPayServiceFee}
+                disabled={submitting}
+                variant="outline"
+                data-testid="pay-service-fee"
+                className="rounded-xl h-11 px-5 font-semibold bg-white border-[hsl(var(--blue-700))] text-[hsl(var(--blue-700))] hover:bg-[hsl(var(--blue-50))]"
+              >
+                Pay service fee ₹{(fee.service_due_inr ?? 0).toLocaleString('en-IN')}
+              </Button>
+            </div>
+          )}
           {fee && (fee.paid || fee.pay_now_inr > 0) && (
             <p className="mt-3 text-[13px] text-muted-foreground" data-testid="application-fee-note">
               {fee.paid
@@ -153,7 +171,9 @@ export default function ApplicationHero({
                 : fee.due_now_inr > 0
                   ? `Embassy and appointment fees of ₹${fee.due_now_inr.toLocaleString('en-IN')} are paid when you submit.`
                   : `Embassy and appointment fees: ₹${fee.pay_now_inr.toLocaleString('en-IN')}. Our team will contact you to collect them.`}
-              {fee.pay_later_inr > 0 && ` Our service fee and GST (₹${fee.pay_later_inr.toLocaleString('en-IN')}) are due on delivery.`}
+              {fee.service_paid
+                ? ` Service fee and GST paid: ₹${(fee.service_paid_inr ?? 0).toLocaleString('en-IN')}.`
+                : fee.pay_later_inr > 0 && ` Our service fee and GST (₹${fee.pay_later_inr.toLocaleString('en-IN')}) are due on delivery${(fee.service_due_inr ?? 0) > 0 ? '; you can also pay them now' : ''}.`}
             </p>
           )}
         </div>

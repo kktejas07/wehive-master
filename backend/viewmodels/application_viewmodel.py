@@ -28,6 +28,7 @@ def _serialize_app(app: dict) -> dict:
         "alert": _derive_alert(app),
         # {'status': 'paid' | 'due', 'amount_inr': …} once the application fee is settled or owed.
         "fee": app.get("fee"),
+        "service_fee": app.get("service_fee"),
     }
 
 

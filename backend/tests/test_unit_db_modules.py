@@ -480,10 +480,16 @@ class TestEvaTools:
     @pytest.mark.asyncio
     async def test_get_application_fee(self):
         with patch("eva_tools.lookup_country", new=AsyncMock(return_value={
-            "name": "Canada", "application_fee": 20000, "embassy_fee": 15000
-        })):
+            "name": "Canada", "requires_appointment": True, "appointment_fee_inr": 1000,
+            "categories": {"Tourist": {"fees_inr": 8000}, "Student": {"fees_inr": 9000}},
+        })), patch("pricing.load_pricing", new=AsyncMock(side_effect=RuntimeError("no db"))):
             result = await get_application_fee("ca")
-            assert result["fee_inr"] == 20000
+            # embassy + appointment at submit; service fee + 18% GST on delivery
+            assert result["pay_at_submit_inr"] == 9000
+            assert result["due_on_delivery_inr"] == 3500 + round((3500 + 1000) * 0.18)
+            assert result["total_inr"] == result["fee_inr"] == 9000 + 4310
+            student = await get_application_fee("ca", "student", 2)
+            assert student["visa_type"] == "Student" and student["embassy_fee_inr"] == 18000
 
     @pytest.mark.asyncio
     async def test_get_application_fee_no_country(self):

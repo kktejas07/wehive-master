@@ -135,7 +135,10 @@ async def _gather_context(user_prompt: str, user_id: str = None) -> str:
         fee_data = await get_application_fee(country_codes[0].lower())
         if fee_data:
             snippets.append(
-                f"Application fee: ₹{fee_data.get('fee_inr', 'N/A')} (embassy: ₹{fee_data.get('embassy_fee', 'N/A')})"
+                f"Fees for one {fee_data['visa_type']} applicant: embassy ₹{fee_data['embassy_fee_inr']:,} + appointment "
+                f"₹{fee_data['appointment_fee_inr']:,} are paid when the application is submitted (₹{fee_data['pay_at_submit_inr']:,}); "
+                f"We Hive service fee ₹{fee_data['service_fee_inr']:,} + GST ₹{fee_data['gst_inr']:,} are due on delivery "
+                f"(₹{fee_data['due_on_delivery_inr']:,}). Total ₹{fee_data['total_inr']:,}."
             )
 
     snippets.extend(s for s in await asyncio.gather(_rag_context(user_prompt), google_kg.context_for(user_prompt)) if s)

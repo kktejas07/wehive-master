@@ -10,6 +10,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from db import db
+from fee_calculator import EXTRA_UNIVERSITY_FEE_INR, FLAT_APPLICATION_FEE_INR, UNIVERSITIES_INCLUDED
 from pricing import load_pricing
 from rate_limit import RateLimit
 from serializers import serialize_event
@@ -34,6 +35,11 @@ async def public_pricing():
         'surcharge_inr': cfg['surcharge_inr'],
         'gst_rate': cfg['gst_rate'],
         'currency': cfg['currency'],
+        'university_application': {
+            'flat_inr': FLAT_APPLICATION_FEE_INR,
+            'included': UNIVERSITIES_INCLUDED,
+            'extra_inr': EXTRA_UNIVERSITY_FEE_INR,
+        },
     }
 
 

@@ -272,10 +272,10 @@ async def _execute_tool(tool_name: str, arguments: dict) -> dict:
         applicants = arguments.get("applicants", 1)
         try:
             from eva_tools import get_application_fee
-            fee = await get_application_fee(country, visa_type)
-            result = {"country": country, "visa_type": visa_type, "applicants": applicants,
-                      "fee_per_applicant": fee, "total": fee * applicants,
-                      "currency": "INR (approximate)"}
+            fee = await get_application_fee(country, visa_type, int(applicants or 1))
+            if not fee:
+                raise ValueError(f"Unknown country: {country}")
+            result = {**fee, "currency": "INR (approximate)"}
             return {"content": [{"type": "text", "text": json.dumps(result)}]}
         except Exception as e:
             return {"content": [{"type": "text", "text": json.dumps({"error": str(e)})}]}
