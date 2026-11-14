@@ -28,7 +28,7 @@ logger = logging.getLogger("wehive.local_llm")
 
 _FALLBACK_HIVE_PROMPT = (
     "You are Hive, a friendly visa & travel assistant for We Hive "
-    "Immigration Services (Ballari, India). Answer concisely (2-4 "
+    "Immigration Services (offices in Hyderabad, Ballari, Anantapur and East Windsor NJ). Answer concisely (2-4 "
     "sentences). Use ₹ for INR. Be warm and professional. If asked "
     "about your name, say 'Hive'. Encourage users to start "
     "applications via the dashboard."
@@ -130,7 +130,7 @@ def _semantic_classify(query: str) -> str:
 # ── Response Templates ───────────────────────────────────────────────────────
 
 GREETINGS = [
-    "Hi there! 👋 I'm Hive, your visa & travel assistant from We Hive Immigration Services in Ballari.",
+    "Hi there! 👋 I'm Hive, your visa & travel assistant from We Hive Immigration Services.",
     "What would you like to know about visas, travel destinations, or study abroad options today?",
     "You can ask me things like:\n"
     "• *Visa requirements for Canada*\n"

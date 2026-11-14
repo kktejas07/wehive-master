@@ -22,6 +22,8 @@ interface ApplicationHeroProps {
   requiredDocs: unknown[];
   submitting?: boolean;
   canSubmit?: boolean;
+  /** GET /payments/application/:id/quote, or null when it could not be loaded. */
+  fee?: { due_now_inr: number; pay_now_inr: number; pay_later_inr: number; paid: boolean; paid_inr: number } | null;
   onScan: () => void;
   onCoverLetter: () => void;
   onItinerary: () => void;
@@ -37,6 +39,7 @@ export default function ApplicationHero({
   requiredDocs,
   submitting,
   canSubmit,
+  fee,
   onScan,
   onCoverLetter,
   onItinerary,
@@ -134,11 +137,25 @@ export default function ApplicationHero({
               ) : (
                 <span className="inline-flex items-center gap-1.5">
                   <Send className="w-4 h-4" />
-                  {app.status === 'draft' ? 'Submit application' : 'Already submitted'}
+                  {app.status !== 'draft'
+                    ? 'Already submitted'
+                    : fee && fee.due_now_inr > 0
+                      ? `Pay ₹${fee.due_now_inr.toLocaleString('en-IN')} & submit`
+                      : 'Submit application'}
                 </span>
               )}
             </Button>
           </div>
+          {fee && (fee.paid || fee.pay_now_inr > 0) && (
+            <p className="mt-3 text-[13px] text-muted-foreground" data-testid="application-fee-note">
+              {fee.paid
+                ? `Application fee paid: ₹${fee.paid_inr.toLocaleString('en-IN')} (embassy and appointment fees).`
+                : fee.due_now_inr > 0
+                  ? `Embassy and appointment fees of ₹${fee.due_now_inr.toLocaleString('en-IN')} are paid when you submit.`
+                  : `Embassy and appointment fees: ₹${fee.pay_now_inr.toLocaleString('en-IN')}. Our team will contact you to collect them.`}
+              {fee.pay_later_inr > 0 && ` Our service fee and GST (₹${fee.pay_later_inr.toLocaleString('en-IN')}) are due on delivery.`}
+            </p>
+          )}
         </div>
       </div>
     </section>

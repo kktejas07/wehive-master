@@ -13,6 +13,7 @@ import {
   ArrowRight, AlertCircle, FileText, Upload, FolderOpen, Globe,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { KEY_STATS } from '../data/mock';
 
 const TABS = [
   { id: 'overview',     label: 'Overview',     Icon: LayoutDashboard },
@@ -111,7 +112,7 @@ function OverviewTab({ agent, summary, stats }) {
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Users, title: 'Add a Student', desc: 'Add a new student to your roster and start tracking their application', link: '?tab=students' },
-          { icon: GraduationCap, title: 'Browse Universities', desc: 'Search 1,000+ partner universities and programs', link: '/universities' },
+          { icon: GraduationCap, title: 'Browse Universities', desc: `Search ${KEY_STATS.universities} partner universities and programs`, link: '/universities' },
           { icon: DollarSign, title: 'View Commissions', desc: 'Track your earnings and check payment status', link: '?tab=commissions' },
           { icon: BookOpen, title: 'Agent Training', desc: 'Country visa guides, compliance tips, best practices', link: '/agent-training' },
         ].map(({ icon: Icon, title, desc, link }) => (

@@ -236,14 +236,17 @@ export default function ApplicationReviewModal({
                 <div className="text-[12px] uppercase tracking-[0.14em] font-bold text-[hsl(var(--blue-700))] mb-2">
                   Estimate
                 </div>
-                <Row k="Application fee" v={inr(fees.application)} />
+                <Row k="Embassy fee" v={inr(fees.embassyFee)} />
                 {fees.requiresAppointment && fees.appointment > 0 && (
                   <Row k="Appointment / VFS" v={inr(fees.appointment)} />
                 )}
+                <Row k="Paid when you submit" v={inr(fees.embassyFee + fees.appointment)} />
+                <Row k="We Hive service fee" v={inr(fees.serviceFee)} />
                 <Row k="GST (18%)" v={inr(fees.gst)} />
+                <Row k="Due on delivery" v={inr(fees.serviceFee + fees.gst)} />
                 <div className="mt-2 pt-2 border-t border-[hsl(var(--border))] flex items-center justify-between">
                   <span className="text-[14px] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-900))]">
-                    Total payable
+                    Total
                   </span>
                   <span data-testid="apply-total" className="text-[18px] font-display font-bold tracking-[-0.02em] text-[hsl(var(--blue-700))] tabular-nums">
                     {inr(fees.total)}

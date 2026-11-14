@@ -26,6 +26,8 @@ def _serialize_app(app: dict) -> dict:
         "created_at": app["created_at"].isoformat() if hasattr(app.get("created_at"), "isoformat") else str(app.get("created_at", "")),
         "updated_at": app["updated_at"].isoformat() if hasattr(app.get("updated_at"), "isoformat") else str(app.get("updated_at", "")),
         "alert": _derive_alert(app),
+        # {'status': 'paid' | 'due', 'amount_inr': …} once the application fee is settled or owed.
+        "fee": app.get("fee"),
     }
 
 

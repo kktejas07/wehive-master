@@ -6,6 +6,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth, API } from '../context/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import { inr } from '../lib/utils';
+import { payApplicationFee } from '../lib/applicationFee';
 import DocumentChecklist, { getReadyCount, DocumentExpirationWarnings } from '../components/DocumentChecklist';
 import ApplicationTimeline from '../components/ApplicationTimeline';
 import ConsultantChat from '../components/ConsultantChat';
@@ -237,10 +239,11 @@ function InterviewPrepCard({ app }) {
 
 export default function ApplicationDetail() {
   const { id } = useParams();
-  const { token, isAuthed, loading: authLoading } = useAuth();
+  const { token, user, isAuthed, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [app, setApp] = useState(null);
+  const [fee, setFee] = useState(null);
   const [country, setCountry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -303,19 +306,50 @@ export default function ApplicationDetail() {
   const readyCount = getReadyCount(docs, requiredDocs);
   const canSubmit = requiredDocs.length > 0 && readyCount === requiredDocs.length && app?.status === 'draft';
 
+  // What is due before submitting: embassy + appointment fees, decided by the server.
+  const loadFee = () => axios
+    .get(`${API}/payments/application/${id}/quote`, { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => setFee(r.data))
+    .catch(() => setFee(null));
+  useEffect(() => {
+    if (token && id) loadFee();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, id]);
+
   const onSubmit = async () => {
     setSubmitting(true);
+    let paidNow = 0;
     try {
+      if (fee?.due_now_inr > 0) {
+        try {
+          const order = await payApplicationFee({ applicationId: id, token, user });
+          paidNow = order.amount_inr;
+        } catch (e) {
+          toast({ title: 'Payment not completed', description: e?.response?.data?.detail || e.message, variant: 'destructive' });
+          return;
+        }
+      }
       await axios.post(
         `${API}/users/me/applications/${id}/submit`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast({ title: 'Submitted', description: 'Your application is queued for review by a consultant.' });
+      toast({
+        title: paidNow ? 'Payment received and application submitted' : 'Submitted',
+        description: paidNow
+          ? `We received ${inr(paidNow)}. Your application is queued for review by a consultant, and the invoice is under My Account → Payments.`
+          : 'Your application is queued for review by a consultant.',
+      });
       await refresh();
     } catch (e) {
-      toast({ title: 'Could not submit', description: e?.response?.data?.detail || 'Try again' });
+      const d = e?.response?.data?.detail;
+      toast({
+        title: paidNow ? 'Payment received, but the application was not submitted' : 'Could not submit',
+        description: (typeof d === 'string' ? d : d?.detail) || 'Try again',
+        variant: 'destructive',
+      });
     } finally {
+      await loadFee();
       setSubmitting(false);
     }
   };
@@ -379,6 +413,7 @@ export default function ApplicationDetail() {
         requiredDocs={requiredDocs}
         submitting={submitting}
         canSubmit={canSubmit}
+        fee={fee}
         onScan={() => setScanOpen(true)}
         onCoverLetter={() => setCoverOpen(true)}
         onItinerary={() => setItineraryOpen(true)}

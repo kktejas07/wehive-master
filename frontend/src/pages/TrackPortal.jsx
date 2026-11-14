@@ -63,7 +63,7 @@ export default function TrackPortal() {
                     data-testid="track-input"
                     required
                     type="text"
-                    placeholder="Application ID (from your confirmation email)"
+                    placeholder="Application ID or reference, e.g. #1A2B3C4D"
                     value={appId}
                     onChange={(e) => setAppId(e.target.value)}
                     className="w-full h-14 pl-12 pr-4 sm:pr-36 rounded-xl border border-[hsl(var(--border))] focus:border-[hsl(var(--blue-700))] focus:ring-2 focus:ring-[hsl(var(--blue-700))]/20 outline-none text-[16px] sm:text-[15px] text-[hsl(var(--blue-900))] placeholder:text-muted-foreground bg-white transition shadow-sm"

@@ -608,7 +608,7 @@ export const FEATURES = [
 
 export const FAQS = [
   { id: 'q1', q: 'How long will my visa take?', a: 'It depends on the country and the embassy, which makes the decision. Each visa page shows the typical time and where that figure comes from: the government\'s own figure where one is published, EU law for Schengen visas, or our estimate. Apply well before you travel.' },
-  { id: 'q2', q: 'Which documents do I need to upload?', a: 'It varies by destination — typically a passport scan, recent photo and bank statements from the last 3 months. Our portal lists the exact requirements once you pick a country.' },
+  { id: 'q2', q: 'Which documents do I need to upload?', a: 'It varies by destination — typically a passport scan, recent photo and bank statements from the last 6 months. Our portal lists the exact requirements once you pick a country.' },
   { id: 'q3', q: 'Is my data safe with We Hive?', a: 'Yes. All uploads are encrypted, stored in a SOC 2 vault and permanently erased 30 days after your visa is approved.' },
   { id: 'q4', q: 'Can I apply for my whole family in one go?', a: 'Absolutely. Add up to eight applicants per case. Documents, payments and tracking stay in one place.' },
   { id: 'q5', q: 'Do you offer rush processing?', a: 'For 22 destinations we offer Same‑Day and 48‑Hour rush. Availability shows up at checkout based on your travel date.' },

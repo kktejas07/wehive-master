@@ -3,6 +3,7 @@
 These let the SPA reflect admin changes (base fees / surcharge / GST / event
 banners) without requiring an admin login.
 """
+import re
 from datetime import datetime
 from typing import Optional
 
@@ -17,6 +18,7 @@ router = APIRouter(prefix='/public', tags=['public'])
 
 # Tracking needs only the application ID, so cap lookups per IP to stop ID guessing.
 _track_limiter = RateLimit(max_calls=30, window_seconds=600)
+_SHORT_REF = re.compile(r'[0-9a-f]{8}')
 
 settings_col = db['settings']
 events_col = db['events']
@@ -38,7 +40,13 @@ async def public_pricing():
 @router.get('/track/{application_id}', dependencies=[Depends(_track_limiter)])
 async def track_application(application_id: str):
     """Public endpoint to track an application's status — no auth required."""
-    app = await applications_col.find_one({'_id': application_id})
+    ref = application_id.strip().lstrip('#').lower()
+    app = await applications_col.find_one({'_id': ref})
+    if not app and _SHORT_REF.fullmatch(ref):
+        # The site shows the first 8 characters as the reference ("#1A2B3C4D").
+        # Only accept it when exactly one application matches.
+        matches = await applications_col.find({'_id': {'$regex': f'^{ref}'}}).to_list(2)
+        app = matches[0] if len(matches) == 1 else None
     if not app:
         raise HTTPException(404, 'Application not found')
 
@@ -59,6 +67,14 @@ async def track_application(application_id: str):
         'submitted_at': app.get('submitted_at'),
         'updated_at': app.get('updated_at'),
     }
+
+
+@router.get('/required-documents')
+async def public_required_documents(visa_type: str = Query('Tourist', max_length=40)):
+    """The upload checklist an Indian passport holder gets when applying, so the visa
+    page can show the same list as the application."""
+    from agents.document_validator import get_required_doc_types
+    return {'visa_type': visa_type, 'documents': get_required_doc_types(visa_type, 'IN')}
 
 
 @router.get('/events')

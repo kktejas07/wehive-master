@@ -87,7 +87,8 @@ async def test_admin_status_change_is_recorded_on_the_timeline(monkeypatch):
     monkeypatch.setattr(cases, '_app_or_404', AsyncMock(return_value=app))
     notify = AsyncMock()
     monkeypatch.setattr(cases, '_notify', notify)
-    monkeypatch.setitem(sys.modules, 'routes_chatbot', types.SimpleNamespace(notify_status_change=AsyncMock()))
+    status_change = AsyncMock()
+    monkeypatch.setitem(sys.modules, 'routes_chatbot', types.SimpleNamespace(notify_status_change=status_change))
     monkeypatch.setattr(cases, 'audit_record', AsyncMock(), raising=False)
 
     body = cases._StatusBody(status='interview_scheduled', note='20 Nov, 10:30 am, Hyderabad')
@@ -97,7 +98,10 @@ async def test_admin_status_change_is_recorded_on_the_timeline(monkeypatch):
     assert update['status'] == 'interview_scheduled'
     last = update['timeline'][-1]
     assert (last['status'], last['label'], last['note']) == ('interview_scheduled', 'Interview Scheduled', '20 Nov, 10:30 am, Hyderabad')
-    assert notify.await_args.args[2] == 'Interview Scheduled'
+    # Exactly one notification per change (there used to be a specific one plus a generic one).
+    notify.assert_not_awaited()
+    status_change.assert_awaited_once()
+    assert status_change.await_args.kwargs['title'] == 'Interview Scheduled'
 
 
 @pytest.mark.asyncio

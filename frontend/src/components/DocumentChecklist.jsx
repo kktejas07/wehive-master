@@ -4,7 +4,7 @@ import { Upload, Check, AlertCircle, Loader2, X, Trash2, HelpCircle } from 'luci
 import { useToast } from '../hooks/use-toast';
 import { API, useAuth } from '../context/AuthContext';
 
-const DOC_LABELS = {
+export const DOC_LABELS = {
   passport: 'Passport (all pages)',
   aadhaar_card: 'Aadhaar Card',
   pan_card: 'PAN Card',

@@ -18,7 +18,7 @@ REQUIRED_DOCS = {
     "tourist": [
         "Passport (6mo validity)",
         "Passport-size photo",
-        "Bank statements (3 months)",
+        "Bank statements (6 months)",
         "Confirmed flight & hotel",
         "Travel insurance",
     ],

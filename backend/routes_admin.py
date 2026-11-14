@@ -491,6 +491,8 @@ async def admin_create_application(payload: AppCreate, admin=Depends(get_current
 class AppPatch(BaseModel):
     status: Optional[Literal['draft', 'submitted', 'in_review', 'approved', 'rejected']] = None
     note: Optional[str] = None
+    # Embassy appointment date, YYYY-MM-DD. An empty string clears it.
+    appointment_date: Optional[str] = Field(None, pattern=r'^(\d{4}-\d{2}-\d{2})?$')
 
 
 @router.patch('/applications/{application_id}')
@@ -522,8 +524,24 @@ async def admin_update_application(application_id: str, patch: AppPatch, admin=D
         })
         update['timeline'] = events
 
+    old_appt = (app.get('visa_appointment') or {}).get('date')
+    appt_changed = patch.appointment_date is not None and (patch.appointment_date or None) != (old_appt or None)
+    if appt_changed:
+        update['visa_appointment'] = {**(app.get('visa_appointment') or {}), 'date': patch.appointment_date or None}
+        events.append({
+            'id': str(uuid.uuid4()),
+            'status': update.get('status') or app.get('status') or AppStatus.DRAFT.value,
+            'label': 'Appointment date updated',
+            'at': now,
+            'note': f'Embassy appointment: {patch.appointment_date}' if patch.appointment_date else 'Embassy appointment date removed',
+        })
+        update['timeline'] = events
+
     await applications.update_one({'_id': application_id}, {'$set': update})
     fresh = await applications.find_one({'_id': application_id})
+    if appt_changed:
+        await audit_record(admin, 'update', 'application', application_id,
+                           before={'appointment_date': old_appt}, after={'appointment_date': patch.appointment_date or None})
     if 'status' in update and app.get('user_id'):
         # Same in-app notification the applicant gets when they submit (routes_apps.submit).
         from routes_chatbot import notify_status_change

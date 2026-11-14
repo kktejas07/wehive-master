@@ -16,7 +16,7 @@ VISA_DOC_REQUIREMENTS = [
             {'id': 'd2', 'name': 'I-20 Form', 'required': True, 'note': 'Issued by your US university'},
             {'id': 'd3', 'name': 'DS-160 Confirmation', 'required': True, 'note': 'Online non-immigrant visa application'},
             {'id': 'd4', 'name': 'SEVIS Fee Receipt', 'required': True, 'note': 'I-901 SEVIS fee payment ($350)'},
-            {'id': 'd5', 'name': 'Bank Statements', 'required': True, 'note': '3 months showing sufficient funds'},
+            {'id': 'd5', 'name': 'Bank Statements', 'required': True, 'note': 'Last 6 months, showing sufficient funds'},
             {'id': 'd6', 'name': 'Admission Letter', 'required': True, 'note': 'University acceptance letter'},
             {'id': 'd7', 'name': 'Passport Photos', 'required': True, 'note': '2 x 2 inch, white background'},
             {'id': 'd8', 'name': 'Academic Transcripts', 'required': False, 'note': 'Previous school records'},

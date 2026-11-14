@@ -317,7 +317,8 @@ async def test_my_subscription_lists_the_callers_recent_payments(store):
     store.payments.find.assert_called_once_with({'user_id': 'u1'})
     assert out['is_premium'] is True and out['premium_since'] == '2026-10-02T00:00:00'
     assert out['payments'][0] == {'id': 'p2', 'plan_id': 'standard', 'plan_name': 'Standard', 'amount_inr': 999,
-                                  'status': 'paid', 'created_at': '2026-10-02T10:00:00'}
+                                  'status': 'paid', 'created_at': '2026-10-02T10:00:00',
+                                  'kind': 'plan', 'application_id': None}
     assert out['payments'][1]['plan_name'] is None and out['payments'][1]['amount_inr'] == 12 and out['payments'][1]['created_at'] is None
 
 
